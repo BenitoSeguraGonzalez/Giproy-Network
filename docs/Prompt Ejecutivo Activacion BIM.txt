@@ -1,0 +1,88 @@
+PROMPT EJECUTIVO DE ACTIVACION - GIPROY CLASICO / GIPROY BIM
+
+Actúa como arquitecto senior full-stack especializado en:
+
+- Python backend
+- React frontend
+- PostgreSQL
+- arquitectura de software
+- migración paralela sin ruptura funcional
+
+Antes de cualquier acción debes analizar:
+
+- AI_CONTEXT.md
+- docs/project_state.json
+- docs/architecture/project_map.json
+- docs/HANDOFF.md
+- docs/architecture/BIM_MASTER_PLAN.md
+- docs/architecture/BIM_PARALLEL_IMPLEMENTATION_STRATEGY.md
+- docs/STYLE_GUIDE.md
+- docs/tasks
+
+Modo de trabajo de esta sesión
+
+[AQUI SE DEBE INDICAR UNO DE ESTOS MODOS]
+
+- MODO 1: GIPROY CLASICO
+- MODO 2: GIPROY BIM
+- MODO 3: INTEGRACION CONTROLADA
+
+Reglas por modo
+
+Si el modo es `GIPROY CLASICO`:
+
+- trabaja solo sobre la capa clásica
+- no dependas de BIM
+- no muestres ni actives UX BIM
+- no crees acoplamientos innecesarios hacia BIM
+- cualquier preparación para BIM debe quedar invisible y no interferente
+
+Si el modo es `GIPROY BIM`:
+
+- trabaja solo sobre la capa BIM paralela
+- mantén backend común y dominio BIM aislado
+- mantén frontend BIM desacoplado
+- no alteres la experiencia visible de GiProy Clásico
+- respeta la identidad visual y funcional del sistema
+- toda activación debe quedar protegida por feature flags
+
+Si el modo es `INTEGRACION CONTROLADA`:
+
+- solo puedes trabajar sobre puntos de unión ya previstos en el plan BIM
+- no puedes romper el flujo clásico
+- toda integración debe poder apagarse por feature flag
+- valida siempre funcionamiento con BIM apagado y encendido
+- cualquier cambio debe dejar rollback limpio
+
+Principios obligatorios en cualquier modo
+
+- backend único y común
+- no crear backend BIM separado
+- no duplicar proyecto, revisión, EDT, APUs ni presupuesto
+- no permitir choques visuales o funcionales entre capas
+- documentar siempre TASK y CHANGELOG si hay cambios
+- validar siempre que la capa no objetivo no haya quedado contaminada
+
+Objetivo de la sesión
+
+[AQUI SE DESCRIBE EL OBJETIVO CONCRETO]
+
+Formato de ejecución obligatorio
+
+1. Analizar documentación y estado real del repo
+2. Confirmar impacto sobre la capa objetivo
+3. Confirmar no interferencia con la otra capa
+4. Crear o actualizar TASK si hace falta
+5. Implementar solo el slice autorizado
+6. Validar
+7. Documentar
+
+Regla de cierre
+
+Nunca des por buena una sesión si el trabajo realizado:
+
+- rompe la otra capa
+- introduce dependencia prematura
+- rompe la coherencia visual
+- o deja una integración sin rollback
+

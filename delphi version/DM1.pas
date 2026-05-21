@@ -1,0 +1,24737 @@
+﻿unit DM1;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, UniProvider, MySQLUniProvider, Data.DB,
+  System.RegularExpressions,
+  FMX.TMSTreeViewBase, FMX.TMSTreeViewData, FMX.TMSCustomTreeView, Windows,
+  FMX.TMSTreeView,
+  DBAccess, Uni, FMX.Types, FMX.Controls, System.ImageList, FMX.ImgList,
+  FMX.ListBox, System.UITypes,
+  System.StrUtils, System.DateUtils, System.Math, MemDS, SalsaObj, RSAObj,
+  HashObj, X509Obj,
+  XAdESObj, AdESObj, CAdESObj, PAdESObj, X509Values, AESObj, SPECKObj, MiscObj,
+  FMX.Forms,
+  FMX.Graphics, FMX.Dialogs, FMX.Platform, CryptBase, Generics.Defaults,
+  FMX.ListView.Types,
+  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView,
+  Generics.Collections,
+  FMX.ScrollBox, FMX.Objects, System.UIConsts, FMX.TMSTableViewEx,
+  FMX.TMSBaseControl,
+  FMX.TMSListView, FMX.TMSTableView, FMX.TMSBitmapContainer, FMX.TMSBitmap,
+  IdTCPConnection,
+  IdTCPClient, FMX.TMSBarButton, FMX.TMSPopup, IdMessageClient, IdSMTP,
+  IdExplicitTLSClientServerBase, IdSMTPBase, IdHTTP, SQLiteUniProvider,
+  IdBaseComponent, IdCoder,
+  IdCoder3to4, IdCoderMIME, IdGlobal, System.Types, ECCObj, IdComponent,
+  IdIOHandler,
+  IdIOHandlerSocket, IdIOHandlerStack, IdSSL, IdSSLOpenSSL, TMSEncryptedInifile,
+  System.NetEncoding,
+  System.IOUtils, System.Net.HttpClient, Soap.EncdDecd, FMX.Layouts,
+  FMX.TMSCustomEdit,
+  FMX.TMSSearchEdit, FMX.Effects, FMX.Memo.Types, FMX.TabControl,
+  FMX.TMSFNCUtils,
+  FMX.TMSFNCGraphics, FMX.TMSFNCGraphicsTypes, FMX.TMSFNCGridCell,
+  FMX.TMSFNCGridOptions,
+  FMX.TMSFNCCustomControl, FMX.TMSFNCCustomScrollControl, FMX.TMSFNCGridData,
+  FMX.TMSFNCCustomGrid,
+  FMX.TMSFNCGrid, System.Variants, FMX.TMSFNCListBox, FMX.Controls.Presentation,
+  FMX.StdCtrls,
+  FMX.TMSLed, FMX.TMSFNCTypes, FMX.TMSFNCTreeView, FMX.TMSGridCell,
+  FMX.TMSGridOptions,
+  FMX.TMSGridData, FMX.TMSCustomGrid, FMX.TMSGrid, FMX.TMSFNCTreeViewBase,
+  FMX.TMSFNCTreeViewData,
+  FMX.TMSFNCCustomTreeView, FMX.TMSFNCBitmapContainer,
+  FMX.TMSFNCCustomComponent, FMX.DialogService,
+  FMX.Edit, FMX.Menus, FMX.TreeView, FMX.TMSFNCSplitter,
+  FMX.TMSFNCHTMLImageContainer,
+  FMX.TMSFNCCheckBox, FMX.DateTimeCtrls, FMX.TextLayout, FMX.EditBox,
+  FMX.NumberBox,
+  FMX.TMSFNCCheckedListBox, FMX.Grid, TLHelp32, Winapi.ShellAPI, FMX.Memo,
+  FMX.WindowsStore, WinInet,
+  FMX.Toast.Windows, RegularExpressionsCore, FMX.TMSFNCChart, ShlObj, Masks,
+  System.JSON, Data.FmtBcd,
+  FlexCel.FMXSupport, FlexCel.Core, FlexCel.Render,
+  System.Net.HttpClientComponent,
+  FlexCel.XlsAdapter, InterBaseUniProvider, System.Net.URLClient,
+  System.Threading, System.Hash,
+  FMX.TMSFNCComboBox, IdSSLOpenSSLHeaders, IdMultipartFormData, REST.Client,
+  REST.Types,
+  REST.Authenticator.Basic, UniDump, DADump, IdFTP, System.Rtti, FMX.Media,
+  IdFTPCommon,
+  System.IniFiles, Unit_UsersIni, System.SyncObjs, System.Generics.Collections,
+  uApiGiProy, uGridFNC,
+  fProductoTienda, uFiscalDigits, uLicenciasPermisos, uMain, DM_Presupuestos,
+  uNuevaCategoria,
+  uNuevaBase, uNuevoRecurso, uPregunta, uAddAPU, uCronoDerivaciones,
+  uPertenencia, uDuplicarBase,
+  uStakes, ulistStakes, uVisorNotas, uRolProyecto, uOpcionesEDT,
+  uPorcentajesIndirectos, uVisorEDT,
+  uAbrirPresupuesto, DM2, DMOnline, uAddEditCPC, DMSeguridad,
+  thActualizaCodEmpresaOnline, DM_EDO,
+  uPreguntaSiNo, DMExportDB, UAuth, uFormImportando, uMensajes, uBitmapUtils,
+  fProductoTienda2,
+  FormUtils, System.TypInfo,
+  uGiProyCryptoEngine_v1_5,
+  uGiProySecureConfig_v1_0_3,
+  uGiProyUserManager_v1_0_2,
+  uGiProyDBActivator_v1_0,
+  uGiProyMigration_v1_0_2;
+
+const
+  GoogleApi = 'AIzaSyDq6cn-KLsi0pOxr1vYR5ELV9Kf_ck_Xvw';
+  URLCurrency =
+    'https://www.xe.com/currencyconverter/convert/?Amount=1&From=USD&To=';
+  salsaKey = 'E8E3E105D8885187EB0408A1D1F57CD5';
+  factorConversionDias = 1.36;
+  plantillasBaseDir = 'Plantillas\';
+  dbPass = 'INeA4scRb0A=dmiFcBhA9IUBHQ==';
+  Pdeveloper = 'T9H8O_JatCQ=zZcRA55LQdE2';
+  Udeveloper = 'yuwZSnDkC3U=Ip--Lc-Fj4-XATNQj3SDnQC9GcTi5Ik=';
+  folder_actaConstitucion = 'Acta de Constitucion del Proyecto\';
+  folder_analisis = 'Analisis\';
+  folder_cronogramaTrabajo = 'Cronograma de Trabajo\';
+  folder_cronogramaValorado = 'Cronograma Valorado\';
+  folder_desagregacionTecnologica = 'Desagregacion Tecnologica';
+  folder_equipoProyecto = 'Equipo del Proyecto (Stakeholders)\';
+  folder_DescomposicionOrganizacion =
+    'Estructura Descomposicion Organizacion (EDO)\';
+  folder_formulasPolinomicas = 'Formulas Polinomicas\';
+  folder_porcentajesIndirectos = 'Porcentajes de Indirectos\';
+  folder_presupuestos = 'Presupuestos\';
+  folder_EDTDiccionario = 'EDT - Diccionario';
+  folder_EDTListado = 'EDT - Listado';
+  folder_EDTValorada = 'EDT - Valorada';
+  folder_GestionTiempos = 'Gestion de Tiempos';
+  fecha0 = '30/12/1899';
+  Dia_de_semana: array[1..7] of string = ('Domingo', 'Lunes', 'Martes',
+    'Miércoles', 'Jueves', 'Viernes', 'Sábado');
+  Dia_de_semanaEspaniol: array[1..7] of string = ('Lunes', 'Martes',
+    'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo');
+  tipo_de_recurso: array[1..6] of string = ('Equipos y Herramientas',
+    'Materiales', 'Transporte', 'Mano de Obra', 'Seguridad Industrial',
+    'Recurso');
+  tipo_de_recursoPRJ: array[1..3] of string = ('Trabajo',
+    'Material', 'Costo');
+  listadodecolumnas: array[1..3] of string = ('Cod. EDT', 'Cod. Item',
+    'Cod. APU');
+  ordinalPeriodos: array[1..8] of string = ('Día', 'Semana', 'Quincena',
+    'Mes', 'Dos Meses', 'Tres Meses', 'Semestre', 'Año');
+  VALOR_DEFECTO_IVA = 1;
+  nombreBaseInstalacionEnc = 'giproylocal_base.sql.enc';
+  nDBInicio = 'giproylocal';
+  URL_POLITICA_PRIVACIDAD = 'https://giproy.com/politica-de-privacidad/';
+  CRONO_GLOBAL_KEY = '__GLOBAL__';
+
+  // contraseña Online: G4^Xs&=h4f
+  // Gemini API KEY: AIzaSyB2kv9voHKfZipp7Qo1MAPXozPtN7cCo8w
+  // DeepSeek API KEY: sk-8e1cd7e08e7946869a60220f0579f50f
+
+  // https://nordvpn.com/es/what-is-my-ip/
+  // giproylocal
+  // Giproy
+  // neQ8%c5b&CZIrzDO
+  // https://dev.mysql.com/downloads/file/?id=526927
+
+  // Giproy Web
+  // IP: 195.179.236.1
+  // DB: u620211766_Bg0JT
+  // User: u620211766_GiProy
+  // Pass: G4^Xs&=h4f
+
+  // GiProy Web Nueva
+  // IP: 195.179.236.1
+  // DB: u620211766_gproy
+  // User: u620211766_admin
+  // Pass: cUNKDGSYr$Z%i3rB
+
+type
+  TCategoriaFiltro = record
+    Slugs: string;
+    StartsWith: string;
+    PerPage: Integer;
+    Page: Integer;
+  end;
+
+type
+  TWPCallback = reference to procedure(const Success: Boolean;
+    const Message: string);
+
+  TDatUsuario = record
+    idUsuario: Int64;
+    Nombre: string;
+    Apellidos: string;
+    usuario: string;
+    fechaAlta: TDateTime;
+    estado: Integer;
+    profesion: string;
+    tipo: string;
+    direccion: string;
+    Ciudad: string;
+    Provincia: string;
+    Pais: string;
+    email: string;
+    Tfno: string;
+    computerIDPrincipal: string;
+    fechahoraIDPrincipal: TDateTime;
+    computerIDMudanza: string;
+    fechaHoraIDMudanza: TDateTime;
+    BackUpActivo: Integer;
+    MudanzaActiva: Integer;
+    idfiscal: string;
+    descripcion: string;
+    FechaInicio: TDateTime;
+    FechaFin: TDateTime;
+    Alias: string;
+    FechaUltimoReporteExpress: TDateTime;
+  end;
+
+type
+  TCrearUsuarioCallback = reference to procedure(const Exito: Boolean;
+    const Mensaje: string);
+
+type
+  dat_respuesta1 = record
+    codSubCategoria: string;
+    codRecurso: string;
+  end;
+
+type
+  dat_importRecursos = record
+    idUnico: string;
+    codRecurso: string;
+    codRecursoCompleto: string;
+    codCategoriaBase: string;
+    codSubCategoria: string;
+    descripcion: string;
+    unidad: string;
+    precio: Double;
+    rendimiento: Double;
+    cantidad: Double;
+    codCPC: string;
+    tipoCPC: string;
+    porcentajeCPC: Double;
+    fechaHoraCreacion: TDateTime;
+    ultModificacion: TDateTime;
+    codAPU: string;
+    codBaseOrigen: string;
+    especificaciones: string;
+    especificaciones2: string;
+  end;
+
+type
+  dat_importAPU = record
+    codBaseOrigen: string;
+    codPresupuestoOrigen: string;
+    revisionOrigen: string;
+    codAPUOrigen: string;
+    codRecursoAPU: string;
+    codAPU: string;
+    descripcion: string;
+    unidad: string;
+    precio: string;
+    cantidad: string;
+    rendimiento: string;
+    Categoria: string;
+    fechaHoraCreacion: TDateTime;
+    fechaHoraActualizacion: TDateTime;
+    codCategoriaApu: string;
+    codSubCategoriaAPU: string;
+    tipoImportacion: string;
+    porcentajeIndirectos: string;
+    totalConIndirectos: string;
+    rendimientoHUnidad: string;
+    HCuadrillas: string;
+    anidado: Boolean;
+    accion: string;
+    idUnicoApuRecurso: string;
+  end;
+
+type
+  dat_importAPUItem = record
+    codBase: string;
+    codAPU: string;
+    CodCategoria: string;
+    codSubCategoria: string;
+    idUnicoRecurso: string;
+    codRecurso: string;
+    codRecursoCompleto: string;
+    descripcion: string;
+    unidad: string;
+    precio: string;
+    moneda: string;
+    cantidadUnidad: string;
+    rendimiento: string;
+    total: string;
+    porcentaje: string;
+    codCPC: string;
+    tipoCPC: string;
+    porcentajeCPC: string;
+    termino: string;
+  end;
+
+type
+  OurArrayStr = array of string;
+
+type
+  dat_fpol2 = record
+    codUnicoRecurso: string;
+    codSubCategoria: string;
+    cantidad: string;
+    precioBase: string;
+  end;
+
+type
+  dat_fploIndices = record
+    codigo: string;
+    descripcion: string;
+  end;
+
+type
+  dat_recursoFP = record
+    codRecurso: string;
+    cantidad: string;
+    precio: string;
+    total: string;
+    indice: string;
+    subcategoria: string;
+  end;
+
+type
+  dat_RecursosAsumidos = record
+    codAPU: string;
+    idUnicoRecurso: string;
+    unidadesRecursos: Double;
+  end;
+
+type
+  dat_recursosApu = record
+    codAPU: string;
+    codRecurso: string;
+    CodCategoria: string;
+    codSubCategoria: string;
+    subcategoria: string;
+    idUnicoRecurso: string;
+    descripcion: string;
+    precio: Double;
+    cantidadUnidad: Double;
+    rendimiento: Double;
+    total: Double;
+  end;
+
+type
+  dat_tmpAPU = record
+    codUnicoAPU: string;
+    cantidad: Double;
+  end;
+
+type
+  dat_grid = record
+    C00: string;
+    C01: string;
+    C02: string;
+    C03: string;
+    C04: string;
+    C05: string;
+    C06: string;
+    C07: string;
+    C08: string;
+    C09: string;
+    C10: string;
+    C11: string;
+    C12: string;
+    C13: string;
+    C14: string;
+    C15: string;
+    C16: string;
+    C17: string;
+    C18: string;
+    C19: string;
+    C20: string;
+  end;
+
+type
+  dat_pareto = record
+    posgrid: Integer;
+    codUnicoItem: string;
+    valor: Double;
+  end;
+
+type
+  dat_anotaciones = record
+    idItem: string;
+    fecha: TDateTime;
+    codEDT: string;
+    paquete: string;
+    descripcion: string;
+    nota: string;
+    autor: string;
+    tipoNota: string;
+    notaReferencia: string;
+  end;
+
+type
+  dat_nota = record
+    idItem: string;
+    fecha: TDateTime;
+    paquete: string;
+    descripcion: string;
+    nota: string;
+  end;
+
+type
+  dat_listaPorcentajeUsado = record
+    descripcion: string;
+    id: string;
+  end;
+
+type
+  dat_costoIndirectoPresupuesto = record
+    cuenta: string;
+    observaciones: string;
+    porcentaje: string;
+    codCuenta: string;
+  end;
+
+type
+  dat_ItemPresupuesto = record
+    descripcion: string;
+    codAPU: string;
+    unidad: string;
+    cantidad: string;
+    PrecioUnitario: string;
+    PrecioTotal: string;
+  end;
+
+type
+  dat_categoria = record
+    categoriaBase: string;
+    ciu: string;
+    nombreBase: string;
+    descripcion: string;
+    codExterno: string;
+    comentarios: string;
+    usado: Integer;
+    fechaCreacion: TDateTime;
+    sincronizada: Boolean;
+    origen: string;
+  end;
+
+type
+  dat_Recurso = record
+    idUnicoRecurso: string;
+    cod_Recurso: string;
+    codCategoriaBase: string;
+    codSubCategoria: string;
+    descripcion: string;
+    unidad: string;
+    precio: string;
+    PrecioLocal: string;
+    termino: string;
+    codAlternativo: string;
+    codCPC: string;
+    especificaciones: string;
+    fechaHoraCreacion: TDateTime;
+    ultimaModificacion: TDateTime;
+  end;
+
+type
+  dat_Apu = record
+    CodCategoria: string;
+    codRecursoAPU: string;
+    categoriaAPU: string;
+    codAPU: string;
+    descripcion: string;
+    unidad: string;
+    rendimiento: string;
+    rendimientotodoAnalisis: Boolean;
+    rendimientoTodoEscenario: Boolean;
+    costoDirectoTotal: string;
+    costoIndirectoTotal: string;
+    porcentajeCostoIndirecto: string;
+    precioUnitarioTotal: string;
+    codCPC: string;
+    fechaHoraCreacion: TDateTime;
+    ultimaModificaion: TDateTime;
+    pendienteRevision: Boolean;
+    rendimientoHUnidad: string;
+    nhCuadrillas: string;
+  end;
+
+type
+  dat_ItemsAPU = record
+    codAPU: string;
+    CodCategoria: string;
+    codSubCategoria: string;
+    idUnicoRecurso: string;
+    codRecurso: string;
+    descripcion: string;
+    unidad: string;
+    precio: string;
+    cantidadUnidad: string;
+    rendimiento: string;
+    total: string;
+    porcentaje: string;
+  end;
+
+type
+  dat_Moneda = record
+    ISO: string;
+    Nombre: string;
+  end;
+
+type
+  item_twvr = record
+    codigo: string;
+    descripcion: string;
+    codExt: string;
+    comentarios: string;
+    codUnico: string;
+    Categoria: string;
+    accion: string;
+  end;
+
+type
+  baseDatos = record
+    codBase: string;
+    Nombre: string;
+    descripcion: string;
+    indirectos: Double;
+    TRendimiento: string;
+    UMedida: string;
+    Pais: string;
+    SeguridadIndustrial: Boolean;
+    moneda: string;
+    simboloMoneda: string;
+    observaciones: string;
+    BasesPadres: TStringList;
+    idUsuario: Integer;
+  end;
+
+type
+  dat_StakesHolders = record
+    rolProyecto: string;
+    idfiscal: string;
+    cargo: string;
+    Nombre: string;
+    Apellidos: string;
+    direccion: string;
+    localidad: string;
+    Provincia: string;
+    Pais: string;
+    telefono: string;
+    email: string;
+    titulacion: string;
+    institucion: string;
+  end;
+
+type
+  dat_Tproyectos = record
+    codigo: string;
+    descripcion: string;
+  end;
+
+type
+  TDModule_1 = class(TDataModule)
+    il_PM_Apus: TImageList;
+    stylbk_2: TStyleBook;
+    il2: TImageList;
+    il_PopupEDT: TImageList;
+    untbl1: TUniTable;
+    ds1: TUniDataSource;
+    untbl2: TUniTable;
+    ds2: TUniDataSource;
+    ds13: TUniDataSource;
+    untbl3: TUniTable;
+    ds3: TUniDataSource;
+    untbl4: TUniTable;
+    ds4: TUniDataSource;
+    mysqlnprvdr1: TMySQLUniProvider;
+    untbl5: TUniTable;
+    ds5: TUniDataSource;
+    SalsaEnc_1: TSalsaEncryption;
+    con2: TUniConnection;
+    unsql_UpdateApusItems: TUniSQL;
+    unsqlBorraApusItems: TUniSQL;
+    unsqlUpdataDespuesAPusItems: TUniSQL;
+    unsql_ActualizarDatosGenerales: TUniSQL;
+    Unsql_generaTanteoAPUS: TUniSQL;
+    StoreProc_CrearLineasTanteoAnidado: TUniStoredProc;
+    StoreProc_calcular_ValoresApusTanteo: TUniStoredProc;
+    StoreProc_DaValorAPU: TUniStoredProc;
+    QAPU: TUniQuery;
+    QFormulaPolinomica: TUniQuery;
+    QIndicesFormulaPolinomica: TUniQuery;
+    QDatosGeneralesPresupuesto: TUniQuery;
+    QIndicesFormulaPolinomicadescripcion: TStringField;
+    QIndicesFormulaPolinomicaterminoRecurso: TStringField;
+    QIndicesFormulaPolinomicaSubtotalTermino: TFloatField;
+    QAPUdescripcionAPU: TStringField;
+    QAPUUnidadAPU: TStringField;
+    QAPUCodCategoria: TStringField;
+    QAPUDescripcion: TStringField;
+    QAPUunidad: TStringField;
+    QAPUCantidad: TFloatField;
+    QAPUrendimiento: TFloatField;
+    QAPUPrecio: TFloatField;
+    QAPUCostoHora: TFloatField;
+    QAPUTotal: TFloatField;
+    QAPUcodCPC: TStringField;
+    QAPUTipoCPC: TStringField;
+    QAPUCostoDirectoTotal: TFloatField;
+    QAPUpesoRelativo: TFloatField;
+    QAPUVAER: TStringField;
+    QAPUPtotalVAER: TFloatField;
+    uProcSql_GeneraRecursos: TUniStoredProc;
+    QDatosGeneralesPresupuestoid: TIntegerField;
+    QDatosGeneralesPresupuestocodBase: TStringField;
+    QDatosGeneralesPresupuestocodPresupuesto: TStringField;
+    QDatosGeneralesPresupuestocodReferencial: TStringField;
+    QDatosGeneralesPresupuestorevision: TStringField;
+    QDatosGeneralesPresupuestodescripcion: TStringField;
+    QDatosGeneralesPresupuestosubtotal: TFloatField;
+    QDatosGeneralesPresupuestoiva: TFloatField;
+    QDatosGeneralesPresupuestoindirectos: TFloatField;
+    QDatosGeneralesPresupuestototal: TFloatField;
+    QDatosGeneralesPresupuestofechaCreacion: TDateTimeField;
+    QDatosGeneralesPresupuestofechaModificacion: TDateTimeField;
+    QDatosGeneralesPresupuestondecimales: TIntegerField;
+    QDatosGeneralesPresupuestondecimalesMoneda: TIntegerField;
+    QDatosGeneralesPresupuestoporcentajeIVA: TFloatField;
+    QDatosGeneralesPresupuestoactivo: TIntegerField;
+    QDaParametro: TUniQuery;
+    QDaParametroValor: TStringField;
+    QEmpresaAsignada: TUniQuery;
+    QColaboradores: TUniQuery;
+    ds_Colaboradores: TUniDataSource;
+    QuComunicacion: TUniQuery;
+    ds_uComunicacion: TUniDataSource;
+    SQLGuardarComunicacionesRecibidas: TUniSQL;
+    SQLInsertaComunicacion: TUniSQL;
+    QUltimoIDComunicacion: TUniQuery;
+    QUltimoIDComunicacionidExterno: TLargeintField;
+    QColaboradoresid: TIntegerField;
+    QColaboradoresEMail: TStringField;
+    QColaboradoresNombre: TStringField;
+    QuComunicacionid: TLargeintField;
+    QuComunicaciongraficoImagen: TBlobField;
+    QuComunicacionreceptor: TStringField;
+    QuComunicaciontipoDescripcion: TStringField;
+    QuComunicacionfechahoraEmision: TDateTimeField;
+    QuComunicacionfechahoraRecepcion: TDateTimeField;
+    QuComunicacionidUsuarioReceptor: TLargeintField;
+    QuComunicacionidUsuarioEmisor: TLargeintField;
+    QuComunicacionidExterno: TLargeintField;
+    QuComunicacionidTipoComunicacion: TLargeintField;
+    QuComunicaciondatoscomunicacion: TMemoField;
+    QuComunicaciongraficoDescripcion: TStringField;
+    QEmpresaAsignadaid: TIntegerField;
+    QEmpresaAsignadacodUnico: TStringField;
+    QEmpresaAsignadaidFiscal: TStringField;
+    QEmpresaAsignadaNombre: TStringField;
+    QEmpresaAsignadadireccion: TStringField;
+    QEmpresaAsignadalocalidad: TStringField;
+    QEmpresaAsignadaprovincia: TStringField;
+    QEmpresaAsignadaemail: TStringField;
+    QEmpresaAsignadatfno: TStringField;
+    QEmpresaAsignadafechaCreacion: TDateTimeField;
+    QEmpresaAsignadafechaModificacion: TDateTimeField;
+    QEmpresaAsignadaid_1: TIntegerField;
+    QEmpresaAsignadaCodUnico_1: TStringField;
+    QEmpresaAsignadaidFiscal_1: TStringField;
+    QEmpresaAsignadanDecimales: TIntegerField;
+    QEmpresaAsignadanDecimalesMoneda: TIntegerField;
+    QEmpresaAsignadaautoguardado: TIntegerField;
+    QEmpresaAsignadatAutoguardado: TIntegerField;
+    QEmpresaAsignadaRConstitucionProyecto: TStringField;
+    QEmpresaAsignadaRAnalisisPrecios: TStringField;
+    QEmpresaAsignadaRCronogramaTrabajo: TStringField;
+    QEmpresaAsignadaRCronogramaValorado: TStringField;
+    QEmpresaAsignadaRDesagregacionTecnologica: TStringField;
+    QEmpresaAsignadaRDesagregacionTecnologicaAPUS: TStringField;
+    QEmpresaAsignadaREDTDiccionario: TStringField;
+    QEmpresaAsignadaREDTListado: TStringField;
+    QEmpresaAsignadaREDTValorada: TStringField;
+    QEmpresaAsignadaREquipoProyecto: TStringField;
+    QEmpresaAsignadaRDescomposicionOrganizacion: TStringField;
+    QEmpresaAsignadaRFormulaPolinomicas: TStringField;
+    QEmpresaAsignadaRGestionTiempos: TStringField;
+    QEmpresaAsignadaRPorcentajeIndirectos: TStringField;
+    QEmpresaAsignadaRPresupuestos: TStringField;
+    QEmpresaAsignadaRCurvaS: TStringField;
+    QEmpresaAsignadaLogoEmpresa: TMemoField;
+    procedure DataModuleCreate(Sender: TObject);
+    procedure con2AfterConnect(Sender: TObject);
+  strict private
+    { strict private declarations }
+    FLicenciasUsuario: TInfoLicenciasUsuario;
+
+    function ObtenerComplementosUsuarioActual: TArray<Integer>;
+
+    /// <summary>
+    /// Devuelve la fecha/hora de la última verificación online de licencias
+    /// para el usuario actual, leyendo el campo UltConexion de la tabla usuarios.
+    ///
+    /// Ejemplo de uso:
+    /// var DT: TDateTime;
+    /// begin
+    /// DT := DM1.GetUltimaVerifLicencias;
+    /// end;
+    /// </summary>
+    function GetUltimaVerifLicencias: TDateTime;
+
+    /// <summary>
+    /// Guarda la fecha/hora de la última verificación online de licencias
+    /// en el campo UltConexion de la tabla usuarios para el usuario actual.
+    ///
+    /// Ejemplo de uso:
+    /// begin
+    /// DM1.SetUltimaVerifLicencias(Now);
+    /// end;
+    /// </summary>
+    procedure SetUltimaVerifLicencias(const AValor: TDateTime);
+
+  public
+    { Public declarations }
+    /// <summary>
+    /// Devuelve el conjunto de licencias/módulos cargados para el usuario actual.
+    ///
+    /// Ejemplo de uso:
+    /// var
+    /// L: TInfoLicenciasUsuario;
+    /// begin
+    /// L := DM1.LicenciasUsuario;
+    /// end;
+    /// </summary>
+    property LicenciasUsuario: TInfoLicenciasUsuario read FLicenciasUsuario;
+
+    /// <summary>
+    /// Carga desde el servidor las licencias/módulos del usuario actual,
+    /// rellenando FLicenciasUsuario.
+    ///
+    /// Devuelve True si ha podido cargar al menos un módulo.
+    ///
+    /// Ejemplo de uso:
+    /// if DM1.CargarLicenciasUsuario then
+    /// ShowMessage('Licencias cargadas correctamente');
+    /// </summary>
+    function CargarLicenciasUsuario: Boolean;
+
+    /// <summary>
+    /// Devuelve True si el usuario actual tiene activo (o sin restricción)
+    /// el módulo/complemento indicado (por su IdComplemento).
+    ///
+    /// Ejemplo de uso:
+    /// if DM1.TieneLicenciaModulo(1) then
+    /// btnModulo1.Enabled := True
+    /// else
+    /// btnModulo1.Enabled := False;
+    /// </summary>
+    function TieneLicenciaModulo(const AIdComplemento: Integer): Boolean;
+  end;
+
+var
+  DModule_1: TDModule_1;
+
+  { --------------- Definición de Variables Globales --------------- }
+  UsuarioGiproy: TDatUsuario;
+  GlobalAuthToken: string = '';
+  codIDUSuario: Integer;
+  usuarioP: string;
+  passwordP: string;
+  rutaApp: string;
+  fileini: string;
+  connDBStr: string;
+  Nombre_usuario: string;
+  Apellidos_usuario: string;
+  Alias_usuario: string;
+  ID_usuario: string;
+  codigo_usuario: Integer;
+  TUsuario: string;
+  DecimalSeparator: AnsiChar;
+  GradienteSeleccion: TGradient;
+  GradienteBase1: TGradient;
+  base_activa: baseDatos;
+  filtradoOPC2Rec: array of Boolean;
+  recurso_activo: string;
+  categoria_recurso_activo: string;
+  OpcionPrincipal: Integer;
+  CategoriaAPUSeleccionada: string;
+  codCategoriaAPUSeleccionada: string;
+  ndecimalesPresupuesto: Integer;
+  ndecimalesMoneda: Integer;
+  ordenacionlistadoCategoiraApus: Integer;
+  EntrarAPUfrm: Boolean;
+  descripcionAPUAntigua: string;
+  listadoCodigoPaises: TStringList;
+  listadoPaises: TStringList;
+  listadoMonedas: TStringList;
+  posicionEcuador: Integer;
+  espaciosFinales: string = '   ';
+  Encoder: TIdEncoderMIME;
+  Decoder: TIdDecoderMIME;
+  nPresupuestoOpc: Integer;
+  listado_PresupuestoStake: array of dat_StakesHolders;
+  listado_tipoProyectos: array of dat_Tproyectos;
+  historicoEDO: TStringList;
+  historicoEDT: TStringList;
+  posEDT: Integer;
+  posEDO: Integer;
+  copynode: TTMSFNCTreeViewNode;
+  derivacionPresupuesto: TStringList;
+  FGroupedPresupuesto: Boolean;
+  ItemTanteo: dat_ItemPresupuesto;
+  listadoIndirectos: array of dat_costoIndirectoPresupuesto;
+  IndirectosPresupuesto: currency;
+  listaPorcentajeUsado: array of dat_listaPorcentajeUsado;
+  listadoNotas: array of dat_nota;
+  visorEDTActivo: Boolean;
+  modoCopiaPresupuesto: Integer;
+  celdasCopiar: array of dat_grid;
+  listadoCodigoUnicosEDT: TStringList;
+  GridEnvio: Integer;
+  cancelarDerivacion: string;
+  MSProject: string;
+  listadoRecursosPresupuesto: array of dat_recursosApu;
+  listadoRecursosAsumidos: array of dat_RecursosAsumidos;
+  autocalcularfechaspresupuesto: Boolean;
+  guardando: Boolean;
+  listadoItemsGridTiempo: TStringList;
+  listadoIndiceFpol: array of dat_fploIndices;
+  proyectoNuevo: Boolean;
+  listadoApusEnGrid: array of dat_tmpAPU;
+  listadoRecursosFP: array of dat_recursoFP;
+  codCategoriaRecursos: Integer;
+  listadoAPUImportar: array of dat_importAPU;
+  listadoRecursosImportar: array of dat_importRecursos;
+  listadoRecursosImportarAPU: array of dat_importRecursos;
+  idFiscalEmpresaSeleccionada: string;
+  CodUnicoEmpresaActiva: string;
+  dirGeoreferencia: string;
+  dirImagenReferencia: string;
+  isOnline: Boolean;
+  tantear: Boolean;
+  codProyecto: string;
+  revision: string;
+  contieneTanteo: Boolean;
+  FechaHoraInternet: TDateTime;
+  listadoRecursosTanteoAnidado: array of dat_ItemsAPU;
+  cadenaCurrency: string;
+  cadenaDecimales: string;
+  Clave_del_Cliente: string;
+  Clave_Secreta_de_cliente: string;
+  HardwareKey: string;
+  codSalsaExt: string;
+  nombreDB: string;
+  UserDB: string;
+  PasswordDB: string;
+  archivoIni: string;
+  puedeHacerMigracion: Boolean;
+  puedeHacerBackUp: Boolean;
+  GPubLista: TArray<uApiGiProy.TPublicidadItem>;
+  GPubIndex: Integer = -1;
+  MostrarTienda: Boolean;
+  BearerToken: string;
+  PaisDefecto: string;
+  CodPaisDefecto: string;
+  ModoCronoDerivaciones: Integer;
+  FS: TFormatSettings;
+  FTrvwResetToken: Integer;
+  FClearingTree: Boolean;
+  PrefijosPaises: TDictionary<string, string>; // clave = prefijo sin +
+  PrefijoPaisLocal: string = '593'; // país del sistema
+  distribucionDerivacion: string = 'Homogenea';
+  codAPUTanteo: string;
+
+{ ------------------------ Procedimientos ------------------------ }
+
+/// <summary>TODO: Descripción de connectaDBEmb.</summary>
+procedure connectaDBEmb();
+
+/// <summary>TODO: Descripción de limpiaOpc.</summary>
+procedure limpiaOpc();
+
+/// <summary>
+/// Implementa la lógica principal de limpia_trvw.
+/// </summary>
+procedure limpia_trvw(var trvw: TTMSFNCTreeView; const idTRVW: Integer);
+
+/// <summary>TODO: Descripción de limpiatrvwApus.</summary>
+procedure limpiatrvwApus();
+
+/// <summary>TODO: Descripción de limpiasub3db.</summary>
+procedure limpiasub3db();
+
+/// <summary>TODO: Descripción de limpiaOPC1.</summary>
+procedure limpiaOPC1();
+
+/// <summary>TODO: Descripción de limpiaOPC2.</summary>
+procedure limpiaOPC2();
+
+/// <summary>TODO: Descripción de limpiaGridRecursos.</summary>
+procedure limpiaGridRecursos();
+
+/// <summary>TODO: Descripción de limpia_trvwAPUS.</summary>
+/// <param name="trvw">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en limpia_trvwAPUS.
+/// </summary>
+procedure limpia_trvwAPUS(trvw: TTMSFMXTreeView);
+
+/// <summary>TODO: Descripción de Limpia_gridAPUSDisponibles.</summary>
+procedure Limpia_gridAPUSDisponibles();
+
+/// <summary>TODO: Descripción de limpia_APUSVisor.</summary>
+procedure limpia_APUSVisor();
+
+/// <summary>TODO: Descripción de limpiaNuevaCategoria.</summary>
+procedure limpiaNuevaCategoria(LForm: TfrmNuevaCategoria);
+
+/// <summary>TODO: Descripción de RefreshCategorias.</summary>
+procedure RefreshCategorias();
+
+/// <summary>
+/// Implementa la lógica principal de GuardaNuevaBase.
+/// </summary>
+procedure GuardaNuevaBase;
+
+/// <summary>
+/// Implementa la lógica principal de GuardaCategoria.
+/// </summary>
+procedure GuardaCategoria(const datos: item_twvr; const origen: string);
+
+/// <summary>
+/// Implementa la lógica principal de addItemTrvw.
+/// </summary>
+procedure addItemTrvw(trvw: TTMSFNCTreeView; node: TTMSFNCTreeViewNode;
+  DatNodo: item_twvr);
+
+/// <summary>TODO: Descripción de borraDBCategoria.</summary>
+/// <param name="codItem">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de borraDBCategoria.
+/// </summary>
+procedure borraDBCategoria(const codItem: string);
+
+/// <summary>TODO: Descripción de activaBaseDatos.</summary>
+/// <param name="codBase">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de activaBaseDatos.
+/// </summary>
+procedure activaBaseDatos(codBase: string);
+
+/// <summary>TODO: Descripción de IniciaNuevoRecurso.</summary>
+procedure IniciaNuevoRecurso(LForm: TfrmNuevoRecurso);
+
+/// <summary>TODO: Descripción de IniciaNuevoProyecto.</summary>
+procedure IniciaNuevoProyecto();
+
+/// <summary>
+/// Implementa la lógica principal de MuestraRecursosGrid.
+/// </summary>
+procedure MuestraRecursosGrid(const Categoria, subcategoria: string);
+
+/// <summary>
+/// Implementa la lógica principal de cargarEditCloneRecurso.
+/// </summary>
+procedure cargarEditCloneRecurso(cod_categoria, cod_subcategoria,
+  cod_Recurso: string; modo: Integer);
+/// <summary>TODO: Descripción de BorrarRecurso.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="codSubCategoria">TODO.</param>
+/// <param name="codRecurso">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de BorrarRecurso.
+/// </summary>
+
+procedure BorrarRecurso(CodCategoria, codSubCategoria, codRecurso: string);
+
+/// <summary>TODO: Descripción de muestraOPC.</summary>
+/// <param name="estado">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de muestraOPC.
+/// </summary>
+procedure muestraOPC(estado: Boolean);
+
+/// <summary>TODO: Descripción de rellenaAPUSCategoria.</summary>
+/// <param name="tOrdenacion">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en rellenaAPUSCategoria.
+/// </summary>
+procedure rellenaAPUSCategoria(tOrdenacion: Integer);
+
+/// <summary>
+/// Implementa la lógica principal de grabaNuevaUnidadMedidaRecursos.
+/// </summary>
+procedure grabaNuevaUnidadMedidaRecursos(subcategoria, unidad: string;
+  LForm: TfrmNuevoRecurso);
+
+/// <summary>
+/// Implementa la lógica principal de editarUnidadMedidaRecursos.
+/// </summary>
+procedure editarUnidadMedida(newDescripcion, oldDescripcion,
+  subcategoria: string; LForm: TfrmNuevoRecurso);
+
+/// <summary>
+/// Implementa la lógica principal de hacerPregunta.
+/// </summary>
+function hacerPregunta(Pregunta, Encabezado, modo, adicional: string;
+  LForm2: TfrmNuevoRecurso): string;
+
+/// <summary>TODO: Descripción de refrescalistaAPUsDisponibles.</summary>
+procedure refrescalistaAPUsDisponibles();
+
+/// Opera sobre datos de APU en rellenaAPUSVisor.
+/// </summary>
+procedure rellenaAPUSVisor(const cod_completoAPU: string);
+
+/// <summary>TODO: Descripción de EnviarAltTab.</summary>
+procedure EnviarAltTab();
+
+/// <summary>TODO: Descripción de VerRecursosCompleto.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de VerRecursosCompleto.
+/// </summary>
+procedure VerRecursosCompleto(const CodCategoria: string);
+
+/// <summary>TODO: Descripción de refrescalistaAPUscompleta.</summary>
+procedure refrescalistaAPUscompleta();
+
+/// <summary>TODO: Descripción de renombraUnidad.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="nombreanterior">TODO.</param>
+/// <param name="nombreNuevo">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de renombraUnidad.
+/// </summary>
+procedure renombraUnidad(CodCategoria, nombreanterior, nombreNuevo: string);
+
+/// <summary>
+/// Implementa la lógica principal de posicionaCombo.
+/// </summary>
+procedure posicionaCombo(cbb: TComboBox; itm: string) overload;
+
+/// <summary>
+/// Implementa la lógica principal de SimKey.
+/// </summary>
+procedure SimKey(VK: BYTE; Down: Boolean);
+
+/// <summary>TODO: Descripción de BorrarAPU.</summary>
+/// <param name="codApu">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en BorrarAPU.
+/// </summary>
+procedure BorrarAPU(codAPU: string);
+
+/// <summary>TODO: Descripción de posicionaAPUSCategoria.</summary>
+/// <param name="codCategoriaBaseEnvio">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en posicionaAPUSCategoria.
+/// </summary>
+procedure posicionaAPUSCategoria(const codCategoriaBaseEnvio: string);
+
+/// <summary>TODO: Descripción de ActualizaDescripcionAPU.</summary>
+/// <param name="codApu">TODO.</param>
+/// <param name="DescripcionAPU">TODO.</param>
+/// <param name="UnidadAPU">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en ActualizaDescripcionAPU.
+/// </summary>
+procedure ActualizaDescripcionAPU(codAPU, DescripcionAPU, UnidadAPU: string);
+
+procedure MueveRecurso(const codRecursoCompleto: string;
+  const codUnicoRecurso: string; const nuevaPosicion: string);
+
+procedure mueveAPUS(const categoriaDrop, codUnicoAPU: string);
+
+/// <summary>TODO: Descripción de cargaDatosBase.</summary>
+procedure cargaDatosBase(LForm: TfrmNuevaBase);
+
+/// <summary>TODO: Descripción de cargaComboPaises.</summary>
+procedure cargaComboPaises();
+
+/// <summary>TODO: Descripción de sincronizarCodigosCategorias.</summary>
+/// <param name="codBase">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de sincronizarCodigosCategorias.
+/// </summary>
+procedure sincronizarCodigosCategorias(codBase: string);
+
+/// <summary>TODO: Descripción de BorrarDB.</summary>
+/// <param name="codBaseBorrar">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de BorrarDB.
+/// </summary>
+procedure BorrarDB(const codBaseBorrar: string);
+
+/// <summary>TODO: Descripción de addlistadoStakeOtros.</summary>
+/// <param name="idFiscalStake">TODO.</param>
+/// <summary>
+/// Gestiona información de stakeholders en addlistadoStakeOtros.
+/// </summary>
+procedure addlistadoStakeOtros(idFiscalStake: string);
+
+/// <summary>TODO: Descripción de cargaTipoProyectoPresupuesto.</summary>
+procedure cargaTipoProyectoPresupuesto();
+
+/// <summary>TODO: Descripción de cargaCategoriaProyectos.</summary>
+/// <param name="codigo">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de cargaCategoriaProyectos.
+/// </summary>
+procedure cargaCategoriaProyectos(codigo: string);
+
+/// <summary>TODO: Descripción de RellenaPertenencia.</summary>
+/// <param name="idUnicoRecurso">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de RellenaPertenencia.
+/// </summary>
+procedure RellenaPertenencia(idUnicoRecurso: string; LForm: TfrmPertenencia);
+
+/// <summary>TODO: Descripción de populaStakesDisponibles.</summary>
+/// <param name="filtro">TODO.</param>
+/// <summary>
+/// Gestiona información de stakeholders en populaStakesDisponibles.
+/// </summary>
+procedure populaStakesDisponibles(const filtro: string);
+
+/// <summary>TODO: Descripción de limpiaGridStakeAsignados.</summary>
+procedure limpiaGridStakeAsignados();
+
+/// <summary>TODO: Descripción de cargaStakeAsignados.</summary>
+procedure cargaStakeAsignados();
+
+/// <summary>TODO: Descripción de addStakeHolder.</summary>
+/// <param name="codSTK">TODO.</param>
+/// <summary>
+/// Gestiona información de stakeholders en addStakeHolder.
+/// </summary>
+procedure addStakeHolder(codSTK: string);
+
+/// <summary>TODO: Descripción de populaRolStake.</summary>
+procedure populaRolStake(LForm: TfrmRolProyecto);
+
+/// <summary>TODO: Descripción de iniciaEDO.</summary>
+procedure iniciaEDO();
+
+/// <summary>TODO: Descripción de limpiaGridEDOStakes.</summary>
+procedure limpiaGridEDOStakes();
+
+/// <summary>
+/// Implementa la lógica principal de AsignaRolEdo.
+/// </summary>
+procedure AsignaRolEdo(subnodo: TTMSFNCTreeViewNode;
+  rolSinAsignar, AValue: string);
+
+/// <summary>TODO: Descripción de sincronizarEDO.</summary>
+procedure sincronizarEDO();
+
+/// <summary>TODO: Descripción de iniciaEDT.</summary>
+procedure iniciaEDT();
+
+/// <summary>TODO: Descripción de generaCodEDT.</summary>
+/// <param name="node">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de generaCodEDT.
+/// </summary>
+procedure generaCodEDT(node: TTMSFNCTreeViewNode);
+
+/// <summary>TODO: Descripción de populaResponsableEDT.</summary>
+procedure populaResponsableEDT(LForm: TfrmOpcionesEDT);
+
+/// <summary>TODO: Descripción de GuardarProyecto.</summary>
+procedure GuardarProyecto();
+
+/// <summary>
+/// Implementa la lógica principal de WriteStreamStr.
+/// </summary>
+procedure WriteStreamStr(Stream: TStream; Str: string);
+
+/// <summary>
+/// Implementa la lógica principal de WriteStreamInt.
+/// </summary>
+procedure WriteStreamInt(Stream: TStream; Num: Integer);
+
+/// <summary>TODO: Descripción de borrarPresupuesto.</summary>
+/// <param name="codPresupuesto">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de borrarPresupuesto.
+/// </summary>
+procedure borrarPresupuesto(codPresupuesto: string);
+
+/// <summary>TODO: Descripción de GuardaSeriesPresupuestos.</summary>
+procedure GuardaSeriesPresupuestos();
+
+/// <summary>TODO: Descripción de calculaPlazosCronograma.</summary>
+procedure calculaPlazosCronograma();
+
+/// <summary>TODO: Descripción de SincronizaCronogramas.</summary>
+procedure SincronizaCronogramas();
+
+/// <summary>TODO: Descripción de cronogramasSincronizaItemsPresupuesto.</summary>
+procedure cronogramasSincronizaItemsPresupuesto();
+
+/// <summary>TODO: Descripción de calcularCantidadesObras.</summary>
+procedure calcularCantidadesObras();
+
+/// <summary>TODO: Descripción de calcularInversion.</summary>
+procedure calcularInversion();
+
+procedure CargaProyectosDisponibles(FechaInicio, FechaFinal: TDateTime;
+  LForm: TfrmAbrirPresupuesto);
+
+procedure generaTablaEDTValores();
+
+procedure colorRow(Grid: TTMSFNCGrid; row: Integer; background: TAlphaColor;
+  FontColor: TAlphaColor);
+
+procedure StringGridDeleteRow(Grid: TStringGrid; ARow: Integer);
+
+/// <summary>TODO: Descripción de limpiaStringGrid.</summary>
+/// <param name="Grid">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de limpiaStringGrid.
+/// </summary>
+procedure limpiaStringGrid(Grid: TTMSFMXGrid);
+
+/// <summary>TODO: Descripción de SendText.</summary>
+/// <param name="Value">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de SendText.
+/// </summary>
+procedure SendText(const Value: WideString);
+
+/// <summary>TODO: Descripción de SeleccionaTabCrono.</summary>
+/// <param name="tabsel">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de SeleccionaTabCrono.
+/// </summary>
+procedure SeleccionaTabCrono(tabsel: Integer);
+
+/// <summary>TODO: Descripción de limpiaStringGridCol.</summary>
+/// <param name="Grid">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de limpiaStringGridCol.
+/// </summary>
+procedure limpiaStringGridCol(Grid: TTMSFMXGrid);
+
+/// <summary>TODO: Descripción de calcularPorCentajeEjecucionObras.</summary>
+procedure calcularPorCentajeEjecucionObras();
+
+/// <summary>TODO: Descripción de limpiagridCrono.</summary>
+/// <param name="Grid">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de limpiagridCrono.
+/// </summary>
+procedure limpiagridCrono(Grid: TTMSFNCGrid);
+
+/// <summary>
+/// Implementa la lógica principal de showHeader.
+/// </summary>
+procedure showHeader(AGrid: TTMSFNCGrid; const NPeriodos: Integer);
+
+/// <summary>TODO: Descripción de calculaTiempoAPUS.</summary>
+procedure calculaTiempoAPUS();
+
+/// <summary>
+/// Implementa la lógica principal de addheadercrono01.
+/// </summary>
+procedure addheadercrono01;
+
+/// <summary>TODO: Descripción de iniciaTablaMemoria.</summary>
+procedure iniciaTablaMemoria();
+
+/// <summary>
+/// Implementa la lógica principal de actualizaaRecursoAnidado.
+/// </summary>
+procedure actualizaaRecursoAnidado(posgrid: Integer; codAPU: string);
+
+/// <summary>
+/// Implementa la lógica principal de ocultaColumnasGrids.
+/// </summary>
+procedure ocultaColumnasGrids(Grid: TTMSFNCGrid; ColumnaInicial: Integer);
+
+/// <summary>
+/// Implementa la lógica principal de ocultaColumnasGridsT2.
+/// </summary>
+procedure ocultaColumnasGridsT2(Grid: TTMSFMXGrid; ColumnaInicial: Integer);
+
+/// <summary>TODO: Descripción de ReservarCodPresupuesto.</summary>
+procedure ReservarCodPresupuesto();
+
+/// <summary>TODO: Descripción de cargaPaisesRegistro.</summary>
+procedure cargaPaisesRegistro();
+
+/// <summary>TODO: Descripción de registrarUsuario.</summary>
+procedure registrarUsuario();
+
+/// <summary>TODO: Descripción de OSExecute.</summary>
+/// <param name="ACommand">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de OSExecute.
+/// </summary>
+procedure OSExecute(const ACommand: string);
+
+/// <summary>TODO: Descripción de borrarAnotacion.</summary>
+/// <param name="codItem">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de borrarAnotacion.
+/// </summary>
+procedure borrarAnotacion(codItem: string);
+
+/// <summary>TODO: Descripción de guardaGridTiempoTemporal.</summary>
+procedure guardaGridTiempoTemporal();
+
+/// <summary>TODO: Descripción de ParetoGeneralTiempo.</summary>
+procedure ParetoGeneralTiempo();
+
+/// <summary>TODO: Descripción de presupuestoCalculaTotalesCrono01.</summary>
+procedure presupuestoCalculaTotalesCrono01();
+
+/// <summary>TODO: Descripción de borrarCPC.</summary>
+procedure borrarCPC();
+
+/// <summary>TODO: Descripción de EditarCPC.</summary>
+procedure EditarCPC();
+
+/// <summary>TODO: Descripción de limpiaLista.</summary>
+/// <param name="Lista">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de limpiaLista.
+/// </summary>
+procedure limpiaLista(Lista: TListView);
+
+/// <summary>TODO: Descripción de generaRecursosPresupuesto.</summary>
+procedure generaRecursosPresupuesto();
+
+/// <summary>TODO: Descripción de verRecursoDesagregacion.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de verRecursoDesagregacion.
+/// </summary>
+procedure verRecursoDesagregacion(CodCategoria: Integer);
+
+/// <summary>TODO: Descripción de resalta_desgPanelCategoria.</summary>
+/// <param name="Panel">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de resalta_desgPanelCategoria.
+/// </summary>
+procedure resalta_desgPanelCategoria(Panel: Integer);
+
+/// <summary>TODO: Descripción de limpiaGridDesagregacion.</summary>
+procedure limpiaGridDesagregacion();
+
+/// <summary>TODO: Descripción de sincronizaDesagregacion.</summary>
+procedure sincronizaDesagregacion();
+
+/// <summary>TODO: Descripción de PresentarRecursosDesagregacion.</summary>
+/// <param name="codAPUDes">TODO.</param>
+/// <param name="PrecioUnitarioAPU">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de PresentarRecursosDesagregacion.
+/// </summary>
+procedure PresentarRecursosDesagregacion(codAPUDes, PrecioUnitarioAPU: string);
+
+/// <summary>TODO: Descripción de actualizaCodigoRecursosCompletos.</summary>
+procedure actualizaCodigoRecursosCompletos();
+
+/// <summary>TODO: Descripción de calculaTotalesRecursosDesagregacion.</summary>
+procedure calculaTotalesRecursosDesagregacion();
+
+/// <summary>TODO: Descripción de sincronizaFooterDesagregacion.</summary>
+procedure sincronizaFooterDesagregacion();
+
+/// <summary>TODO: Descripción de sincronizaDesagCPC.</summary>
+procedure sincronizaDesagCPC();
+
+/// <summary>TODO: Descripción de iniciaDBPresupuestosRecursos.</summary>
+procedure iniciaDBPresupuestosRecursos();
+
+/// <summary>TODO: Descripción de resalta_FpoliPanelCategoria.</summary>
+/// <param name="Panel">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de resalta_FpoliPanelCategoria.
+/// </summary>
+procedure resalta_FpoliPanelCategoria(Panel: Integer);
+
+/// <summary>TODO: Descripción de muestraRecursosFpolinomica.</summary>
+/// <param name="categoria">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de muestraRecursosFpolinomica.
+/// </summary>
+procedure muestraRecursosFpolinomica(const Categoria: string);
+
+/// <summary>TODO: Descripción de limpiaGridFpolinomica.</summary>
+procedure limpiaGridFpolinomica();
+
+/// <summary>TODO: Descripción de completagridGeneralFP.</summary>
+procedure completagridGeneralFP();
+
+/// <summary>TODO: Descripción de actualizaTablasIndices.</summary>
+procedure actualizaTablasIndices();
+
+/// <summary>TODO: Descripción de limpia_gridFpolIndices.</summary>
+procedure limpia_gridFpolIndices();
+
+/// <summary>TODO: Descripción de cargaOpcionesIndices.</summary>
+procedure cargaOpcionesIndices();
+
+/// <summary>
+/// Implementa la lógica principal de ajustaValorIndice.
+/// </summary>
+procedure ajustaValorIndice(indice: string; valor: Double);
+
+/// <summary>TODO: Descripción de sincronizaIndices.</summary>
+/// <param name="indice">TODO.</param>
+/// <param name="codUnicoItem">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de sincronizaIndices.
+/// </summary>
+procedure sincronizaIndices(indice, codUnicoItem: string);
+
+/// <summary>TODO: Descripción de cargaTablaIndicesSeleccionados.</summary>
+/// <param name="modo">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de cargaTablaIndicesSeleccionados.
+/// </summary>
+procedure cargaTablaIndicesSeleccionados(modo: string);
+
+/// <summary>TODO: Descripción de calculaValoresIndices.</summary>
+/// <param name="ARow">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de calculaValoresIndices.
+/// </summary>
+procedure calculaValoresIndices(ARow: Integer);
+
+/// <summary>TODO: Descripción de totalizaValoresIndice.</summary>
+procedure totalizaValoresIndice();
+
+/// <summary>TODO: Descripción de limpiaBaseDatos.</summary>
+procedure limpiaBaseDatos();
+
+/// <summary>
+/// Implementa la lógica principal de addlog.
+/// </summary>
+procedure addlog(Texto: string);
+
+/// <summary>TODO: Descripción de borraDBDatosDervicacion.</summary>
+procedure borraDBDatosDervicacion();
+
+/// <summary>
+/// Opera sobre datos de APU en adicionaSumaApusEnGrid.
+/// </summary>
+procedure adicionaSumaApusEnGrid(codUnicoAPU: string; cantidad: Double);
+
+/// <summary>
+/// Devuelve información calculada o consultada en DatosRecursosFpolinomica.
+/// </summary>
+procedure DatosRecursosFpolinomica;
+
+/// <summary>TODO: Descripción de sincronizaIndiceyCoeficientes.</summary>
+procedure sincronizaIndiceyCoeficientes();
+
+/// <summary>TODO: Descripción de actualizaIndiceEnTabla.</summary>
+/// <param name="codUnicoIndice">TODO.</param>
+/// <param name="IndiceS">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de actualizaIndiceEnTabla.
+/// </summary>
+procedure actualizaIndiceEnTabla(codUnicoIndice, IndiceS: string);
+
+/// <summary>TODO: Descripción de estadoIndices.</summary>
+procedure estadoIndices();
+
+/// <summary>TODO: Descripción de actualizaComboIndices.</summary>
+procedure actualizaComboIndices();
+
+/// <summary>TODO: Descripción de guardaTablaIndicesCuadrilla.</summary>
+procedure guardaTablaIndicesCuadrilla();
+
+/// <summary>TODO: Descripción de cargarValoresCuadrillaTipo.</summary>
+procedure cargarValoresCuadrillaTipo();
+
+/// <summary>TODO: Descripción de activa_gridCuadrillaTipo.</summary>
+procedure activa_gridCuadrillaTipo();
+
+/// <summary>TODO: Descripción de ComprobarInconsistenciaCuadrillas.</summary>
+procedure ComprobarInconsistenciaCuadrillas();
+
+/// <summary>TODO: Descripción de calculaResumenFpol.</summary>
+procedure calculaResumenFpol();
+
+/// <summary>TODO: Descripción de calculaResumenFpolCuadrilla.</summary>
+procedure calculaResumenFpolCuadrilla();
+
+/// <summary>TODO: Descripción de AjustaCurvaS.</summary>
+procedure AjustaCurvaS();
+
+/// <summary>TODO: Descripción de CambiaEstadoBase.</summary>
+/// <param name="estado">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de CambiaEstadoBase.
+/// </summary>
+procedure CambiaEstadoBase(estado: Boolean; LForm: TfrmNuevaBase);
+
+/// <summary>
+/// Opera sobre datos de APU en daCodApusActualizar.
+/// </summary>
+procedure daCodApusActualizar(listadoAPU: TStringList; idUnicoRecurso: string);
+
+/// <summary>TODO: Descripción de generaListadoRecursosImportar.</summary>
+procedure generaListadoRecursosImportar();
+
+/// <summary>
+/// Implementa la lógica principal de actualizaDatosRecurso.
+/// </summary>
+procedure actualizaDatosRecurso(idUnicoRecurso: string; descripcion: string;
+  unidad: string; precio: string);
+
+/// <summary>TODO: Descripción de actualizarApusBase.</summary>
+/// <param name="codAPU">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en actualizarApusBase.
+/// </summary>
+procedure actualizarApusBase(codAPU: string);
+
+/// <summary>
+/// Implementa la lógica principal de AjustaGridAutomatico.
+/// </summary>
+procedure AjustaGridAutomatico(Grid: TTMSFNCGrid; columnaPrincipal: Integer);
+
+/// <summary>TODO: Descripción de CreaSubCategoriasIniciales.</summary>
+/// <param name="CodBase">TODO.</param>
+/// <param name="nombreBase">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de CreaSubCategoriasIniciales.
+/// </summary>
+procedure CreaSubCategoriasIniciales(codBase, nombreBase: string);
+
+/// <summary>
+/// Opera sobre datos de APU en ImportarActualizarRecursoAPUDBOrigen.
+/// </summary>
+procedure ImportarActualizarRecursoAPUDBOrigen(const dbOrigen, codAPUOrigen,
+  codAPUDestino, codPresupuestoOrigen, revisionOrigen: string);
+
+/// <summary>TODO: Descripción de ActualizacionApusImportar.</summary>
+/// <param name="datosImportar">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en ActualizacionApusImportar.
+/// </summary>
+procedure ActualizacionApusImportar(datosImportar: dat_importAPU);
+
+/// <summary>TODO: Descripción de CreaItemsApuImportar.</summary>
+procedure CreaItemsApuImportar();
+
+/// <summary>TODO: Descripción de PasarAPUaRecurso.</summary>
+/// <param name="APUDestino">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en PasarAPUaRecurso.
+/// </summary>
+procedure PasarAPUaRecurso(APUDestino: dat_importAPU);
+
+/// <summary>
+/// Implementa la lógica principal de calculaPorcentajePrecio.
+/// </summary>
+procedure calculaPorcentajePrecio(trvw: TTMSFMXTreeView;
+  posicionMuestra: Integer; costoTotal: Double);
+
+/// <summary>
+/// Implementa la lógica principal de ajustaGridTMSAutomatico.
+/// </summary>
+procedure ajustaGridTMSAutomatico(Grid: TTMSFMXGrid; columnaPrincipal: Integer);
+
+/// <summary>
+/// Implementa la lógica principal de guardacofiguracionDatosLocalUsuario.
+/// </summary>
+procedure guardacofiguracionDatosLocalUsuario(email: string;
+  FechaInicio, FechaFin: TDateTime);
+
+/// <summary>TODO: Descripción de cargaImagenesProyecto.</summary>
+procedure cargaImagenesProyecto();
+
+/// <summary>TODO: Descripción de addImagenesReferencia.</summary>
+procedure addImagenesReferencia();
+
+/// <summary>TODO: Descripción de exportaImagenRevisiones.</summary>
+/// <param name="codProyecto">TODO.</param>
+/// <param name="revision">TODO.</param>
+/// <param name="nuevarevision">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de exportaImagenRevisiones.
+/// </summary>
+procedure exportaImagenRevisiones(codProyecto, revision, nuevarevision: string);
+
+/// <summary>
+/// Implementa la lógica principal de AjustaFloatGrid.
+/// </summary>
+procedure AjustaFloatGrid(Grid: TTMSFNCGrid; Columna: Integer);
+
+/// <summary>TODO: Descripción de sincronizaTamanoGrid.</summary>
+/// <param name="gridMaster">TODO.</param>
+/// <param name="gridHijo">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de sincronizaTamanoGrid.
+/// </summary>
+procedure sincronizaTamanoGrid(gridMaster, gridHijo: TTMSFNCGrid);
+
+/// <summary>TODO: Descripción de recalculaCronogramas.</summary>
+procedure recalculaCronogramas();
+
+/// <summary>TODO: Descripción de cierraGridTanteo.</summary>
+procedure cierraGridTanteo();
+
+/// <summary>TODO: Descripción de abreGridTanteo.</summary>
+/// <param name="posgrid">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de abreGridTanteo.
+/// </summary>
+procedure abreGridTanteo(posgrid: Integer);
+
+/// <summary>TODO: Descripción de contieneTanteos.</summary>
+procedure contieneTanteos(const CodAPU: string);
+
+/// <summary>
+/// Implementa la lógica principal de RecorrerDirectorios.
+/// </summary>
+procedure RecorrerDirectorios(sRuta: string; bIncluirSubdirectorios: Boolean;
+  ResultadosDir: TStringList);
+
+/// <summary>TODO: Descripción de actualizaEstadoDecimales.</summary>
+procedure actualizaEstadoDecimales();
+
+/// <summary>
+/// Implementa la lógica principal de ArchivosDirectorio.
+/// </summary>
+procedure ArchivosDirectorio(dir, mascara: string; var Lista: TStringList;
+  const soloNombres: Boolean);
+
+/// <summary>
+/// Opera sobre datos de APU en restaurarApuTanteo.
+/// </summary>
+procedure restaurarApuTanteo(codAPU: string; modo: Integer);
+
+/// <summary>TODO: Descripción de guardarTanteo_recursosApuAnidado.</summary>
+procedure guardarTanteo_recursosApuAnidado();
+
+/// <summary>TODO: Descripción de actualizaLineaPresupuestoItemsDB.</summary>
+/// <param name="codApu">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de actualizaLineaPresupuestoItemsDB.
+/// </summary>
+procedure actualizaLineaPresupuestoItemsDB(codAPU: string);
+
+/// <summary>
+/// Implementa la lógica principal de LimpiaTanteoDB.
+/// </summary>
+procedure LimpiaTanteoDB(codAPU: string; modo: Integer);
+
+/// <summary>TODO: Descripción de LimpiaTanteoTodaDB.</summary>
+procedure LimpiaTanteoTodaDB();
+
+/// <summary>TODO: Descripción de LimpiaDBHuerfanas.</summary>
+procedure LimpiaDBHuerfanas();
+
+/// <summary>TODO: Descripción de crearCadenacurrency.</summary>
+procedure crearCadenacurrency();
+
+/// <summary>TODO: Descripción de iniciaTreeViewTanteo.</summary>
+procedure iniciaTreeViewTanteo();
+
+/// <summary>
+/// Opera sobre datos de APU en cargaCabeceraTanteoAPUS.
+/// </summary>
+procedure cargaCabeceraTanteoAPUS(codAPU: string; modo: Integer);
+
+/// <summary>TODO: Descripción de ActualizaSimboloMonedaenDB.</summary>
+procedure ActualizaSimboloMonedaenDB();
+
+/// <summary>TODO: Descripción de iniciaTanteoCrono.</summary>
+procedure iniciaTanteoCrono();
+
+/// <summary>TODO: Descripción de ejecutaCronoDerivaciones.</summary>
+procedure ejecutaCronoDerivaciones();
+
+/// <summary>TODO: Descripción de crearCadenaDecimales.</summary>
+procedure crearCadenaDecimales();
+
+/// <summary>
+/// Implementa la lógica principal de ajustaPorcentajeItems.
+/// </summary>
+procedure ajustaPorcentajeItems(const subtotal: Double; modo: Integer);
+
+/// <summary>TODO: Descripción de DaSeleccionRolesStake.</summary>
+procedure DaSeleccionRolesStake();
+
+/// <summary>TODO: Descripción de borraStakeHolder.</summary>
+/// <param name="idStake">TODO.</param>
+/// <summary>
+/// Gestiona información de stakeholders en borraStakeHolder.
+/// </summary>
+procedure borraStakeHolder(idStake: string);
+
+/// <summary>TODO: Descripción de DaSeleccionRolesStake2.</summary>
+procedure DaSeleccionRolesStake2();
+
+/// <summary>TODO: Descripción de actualizaRolgridStake.</summary>
+/// <param name="IdUnico">TODO.</param>
+/// <param name="newRolStake">TODO.</param>
+/// <summary>
+/// Gestiona información de stakeholders en actualizaRolgridStake.
+/// </summary>
+procedure actualizaRolgridStake(idUnico, newRolStake: string);
+
+/// <summary>
+/// Implementa la lógica principal de addHito.
+/// </summary>
+procedure addHito(NodoBase: TTMSFNCTreeViewNode; nombreHito: string);
+
+/// <summary>TODO: Descripción de treeviewDesagregacionManualSize.</summary>
+procedure treeviewDesagregacionManualSize();
+
+/// <summary>TODO: Descripción de muestraRecursosDesagregacion.</summary>
+/// <param name="codigo">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de muestraRecursosDesagregacion.
+/// </summary>
+procedure muestraRecursosDesagregacion(codigo: Integer);
+
+/// <summary>TODO: Descripción de AbrirImagenConVisor.</summary>
+procedure AbrirImagenConVisor();
+
+/// <summary>TODO: Descripción de borrarImagenReferencial.</summary>
+procedure borrarImagenReferencial();
+
+/// <summary>
+/// Implementa la lógica principal de RegistraLogUsuario.
+/// </summary>
+procedure RegistraLogUsuario(const tIDUsuario, tipoEntrada: Integer;
+  out tmpstr: string);
+
+/// <summary>TODO: Descripción de guardaConfiguracionDecimales.</summary>
+procedure guardaConfiguracionDecimales();
+
+/// <summary>TODO: Descripción de Actualiza_UsuariosColaborador.</summary>
+procedure Actualiza_UsuariosColaborador();
+
+/// <summary>TODO: Descripción de WipeFile.</summary>
+/// <param name="FileName">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de WipeFile.
+/// </summary>
+procedure WipeFile(FileName: string);
+
+/// <summary>
+/// Implementa la lógica principal de CrearUsuarioWordPressAsync.
+/// </summary>
+function CrearUsuarioWordPressAsync(const AToken, AUser, APass, AEmail,
+  role: string): Boolean;
+
+/// <summary>TODO: Descripción de PreparaBaseInicio.</summary>
+/// <param name="archivoBase">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de PreparaBaseInicio.
+/// </summary>
+procedure PreparaBaseInicio(archivoBase: string);
+
+/// <summary>TODO: Descripción de GuardaFechaHoraEntrada.</summary>
+procedure GuardaFechaHoraEntrada();
+
+/// <summary>TODO: Descripción de MuestraMensajeGiproy.</summary>
+/// <param name="Texto">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de MuestraMensajeGiproy.
+/// </summary>
+procedure MuestraMensajeGiproy(const Encabezado, Texto: string);
+
+/// <summary>TODO: Descripción de AjustarEstadosBackUp_Mudanza.</summary>
+procedure AjustarEstadosBackUp_Mudanza();
+
+/// <summary>TODO: Descripción de activaLoopPublicidad.</summary>
+procedure activaLoopPublicidad();
+
+/// <summary>
+/// Implementa la lógica principal de EliminarUsuarioWordPressAsync.
+/// </summary>
+procedure EliminarUsuarioWordPressAsync(const AToken, AEmail: string;
+  const Callback: TProc<Boolean, string>);
+
+/// Abrir navegador predeterminado en la url definida.
+/// <summary>
+/// Implementa la lógica principal de AbrirEnlace.
+/// </summary>
+procedure AbrirEnlace(const AUrl: string);
+
+/// <summary>
+/// Implementa la lógica principal de CargarTiendaOnline.
+/// </summary>
+procedure CargarTiendaOnline;
+
+/// <summary>
+/// Implementa la lógica principal de EjecutarCargaTiendaOnlineEnThread.
+/// </summary>
+procedure EjecutarCargaTiendaOnlineEnThread;
+// procedure CargarTiendaOnline2;
+
+/// <summary>
+/// Devuelve información calculada o consultada en DarMatrizProductosWP.
+/// </summary>
+
+procedure DarMatrizProductosWP(var matrizProductos: TArray<string>);
+
+/// <summary>
+/// Implementa la lógica principal de crearPanelTienda.
+/// </summary>
+procedure crearPanelTienda(nPanel, TextoTitulo: string; Wlayout: Integer);
+
+/// <summary>
+/// Implementa la lógica principal de CargarProductoEnLista.
+/// </summary>
+procedure CargarProductoEnLista(LvTienda: TListBox; const x: Integer;
+  const NombreProducto, descripcion, precio: string;
+  const ImagenBase64, ImagenURL: string);
+
+/// <summary>
+/// Implementa la lógica principal de CargarProductoEnLista_v2.
+/// </summary>
+procedure CargarProductoEnLista_v2(LvTienda: TListBox; const x: Integer;
+  const NombreProducto, precio: string; const ImagenBase64, ImagenURL,
+  urlLink: string);
+
+/// <summary>
+/// Implementa la lógica principal de ActivaCamposRegistroUsuario.
+/// </summary>
+procedure ActivaCamposRegistroUsuario(estado: Boolean);
+
+/// <summary>
+/// Implementa la lógica principal de posicionaComboFNC.
+/// </summary>
+procedure posicionaComboFNC(cbb: TTMSFNCComboBox; itm: string) overload;
+
+/// <summary>
+/// Implementa la lógica principal de RellenaDatosRegistro.
+/// </summary>
+procedure RellenaDatosRegistro(const DatosRuc: TRucInfo);
+
+procedure ClipboardToStringArrayFMX(out datos: TArray<string>);
+
+procedure posicionaComboEx(const cbb: TComboBox; const itm: string) overload;
+
+procedure ExpandTreeDeferred(trvw: TTMSFNCTreeView);
+
+procedure SincronizarSecuenciasAPU();
+
+procedure RecalcularAPUsPendientes();
+
+procedure BeginGuardarAPU;
+
+procedure EndGuardarAPU;
+
+procedure IniciaReportes(const codUnico: string);
+
+procedure CargarDecimalesTrabajo();
+
+procedure cargaValoresSeriePresupuesto();
+
+procedure CargarPrefijosPaises;
+
+procedure AjustaGrid_EDOStake();
+
+procedure QuitarColorNodo(ATree: TTMSFNCTreeView; ANode: TTMSFNCTreeViewNode);
+
+procedure AplicarColorNodoEX(ATree: TTMSFNCTreeView; ANode: TTMSFNCTreeViewNode;
+  const AColorHex: string);
+
+procedure PosicionarEnCelda(G: TTMSFNCGrid; ACol, ARow: Integer);
+
+procedure EditarCelda(G: TTMSFNCGrid; ACol, ARow: Integer);
+
+procedure SafeResizeGrid(const G: TTMSFNCGrid; const ACols, ARows: Integer);
+
+procedure EjecutaCronoDerivaciones_UI;
+
+procedure AseguraCronoConfigGlobalPorDefecto;
+
+procedure AplicaCronoConfigGlobalAUI;
+
+procedure CopiarDatasetACrono0;
+
+{ ----------------------------------------------------------- }
+{ ------------------------ Funciones ------------------------ }
+{ ----------------------------------------------------------- }
+
+/// <summary>
+/// Implementa la lógica principal de CheckInternet: Boolean.
+/// </summary>
+function CheckInternet: Boolean;
+
+/// <summary>TODO: Descripción de compruebaUsuario.</summary>
+/// <param name="User">TODO.</param>
+/// <param name="password">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebaUsuario.
+/// </summary>
+function compruebaUsuario_old(User, password: string;
+  out MensajeError: string): Boolean; // deprecated ???
+
+function compruebaUsuario(User, Password: string;
+  out MensajeError: string): Boolean;
+
+/// <summary>
+/// Implementa la lógica principal de addNodeEDT.
+/// </summary>
+function addNodeEDT(node: TTMSFNCTreeViewNode; Texto: string)
+  : TTMSFNCTreeViewNode;
+
+/// <summary>TODO: Descripción de categoriaExistente.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="Descripcion">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de categoriaExistente.
+/// </summary>
+function categoriaExistente(CodCategoria, descripcion: string): Boolean;
+
+/// <summary>TODO: Descripción de Capitalize.</summary>
+/// <param name="Str">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de Capitalize.
+/// </summary>
+function Capitalize(Str: string): string;
+
+/// <summary>TODO: Descripción de generaCodigoUnico.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaCodigoUnico.
+/// </summary>
+function generaCodigoUnico(): string;
+
+/// <summary>TODO: Descripción de generaCodigoUnicoShort.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaCodigoUnicoShort.
+/// </summary>
+function generaCodigoUnicoShort(): string;
+
+/// <summary>TODO: Descripción de quitaHTML.</summary>
+/// <param name="datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de quitaHTML.
+/// </summary>
+function quitaHTML(datos: string): string;
+
+/// <summary>TODO: Descripción de decimal_correcto.</summary>
+/// <param name="datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de decimal_correcto.
+/// </summary>
+function decimal_correcto(datos: string): string;
+
+/// <summary>TODO: Descripción de daCodigoCategoriaRecursos.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCodigoCategoriaRecursos.
+/// </summary>
+function daCodigoCategoriaRecursos(): string;
+
+/// <summary>TODO: Descripción de daCodigoSubCategoriaRecursos.</summary>
+/// <param name="codCategoriaRecursos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCodigoSubCategoriaRecursos.
+/// </summary>
+function daCodigoSubCategoriaRecursos(codCategoriaRecursos: string): string;
+
+/// <summary>TODO: Descripción de generaCodigoRecurso.</summary>
+/// <param name="codCategoriaBase">TODO.</param>
+/// <param name="codSubCategoria">TODO.</param>
+/// <param name="codRecurso">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaCodigoRecurso.
+/// </summary>
+function generaCodigoRecurso(codCategoriaBase, codSubCategoria,
+  codRecurso: string): string;
+
+/// <summary>TODO: Descripción de daCodigoAPUSCategoriaRecurso.</summary>
+/// <param name="codCompleto">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en daCodigoAPUSCategoriaRecurso.
+/// </summary>
+function daCodigoAPUSCategoriaRecurso(codCompleto: string): string;
+
+/// <summary>TODO: Descripción de daCodigoAPUSSubCategoriaRecurso.</summary>
+/// <param name="codCompleto">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en daCodigoAPUSSubCategoriaRecurso.
+/// </summary>
+function daCodigoAPUSSubCategoriaRecurso(codCompleto: string): string;
+
+/// <summary>TODO: Descripción de daCodigoAPUSRecurso.</summary>
+/// <param name="codCompleto">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en daCodigoAPUSRecurso.
+/// </summary>
+function daCodigoAPUSRecurso(codCompleto: string): string;
+
+/// <summary>
+/// Implementa la lógica principal de PasarCadenaNDecimalesquitar.
+/// </summary>
+function PasarCadenaNDecimalesquitar(datos: string;
+  nDecimales: Integer): string;
+
+/// <summary>
+/// Devuelve información calculada o consultada en daDatoCodigo.
+/// </summary>
+function daDatoCodigo(codigo: string; modo: Integer): string;
+
+/// <summary>
+/// Implementa la lógica principal de ponerCerosInicio.
+/// </summary>
+function ponerCerosInicio(datos: string; ceros: Integer): string;
+
+/// <summary>TODO: Descripción de daCodigoParcialRecurso.</summary>
+/// <param name="datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCodigoParcialRecurso.
+/// </summary>
+function daCodigoParcialRecurso(datos: string): string;
+
+/// <summary>
+/// Implementa la lógica principal de interpretaCodigoRecurso.
+/// </summary>
+function interpretaCodigoRecurso(codRecurso: string; posicion: Integer): string;
+
+/// <summary>
+/// Opera sobre datos de APU en GeneraCodUnicoAPU: string.
+/// </summary>
+function GeneraCodUnicoAPU: string;
+
+/// <summary>TODO: Descripción de daNuevoNombreAPU.</summary>
+/// <param name="nombreBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en daNuevoNombreAPU.
+/// </summary>
+function daNuevoNombreAPU(nombreBase: string): string;
+
+/// <summary>
+/// Implementa la lógica principal de NcaracteresDelante.
+/// </summary>
+function NcaracteresDelante(datos: string; ncaracteres: Integer): string;
+
+/// <summary>TODO: Descripción de nuevoCodigoRecurso.</summary>
+/// <param name="Categoria">TODO.</param>
+/// <param name="subCategoria">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de nuevoCodigoRecurso.
+/// </summary>
+function nuevoCodigoRecurso(Categoria, subcategoria: string): string;
+
+/// <summary>
+/// Implementa la lógica principal de posicionLista.
+/// </summary>
+function posicionLista(lst: TStringList; cadena: string): Integer;
+
+/// <summary>TODO: Descripción de daDatosMonedaPais.</summary>
+/// <param name="codPais">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daDatosMonedaPais.
+/// </summary>
+function daDatosMonedaPais(codPais: string): string;
+
+/// <summary>
+/// Implementa la lógica principal de redondeaquitar.
+/// </summary>
+function redondeaquitar(cantidad: Double; redondeo: Integer): Double;
+
+/// <summary>
+/// Implementa la lógica principal de existeCadena.
+/// </summary>
+function existeCadena(Lista: TStringList; cadena: string): Boolean;
+
+/// <summary>TODO: Descripción de trimExp.</summary>
+/// <param name="cadena">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de trimExp.
+/// </summary>
+function trimExp(cadena: string): string;
+
+/// <summary>
+/// Implementa la lógica principal de posicionaNodo.
+/// </summary>
+function posicionaNodo(trvw: TTMSFNCTreeView; Texto: string; Columna: Integer;
+  aCase: Boolean): TTMSFNCTreeViewNode;
+
+/// <summary>TODO: Descripción de BitmapToString.</summary>
+/// <param name="img">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de BitmapToString.
+/// </summary>
+function BitmapToString(img: Tbitmap): string;
+
+/// <summary>TODO: Descripción de StringToBitmap.</summary>
+/// <param name="imgStr">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de StringToBitmap.
+/// </summary>
+function StringToBitmap(imgStr: string): Tbitmap;
+
+/// <summary>TODO: Descripción de ReadStreamStr.</summary>
+/// <param name="Stream">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ReadStreamStr.
+/// </summary>
+function ReadStreamStr(Stream: TStream): string;
+
+/// <summary>TODO: Descripción de ReadStreamInt.</summary>
+/// <param name="Stream">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ReadStreamInt.
+/// </summary>
+function ReadStreamInt(Stream: TStream): Integer;
+
+/// <summary>TODO: Descripción de generaCodigoPresupuesto.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaCodigoPresupuesto.
+/// </summary>
+function generaCodigoPresupuesto(): string;
+
+/// <summary>
+/// Implementa la lógica principal de existeNodo.
+/// </summary>
+function existeNodo(trvw: TTMSFNCTreeView; textoBuscar: string): Boolean;
+
+/// <summary>
+/// Implementa la lógica principal de posicionaNodoDesc.
+/// </summary>
+function posicionaNodoDesc(trvw: TTMSFNCTreeView; Texto: string;
+  Columna: Integer; aCase: Boolean): TTMSFNCTreeViewNode;
+
+/// <summary>TODO: Descripción de creaSangria.</summary>
+/// <param name="datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de creaSangria.
+/// </summary>
+function creaSangria(datos: string): string;
+
+/// <summary>TODO: Descripción de pasaFormatoCompleto.</summary>
+/// <param name="datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de pasaFormatoCompleto.
+/// </summary>
+function pasaFormatoCompleto(datos: Double): string;
+
+/// <summary>TODO: Descripción de quitaSignoMiles.</summary>
+/// <param name="datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de quitaSignoMiles.
+/// </summary>
+function quitaSignoMiles(datos: string): string;
+
+/// <summary>TODO: Descripción de codigoUnicoItemPresupuesto.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de codigoUnicoItemPresupuesto.
+/// </summary>
+function codigoUnicoItemPresupuesto(): string;
+
+/// <summary>TODO: Descripción de daPaqueteItem.</summary>
+/// <param name="posgrid">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daPaqueteItem.
+/// </summary>
+function daPaqueteItem(posgrid: Integer): string;
+
+/// <summary>TODO: Descripción de daCodEDT.</summary>
+/// <param name="posgrid">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCodEDT.
+/// </summary>
+function daCodEDT(posgrid: Integer): string;
+
+/// <summary>
+/// Implementa la lógica principal de cuentaCaracteres.
+/// </summary>
+function cuentaCaracteres(cadena: string; caracter: string): Integer;
+
+/// <summary>TODO: Descripción de getLastMemoLineNumber.</summary>
+/// <param name="Memo">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en getLastMemoLineNumber.
+/// </summary>
+function getLastMemoLineNumber(const Memo: TMemo): Integer;
+
+/// <summary>TODO: Descripción de dasumaValoresEDT.</summary>
+/// <param name="EDTFiltro">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en dasumaValoresEDT.
+/// </summary>
+function dasumaValoresEDT(EDTFiltro: string): Double;
+
+/// <summary>
+/// Implementa la lógica principal de searchGrid.
+/// </summary>
+function searchGrid(Grid: TTMSFNCGrid; Columna: Integer;
+  datosBusqueda: string): Integer;
+
+/// <summary>
+/// Implementa la lógica principal de encuentraItemGrid.
+/// </summary>
+function encuentraItemGrid(Grid: TTMSFNCGrid; Columna: Integer;
+  textoBuscar: string; CaseSensitive: Boolean): Integer;
+
+/// <summary>
+/// Implementa la lógica principal de encuentraItemenCuenta.
+/// </summary>
+function encuentraItemenCuenta(Grid: TTMSFNCGrid; filaRef: Integer;
+  Columna: Integer; textoBuscar: string; CaseSensitive: Boolean): Integer;
+
+/// <summary>TODO: Descripción de cuentaItemsRealesGrid.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cuentaItemsRealesGrid.
+/// </summary>
+function cuentaItemsRealesGrid(): Integer;
+
+/// <summary>TODO: Descripción de generalistadoEDTCapitulos.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generalistadoEDTCapitulos.
+/// </summary>
+function generalistadoEDTCapitulos(): TStringList;
+
+/// <summary>
+/// Implementa la lógica principal de posicionPrimerItem.
+/// </summary>
+function posicionPrimerItem(Grid: TTMSFNCGrid; codItem: string): Integer;
+
+/// <summary>TODO: Descripción de quitaHtmlNegritas.</summary>
+/// <param name="datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de quitaHtmlNegritas.
+/// </summary>
+function quitaHtmlNegritas(datos: string): string;
+
+/// <summary>TODO: Descripción de diasLaborables.</summary>
+/// <param name="diaInicio">TODO.</param>
+/// <param name="diaFin">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de diasLaborables.
+/// </summary>
+function diasLaborables(diaInicio, diaFin: TDateTime): Integer;
+
+/// <summary>TODO: Descripción de daRendimiento.</summary>
+/// <param name="codApu">TODO.</param>
+/// <param name="codCategoria">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daRendimiento.
+/// </summary>
+function daRendimiento(codAPU, CodCategoria: string): Double;
+
+/// <summary>TODO: Descripción de daTrabajo.</summary>
+/// <param name="codApu">TODO.</param>
+/// <param name="codCategoria">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daTrabajo.
+/// </summary>
+function daTrabajo(codAPU, CodCategoria: string): Double;
+
+/// <summary>
+/// Devuelve información calculada o consultada en daPorcentajeTiempo.
+/// </summary>
+function daPorcentajeTiempo(codAPU: string; duracionActividad: Double): Double;
+
+/// <summary>TODO: Descripción de creaDataBaseDesdePadre.</summary>
+/// <param name="BasePadre">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de creaDataBaseDesdePadre.
+/// </summary>
+function creaDataBaseDesdePadre(BasePadre: string): string;
+
+/// <summary>TODO: Descripción de validar_correo_electronico.</summary>
+/// <param name="correo_electronico">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de validar_correo_electronico.
+/// </summary>
+function validar_correo_electronico(correo_electronico: string): Boolean;
+
+/// <summary>TODO: Descripción de IsAlphaNumeric.</summary>
+/// <param name="C">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de IsAlphaNumeric.
+/// </summary>
+function IsAlphaNumeric(C: Char): Boolean;
+
+/// <summary>TODO: Descripción de cuentaItemsRealesGridTiempo.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cuentaItemsRealesGridTiempo.
+/// </summary>
+function cuentaItemsRealesGridTiempo(): Integer;
+
+/// <summary>TODO: Descripción de da20ParetoTiempo.</summary>
+/// <param name="codCapitulo">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en da20ParetoTiempo.
+/// </summary>
+function da20ParetoTiempo(codCapitulo: string): Integer;
+
+/// <summary>
+/// Implementa la lógica principal de ItemEnLista.
+/// </summary>
+function ItemEnLista(AItem: string; Lista: TStringList): Boolean;
+
+/// <summary>TODO: Descripción de generaDesagregacionAPUS.</summary>
+/// <param name="codAPUSDes">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en generaDesagregacionAPUS.
+/// </summary>
+function generaDesagregacionAPUS(codAPUSDes: string): Double;
+
+/// <summary>
+/// Implementa la lógica principal de calcularTotalRecursoDesagregacion.
+/// </summary>
+function calcularTotalRecursoDesagregacion(cantidad, precio,
+  rendimiento: string; categoriaBase: Integer): string;
+
+/// <summary>TODO: Descripción de IsConnected.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de IsConnected.
+/// </summary>
+function IsConnected(): Integer;
+
+/// <summary>TODO: Descripción de buscacodigoIndiceFpol.</summary>
+/// <param name="descripcion">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de buscacodigoIndiceFpol.
+/// </summary>
+function buscacodigoIndiceFpol(descripcion: string): string;
+
+/// <summary>TODO: Descripción de Guardar_DatosGenerales.</summary>
+/// <param name="fechaCreacion">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de Guardar_DatosGenerales.
+/// </summary>
+function Guardar_DatosGenerales(fechaCreacion: TDateTime): Boolean;
+
+/// <summary>TODO: Descripción de Guardar_DatosProyecto.</summary>
+/// <param name="fechaCreacion">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de Guardar_DatosProyecto.
+/// </summary>
+function Guardar_DatosProyecto(fechaCreacion: TDateTime): Boolean;
+
+/// <summary>TODO: Descripción de Guardar_StakeHolders.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Gestiona información de stakeholders en Guardar_StakeHolders.
+/// </summary>
+function Guardar_StakeHolders(): Boolean;
+
+/// <summary>TODO: Descripción de Guardar_EDO.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de Guardar_EDO.
+/// </summary>
+function Guardar_EDO(): Boolean;
+
+/// <summary>TODO: Descripción de Guardar_EDT.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de Guardar_EDT.
+/// </summary>
+function Guardar_EDT(): Boolean;
+
+/// <summary>TODO: Descripción de Guardar_Indirectos.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de Guardar_Indirectos.
+/// </summary>
+function Guardar_Indirectos(): Boolean;
+
+/// <summary>TODO: Descripción de guardar_ItemsPresupuesto.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de guardar_ItemsPresupuesto.
+/// </summary>
+function guardar_ItemsPresupuesto(): Boolean;
+
+/// <summary>TODO: Descripción de guardar_Anotaciones.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de guardar_Anotaciones.
+/// </summary>
+function guardar_Anotaciones(): Boolean;
+
+/// <summary>TODO: Descripción de borrado_tablasProyecto.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de borrado_tablasProyecto.
+/// </summary>
+function borrado_tablasProyecto(): Boolean;
+
+/// <summary>TODO: Descripción de ProyectocumpleRequisitosMinimos.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ProyectocumpleRequisitosMinimos.
+/// </summary>
+function ProyectocumpleRequisitosMinimos(): Boolean;
+
+/// <summary>TODO: Descripción de proyectoGuardado.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de proyectoGuardado.
+/// </summary>
+function proyectoGuardado(): Boolean;
+
+/// <summary>TODO: Descripción de compruebaCodigoProyectoRevisado.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebaCodigoProyectoRevisado.
+/// </summary>
+function compruebaCodigoProyectoRevisado(): string;
+
+/// <summary>TODO: Descripción de cargar_DatosProyecto.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargar_DatosProyecto.
+/// </summary>
+function cargar_DatosProyecto(codBase: string): Boolean;
+
+/// <summary>TODO: Descripción de cargar_StakeHolders.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Gestiona información de stakeholders en cargar_StakeHolders.
+/// </summary>
+function cargar_StakeHolders(codBase: string): Boolean;
+
+/// <summary>TODO: Descripción de asignarDBProyecto.</summary>
+/// <param name="codProyecto">TODO.</param>
+/// <param name="codbase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de asignarDBProyecto.
+/// </summary>
+function asignarDBProyecto(codProyecto, codBase: string): Boolean;
+
+/// <summary>TODO: Descripción de compruebaEleccionBase.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebaEleccionBase.
+/// </summary>
+function compruebaEleccionBase(): Boolean;
+
+/// <summary>TODO: Descripción de cargar_EDO.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargar_EDO.
+/// </summary>
+function cargar_EDO(codBase: string): Boolean;
+
+/// <summary>TODO: Descripción de cargar_EDT.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargar_EDT.
+/// </summary>
+function cargar_EDT(codBase: string): Boolean;
+
+/// <summary>TODO: Descripción de activa_DatosGeneralesProyecto.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de activa_DatosGeneralesProyecto.
+/// </summary>
+function activa_DatosGeneralesProyecto(codBase: string): Boolean;
+
+/// <summary>TODO: Descripción de cargar_indirectos.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargar_indirectos.
+/// </summary>
+function cargar_indirectos(codBase: string): Boolean;
+
+/// <summary>TODO: Descripción de cargar_Items.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargar_Items.
+/// </summary>
+function cargar_Items(const codBase: string): Boolean;
+
+/// <summary>TODO: Descripción de cargarAnotaciones.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargarAnotaciones.
+/// </summary>
+function cargarAnotaciones(codBase: string): Boolean;
+
+/// <summary>TODO: Descripción de CargaProyecto.</summary>
+/// <param name="CodBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de CargaProyecto.
+/// </summary>
+function CargaProyecto(codBase: string): string;
+
+/// <summary>TODO: Descripción de guardaTablaIndicesSeleccionados.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de guardaTablaIndicesSeleccionados.
+/// </summary>
+function guardaTablaIndicesSeleccionados(): Boolean;
+
+/// <summary>TODO: Descripción de guardarDatosDerivacion.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de guardarDatosDerivacion.
+/// </summary>
+function guardarDatosDerivacion(LForm: Tfrm_CronoDerivaciones): Boolean;
+
+/// <summary>TODO: Descripción de cargarDatosDerivacion.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargarDatosDerivacion.
+/// </summary>
+function cargarDatosDerivacion(LForm: Tfrm_CronoDerivaciones): Boolean;
+
+/// <summary>TODO: Descripción de daNombreSubcategoriaFpol.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="codSubCategoria">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daNombreSubcategoriaFpol.
+/// </summary>
+function daNombreSubcategoriaFpol(CodCategoria, codSubCategoria
+  : string): string;
+/// <summary>TODO: Descripción de daValorUltCategoria.</summary>
+/// <param name="categoriaBase">TODO.</param>
+/// <returns>TODO.</returns>
+
+/// <summary>
+/// Devuelve información calculada o consultada en daValorUltCategoria.
+/// </summary>
+
+function daValorUltCategoria(categoriaBase: string): Integer;
+
+/// <summary>TODO: Descripción de daDescripcionSubCategoria.</summary>
+/// <param name="codBaseBusqueda">TODO.</param>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="codSubCategoria">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daDescripcionSubCategoria.
+/// </summary>
+function daDescripcionSubCategoria(codBaseBusqueda, CodCategoria,
+  codSubCategoria: string): string;
+
+/// <summary>TODO: Descripción de existeSubCategoria.</summary>
+/// <param name="codBaseBusqueda">TODO.</param>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="descripcionBusqueda">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de existeSubCategoria.
+/// </summary>
+function existeSubCategoria(codBaseBusqueda, CodCategoria, descripcionBusqueda
+  : string): string;
+
+/// <summary>TODO: Descripción de generaSiNoExisteCategoriaVarios.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaSiNoExisteCategoriaVarios.
+/// </summary>
+function generaSiNoExisteCategoriaVarios(CodCategoria: string): string;
+
+/// <summary>TODO: Descripción de daCodigoRecursoDestinoImportar.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="codSubCategoria">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCodigoRecursoDestinoImportar.
+/// </summary>
+function daCodigoRecursoDestinoImportar(CodCategoria, codSubCategoria
+  : string): string;
+
+/// <summary>TODO: Descripción de CrearApuNuevoImportar.</summary>
+/// <param name="codBaseOrigen">TODO.</param>
+/// <param name="codApuOrigen">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en CrearApuNuevoImportar.
+/// </summary>
+function CrearApuNuevoImportar(codBaseOrigen, codAPUOrigen: string): string;
+
+/// <summary>TODO: Descripción de contarCaracteresenCadena.</summary>
+/// <param name="cadena">TODO.</param>
+/// <param name="caracter">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de contarCaracteresenCadena.
+/// </summary>
+function contarCaracteresenCadena(cadena, caracter: string): Integer;
+
+/// <summary>TODO: Descripción de QuitarEspeciales.</summary>
+/// <param name="Cad">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de QuitarEspeciales.
+/// </summary>
+function QuitarEspeciales(const Cad: string): string;
+
+/// <summary>TODO: Descripción de crearAccionImportacion.</summary>
+/// <param name="datosImportar">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de crearAccionImportacion.
+/// </summary>
+function crearAccionImportacion(datosImportar: dat_importAPU): string;
+
+/// <summary>TODO: Descripción de crearApuImportar.</summary>
+/// <param name="APUImportar">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en crearApuImportar.
+/// </summary>
+function crearApuImportar(APUImportar: dat_importAPU): string;
+
+/// <summary>TODO: Descripción de actualizarDatosAPUImportar.</summary>
+/// <param name="APUImportar">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en actualizarDatosAPUImportar.
+/// </summary>
+function actualizarDatosAPUImportar(APUImportar: dat_importAPU): dat_importAPU;
+
+/// <summary>TODO: Descripción de daCodigoCategoriaGeneral.</summary>
+/// <param name="codCategoriaBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCodigoCategoriaGeneral.
+/// </summary>
+function daCodigoCategoriaGeneral(codCategoriaBase: string): dat_respuesta1;
+
+/// <summary>TODO: Descripción de ImportacionApusNuevo.</summary>
+/// <param name="datosImportar">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en ImportacionApusNuevo.
+/// </summary>
+function ImportacionApusNuevo(datosImportar: dat_importAPU): dat_importAPU;
+
+/// <summary>TODO: Descripción de ExisteEmpresa.</summary>
+/// <param name="CodUnico">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ExisteEmpresa.
+/// </summary>
+function ExisteEmpresa(codUnico: string): Boolean;
+
+/// <summary>TODO: Descripción de generaCodigoUnicoConfig.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaCodigoUnicoConfig.
+/// </summary>
+function generaCodigoUnicoConfig(): string;
+
+/// <summary>TODO: Descripción de calculaIndirectos.</summary>
+/// <param name="costoDirecto">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de calculaIndirectos.
+/// </summary>
+function calculaIndirectos(costoDirecto: Double): Double;
+
+/// <summary>TODO: Descripción de danombrePlantilla.</summary>
+/// <param name="nombrePlantilla">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en danombrePlantilla.
+/// </summary>
+function danombrePlantilla(nombrePlantilla: string): string;
+
+/// <summary>TODO: Descripción de BorrarCarpeta.</summary>
+/// <param name="vOrigen">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de BorrarCarpeta.
+/// </summary>
+function BorrarCarpeta(const vOrigen: string): Boolean;
+
+/// <summary>
+/// Implementa la lógica principal de calculaPorcentajeIvaPrecios.
+/// </summary>
+function calculaPorcentajeIvaPrecios(total: Double;
+  cantidadIva: Double): Double;
+/// <summary>TODO: Descripción de daNombreMoneda.</summary>
+/// <param name="moneda">TODO.</param>
+/// <returns>TODO.</returns>
+
+/// <summary>
+/// Devuelve información calculada o consultada en daNombreMoneda.
+/// </summary>
+
+function daNombreMoneda(moneda: string): string;
+
+/// <summary>TODO: Descripción de guardarcomoRevision.</summary>
+/// <param name="codBase">TODO.</param>
+/// <param name="revisionOrigen">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de guardarcomoRevision.
+/// </summary>
+function guardarcomoRevision(codBase, revisionOrigen: string): string;
+
+/// <summary>TODO: Descripción de existeRevisionCero.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de existeRevisionCero.
+/// </summary>
+function existeRevisionCero(): Boolean;
+
+/// <summary>TODO: Descripción de compruebaUSuarioOffline.</summary>
+/// <param name="uSer">TODO.</param>
+/// <param name="password">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebaUSuarioOffline.
+/// </summary>
+function compruebaUSuarioOffline_old(User, password: string): Boolean;
+// deprecated ???
+
+function compruebaUsuarioOffline(User, Password: string): Boolean;
+
+/// <summary>TODO: Descripción de ImportarPlantillaProjectExcel.</summary>
+/// <param name="archivoExcel">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ImportarPlantillaProjectExcel.
+/// </summary>
+function ImportarPlantillaProjectExcel(archivoExcel: string): string;
+
+/// <summary>TODO: Descripción de daSQLQueryText.</summary>
+/// <param name="Nconsulta">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daSQLQueryText.
+/// </summary>
+function daSQLQueryText(Nconsulta: Integer): string;
+
+/// <summary>TODO: Descripción de listaRevisionesBase.</summary>
+/// <param name="codBaseTratar">TODO.</param>
+/// <param name="codPresupuesto">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de listaRevisionesBase.
+/// </summary>
+function listaRevisionesBase(codBaseTratar, codPresupuesto: string)
+  : TStringList;
+/// <summary>TODO: Descripción de daCodProyectoDescripcionDB.</summary>
+/// <param name="descripcion">TODO.</param>
+/// <returns>TODO.</returns>
+
+/// <summary>
+/// Devuelve información calculada o consultada en daCodProyectoDescripcionDB.
+/// </summary>
+
+function daCodProyectoDescripcionDB(descripcion: string): string;
+
+/// <summary>TODO: Descripción de daPorcentajeAsignadoRevision.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daPorcentajeAsignadoRevision.
+/// </summary>
+function daPorcentajeAsignadoRevision(): Double;
+
+/// <summary>
+/// Implementa la lógica principal de posicionaEnGrid.
+/// </summary>
+function posicionaEnGrid(Grid: TTMSFNCGrid; Columna: Integer; itm: string):
+  Integer;
+
+/// <summary>TODO: Descripción de deltree.</summary>
+/// <param name="FileName">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de deltree.
+/// </summary>
+function deltree(const FileName: string): Boolean;
+
+/// <summary>TODO: Descripción de IsRunnig.</summary>
+/// <param name="FicheroExe">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de IsRunnig.
+/// </summary>
+function IsRunnig(FicheroExe: string): Boolean;
+
+/// <summary>TODO: Descripción de daNHcuardillas.</summary>
+/// <param name="codAPU">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daNHcuardillas.
+/// </summary>
+function daNHcuardillas(codAPU: string): Integer;
+
+/// <summary>TODO: Descripción de darendimientoHUnidad.</summary>
+/// <param name="codAPU">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en darendimientoHUnidad.
+/// </summary>
+function darendimientoHUnidad(codAPU: string): Double;
+
+/// <summary>TODO: Descripción de CuentaRevisiones.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de CuentaRevisiones.
+/// </summary>
+function CuentaRevisiones(): Integer;
+
+/// <summary>TODO: Descripción de nApusAnidados.</summary>
+/// <param name="codAPU">TODO.</param>
+/// <param name="codAPUanidado">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en nApusAnidados.
+/// </summary>
+function nApusAnidados(codAPU, codAPUanidado: string): Integer;
+
+/// <summary>
+/// Opera sobre datos de APU en RecalculaApuAnidado.
+/// </summary>
+function RecalculaApuAnidado(nuevoPrecioAnidado, codAPUanidado, codAPU: string;
+  guardar: Boolean): Double;
+
+/// <summary>TODO: Descripción de Porcentaje.</summary>
+/// <param name="Valor">TODO.</param>
+/// <param name="porcentaje">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de porcentaje.
+/// </summary>
+function porcentaje(valor, porcentaje: Double): Double;
+
+/// <summary>TODO: Descripción de quitaSimboloMoneda.</summary>
+/// <param name="Datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de quitaSimboloMoneda.
+/// </summary>
+function quitaSimboloMoneda(datos: string): string;
+
+/// <summary>TODO: Descripción de generaCodigoPresupuestoNuevo.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaCodigoPresupuestoNuevo.
+/// </summary>
+function generaCodigoPresupuestoNuevo(): string;
+
+/// <summary>TODO: Descripción de quitaFormatFloat.</summary>
+/// <param name="datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de quitaFormatFloat.
+/// </summary>
+function quitaFormatFloat(datos: string): Double;
+
+/// <summary>
+/// Implementa la lógica principal de IsControlKeyPressed: Boolean.
+/// </summary>
+function IsControlKeyPressed: Boolean;
+
+/// <summary>
+/// Implementa la lógica principal de IsShiftKeyPressed: Boolean.
+/// </summary>
+function IsShiftKeyPressed: Boolean;
+
+/// <summary>TODO: Descripción de faltaDatosDerivacion.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de faltaDatosDerivacion.
+/// </summary>
+function faltaDatosDerivacion(): Integer;
+
+/// <summary>TODO: Descripción de cantidadCronoDerivaciones.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cantidadCronoDerivaciones.
+/// </summary>
+function cantidadCronoDerivaciones(): Integer;
+
+/// <summary>
+/// Implementa la lógica principal de forzarNdecimales.
+/// </summary>
+function forzarNdecimales(valor: Double; nDecimales: Integer): string;
+
+/// <summary>TODO: Descripción de compruebaTodoCPC.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebaTodoCPC.
+/// </summary>
+function compruebaTodoCPC(): Boolean;
+
+/// <summary>TODO: Descripción de compruebatodoFpolinomica.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebatodoFpolinomica.
+/// </summary>
+function compruebatodoFpolinomica(): Boolean;
+
+/// <summary>
+/// Implementa la lógica principal de ForzarCadenaNDecimales.
+/// </summary>
+function ForzarCadenaNDecimales(datos: string; nDecimales: Integer): string;
+
+/// <summary>TODO: Descripción de cargarTablaIndicesFPolinomica.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargarTablaIndicesFPolinomica.
+/// </summary>
+function cargarTablaIndicesFPolinomica(): Boolean;
+
+/// <summary>TODO: Descripción de compruebaCodigoIndiceRepetido.</summary>
+/// <param name="codigoIndice">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebaCodigoIndiceRepetido.
+/// </summary>
+function compruebaCodigoIndiceRepetido(codigoIndice: string): Boolean;
+
+/// <summary>TODO: Descripción de daValorParametro.</summary>
+/// <param name="idParametro">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daValorParametro.
+/// </summary>
+function daValorParametro(idParametro: Integer): string;
+
+/// <summary>TODO: Descripción de compruebaModeloNegocio.</summary>
+/// <param name="Modulo">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebaModeloNegocio.
+/// </summary>
+function compruebaModeloNegocio(Modulo: Integer): Boolean;
+
+/// <summary>TODO: Descripción de daCantidadReportesRestantes.</summary>
+/// <param name="idComplemento">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCantidadReportesRestantes.
+/// </summary>
+function daCantidadReportesRestantes(idComplemento: Integer): Integer;
+
+/// <summary>
+/// Implementa la lógica principal de ejecutaExportacionReporte.
+/// </summary>
+function ejecutaExportacionReporte(idComplemento: Integer;
+  triggerOperacion: string): string;
+
+/// <summary>TODO: Descripción de enviar_invitacion_unirse_giproy.</summary>
+/// <param name="email">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de enviar_invitacion_unirse_giproy.
+/// </summary>
+function enviar_invitacion_unirse_giproy(email: string): string;
+
+/// <summary>TODO: Descripción de CuentaUsuariosColaboradores.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de CuentaUsuariosColaboradores.
+/// </summary>
+function CuentaUsuariosColaboradores(): Integer;
+
+/// <summary>TODO: Descripción de comprobarModuloActivo.</summary>
+/// <param name="idComplemento">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de comprobarModuloActivo.
+/// </summary>
+function comprobarModuloActivo(idComplemento: Integer): Boolean;
+
+/// <summary>
+/// Devuelve información calculada o consultada en DarkenColor.
+/// </summary>
+function DarkenColor(const AColor: TAlphaColor; Factor: Single): TAlphaColor;
+
+/// <summary>TODO: Descripción de ActivarLicenciaProducto.</summary>
+/// <param name="LicenciaProducto">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ActivarLicenciaProducto.
+/// </summary>
+function ActivarLicenciaProducto(LicenciaProducto: string): string;
+
+/// <summary>TODO: Descripción de PrettyJSON.</summary>
+/// <param name="JSONStr">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de PrettyJSON.
+/// </summary>
+function PrettyJSON(const JSONStr: string): string;
+
+/// <summary>TODO: Descripción de DescargaFTP.</summary>
+/// <param name="nombreArchivo">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de DescargaFTP.
+/// </summary>
+function DescargaFTP(nombreArchivo: string): string;
+
+/// <summary>
+/// Implementa la lógica principal de DesencriptaFile.
+/// </summary>
+function DesencriptaFile(FInicio: string; keysalsa: string): string;
+
+/// <summary>
+/// Implementa la lógica principal de importarDBG.
+/// </summary>
+function importarDBG(ficheroImp: string; keysalsa: string): string;
+
+/// <summary>TODO: Descripción de Borrarftp.</summary>
+/// <param name="nombreArchivo">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de Borrarftp.
+/// </summary>
+function Borrarftp(nombreArchivo: string): string;
+
+/// <summary>TODO: Descripción de RestaurarMudanzaSistema.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de RestaurarMudanzaSistema.
+/// </summary>
+function RestaurarMudanzaSistema(): Boolean;
+
+/// <summary>TODO: Descripción de RestaurarBackup.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de RestaurarBackup.
+/// </summary>
+function RestaurarBackup(): Boolean;
+
+/// <summary>TODO: Descripción de PreguntarSiEjecutarMudanza.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de PreguntarSiEjecutarMudanza.
+/// </summary>
+function PreguntarSiEjecutarMudanza(): Integer;
+
+/// <summary>TODO: Descripción de realizarPreguntaSiNo.</summary>
+/// <param name="TextoPregunta">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de realizarPreguntaSiNo.
+/// </summary>
+function realizarPreguntaSiNo(TextoPregunta: string): Integer;
+
+/// <summary>TODO: Descripción de recibeCodigoActualEncriptacion.</summary>
+/// <param name="usuarioE">TODO.</param>
+/// <param name="PasswordE">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de recibeCodigoActualEncriptacion.
+/// </summary>
+function recibeCodigoActualEncriptacion(usuarioE, PasswordE: string): string;
+
+/// <summary>
+/// Implementa la lógica principal de encriptaEx.
+/// </summary>
+function encriptaEx(datos: string; keysalsa: string): string;
+
+/// <summary>
+/// Implementa la lógica principal de DesencriptaEx.
+/// </summary>
+function DesencriptaEx(datos: string; keysalsa: string): string;
+
+/// <summary>TODO: Descripción de PreguntarSiRestaurarBackUp.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de PreguntarSiRestaurarBackUp.
+/// </summary>
+function PreguntarSiRestaurarBackUp(): Integer;
+
+/// <summary>TODO: Descripción de InicializaDBGiProy.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de InicializaDBGiProy.
+/// </summary>
+function InicializaDBGiProy(): Integer;
+
+/// <summary>TODO: Descripción de importarDBG2.</summary>
+/// <param name="ficheroImp">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de importarDBG2.
+/// </summary>
+function importarDBG2(ficheroImp: string): string;
+
+/// <summary>TODO: Descripción de recibeCodigoDBInstalacion.</summary>
+/// <param name="usuarioE">TODO.</param>
+/// <param name="PasswordE">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de recibeCodigoDBInstalacion.
+/// </summary>
+function recibeCodigoDBInstalacion(usuarioE, PasswordE: string): string;
+
+/// <summary>TODO: Descripción de generaKeySalsa.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaKeySalsa.
+/// </summary>
+function generaKeySalsa(): string;
+
+/// <summary>TODO: Descripción de activaDBUsuario.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de activaDBUsuario.
+/// </summary>
+function activaDBUsuario(): Boolean;
+
+/// <summary>TODO: Descripción de generaBackUP.</summary>
+/// <param name="automatico">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaBackUP.
+/// </summary>
+function generaBackUP(automatico: Boolean): string;
+
+/// <summary>
+/// Implementa la lógica principal de LoginUsuario.
+/// </summary>
+function LoginUsuario(const AUsuario, APassword: string;
+  out datos: TDatUsuario): Boolean;
+
+/// <summary>
+/// Implementa la lógica principal de ObtenerUltimoBackupDisponiblesFecha.
+/// </summary>
+function ObtenerUltimoBackupDisponiblesFecha(const AUrl, AToken: string;
+  AIdUsuario: Integer; out AFecha: TDateTime; out AJson: TJSONObject): Boolean;
+
+/// <summary>
+/// Implementa la lógica principal de ParseMysqlDateTime.
+/// </summary>
+function ParseMysqlDateTime(const S: string; out DT: TDateTime): Boolean;
+
+/// <summary>
+/// Implementa la lógica principal de TryParseFechaPHP.
+/// </summary>
+function TryParseFechaPHP(const S: string; out DT: TDateTime): Boolean;
+
+/// <summary>
+/// Implementa la lógica principal de ParsePhpDateTimeISO.
+/// </summary>
+function ParsePhpDateTimeISO(const S: string; out DT: TDateTime): Boolean;
+
+/// <summary>TODO: Descripción de ConsultaEstadoMigracion.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ConsultaEstadoMigracion.
+/// </summary>
+function ConsultaEstadoMigracion(): Boolean;
+
+/// <summary>TODO: Descripción de ConsultaEstadoBackUP.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ConsultaEstadoBackUP.
+/// </summary>
+function ConsultaEstadoBackUP(): Boolean;
+
+/// <summary>TODO: Descripción de DaPublicidadEmitir.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en DaPublicidadEmitir.
+/// </summary>
+function DaPublicidadEmitir(): string;
+
+/// <summary>
+/// Implementa la lógica principal de EliminarUsuarioWordPressSync.
+/// </summary>
+function EliminarUsuarioWordPressSync(const AToken, AEmail: string;
+  out AMessage: string): Boolean;
+
+/// <summary>
+/// Implementa la lógica principal de CSVtoMatriz.
+/// </summary>
+function CSVtoMatriz(const ArchivoCSV: string; Delimitador: Char = ',')
+  : TArray<TArray<string>>;
+
+/// <summary>
+/// Implementa la lógica principal de SplitByCommas.
+/// </summary>
+function SplitByCommas(const Input: string): TArray<string>;
+
+/// <summary>
+/// Implementa la lógica principal de FindComponentRecursive.
+/// </summary>
+function FindComponentRecursive(AParent: TFmxObject; const AName: string)
+  : TFmxObject;
+
+/// <summary>
+/// Implementa la lógica principal de SoloLetrasYNumeros.
+/// </summary>
+function SoloLetrasYNumeros(const Texto: string): string;
+
+/// <summary>
+/// Implementa la lógica principal de SepararApellidoNombre.
+/// </summary>
+function SepararApellidoNombre(const Texto: string): TNombreSeparado;
+
+/// <summary>
+/// TODO: Descripción de realizarRegistro.
+/// </summary>
+function realizarRegistro(out error: string): Boolean;
+
+/// <summary>
+/// Implementa el autocambio de la cadena a un correcto uso del separador decimal
+/// </summary>
+function NormalizaDecimalTexto(const AText: string): string;
+
+function SafeStrToFloat(const S: string; const ADefault: Double = 0.0): Double;
+
+function DuplicarAPU_Completo(const ACodAPUOrigen: string; const
+  ANuevaDescripcion: string): string;
+
+function TryPointToCellByRTTI(AGrid: TObject; const x, Y: Single; out ACol,
+  ARow: Integer): Boolean;
+
+function NormalizarTelefono(const Tel: string): string;
+
+function CompruebaRuc(out error: string): Boolean;
+
+function StripFontTag(const S: string): string;
+
+function StripHtmlFont(const S: string): string;
+
+function ExtractFontColor(const S: string): string;
+
+function GetAppVersion: string;
+
+function daDiasPlazoEjecucion: integer;
+
+function ObtenerDerivacionItem(const ACodUnicoItems: string): string;
+
+function CronoDerivacionHomogeneaTexto(const APeriodos: Integer): string;
+
+function CargaCronoConfigGlobal(out ATipoPeriodo: string; out APeriodos:
+  Integer; out ATipoDerivacion: string; out ADerivacion: string): Boolean;
+
+function PasaStrtoPorcentaje(str: string): currency;
+
+implementation
+
+{%CLASSGROUP 'FMX.Controls.TControl'}
+{$R *.dfm}
+
+procedure CopiarDatasetACrono0;
+var
+  DS: TDataSet;
+  row: Integer;
+begin
+  DS := DMPresupuesto.QTPresupuestosItems;
+  if (not Assigned(DS)) or (not DS.Active) then
+    Exit;
+
+  frmMain.grid_crono0.BeginUpdate;
+  try
+    frmMain.grid_crono0.Clear;
+
+    frmMain.grid_crono0.RowCount := DS.RecordCount + 1;
+
+    row := 1;
+    DS.First;
+    while not DS.Eof do
+    begin
+      // Cod EDT
+      frmMain.grid_crono0.Cells[0, row] :=
+        DS.FieldByName('codEdt').AsString;
+
+      // Cod Items
+      frmMain.grid_crono0.Cells[1, row] :=
+        DS.FieldByName('codItems').AsString;
+
+      // Cod APU
+      frmMain.grid_crono0.Cells[2, row] :=
+        DS.FieldByName('codAPU').AsString;
+
+      // Descripción
+      frmMain.grid_crono0.Cells[3, row] :=
+        DS.FieldByName('descripcion').AsString;
+
+      // Unidad
+      frmMain.grid_crono0.Cells[4, row] :=
+        DS.FieldByName('unidad').AsString;
+
+      // Cantidad
+      if not DS.FieldByName('cantidad').IsNull then
+        frmMain.grid_crono0.Cells[5, row] :=
+          FloatToStr(DS.FieldByName('cantidad').AsFloat)
+      else
+        frmMain.grid_crono0.Cells[5, row] := '';
+
+      // P.Unitario
+      if not DS.FieldByName('PUnitario').IsNull then
+        frmMain.grid_crono0.Cells[6, row] :=
+          FormatFloat(cadenaCurrency,
+          DS.FieldByName('PUnitario').AsFloat)
+      else
+        frmMain.grid_crono0.Cells[6, row] := '';
+
+      // P.Total
+      if not DS.FieldByName('Ptotal').IsNull then
+        frmMain.grid_crono0.Cells[7, row] :=
+          FormatFloat(cadenaCurrency,
+          DS.FieldByName('Ptotal').AsFloat)
+      else
+        frmMain.grid_crono0.Cells[7, row] := '';
+
+      // Notas
+      frmMain.grid_crono0.Cells[8, row] :=
+        DS.FieldByName('notas').AsString;
+
+      // codUnicoItems (clave técnica)
+      frmMain.grid_crono0.Cells[10, row] :=
+        DS.FieldByName('codUnicoItems').AsString;
+
+      Inc(row);
+      DS.Next;
+    end;
+
+  finally
+    frmMain.grid_crono0.EndUpdate;
+  end;
+end;
+
+function ObtenerDerivacionItem(const ACodUnicoItems: string): string;
+var
+  qry: TUniQuery;
+  tipoPeriodo, tipoDerivacion, derivacion: string;
+  periodos: Integer;
+begin
+  Result := '';
+
+  // 1️⃣ Buscar override por ítem
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.SQL.Text :=
+      'SELECT derivacion ' +
+      'FROM presupuestos_cronogramas ' +
+      'WHERE codBase = :codBase ' +
+      '  AND codPresupuesto = :codPresupuesto ' +
+      '  AND revision = :revision ' +
+      '  AND codUnicoItems = :codUnicoItems ' +
+      'LIMIT 1';
+
+    qry.ParamByName('codBase').AsString := base_activa.codBase;
+    qry.ParamByName('codPresupuesto').AsString := codProyecto;
+    qry.ParamByName('revision').AsString := revision;
+    qry.ParamByName('codUnicoItems').AsString := ACodUnicoItems;
+
+    qry.Open;
+
+    if not qry.IsEmpty then
+    begin
+      Result := qry.FieldByName('derivacion').AsString;
+      Exit;
+    end;
+  finally
+    qry.Free;
+  end;
+
+  // 2️⃣ Si no existe override → usar GLOBAL
+  if CargaCronoConfigGlobal(tipoPeriodo, periodos, tipoDerivacion, derivacion)
+    then
+  begin
+    Result := derivacion;
+    Exit;
+  end;
+
+  // 3️⃣ Fallback extremo (no debería ocurrir)
+  Result := CronoDerivacionHomogeneaTexto(
+    StrToIntDef(frmMain.lbl_cronogramaNPeriodos.Text, 1)
+    );
+end;
+
+procedure EjecutaCronoDerivaciones_UI;
+var
+  derivacionCompleta: Integer;
+  nperiodos: Integer;
+  baseRows: Integer;
+
+  procedure PrepGrid(const G: TTMSFNCGrid; const ACols, ARows: Integer);
+  begin
+    if not Assigned(G) then
+      Exit;
+
+    G.StopEdit;
+    G.BeginUpdate;
+    try
+      if G.RowCount <> ARows then
+        G.RowCount := ARows;
+
+      if G.ColumnCount <> ACols then
+        G.ColumnCount := ACols;
+    finally
+      G.EndUpdate;
+    end;
+  end;
+
+begin
+  // 1) Asegurar config global (si es primera vez: mensual + homogénea)
+  AseguraCronoConfigGlobalPorDefecto;
+
+  // 2) Aplicarla a UI + grid base (col 11), siempre
+  AplicaCronoConfigGlobalAUI;
+
+  // 3) Evaluación “falta” (con global siempre será 0)
+  derivacionCompleta := faltaDatosDerivacion;
+
+  // 4) Periodos desde UI (ya aplicados)
+  nperiodos := StrToIntDef(frmMain.lbl_cronogramaNPeriodos.Text, 0);
+  if nperiodos <= 0 then
+    nperiodos := 1;
+
+  // 5) Filas base
+  baseRows := frmMain.grid_crono0.RowCount;
+  if baseRows < 2 then
+    baseRows := 2;
+
+  // 6) Preparar estructura UNA vez
+  PrepGrid(frmMain.grid_Crono1, nperiodos + 1, baseRows);
+  PrepGrid(frmMain.grid_Crono2, nperiodos + 1, baseRows);
+  PrepGrid(frmMain.grid_Crono3, nperiodos + 1, baseRows);
+  PrepGrid(frmMain.grid_GBarras, nperiodos, baseRows);
+  PrepGrid(frmMain.grid_CronoTotales, nperiodos, baseRows);
+
+  // 7) Limpieza y cálculo (YA NO SE CORTA por count)
+  limpiagridCrono(frmMain.grid_Crono1);
+  calcularPorCentajeEjecucionObras();
+
+  limpiagridCrono(frmMain.grid_Crono2);
+  limpiagridCrono(frmMain.grid_CronoTotales);
+  calcularInversion();
+
+  limpiagridCrono(frmMain.grid_Crono3);
+  calcularCantidadesObras();
+
+  frmMain.tbc1.ActiveTab := frmMain.tab_1;
+  frmMain.grid_Crono1.SetFocus;
+  SeleccionaTabCrono(1);
+
+  cancelarDerivacion :=
+    frmMain.cbb_cronoTipoPeriodo.Items[frmMain.cbb_cronoTipoPeriodo.ItemIndex] +
+    ',' +
+    frmMain.lbl_cronogramaNPeriodos.Text;
+
+  if derivacionCompleta = 0 then
+    AjustaCurvaS();
+
+  sincronizaTamanoGrid(frmMain.grid_Crono1, frmMain.grid_CronoTotales);
+  sincronizaTamanoGrid(frmMain.grid_Crono1, frmMain.grid_Crono2);
+  sincronizaTamanoGrid(frmMain.grid_Crono1, frmMain.grid_Crono3);
+  sincronizaTamanoGrid(frmMain.grid_Crono1, frmMain.grid_GBarras);
+
+  if frmMain.grid_CronoTotales.ColumnCount > 0 then
+    frmMain.grid_CronoTotales.Columns[
+      frmMain.grid_CronoTotales.ColumnCount - 1
+    ].Width := 0;
+end;
+
+function CronoTipoPeriodoTexto: string;
+begin
+  if (frmMain.cbb_cronoTipoPeriodo.ItemIndex >= 0) and
+    (frmMain.cbb_cronoTipoPeriodo.ItemIndex <
+    frmMain.cbb_cronoTipoPeriodo.Items.Count) then
+    Result :=
+      frmMain.cbb_cronoTipoPeriodo.Items[frmMain.cbb_cronoTipoPeriodo.ItemIndex]
+  else
+    Result := 'Mensual';
+end;
+
+function CronoDerivacionHomogeneaTexto(const APeriodos: Integer): string;
+var
+  i: Integer;
+  basePct, suma: Double;
+  lastPct: Double;
+  L: TStringList;
+begin
+  Result := '';
+  if APeriodos <= 0 then
+    Exit;
+
+  L := TStringList.Create;
+  try
+    L.Clear;
+
+    if APeriodos = 1 then
+    begin
+      L.Add('100');
+      Result := L.Text;
+      Exit;
+    end;
+
+    basePct := 100.0 / APeriodos;
+    suma := 0;
+
+    for i := 0 to APeriodos - 2 do
+    begin
+      L.Add(FloatToStr(basePct));
+      suma := suma + basePct;
+    end;
+
+    lastPct := 100.0 - suma;
+    L.Add(FloatToStr(lastPct));
+
+    Result := L.Text;
+  finally
+    L.Free;
+  end;
+end;
+
+procedure AplicaDerivacionAGridCrono0_Global(const ADerivacion: string);
+var
+  x: Integer;
+begin
+  // Col 11 = derivacion (según tu código)
+  frmMain.grid_crono0.Columns[11].Width := 0;
+  for x := 1 to frmMain.grid_crono0.RowCount - 1 do
+  begin
+    // Solo aplica a filas “item” (según tu lógica: si col 0 = '' es item)
+    if frmMain.grid_crono0.Cells[0, x] = '' then
+      frmMain.grid_crono0.Cells[11, x] := ADerivacion;
+  end;
+end;
+
+function ExisteCronoConfigGlobal: Boolean;
+var
+  qry: TUniQuery;
+begin
+  Result := False;
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.Close;
+    qry.SQL.Clear;
+    qry.SQL.Text :=
+      'SELECT 1 ' +
+      'FROM presupuestos_cronogramas c ' +
+      'WHERE c.codBase = :codbase ' +
+      '  AND c.codPresupuesto = :codPresupuesto ' +
+      '  AND c.revision = :revision ' +
+      '  AND c.codUnicoItems = :globalKey ' +
+      'LIMIT 1';
+    qry.ParamByName('codbase').AsString := base_activa.codBase;
+    qry.ParamByName('codPresupuesto').AsString := codProyecto;
+    qry.ParamByName('revision').AsString := revision;
+    qry.ParamByName('globalKey').AsString := CRONO_GLOBAL_KEY;
+    qry.Open;
+    Result := not qry.IsEmpty;
+  finally
+    qry.Free;
+  end;
+end;
+
+function GuardaCronoConfigGlobal(const ATipoPeriodo: string; const APeriodos:
+  Integer;
+  const ATipoDerivacion: string; const ADerivacion: string): Boolean;
+var
+  qry: TUniQuery;
+  StartedHere: Boolean;
+begin
+  Result := False;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    StartedHere := not DModule_1.con2.InTransaction;
+    if StartedHere then
+      DModule_1.con2.StartTransaction;
+
+    try
+      // Borrar la global previa
+      qry.Close;
+      qry.SQL.Clear;
+      qry.SQL.Text :=
+        'DELETE FROM presupuestos_cronogramas ' +
+        'WHERE codBase = :codbase ' +
+        '  AND codPresupuesto = :codPresupuesto ' +
+        '  AND revision = :revision ' +
+        '  AND codUnicoItems = :globalKey';
+      qry.ParamByName('codbase').AsString := base_activa.codBase;
+      qry.ParamByName('codPresupuesto').AsString := codProyecto;
+      qry.ParamByName('revision').AsString := revision;
+      qry.ParamByName('globalKey').AsString := CRONO_GLOBAL_KEY;
+      qry.ExecSQL;
+
+      // Insertar global
+      qry.Close;
+      qry.SQL.Clear;
+      qry.SQL.Text :=
+        'INSERT INTO presupuestos_cronogramas ' +
+        '(codBase, codPresupuesto, revision, codUnicoItems, tipoPeriodo, Periodos, tipoDerivacion, derivacion) ' +
+        'VALUES ' +
+        '(:codBase, :codPresupuesto, :revision, :codUnicoItems, :tipoPeriodo, :Periodos, :tipoDerivacion, :derivacion)';
+      qry.ParamByName('codBase').AsString := base_activa.codBase;
+      qry.ParamByName('codPresupuesto').AsString := codProyecto;
+      qry.ParamByName('revision').AsString := revision;
+      qry.ParamByName('codUnicoItems').AsString := CRONO_GLOBAL_KEY;
+      qry.ParamByName('tipoPeriodo').AsString := ATipoPeriodo;
+      qry.ParamByName('Periodos').AsInteger := APeriodos;
+      qry.ParamByName('tipoDerivacion').AsString := ATipoDerivacion;
+      qry.ParamByName('derivacion').AsString := ADerivacion;
+      qry.ExecSQL;
+
+      if StartedHere then
+        DModule_1.con2.Commit;
+
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        if StartedHere and DModule_1.con2.InTransaction then
+          DModule_1.con2.Rollback;
+        raise;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+function CargaCronoConfigGlobal(out ATipoPeriodo: string; out APeriodos:
+  Integer;
+  out ATipoDerivacion: string; out ADerivacion: string): Boolean;
+var
+  qry: TUniQuery;
+begin
+  Result := False;
+  ATipoPeriodo := '';
+  APeriodos := 0;
+  ATipoDerivacion := '';
+  ADerivacion := '';
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.Close;
+    qry.SQL.Clear;
+    qry.SQL.Text :=
+      'SELECT tipoPeriodo, Periodos, tipoDerivacion, derivacion ' +
+      'FROM presupuestos_cronogramas c ' +
+      'WHERE c.codBase = :codbase ' +
+      '  AND c.codPresupuesto = :codPresupuesto ' +
+      '  AND c.revision = :revision ' +
+      '  AND c.codUnicoItems = :globalKey ' +
+      'LIMIT 1';
+    qry.ParamByName('codbase').AsString := base_activa.codBase;
+    qry.ParamByName('codPresupuesto').AsString := codProyecto;
+    qry.ParamByName('revision').AsString := revision;
+    qry.ParamByName('globalKey').AsString := CRONO_GLOBAL_KEY;
+    qry.Open;
+
+    if qry.IsEmpty then
+      Exit;
+
+    ATipoPeriodo := qry.FieldByName('tipoPeriodo').AsString;
+    APeriodos := qry.FieldByName('Periodos').AsInteger;
+    ATipoDerivacion := qry.FieldByName('tipoDerivacion').AsString;
+    ADerivacion := qry.FieldByName('derivacion').AsString;
+
+    Result := True;
+  finally
+    qry.Free;
+  end;
+end;
+
+procedure AseguraCronoConfigGlobalPorDefecto;
+var
+  tipoPeriodo, tipoDerivacion, derivacion: string;
+  periodos: Integer;
+begin
+  if ExisteCronoConfigGlobal then
+    Exit;
+
+  // Defaults: Mensual + Homogenea
+  frmMain.cbb_cronoTipoPeriodo.ItemIndex := 3;
+  calculaPlazosCronograma;
+  periodos := StrToIntDef(frmMain.lbl_cronogramaNPeriodos.Text, 1);
+  if periodos <= 0 then
+    periodos := 1;
+
+  tipoPeriodo := CronoTipoPeriodoTexto;
+  tipoDerivacion := 'Homogenea';
+  derivacion := CronoDerivacionHomogeneaTexto(periodos);
+
+  // aplicar a grid base (col 11) para que el cálculo use lo mismo
+  AplicaDerivacionAGridCrono0_Global(derivacion);
+
+  // persistir global
+  GuardaCronoConfigGlobal(tipoPeriodo, periodos, tipoDerivacion, derivacion);
+end;
+
+procedure AplicaCronoConfigGlobalAUI;
+var
+  tipoPeriodo, tipoDerivacion, derivacion: string;
+  periodos: Integer;
+begin
+  if not CargaCronoConfigGlobal(tipoPeriodo, periodos, tipoDerivacion,
+    derivacion) then
+    Exit;
+
+  // UI
+  posicionaCombo(frmMain.cbb_cronoTipoPeriodo, tipoPeriodo);
+  frmMain.lbl_cronogramaNPeriodos.Text := IntToStr(periodos);
+
+  // base grid (col 11)
+  AplicaDerivacionAGridCrono0_Global(derivacion);
+
+  // compatibilidad con tu variable
+  distribucionDerivacion := tipoDerivacion;
+end;
+
+// ====== REEMPLAZO 1: cantidadCronoDerivaciones ======
+function cantidadCronoDerivaciones(): Integer;
+begin
+  // En el nuevo modelo, esta función indica si EXISTE config global (1) o no (0)
+  if ExisteCronoConfigGlobal then
+    Result := 1
+  else
+    Result := 0;
+end;
+
+// ====== REEMPLAZO 2: faltaDatosDerivacion ======
+function faltaDatosDerivacion(): Integer;
+var
+  qry: TUniQuery;
+begin
+  // Si hay global, NUNCA “faltan derivaciones” para el motor base
+  if ExisteCronoConfigGlobal then
+  begin
+    Result := 0;
+    Exit;
+  end;
+
+  // Si no hay global, entonces sí consideramos que falta (modelo antiguo)
+  qry := TUniQuery.Create(nil);
+  Result := -1;
+  try
+    qry.Connection := DModule_1.con2;
+    qry.Close;
+    qry.SQL.Clear;
+    qry.SQL.Add(
+      'SELECT COUNT(p.Descripcion) AS NDerivacion ' +
+      '  FROM presupuestos_items p ' +
+      '    LEFT JOIN presupuestos_cronogramas c ' +
+      '      ON c.codBase = p.codBase ' +
+      '     AND c.codPresupuesto = p.codPresupuesto ' +
+      '     AND c.revision = p.revision ' +
+      '     AND c.codUnicoItems = p.codUnicoItems ' +
+      ' WHERE p.codBase = :codbase ' +
+      '   AND p.codPresupuesto = :codPresupuesto ' +
+      '   AND p.revision = :revision ' +
+      '   AND c.Derivacion IS NULL'
+      );
+    qry.ParamByName('codbase').AsString := base_activa.codBase;
+    qry.ParamByName('codPresupuesto').AsString := codProyecto;
+    qry.ParamByName('revision').AsString := revision;
+    qry.Open;
+    Result := qry.FieldByName('NDerivacion').AsInteger;
+  finally
+    qry.Free;
+  end;
+end;
+
+// ====== REEMPLAZO 3: guardarDatosDerivacion (AHORA guarda GLOBAL, no por item) ======
+function guardarDatosDerivacion(LForm: Tfrm_CronoDerivaciones): Boolean;
+var
+  tmpTipoDeriv: string;
+  tmpDeriv: string;
+  periodos: Integer;
+  tipoPeriodo: string;
+begin
+  Result := False;
+
+  // Si viene desde el form, construye derivación desde el grid del form.
+  // Si no viene (nil), se asegura el default global.
+  if LForm = nil then
+  begin
+    AseguraCronoConfigGlobalPorDefecto;
+    AplicaCronoConfigGlobalAUI;
+    Result := True;
+    Exit;
+  end;
+
+  // periodos desde UI principal (fuente de verdad)
+  periodos := StrToIntDef(frmMain.lbl_cronogramaNPeriodos.Text, 1);
+  if periodos <= 0 then
+    periodos := 1;
+
+  tipoPeriodo := CronoTipoPeriodoTexto;
+
+  if LForm.chkHomogenea.IsChecked then
+    tmpTipoDeriv := 'Homogenea'
+  else
+    tmpTipoDeriv := 'Distribuida';
+
+  // Construir texto de derivación (una línea por periodo, sin %)
+  // IMPORTANTE: tu sistema original guardaba "texto" en Cells[11,*] como TStringList.Text
+  // Aquí lo hacemos igual.
+  tmpDeriv := '';
+  with TStringList.Create do
+    try
+      Clear;
+
+      // Si homogénea, recalcular y tomarla
+      if tmpTipoDeriv = 'Homogenea' then
+      begin
+        Text := CronoDerivacionHomogeneaTexto(periodos);
+      end
+      else
+      begin
+        // Distribuida: tomar valores del grid del form fila 1
+        // grid_DefDerivacion: columna 0..periodos-1 en fila 1 con "xx%"
+        // Guardamos sin el símbolo %
+        // Si hay menos columnas, rellenamos con 0.
+        // (Esto evita guardados corruptos)
+        var i: Integer;
+        var v: string;
+        for i := 0 to periodos - 1 do
+        begin
+          if i < LForm.grid_DefDerivacion.ColumnCount then
+            v := LForm.grid_DefDerivacion.Cells[i, 1]
+          else
+            v := '0%';
+
+          v := ReplaceStr(v, '%', '');
+          v := Trim(v);
+          if v = '' then
+            v := '0';
+          Add(v);
+        end;
+      end;
+
+      tmpDeriv := Text;
+    finally
+      Free;
+    end;
+
+  // Persistir global
+  Result := GuardaCronoConfigGlobal(tipoPeriodo, periodos, tmpTipoDeriv,
+    tmpDeriv);
+
+  if Result then
+  begin
+    // Aplicar global a base grid para que el cálculo use lo mismo
+    AplicaDerivacionAGridCrono0_Global(tmpDeriv);
+    distribucionDerivacion := tmpTipoDeriv;
+  end;
+end;
+
+// ====== REEMPLAZO 4: actualizaDerivacion (AHORA aplica GLOBAL sin requerir form) ======
+procedure actualizaDerivacion(LForm: Tfrm_CronoDerivaciones);
+var
+  tipoPeriodo, tipoDerivacion, derivacion: string;
+  periodos: Integer;
+begin
+  // Si hay form, primero guardamos su configuración global (esto valida y persiste)
+  if LForm <> nil then
+    guardarDatosDerivacion(LForm)
+  else
+    AseguraCronoConfigGlobalPorDefecto;
+
+  // Luego aplicamos global a UI/base grid siempre
+  if CargaCronoConfigGlobal(tipoPeriodo, periodos, tipoDerivacion, derivacion)
+    then
+  begin
+    posicionaCombo(frmMain.cbb_cronoTipoPeriodo, tipoPeriodo);
+    frmMain.lbl_cronogramaNPeriodos.Text := IntToStr(periodos);
+    AplicaDerivacionAGridCrono0_Global(derivacion);
+    distribucionDerivacion := tipoDerivacion;
+  end;
+end;
+
+function daDiasPlazoEjecucion: Integer;
+var
+  qry: TUniQuery;
+begin
+  Result := 1;
+
+  if base_activa.codBase = '' then
+    Exit;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    qry.SQL.Text :=
+      'SELECT PlazoEjecucion ' +
+      'FROM Presupuestos_datosProyecto ' +
+      'WHERE codBase = :codBase ' +
+      'AND codPresupuesto = :codPresupuesto ' +
+      'AND revision = :revision ' +
+      'LIMIT 1';
+
+    qry.ParamByName('codBase').AsString := base_activa.codBase;
+    qry.ParamByName('codPresupuesto').AsString := codProyecto;
+    qry.ParamByName('revision').AsString := revision;
+
+    qry.Open;
+
+    if not qry.IsEmpty then
+    begin
+      if not qry.FieldByName('PlazoEjecucion').IsNull then
+        Result := qry.FieldByName('PlazoEjecucion').AsInteger;
+    end;
+
+  finally
+    qry.Free;
+  end;
+end;
+
+// ============================================================
+// FORMATEO FORZADO (Cantidad, Rendimiento, Porcentaje)
+// ============================================================
+
+procedure SafeResizeGrid(const G: TTMSFNCGrid; const ACols, ARows: Integer);
+var
+  NewCols, NewRows: Integer;
+begin
+  if not Assigned(G) then
+    Exit;
+
+  // Solo UI thread
+  if TThread.Current.ThreadID <> MainThreadID then
+  begin
+    TThread.Queue(nil,
+      procedure
+      begin
+        SafeResizeGrid(G, ACols, ARows);
+      end);
+    Exit;
+  end;
+
+  NewCols := Max(1, ACols);
+  NewRows := Max(1, ARows);
+
+  // Para evitar reentradas/pintado mientras cambias estructura
+  G.StopEdit;
+
+  G.BeginUpdate;
+  try
+    // Primero RowCount (suele ser menos conflictivo)
+    if G.RowCount <> NewRows then
+      G.RowCount := NewRows;
+
+    // Luego ColumnCount
+    if G.ColumnCount <> NewCols then
+      G.ColumnCount := NewCols;
+
+  finally
+    G.EndUpdate;
+  end;
+end;
+
+function _MaskDec(const Decs: Integer): string;
+begin
+  if Decs <= 0 then
+    Result := '0'
+  else
+    Result := '0.' + StringOfChar('0', Decs);
+end;
+
+function FormateaCantidad2(const Valor: Double): string;
+begin
+  Result := FormatFloat('0.00', Valor);
+end;
+
+function FormateaRendForzado(const Valor: Double; const Decs: Integer): string;
+begin
+  Result := FormatFloat(_MaskDec(Decs), Valor);
+end;
+
+function FormateaPorcentaje2(const Valor: Double): string;
+begin
+  Result := FormatFloat('0.00', Valor) + '%';
+end;
+
+function _StrToFloatDefFS(const S: string; const Def: Double): Double;
+var
+  T: string;
+  FS: TFormatSettings;
+begin
+  FS := FormatSettings;
+  T := Trim(S);
+
+  // Quita símbolo de moneda si aparece en el texto (ej: "$", "USD", etc.)
+  if (FS.CurrencyString <> '') then
+    T := StringReplace(T, FS.CurrencyString, '', [rfReplaceAll]);
+
+  // Quita espacios
+  T := StringReplace(T, ' ', '', [rfReplaceAll]);
+
+  // Quita separador de miles
+  if FS.ThousandSeparator <> #0 then
+    T := StringReplace(T, FS.ThousandSeparator, '', [rfReplaceAll]);
+
+  // Si por alguna razón viene con coma/punto cruzados, no forzamos conversión agresiva:
+  // StrToFloat con FS debe coincidir con lo que produjo FormatFloat en esta misma sesión.
+
+  Result := StrToFloatDef(T, Def, FS);
+end;
+
+// ============================================================
+// AJUSTA % (col 7) CON 2 DECIMALES FORZADOS
+// modo: 1 = Trvw_APUSTanteo, 2 = Trvw_TanteoCrono
+// ============================================================
+procedure PosicionarEnCelda(G: TTMSFNCGrid; ACol, ARow: Integer);
+var
+  C: TTMSFNCGridCellRec;
+begin
+  if not Assigned(G) then
+    Exit;
+  if (ACol < 0) or (ACol >= G.ColumnCount) then
+    Exit;
+  if (ARow < 0) or (ARow >= G.RowCount) then
+    Exit;
+
+  C.Col := ACol;
+  C.Row := ARow;
+
+  G.SelectCell(C);
+  G.SetFocus;
+end;
+
+procedure EditarCelda(G: TTMSFNCGrid; ACol, ARow: Integer);
+var
+  C: TTMSFNCGridCellRec;
+begin
+  if not Assigned(G) then
+    Exit;
+  if (ACol < 0) or (ACol >= G.ColumnCount) then
+    Exit;
+  if (ARow < 0) or (ARow >= G.RowCount) then
+    Exit;
+
+  C.Col := ACol;
+  C.Row := ARow;
+
+  G.SetFocus;
+  G.EditCell(C);
+end;
+
+procedure ajustaPorcentajeItems(const subtotal: Double; modo: Integer);
+var
+  tree: TTMSFNCTreeView;
+  nodo: TTMSFNCTreeViewNode;
+  porcentaje: Double;
+  i: Integer;
+begin
+  if subtotal = 0 then
+    Exit;
+
+  case modo of
+    1: tree := frmMain.Trvw_APUSTanteo;
+    2: tree := frmMain.Trvw_TanteoCrono;
+  else
+    Exit;
+  end;
+
+  // Recorremos todos los nodos hijos (ítems)
+  for i := 0 to tree.Nodes.Count - 1 do
+  begin
+    nodo := tree.Nodes[i];
+
+    if (nodo <> nil) and (nodo.getParent <> nil) then
+    begin
+      // Convertimos directamente desde el valor REAL ya calculado
+      porcentaje :=
+        (_StrToFloatDefFS(nodo.Text[6], 0) * 100) / subtotal;
+
+      nodo.Text[7] := FormateaPorcentaje2(porcentaje);
+    end;
+  end;
+end;
+
+// ============================================================
+// RESTAURA APU TANTEO (solo formato visual en cols 3,5,7)
+// ============================================================
+procedure restaurarApuTanteo(codAPU: string; modo: Integer);
+var
+  nodo: TTMSFNCTreeViewNode;
+  subtotal: Double;
+  porcentajeIndirectos: Double;
+  indirectos: Double;
+  total: Double;
+  tamanoTotal: Double;
+  tamanoDescripcion: Double;
+  tree: TTMSFNCTreeView;
+  totalItem: Double;
+  porcentajeItem: Double;
+  i: Integer;
+begin
+  { modo  1:Tanteo de Presupuesto, 2:Tanteo de Cronogramas }
+  tantear := False;
+
+  DMPresupuesto.TanteoAsegurarInicio(codAPU);
+  cargaCabeceraTanteoAPUS(codAPU, modo);
+
+  case modo of
+    1: tree := frmMain.Trvw_APUSTanteo;
+    2: tree := frmMain.Trvw_TanteoCrono;
+  else
+    Exit;
+  end;
+
+  with DMPresupuesto.QTanteoRecursoAPUS do
+  begin
+    Close;
+    ParamByName('codBase').AsString := base_activa.codBase;
+    ParamByName('codPresupuesto').AsString := codProyecto;
+    ParamByName('revision').AsString := revision;
+    ParamByName('codAPU').AsString := codAPU;
+
+    Open;
+    First;
+
+    subtotal := 0;
+
+    while not Eof do
+    begin
+      tamanoTotal := tree.Width;
+
+      nodo := tree.AddNode(
+        tree.Nodes[
+        FieldByName('CodCategoria').AsInteger - 1
+        ]
+        );
+
+      nodo.Text[0] := FieldByName('codRecursoCompleto').AsString;
+      nodo.Text[1] := FieldByName('descripcion').AsString;
+      nodo.Text[2] := FieldByName('unidad').AsString;
+
+      nodo.Text[3] := FormatFloat('0.00',
+        BcdToDouble(FieldByName('CantidadUnidad').AsBCD));
+
+      nodo.Text[4] := FormatFloat(cadenaCurrency,
+        BcdToDouble(FieldByName('Precio').AsBCD));
+
+      if FieldByName('CodCategoria').AsInteger <> 2 then
+        nodo.Text[5] := FormatFloat(
+          '0.' + StringOfChar('0', NDecimalesPresupuesto),
+          BcdToDouble(FieldByName('Rendimiento').AsBCD))
+      else
+        nodo.Text[5] := '';
+
+      totalItem :=
+        BcdToDouble(FieldByName('Total').AsBCD);
+
+      nodo.Text[6] :=
+        FormatFloat(cadenaCurrency, totalItem);
+
+      // 🔹 Guardamos el valor real del total en Tag (es seguro en FMX)
+      nodo.Tag := Round(totalItem * 1000000);
+
+      subtotal := subtotal + totalItem;
+
+      nodo.Text[7] := ''; // Se calcula después
+
+      nodo.Text[8] := FieldByName('idunicorecurso').AsString;
+
+      Next;
+    end;
+  end;
+
+  // ========================================
+  // CALCULO REAL DEL PORCENTAJE (CORRECTO)
+  // ========================================
+  if subtotal > 0 then
+  begin
+    for var r := 0 to tree.Nodes.Count - 1 do
+    begin
+      var nodoRaiz := tree.Nodes[r];
+
+      for var h := 0 to nodoRaiz.Nodes.Count - 1 do
+      begin
+        var nodoHijo := nodoRaiz.Nodes[h];
+
+        totalItem := nodoHijo.Tag / 1000000;
+
+        porcentajeItem :=
+          (totalItem * 100) / subtotal;
+
+        nodoHijo.Text[7] :=
+          FormatFloat('0.00', porcentajeItem) + '%';
+      end;
+    end;
+  end;
+
+  porcentajeIndirectos := base_activa.indirectos;
+  indirectos := (subtotal * porcentajeIndirectos) / 100;
+  total := subtotal + indirectos;
+
+  case modo of
+    1:
+      begin
+        tamanoDescripcion := tamanoTotal - 690;
+
+        frmMain.Trvw_APUSTanteo.Columns[0].Width := 150;
+        frmMain.Trvw_APUSTanteo.Columns[1].Width := tamanoDescripcion;
+        frmMain.Trvw_APUSTanteo.Columns[2].Width := 90;
+        frmMain.Trvw_APUSTanteo.Columns[3].Width := 90;
+        frmMain.Trvw_APUSTanteo.Columns[4].Width := 90;
+        frmMain.Trvw_APUSTanteo.Columns[5].Width := 90;
+        frmMain.Trvw_APUSTanteo.Columns[6].Width := 90;
+        frmMain.Trvw_APUSTanteo.Columns[7].Width := 90;
+        frmMain.Trvw_APUSTanteo.Columns[8].Width := 0;
+        frmMain.Trvw_APUSTanteo.Columns[8].Visible := False;
+
+        frmMain.Trvw_APUSTanteo.ExpandAll;
+
+        frmMain.lbl_TanteoCostoDirecto.Text :=
+          FormatFloat(cadenaCurrency, subtotal);
+        frmMain.lbl_TanteoCostoIndirecto.Text :=
+          FormatFloat(cadenaCurrency, indirectos);
+        frmMain.lbl_TanteoTotal.Text :=
+          FormatFloat(cadenaCurrency, total);
+      end;
+
+    2:
+      begin
+        tamanoDescripcion := tamanoTotal - 690;
+
+        frmMain.Trvw_TanteoCrono.Columns[0].Width := 150;
+        frmMain.Trvw_TanteoCrono.Columns[1].Width := tamanoDescripcion;
+        frmMain.Trvw_TanteoCrono.Columns[2].Width := 90;
+        frmMain.Trvw_TanteoCrono.Columns[3].Width := 90;
+        frmMain.Trvw_TanteoCrono.Columns[4].Width := 90;
+        frmMain.Trvw_TanteoCrono.Columns[5].Width := 90;
+        frmMain.Trvw_TanteoCrono.Columns[6].Width := 90;
+        frmMain.Trvw_TanteoCrono.Columns[7].Width := 90;
+        frmMain.Trvw_TanteoCrono.Columns[8].Width := 0;
+        frmMain.Trvw_TanteoCrono.Columns[8].Visible := False;
+
+        frmMain.Trvw_TanteoCrono.ExpandAll;
+
+        frmMain.lbl_TanteoCronoCostoDirecto.Text :=
+          FormatFloat(cadenaCurrency, subtotal);
+        frmMain.lbl_TanteoCronoCostoIndirecto.Text :=
+          FormatFloat(cadenaCurrency, indirectos);
+        frmMain.lbl_TanteoCronoTotal.Text :=
+          FormatFloat(cadenaCurrency, total);
+      end;
+  end;
+end;
+
+function GetAppVersion: string;
+var
+  Size, Handle: DWORD;
+  Buffer: Pointer;
+  FileInfo: PVSFixedFileInfo;
+  Len: UINT;
+begin
+  Result := '0.0.0.0';
+
+  Size := GetFileVersionInfoSize(PChar(ParamStr(0)), Handle);
+  if Size = 0 then
+    Exit;
+
+  GetMem(Buffer, Size);
+  try
+    if GetFileVersionInfo(PChar(ParamStr(0)), Handle, Size, Buffer) then
+    begin
+      if VerQueryValue(Buffer, '\', Pointer(FileInfo), Len) then
+      begin
+        Result :=
+          IntToStr(HiWord(FileInfo.dwFileVersionMS)) + '.' +
+          IntToStr(LoWord(FileInfo.dwFileVersionMS)) + '.' +
+          IntToStr(HiWord(FileInfo.dwFileVersionLS)) + '.' +
+          IntToStr(LoWord(FileInfo.dwFileVersionLS));
+      end;
+    end;
+  finally
+    FreeMem(Buffer);
+  end;
+end;
+
+function StripHtmlFont(const S: string): string;
+var
+  tmp: string;
+  p1, p2: Integer;
+begin
+  tmp := S;
+
+  p1 := Pos('<font', LowerCase(tmp));
+  if p1 > 0 then
+  begin
+    p2 := Pos('>', tmp);
+    if p2 > 0 then
+      Delete(tmp, p1, p2 - p1 + 1);
+  end;
+
+  tmp := StringReplace(tmp, '</font>', '', [rfReplaceAll, rfIgnoreCase]);
+
+  Result := tmp;
+end;
+
+function ExtractFontColor(const S: string): string;
+var
+  p1, p2: Integer;
+  tmp: string;
+begin
+  Result := '';
+
+  tmp := LowerCase(S);
+
+  p1 := Pos('<font color="', tmp);
+  if p1 > 0 then
+  begin
+    Inc(p1, Length('<font color="'));
+    p2 := PosEx('"', tmp, p1);
+    if p2 > p1 then
+      Result := Copy(S, p1, p2 - p1);
+  end;
+end;
+
+procedure QuitarColorNodo(ATree: TTMSFNCTreeView; ANode: TTMSFNCTreeViewNode);
+var
+  i: Integer;
+begin
+  if not Assigned(ANode) then
+    Exit;
+
+  ATree.BeginUpdate;
+  try
+    for i := 0 to ATree.Columns.Count - 1 do
+    begin
+      try
+        ANode.Text[i] := StripFontTag(ANode.Text[i]);
+      except
+      end;
+    end;
+  finally
+    ATree.EndUpdate;
+  end;
+
+  ATree.Repaint;
+end;
+
+procedure AplicarColorNodoEX(ATree: TTMSFNCTreeView; ANode: TTMSFNCTreeViewNode;
+  const AColorHex: string);
+var
+  i: Integer;
+  textoBase: string;
+begin
+  if not Assigned(ANode) then
+    Exit;
+
+  ATree.BeginUpdate;
+  try
+    for i := 0 to ATree.Columns.Count - 1 do
+    begin
+      // Protección contra AV
+      try
+        textoBase := StripFontTag(ANode.Text[i]);
+        if textoBase <> '' then
+          ANode.Text[i] := '<font color="' + AColorHex + '">' + textoBase +
+            '</font>';
+      except
+        // Si alguna columna no existe en ese nodo, se ignora
+      end;
+    end;
+  finally
+    ATree.EndUpdate;
+  end;
+
+  ATree.Repaint;
+end;
+
+function StripFontTag(const S: string): string;
+var
+  tmp: string;
+  p: Integer;
+begin
+  tmp := S;
+  tmp := StringReplace(tmp, '</font>', '', [rfReplaceAll, rfIgnoreCase]);
+
+  p := Pos('">', tmp);
+  if p > 0 then
+    tmp := Copy(tmp, p + 2, Length(tmp));
+
+  Result := tmp;
+end;
+
+procedure CargarDecimalesTrabajo();
+var
+  qry: TUniquery;
+begin
+  qry := TUniquery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.close;
+    qry.sql.Clear;
+    {(*}
+    qry.sql.Add
+      (
+        'SELECT ' +
+        '  nDecimales, ' +
+        '  nDecimalesMoneda ' +
+        'FROM empresas_config ' +
+        'WHERE ' +
+        '  CodUnico = :codUnico'
+      );
+    {*)}
+    qry.ParamByName('codUnico').AsString := codProyecto;
+    qry.Open;
+    if not qry.Eof then
+    begin
+      ndecimalesPresupuesto := qry.FieldByName('nDecimales').AsInteger;
+      ndecimalesMoneda := qry.FieldByName('nDecimalesMoneda').AsInteger;
+    end
+    else
+    begin
+      ndecimalesPresupuesto := 4;
+      ndecimalesMoneda := 2;
+    end;
+  finally
+    qry.free;
+  end;
+end;
+
+function TryPointToCellByRTTI(AGrid: TObject; const x, Y: Single;
+  out ACol, ARow: Integer): Boolean;
+const
+  // Nombres candidatos (NO se llaman directamente; se buscan si existen)
+  CNames: array[0..11] of string = ('PointToCell', 'MouseToCell', 'XYToCell',
+    'CellAtPoint', 'GetCellAtPoint', 'GetCellAtXY', 'CoordToCell',
+    'CellFromPoint', 'GetCellFromPoint', 'HitTestCell', 'GetCellByPoint',
+    'CellByPoint');
+var
+  Ctx: TRttiContext;
+  T: TRttiType;
+  M: TRttiMethod;
+  Name: string;
+  Args: TArray<TValue>;
+  V: TValue;
+begin
+  Result := False;
+  ACol := -1;
+  ARow := -1;
+  if AGrid = nil then
+    Exit;
+
+  Ctx := TRttiContext.Create;
+  T := Ctx.GetType(AGrid.ClassType);
+
+  for Name in CNames do
+  begin
+    for M in T.GetMethods do
+    begin
+      if not SameText(M.Name, Name) then
+        Continue;
+
+      // Firma 1: function ...(P: TPointF; var/out Col, Row: Integer): Boolean
+      if (Length(M.GetParameters) = 3) and
+        (M.GetParameters[0].ParamType.Handle = TypeInfo(TPointF)) and
+        (M.GetParameters[1].ParamType.Handle = TypeInfo(Integer)) and
+        (M.GetParameters[1].Flags * [pfVar, pfOut] <> []) and
+        (M.GetParameters[2].ParamType.Handle = TypeInfo(Integer)) and
+        (M.GetParameters[2].Flags * [pfVar, pfOut] <> []) then
+      begin
+        Args := [TValue.From<TPointF>(PointF(x, Y)), TValue.From<Integer>(-1),
+          TValue.From<Integer>(-1)];
+        V := M.Invoke(AGrid, Args);
+        ACol := Args[1].AsInteger;
+        ARow := Args[2].AsInteger;
+
+        if V.Kind = tkEnumeration then
+          Result := V.AsBoolean
+        else if V.Kind = tkInteger then
+          Result := V.AsInteger <> 0
+        else
+          Result := (ARow >= 0);
+
+        Exit;
+      end;
+
+      // Firma 2: function ...(X,Y: Single; var/out Col, Row: Integer): Boolean
+      if (Length(M.GetParameters) = 4) and
+        (M.GetParameters[0].ParamType.Handle = TypeInfo(Single)) and
+        (M.GetParameters[1].ParamType.Handle = TypeInfo(Single)) and
+        (M.GetParameters[2].ParamType.Handle = TypeInfo(Integer)) and
+        (M.GetParameters[2].Flags * [pfVar, pfOut] <> []) and
+        (M.GetParameters[3].ParamType.Handle = TypeInfo(Integer)) and
+        (M.GetParameters[3].Flags * [pfVar, pfOut] <> []) then
+      begin
+        Args := [TValue.From<Single>(x), TValue.From<Single>(Y),
+          TValue.From<Integer>(-1), TValue.From<Integer>(-1)];
+        V := M.Invoke(AGrid, Args);
+        ACol := Args[2].AsInteger;
+        ARow := Args[3].AsInteger;
+
+        if V.Kind = tkEnumeration then
+          Result := V.AsBoolean
+        else if V.Kind = tkInteger then
+          Result := V.AsInteger <> 0
+        else
+          Result := (ARow >= 0);
+
+        Exit;
+      end;
+    end;
+  end;
+end;
+
+procedure BeginGuardarAPU;
+var
+  Q: TUniQuery;
+begin
+  Q := TUniQuery.Create(nil);
+  try
+    Q.Connection := DModule_1.con2;
+    Q.SQL.Text := 'SET @apu_guardando = 1';
+    Q.ExecSQL;
+  finally
+    Q.Free;
+  end;
+end;
+
+procedure EndGuardarAPU;
+var
+  Q: TUniQuery;
+begin
+  Q := TUniQuery.Create(nil);
+  try
+    Q.Connection := DModule_1.con2;
+    Q.SQL.Text := 'SET @apu_guardando = NULL';
+    Q.ExecSQL;
+  finally
+    Q.Free;
+  end;
+end;
+
+procedure RecalcularAPUsPendientes;
+var
+  Q: TUniQuery;
+begin
+  Q := TUniQuery.Create(nil);
+  try
+    Q.Connection := DModule_1.con2;
+
+    // No recalcular si se está guardando
+    Q.SQL.Text := 'SET @apu_en_recalculo = 1; ' +
+      'CALL procesar_recalculo_apus(:b); ' + 'SET @apu_en_recalculo = NULL;';
+
+    Q.ParamByName('b').AsString := base_activa.codBase;
+    Q.ExecSQL;
+  finally
+    Q.Free;
+  end;
+end;
+
+procedure SincronizarSecuenciasAPU;
+const
+  SQL_UPDATE_SECUENCIA = 'REPLACE INTO apu_secuencias ' +
+    '(codBase, codCategoriaAPU, ultimo_codRecursoAPU) ' + 'SELECT ' +
+    '  codBase, ' + '  codCategoriaAPU, ' + '  IFNULL(MAX(codRecursoAPU),0) ' +
+    'FROM apus ' + 'WHERE codCategoriaAPU IS NOT NULL ' +
+    'GROUP BY codBase, codCategoriaAPU';
+var
+  Query: TUniQuery;
+begin
+  Query := TUniQuery.Create(nil);
+  try
+    try
+      Query.Connection := DModule_1.con2;
+
+      if Query.Active then
+        Query.Close;
+
+      Query.SQL.Text := SQL_UPDATE_SECUENCIA;
+      Query.ExecSQL;
+
+    except
+      on E: Exception do
+        raise Exception.Create('Error SincronizarSecuenciasAPU: ' + E.Message);
+    end;
+  finally
+    Query.Free;
+  end;
+end;
+
+function posicionaEnGrid(Grid: TTMSFNCGrid; Columna: Integer;
+  itm: string): Integer;
+var
+  x: Integer;
+  salir: Boolean;
+  posicionGrid: Integer;
+  tmpstr: string;
+begin
+  salir := False;
+  x := 1;
+  posicionGrid := -1;
+  while (not salir) and (x < Grid.RowCount) do
+  begin
+    tmpstr := Grid.cells[Columna, x];
+    if tmpstr = itm then
+    begin
+      salir := True;
+      posicionGrid := x;
+    end;
+    Inc(x);
+  end;
+  Result := posicionGrid;
+end;
+
+// === Funciones de conversión seguras ===
+function SafeStrToInt(const S: string; const ADefault: Integer = 0): Integer;
+begin
+  if not TryStrToInt(Trim(S), Result) then
+    Result := ADefault;
+end;
+
+procedure ClipboardToStringArrayFMX(out datos: TArray<string>);
+var
+  ClipboardService: IFMXClipboardService;
+  Texto: string;
+  Lineas: TStringList;
+  I: Integer;
+begin
+  SetLength(datos, 0);
+
+  if not TPlatformServices.Current.SupportsPlatformService(IFMXClipboardService,
+    ClipboardService) then
+    Exit;
+
+  Texto := ClipboardService.GetClipboard.ToString.Trim;
+  if Texto = '' then
+    Exit;
+
+  Lineas := TStringList.Create;
+  try
+    Lineas.Text := Texto;
+
+    SetLength(datos, Lineas.Count);
+    for I := 0 to Lineas.Count - 1 do
+      datos[I] := Trim(Lineas[I]);
+  finally
+    Lineas.Free;
+  end;
+end;
+
+function NormalizaDecimalTexto(const AText: string): string;
+var
+  separadorDecimal: string;
+  valorContrarioSeparador: string;
+  AFormattedText: string;
+  fNum: Double;
+begin
+  separadorDecimal := '.';
+  separadorDecimal := decimal_correcto(separadorDecimal);
+  if separadorDecimal = '.' then
+    valorContrarioSeparador := ','
+  else
+    valorContrarioSeparador := '.';
+  AFormattedText := ReplaceStr(AText, valorContrarioSeparador,
+    separadorDecimal);
+  fNum := StrToFloatDef(AFormattedText, 0);
+  Result := FloatToStr(fNum);
+end;
+
+function SafeStrToFloat(const S: string; const ADefault: Double = 0.0): Double;
+begin
+  if not TryStrToFloat(S, Result) then
+    Result := ADefault;
+end;
+
+// === Fin funciones de conversión seguras ===
+
+{ TDModule_1 }
+
+/// <summary>
+/// Implementa la lógica principal de SepararApellidoNombre.
+/// </summary>
+function SepararApellidoNombre(const Texto: string): TNombreSeparado;
+const
+  Particulas: array[0..6] of string = ('de', 'del', 'de la', 'de los',
+    'de las', 'la', 'los');
+var
+  Palabras: TArray<string>;
+  I, total: Integer;
+  PosNombres: Integer;
+
+  /// <summary>
+  /// Implementa la lógica principal de EsParticula.
+  /// </summary>
+
+  function EsParticula(const Texto: string): Boolean;
+  var
+    P: string;
+  begin
+    for P in Particulas do
+      if SameText(Texto, P) then
+        Exit(True);
+    Result := False;
+  end;
+
+begin
+  Result.Nombre := '';
+  Result.Apellidos := '';
+
+  if Trim(Texto) = '' then
+    Exit;
+
+  // Normalizar: dividir por espacios
+  Palabras := Texto.Trim.Split([' '], TStringSplitOptions.ExcludeEmpty);
+  total := Length(Palabras);
+  if total = 0 then
+    Exit;
+
+  case total of
+    1:
+      Result.Nombre := Palabras[0];
+    // Solo un nombre, sin apellidos
+
+    2:
+      begin
+        // Ej: "Pérez Juan"
+        Result.Apellidos := Palabras[0];
+        Result.Nombre := Palabras[1];
+      end;
+  else
+    begin
+      // Buscamos el inicio de los nombres
+      // Por convención, los nombres están al final.
+      // Tomamos los dos últimos términos como nombres, salvo que haya partículas
+      PosNombres := total - 2;
+
+      // Detectar si los apellidos incluyen partículas (de, del, de la, etc.)
+      for I := 0 to total - 2 do
+      begin
+        if EsParticula(Palabras[I].ToLower) then
+        begin
+          // mantenemos las partículas dentro de los apellidos
+          PosNombres := total - 2;
+        end;
+      end;
+
+      // Si hay más de 3 palabras, ajustamos el corte para que los dos últimos sean nombres
+      // y el resto (incluidas partículas) sean apellidos
+      if total > 2 then
+      begin
+        Result.Apellidos := string.Join(' ', Copy(Palabras, 0, total - 2));
+        Result.Nombre := string.Join(' ', Copy(Palabras, total - 2, 2));
+      end
+      else
+      begin
+        // Caso de fallback
+        Result.Apellidos := Palabras[0];
+        Result.Nombre := string.Join(' ', Copy(Palabras, 1, total - 1));
+      end;
+    end;
+  end;
+end;
+
+/// <summary>
+/// Valida o gestiona datos relacionados con el RUC en CompruebaRuc.
+/// </summary>
+function CompruebaRuc(out error: string): Boolean;
+var
+  DatosRuc: TRucInfo;
+  Ok: Boolean;
+  err: string;
+  RucConsulta: string;
+  R: TFiscalDigitRule;
+  I: Integer;
+begin
+  Result := False;
+  ActivaCamposRegistroUsuario(False);
+  if BearerToken = '' then
+  begin
+    Ok := ObtenerTokenWebServiceRUC(BearerToken, err);
+    if not Ok then
+    begin
+      ShowMessage(err);
+      Exit;
+    end;
+  end;
+  RucConsulta := frmMain.edt_RIdFiscal.Text;
+  Ok := ExisteIdFiscal(RucConsulta, err);
+  if Ok then
+  begin
+    error := 'IdFiscal ya registrado.';
+    Exit
+  end;
+  Ok := GetFiscalDigitsRule(PaisDefecto, R);
+  if Ok then
+  begin
+    Ok := FiscalIdMatchesDigitsForCountry(PaisDefecto, RucConsulta, R);
+    if Ok then
+    begin
+      Ok := ConsultarRuc(RucConsulta, BearerToken, DatosRuc, err);
+      if Ok then
+      begin
+        RellenaDatosRegistro(DatosRuc);
+        error := '';
+        Result := True;
+      end
+      else
+      begin
+        if err = 'El RUC no está activo' then
+        begin
+          error := '001:' + err;
+          Exit;
+        end;
+        if err = 'El RUC pertenece a una empresa u otro tipo de contribuyente'
+          then
+        begin
+          error := '002:' + err;
+          Exit;
+        end;
+        if err = 'RUC no encontrado en la base de datos' then
+        begin
+          error := '003: ' + err;
+          Exit;
+        end;
+
+      end;
+    end;
+  end;
+  error := err;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de RellenaDatosRegistro.
+/// </summary>
+procedure RellenaDatosRegistro(const DatosRuc: TRucInfo);
+var
+  NomSep: TNombreSeparado;
+begin
+  ActivaCamposRegistroUsuario(True);
+
+  // Separar nombre y apellidos a partir de la razón social del RUC
+  NomSep := SepararApellidoNombre(DatosRuc.RazonSocial);
+
+  frmMain.edt_RNombre.Text := NomSep.Nombre;
+  frmMain.edt_RApellidos.Text := NomSep.Apellidos;
+
+  // Empresa: usamos la razón social completa
+  frmMain.edt_REmpresa.Text := DatosRuc.RazonSocial;
+
+  // Ciudad y provincia desde los datos del RUC
+  frmMain.edt_RCiudad.Text := DatosRuc.DescripcionCantonEst;
+  frmMain.edt_RProvincia.Text := DatosRuc.DescripcionProvinciaEst;
+
+  // País por defecto
+  posicionaComboFNC(frmMain.cbb_RPais, PaisDefecto);
+
+  frmMain.edt_RNacionalidad.Text := 'Ecuatoriano';
+  frmMain.edt_RProfesion.Text := '';
+  frmMain.edt_RMovil.Text := '';
+  frmMain.edt_REmail.Text := '';
+  frmMain.edt_RPassword.Text := '';
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ActivaCamposRegistroUsuario.
+/// </summary>
+procedure ActivaCamposRegistroUsuario(estado: Boolean);
+begin
+  frmMain.lyt_RNombre_Apellidos.Enabled := estado;
+  frmMain.lyt_RFechayNacionalidad.Enabled := estado;
+  frmMain.lyt_RProfesionyEmpresa.Enabled := estado;
+  frmMain.lyt_RCiudadyProvincia.Enabled := estado;
+  frmMain.lyt_RPaisyMovil.Enabled := estado;
+  frmMain.lyt_REmailyPassword.Enabled := estado;
+  frmMain.lyt_RFechayNacionalidad.Enabled := estado;
+
+  frmMain.chk_AutorizacionGiproy.IsChecked := estado;
+  frmMain.chk_AutorizacionPublicidad.IsChecked := estado;
+  frmMain.chk_ProteccionDatos.IsChecked := estado;
+  frmMain.rct_RegistrarUsuario.Enabled := estado;
+
+  if not estado then
+  begin
+    frmMain.edt_RNombre.Text := '';
+    frmMain.edt_RAlias.Text := '';
+    frmMain.edt_RApellidos.Text := '';
+    frmMain.edt_RNacionalidad.Text := '';
+    frmMain.edt_RProfesion.Text := '';
+    frmMain.edt_REmpresa.Text := '';
+    frmMain.edt_RCiudad.Text := '';
+    frmMain.edt_RProvincia.Text := '';
+    posicionaComboFNC(frmMain.cbb_RPais, PaisDefecto);
+    frmMain.edt_RMovil.Text := '';
+    frmMain.edt_REmail.Text := '';
+    frmMain.edt_RPassword.Text := '';
+  end;
+  frmMain.edt_RNombre.ReadOnly := True;
+  frmMain.edt_RApellidos.ReadOnly := True;
+  frmMain.cbb_RPais.Enabled := False;
+end;
+
+/// <summary>TODO: Descripción de activaLoopPublicidad.</summary>
+procedure activaLoopPublicidad();
+var
+  J: TJSONObject;
+  Ok: Boolean;
+begin
+  J := nil;
+  try
+    SetLength(GPubLista, 0);
+    GPubIndex := -1;
+
+    // Usa tu URL del endpoint y el token global de tu app
+    Ok := ConsultarPublicidadActivaTipado(UrlVisorPublicidad, GlobalAuthToken,
+      GPubLista, J);
+    if Ok and (Length(GPubLista) > 0) then
+      GPubIndex := 0; // apunta al primer elemento
+  finally
+    J.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de DaPublicidadEmitir.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en DaPublicidadEmitir.
+/// </summary>
+function DaPublicidadEmitir(): string;
+begin
+  // Si no hay lista cargada, intenta cargarla
+  if (GPubIndex < 0) or (GPubIndex >= Length(GPubLista)) then
+    activaLoopPublicidad;
+
+  // Si sigue sin haber datos, devuelve vacío
+  if (GPubIndex < 0) or (Length(GPubLista) = 0) then
+    Exit('');
+
+  // Devuelve el URI actual
+  Result := GPubLista[GPubIndex].URI;
+
+  // Avanza el puntero y si llegó al final, recarga desde el servidor
+  Inc(GPubIndex);
+  if GPubIndex >= Length(GPubLista) then
+    activaLoopPublicidad();
+end;
+
+/// <summary>TODO: Descripción de AjustarEstadosBackUp_Mudanza.</summary>
+procedure AjustarEstadosBackUp_Mudanza();
+begin
+  frmMain.rect_crearBackUp.Enabled := puedeHacerBackUp;
+  frmMain.rect_RestaurarBackUp.Enabled := puedeHacerBackUp;
+  frmMain.rect_CrearMigracion.Enabled := puedeHacerMigracion;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de MuestraMensajeGiproy.
+/// </summary>
+procedure MuestraMensajeGiproy(const Encabezado, Texto: string);
+var
+  LForm: TfMensajes;
+begin
+  LForm := TfMensajes.Create(frmMain);
+  try
+    LForm.lbl_mensajes.Text := Texto;
+    LForm.lbl_Encabezado.Text := Encabezado;
+    LForm.Position := TFormPosition.Designed;
+    LForm.Height := 125;
+    LForm.CentrarSobre(frmMain.tbc_PreciosUnitarios);
+    LForm.ShowModal;
+  finally
+    LForm.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ConsultaEstadoMigracion: Boolean.
+/// </summary>
+function ConsultaEstadoMigracion: Boolean;
+var
+  J, Item: TJSONObject;
+  Items: TJSONArray;
+  Itotal, Iusados, Irestantes: Integer;
+  SUltimoUso: string;
+  FechaUltimoUso: TDateTime;
+  FSOut: TFormatSettings;
+begin
+  Result := False;
+  // Defaults UI
+  frmMain.lbl_EstadoSuscripcionSincronizacion.Text := 'No Activo';
+  frmMain.lbl_EstadoSuscripcionSincronizacion.TextSettings.FontColor :=
+    TAlphaColorRec.Red;
+  frmMain.lbl_n_sincronizaciones.Text := '0';
+  frmMain.lbl_n_sincronizacionesUsadas.Text := '0';
+  frmMain.lbl_n_sincronizacionesRestantes.Text := '0';
+  frmMain.lbl_EstadoSuscripcionFechaUltimoUso.Text := '-';
+  frmMain.rect_CrearMigracion.Enabled := False;
+  J := nil;
+  // Formato SOLO para salida visual
+  FSOut := TFormatSettings.Create;
+  FSOut.DateSeparator := '/';
+  FSOut.TimeSeparator := ':';
+  FSOut.ShortDateFormat := 'dd/mm/yyyy';
+  FSOut.LongTimeFormat := 'hh:nn:ss';
+  try
+    try
+      if ConsultarEstadoSuscripcion(GlobalAuthToken, codIDUSuario, 13, J) then
+      begin
+        Items := J.GetValue<TJSONArray>('items');
+        if (Items <> nil) and (Items.Count > 0) then
+        begin
+          Item := Items.Items[0] as TJSONObject;
+
+          Itotal := Item.GetValue<Integer>('unidades_disponibles', 0);
+          Iusados := Item.GetValue<Integer>('total_usados', 0);
+          Irestantes := Itotal - Iusados;
+          if Irestantes < 0 then
+            Irestantes := 0;
+
+          if Irestantes > 0 then
+          begin
+            frmMain.lbl_EstadoSuscripcionSincronizacion.Text := 'Activo';
+            frmMain.lbl_EstadoSuscripcionSincronizacion.TextSettings.FontColor
+              := TAlphaColorRec.Green;
+            frmMain.rect_CrearMigracion.Enabled := True;
+          end
+          else
+          begin
+            frmMain.lbl_EstadoSuscripcionSincronizacion.Text := '0';
+            frmMain.lbl_EstadoSuscripcionSincronizacion.TextSettings.FontColor
+              := TAlphaColorRec.Red;
+          end;
+
+          // Parseo robusto de "ultima_uso"
+          SUltimoUso := Item.GetValue<string>('ultima_uso').Trim;
+          if SUltimoUso <> '' then
+          begin
+            if ParsePhpDateTimeISO(SUltimoUso, FechaUltimoUso) then
+              frmMain.lbl_EstadoSuscripcionFechaUltimoUso.Text :=
+                FormatDateTime(FSOut.ShortDateFormat + ' ' +
+                FSOut.LongTimeFormat, FechaUltimoUso)
+            else
+              frmMain.lbl_EstadoSuscripcionFechaUltimoUso.Text := SUltimoUso;
+          end
+          else
+            frmMain.lbl_EstadoSuscripcionFechaUltimoUso.Text := '-';
+
+          // Números
+          frmMain.lbl_n_sincronizaciones.Text := IntToStr(Itotal);
+          frmMain.lbl_n_sincronizacionesUsadas.Text := IntToStr(Iusados);
+          frmMain.lbl_n_sincronizacionesRestantes.Text := IntToStr(Irestantes);
+
+          Result := True;
+        end
+        else
+        begin
+          frmMain.lbl_EstadoSuscripcionSincronizacion.Text := 'No Activo';
+          frmMain.lbl_EstadoSuscripcionSincronizacion.TextSettings.FontColor :=
+            TAlphaColorRec.Red;
+          Result := False;
+        end;
+      end
+      else
+        Result := False;
+
+    except
+      on E: Exception do
+      begin
+        frmMain.lbl_EstadoSuscripcionSincronizacion.Text := 'Error consulta: ' +
+          E.Message;
+        frmMain.lbl_EstadoSuscripcionSincronizacion.TextSettings.FontColor :=
+          TAlphaColorRec.Red;
+        Result := False;
+      end;
+    end;
+  finally
+    if Assigned(J) then
+      J.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ConsultaEstadoBackUP: Boolean.
+/// </summary>
+function ConsultaEstadoBackUP: Boolean;
+var
+  J, Item: TJSONObject;
+  Items: TJSONArray;
+  estado: string;
+  SValidez, SUltimoUso: string;
+  FechaValidez, FechaUltimoUso: TDateTime;
+  DiasRestantes: Integer;
+  FSOut: TFormatSettings;
+begin
+  Result := False;
+
+  // Formato SOLO de salida (lo que verá el usuario)
+  FSOut := TFormatSettings.Create;
+  FSOut.DateSeparator := '/';
+  FSOut.TimeSeparator := ':';
+  FSOut.ShortDateFormat := 'dd/mm/yyyy';
+  FSOut.LongTimeFormat := 'hh:nn:ss';
+
+  // Defaults de UI
+  frmMain.lbl_EstadoSuscripcionBackUp.Text := 'No Activa';
+  frmMain.lbl_EstadoSuscripcionBackUp.TextSettings.FontColor :=
+    TAlphaColorRec.Red;
+  frmMain.lbl_FechaValidezBackup.Text := '-';
+  frmMain.lbl_DiasRestantesBackup.Text := '0';
+  frmMain.lbl_FechaUltimoBackup.Text := '-';
+
+  J := nil;
+  try
+    try
+      // idComplementos = 14 → Pack Respaldo
+      if not ConsultarEstadoSuscripcion(GlobalAuthToken, codIDUSuario, 14, J)
+        then
+        Exit(False);
+
+      Items := J.GetValue<TJSONArray>('items');
+      if (Items = nil) or (Items.Count = 0) then
+        Exit(False);
+
+      Item := Items.Items[0] as TJSONObject;
+
+      // Puede venir el texto "estado" desde el PHP (Activa/Caducada/...)
+      estado := Item.GetValue<string>('estado', '');
+
+      // fecha_caducidad & dias_restantes (TipoProducto=2)
+      SValidez := Item.GetValue<string>('fecha_caducidad', '').Trim;
+      if (SValidez <> '') and ParsePhpDateTimeISO(SValidez, FechaValidez) then
+        frmMain.lbl_FechaValidezBackup.Text :=
+          FormatDateTime(FSOut.ShortDateFormat + ' ' + FSOut.LongTimeFormat,
+          FechaValidez)
+      else
+        frmMain.lbl_FechaValidezBackup.Text := '-';
+
+      // Calcular/leer dias_restantes
+      DiasRestantes := Item.GetValue<Integer>('dias_restantes',
+        Max(0, Trunc(FechaValidez - Now)));
+      if DiasRestantes < 0 then
+        DiasRestantes := 0;
+      frmMain.lbl_DiasRestantesBackup.Text := IntToStr(DiasRestantes);
+
+      // ultima_uso
+      SUltimoUso := Item.GetValue<string>('ultima_uso', '').Trim;
+      if (SUltimoUso <> '') and ParsePhpDateTimeISO(SUltimoUso, FechaUltimoUso)
+        then
+        frmMain.lbl_FechaUltimoBackup.Text :=
+          FormatDateTime(FSOut.ShortDateFormat + ' ' + FSOut.LongTimeFormat,
+          FechaUltimoUso)
+      else if SUltimoUso <> '' then
+        frmMain.lbl_FechaUltimoBackup.Text := SUltimoUso
+          // fallback textual
+      else
+        frmMain.lbl_FechaUltimoBackup.Text := '-';
+
+      // Estado visual (verde/rojo). Si no hay 'estado', usamos días restantes.
+      if (estado.ToLower = 'activa') or (DiasRestantes > 0) then
+      begin
+        frmMain.lbl_EstadoSuscripcionBackUp.Text := 'Activa';
+        frmMain.lbl_EstadoSuscripcionBackUp.TextSettings.FontColor :=
+          TAlphaColorRec.Green;
+        Result := True;
+      end
+      else
+      begin
+        frmMain.lbl_EstadoSuscripcionBackUp.Text :=
+          IfThen(estado <> '', estado, 'No Activa');
+        frmMain.lbl_EstadoSuscripcionBackUp.TextSettings.FontColor :=
+          TAlphaColorRec.Red;
+        Result := False;
+      end;
+
+    except
+      on E: Exception do
+      begin
+        frmMain.lbl_EstadoSuscripcionBackUp.Text := 'Error: ' + E.Message;
+        frmMain.lbl_EstadoSuscripcionBackUp.TextSettings.FontColor :=
+          TAlphaColorRec.Red;
+        Result := False;
+      end;
+    end;
+  finally
+    if Assigned(J) then
+      J.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ParsePhpDateTimeISO.
+/// </summary>
+function ParsePhpDateTimeISO(const S: string; out DT: TDateTime): Boolean;
+var
+  s2: string;
+  FSIn: TFormatSettings;
+begin
+  Result := False;
+  if S.Trim = '' then
+    Exit;
+
+  // 1) Intento ISO8601 (acepta "YYYY-MM-DDThh:mm:ss[.sss][Z|±hh:mm]")
+  if TryISO8601ToDate(S, DT, False) then
+    Exit(True);
+
+  // 2) Intento "YYYY-MM-DD hh:mm:ss" (MySQL típico)
+  FSIn := TFormatSettings.Create;
+  FSIn.DateSeparator := '-';
+  FSIn.TimeSeparator := ':';
+  FSIn.ShortDateFormat := 'yyyy-MM-dd';
+  FSIn.LongTimeFormat := 'hh:nn:ss';
+
+  s2 := StringReplace(S, 'T', ' ', [rfReplaceAll]);
+  // por si viene con 'T'
+  // quitar 'Z' final
+  if (s2 <> '') and (s2[High(s2)] = 'Z') then
+    Delete(s2, Length(s2), 1);
+
+  // quitar offset si viniera (ej. 2025-10-17 11:00:00+02:00)
+  // nos quedamos con los primeros 19 chars "YYYY-MM-DD hh:mm:ss"
+  if Length(s2) >= 19 then
+    s2 := Copy(s2, 1, 19);
+
+  Result := TryStrToDateTime(s2, DT, FSIn);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ParseMysqlDateTime.
+/// </summary>
+function ParseMysqlDateTime(const S: string; out DT: TDateTime): Boolean;
+var
+  T: string;
+  Y, M, D, H, N, Sec: Integer;
+begin
+  Result := False;
+  T := Trim(S);
+  if Length(T) < 19 then
+    Exit; // 'YYYY-MM-DD hh:mm:ss' = 19
+  try
+    Y := SafeStrToInt(Copy(T, 1, 4));
+    M := SafeStrToInt(Copy(T, 6, 2));
+    D := SafeStrToInt(Copy(T, 9, 2));
+    H := SafeStrToInt(Copy(T, 12, 2));
+    N := SafeStrToInt(Copy(T, 15, 2));
+    Sec := SafeStrToInt(Copy(T, 18, 2));
+    DT := EncodeDateTime(Y, M, D, H, N, Sec, 0);
+    Result := True;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de TryParseFechaPHP.
+/// </summary>
+function TryParseFechaPHP(const S: string; out DT: TDateTime): Boolean;
+var
+  ISO: string;
+begin
+  // 1) Formato exacto MySQL con FS invariantes
+  FS.DateSeparator := '-';
+  FS.TimeSeparator := ':';
+  FS.ShortDateFormat := 'yyyy-mm-dd';
+  FS.LongTimeFormat := 'hh:nn:ss'; // minutos = nn
+
+  Result := TryStrToDateTime(S, DT, FS);
+  if Result then
+    Exit;
+
+  // 2) ISO 8601: sustituye espacio por 'T' y vuelve a intentar
+  ISO := StringReplace(S, ' ', 'T', [rfReplaceAll]);
+  if TryISO8601ToDate(ISO, DT) then
+    Exit(True);
+
+  // 3) Parser manual como red de seguridad
+  Result := ParseMysqlDateTime(S, DT);
+end;
+
+/// <summary>TODO: Descripción de GuardaFechaHoraEntrada.</summary>
+procedure GuardaFechaHoraEntrada();
+var
+  Http: TNetHTTPClient;
+  Params: TStringList;
+  Resp: IHTTPResponse;
+  tmpstr: string;
+begin
+  Http := TNetHTTPClient.Create(nil);
+  Params := TStringList.Create;
+  try
+    Http.CustomHeaders['Authorization'] := 'Bearer ' + GlobalAuthToken;
+    Http.ContentType := 'application/x-www-form-urlencoded';
+
+    Params.AddPair('idUsuario', IntToStr(codIDUSuario));
+    Params.AddPair('FechaHora', FormatDateTime('yyyy-mm-dd hh:nn:ss', Now));
+
+    Resp := Http.Post
+      ('https://app.62.171.171.124.sslip.io/GuardaHoraEntrada.php', Params);
+
+    if Resp.StatusCode <> 200 then
+      raise Exception.CreateFmt('HTTP %d: %s'#13#10'%s',
+        [Resp.StatusCode, Resp.StatusText,
+          Resp.ContentAsString(TEncoding.UTF8)]);
+
+    tmpstr := 'OK: ' + Resp.ContentAsString;
+  finally
+    Params.Free;
+    Http.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de LoginUsuario.
+/// </summary>
+function LoginUsuario(const AUsuario, APassword: string;
+  out datos: TDatUsuario): Boolean;
+var
+  Http: TNetHTTPClient;
+  Params: TStringList;
+  Resp: IHTTPResponse;
+  JSONRoot, JSONUser: TJSONObject;
+  SResp, S: string;
+begin
+  Result := False;
+  FillChar(datos, SizeOf(datos), 0);
+
+  if AUsuario.Trim = '' then
+    raise EArgumentException.Create('El usuario (email) no puede estar vacío.');
+  if APassword = '' then
+    raise EArgumentException.Create('La contraseña no puede estar vacía.');
+
+  Http := TNetHTTPClient.Create(nil);
+  Params := TStringList.Create;
+  try
+    try
+      Http.ConnectionTimeout := 30000;
+      Http.ResponseTimeout := 60000;
+      Http.Accept := 'application/json';
+      Http.ContentType := 'application/x-www-form-urlencoded';
+
+      Params.Clear;
+      Params.AddPair('usuario', AUsuario);
+      Params.AddPair('password', APassword);
+
+      Resp := Http.Post(AServerURLLogin, Params);
+
+      // Siempre leemos el cuerpo, aunque el status no sea 200
+      SResp := Resp.ContentAsString(TEncoding.UTF8);
+
+      JSONRoot := TJSONObject.ParseJSONValue(SResp) as TJSONObject;
+      if not Assigned(JSONRoot) then
+        raise EApiException.Create
+          (Format('HTTP %d %s. Respuesta no es JSON: %s',
+          [Resp.StatusCode, Resp.StatusText, SResp]), Resp.StatusCode);
+
+      try
+        // ok = true ?
+        if not JSONRoot.GetValue<Boolean>('ok', False) then
+        begin
+          // Intentar sacar un mensaje de error del JSON
+          S := JSONRoot.GetValue<string>('error',
+            JSONRoot.GetValue<string>('msg',
+            JSONRoot.GetValue<string>('message',
+            'Credenciales inválidas o error en la autenticación')));
+          raise EApiException.Create(S, Resp.StatusCode);
+        end;
+
+        // Token JWT
+        GlobalAuthToken := JSONRoot.GetValue<string>('token', '');
+
+        // Objeto usuario
+        JSONUser := JSONRoot.GetValue<TJSONObject>('usuario');
+        if not Assigned(JSONUser) then
+          raise EApiException.Create
+            ('No se recibió el objeto "usuario" en la respuesta.',
+            Resp.StatusCode);
+
+        // ------------------------
+        // Campos básicos de datos
+        // ------------------------
+        datos.idUsuario := JSONUser.GetValue<Int64>('idUsuario', 0);
+        datos.Nombre := JSONUser.GetValue<string>('Nombre', '');
+        datos.Apellidos := JSONUser.GetValue<string>('Apellidos', '');
+        datos.usuario := JSONUser.GetValue<string>('usuario', '');
+        datos.Alias := JSONUser.GetValue<string>('Alias', '');
+        datos.estado := JSONUser.GetValue<Integer>('estado', 0);
+        datos.profesion := JSONUser.GetValue<string>('profesion', '');
+        datos.tipo := JSONUser.GetValue<string>('tipo', '');
+        datos.direccion := JSONUser.GetValue<string>('direccion', '');
+        datos.Ciudad := JSONUser.GetValue<string>('Ciudad', '');
+        datos.Provincia := JSONUser.GetValue<string>('Provincia', '');
+        datos.Pais := JSONUser.GetValue<string>('Pais', '');
+        datos.email := JSONUser.GetValue<string>('email', '');
+        datos.Tfno := JSONUser.GetValue<string>('Tfno', '');
+        datos.idfiscal := JSONUser.GetValue<string>('idfiscal', '');
+
+        datos.computerIDPrincipal := JSONUser.GetValue<string>
+          ('computerIDPrincipal', '');
+        datos.computerIDMudanza := JSONUser.GetValue<string>
+          ('computerIDMudanza', '');
+        datos.BackUpActivo := JSONUser.GetValue<Integer>('BackUpActivo', 0);
+        datos.MudanzaActiva := JSONUser.GetValue<Integer>('MudanzaActiva', 0);
+
+        // Si el JSON no tiene "descripcion" simplemente quedará vacío
+        datos.descripcion := JSONUser.GetValue<string>('descripcion', '');
+
+        // ------------------------
+        // Fechas usando TryParseFechaPHP
+        // ------------------------
+
+        // fechaAlta: "YYYY-MM-DD hh:mm:ss"
+        S := JSONUser.GetValue<string>('fechaAlta', '');
+        if (S <> '') then
+          if not TryParseFechaPHP(Trim(S), datos.fechaAlta) then
+            datos.fechaAlta := 0;
+
+        // FechaInicio (si alguna vez la devuelve el backend)
+        S := JSONUser.GetValue<string>('FechaInicio', '');
+        if (S <> '') then
+          if not TryParseFechaPHP(Trim(S), datos.FechaInicio) then
+            datos.FechaInicio := 0;
+
+        // FechaFin
+        S := JSONUser.GetValue<string>('FechaFin', '');
+        if (S <> '') then
+          if not TryParseFechaPHP(Trim(S), datos.FechaFin) then
+            datos.FechaFin := 0;
+
+        // fechahoraIDPrincipal: "YYYY-MM-DD hh:mm:ss[.fff]"
+        S := JSONUser.GetValue<string>('fechahoraIDPrincipal', '');
+        if (S <> '') then
+          if not TryParseFechaPHP(Trim(S), datos.fechahoraIDPrincipal) then
+            datos.fechahoraIDPrincipal := 0;
+
+        // fechaHoraIDMudanza: "YYYY-MM-DD hh:mm:ss[.fff]"
+        S := JSONUser.GetValue<string>('fechaHoraIDMudanza', '');
+        if (S <> '') then
+          if not TryParseFechaPHP(Trim(S), datos.fechaHoraIDMudanza) then
+            datos.fechaHoraIDMudanza := 0;
+
+        // FechaUltimoReporteExpress (si el backend la devuelve)
+        S := JSONUser.GetValue<string>('FechaUltimoReporteExpress', '');
+        if (S <> '') then
+          if not TryParseFechaPHP(Trim(S), datos.FechaUltimoReporteExpress) then
+            datos.FechaUltimoReporteExpress := 0;
+
+        Result := True;
+      finally
+        JSONRoot.Free;
+      end;
+
+    finally
+      Params.Free;
+      Http.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ObtenerUltimoBackupDisponiblesFecha.
+/// </summary>
+function ObtenerUltimoBackupDisponiblesFecha(const AUrl, AToken: string;
+  AIdUsuario: Integer; out AFecha: TDateTime; out AJson: TJSONObject): Boolean;
+var
+  Client: TNetHTTPClient;
+  Resp: IHTTPResponse;
+  Headers: TNetHeaders;
+  Body, RespText, LFechaStr: string;
+  JsonValue: TJSONValue;
+  Stream: TStringStream;
+begin
+  Result := False;
+  AJson := nil;
+  AFecha := 0;
+
+  if AUrl.Trim.IsEmpty then
+    raise EArgumentException.Create('AUrl no puede estar vacío');
+  if AToken.Trim.IsEmpty then
+    raise EArgumentException.Create('AToken no puede estar vacío');
+  if AIdUsuario <= 0 then
+    raise EArgumentException.Create('AIdUsuario debe ser > 0');
+
+  Client := TNetHTTPClient.Create(nil);
+  try
+    Client.ConnectionTimeout := 10000;
+    Client.ResponseTimeout := 15000;
+    Client.Accept := 'application/json';
+    Client.AllowCookies := False;
+
+    SetLength(Headers, 2);
+    Headers[0].Name := 'Authorization';
+    Headers[0].Value := 'Bearer ' + AToken;
+    Headers[1].Name := 'Content-Type';
+    Headers[1].Value := 'application/x-www-form-urlencoded; charset=utf-8';
+
+    // El PHP espera idUsuario y devuelve { ok:true, Mensaje, adicional, fechaHoraEnvio, ... }
+    Body := Format('idUsuario=%d', [AIdUsuario]);
+
+    Stream := TStringStream.Create(Body, TEncoding.UTF8);
+    try
+      Resp := Client.Post(AUrl, Stream, nil, Headers);
+      // ← CORREGIDO
+    finally
+      Stream.Free;
+    end;
+
+    RespText := Resp.ContentAsString(TEncoding.UTF8);
+    JsonValue := TJSONObject.ParseJSONValue(RespText);
+    if (JsonValue = nil) or not (JsonValue is TJSONObject) then
+      raise EApiException.Create('Respuesta no es JSON válido',
+        Resp.StatusCode);
+
+    AJson := TJSONObject((JsonValue as TJSONObject).Clone);
+    JsonValue.Free;
+
+    if (Resp.StatusCode < 200) or (Resp.StatusCode >= 300) then
+      raise EApiException.Create(Format('HTTP %d: %s', [Resp.StatusCode,
+          AJson.GetValue<string>('message', 'Error')]), Resp.StatusCode);
+
+    if not AJson.GetValue<Boolean>('ok', False) then
+      raise EApiException.Create('La API respondió ok=false: ' +
+        AJson.GetValue<string>('message', 'Error'), Resp.StatusCode);
+
+    // Tomar el campo devuelto por el SELECT del PHP:
+    LFechaStr := AJson.GetValue<string>('fechaHoraEnvio', '');
+    if LFechaStr <> '' then
+    begin
+      if not TryStrToDateTime(LFechaStr, AFecha, TFormatSettings.Create('es-ES'))
+        then
+        if not TryISO8601ToDate(LFechaStr, AFecha) then
+          AFecha := 0;
+    end;
+
+    Result := AFecha > 0;
+  finally
+    Client.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de generaBackUP.</summary>
+/// <param name="automatico">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaBackUP.
+/// </summary>
+function generaBackUP(automatico: Boolean): string;
+var
+  realizarBackup: Boolean;
+  fechaUltimoBackUp: TDateTime;
+  fechaCaducidadProducto: TDateTime;
+  DiferenciaEnHoras: Double;
+  Proceder: Boolean;
+  nombreFichero: string;
+  keysalsa: string;
+  datosComunicacion: string;
+  adicional: string;
+  Ok: Boolean;
+  JSON: TJSONObject;
+begin
+  Result := 'error';
+  realizarBackup := False;
+  if automatico then
+  begin
+    JSON := nil;
+    try
+      try
+        Ok := ObtenerUltimoBackupDisponiblesFecha(UrlBackupDisponibles,
+          GlobalAuthToken, codIDUSuario, fechaUltimoBackUp, JSON);
+      except
+        on E: Exception do
+        begin
+          realizarBackup := True;
+        end;
+      end;
+      if not Ok then
+      begin
+        realizarBackup := False;
+      end
+      else
+      begin
+        DiferenciaEnHoras := (Now - fechaUltimoBackUp) * 24;
+        if DiferenciaEnHoras > 72 then
+          realizarBackup := True
+        else
+          realizarBackup := False;
+      end;
+    finally
+      JSON.Free;
+    end;
+  end
+  else
+  begin
+    realizarBackup := True;
+  end;
+  if realizarBackup then
+  begin
+    Proceder := False;
+    JSON := nil;
+    try
+      try
+        Ok := DarFechaCaducidadProductoFecha(UrlDarFechaCaducidadProducto,
+          GlobalAuthToken, codIDUSuario, 13 { idProducto Backup },
+          fechaCaducidadProducto, JSON); // ok
+
+        if Ok and (fechaCaducidadProducto > Now) then
+          Proceder := True
+        else
+          Proceder := False;
+      finally
+        JSON.Free;
+      end;
+    except
+
+    end;
+
+    if Proceder then
+    begin
+      nombreFichero := MigrarGiProy();
+      if nombreFichero <> 'error' then
+      begin
+        keysalsa := generaKeySalsa;
+        nombreFichero := Encripta_Envia(nombreFichero, keysalsa);
+        if nombreFichero <> 'error' then
+        begin
+          adicional := FormatDateTime('dd/mm/yyyy', Now);
+          datosComunicacion := encriptaEx(ExtractFileName(nombreFichero) + '&&'
+            + keysalsa, codSalsaExt);
+          EnviaExportacionDB(codIDUSuario, codIDUSuario, datosComunicacion, 8,
+            adicional); // ok
+          WipeFile(nombreFichero);
+        end
+        else
+          MuestraMensajeGiproy('Error', 'Error 0001: Error en backup');
+      end;
+      Result := 'ok';
+    end;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de activaDBUsuario.
+/// </summary>
+function activaDBUsuario(): Boolean;
+var
+  tmpstr: string;
+begin
+  Result := False;
+  try
+    if Assigned(frmMain.users) then
+    begin
+      frmMain.users.GetDatabaseConfig(UserDB, PasswordDB, nombreDB);
+      if DModule_1.con2.Connected then
+        DModule_1.con2.Disconnect;
+      DModule_1.con2.Username := UserDB;
+      DModule_1.con2.password := PasswordDB;
+      DModule_1.con2.Database := nombreDB;
+      DModule_1.con2.connect;
+
+      if DModule_1.con2.Connected then
+        Result := True
+      else
+        Result := False;
+    end
+    else
+      Result := False;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de InicializaDBGiProy.
+/// </summary>
+function InicializaDBGiProy(): Integer;
+var
+  respuesta: string;
+begin
+  Result := 0;
+  try
+    respuesta := DescargaFTP(nombreBaseInstalacionEnc);
+    respuesta := DesencriptaFile(respuesta, codSalsaExt);
+    PreparaBaseInicio(respuesta);
+    Result := 1;
+  except
+    Result := 0;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de PreparaBaseInicio.
+/// </summary>
+procedure PreparaBaseInicio(archivoBase: string);
+const
+  {(*}
+  L1 =
+    'CREATE USER IF NOT EXISTS ''Giproy''@''localhost'' IDENTIFIED WITH caching_sha2_password PASSWORD EXPIRE DEFAULT;';
+  L2 = 'GRANT SELECT ON *.* TO ''Giproy''@''localhost'';';
+  L3 = 'GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON giproylocal_4.* TO ''Giproy''@''localhost'';';
+  {*)}
+var
+  localDBStr: TStringList;
+  L1m, L2m, L3m: string;
+  NewUserDB: string;
+  NewPasswordDB: string;
+  NewTableDB: string;
+  respuesta: string;
+  J: TJSONObject;
+  Ok: Boolean;
+begin
+  localDBStr := TStringList.Create;
+  try
+    localDBStr.LoadFromFile(archivoBase);
+
+    nombreDB := nDBInicio + '_' + IntToStr(codIDUSuario);
+    NewUserDB := 'Giproy_' + IntToStr(codIDUSuario);
+    NewPasswordDB := generaKeySalsa();
+
+    L1m := AnsiReplaceStr(L1, 'Giproy', NewUserDB);
+    L1m := 'DROP USER IF EXISTS ' + quotedstr(NewUserDB) + '@' +
+      quotedstr('localhost') + ';' + Chr(13) + L1m;
+    L1m := AnsiReplaceStr(L1m, 'caching_sha2_password PASSWORD EXPIRE DEFAULT',
+      quotedstr(NewPasswordDB));
+    L1m := AnsiReplaceStr(L1m, 'WITH', 'BY');
+
+    L3m := AnsiReplaceStr(L3, 'giproylocal_4', nombreDB);
+    L2m := AnsiReplaceStr(L3m, 'Giproy', NewUserDB);
+
+    localDBStr.Text := AnsiReplaceStr(localDBStr.Text, nDBInicio, nombreDB);
+    localDBStr.Text := AnsiReplaceStr(localDBStr.Text, L1, L1m);
+    localDBStr.Text := AnsiReplaceStr(localDBStr.Text, L2, L3);
+    // (respetado tal cual tu código)
+    localDBStr.Text := AnsiReplaceStr(localDBStr.Text, L3, L2m);
+
+    localDBStr.SaveToFile(archivoBase);
+  finally
+    localDBStr.Free;
+  end;
+
+  // Reconfigura conexión "root/admin" para ejecutar el script
+  if DModule_1.con2.Connected then
+    DModule_1.con2.Disconnect;
+  DModule_1.con2.Username := UserDB;
+  DModule_1.con2.password := PasswordDB;
+  DModule_1.con2.Database := '';
+  DModule_1.con2.connect;
+
+  respuesta := 'error';
+  if DModule_1.con2.Connected then
+    respuesta := importarDBG2(archivoBase).Trim;
+
+  if respuesta <> 'error' then
+  begin
+    // Guardamos credenciales del nuevo esquema de usuario/app
+    frmMain.users.SetDatabaseConfig(NewUserDB, NewPasswordDB, nombreDB);
+    J := nil;
+    try
+      Ok := GuardarHardwareIDAhora(GlobalAuthToken, codIDUSuario,
+        HardwareKey, J);
+      if not Ok then
+        raise Exception.Create
+          ('No se pudo actualizar el HardwareID online (ok=false).');
+    finally
+      J.Free;
+    end;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de importarDBG2.
+/// </summary>
+function importarDBG2(ficheroImp: string): string;
+var
+  dump: TUniDump;
+  FS: TMemoryStream;
+  ficheroDB: string;
+begin
+  dump := TUniDump.Create(nil);
+  FS := TMemoryStream.Create;
+  try
+    try
+      FS.LoadFromFile(ficheroImp);
+      FS.Position := 0;
+      dump.Connection := DModule_1.con2;
+      dump.SpecificOptions.Values['UseExtSyntax'] := 'False';
+      dump.RestoreFromFile(ficheroImp);
+      WipeFile(ficheroImp);
+      Result := 'Importación Realizada';
+    except
+      Result := 'error';
+    end;
+  finally
+    dump.Free;
+    FS.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de generaKeySalsa.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaKeySalsa.
+/// </summary>
+function generaKeySalsa(): string;
+var
+  S: string;
+  kl: Integer;
+  Conv: TConvert;
+begin
+  kl := 32;
+  Conv := TConvert.Create(nil);
+  try
+    Conv.AType := hexa;
+    S := Conv.RandomString(kl div 2);
+    Result := S;
+  finally
+    Conv.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de PreguntarSiRestaurarBackUp.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de PreguntarSiRestaurarBackUp.
+/// </summary>
+function PreguntarSiRestaurarBackUp(): Integer;
+var
+  respuesta: Integer;
+  datosBackUP: string;
+  adicionales: string;
+  respuestaDescripta: dat_respuestaFicheroImportacion;
+  ficheroDatos: string;
+  Mensaje: string;
+  x: Integer;
+  J: TJSONObject;
+  Ok: Boolean;
+
+  // nuevos
+  FechaBk: TDateTime;
+  MsgBk, AddBk: string;
+begin
+  Result := 0;
+
+  respuesta := realizarPreguntaSiNo('¿Desea Restaurar Copia de Seguridad?' +
+    sLineBreak + 'El ordenador de trabajo se definirá como el actual.');
+
+  case respuesta of
+    0:
+      Exit(0);
+
+    1:
+      begin
+        // === NUEVO: Consultar el backup disponible vía API ===
+        J := nil;
+        if not ConsultarBackupDisponibleDatos(UrlBackupDisponibles,
+          GlobalAuthToken, codIDUSuario, FechaBk, MsgBk, AddBk, J) then
+        begin
+          if Assigned(J) then
+            J.Free;
+          MuestraMensajeGiproy('Advertencia',
+            'No hay copias de seguridad disponibles para restaurar.');
+          Exit(0);
+        end;
+
+        try
+          // Los campos vienen en MsgBk y AddBk (result.Mensaje y result.adicional)
+          datosBackUP := MsgBk;
+          adicionales := AddBk;
+        finally
+          J.Free;
+        end;
+        // =====================================================
+
+        // Proceso original (desencriptar y preparar importación)
+        datosBackUP := DesencriptaEx(datosBackUP, codSalsaExt);
+        respuestaDescripta := frmMain.daRespuestaDesencripta(datosBackUP);
+
+        // Descarga del fichero indicado en el mensaje
+        ficheroDatos := DescargaFTP(respuestaDescripta.fichero);
+
+        // Asegura que x tiene un valor antes del primer uso
+        x := 0;
+
+        if x < 1 then
+        begin
+          // Importación del backup
+          Mensaje := importarDBG(ficheroDatos, respuestaDescripta.claveSalsa);
+          x := AnsiPos('error', LowerCase(Mensaje));
+
+          if x < 1 then
+          begin
+            // === NUEVO: Registrar HardwareID usando la API (sustituye SQL directo) ===
+            J := nil;
+            try
+              Ok := GuardarHardwareIDAhora(GlobalAuthToken, codIDUSuario,
+                HardwareKey, J);
+              if not Ok then
+              begin
+                MuestraMensajeGiproy('Error',
+                  'Error 0002: Restauración completada, pero no se pudo registrar el HardwareID online.');
+                Result := 0;
+                Exit;
+              end;
+              // (Opcional) leer filas afectadas:
+              // var Rows: Integer := J.GetValue<Integer>('rows_affected', 0);
+            finally
+              J.Free;
+            end;
+            // =======================================================================
+
+            MuestraMensajeGiproy('Información ', 'Restauración Completa.');
+            Result := 1;
+          end
+          else
+          begin
+            MuestraMensajeGiproy('Error', 'Error 0003: Error de importación.');
+            Result := 0;
+          end;
+        end
+        else
+        begin
+          MuestraMensajeGiproy('Error', 'Error 0004: Error de importación.');
+          Result := 0;
+        end;
+      end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de PreguntarSiEjecutarMudanza.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de PreguntarSiEjecutarMudanza.
+/// </summary>
+function PreguntarSiEjecutarMudanza(): Integer;
+var
+  respuesta: Integer;
+begin
+  // 0 Salir de Sistema, 1 Realizar Mudanza
+  Result := 0;
+  respuesta := realizarPreguntaSiNo
+    ('¿Desea ejecutar la exportación hacia otro ordenador?');
+  case respuesta of
+    0:
+      Result := 0;
+    1:
+      begin
+        Result := 1;
+        TThread.CreateAnonymousThread(
+          procedure
+          var
+            JsonResp, JsonUpd: TJSONObject;
+            fechaHora: TDateTime;
+            datosMudanza: string;
+            adicionales: string;
+            respuestaDescripta: dat_respuestaFicheroImportacion;
+            ficheroDatos: string;
+            Mensaje: string;
+            x, RowsAffected: Integer;
+          begin
+            JsonResp := nil;
+            JsonUpd := nil;
+            try
+              FormImportando.lblTextoAccion.Text := 'Iniciando Exportación.';
+
+              // === 1) Consulta HTTP a MigracionesDisponibles.php ===
+              if not ConsultarMigracionDisponibleDatos
+                (UrlMigracionesDisponibles, GlobalAuthToken, // Bearer token
+                codIDUSuario, // idEmisor
+                fechaHora, datosMudanza, adicionales, JsonResp) then
+              begin
+                TThread.Synchronize(nil,
+                  procedure
+                  begin
+                    MuestraMensajeGiproy('Advertencia',
+                      'No se encontraron migraciones disponibles en los últimos 3 días.');
+                  end);
+                Exit;
+              end;
+
+              // === 2) Descifrado e importación ===
+              FormImportando.lblTextoAccion.Text :=
+                'Descifrando paquete de exportación...';
+              datosMudanza := DesencriptaEx(datosMudanza, codSalsaExt);
+
+              respuestaDescripta := frmMain.daRespuestaDesencripta
+                (datosMudanza);
+
+              FormImportando.lblTextoAccion.Text := 'Descargando fichero...';
+              ficheroDatos := DescargaFTP(respuestaDescripta.fichero);
+
+              x := AnsiPos('error', LowerCase(ficheroDatos));
+              if x < 1 then
+              begin
+                FormImportando.lblTextoAccion.Text :=
+                  'Importando base de datos...';
+                Mensaje := importarDBG(ficheroDatos,
+                  respuestaDescripta.claveSalsa);
+
+                x := AnsiPos('error', LowerCase(Mensaje));
+                if x < 1 then
+                begin
+                  // === 3) Limpieza de fichero remoto ===
+                  FormImportando.lblTextoAccion.Text :=
+                    'Limpiando y cerrando...';
+                  Borrarftp(respuestaDescripta.fichero);
+
+                  // === 4) ACTUALIZAR ESTADO MIGRACIÓN (HTTP) ===
+                  // Sustituye el UPDATE local por el endpoint ActualizaEstadoMigracion.php
+                  // Usa el helper "Ahora" para setear fecha actual automáticamente.
+                  if not ActualizarEstadoMigracionAhora
+                    (UrlActualizaEstadoMigracion, GlobalAuthToken,
+                    // Bearer token
+                    codigo_usuario,
+                    // idUsuario (mantengo tu variable original)
+                    HardwareKey, // computerIDMudanza
+                    RowsAffected, // OUT
+                    JsonUpd // OUT JSON de respuesta
+                    ) then
+                  begin
+                    // Si la función devolvió False, ya lanzó EApiException antes o no vino ok=true
+                    TThread.Synchronize(nil,
+                      procedure
+                      begin
+                        MuestraMensajeGiproy('Error',
+                          'Error 0005: No fue posible actualizar el estado de la mudanza en el servidor.');
+                      end);
+                    Exit;
+                  end;
+
+                  if RowsAffected <= 0 then
+                  begin
+                    TThread.Synchronize(nil,
+                      procedure
+                      begin
+                        MuestraMensajeGiproy('Advertencia',
+                          'El servidor no reportó cambios (rows_affected=0).');
+                      end);
+                  end;
+                  TThread.Synchronize(nil,
+                    procedure
+                    begin
+                      MuestraMensajeGiproy('Exito',
+                        'Exportación e importación completadas correctamente.');
+                    end);
+                end
+                else
+                begin
+                  TThread.Synchronize(nil,
+                    procedure
+                    begin
+                      MuestraMensajeGiproy('Error',
+                        'Error 0006: Error de importación: ' + Mensaje);
+                    end);
+                end;
+              end
+              else
+              begin
+                TThread.Synchronize(nil,
+                  procedure
+                  begin
+                    MuestraMensajeGiproy('Error',
+                      'Error 0007: Error de importación: ' + ficheroDatos);
+                  end);
+              end;
+
+            except
+              on E: EApiException do
+              begin
+                TThread.Synchronize(nil,
+                  procedure
+                  begin
+                    MuestraMensajeGiproy('Error',
+                      'Error 0008: Error de API (HTTP:' + IntToStr(E.StatusCode)
+                      + ') ' + E.Message);
+                  end);
+              end;
+              on E: Exception do
+              begin
+                TThread.Synchronize(nil,
+                  procedure
+                  begin
+                    MuestraMensajeGiproy('Error',
+                      'Error 0009: Error en la exportación: ' + E.Message);
+                  end);
+              end;
+            end;
+            TThread.Synchronize(nil,
+              procedure
+              begin
+                FormImportando.DetenerAnimacion;
+              end);
+            if Assigned(JsonResp) then
+              JsonResp.Free;
+            if Assigned(JsonUpd) then
+              JsonUpd.Free;
+          end).Start;
+      end;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de encriptaEx.
+/// </summary>
+function encriptaEx(datos: string; keysalsa: string): string;
+var
+  SalsaEnc: TSalsaEncryption;
+begin
+  SalsaEnc := TSalsaEncryption.Create(nil);
+  try
+    try
+      SalsaEnc.keyLength := skl256;
+      SalsaEnc.outputFormat := base64url;
+      SalsaEnc.Unicode := yesUni;
+      SalsaEnc.key := keysalsa;
+      Result := SalsaEnc.Encrypt(datos);
+    finally
+      SalsaEnc.Free;
+    end;
+  except
+    Result := 'error';
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de DesencriptaEx.
+/// </summary>
+function DesencriptaEx(datos: string; keysalsa: string): string;
+var
+  SalsaEnc: TSalsaEncryption;
+begin
+  SalsaEnc := TSalsaEncryption.Create(nil);
+  try
+    try
+      SalsaEnc.keyLength := skl256;
+      SalsaEnc.outputFormat := base64url;
+      SalsaEnc.Unicode := yesUni;
+      SalsaEnc.key := keysalsa;
+      Result := SalsaEnc.Decrypt(datos);
+    finally
+      SalsaEnc.Free;
+    end;
+  except
+    Result := 'error';
+  end;
+end;
+
+/// <summary>TODO: Descripción de recibeCodigoActualEncriptacion.</summary>
+/// <param name="usuarioE">TODO.</param>
+/// <param name="PasswordE">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de recibeCodigoActualEncriptacion.
+/// </summary>
+function recibeCodigoActualEncriptacion(usuarioE, PasswordE: string): string;
+var
+  Client: TNetHTTPClient;
+  Params: TStringList;
+  Resp: IHTTPResponse;
+  AUrl: string;
+  x: Integer;
+  JsonResp: TJSONObject;
+  Credentials: TJSONObject;
+begin
+  Result := '';
+  AUrl := 'https://app.62.171.171.124.sslip.io/pencript.php';
+  Client := TNetHTTPClient.Create(nil);
+  try
+    Client.ConnectionTimeout := 15000;
+    Client.ResponseTimeout := 30000;
+    Params := TStringList.Create;
+    try
+      Params.Add('username=' + TNetEncoding.URL.Encode(usuarioE));
+      Params.Add('password=' + TNetEncoding.URL.Encode(PasswordE));
+      Resp := Client.Post(AUrl, Params);
+      Result := Resp.ContentAsString(TEncoding.UTF8);
+      x := AnsiPos('SERVER ERROR', Result);
+      if x > 0 then
+        Result := 'Error'
+      else
+      begin
+        JsonResp := TJSONObject.ParseJSONValue
+          (Resp.ContentAsString(TEncoding.UTF8)) as TJSONObject;
+        if Assigned(JsonResp) then
+        begin
+          Credentials := JsonResp.GetValue('credentials') as TJSONObject;
+          Result := Credentials.GetValue('password').Value;
+        end
+        else
+          Result := 'Error: respuesta no válida';
+      end;
+    finally
+      Params.Free;
+    end;
+  finally
+    Client.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de recibeCodigoDBInstalacion.</summary>
+/// <param name="usuarioE">TODO.</param>
+/// <param name="PasswordE">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de recibeCodigoDBInstalacion.
+/// </summary>
+function recibeCodigoDBInstalacion(usuarioE, PasswordE: string): string;
+var
+  Client: TNetHTTPClient;
+  Params: TStringList;
+  Resp: IHTTPResponse;
+  AUrl: string;
+  x: Integer;
+  JsonResp: TJSONObject;
+  Credentials: TJSONObject;
+begin
+  Result := '';
+  AUrl := 'https://app.62.171.171.124.sslip.io/dacredendialesDB.php';
+  Client := TNetHTTPClient.Create(nil);
+  try
+    Client.ConnectionTimeout := 15000;
+    Client.ResponseTimeout := 30000;
+    Params := TStringList.Create;
+    try
+      Params.Add('username=' + TNetEncoding.URL.Encode(usuarioE));
+      Params.Add('password=' + TNetEncoding.URL.Encode(PasswordE));
+      Resp := Client.Post(AUrl, Params);
+      Result := Resp.ContentAsString(TEncoding.UTF8);
+      x := AnsiPos('SERVER ERROR', Result);
+      if x > 0 then
+        Result := 'Error'
+      else
+      begin
+        JsonResp := TJSONObject.ParseJSONValue
+          (Resp.ContentAsString(TEncoding.UTF8)) as TJSONObject;
+        if Assigned(JsonResp) then
+        begin
+          Credentials := JsonResp.GetValue('credentials') as TJSONObject;
+          UserDB := Credentials.GetValue('userdb').Value;
+          PasswordDB := Credentials.GetValue('password').Value;
+          Result := 'ok';
+        end
+        else
+          Result := 'Error: respuesta no válida';
+      end;
+    finally
+      Params.Free;
+    end;
+  finally
+    Client.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de Borrarftp.</summary>
+/// <param name="nombreArchivo">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de Borrarftp.
+/// </summary>
+function Borrarftp(nombreArchivo: string): string;
+var
+  IdFTP: TIdFTP;
+  SSLIOHandler: TIdSSLIOHandlerSocketOpenSSL;
+  remoteFile: string;
+  listado: string;
+  x: Integer;
+begin
+  IdFTP := TIdFTP.Create(nil);
+  SSLIOHandler := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  try
+    // Configure SSLIOHandler
+    SSLIOHandler.SSLOptions.Method := sslvTLSv1_2;
+    IdFTP.IOHandler := SSLIOHandler;
+
+    // Configure FTP component
+    IdFTP.Host := '62.171.171.124';
+    IdFTP.Port := 21;
+    IdFTP.Username := 'usuario_transferencia';
+    IdFTP.password := 'AC16AC662asdC_7A';
+    IdFTP.UseTLS := utUseExplicitTLS;
+    IdFTP.DataPortProtection := ftpdpsPrivate;
+    IdFTP.Passive := True;
+
+    // Connect
+    IdFTP.connect;
+    if IdFTP.Connected then
+    begin
+      remoteFile := ExtractFileName(nombreArchivo);
+      IdFTP.List('*.enc', True);
+      listado := IdFTP.ListResult.Text;
+      x := AnsiPos(remoteFile, listado);
+      if x > 0 then
+        IdFTP.Delete(remoteFile);
+      Result := nombreArchivo;
+    end;
+
+    IdFTP.Disconnect;
+  except
+    on E: Exception do
+      Result := 'Error connecting to FTPS: ' + E.Message;
+  end;
+  SSLIOHandler.Free;
+  IdFTP.Free;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de importarDBG.
+/// </summary>
+function importarDBG(ficheroImp: string; keysalsa: string): string;
+var
+  dump: TUniDump;
+  FS: TMemoryStream;
+  ficheroDB: string;
+begin
+  dump := TUniDump.Create(nil);
+  FS := TMemoryStream.Create;
+  try
+    try
+      ficheroDB := DesencriptaFile(ficheroImp, keysalsa);
+      FS.LoadFromFile(ficheroDB);
+      FS.Position := 0;
+      dump.Connection := DModule_1.con2;
+      dump.SpecificOptions.Values['UseExtSyntax'] := 'False';
+      dump.RestoreFromFile(ficheroDB);
+      WipeFile(ficheroDB);
+      Result := 'Importación Realizada';
+    except
+      Result := 'error';
+    end;
+  finally
+    dump.Free;
+    FS.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de WipeFile.</summary>
+/// <param name="FileName">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de WipeFile.
+/// </summary>
+procedure WipeFile(FileName: string);
+var
+  buffer: array[0..4095] of BYTE;
+  Max, N: LongInt;
+  I: Integer;
+  FS: TFileStream;
+
+  /// <summary>
+  /// Implementa la lógica principal de RandomizeBuffer.
+  /// </summary>
+
+  procedure RandomizeBuffer;
+  var
+    I: Integer;
+  begin
+    for I := Low(buffer) to High(buffer) do
+      buffer[I] := Random(256);
+  end;
+
+begin
+  FS := TFileStream.Create(FileName, fmOpenReadWrite or fmShareExclusive);
+  try
+    for I := 1 to 3 do
+    begin
+      RandomizeBuffer;
+      Max := FS.Size;
+      FS.Position := 0;
+      while Max > 0 do
+      begin
+        if Max > SizeOf(buffer) then
+          N := SizeOf(buffer)
+        else
+          N := Max;
+        FS.Write(buffer, N);
+        Max := Max - N;
+      end;
+      FlushFileBuffers(FS.Handle);
+    end;
+  finally
+    FS.Free;
+    DeleteFile(PChar(FileName));
+  end;
+end;
+
+/// <summary>TODO: Descripción de DescargaFTP.</summary>
+/// <param name="nombreArchivo">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de DescargaFTP.
+/// </summary>
+function DescargaFTP(nombreArchivo: string): string;
+var
+  IdFTP: TIdFTP;
+  SSLIOHandler: TIdSSLIOHandlerSocketOpenSSL;
+  localFile: string;
+begin
+  IdFTP := TIdFTP.Create(nil);
+  SSLIOHandler := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  try
+    // Configure SSLIOHandler
+    SSLIOHandler.SSLOptions.Method := sslvTLSv1_2;
+    IdFTP.IOHandler := SSLIOHandler;
+
+    // Configure FTP component
+    IdFTP.Host := '62.171.171.124';
+    IdFTP.Port := 21;
+    IdFTP.Username := 'usuario_transferencia';
+    IdFTP.password := 'AC16AC662asdC_7A';
+    IdFTP.UseTLS := utUseExplicitTLS;
+    IdFTP.DataPortProtection := ftpdpsPrivate;
+    IdFTP.Passive := True;
+    IdFTP.TransferType := ftBinary;
+    IdFTP.ConnectTimeout := 30000;
+
+    // Connect
+    IdFTP.connect;
+    if IdFTP.Connected then
+    begin
+      localFile := IncludeTrailingPathDelimiter(rutaApp) + nombreArchivo;
+      if FileExists(localFile) then
+        DeleteFile(PWideChar(localFile));
+      IdFTP.Get(nombreArchivo, localFile, False, False);
+      if FileExists(PWideChar(localFile)) then
+      begin
+        // Borrarftp(nombreArchivo); //
+      end;
+      Result := localFile;
+    end;
+    IdFTP.Disconnect;
+  except
+    on E: Exception do
+      Result := 'Error connecting to FTPS: ' + E.Message;
+  end;
+  SSLIOHandler.Free;
+  IdFTP.Free;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de DesencriptaFile.
+/// </summary>
+function DesencriptaFile(FInicio: string; keysalsa: string): string;
+var
+  SalsaEnc: TSalsaEncryption;
+  FicheroDesencriptado: string;
+  x: Integer;
+  ext: string;
+begin
+  SalsaEnc := TSalsaEncryption.Create(nil);
+  // Rutina de encriptacion y borrado
+  try
+    try
+      FicheroDesencriptado := FInicio;
+      ext := ExtractFileExt(FicheroDesencriptado);
+      FicheroDesencriptado := AnsiReplaceStr(FicheroDesencriptado, ext, '');
+      if FileExists(FicheroDesencriptado) then
+        DeleteFile(PWideChar(FicheroDesencriptado));
+      SalsaEnc.keyLength := skl256;
+      SalsaEnc.outputFormat := base64url;
+      SalsaEnc.Unicode := yesUni;
+      SalsaEnc.key := keysalsa;
+      SalsaEnc.DecryptFile(FInicio, FicheroDesencriptado);
+      Result := FicheroDesencriptado;
+    finally
+      SalsaEnc.Free;
+      WipeFile(FInicio);
+    end;
+  except
+    Result := 'error';
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de realizarPreguntaSiNo.
+/// </summary>
+function realizarPreguntaSiNo(TextoPregunta: string): Integer;
+var
+  LForm: TfrmPreguntaSiNo;
+begin
+  Result := 0;
+  LForm := TfrmPreguntaSiNo.Create(Application);
+  try
+    LForm.lbl_TextoPregunta.Text := TextoPregunta;
+    LForm.Position := TFormPosition.Designed;
+    LForm.Height := 115;
+    LForm.CentrarSobre(frmMain.tbc_PreciosUnitarios);
+    Result := LForm.ShowModal;
+  finally
+    LForm.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de RestaurarMudanzaSistema.
+/// </summary>
+function RestaurarMudanzaSistema(): Boolean;
+begin
+  Result := False;
+  if PreguntarSiEjecutarMudanza = 1 then
+    Result := True;
+end;
+
+/// <summary>TODO: Descripción de RestaurarBackup.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de RestaurarBackup.
+/// </summary>
+function RestaurarBackup(): Boolean;
+begin
+  Result := False;
+  if PreguntarSiRestaurarBackUp() = 1 then
+    Result := True;
+end;
+
+/// <summary>TODO: Descripción de PrettyJSON.</summary>
+/// <param name="JSONStr">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de PrettyJSON.
+/// </summary>
+function PrettyJSON(const JSONStr: string): string;
+var
+  JsonValue: TJSONValue;
+begin
+  Result := '';
+  JsonValue := TJSONObject.ParseJSONValue(JSONStr);
+  if Assigned(JsonValue) then
+    try
+      Result := JsonValue.Format(2);
+    finally
+      JsonValue.Free;
+    end
+  else
+    Result := JSONStr;
+end;
+
+/// <summary>TODO: Descripción de ActivarLicenciaProducto.</summary>
+/// <param name="LicenciaProducto">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ActivarLicenciaProducto.
+/// </summary>
+function ActivarLicenciaProducto(LicenciaProducto: string): string;
+var
+  LClient: TRESTClient;
+  LRequest: TRESTRequest;
+  LResponse: TRESTResponse;
+  LAuth: THTTPBasicAuthenticator;
+begin
+  LClient := TRESTClient.Create('https://www.giproy.com');
+  LAuth := THTTPBasicAuthenticator.Create(Clave_del_Cliente,
+    Clave_Secreta_de_cliente);
+  LClient.Authenticator := LAuth;
+  LRequest := TRESTRequest.Create(nil);
+  LRequest.Client := LClient;
+  LResponse := TRESTResponse.Create(nil);
+  try
+    LRequest.Response := LResponse;
+    LRequest.Resource := 'wp-json/lmfwc/v2/licenses/activate/' +
+      LicenciaProducto;
+    LRequest.Method := TRESTRequestMethod.rmGET;
+
+    LRequest.Execute;
+
+    if LResponse.StatusCode = 200 then
+      Result := PrettyJSON(LResponse.Content)
+    else
+      Result := 'Error ' + LResponse.StatusCode.ToString + ': ' +
+        LResponse.StatusText;
+  finally
+    LAuth.Free;
+    LRequest.Free;
+    LResponse.Free;
+    LClient.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de EliminarUsuarioWordPressAsync.
+/// </summary>
+procedure EliminarUsuarioWordPressAsync(const AToken, AEmail: string;
+  const Callback: TProc<Boolean, string>);
+begin
+  TTask.Run(
+    procedure
+    var
+      Http: TNetHTTPClient;
+      Resp: IHTTPResponse;
+      JSONBody: TStringStream;
+      Obj, RespuestaJSON: TJSONObject;
+      ResultadoMsg: string;
+      Exito: Boolean;
+      LCallback: TProc<Boolean, string>;
+
+      LOk: Boolean;
+      LDone: Boolean;
+      LMessage: string;
+      LStatusOK: Boolean;
+      const
+      // El plugin requiere estos campos SIEMPRE, aunque para "delete" no los use funcionalmente.
+      PLACEHOLDER_FULLNAME = 'GiProy System';
+      PLACEHOLDER_PASSWORD = 'NotUsedButRequired_123!';
+    begin
+      LCallback := Callback;
+      Exito := False;
+      ResultadoMsg := '';
+
+      Http := TNetHTTPClient.Create(nil);
+      try
+        Http.ContentType := 'application/json';
+        Http.Accept := 'application/json';
+
+        // Token por header (recomendado por el plugin)
+        Http.CustomHeaders['X-Secret-Token'] := AToken;
+        // Alternativa válida:
+        // Http.CustomHeaders['Authorization'] := 'Bearer ' + AToken;
+
+        Obj := TJSONObject.Create;
+        try
+          Obj.AddPair('action', 'delete');
+          Obj.AddPair('full_name', PLACEHOLDER_FULLNAME);
+          Obj.AddPair('email', AEmail);
+          Obj.AddPair('password', PLACEHOLDER_PASSWORD);
+
+          JSONBody := TStringStream.Create(Obj.ToJSON, TEncoding.UTF8);
+          try
+            try
+              Resp := Http.Post
+                ('https://www.giproy.com/wp-json/alta-customer/v1/user',
+                JSONBody);
+
+              // En delete normalmente será 200; si hay error puede ser 401/400/500
+              LStatusOK := (Resp.StatusCode = 200) or (Resp.StatusCode = 201);
+
+              // Parsear JSON (también en errores suele devolver JSON)
+              try
+                RespuestaJSON := TJSONObject.ParseJSONValue
+                  (Resp.ContentAsString(TEncoding.UTF8)) as TJSONObject;
+              except
+                RespuestaJSON := nil;
+              end;
+
+              if Assigned(RespuestaJSON) then
+                try
+                  LOk := RespuestaJSON.GetValue<Boolean>('ok', False);
+                  LDone := RespuestaJSON.GetValue<Boolean>('done', False);
+                  LMessage := RespuestaJSON.GetValue<string>('message', '');
+
+                  Exito := LOk;
+
+                  if LMessage <> '' then
+                    ResultadoMsg := LMessage
+                  else if LStatusOK then
+                    ResultadoMsg := 'Operación completada.'
+                  else
+                    ResultadoMsg := Format('Error HTTP %d: %s',
+                      [Resp.StatusCode, Resp.StatusText]);
+
+                  // Contexto extra útil (sin cambiar el callback)
+                  if LOk and (not LDone) then
+                    ResultadoMsg := ResultadoMsg +
+                      ' (no se borró: el usuario no existía)';
+
+                finally
+                  RespuestaJSON.Free;
+                end
+              else
+              begin
+                // Sin JSON parseable
+                if LStatusOK then
+                  ResultadoMsg := 'Respuesta no JSON: ' +
+                    Resp.ContentAsString(TEncoding.UTF8)
+                else
+                  ResultadoMsg := Format('Error HTTP %d: %s. Respuesta: %s',
+                    [Resp.StatusCode, Resp.StatusText,
+                      Resp.ContentAsString(TEncoding.UTF8)]);
+                Exito := False;
+              end;
+
+            except
+              on E: Exception do
+              begin
+                ResultadoMsg := 'Error de conexión: ' + E.Message;
+                Exito := False;
+              end;
+            end;
+          finally
+            JSONBody.Free;
+          end;
+        finally
+          Obj.Free;
+        end;
+      finally
+        Http.Free;
+      end;
+
+      TThread.Synchronize(nil,
+        procedure
+        begin
+          if Assigned(LCallback) then
+            LCallback(Exito, ResultadoMsg);
+        end);
+    end);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de CrearUsuarioWordPressAsync.
+/// </summary>
+function CrearUsuarioWordPressAsync(const AToken, AUser, APass, AEmail,
+  role: string): Boolean;
+var
+  Http: TNetHTTPClient;
+  Resp: IHTTPResponse;
+  JSONBody: TStringStream;
+  Obj, RespuestaJSON: TJSONObject;
+  ResultadoMsg: string;
+  Exito: Boolean;
+  LOk: Boolean;
+  LDone: Boolean;
+  LMessage: string;
+  LUserLogin: string;
+  LCreds: TJSONObject;
+  LStatusOK: Boolean;
+begin
+  Result := False;
+  Exito := False;
+  ResultadoMsg := '';
+  LUserLogin := '';
+  Http := TNetHTTPClient.Create(nil);
+  try
+    Http.ContentType := 'application/json';
+    Http.Accept := 'application/json';
+    Http.CustomHeaders['X-Secret-Token'] := AToken;
+    // Alternativa válida (si lo prefieres):
+    // Http.CustomHeaders['Authorization'] := 'Bearer ' + AToken;
+
+    Obj := TJSONObject.Create;
+    try
+      // Nuevo plugin: campos esperados
+      Obj.AddPair('action', 'create'); // create | delete | recreate
+      Obj.AddPair('full_name', AUser); // aquí usamos AUser como nombre completo
+      Obj.AddPair('email', AEmail);
+      Obj.AddPair('password', APass); // el plugin requiere password siempre
+
+      JSONBody := TStringStream.Create(Obj.ToJSON, TEncoding.UTF8);
+      try
+        try
+          Resp := Http.Post
+            ('https://www.giproy.com/wp-json/alta-customer/v1/user', JSONBody);
+
+          // El plugin devuelve 200 o 201 en casos correctos
+          LStatusOK := (Resp.StatusCode = 200) or (Resp.StatusCode = 201);
+
+          // Intentar parsear JSON tanto en OK como en error (401/400/500 suelen devolver JSON)
+          try
+            RespuestaJSON := TJSONObject.ParseJSONValue
+              (Resp.ContentAsString(TEncoding.UTF8)) as TJSONObject;
+          except
+            RespuestaJSON := nil;
+          end;
+
+          if Assigned(RespuestaJSON) then
+            try
+              LOk := RespuestaJSON.GetValue<Boolean>('ok', False);
+              LDone := RespuestaJSON.GetValue<Boolean>('done', False);
+              LMessage := RespuestaJSON.GetValue<string>('message', '');
+
+              // Extraer credentials.user_login si viene
+              LCreds := RespuestaJSON.GetValue<TJSONObject>('credentials');
+              if Assigned(LCreds) then
+                LUserLogin := LCreds.GetValue<string>('user_login', '');
+
+              // Éxito real según JSON ok=true (aunque HTTP sea 200/201)
+              Exito := LOk;
+
+              if LMessage <> '' then
+                ResultadoMsg := LMessage
+              else if LStatusOK then
+                ResultadoMsg := 'Operación completada.'
+              else
+              begin
+                ResultadoMsg := Format('Error HTTP %d: %s',
+                  [Resp.StatusCode, Resp.StatusText]);
+                Result := False;
+                Exit;
+              end;
+
+              // Añadir contexto útil
+              if LUserLogin <> '' then
+                ResultadoMsg := ResultadoMsg + ' (login=' + LUserLogin + ')';
+
+              if LOk and (not LDone) then
+              begin
+                ResultadoMsg := ResultadoMsg + ' (no se creó: ya existía)';
+                Exito := True;
+              end;
+
+            finally
+              RespuestaJSON.Free;
+            end
+          else
+          begin
+            // Sin JSON parseable
+            if LStatusOK then
+              ResultadoMsg := 'Respuesta no JSON: ' +
+                Resp.ContentAsString(TEncoding.UTF8)
+            else
+              ResultadoMsg := Format('Error HTTP %d: %s. Respuesta: %s',
+                [Resp.StatusCode, Resp.StatusText,
+                  Resp.ContentAsString(TEncoding.UTF8)]);
+            Exito := False;
+            Exit;
+          end;
+
+        except
+          on E: Exception do
+          begin
+            ResultadoMsg := 'Error de conexión: ' + E.Message;
+            Exito := False;
+            Exit;
+          end;
+        end;
+      finally
+        JSONBody.Free;
+      end;
+    finally
+      Obj.Free;
+    end;
+  finally
+    Http.Free;
+  end;
+  Result := Exito;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de EliminarUsuarioWordPressSync.
+/// </summary>
+function EliminarUsuarioWordPressSync(const AToken, AEmail: string;
+  out AMessage: string): Boolean;
+var
+  Done: TEvent;
+  SuccessLocal: Boolean;
+  MsgLocal: string;
+begin
+  Result := False;
+  AMessage := '';
+  Done := TEvent.Create(nil, True, False, '');
+  try
+    EliminarUsuarioWordPressAsync(AToken, AEmail, TProc<Boolean, string>(
+      procedure(const Success: Boolean; const Message: string)
+      begin
+        SuccessLocal := Success;
+        MsgLocal := Message;
+        Done.SetEvent;
+      end));
+
+    if Done.WaitFor(30000) = wrSignaled then
+    begin
+      Result := SuccessLocal;
+      AMessage := MsgLocal;
+    end
+    else
+    begin
+      Result := False;
+      AMessage := 'Timeout al eliminar usuario en WordPress.';
+    end;
+  finally
+    Done.Free;
+  end;
+end;
+
+/// <summary>
+/// Devuelve información calculada o consultada en DarkenColor.
+/// </summary>
+function DarkenColor(const AColor: TAlphaColor; Factor: Single): TAlphaColor;
+var
+  R, g, b, a: BYTE;
+begin
+  a := TAlphaColorRec(AColor).a;
+  R := Round(TAlphaColorRec(AColor).R * Factor);
+  g := Round(TAlphaColorRec(AColor).g * Factor);
+  b := Round(TAlphaColorRec(AColor).b * Factor);
+
+  Result := (a shl 24) or (R shl 16) or (g shl 8) or b;
+end;
+
+/// <summary>TODO: Descripción de comprobarModuloActivo.</summary>
+/// <param name="idComplemento">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de comprobarModuloActivo.
+/// </summary>
+function comprobarModuloActivo(idComplemento: Integer): Boolean;
+var
+  J: TJSONObject;
+  Activo: Boolean;
+  Conteo: Integer;
+  Msg: string;
+begin
+  Result := False;
+  J := nil;
+  try
+    if (idComplemento <= 0) then
+      Exit(False);
+
+    if ComprobarModuloDatos(UrlComprobarModulo, GlobalAuthToken, idComplemento,
+      Activo, Conteo, Msg, J) then
+    begin
+      Result := Activo;
+      // Opcional: usar Conteo / Msg para logging o UI
+      // if not Activo then Log('Complemento inactivo: ' + Msg);
+    end
+    else
+      Result := False;
+  except
+    on E: Exception do
+      Result := False;
+  end;
+  J.Free;
+end;
+
+/// <summary>TODO: Descripción de CuentaUsuariosColaboradores.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de CuentaUsuariosColaboradores.
+/// </summary>
+function CuentaUsuariosColaboradores(): Integer;
+var
+  qry: TUniQuery;
+begin
+  Result := 0;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT ' + 'count(id) AS Contador ' + 'FROM ' + 'colaboradores '
+        + 'WHERE ' + 'estado = 1 ' + 'AND idUsuario = :idUsuario');
+      { *) }
+      ParamByName('idUsuario').AsInteger := codigo_usuario;
+      Prepare;
+      Open;
+      Result := FieldByName('Contador').AsInteger;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de Actualiza_UsuariosColaborador.</summary>
+procedure Actualiza_UsuariosColaborador();
+begin
+  // Colaboradores
+  with DModule_1.QColaboradores do
+  begin
+    Active := False;
+    ParamByName('email').AsString := LowerCase(ID_usuario);
+    Open;
+    Active := True;
+  end;
+  DModule_1.ds_Colaboradores.Enabled := True;
+  frmMain.DataGridDBConnector_Colaboradores.Active := True;
+  frmMain.DGrid_Colaboradores.columns[0].width := 50;
+  frmMain.DGrid_Colaboradores.columns[1].width := 300;
+  frmMain.DataGridDBConnector_Colaboradores.columns[1].Header := 'E-Mail';
+  frmMain.DGrid_Colaboradores.columns[2].width := 910;
+  frmMain.DataGridDBConnector_Colaboradores.columns[2].Header := 'Colaborador';
+
+  // Comunicación
+  with DModule_1.QuComunicacion do
+  begin
+    Active := False;
+    ParamByName('p_idUsuario').AsInteger := codigo_usuario;
+    Open;
+    Active := True;
+  end;
+  DModule_1.ds_uComunicacion.Enabled := True;
+  frmMain.DataGridDBConnector_Comunicacion.Active := True;
+  frmMain.DGrid_Comunicaciones.columns[0].width := 80;
+  frmMain.DataGridDBConnector_Comunicacion.columns[0].Header := 'ID.';
+  frmMain.DGrid_Comunicaciones.columns[1].width := 80;
+  frmMain.DataGridDBConnector_Comunicacion.columns[1].Header := 'Tipo';
+  frmMain.DataGridDBConnector_Comunicacion.columns[1].PictureField := True;
+  frmMain.DGrid_Comunicaciones.columns[2].width := 340;
+  frmMain.DataGridDBConnector_Comunicacion.columns[2].Header := 'Emisor';
+  frmMain.DGrid_Comunicaciones.columns[3].width := 400;
+  frmMain.DataGridDBConnector_Comunicacion.columns[3].Header := 'Descripción';
+  frmMain.DGrid_Comunicaciones.columns[4].width := 200;
+  frmMain.DataGridDBConnector_Comunicacion.columns[4].Header := 'F. Emisión';
+  frmMain.DGrid_Comunicaciones.columns[5].width := 120;
+  frmMain.DataGridDBConnector_Comunicacion.columns[5].Header := 'F. Recepción';
+
+  frmMain.DGrid_Comunicaciones.columns[6].width := 0;
+  frmMain.DGrid_Comunicaciones.columns[7].width := 0;
+  frmMain.DGrid_Comunicaciones.columns[8].width := 0;
+  frmMain.DGrid_Comunicaciones.columns[9].width := 0;
+  frmMain.DGrid_Comunicaciones.columns[10].width := 0;
+end;
+
+/// <summary>TODO: Descripción de enviar_invitacion_unirse_giproy.</summary>
+/// <param name="email">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de enviar_invitacion_unirse_giproy.
+/// </summary>
+function enviar_invitacion_unirse_giproy(email: string): string;
+var
+  Http: TIdHTTP;
+  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  Params: TStringList;
+  respuesta: string;
+begin
+  Http := TIdHTTP.Create(nil);
+  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  Params := TStringList.Create;
+  try
+    // Configuración del handler SSL
+    Http.IOHandler := SSL;
+    Http.Request.ContentType := 'application/x-www-form-urlencoded';
+    Http.Request.UserAgent := 'DelphiInvitador/1.0';
+
+    // Parámetro POST: el email
+    Params.Add('email=' + TNetEncoding.URL.Encode(email));
+    Params.Add('nombre_emisor' + ID_usuario);
+
+    // Llamada HTTP POST
+    respuesta := Http.Post
+      ('https://app.62.171.171.124.sslip.io/recover-password-giproy/enviar_invitacion.php',
+      Params);
+
+    // Mostrar respuesta del servidor
+    Result := 'Servidor dice: ' + respuesta;
+  except
+    on E: Exception do
+      Result := 'Error al enviar invitación: ' + E.Message;
+  end;
+  // Liberar recursos
+  Params.Free;
+  SSL.Free;
+  Http.Free;
+end;
+
+/// <summary>TODO: Descripción de guardaConfiguracionDecimales.</summary>
+procedure guardaConfiguracionDecimales();
+var
+  qry: TUniQuery;
+  textoQry: string;
+  textoQry2: string;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  {(*}
+  textoQry :=
+    'SELECT ' +
+    '  id ' +
+    'FROM ' +
+    '  presupuestos_datosgenerales pd ' +
+    'WHERE ' +
+    '  pd.codPresupuesto = :codPresupuesto ' +
+    '  AND pd.revision = :revision';
+
+  textoQry2 := 'UPDATE presupuestos_datosgenerales pd ' +
+    'SET pd.ndecimales = :nDecimales, ' +
+    'pd.ndecimalesMoneda = :nDecimalesMoneda ' +
+    'WHERE ' +
+    '  pd.codPresupuesto = :codPresupuesto AND ' +
+    '  pd.revision = :revision';
+  {*)}
+
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add(textoQry);
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsInteger := SafeStrToInt(revision);
+      Prepare;
+      ExecSQL;
+      tmpstr := FieldByName('id').AsString;
+      tmpstr := Trim(tmpstr);
+      if tmpstr <> '' then
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add(textoQry2);
+        ParamByName('nDecimales').AsInteger := ndecimalesPresupuesto;
+        ParamByName('nDecimalesMoneda').AsInteger := ndecimalesMoneda;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsInteger := SafeStrToInt(revision);
+        Prepare;
+        ExecSQL;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ejecutaExportacionReporte.
+/// </summary>
+function ejecutaExportacionReporte(idComplemento: Integer;
+  triggerOperacion: string): string;
+var
+  qry: TUniQuery;
+  codValidacionReporte: string;
+  Ok: Boolean;
+  JSON: TJSONObject;
+  Restantes: Integer;
+begin
+  Result := '0';
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    // 1) Verificar si ya existe un código previo para este usuario + trigger
+    qry.Close;
+    qry.SQL.Clear;
+    qry.SQL.Add('SELECT gr.codValidacionReporte ' +
+      'FROM gestionexportacionreportes gr ' +
+      'WHERE gr.TriggerComprobacion = :TriggerComprobacion ' +
+      '  AND gr.idUsuario = :idUsuario ' +
+      'ORDER BY gr.FechaHoraAdquisicion DESC ' + 'LIMIT 1');
+    qry.ParamByName('TriggerComprobacion').AsString := triggerOperacion;
+    qry.ParamByName('idUsuario').AsInteger := codIDUSuario;
+    qry.Open;
+
+    if not qry.Eof then
+      codValidacionReporte := qry.FieldByName('codValidacionReporte')
+        .AsString.Trim
+    else
+      codValidacionReporte := '';
+
+    // 2) Si no hay registro previo, intentar consumir complemento vía API PHP
+    if codValidacionReporte = '' then
+    begin
+      Ok := UtilizarComplementoDatos(GlobalAuthToken, codIDUSuario,
+        idComplemento, codValidacionReporte, Restantes, JSON);
+
+      if Assigned(JSON) then
+        JSON.Free;
+
+      // Si el backend devolvió código "0", significa sin saldo o error
+      if (not Ok) or (codValidacionReporte = '0') then
+        Exit('0');
+    end;
+
+    // 3) Si hay código válido, registrar adquisición localmente
+    if codValidacionReporte <> '0' then
+    begin
+      qry.Close;
+      qry.SQL.Clear;
+      qry.SQL.Add('INSERT INTO gestionexportacionreportes (' +
+        '  codValidacionReporte, idUsuario, idComplemento, TriggerComprobacion, FechaHoraAdquisicion'
+        + ') VALUES (' +
+        '  :codValidacionReporte, :idUsuario, :idComplemento, :TriggerComprobacion, :FechaHoraAdquisicion'
+        + ')');
+      qry.ParamByName('codValidacionReporte').AsString := codValidacionReporte;
+      qry.ParamByName('idUsuario').AsInteger := codIDUSuario;
+      qry.ParamByName('idComplemento').AsInteger := idComplemento;
+      qry.ParamByName('TriggerComprobacion').AsString := triggerOperacion;
+      qry.ParamByName('FechaHoraAdquisicion').AsDateTime := Now;
+      qry.ExecSQL;
+    end;
+
+    Result := codValidacionReporte;
+
+  except
+    on E: Exception do
+    begin
+      // Puedes registrar el error si tienes logging
+      // LogError('ejecutaExportacionReporte: ' + E.Message);
+      Result := '0';
+    end;
+  end;
+
+  qry.Free;
+end;
+
+/// <summary>TODO: Descripción de daCantidadReportesRestantes.</summary>
+/// <param name="idComplemento">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCantidadReportesRestantes.
+/// </summary>
+function daCantidadReportesRestantes(idComplemento: Integer): Integer;
+var
+  JSON: TJSONObject;
+  Ok: Boolean;
+  CantRestante, TotalComprado, TotalUsado: Integer;
+begin
+  Result := 0;
+  try
+    // Consulta al endpoint ComplementosSinUsar.php
+    Ok := ObtenerComplementosSinUsarDatos(UrlComplementosSinUsar,
+      // URL definida en tus constantes o config
+      GlobalAuthToken, // token JWT actual
+      codIDUSuario, // usuario actual logueado
+      idComplemento, // complemento que se consulta
+      CantRestante, TotalComprado, TotalUsado, JSON);
+
+    if Ok then
+      Result := CantRestante
+    else
+      Result := 0;
+  except
+    on E: Exception do
+    begin
+      // Manejo tolerante de error, coherente con tu versión previa
+      Result := 0;
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de compruebaModeloNegocio.</summary>
+/// <param name="Modulo">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebaModeloNegocio.
+/// </summary>
+function compruebaModeloNegocio(Modulo: Integer): Boolean;
+begin
+  Result := True;
+  case Modulo of
+    1: // Importar APUS
+      begin
+        if LowerCase(TUsuario) = LowerCase('Expres') then
+          Result := False;
+      end;
+    2: // Cronogramas
+      begin
+        if LowerCase(TUsuario) = LowerCase('Expres') then
+          Result := False;
+      end;
+    3: // Desagregacion
+      begin
+        if LowerCase(TUsuario) = LowerCase('Expres') then
+          Result := False;
+      end;
+    4: // Formula Polinomica
+      begin
+        if LowerCase(TUsuario) = LowerCase('Expres') then
+          Result := False;
+      end;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de RegistraLogUsuario.
+/// </summary>
+procedure RegistraLogUsuario(const tIDUsuario, tipoEntrada: Integer;
+  out tmpstr: string);
+var
+  JSON: TJSONObject;
+  Ok: Boolean;
+begin
+  tmpstr := '';
+  JSON := nil;
+  Ok := False;
+  try
+    try
+      if tIDUsuario <= 0 then
+        raise Exception.Create('tIDUsuario debe ser > 0');
+
+      if (tipoEntrada <> 1) and (tipoEntrada <> 2) then
+        raise Exception.Create('tipoEntrada inválido (use 1=login, 2=logout)');
+
+      if UrlLogEntrada.Trim = '' then
+        raise Exception.Create('UrlLogEntrada no configurada');
+
+      if GlobalAuthToken.Trim = '' then
+        raise Exception.Create('GlobalAuthToken no configurado');
+
+      case tipoEntrada of
+        1:
+          Ok := RegistrarLoginUsuario(UrlLogEntrada, GlobalAuthToken,
+            tIDUsuario, JSON);
+        2:
+          Ok := RegistrarLogoutUsuario(UrlLogEntrada, GlobalAuthToken,
+            tIDUsuario, JSON);
+      end;
+
+      if Ok and (JSON <> nil) then
+        tmpstr := Format('OK. filas=%d, ms=%d, ip=%s',
+          [JSON.GetValue<Integer>('rows_affected', 0),
+            JSON.GetValue<Integer>('elapsed_ms', -1),
+            JSON.GetValue<string>('ip', '')])
+      else if JSON <> nil then
+        tmpstr := 'La API respondió ok=false: ' + JSON.GetValue<string>
+          ('message', 'Error');
+
+    except
+      on E: EApiException do
+        tmpstr := Format('Error API (HTTP %d): %s', [E.StatusCode, E.Message]);
+      on E: Exception do
+        tmpstr := 'Error inesperado: ' + E.Message;
+    end;
+  finally
+    JSON.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de daValorParametro.</summary>
+/// <param name="idParametro">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daValorParametro.
+/// </summary>
+function daValorParametro(idParametro: Integer): string;
+begin
+  DModule_1.QDaParametro.Close;
+  DModule_1.QDaParametro.ParamByName('idParametros').AsInteger := idParametro;
+  DModule_1.QDaParametro.Open;
+  Result := DModule_1.QDaParametroValor.AsString.Trim;
+end;
+
+/// <summary>TODO: Descripción de compruebaCodigoIndiceRepetido.</summary>
+/// <param name="codigoIndice">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebaCodigoIndiceRepetido.
+/// </summary>
+function compruebaCodigoIndiceRepetido(codigoIndice: string): Boolean;
+var
+  x: Integer;
+  encontrado: Boolean;
+  codActual: string;
+begin
+  encontrado := False;
+  x := 1;
+  while (not encontrado) and (x < frmMain.grid_FpolCuadrillaTipo.RowCount) do
+  begin
+    codActual := frmMain.grid_FpolCuadrillaTipo.cells[2, x];
+    if codActual = codigoIndice then
+      encontrado := True;
+    Inc(x);
+  end;
+  Result := encontrado;
+end;
+
+/// <summary>TODO: Descripción de muestrarecursosDesagregacion.</summary>
+/// <param name="codigo">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de muestraRecursosDesagregacion.
+/// </summary>
+procedure muestraRecursosDesagregacion(codigo: Integer);
+begin
+  resalta_desgPanelCategoria(codigo);
+  verRecursoDesagregacion(codigo);
+end;
+
+/// <summary>TODO: Descripción de compruebatodoFpolinomica.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebatodoFpolinomica.
+/// </summary>
+function compruebatodoFpolinomica(): Boolean;
+var
+  datos: string;
+  valor: Integer;
+begin
+  Result := False;
+  datos := frmMain.lbl_RecursosPorAsignar.Text;
+  datos := AnsiReplaceStr(datos, 'Recursos por Asignar:', '').Trim;
+  valor := StrToIntDef(datos, -1);
+  if valor = 0 then
+    Result := True;
+end;
+
+/// <summary>TODO: Descripción de compruebaTodoCPC.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebaTodoCPC.
+/// </summary>
+function compruebaTodoCPC(): Boolean;
+var
+  x: Integer;
+  codAPU: string;
+begin
+  Result := True;
+  with DModule_1.QAPU do
+  begin
+    for x := 1 to frmMain.grid_DesagregacionAPUS.RowCount - 1 do
+    begin
+      if Result then
+      begin
+        codAPU := frmMain.grid_DesagregacionAPUS.cells[11, x];
+        if codAPU <> '' then
+        begin
+          Close;
+          ParamByName('codBase').AsString := base_activa.codBase;
+          ParamByName('codApu').AsString := codAPU;
+          Prepare;
+          Execute;
+          if FieldByName('codCPC').AsString.Trim = '' then
+          begin
+            Result := False;
+          end;
+        end;
+      end;
+    end;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de forzarNdecimales.
+/// </summary>
+function forzarNdecimales(valor: Double; nDecimales: Integer): string;
+var
+  x: Integer;
+  cadenaDecimales: string;
+begin
+  cadenaDecimales := '';
+  for x := 1 to nDecimales - 1 do
+    cadenaDecimales := cadenaDecimales + '#';
+  cadenaDecimales := '0.' + cadenaDecimales + '0';
+  Result := FormatFloat(cadenaDecimales, valor);
+end;
+
+/// <summary>TODO: Descripción de actualizaRolgridStake.</summary>
+/// <param name="IdUnico">TODO.</param>
+/// <param name="newRolStake">TODO.</param>
+/// <summary>
+/// Gestiona información de stakeholders en actualizaRolgridStake.
+/// </summary>
+procedure actualizaRolgridStake(idUnico, newRolStake: string);
+var
+  res: TPoint;
+begin
+  res := frmMain.grid_stakesAsignados.FindFirst(idUnico, []);
+  frmMain.grid_stakesAsignados.cells[res.x - 1, res.Y] := newRolStake;
+end;
+
+/// <summary>TODO: Descripción de borraStakeHolder.</summary>
+/// <param name="idStake">TODO.</param>
+/// <summary>
+/// Gestiona información de stakeholders en borraStakeHolder.
+/// </summary>
+procedure borraStakeHolder(idStake: string);
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from stakeholders where idFiscal=:idFiscal');
+      ParamByName('idFiscal').AsString := idStake;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de IsControlKeyPressed: Boolean.
+/// </summary>
+function IsControlKeyPressed: Boolean;
+begin
+  Result := GetKeyState(VK_CONTROL) < 0;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de IsShiftKeyPressed: Boolean.
+/// </summary>
+function IsShiftKeyPressed: Boolean;
+begin
+  Result := GetKeyState(VK_SHIFT) < 0;
+end;
+
+procedure ejecutaCronoDerivaciones;
+begin
+  if TThread.Current.ThreadID <> MainThreadID then
+  begin
+    TThread.Synchronize(nil, EjecutaCronoDerivaciones_UI);
+    Exit;
+  end;
+
+  EjecutaCronoDerivaciones_UI;
+end;
+
+/// <summary>TODO: Descripción de iniciaTanteoCrono.</summary>
+procedure iniciaTanteoCrono();
+var
+  nodo: TTMSFNCTreeViewNode;
+begin
+  frmMain.Trvw_TanteoCrono.ClearNodes;
+  nodo := frmMain.Trvw_TanteoCrono.addnode;
+  nodo.Text[0] := 'Equipos y Herramientas';
+  nodo.Extended := True;
+  nodo := frmMain.Trvw_TanteoCrono.addnode;
+  nodo.Text[0] := 'Materiales';
+  nodo.Extended := True;
+  nodo := frmMain.Trvw_TanteoCrono.addnode;
+  nodo.Text[0] := 'Transporte';
+  nodo.Extended := True;
+  nodo := frmMain.Trvw_TanteoCrono.addnode;
+  nodo.Text[0] := 'Mano de Obra';
+  nodo.Extended := True;
+end;
+
+/// <summary>TODO: Descripción de crearCadenacurrency.</summary>
+procedure crearCadenacurrency();
+var
+  x: Integer;
+  settings: TFormatSettings;
+begin
+  {
+    0   = Before amount
+    1   = After amount
+    2   = Before amount with space
+    3   = After amount with space
+  }
+  // $ #,###0.00
+  cadenaCurrency := '';
+  for x := 1 to ndecimalesMoneda do
+    cadenaCurrency := cadenaCurrency + '0';
+  cadenaCurrency := '0.' + cadenaCurrency;
+  cadenaCurrency := '#,###' + cadenaCurrency;
+
+  if base_activa.simboloMoneda <> '' then
+  begin
+    if base_activa.simboloMoneda = '$' then
+      cadenaCurrency := (base_activa.simboloMoneda + ' ' + cadenaCurrency).Trim
+    else
+      cadenaCurrency := (cadenaCurrency + ' ' + base_activa.simboloMoneda).Trim;
+  end
+  else
+  begin
+    base_activa.simboloMoneda := '$';
+    cadenaCurrency := (base_activa.simboloMoneda + ' ' + cadenaCurrency).Trim
+  end;
+end;
+
+/// <summary>TODO: Descripción de crearCadenaDecimales.</summary>
+procedure crearCadenaDecimales();
+var
+  x: Integer;
+begin
+  cadenaDecimales := '';
+  for x := 1 to ndecimalesPresupuesto do
+    cadenaDecimales := cadenaDecimales + '0';
+  cadenaDecimales := '0.' + cadenaDecimales;
+  cadenaDecimales := '#,###' + cadenaDecimales;
+end;
+
+/// <summary>TODO: Descripción de Porcentaje.</summary>
+/// <param name="Valor">TODO.</param>
+/// <param name="porcentaje">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de porcentaje.
+/// </summary>
+function porcentaje(valor, porcentaje: Double): Double;
+begin
+  try
+    Result := (valor * porcentaje) / 100;
+  except
+
+    Result := 0;
+  end;
+end;
+
+/// <summary>TODO: Descripción de actualizaLineaPresupuestoItemsDB.</summary>
+/// <param name="codAPU">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de actualizaLineaPresupuestoItemsDB.
+/// </summary>
+procedure actualizaLineaPresupuestoItemsDB(codAPU: string);
+var
+  SQLText: string;
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  SQLText := 'UPDATE presupuestos_items presupuesto ' +
+    'LEFT JOIN apus apu ON ( apu.codBase = presupuesto.codBase AND apu.CodAPU = presupuesto.CodAPU ) '
+    + 'LEFT JOIN presupuestos_datosgenerales datos ON ( datos.codBase = presupuesto.codBase AND datos.codPresupuesto = presupuesto.codPresupuesto AND datos.revision = presupuesto.revision ) '
+    + 'LEFT JOIN presupuestos_tanteo_apus tanteo ON (' +
+    '  tanteo.codBase = presupuesto.codBase ' +
+    '  AND tanteo.codPresupuesto = presupuesto.codPresupuesto ' +
+    '  AND tanteo.revision = presupuesto.revision ' +
+    '  AND tanteo.CodAPU = presupuesto.codAPU ' + ') ' +
+    'SET presupuesto.PUnitario = (' +
+    '                              (IF ( tanteo.CostoDirectoTotal IS NULL, apu.CostoDirectoTotal, tanteo.CostoDirectoTotal )) + '
+    + '                              (( ( IF ( tanteo.CostoDirectoTotal IS NULL, apu.CostoDirectoTotal, tanteo.CostoDirectoTotal )) * datos.indirectos )/ 100 )'
+    + '    ),' +
+    '  presupuesto.Ptotal := presupuesto.PUnitario * presupuesto.cantidad ' +
+    'WHERE presupuesto.codAPU = :CodAPU ' +
+    '  AND presupuesto.codPresupuesto = :codPresupuesto  AND presupuesto.codBase = :codBase '
+    + '  AND presupuesto.revision = :revision';
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add(SQLText);
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      ParamByName('codAPU').AsString := codAPU;
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Limpia de la base de datos todas las "bases" huérfanas asociadas
+/// al proyecto indicado por codProyecto, eliminando también sus
+/// registros relacionados en apus, apus_items, recursos y categoriaapus.
+/// </summary>
+procedure LimpiaDBHuerfanas();
+var
+  qry: TUniQuery;
+  SQLText: TStringList;
+  basesList: TStringList;
+  I, x: Integer;
+begin
+  // Si no hay proyecto definido, no hacemos nada
+  if codProyecto = '' then
+    Exit;
+
+  qry := TUniQuery.Create(nil);
+  SQLText := TStringList.Create;
+  basesList := TStringList.Create;
+  try
+    qry.Connection := DModule_1.con2;
+
+    // ==================================================================
+    // 1) Obtener todas las codBase huérfanas para este proyecto
+    // (protegemos el formato del SQL con las marcas {(*} {*)})
+    // ==================================================================
+    {(*}
+    qry.SQL.Text :=
+      'SELECT ' +
+      '    b.codBase ' +
+      'FROM ' +
+      '    bases b ' +
+      'LEFT JOIN presupuestos_datosproyecto dp ' +
+      '    ON dp.codPresupuesto = b.presupuestoAsignado ' +
+      'WHERE ' +
+      '    b.presupuestoAsignado = :PresupuestoAsignado ' +
+      '    AND dp.codPresupuesto IS NULL;';
+    {*)}
+
+    qry.ParamByName('PresupuestoAsignado').AsString := codProyecto;
+    qry.Open;
+    while not qry.Eof do
+    begin
+      basesList.Add(qry.FieldByName('codBase').AsString);
+      qry.Next;
+    end;
+    qry.Close;
+
+    // Si no hay bases para limpiar, salimos
+    if basesList.Count = 0 then
+      Exit;
+
+    // ==================================================================
+    // 2) Preparar las sentencias de borrado por codBase
+    // ==================================================================
+    SQLText.Clear;
+    SQLText.Add('delete from bases where codBase = :codBase');
+    SQLText.Add('delete from recursos where codBase = :codBase');
+    SQLText.Add('delete from apus_items where codBase = :codBase');
+    SQLText.Add('delete from apus where codBase = :codBase');
+    SQLText.Add('delete from categoriaapus where codBase = :codBase');
+
+    // ==================================================================
+    // 3) Ejecutar los DELETE dentro de una transacción
+    // ==================================================================
+    if not qry.Connection.InTransaction then
+      qry.Connection.StartTransaction;
+    try
+      // Recorremos todas las codBase que hay que eliminar
+      for I := 0 to basesList.Count - 1 do
+      begin
+        // Para cada codBase ejecutamos todos los DELETE preparados
+        for x := 0 to SQLText.Count - 1 do
+        begin
+          qry.Close;
+          qry.SQL.Clear;
+          qry.SQL.Add(SQLText[x]);
+          qry.ParamByName('codBase').AsString := basesList[I];
+          qry.ExecSQL;
+        end;
+      end;
+
+      if qry.Connection.InTransaction then
+        qry.Connection.Commit;
+    except
+      // Si algo falla, deshacemos todos los borrados
+      if qry.Connection.InTransaction then
+      begin
+        qry.Connection.Rollback;
+        EndGuardarAPU;
+      end;
+      raise;
+    end;
+  finally
+    basesList.Free;
+    SQLText.Free;
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de darendimientoHUnidad.</summary>
+/// <param name="codAPU">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en darendimientoHUnidad.
+/// </summary>
+function darendimientoHUnidad(codAPU: string): Double;
+var
+  SQLText: string;
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  Result := 0;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQLText := 'SELECT ' +
+        '  redondea (sum(tanteo.Rendimiento * tanteo.CantidadUnidad), dg.ndecimalesMoneda) AS nhunidad '
+        + 'FROM ' + '  presupuestos_tanteo_recursos tanteo ' +
+        '  INNER JOIN apus_items items ON (items.CodAPU = tanteo.CodAPU AND items.idUnicoRecurso = tanteo.idUnicoRecurso AND items.codBase = tanteo.codBase) '
+        + '  INNER JOIN presupuestos_datosgenerales dg ON dg.codBase = tanteo.codBase '
+        + '  AND dg.codPresupuesto = tanteo.codPresupuesto ' +
+        '  AND dg.revision = tanteo.revision ' + 'WHERE ' +
+        '  tanteo.CodAPU = :codAPU ' + '  AND tanteo.codBase = :codBase ' +
+        '  AND tanteo.codPresupuesto = :codPresupuesto ' +
+        '  AND tanteo.revision = :revision ' + '  AND items.CodCategoria = 4 ' +
+        'GROUP BY ' + '  tanteo.Rendimiento, ' + '  tanteo.CantidadUnidad, ' +
+        '  dg.ndecimalesMoneda';
+      { *) }
+      SQL.Add(SQLText);
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      ParamByName('codAPU').AsString := codAPU;
+      Prepare;
+      Open;
+      tmpstr := decimal_correcto(FieldByName('nhunidad').AsString);
+      Result := StrToFloatDef(tmpstr, 0);
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de daNHcuardillas.</summary>
+/// <param name="codAPU">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daNHcuardillas.
+/// </summary>
+function daNHcuardillas(codAPU: string): Integer;
+var
+  SQLText: string;
+  qry: TUniQuery;
+  tmpstr: string;
+  calculos: Integer;
+begin
+  Result := 0;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQLText := 'SELECT ' + '  items.Descripcion, ' + '  IF( ' +
+        '    tanteo.CodAPU IS NULL, ' +
+        '    Redondea (items.CantidadUnidad, dg.ndecimalesMoneda), ' +
+        '    redondea (tanteo.CantidadUnidad, dg.ndecimalesMoneda) ' +
+        '  ) AS CantidadUnidad ' + 'FROM ' + '  apus_items items ' +
+        '  LEFT JOIN presupuestos_tanteo_recursos tanteo ON ( ' +
+        '    tanteo.CodAPU = items.CodAPU ' +
+        '    AND tanteo.codBase = items.codBase ' +
+        '    AND tanteo.codPresupuesto = :codPresupuesto ' +
+        '    AND tanteo.revision = :revision ' +
+        '    AND tanteo.idUnicoRecurso = items.idUnicoRecurso ' + '  ) ' +
+        '  INNER JOIN presupuestos_datosgenerales dg ON dg.codBase = items.codBase '
+        + '  AND dg.codPresupuesto = tanteo.codPresupuesto ' +
+        '  AND dg.revision = tanteo.revision ' + 'WHERE ' +
+        '  items.CodAPU = :codAPU ' + '  AND items.codBase = :codBase ' +
+        '  AND items.CodCategoria = 4';
+      { *) }
+      SQL.Add(SQLText);
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      ParamByName('codAPU').AsString := codAPU;
+      Prepare;
+      Open;
+      calculos := 0;
+      while not Eof do
+      begin
+        tmpstr := FieldByName('CantidadUnidad').AsString;
+        calculos := calculos + StrToIntDef(tmpstr, 0);
+        Next;
+      end;
+      Result := calculos;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de LimpiaTanteoDB.
+/// </summary>
+procedure LimpiaTanteoDB(codAPU: string; modo: Integer);
+var
+  qry: TUniQuery;
+  x: Integer;
+  SQLText: string;
+  costoDirectoAPU: Double;
+  tmpstr: string;
+  PpresupuestoIndirectos: Double;
+  cantidad_presupuesto: Double;
+  totalLinea: Double;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from presupuestos_Tanteo_Apus where codBase=:codBase and codPresupuesto=:codPresupuesto and revision=:revision and codAPU=:codAPU');
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      ParamByName('codAPU').AsString := codAPU;
+      Prepare;
+      ExecSQL;
+
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from presupuestos_Tanteo_Recursos where codBase=:codBase and codPresupuesto=:codPresupuesto and revision=:revision and codAPU=:codAPU');
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      ParamByName('codAPU').AsString := codAPU;
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+    restaurarApuTanteo(codAPU, modo);
+  end;
+end;
+
+/// <summary>TODO: Descripción de LimpiaTanteoTodaDB.</summary>
+procedure LimpiaTanteoTodaDB();
+var
+  qry: TUniQuery;
+  x: Integer;
+  codAPU: string;
+  SQLText: string;
+  costoDirectoAPU: Double;
+  tmpstr: string;
+  PpresupuestoIndirectos: Double;
+  cantidad_presupuesto: Double;
+  totalLinea: Double;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from presupuestos_Tanteo_Apus where codBase=:codBase and codPresupuesto=:codPresupuesto and revision=:revision');
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      ExecSQL;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from presupuestos_Tanteo_Apus_bkp where codBase=:codBase and codPresupuesto=:codPresupuesto and revision=:revision');
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      ExecSQL;
+
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from presupuestos_Tanteo_Recursos where codBase=:codBase and codPresupuesto=:codPresupuesto and revision=:revision');
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      ExecSQL;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from presupuestos_Tanteo_Recursos_bkp where codBase=:codBase and codPresupuesto=:codPresupuesto and revision=:revision');
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+    DMPresupuesto.calculaTotal;
+  end;
+end;
+
+/// <summary>
+/// Opera sobre datos de APU en cargaCabeceraTanteoAPUS.
+/// </summary>
+procedure cargaCabeceraTanteoAPUS(codAPU: string; modo: Integer);
+begin
+  with DMPresupuesto.QTanteoAPUS do
+  begin
+    ParamByName('codBase').AsString := base_activa.codBase;
+    ParamByName('codPresupuesto').AsString := codProyecto;
+    ParamByName('revision').AsString := revision;
+    ParamByName('codAPU').AsString := codAPU;
+    ExecSQL;
+  end;
+  case modo of
+    1:
+      begin
+        frmMain.edt_EditApuDescripcion.Text :=
+          DMPresupuesto.QTanteoAPUSdescripcion.AsString;
+        if frmMain.edt_EditApuDescripcion.Text = '' then
+        begin
+          frmMain.edt_EditApuDescripcion.Text :=
+            DMPresupuesto.QTPresupuestosItems.FieldByName('descripcion').AsString;
+          frmMain.edt_EditAPUUnidad.Text :=
+            DMPresupuesto.QTPresupuestosItems.FieldByName('unidad').asstring;
+          frmMain.lbl_TanteoCostoDirecto.Text := FormatFloat(cadenaCurrency, 0);
+          frmMain.lbl_TanteoCostoIndirecto.Text :=
+            FormatFloat(cadenaCurrency, 0);
+          frmMain.lbl_TanteoTotal.Text := FormatFloat(cadenaCurrency, 0);
+        end
+        else
+        begin
+          frmMain.edt_EditAPUUnidad.Text :=
+            DMPresupuesto.QTanteoAPUSunidad.AsString;
+          frmMain.lbl_TanteoCostoDirecto.Text :=
+            FormatFloat(cadenaCurrency,
+            DMPresupuesto.QTanteoAPUScostodirectototal.AsFloat);
+          frmMain.lbl_TanteoCostoIndirecto.Text :=
+            FormatFloat(cadenaCurrency,
+            DMPresupuesto.QTanteoAPUScostoindirectototal.AsFloat);
+          frmMain.lbl_TanteoTotal.Text := FormatFloat(cadenaCurrency,
+            DMPresupuesto.QTanteoAPUSpreciounitariototal.AsFloat);
+        end;
+      end;
+    2:
+      begin
+        frmMain.edt_TanteoCronoDescripcion.Text :=
+          DMPresupuesto.QTanteoRecursoAPUSdescripcion.AsString;
+        if frmMain.edt_TanteoCronoDescripcion.Text = '' then
+        begin
+          frmMain.edt_TanteoCronoUnidad.Text :=
+            DMPresupuesto.QTPresupuestosItems.FieldByName('unidad').asstring;
+          ;
+          frmMain.lbl_TanteoCronoCostoDirecto.Text :=
+            FormatFloat(cadenaCurrency, 0);
+          frmMain.lbl_TanteoCronoCostoIndirecto.Text :=
+            FormatFloat(cadenaCurrency, 0);
+          frmMain.lbl_TanteoCronoTotal.Text := FormatFloat(cadenaCurrency, 0);
+        end
+        else
+        begin
+          frmMain.edt_TanteoCronoUnidad.Text :=
+            DMPresupuesto.QTanteoAPUSunidad.AsString;
+          frmMain.lbl_TanteoCostoDirecto.Text :=
+            FormatFloat(cadenaCurrency,
+            DMPresupuesto.QTanteoAPUScostodirectototal.AsFloat);
+          frmMain.lbl_TanteoCronoCostoIndirecto.Text :=
+            FormatFloat(cadenaCurrency,
+            DMPresupuesto.QTanteoAPUScostoindirectototal.AsFloat);
+          frmMain.lbl_TanteoCronoTotal.Text := FormatFloat(cadenaCurrency,
+            DMPresupuesto.QTanteoAPUSpreciounitariototal.AsFloat);
+        end;
+      end;
+  end;
+end;
+
+procedure iniciaTreeViewTanteo();
+var
+  nodo: TTMSFNCTreeViewNode;
+begin
+  frmMain.Trvw_APUSTanteo.ClearNodes;
+  nodo := frmMain.Trvw_APUSTanteo.addnode;
+  nodo.Text[0] := 'Equipos y Herramientas';
+  nodo.Extended := True;
+  nodo := frmMain.Trvw_APUSTanteo.addnode;
+  nodo.Text[0] := 'Materiales';
+  nodo.Extended := True;
+  nodo := frmMain.Trvw_APUSTanteo.addnode;
+  nodo.Text[0] := 'Transporte';
+  nodo.Extended := True;
+  nodo := frmMain.Trvw_APUSTanteo.addnode;
+  nodo.Text[0] := 'Mano de Obra';
+  nodo.Extended := True;
+end;
+
+/// <summary>TODO: Descripción de IsRunnig.</summary>
+/// <param name="FicheroExe">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de IsRunnig.
+/// </summary>
+function IsRunnig(FicheroExe: string): Boolean;
+var
+  ContinueLoop: BOOL;
+  FSnapshotHandle: THandle;
+  FProcessEntry32: TProcessEntry32;
+begin
+  Result := False;
+  FicheroExe := ExtractFileName(FicheroExe);
+  FSnapshotHandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  FProcessEntry32.dwSize := SizeOf(FProcessEntry32);
+  ContinueLoop := Process32First(FSnapshotHandle, FProcessEntry32);
+  Result := False;
+  while Integer(ContinueLoop) <> 0 do
+  begin
+    if ((UpperCase(ExtractFileName(FProcessEntry32.szExeFile))
+      = UpperCase(FicheroExe)) or (UpperCase(FProcessEntry32.szExeFile)
+      = UpperCase(FicheroExe))) then
+    begin
+      Result := True;
+    end;
+    ContinueLoop := Process32Next(FSnapshotHandle, FProcessEntry32);
+  end;
+  CloseHandle(FSnapshotHandle);
+end;
+
+/// <summary>TODO: Descripción de deltree.</summary>
+/// <param name="FileName">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de deltree.
+/// </summary>
+function deltree(const FileName: string): Boolean;
+var
+  Path: string;
+  SearchRec: TSearchRec;
+
+  /// <summary>TODO: Descripción de RemoveDirectory.</summary>
+  /// <param name="Dir">TODO.</param>
+
+  /// <summary>
+  /// Implementa la lógica principal de RemoveDirectory.
+  /// </summary>
+
+  procedure RemoveDirectory(const dir: string);
+  var
+    SearchRec: TSearchRec;
+  begin
+    if FindFirst(dir + '\*', faAnyFile, SearchRec) = 0 then
+    begin
+      try
+        repeat
+          if (SearchRec.Attr and faDirectory) = faDirectory then
+          begin
+            if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+              RemoveDirectory(dir + '\' + SearchRec.Name)
+          end
+          else
+            System.SysUtils.DeleteFile(dir + '\' + SearchRec.Name);
+        until FindNext(SearchRec) <> 0;
+      finally
+        System.SysUtils.FindClose(SearchRec);
+      end;
+    end;
+    RemoveDir(dir);
+  end;
+
+begin
+  Result := True;
+  try
+    if DirectoryExists(FileName) then
+      RemoveDirectory(FileName)
+    else if FindFirst(FileName, faAnyFile, SearchRec) = 0 then
+    begin
+      repeat
+        if (SearchRec.Name = '.') or (SearchRec.Name = '..') then
+          Continue;
+
+        Path := ExtractFilePath(FileName) + '\' + SearchRec.Name;
+        if DirectoryExists(Path) then
+          RemoveDirectory(Path)
+        else
+          System.SysUtils.DeleteFile(Path);
+      until FindNext(SearchRec) <> 0;
+
+      System.SysUtils.FindClose(SearchRec);
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de cumplimentaComboConfiguracion.</summary>
+/// <param name="comboCfg">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de cumplimentaComboConfiguracion.
+/// </summary>
+
+/// <summary>
+/// Implementa la lógica principal de ArchivosDirectorio.
+/// </summary>
+procedure ArchivosDirectorio(dir, mascara: string; var Lista: TStringList;
+  const soloNombres: Boolean);
+var
+  SR: TSearchRec;
+begin
+  dir := IncludeTrailingPathDelimiter(dir);
+  if FindFirst(dir + mascara, faAnyFile, SR) = 0 then
+  begin
+    repeat
+      if not soloNombres then
+        Lista.Add(ExtractFileName(ChangeFileExt(dir + SR.Name, '')))
+      else
+        Lista.Add(dir + SR.Name);
+    until FindNext(SR) <> 0;
+    System.SysUtils.FindClose(SR);
+  end;
+end;
+
+/// <summary>TODO: Descripción de daPorcentajeAsignadoRevision.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daPorcentajeAsignadoRevision.
+/// </summary>
+function daPorcentajeAsignadoRevision(): Double;
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  Result := 0;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT ' + '  indirectos ' + 'FROM ' +
+        '  presupuestos_datosgenerales ' + 'WHERE ' + '  codBase = :codBase ' +
+        '  AND codPresupuesto = :codPresupuesto ' +
+        '  AND revision = :revision');
+      { *) }
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codpresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      Open;
+      tmpstr := FieldByName('indirectos').AsString;
+      if tmpstr = '' then
+        tmpstr := '0';
+      Result := SafeStrToFloat(tmpstr);
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de daCodProyectoDescripcionDB.</summary>
+/// <param name="descripcion">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCodProyectoDescripcionDB.
+/// </summary>
+function daCodProyectoDescripcionDB(descripcion: string): string;
+var
+  x: Integer;
+  tmpstr: string;
+begin
+  Result := '';
+  x := AnsiPos('P:', descripcion);
+  if x > 0 then
+  begin
+    tmpstr := Copy(descripcion, x + 2, Length(descripcion));
+    Result := tmpstr;
+  end;
+end;
+
+/// <summary>TODO: Descripción de listaRevisionesBase.</summary>
+/// <param name="codBaseTratar">TODO.</param>
+/// <param name="codPresupuesto">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de listaRevisionesBase.
+/// </summary>
+function listaRevisionesBase(codBaseTratar, codPresupuesto: string)
+  : TStringList;
+var
+  qry: TUniQuery;
+  tmplst: TStringList;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  tmplst := TStringList.Create;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT ' + '  Revision ' + 'FROM ' +
+        '  presupuestos_datosGenerales ' + 'WHERE ' + '  codBase = :codBase ' +
+        '  AND codPresupuesto = :codPresupuesto');
+      { *) }
+      ParamByName('codBase').AsString := codBaseTratar;
+      ParamByName('codPresupuesto').AsString := codPresupuesto;
+      Prepare;
+      Open;
+      while not Eof do
+      begin
+        tmpstr := FieldByName('revision').AsString;
+        tmplst.Add(tmpstr);
+        Next;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+  Result := tmplst;
+end;
+
+/// <summary>TODO: Descripción de abreGridTanteo.</summary>
+/// <param name="posgrid">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de abreGridTanteo.
+/// </summary>
+procedure abreGridTanteo(posgrid: Integer);
+var
+  codAPU: string;
+  ARow: Integer;
+begin
+  frmMain.grid_Presupuestos.Enabled := False;
+  frmMain.lyt_Tanteo.Height := 270;
+  frmMain.iGlow_AbrirTanteo.Enabled := True;
+  tantear := True;
+  ARow := frmMain.grid_Presupuestos.Selection.StartRow;
+  with DMPresupuesto.dsTpresupuestosItems.DataSet do
+  begin
+    DisableControls;
+    First;
+    MoveBy(ARow - 1);
+    EnableControls;
+  end;
+  codAPU := DMPresupuesto.QTPresupuestosItems.FieldByName('codAPU').AsString;
+  ItemTanteo.codAPU := codAPU;
+
+  frmMain.edt_EditApuDescripcion.Text :=
+    DMPresupuesto.QTPresupuestosItems.FieldByName('descripcion').AsString;
+
+  frmMain.edt_EditAPUUnidad.Text :=
+    DMPresupuesto.QTPresupuestosItems.FieldByName('unidad').AsString;
+
+  frmMain.chkTipoRendimientoAPUSPresupuesto.IsChecked := True;
+end;
+
+procedure cierraGridTanteo();
+begin
+  frmMain.iGlow_AbrirTanteo.Enabled := False;
+  frmMain.lyt_Tanteo.Height := 0;
+  tantear := False;
+  frmMain.grid_Presupuestos.Enabled := True;
+  frmMain.chkTipoRendimientoAPUSPresupuesto.IsChecked := True;
+end;
+
+/// <summary>TODO: Descripción de ImportarPlantillaProjectExcel.</summary>
+/// <param name="archivoExcel">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ImportarPlantillaProjectExcel.
+/// </summary>
+function ImportarPlantillaProjectExcel(archivoExcel: string): string;
+var
+  excelFile: TExcelFile;
+  nombreProyecto: string;
+  nombreProyectoProject: string;
+  valorC: TCellValue;
+  x, Y: Integer;
+  sheet: Integer;
+  salir: Boolean;
+  posicionInicioExcelC: Integer;
+  nperiodos: Integer;
+  tmpstr: string;
+  listaDatos: TStringList;
+  C, R: Integer;
+  valorF: Double;
+  ajuste: Double;
+begin
+  Result := 'Correcto';
+  if FileExists(archivoExcel) then
+  begin
+    excelFile := TXlsFile.Create(True);
+    try
+      excelFile.Open(archivoExcel);
+      // posicionarse en hoja de datos
+      x := 1;
+      salir := False;
+      excelFile.ActiveSheet := 1;
+      sheet := -1;
+      while (not salir) and (x <= excelFile.SheetCount) do
+      begin
+        excelFile.ActiveSheet := x;
+        if LowerCase(excelFile.SheetName) = 'uso de tareas' then
+        begin
+          salir := True;
+          sheet := x;
+        end;
+        Inc(x);
+      end;
+      if sheet > 0 then
+      begin
+        excelFile.ActiveSheet := sheet;
+        nombreProyecto := frmMain.edt_descripcionPresupuesto.Text;
+
+        valorC := excelFile.GetCellValue(6, 1);
+        nombreProyectoProject := valorC.ToString;
+        if LowerCase(nombreProyecto) = LowerCase(nombreProyectoProject) then
+        begin
+          posicionInicioExcelC := 7;
+          nperiodos := StrToIntDef(frmMain.lbl_cronogramaNPeriodos.Text, 0);
+          limpiagridCrono(frmMain.grid_Crono1);
+          for x := 1 to frmMain.grid_crono0.RowCount - 1 do
+          begin
+            // crear lineas de valores
+            tmpstr := frmMain.grid_crono0.cells[3, x];
+            if tmpstr <> '' then
+            begin
+              listaDatos := TStringList.Create;
+              R := x + posicionInicioExcelC;
+              ajuste := 0;
+              for C := 4 to 4 + nperiodos - 1 do
+              begin
+                valorC := excelFile.GetCellValue(R, C);
+                tmpstr := valorC.ToString;
+                tmpstr := decimal_correcto(tmpstr);
+                valorF := StrToFloatDef(tmpstr, 0);
+                valorF := valorF * 100;
+                if C < (4 + nperiodos - 1) then
+                begin
+                  ajuste := ajuste + valorF;
+                end
+                else
+                begin
+                  valorF := 100 - ajuste;
+                end;
+                tmpstr := FloatToStr(valorF);
+                listaDatos.Add(tmpstr);
+              end;
+              frmMain.grid_crono0.cells[11, x] := listaDatos.Text;
+            end;
+          end;
+          calcularPorCentajeEjecucionObras();
+          recalculaCronogramas;
+        end
+        else
+        begin
+          Result := 'Error: Proyecto no coincidente';
+        end;
+      end
+      else
+      begin
+        Result := 'Error: Hoja de Datos no encontrada';
+      end;
+    except
+      on ex: Exception do
+      begin
+        Result := 'Error: estructura de archivo no valida';
+      end;
+    end;
+  end
+  else
+    Result := 'Error: fichero no existe';
+end;
+
+/// <summary>TODO: Descripción de recalculaCronogramas.</summary>
+procedure recalculaCronogramas();
+var
+  x: Integer;
+begin
+  limpiagridCrono(frmMain.grid_Crono2);
+  limpiagridCrono(frmMain.grid_CronoTotales);
+  calcularInversion();
+  limpiagridCrono(frmMain.grid_Crono3);
+  calcularCantidadesObras();
+  frmMain.tbc1.ActiveTab := frmMain.tab_1;
+  frmMain.grid_Crono1.SetFocus;
+  SeleccionaTabCrono(1);
+  cancelarDerivacion := frmMain.cbb_cronoTipoPeriodo.Items
+    [frmMain.cbb_cronoTipoPeriodo.itemindex] + ',' +
+  frmMain.lbl_cronogramaNPeriodos.Text;
+  AjustaCurvaS();
+  guardarDatosDerivacion(nil);
+
+  sincronizaTamanoGrid(frmMain.grid_Crono1, frmMain.grid_CronoTotales);
+  sincronizaTamanoGrid(frmMain.grid_Crono1, frmMain.grid_Crono3);
+  frmMain.grid_CronoTotales.ColumnCount :=
+    frmMain.grid_CronoTotales.ColumnCount - 1;
+end;
+
+/// <summary>TODO: Descripción de sincronizaTamanoGrid.</summary>
+/// <param name="gridMaster">TODO.</param>
+/// <param name="gridHijo">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de sincronizaTamanoGrid.
+/// </summary>
+procedure sincronizaTamanoGrid(gridMaster, gridHijo: TTMSFNCGrid);
+var
+  x: Integer;
+begin
+  gridHijo.ColumnCount := gridMaster.ColumnCount;
+  for x := 0 to gridMaster.ColumnCount - 1 do
+  begin
+    gridHijo.columns[x].width := gridMaster.columns[x].width;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de CheckInternet: Boolean.
+/// </summary>
+function CheckInternet: Boolean;
+var
+  vIdTCPClient: TIdTCPClient;
+begin
+  Result := False;
+  frmMain.led_OnlineDB.State := False;
+  vIdTCPClient := TIdTCPClient.Create(nil);
+  try
+    try
+      with vIdTCPClient do
+      begin
+        ReadTimeout := 1000;
+        ConnectTimeout := 1000;
+        Port := 80;
+        Host := 'google.com';
+        connect;
+        Disconnect;
+      end;
+      Result := True;
+      frmMain.led_OnlineDB.State := True;
+    except
+      Result := False;
+    end;
+  finally
+    FreeAndNil(vIdTCPClient);
+  end;
+end;
+
+/// <summary>TODO: Descripción de CuentaRevisiones.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de CuentaRevisiones.
+/// </summary>
+function CuentaRevisiones(): Integer;
+var
+  qry: TUniQuery;
+  SQLstring: string;
+  tmpstr: string;
+begin
+  if base_activa.codBase <> '' then
+  begin
+    qry := TUniQuery.Create(nil);
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('SELECT ' + '  count(*) AS nrevisiones ' + 'FROM ' +
+          '  Presupuestos_DatosGenerales ' + 'WHERE ' + '  codBase = :codBase '
+          + '  AND codPresupuesto = :codPresupuesto');
+        { *) }
+        ParamByName('codBase').AsString := base_activa.codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        Prepare;
+        Open;
+        Result := FieldByName('nrevisiones').AsInteger;
+      end;
+    finally
+      qry.Free;
+    end;
+  end
+  else
+  begin
+    Result := 0;
+  end;
+end;
+
+/// <summary>TODO: Descripción de existeRevisionCero.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de existeRevisionCero.
+/// </summary>
+function existeRevisionCero(): Boolean;
+var
+  qry: TUniQuery;
+  SQLstring: string;
+  codBase: string;
+  tmpstr: string;
+begin
+  codBase := base_activa.codBase;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT ' + '  revision ' + 'FROM ' +
+        '  Presupuestos_DatosGenerales ' + 'WHERE ' + '  codBase = :codBase ' +
+        '  AND codPresupuesto = :codPresupuesto ' +
+        '  AND Revision = :revision');
+      { *) }
+      ParamByName('codBase').AsString := codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      Open;
+      tmpstr := FieldByName('revision').AsString;
+      if tmpstr <> '' then
+        Result := True
+      else
+        Result := False;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de guardarcomoRevision.</summary>
+/// <param name="codBase">TODO.</param>
+/// <param name="revisionOrigen">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de guardarcomoRevision.
+/// </summary>
+function guardarcomoRevision(codBase, revisionOrigen: string): string;
+var
+  qry: TUniQuery;
+  SQLstring: string;
+  x: Integer;
+  nuevarevision: string;
+  datos: Integer;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      if not DModule_1.con2.InTransaction then
+        DModule_1.con2.StartTransaction;
+      try
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'SELECT ' + '  revision ' + 'FROM ' +
+          '  Presupuestos_DatosGenerales ' + 'WHERE ' + '  codBase = :codBase '
+          +
+          '  AND codPresupuesto = :codPresupuesto ';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        Prepare;
+        Open;
+        Last;
+        nuevarevision := FieldByName('revision').AsString;
+        x := StrToIntDef(nuevarevision, -1);
+        Inc(x);
+        nuevarevision := IntToStr(x);
+        Result := nuevarevision;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO Presupuestos_anotaciones ( ' + '  codBase, ' +
+          '  codPresupuesto, ' + '  revision, ' + '  idItem, ' + '  fecha, ' +
+          '  codEdt, ' + '  paquete, ' + '  descripcion, ' + '  nota, ' +
+          '  autor, ' + '  notaReferencia, ' + '  tipoNota) ' + 'SELECT ' +
+          '  codBase, ' + '  codPresupuesto, ' + '  :nuevaRevision, ' +
+          '  idItem, ' + '  fecha, ' + '  codEdt, ' + '  paquete, ' +
+          '  descripcion, ' + '  nota, ' + '  autor, ' + '  notaReferencia, ' +
+          '  tipoNota ' + 'FROM ' + '  Presupuestos_Anotaciones ' + 'WHERE ' +
+          '  codBase = :codBase ' + '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO Presupuestos_anotaciones ' + '  (codBase, ' +
+          '  codPresupuesto, ' + '  revision, ' + '  idItem, ' + '  fecha, ' +
+          '  codEdt, ' + '  paquete, ' + '  descripcion, ' + '  nota, ' +
+          '  autor, ' + '  notaReferencia, ' + '  tipoNota) ' + 'SELECT ' +
+          '  codBase, ' + '  codPresupuesto, ' + '  :nuevaRevision, ' +
+          '  idItem, ' + '  fecha, ' + '  codEdt, ' + '  paquete, ' +
+          '  descripcion, ' + '  nota, ' + '  autor, ' + '  notaReferencia, ' +
+          '  tipoNota ' + 'FROM ' + '  Presupuestos_Anotaciones ' + 'WHERE ' +
+          '  codBase = :codBase ' + '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO presupuestos_asignacionTerminos ( ' +
+          '  codBase, ' + '  codPresupuesto, ' + '  revision, ' +
+          '  asignacion, '
+          + '  descripcion) ' + 'SELECT ' + '  codBase, ' + '  :nuevaRevision, '
+          +
+          '  codPresupuesto, ' + '  asignacion, ' + '  descripcion ' + 'FROM ' +
+          '  presupuestos_asignacionTerminos ' + 'WHERE ' +
+          '  codBase = :codBase ' + '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        {(*}
+        SQLstring :=
+          'INSERT INTO presupuestos_cronogramas ( ' +
+          '  codBase, ' +
+          '  codPresupuesto, ' +
+          '  revision, ' +
+          '  tipoPeriodo, ' +
+          '  Periodos, ' +
+          '  tipoDerivacion, ' +
+          '  Derivacion) ' +
+          'SELECT ' +
+          '  codBase, ' +
+          '  codPresupuesto, ' +
+          '  :nuevaRevision, ' +
+          '  tipoPeriodo, ' +
+          '  Periodos, ' +
+          '  tipoDerivacion, ' +
+          '  Derivacion ' +
+          'FROM ' +
+          '  presupuestos_Cronogramas ' +
+          'WHERE ' +
+          '  codBase = :codBase ' +
+          '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        {*)}
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO presupuestos_DatosGenerales ( ' + '  codBase, '
+          + '  codPresupuesto, ' + '  codReferencial, ' + '  revision, ' +
+          '  descripcion, ' + '  subtotal, ' + '  iva, ' + '  indirectos, ' +
+          '  total, ' + '  fechaCreacion, ' + '  fechaModificacion, ' +
+          '  porcentajeIVA) ' + 'SELECT ' + '  codBase, ' + '  codPresupuesto, '
+          +
+          '  codReferencial, ' + '  :nuevaRevision, ' + '  descripcion, ' +
+          '  subtotal, ' + '  iva, ' + '  indirectos, ' + '  total, ' +
+          '  fechaCreacion, ' + '  :fechaModificacion, ' + '  porcentajeIVA ' +
+          'FROM ' + '  presupuestos_DatosGenerales ' + 'WHERE ' +
+          '  codBase = :codBase ' + '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        ParamByName('fechaModificacion').AsDateTime := Now;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO presupuestos_datosProyecto ( ' + '  codBase, '
+          +
+          '  codPresupuesto, ' + '  revision, ' + '  codReferencial, ' +
+          '  descripcion, ' + '  tipoProyecto, ' + '  categoria, ' +
+          '  tipoConstruccion, ' + '  ambitoContratacion, ' + '  tipoContrato, '
+          +
+          '  fechaInicio, ' + '  PlazoEjecucion, ' + '  fechaFinalizacion, ' +
+          '  direccion, ' + '  ciudad, ' + '  provincia, ' + '  pais, ' +
+          '  objetoContrato, ' + '  validezPropuesta, ' + '  foto1, ' +
+          '  foto2, ' + '  fechaHoraCreacion, ' + '  Ultmodificacion, ' +
+          '  latitud, ' + '  longitud, ' + '  Aterreno, ' + '  Aconstruccion ' +
+          ') ' + 'SELECT ' + '  codBase, ' + '  codPresupuesto, ' +
+          '  :nuevaRevision, ' + '  codReferencial, ' + '  descripcion, ' +
+          '  tipoProyecto, ' + '  categoria, ' + '  tipoConstruccion, ' +
+          '  ambitoContratacion, ' + '  tipoContrato, ' + '  fechaInicio, ' +
+          '  PlazoEjecucion, ' + '  fechaFinalizacion, ' + '  direccion, ' +
+          '  ciudad, ' + '  provincia, ' + '  pais, ' + '  objetoContrato, ' +
+          '  validezPropuesta, ' + '  foto1, ' + '  foto2, ' +
+          '  fechaHoraCreacion, ' + '  :Ultmodificacion, ' + '  latitud, ' +
+          '  longitud, ' + '  Aterreno, ' + '  Aconstruccion ' + 'FROM ' +
+          '  presupuestos_DatosProyecto ' + 'WHERE ' + '  codBase = :codBase ' +
+          '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        ParamByName('ultmodificacion').AsDateTime := Now;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO presupuestos_datosProyecto ( ' + '  codBase, '
+          +
+          '  codPresupuesto, ' + '  revision, ' + '  codReferencial, ' +
+          '  descripcion, ' + '  tipoProyecto, ' + '  categoria, ' +
+          '  tipoConstruccion, ' + '  ambitoContratacion, ' + '  tipoContrato, '
+          +
+          '  fechaInicio, ' + '  PlazoEjecucion, ' + '  fechaFinalizacion, ' +
+          '  direccion, ' + '  ciudad, ' + '  provincia, ' + '  pais, ' +
+          '  objetoContrato, ' + '  validezPropuesta, ' + '  foto1, ' +
+          '  foto2, ' + '  fechaHoraCreacion, ' + '  Ultmodificacion, ' +
+          '  latitud, ' + '  longitud, ' + '  Aterreno, ' + '  Aconstruccion ' +
+          ') ' + 'SELECT ' + '  codBase, ' + '  codPresupuesto, ' +
+          '  :nuevaRevision, ' + '  codReferencial, ' + '  descripcion, ' +
+          '  tipoProyecto, ' + '  categoria, ' + '  tipoConstruccion, ' +
+          '  ambitoContratacion, ' + '  tipoContrato, ' + '  fechaInicio, ' +
+          '  PlazoEjecucion, ' + '  fechaFinalizacion, ' + '  direccion, ' +
+          '  ciudad, ' + '  provincia, ' + '  pais, ' + '  objetoContrato, ' +
+          '  validezPropuesta, ' + '  foto1, ' + '  foto2, ' +
+          '  fechaHoraCreacion, ' + '  :Ultmodificacion, ' + '  latitud, ' +
+          '  longitud, ' + '  Aterreno, ' + '  Aconstruccion ' + 'FROM ' +
+          '  presupuestos_DatosProyecto ' + 'WHERE ' + '  codBase = :codBase ' +
+          '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO presupuestos_EDO ( ' + '  codBase, ' +
+          '  codPresupuesto, ' + '  revision, ' + '  datosEDO) ' + 'SELECT ' +
+          '  codBase, ' + '  codPresupuesto, ' + '  :nuevaRevision, ' +
+          '  datosEDO ' + 'FROM ' + '  presupuestos_EDO ' + 'WHERE ' +
+          '  codBase = :codBase ' + '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO presupuestos_EDT ( ' + '  codBase, ' +
+          '  codPresupuesto, ' + '  revision, ' + '  datosEDT) ' + 'SELECT ' +
+          '  codBase, ' + '  codPresupuesto, ' + '  :nuevaRevision, ' +
+          '  datosEDT ' + 'FROM ' + '  presupuestos_EDT ' + 'WHERE ' +
+          '  codBase = :codBase ' + '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO presupuestos_FpolCuadrillas ( ' + '  codBase, '
+          + '  codPresupuesto, ' + '  revision, ' + '  codIndice, ' +
+          '  Indice, '
+          + '  descripcion, ' + '  SalarioMinimo) ' + 'SELECT ' + '  codBase, '
+          +
+          '  codPresupuesto, ' + '  :nuevaRevision, ' + '  codIndice, ' +
+          '  Indice, ' + '  descripcion, ' + '  SalarioMinimo ' + 'FROM ' +
+          '  presupuestos_FpolCuadrillas ' + 'WHERE ' + '  codBase = :codBase '
+          +
+          '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO presupuestos_Fpolinomica ( ' + '  codBase, ' +
+          '  codPresupuesto, ' + '  revision, ' + '  datosEDO, ' + '  tipo) ' +
+          'SELECT ' + '  codBase, ' + '  codPresupuesto, ' + '  :nuevaRevision, '
+          + '  datosEDO, ' + '  tipo ' + 'FROM ' + '  presupuestos_Fpolinomica '
+          +
+          'WHERE ' + '  codBase = :codBase ' +
+          '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO Presupuestos_indicesSeleccionados ( ' +
+          '  codBase, ' + '  codPresupuesto, ' + '  revision, ' + '  codIndice, '
+          + '  descripcion, ' + '  termino) ' + 'SELECT ' + '  codBase, ' +
+          '  codPresupuesto, ' + '  :nuevaRevision, ' + '  codIndice, ' +
+          '  descripcion, ' + '  termino ' + 'FROM ' +
+          '  presupuestos_indicesSeleccionados ' + 'WHERE ' +
+          '  codBase = :codBase ' + '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO presupuestos_indirectos ( ' + '  codBase, ' +
+          '  codPresupuesto, ' + '  revision, ' + '  cuenta, ' + '  codCuenta, '
+          +
+          '  observaciones, ' + '  valor) ' + 'SELECT ' + '  codBase, ' +
+          '  codPresupuesto, ' + '  :nuevaRevision, ' + '  cuenta, ' +
+          '  codCuenta, ' + '  observaciones, ' + '  valor ' + 'FROM ' +
+          '  presupuestos_indirectos ' + 'WHERE ' + '  codBase = :codBase ' +
+          '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+
+        SQL.Text :=
+          'INSERT INTO presupuestos_items ( ' +
+          '  codBase, codPresupuesto, revision, codEdt, codItems, codUnicoItems, ' +
+          '  codAPUGenerico, codAPU, descripcion, unidad, cantidad, PUnitario, ' +
+          '  Ptotal, notas, rendimientoHUnidad, nhCuadrillas ) ' +
+
+        'SELECT ' +
+          '  codBase, codPresupuesto, :nuevaRevision, codEdt, codItems, codUnicoItems, ' +
+          '  codAPUGenerico, codAPU, descripcion, unidad, cantidad, PUnitario, ' +
+          '  Ptotal, notas, rendimientoHUnidad, nhCuadrillas ' +
+
+        'FROM presupuestos_items ' +
+          'WHERE codBase=:codBase ' +
+          'AND codPresupuesto=:codPresupuesto ' +
+          'AND revision=:revision';
+
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+
+        ExecSQL;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO Presupuestos_notasRevision ( ' + '  codBase, '
+          +
+          '  codPresupuesto, ' + '  revision, ' + '  Seccion, ' + '  Nota, ' +
+          '  FechaHora) ' + 'SELECT ' + '  codBase, ' + '  codPresupuesto, ' +
+          '  :nuevaRevision, ' + '  Seccion, ' + '  Nota, ' + '  FechaHora ' +
+          'FROM ' + '  presupuestos_NotasRevision ' + 'WHERE ' +
+          '  codBase = :codBase ' + '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { }
+        SQLstring := 'INSERT INTO Presupuestos_recursos ( ' + '  codBase, ' +
+          '  codPresupuesto, ' + '  revision, ' + '  codAPU, ' +
+          '  codCategoria, ' + '  codSubCategoria, ' + '  idUnicoRecurso, ' +
+          '  codRecurso, ' + '  codRecursoCompleto, ' + '  Descripcion, ' +
+          '  Unidad, ' + '  Precio, ' + '  moneda, ' + '  cantidadUnidad, ' +
+          '  Rendimiento, ' + '  Total, ' + '  porcentaje, ' + '  codCPC, ' +
+          '  TipoCPC, ' + '  porcentajeCPC, ' + '  termino ' + ') ' + 'SELECT '
+          +
+          '  codBase, ' + '  codPresupuesto, ' + '  :nuevaRevision, ' +
+          '  codAPU, ' + '  codCategoria, ' + '  codSubCategoria, ' +
+          '  idUnicoRecurso, ' + '  codRecurso, ' + '  codRecursoCompleto, ' +
+          '  Descripcion, ' + '  Unidad, ' + '  Precio, ' + '  moneda, ' +
+          '  cantidadUnidad, ' + '  Rendimiento, ' + '  Total, ' +
+          '  porcentaje, ' + '  codCPC, ' + '  TipoCPC, ' + '  porcentajeCPC, '
+          +
+          '  termino ' + 'FROM ' + '  Presupuestos_recursos ' + 'WHERE ' +
+          '  codBase = :codBase ' + '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'INSERT INTO Presupuestos_StakeHolders ( ' + '  idGrid, ' +
+          '  codBase, ' + '  codPresupuesto, ' + '  revision, ' +
+          '  rolPresupuesto, ' + '  idFiscal, ' + '  nombre, ' + '  apellidos, '
+          +
+          '  localidad, ' + '  provincia, ' + '  pais, ' + '  telefono, ' +
+          '  email, ' + '  titulacion, ' + '  institucion, ' + '  cargo ' + ') '
+          +
+          'SELECT ' + '  idGrid, ' + '  codBase, ' + '  codPresupuesto, ' +
+          '  :nuevaRevision, ' + '  rolPresupuesto, ' + '  idFiscal, ' +
+          '  nombre, ' + '  apellidos, ' + '  localidad, ' + '  provincia, ' +
+          '  pais, ' + '  telefono, ' + '  email, ' + '  titulacion, ' +
+          '  institucion, ' + '  cargo ' + 'FROM ' +
+          '  presupuestos_stakeHolders ' + 'WHERE ' + '  codBase = :codBase ' +
+          '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        ParamByName('nuevaRevision').AsString := nuevarevision;
+        Prepare;
+        Open;
+        exportaImagenRevisiones(codProyecto, revisionOrigen, nuevarevision);
+
+        Close;
+        SQL.Clear;
+        { (* }
+        SQLstring := 'SELECT ' + '  count(codAPU) AS Datos ' + 'FROM ' +
+          '  presupuestos_tanteo_apus ' + 'WHERE ' + '  codBase = :codBase ' +
+          '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision';
+        { *) }
+        SQL.Add(SQLstring);
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revisionOrigen;
+        Prepare;
+        Open;
+        datos := FieldByName('datos').AsInteger;
+
+        if datos > 0 then
+        begin
+          Close;
+          SQL.Clear;
+          { (* }
+          SQLstring := 'INSERT INTO presupuestos_tanteo_apus ( ' +
+            '  codUnicoTanteo, ' + '  codBase, ' + '  codPresupuesto, ' +
+            '  revision, ' + '  CodAPU, ' + '  CostoDirectoTotal, ' +
+            '  ultimaModificacion) ' + 'SELECT ' + '  codUnicoTanteo, ' +
+            '  :codBase, ' + '  :codPresupuesto, ' + '  :Nrevision, ' +
+            '  CodAPU, ' + '  CostoDirectoTotal, ' + '  :ultimaModificacion ' +
+            'FROM ' + '  presupuestos_tanteo_apus ' + 'WHERE ' +
+            '  codBase = :codBase ' + '  AND codPresupuesto = :codPresupuesto '
+            +
+            '  AND revision = :revision';
+          { *) }
+          SQL.Add(SQLstring);
+          ParamByName('codBase').AsString := codBase;
+          ParamByName('codPresupuesto').AsString := codProyecto;
+          ParamByName('revision').AsString := revisionOrigen;
+          ParamByName('Nrevision').AsString := nuevarevision;
+          ParamByName('ultimaModificacion').AsDateTime := Now;
+          Prepare;
+          Open;
+
+          Close;
+          SQL.Clear;
+          { (* }
+          SQLstring := 'INSERT INTO presupuestos_tanteo_recursos ( ' +
+            '  codUnicoTanteo, ' + '  codBase, ' + '  codPresupuesto, ' +
+            '  revision, ' + '  CodAPU, ' + '  descripcion, ' +
+            '  idUnicoRecurso, ' + '  Precio, ' + '  CantidadUnidad, ' +
+            '  Rendimiento, ' + '  Total) ' + 'SELECT ' + '  codUnicoTanteo, ' +
+            '  :codBase, ' + '  :codPresupuesto, ' + '  :Nrevision, ' +
+            '  CodAPU, ' + '  descripcion, ' + '  idUnicoRecurso, ' +
+            '  Precio, '
+            + '  CantidadUnidad, ' + '  Rendimiento, ' + '  Total ' + 'FROM ' +
+            '  presupuestos_tanteo_recursos; ' + 'codBase = :codBase ' +
+            'AND codPresupuesto = :codPresupuesto ' +
+            'AND revision = :revision';
+          { *) }
+          SQL.Add(SQLstring);
+          ParamByName('codBase').AsString := codBase;
+          ParamByName('codPresupuesto').AsString := codProyecto;
+          ParamByName('revision').AsString := revisionOrigen;
+          ParamByName('Nrevision').AsString := nuevarevision;
+          Prepare;
+          Open;
+        end;
+        DModule_1.con2.Commit;
+      except
+        on E: Exception do
+        begin
+          if DModule_1.con2.InTransaction then
+            DModule_1.con2.Rollback;
+          raise Exception.Create('cambiaBaseDatos falló y se revirtió todo.' +
+            sLineBreak + E.Message);
+        end;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de daNombreMoneda.</summary>
+/// <param name="moneda">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daNombreMoneda.
+/// </summary>
+function daNombreMoneda(moneda: string): string;
+var
+  qry: TUniQuery;
+begin
+  Result := '';
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT ' + '  money ' + 'FROM ' + '  currency ' + 'WHERE ' +
+        '  CurrencyISO = :CurrencyISO ' + '  AND LANGUAGE = :language');
+      { *) }
+      ParamByName('CurrencyISO').AsString := moneda;
+      ParamByName('language').AsString := 'ES';
+      Prepare;
+      Open;
+      Result := FieldByName('Money').AsString;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de calculaPorcentajeIvaPrecios.
+/// </summary>
+function calculaPorcentajeIvaPrecios(total: Double;
+  cantidadIva: Double): Double;
+var
+  tmpflt: Double;
+begin
+  tmpflt := cantidadIva / total;
+  tmpflt := tmpflt * 100;
+  Result := tmpflt;
+end;
+
+/// <summary>TODO: Descripción de BorrarCarpeta.</summary>
+/// <param name="vOrigen">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de BorrarCarpeta.
+/// </summary>
+function BorrarCarpeta(const vOrigen: string): Boolean;
+var
+  vCarpetas: TSHFileOpStruct;
+begin
+  FillChar(vCarpetas, SizeOf(vCarpetas), #0);
+  vCarpetas.wFunc := FO_DELETE;
+  vCarpetas.Wnd := GetDesktopWindow;
+  vCarpetas.pFrom := PChar(vOrigen + #0#0);
+  vCarpetas.fFlags := FOF_NOCONFIRMATION or FOF_SILENT or FOF_ALLOWUNDO;
+  Result := (ShFileOperation(vCarpetas) = 0);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de RecorrerDirectorios.
+/// </summary>
+procedure RecorrerDirectorios(sRuta: string; bIncluirSubdirectorios: Boolean;
+  ResultadosDir: TStringList);
+var
+  Directorio: TSearchRec;
+  iResultado: Integer;
+  dirBuscarFichero: string;
+begin
+  if sRuta[Length(sRuta)] <> '\' then
+    sRuta := sRuta + '\';
+
+  if not DirectoryExists(sRuta) then
+  begin
+    Exit;
+  end;
+  iResultado := FindFirst(sRuta + '*.*', faAnyFile, Directorio);
+  while iResultado = 0 do
+  begin
+    if (Directorio.Attr and faDirectory = faDirectory) and bIncluirSubdirectorios
+      then
+    begin
+      if (Directorio.Name <> '.') and (Directorio.Name <> '..') then
+        RecorrerDirectorios(sRuta + Directorio.Name, True, ResultadosDir);
+    end
+    else if (Directorio.Attr and faVolumeId <> faVolumeId) then
+    begin
+      ResultadosDir.Add(sRuta + Directorio.Name);
+    end;
+
+    iResultado := FindNext(Directorio);
+  end;
+  System.SysUtils.FindClose(Directorio);
+end;
+
+/// <summary>TODO: Descripción de danombrePlantilla.</summary>
+/// <param name="nombrePlantilla">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en danombrePlantilla.
+/// </summary>
+function danombrePlantilla(nombrePlantilla: string): string;
+var
+  pathPlantilla: string;
+  listaResultados: TStringList;
+  salir: Boolean;
+  tmpstr: string;
+  x: Integer;
+begin
+  Result := '';
+  listaResultados := TStringList.Create;
+  pathPlantilla := rutaApp + 'Plantillas\';
+  RecorrerDirectorios(pathPlantilla, True, listaResultados);
+  salir := False;
+  x := 0;
+  while (not salir) and (x < listaResultados.Count) do
+  begin
+    tmpstr := listaResultados[x];
+    tmpstr := ExtractFileName(tmpstr);
+    if tmpstr = nombrePlantilla + '.zip' then
+    begin
+      salir := True;
+      Result := listaResultados[x];
+    end;
+    Inc(x);
+  end;
+end;
+
+procedure borraEmpresa(codUnico: string);
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  if codUnico <> '' then
+  begin
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        SQL.Add('delete from empresas where codUnico=' + quotedstr(codUnico));
+        Prepare;
+        ExecSQL;
+        Close;
+        SQL.Clear;
+        SQL.Add('delete from empresas_config where CodUnico=' +
+          quotedstr(codUnico));
+        Prepare;
+        ExecSQL;
+      end;
+    finally
+      qry.Free;
+    end;
+  end;
+end;
+
+procedure IniciaReportes(const codUnico: string);
+var
+  qry: TUniQuery;
+
+  function GetFieldSafe(const AField: string): string;
+  begin
+    if qry.FieldByName(AField).IsNull then
+      Result := ''
+    else
+      Result := qry.FieldByName(AField).AsString.Trim;
+  end;
+
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.SQL.Text := 'SELECT * ' + 'FROM empresas_config ' +
+      'WHERE codUnico = :codUnico';
+
+    qry.ParamByName('codUnico').AsString := codUnico;
+    qry.Open;
+
+    // Si no existe configuración, salir
+    if qry.IsEmpty then
+      Exit;
+
+    // Reportes
+    frmMain.Reportes.ActaConstitucion := GetFieldSafe('RConstitucionProyecto');
+    frmMain.Reportes.AnalisisPrecios := GetFieldSafe('RAnalisisPrecios');
+    frmMain.Reportes.CronoTrabajo := GetFieldSafe('RCronogramaTrabajo');
+    frmMain.Reportes.CronoValorado := GetFieldSafe('RCronogramaValorado');
+    frmMain.Reportes.DescomposicionOrganizacion :=
+      GetFieldSafe('RDescomposicionOrganizacion');
+    frmMain.Reportes.DesagregacionTecnologica :=
+      GetFieldSafe('RDesagregacionTecnologica');
+    frmMain.Reportes.EDTDiccionario := GetFieldSafe('REDTDiccionario');
+    frmMain.Reportes.EDTListado := GetFieldSafe('REDTListado');
+    frmMain.Reportes.EDTValorada := GetFieldSafe('REDTValorada');
+    frmMain.Reportes.EquipoProyecto := GetFieldSafe('REquipoProyecto');
+    frmMain.Reportes.FormulaPolinomica := GetFieldSafe('RFormulaPolinomicas');
+    frmMain.Reportes.GestionTiempos := GetFieldSafe('RGestionTiempos');
+    frmMain.Reportes.PorcentajeIndirecto :=
+      GetFieldSafe('RPorcentajeIndirectos');
+    frmMain.Reportes.Presupuesto := GetFieldSafe('RPresupuestos');
+    frmMain.Reportes.DesagregacionTecnologicaAPUS :=
+      GetFieldSafe('RDesagregacionTecnologicaAPUS');
+    frmMain.Reportes.CurvasS := GetFieldSafe('RCurvaS');
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de actualizaEstadoDecimales.</summary>
+procedure actualizaEstadoDecimales();
+begin
+  frmMain.lbl_DecimalesTrabajo.Text := 'Decimales Calculo: ' +
+    IntToStr(ndecimalesPresupuesto) + ' Decimales Moneda: ' +
+    IntToStr(ndecimalesMoneda);
+end;
+
+function ExisteEmpresa(codUnico: string): Boolean;
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  Result := False;
+  qry := TUniQuery.Create(nil);
+  if codUnico <> '' then
+  begin
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        SQL.Add('select * from empresas where CodUnico=:CodUnico');
+        ParamByName('codUnico').AsString := codUnico;
+        Prepare;
+        Open;
+        tmpstr := FieldByName('codUnico').AsString;
+        if tmpstr <> '' then
+          Result := True;
+      end;
+    finally
+      qry.Free;
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de generaListadoRecursosImportar.</summary>
+procedure generaListadoRecursosImportar();
+var
+  x: Integer;
+  tmpstr: string;
+begin
+  for x := 0 to Length(listadoAPUImportar) - 1 do
+  begin
+    tmpstr := crearAccionImportacion(listadoAPUImportar[x]);
+    if (tmpstr = 'Nuevo') or (tmpstr = 'Mantener') then
+      listadoAPUImportar[x].accion := tmpstr;
+    if (tmpstr <> 'Nuevo') and (tmpstr <> 'Mantener') then
+    begin
+      listadoAPUImportar[x].accion := 'Actualizar';
+      listadoAPUImportar[x].codAPU := tmpstr;
+    end;
+  end;
+  for x := 0 to Length(listadoAPUImportar) - 1 do
+  begin
+    SetLength(listadoRecursosImportarAPU, 0);
+
+    if listadoAPUImportar[x].accion = 'Nuevo' then
+    begin
+      listadoAPUImportar[x] := actualizarDatosAPUImportar
+        (listadoAPUImportar[x]);
+      listadoAPUImportar[x] := ImportacionApusNuevo(listadoAPUImportar[x]);
+      ImportarActualizarRecursoAPUDBOrigen(listadoAPUImportar[x].codBaseOrigen,
+        listadoAPUImportar[x].codAPUOrigen, listadoAPUImportar[x].codAPU,
+        listadoAPUImportar[x].codPresupuestoOrigen,
+        listadoAPUImportar[x].revisionOrigen);
+      CreaItemsApuImportar;
+      PasarAPUaRecurso(listadoAPUImportar[x]);
+      actualizarApusBase(listadoAPUImportar[x].codAPU);
+    end;
+
+    if listadoAPUImportar[x].accion = 'Actualizar' then
+    begin
+      ActualizacionApusImportar(listadoAPUImportar[x]);
+      listadoAPUImportar[x] := actualizarDatosAPUImportar
+        (listadoAPUImportar[x]);
+      listadoAPUImportar[x] := ImportacionApusNuevo(listadoAPUImportar[x]);
+      ImportarActualizarRecursoAPUDBOrigen(listadoAPUImportar[x].codBaseOrigen,
+        listadoAPUImportar[x].codAPUOrigen, listadoAPUImportar[x].codAPU,
+        listadoAPUImportar[x].codPresupuestoOrigen,
+        listadoAPUImportar[x].revisionOrigen);
+      CreaItemsApuImportar;
+      actualizarApusBase(listadoAPUImportar[x].codAPU);
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de PasarAPUaRecurso.</summary>
+/// <param name="APUDestino">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en PasarAPUaRecurso.
+/// </summary>
+procedure PasarAPUaRecurso(APUDestino: dat_importAPU);
+var
+  qry: TUniQuery;
+  idUnicoRecurso: string;
+  especificaciones: string;
+  codRecursoAPU: string;
+  codRecursoCompleto: string;
+  codCategoriaBase: string;
+  codSubCategoria: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      especificaciones := 'APU: ' + APUDestino.codAPU;
+      APUDestino.idUnicoApuRecurso := 'Rsr' + generaCodigoUnico;
+      codSubCategoria := APUDestino.codSubCategoriaAPU;
+      codRecursoAPU := daCodigoRecursoDestinoImportar('6', codSubCategoria);
+      codRecursoCompleto := generaCodigoRecurso('6', codSubCategoria,
+        codRecursoAPU);
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('INSERT INTO recursos ' + '      ( ' + '        idunico, ' +
+        '        codbase, ' + '        codrecurso, ' +
+        '        codrecursocompleto, ' + '        codcategoriabase, ' +
+        '        codsubcategoria, ' + '        descripcion, ' +
+        '        unidad, ' + '        precio, ' + '        preciolocal, ' +
+        '        moneda, ' + '        especificaciones, ' +
+        '        fechahoracreacion, ' + '        ultimamodificacion ' +
+        '      ) ' + 'VALUES ' + '      ( ' + '        :idUnico, ' +
+        '        :codBase, ' + '        :codRecurso, ' +
+        '        :codRecursoCompleto, ' + '        :codCategoriaBase, ' +
+        '        :codSubCategoria, ' + '        :Descripcion, ' +
+        '        :unidad, ' + '        :precio, ' + '        :preciolocal, ' +
+        '        :moneda, ' + '        :especificaciones, ' +
+        '        :fechahoraCreacion, ' + '        :ultimaModificacion '
+        + '    )');
+      { *) }
+      ParamByName('idUnico').AsString := APUDestino.idUnicoApuRecurso;
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codRecurso').AsString := codRecursoAPU;
+      ParamByName('codRecursoCompleto').AsString := codRecursoCompleto;
+      ParamByName('codCategoriaBase').AsString := '6';
+      ParamByName('codSubCategoria').AsString := codSubCategoria;
+      ParamByName('Descripcion').AsString := APUDestino.descripcion;
+      ParamByName('unidad').AsString := APUDestino.unidad;
+      ParamByName('precio').AsFloat :=
+        SafeStrToFloat(decimal_correcto(APUDestino.precio));
+      ParamByName('precioLocal').AsFloat :=
+        SafeStrToFloat(decimal_correcto(APUDestino.precio));
+      ParamByName('moneda').AsString := base_activa.moneda;
+      ParamByName('especificaciones').AsString := especificaciones;
+      ParamByName('fechaHoraCreacion').AsDateTime := Now;
+      ParamByName('ultimaModificacion').AsDateTime := Now;
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de ActualizacionApusImportar.</summary>
+/// <param name="datosImportar">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en ActualizacionApusImportar.
+/// </summary>
+procedure ActualizacionApusImportar(datosImportar: dat_importAPU);
+var
+  codApuBorrar: string;
+  qry: TUniQuery;
+begin
+  codApuBorrar := datosImportar.codAPU;
+  if codApuBorrar <> '' then
+  begin
+    qry := TUniQuery.Create(nil);
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        SQL.Add('delete from apus_items where codApu=:codApu and codBase=:codBase');
+        ParamByName('codApu').AsString := codApuBorrar;
+        ParamByName('codBase').AsString := base_activa.codBase;
+        Prepare;
+        ExecSQL;
+      end;
+    finally
+      qry.Free;
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de ImportacionApusNuevo.</summary>
+/// <param name="datosImportar">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en ImportacionApusNuevo.
+/// </summary>
+function ImportacionApusNuevo(datosImportar: dat_importAPU): dat_importAPU;
+var
+  CodAPUNueva: string;
+begin
+  CodAPUNueva := crearApuImportar(datosImportar);
+  datosImportar.codAPU := CodAPUNueva;
+  Result := datosImportar;
+end;
+
+/// <summary>TODO: Descripción de CreaItemsApuImportar.</summary>
+procedure CreaItemsApuImportar;
+var
+  qry: TUniQuery;
+  I: Integer;
+  precio, rendimiento, cantidad, total: Double;
+begin
+  if Length(listadoRecursosImportarAPU) = 0 then
+    Exit;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    qry.SQL.Text :=
+      { (* }
+    'INSERT INTO apus_Items ' +
+      '(codBase, codAPU, codCategoria, codSubCategoria, idUnicoRecurso, ' +
+      ' codRecurso, codRecursoCompleto, descripcion, unidad, precio, moneda, ' +
+      ' cantidadUnidad, rendimiento, total) ' + 'VALUES ' +
+      '(:codBase, :codAPU, :codCategoria, :codSubCategoria, :idUnicoRecurso, ' +
+      ' :codRecurso, :codRecursoCompleto, :descripcion, :unidad, :precio, :moneda, '
+      + ' :cantidadUnidad, :rendimiento, :total)';
+    { *) }
+
+    DModule_1.con2.StartTransaction;
+    try
+      for I := 0 to High(listadoRecursosImportarAPU) do
+      begin
+        // --- Normalización previa (1 sola vez)
+        precio := listadoRecursosImportarAPU[I].precio;
+
+        cantidad := listadoRecursosImportarAPU[I].cantidad;
+
+        rendimiento := listadoRecursosImportarAPU[I].rendimiento;
+
+        total := RoundTo(precio * cantidad * rendimiento, -2);
+
+        // --- Parámetros
+        qry.ParamByName('codBase').AsString := base_activa.codBase;
+        qry.ParamByName('codAPU').AsString := listadoRecursosImportarAPU
+          [I].codAPU;
+        qry.ParamByName('codCategoria').AsString := listadoRecursosImportarAPU
+          [I].codCategoriaBase;
+        qry.ParamByName('codSubCategoria').AsString :=
+          listadoRecursosImportarAPU[I].codSubCategoria;
+        qry.ParamByName('idUnicoRecurso').AsString := listadoRecursosImportarAPU
+          [I].idUnico;
+        qry.ParamByName('codRecurso').AsString := listadoRecursosImportarAPU[I]
+          .codRecurso;
+        qry.ParamByName('codRecursoCompleto').AsString :=
+          listadoRecursosImportarAPU[I].codRecursoCompleto;
+        qry.ParamByName('descripcion').AsString := listadoRecursosImportarAPU[I]
+          .descripcion;
+        qry.ParamByName('unidad').AsString := listadoRecursosImportarAPU
+          [I].unidad;
+        qry.ParamByName('precio').AsFloat := precio;
+        qry.ParamByName('moneda').AsString := base_activa.moneda;
+        qry.ParamByName('cantidadUnidad').AsFloat := cantidad;
+        qry.ParamByName('rendimiento').AsFloat := rendimiento;
+        qry.ParamByName('total').AsFloat := total;
+
+        qry.ExecSQL;
+      end;
+
+      DModule_1.con2.Commit;
+    except
+      DModule_1.con2.Rollback;
+      EndGuardarAPU;
+      raise;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Opera sobre datos de APU en ImportarActualizarRecursoAPUDBOrigen.
+/// </summary>
+procedure ImportarActualizarRecursoAPUDBOrigen(const dbOrigen, codAPUOrigen,
+  codAPUDestino, codPresupuestoOrigen, revisionOrigen: string);
+var
+  QOrigen, QRecOrigen, QBuscaDestino, QIns, QUpd: TUniQuery;
+  I: Integer;
+  Resp: dat_respuesta1;
+  IdDestino, CodSubCat, CodRec, CodRecCompleto: string;
+  precio: Double;
+begin
+  // ===============================
+  // FASE 0: LIMPIAR BUFFER
+  // ===============================
+  SetLength(listadoRecursosImportarAPU, 0);
+
+  QOrigen := TUniQuery.Create(nil);
+  QRecOrigen := TUniQuery.Create(nil);
+  QBuscaDestino := TUniQuery.Create(nil);
+  QIns := TUniQuery.Create(nil);
+  QUpd := TUniQuery.Create(nil);
+
+  try
+    QOrigen.Connection := DModule_1.con2;
+    QRecOrigen.Connection := DModule_1.con2;
+    QBuscaDestino.Connection := DModule_1.con2;
+    QIns.Connection := DModule_1.con2;
+    QUpd.Connection := DModule_1.con2;
+
+    // =====================================================
+    // FASE 1: CARGAR RECURSOS DEL APU ORIGEN
+    // =====================================================
+    if codPresupuestoOrigen = '' then
+    begin
+      QOrigen.SQL.Text :=
+        { (* }
+      'SELECT idUnicoRecurso, precio, rendimiento, cantidadUnidad ' +
+        'FROM apus_items ' + 'WHERE codBase = :base AND codAPU = :apu';
+      { *) }
+    end
+    else
+    begin
+      QOrigen.SQL.Text :=
+        { (* }
+      'SELECT rb.idUnicoRecurso, ' + 'COALESCE(rt.precio, rb.precio) precio, '
+        + 'COALESCE(rt.rendimiento, rb.rendimiento) rendimiento, ' +
+        'COALESCE(rt.cantidadUnidad, rb.cantidadUnidad) cantidadUnidad ' +
+        'FROM apus_items rb ' + 'LEFT JOIN presupuestos_tanteo_recursos rt ' +
+        ' ON rt.codBase = rb.codBase ' +
+        ' AND rt.idUnicoRecurso = rb.idUnicoRecurso ' +
+        ' AND rt.codPresupuesto = :pres ' + ' AND rt.revision = :rev ' +
+        'WHERE rb.codBase = :base AND rb.codAPU = :apu';
+      { *) }
+
+      QOrigen.ParamByName('pres').AsString := codPresupuestoOrigen;
+      QOrigen.ParamByName('rev').AsString := revisionOrigen;
+    end;
+
+    QOrigen.ParamByName('base').AsString := dbOrigen;
+    QOrigen.ParamByName('apu').AsString := codAPUOrigen;
+    QOrigen.Open;
+
+    while not QOrigen.Eof do
+    begin
+      I := Length(listadoRecursosImportarAPU);
+      SetLength(listadoRecursosImportarAPU, I + 1);
+
+      listadoRecursosImportarAPU[I].idUnico :=
+        QOrigen.FieldByName('idUnicoRecurso').AsString;
+      listadoRecursosImportarAPU[I].codBaseOrigen := dbOrigen;
+      listadoRecursosImportarAPU[I].codAPU := codAPUDestino;
+      listadoRecursosImportarAPU[I].precio :=
+        QOrigen.FieldByName('precio').AsFloat;
+      listadoRecursosImportarAPU[I].rendimiento :=
+        QOrigen.FieldByName('rendimiento').AsFloat;
+      listadoRecursosImportarAPU[I].cantidad :=
+        QOrigen.FieldByName('cantidadUnidad').AsFloat;
+
+      QOrigen.Next;
+    end;
+
+    // =====================================================
+    // FASE 2: COMPLETAR DATOS DE RECURSO ORIGEN
+    // =====================================================
+    QRecOrigen.SQL.Text :=
+      { (* }
+    'SELECT codCategoriaBase, descripcion, unidad, ' +
+      'especificaciones, especificaciones2 ' + 'FROM recursos ' +
+      'WHERE codBase = :base AND idUnico = :id';
+    { *) }
+
+    for I := 0 to High(listadoRecursosImportarAPU) do
+    begin
+      QRecOrigen.Close;
+      QRecOrigen.ParamByName('base').AsString := dbOrigen;
+      QRecOrigen.ParamByName('id').AsString := listadoRecursosImportarAPU
+        [I].idUnico;
+      QRecOrigen.Open;
+
+      listadoRecursosImportarAPU[I].codCategoriaBase :=
+        QRecOrigen.FieldByName('codCategoriaBase').AsString;
+      listadoRecursosImportarAPU[I].descripcion :=
+        QRecOrigen.FieldByName('descripcion').AsString;
+      listadoRecursosImportarAPU[I].unidad :=
+        QRecOrigen.FieldByName('unidad').AsString;
+      listadoRecursosImportarAPU[I].especificaciones :=
+        QRecOrigen.FieldByName('especificaciones').AsString;
+      listadoRecursosImportarAPU[I].especificaciones2 :=
+        QRecOrigen.FieldByName('especificaciones2').AsString;
+    end;
+
+    // =====================================================
+    // FASE 3: INSERT / UPDATE EN DESTINO
+    // =====================================================
+    DModule_1.con2.StartTransaction;
+    try
+      { (* }
+      QBuscaDestino.SQL.Text := 'SELECT idUnico, codRecursoCompleto ' +
+        'FROM recursos ' +
+        'WHERE codBase = :base AND descripcion = :desc AND unidad = :unidad';
+
+      QIns.SQL.Text := 'INSERT INTO recursos ' +
+        '(idUnico, codBase, codRecurso, codRecursoCompleto, codCategoriaBase, '
+        + ' codSubCategoria, descripcion, unidad, precio, precioLocal, moneda, '
+        + ' especificaciones, especificaciones2, fechaHoraCreacion, ultimaModificacion) '
+        + 'VALUES ' +
+        '(:id, :base, :codRec, :codRecComp, :cat, :sub, :desc, :unidad, ' +
+        ' :precio, :precioLocal, :moneda, :esp1, :esp2, NOW(), NOW())';
+
+      QUpd.SQL.Text :=
+        'UPDATE recursos SET precio = :precio, precioLocal = :precioLocal, ' +
+        'ultimaModificacion = NOW() ' +
+        'WHERE idUnico = :id AND codBase = :base';
+      { *) }
+
+      for I := 0 to High(listadoRecursosImportarAPU) do
+      begin
+        // Buscar destino
+        QBuscaDestino.Close;
+        QBuscaDestino.ParamByName('base').AsString := base_activa.codBase;
+        QBuscaDestino.ParamByName('desc').AsString := listadoRecursosImportarAPU
+          [I].descripcion;
+        QBuscaDestino.ParamByName('unidad').AsString :=
+          listadoRecursosImportarAPU[I].unidad;
+        QBuscaDestino.Open;
+
+        precio := listadoRecursosImportarAPU[I].precio;
+
+        if QBuscaDestino.IsEmpty then
+        begin
+          listadoRecursosImportarAPU[I].idUnico := 'Rsr' + generaCodigoUnico;
+
+          Resp := daCodigoCategoriaGeneral(listadoRecursosImportarAPU[I]
+            .codCategoriaBase);
+
+          CodSubCat := Resp.codSubCategoria;
+          CodRec := Resp.codRecurso;
+
+          CodRecCompleto := generaCodigoRecurso
+            (listadoRecursosImportarAPU[I].codCategoriaBase, CodSubCat, CodRec);
+
+          listadoRecursosImportarAPU[I].codSubCategoria := CodSubCat;
+          listadoRecursosImportarAPU[I].codRecurso := CodRec;
+          listadoRecursosImportarAPU[I].codRecursoCompleto := CodRecCompleto;
+
+          QIns.ParamByName('id').AsString := listadoRecursosImportarAPU
+            [I].idUnico;
+          QIns.ParamByName('base').AsString := base_activa.codBase;
+          QIns.ParamByName('codRec').AsString := CodRec;
+          QIns.ParamByName('codRecComp').AsString := CodRecCompleto;
+          QIns.ParamByName('cat').AsString := listadoRecursosImportarAPU[I]
+            .codCategoriaBase;
+          QIns.ParamByName('sub').AsString := CodSubCat;
+          QIns.ParamByName('desc').AsString := listadoRecursosImportarAPU[I]
+            .descripcion;
+          QIns.ParamByName('unidad').AsString := listadoRecursosImportarAPU
+            [I].unidad;
+          QIns.ParamByName('precio').AsFloat := precio;
+          QIns.ParamByName('precioLocal').AsFloat := precio;
+          QIns.ParamByName('moneda').AsString := base_activa.moneda;
+          QIns.ParamByName('esp1').AsString := listadoRecursosImportarAPU[I]
+            .especificaciones;
+          QIns.ParamByName('esp2').AsString := listadoRecursosImportarAPU[I]
+            .especificaciones2;
+          QIns.ExecSQL;
+        end
+        else
+        begin
+          listadoRecursosImportarAPU[I].idUnico :=
+            QBuscaDestino.FieldByName('idUnico').AsString;
+          listadoRecursosImportarAPU[I].codRecursoCompleto :=
+            QBuscaDestino.FieldByName('codRecursoCompleto').AsString;
+
+          QUpd.ParamByName('id').AsString := listadoRecursosImportarAPU
+            [I].idUnico;
+          QUpd.ParamByName('base').AsString := base_activa.codBase;
+          QUpd.ParamByName('precio').AsFloat := precio;
+          QUpd.ParamByName('precioLocal').AsFloat := precio;
+          QUpd.ExecSQL;
+        end;
+      end;
+
+      DModule_1.con2.Commit;
+    except
+      DModule_1.con2.Rollback;
+      EndGuardarAPU;
+      raise;
+    end;
+  finally
+    QOrigen.Free;
+    QRecOrigen.Free;
+    QBuscaDestino.Free;
+    QIns.Free;
+    QUpd.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de daCodigoCategoriaGeneral.</summary>
+/// <param name="codCategoriaBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCodigoCategoriaGeneral.
+/// </summary>
+function daCodigoCategoriaGeneral(codCategoriaBase: string): dat_respuesta1;
+var
+  qry: TUniQuery;
+  x: Integer;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT Ciu ' + '  FROM categoriaapus ' +
+        ' WHERE codBase = :codBase ' +
+        '   AND categoria_base = :codCategoriaBase ' +
+        '   AND Descripcion = :descripcion');
+      { *) }
+      ParamByName('codbase').AsString := base_activa.codBase;
+      ParamByName('codCategoriaBase').AsString := codCategoriaBase;
+      ParamByName('descripcion').AsString := 'General';
+      Prepare;
+      Open;
+      Last;
+      Result.codSubCategoria := FieldByName('Ciu').AsString;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT codRecurso ' + '  FROM recursos ' +
+        ' WHERE codBase = :codBase ' +
+        '   AND codCategoriaBase = :codCategoriaBase ' +
+        '   AND codSubCategoria = :codSubCategoria ' +
+        ' ORDER BY codRecurso ASC');
+      { *) }
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codCategoriaBase').AsString := codCategoriaBase;
+      ParamByName('codSubCategoria').AsString := Result.codSubCategoria;
+      Prepare;
+      Open;
+      Last;
+      x := StrToIntDef(FieldByName('codRecurso').AsString, 0);
+      Inc(x);
+      Result.codRecurso := IntToStr(x);
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de actualizarDatosAPUImportar.</summary>
+/// <param name="APUImportar">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en actualizarDatosAPUImportar.
+/// </summary>
+function actualizarDatosAPUImportar(APUImportar: dat_importAPU): dat_importAPU;
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  codRecursoAPU: Integer;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      { Actualizar codCategoriaApu y Recursos }
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT *' + ' FROM APUS ' + 'WHERE codBase = :codBase ' +
+        '  AND CategoriaAPU = :CategoriaAPU ' + 'ORDER BY codRecursoAPU ASC');
+      { *) }
+      ParamByName('codbase').AsString := base_activa.codBase;
+      ParamByName('categoriaAPU').AsString := APUImportar.Categoria;
+      Prepare;
+      Open;
+      Last;
+      tmpstr := FieldByName('categoriaAPU').AsString;
+      if tmpstr <> '' then
+      begin
+        codRecursoAPU := StrToIntDef(FieldByName('codRecursoAPU').AsString, 0);
+        Inc(codRecursoAPU);
+        APUImportar.codRecursoAPU := IntToStr(codRecursoAPU);
+      end
+      else
+      begin
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('SELECT * ' + ' FROM categoriaApus ' +
+          'WHERE codBase = :codBase ' + '  AND descripcion = :descripcion ' +
+          '  AND categoria_base = 6');
+        { *) }
+        ParamByName('codBase').AsString := base_activa.codBase;
+        ParamByName('descripcion').AsString := APUImportar.Categoria;
+        Prepare;
+        Open;
+        APUImportar.codCategoriaApu := FieldByName('ciu').AsString;
+        APUImportar.codRecursoAPU := '1';
+      end;
+      { Actualizar Datos Adicionales desde Base de Origen }
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT * ' + '  FROM apus ' + ' WHERE codBase = :codBase ' +
+        '   AND codAPU = :codAPU');
+      { *) }
+      ParamByName('codbase').AsString := APUImportar.codBaseOrigen;
+      ParamByName('codAPU').AsString := APUImportar.codAPUOrigen;
+      Prepare;
+      Open;
+      APUImportar.rendimiento := decimal_correcto(FieldByName('rendimiento')
+        .AsString);
+      APUImportar.porcentajeIndirectos :=
+        decimal_correcto(FieldByName('PorcentajeCostoIndirecto').AsString);
+      APUImportar.totalConIndirectos :=
+        decimal_correcto(FieldByName('PrecioUnitarioTotal').AsString);
+      APUImportar.rendimientoHUnidad :=
+        decimal_correcto(FieldByName('rendimientoHUnidad').AsString);
+      APUImportar.HCuadrillas := decimal_correcto(FieldByName('nhCuadrillas')
+        .AsString);
+    end;
+  finally
+    qry.Free;
+    Result := APUImportar;
+  end;
+end;
+
+/// <summary>TODO: Descripción de crearApuImportar.</summary>
+/// <param name="APUImportar">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en crearApuImportar.
+/// </summary>
+function crearApuImportar(APUImportar: dat_importAPU): string;
+var
+  qry: TUniQuery;
+  codAPUNuevo: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      codAPUNuevo := GeneraCodUnicoAPU;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('INSERT INTO apus ( ' + '  codBase, ' + '  codCategoriaAPU, ' +
+        '  codRecursoAPU, ' + '  CategoriaAPU, ' + '  CodAPU, ' +
+        '  Descripcion, ' + '  Unidad, ' + '  Rendimiento, ' +
+        '  RendimientoTodoAnalisis, ' + '  RendimientoTodoEscenario, ' +
+        '  FechaHoraCreacion, ' + '  CostoDirectoTotal, ' +
+        '  CostoIndirectoTotal, ' + '  PorcentajeCostoIndirecto, ' +
+        '  PrecioUnitarioTotal, ' + '  moneda, ' + '  ultimaModificacion, ' +
+        '  pendienteRevision, ' + '  rendimientoHUnidad, ' + '  nhCuadrillas, '
+        + '  anidado) ' + 'VALUES ( ' + '  :codBase, ' + '  :codCategoriaAPU, '
+        + '  :codRecursoAPU, ' + '  :CategoriaAPU, ' + '  :CodAPU, ' +
+        '  :Descripcion, ' + '  :Unidad, ' + '  :Rendimiento, ' +
+        '  :RendimientoTodoAnalisis, ' + '  :RendimientoTodoEscenario, ' +
+        '  :FechaHoraCreacion, ' + '  :CostoDirectoTotal, ' +
+        '  :CostoIndirectoTotal, ' + '  :PorcentajeCostoIndirecto, ' +
+        '  :PrecioUnitarioTotal, ' + '  :moneda, ' + '  :ultimaModificacion, ' +
+        '  :pendienteRevision, ' + '  :rendimientoHUnidad, ' +
+        '  :nhCuadrillas, ' + '  :anidado)');
+      { *) }
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codCategoriaAPU').AsString := APUImportar.codSubCategoriaAPU;
+      ParamByName('codRecursoAPU').AsString := APUImportar.codRecursoAPU;
+      ParamByName('CategoriaAPU').AsString := APUImportar.Categoria;
+      ParamByName('codAPU').AsString := codAPUNuevo;
+      ParamByName('Descripcion').AsString := APUImportar.descripcion;
+      ParamByName('Unidad').AsString := APUImportar.unidad;
+      ParamByName('RendimientoTodoAnalisis').AsBoolean := False;
+      ParamByName('RendimientoTodoEscenario').AsBoolean := True;
+      ParamByName('fechaHoraCreacion').AsDateTime := Now;
+      ParamByName('CostoDirectoTotal').AsFloat :=
+        SafeStrToFloat(decimal_correcto(APUImportar.precio));
+      ParamByName('CostoIndirectoTotal').AsFloat :=
+        SafeStrToFloat(decimal_correcto(APUImportar.totalConIndirectos));
+      ParamByName('PorcentajeCostoIndirecto').AsFloat :=
+        SafeStrToFloat(decimal_correcto(APUImportar.porcentajeIndirectos));
+      ParamByName('PrecioUnitarioTotal').AsFloat :=
+        SafeStrToFloat(decimal_correcto(APUImportar.totalConIndirectos));
+      ParamByName('moneda').AsString := base_activa.moneda;
+      ParamByName('ultimaModificacion').AsDateTime := Now;
+      ParamByName('pendienteRevision').AsBoolean := False;
+      ParamByName('rendimientoHUnidad').AsFloat :=
+        SafeStrToFloat(decimal_correcto(APUImportar.rendimientoHUnidad));
+      ParamByName('nhCuadrillas').AsFloat :=
+        SafeStrToFloat(decimal_correcto(APUImportar.HCuadrillas));
+      ParamByName('anidado').AsBoolean := APUImportar.anidado;
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+    Result := codAPUNuevo;
+  end;
+end;
+
+/// <summary>TODO: Descripción de crearAccionImportacion.</summary>
+/// <param name="datosImportar">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de crearAccionImportacion.
+/// </summary>
+function crearAccionImportacion(datosImportar: dat_importAPU): string;
+var
+  qry: TUniQuery;
+  fechaOrigen: TDateTime;
+  fechaDestino: TDateTime;
+begin
+  Result := '';
+  qry := TUniQuery.Create(nil);
+  fechaOrigen := strtodatetime(fecha0);
+  fechaDestino := strtodatetime(fecha0);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      fechaOrigen := datosImportar.fechaHoraActualizacion;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT * ' + '  FROM APUS ' +
+        ' WHERE descripcion = :descripcion ' + '   AND unidad = :unidad ' +
+        '   AND codBase = :codBase');
+      { *) }
+      ParamByName('descripcion').AsString := datosImportar.descripcion;
+      ParamByName('unidad').AsString := datosImportar.unidad;
+      ParamByName('codBase').AsString := base_activa.codBase;
+      Prepare;
+      Open;
+      fechaDestino := FieldByName('ultimaModificacion').AsDateTime;
+      if fechaDestino = strtodate('30/12/1899') then
+        Result := 'Nuevo'
+      else
+      begin
+        if fechaOrigen > fechaDestino then
+        begin
+          Result := FieldByName('codAPU').AsString;
+        end
+        else
+          Result := 'Mantener';
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de CreaSubCategoriasIniciales.</summary>
+/// <param name="CodBase">TODO.</param>
+/// <param name="nombreBase">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de CreaSubCategoriasIniciales.
+/// </summary>
+procedure CreaSubCategoriasIniciales(codBase, nombreBase: string);
+const
+  NombreCategoriaInicial = 'General';
+var
+  qry: TUniQuery;
+  x: Integer;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      for x := 1 to 6 do
+      begin
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('INSERT INTO categoriaApus ( ' + '  codBase, ' +
+          '  categoria_base, ' + '  ciu, ' + '  nombreBase, ' +
+          '  Descripcion, ' + '  origen, ' + '  fechaCreacion) ' + 'VALUES ( ' +
+          '  :codBase, ' + '  :categoria_base, ' + '  :ciu, ' +
+          '  :nombreBase, ' + '  :Descripcion, ' + '  :origen, ' +
+          '  :fechaCreacion)');
+        { *) }
+        ParamByName('codbase').AsString := codBase;
+        ParamByName('categoria_base').AsString := IntToStr(x);
+        ParamByName('Ciu').AsString := '1';
+        ParamByName('nombreBase').AsString := nombreBase;
+        ParamByName('descripcion').AsString := NombreCategoriaInicial;
+        ParamByName('origen').AsString := 'Usuario';
+        ParamByName('fechaCreacion').AsDateTime := Now;
+        Prepare;
+        ExecSQL;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ajustaGridTMSAutomatico.
+/// </summary>
+procedure ajustaGridTMSAutomatico(Grid: TTMSFMXGrid; columnaPrincipal: Integer);
+var
+  x: Integer;
+  columnas: Integer;
+  valor1: Double;
+  valor2: Double;
+  tmpstr: string;
+  ajustar: Boolean;
+begin
+  valor1 := Grid.width;
+  valor2 := 0;
+  columnas := Grid.ColumnCount;
+  Grid.columns[columnaPrincipal].width := 0;
+  for x := 0 to columnas - 1 do
+  begin
+    tmpstr := Grid.cells[x, 0];
+    if Grid.columns[x].width > 0 then
+      ajustar := True
+    else
+      ajustar := False;
+    if ajustar then
+      Grid.AutoSizeColumn(x);
+    if (x <> columnaPrincipal) and (ajustar) then
+    begin
+      valor2 := valor2 + Grid.columns[x].width;
+    end;
+  end;
+  Grid.columns[columnaPrincipal].width := valor1 - valor2 - 20;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de AjustaGridAutomatico.
+/// </summary>
+procedure AjustaGridAutomatico(Grid: TTMSFNCGrid; columnaPrincipal: Integer);
+const
+  MIN_PRINCIPAL = 50;
+var
+  x: Integer;
+  columnas: Integer;
+  valor1: Double;
+  valor2: Double;
+  tmpstr: string;
+  ajustar: Boolean;
+  anchoPrincipal: Double;
+begin
+  valor1 := Grid.width; // ancho total disponible
+  valor2 := 0;
+  columnas := Grid.ColumnCount;
+  // Forzamos a que la columna principal tenga un ancho inicial 0 para que no interfiera
+  Grid.columns[columnaPrincipal].width := 0;
+
+  // Ajustar automáticamente las demás columnas que tengan width > 0
+  for x := 0 to columnas - 1 do
+  begin
+    if Grid.columns[x].width > 0 then
+      ajustar := True
+    else
+      ajustar := False;
+
+    if ajustar and (x <> columnaPrincipal) then
+    begin
+      Grid.AutoSizeColumn(x);
+      valor2 := valor2 + Grid.columns[x].width;
+    end;
+  end;
+
+  // Calcular ancho disponible para la principal
+  anchoPrincipal := valor1 - valor2 - 20; // 20 de margen
+
+  // Aplicar mínimo
+  if anchoPrincipal < MIN_PRINCIPAL then
+    anchoPrincipal := MIN_PRINCIPAL;
+
+  Grid.columns[columnaPrincipal].width := anchoPrincipal;
+end;
+
+/// <summary>TODO: Descripción de QuitarEspeciales.</summary>
+/// <param name="Cad">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de QuitarEspeciales.
+/// </summary>
+function QuitarEspeciales(const Cad: string): string;
+const
+  VALIDOS = [' ', '0'..'9', 'A'..'Z', 'a'..'z', 'á', 'é', 'í', 'ó', 'ú',
+    '.', ',', '-', '_'];
+var
+  I: Integer;
+begin
+  Result := '';
+  for I := 1 to Length(Cad) do
+    if Cad[I] in VALIDOS then
+      Result := Result + Cad[I]
+end;
+
+/// <summary>TODO: Descripción de actualizarApusBase.</summary>
+/// <param name="codAPU">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en actualizarApusBase.
+/// </summary>
+procedure actualizarApusBase(codAPU: string);
+type
+  dat_recursosAPUActualizar = record
+    idUnicoRecurso: string;
+    descripcion: string;
+    unidad: string;
+    precio: string
+  end;
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  especificacionesAPU: string;
+  listaActualizar: array of dat_recursosAPUActualizar;
+begin
+  qry := TUniQuery.Create(nil);
+  especificacionesAPU := 'APU: ' + codAPU;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT idUnicoRecurso, ' + '       descripcion, ' +
+        '       unidad, ' + '       precio ' + '  FROM APUS_items ' +
+        ' WHERE codAPU = :codAPU ' + '   AND codBase = :codBase');
+      { *) }
+      ParamByName('codAPU').AsString := codAPU;
+      ParamByName('codBase').AsString := base_activa.codBase;
+      Prepare;
+      Open;
+      x := 0;
+      while not Eof do
+      begin
+        SetLength(listaActualizar, x + 1);
+        listaActualizar[x].idUnicoRecurso :=
+          FieldByName('idUnicoRecurso').AsString;
+        listaActualizar[x].descripcion := FieldByName('descripcion').AsString;
+        listaActualizar[x].unidad := FieldByName('unidad').AsString;
+        listaActualizar[x].precio := FieldByName('precio').AsString;
+        Next;
+        Inc(x);
+      end;
+    end;
+    for x := 0 to Length(listaActualizar) - 1 do
+    begin
+      actualizaDatosRecurso(listaActualizar[x].idUnicoRecurso,
+        listaActualizar[x].descripcion, listaActualizar[x].unidad,
+        listaActualizar[x].precio);
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+procedure actualizaDatosRecurso(idUnicoRecurso: string; descripcion: string;
+  unidad: string; precio: string);
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  consultaSQL: string;
+  x: Integer;
+  subtotal: Double;
+  indirecto: Double;
+  TotalAPU: Double;
+  Tprecio, TRendimiento, TcantidadUnidad: Double;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    // ----------------------------------------------------------------------------------------
+    // Actualizar tabla RECURSOS (Esto lanza trigger de actualizacion de APUS y APUS_Items)
+    // ----------------------------------------------------------------------------------------
+    qry.Close;
+    qry.SQL.Clear;
+    { (* }
+    qry.SQL.Add('UPDATE recursos ' +
+      '   SET descripcion        = :descripcion, ' +
+      '       unidad             = :unidad, ' +
+      '       precio             = :precio, ' +
+      '       preciolocal        = :preciolocal, ' +
+      '       ultimaModificacion = :ultimaModificacion ' +
+      ' WHERE codBase            = :codBase ' +
+      '   AND idUnico            = :idUnicoRecurso');
+    { *) }
+
+    qry.ParamByName('codBase').AsString := base_activa.codBase;
+    qry.ParamByName('idUnicoRecurso').AsString := idUnicoRecurso;
+    qry.ParamByName('descripcion').AsString := descripcion;
+    qry.ParamByName('unidad').AsString := unidad;
+    qry.ParamByName('precio').AsFloat :=
+      SafeStrToFloat(decimal_correcto(precio));
+    qry.ParamByName('preciolocal').AsFloat :=
+      SafeStrToFloat(decimal_correcto(precio));
+    qry.ParamByName('ultimaModificacion').AsDateTime := Now;
+    qry.ExecSQL;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de contarCaracteresenCadena.
+/// </summary>
+function contarCaracteresenCadena(cadena, caracter: string): Integer;
+
+var
+  x, Y: Integer;
+begin
+  Result := -1;
+  Y := 0;
+  for x := 1 to Length(cadena) do
+  begin
+    if cadena[x] = caracter then
+      Inc(Y);
+  end;
+  if Y > 0 then
+    Result := Y;
+end;
+
+/// <summary>TODO: Descripción de CrearApuNuevoImportar.</summary>
+/// <param name="codBaseOrigen">TODO.</param>
+/// <param name="codApuOrigen">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en CrearApuNuevoImportar.
+/// </summary>
+function CrearApuNuevoImportar(codBaseOrigen, codAPUOrigen: string): string;
+
+var
+  qry: TUniQuery;
+  APUOrigen: dat_importAPU;
+  itemsAPU: array of dat_importAPUItem;
+  codRecursoGenerado: string;
+  costoDirectoAPU: Double;
+  porcentajeIndirectos: Double;
+  CostoTotalConIndirectos: Double;
+  tmpstr: string;
+  x: Integer;
+begin
+  qry := TUniQuery.Create(nil);
+  porcentajeIndirectos := base_activa.indirectos;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      { Crear APU como Recurso, guardar codRecursoGenerado }
+
+      { Creacion APU }
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT * ' + '  FROM APUS ' + ' WHERE codBase = :codBase ' +
+        '   AND codAPU = :codAPU');
+      { *) }
+      ParamByName('codbase').AsString := codBaseOrigen;
+      ParamByName('codAPU').AsString := codAPUOrigen;
+      Prepare;
+      Open;
+      APUOrigen.codCategoriaApu := FieldByName('codCategoriaApu').AsString;
+      APUOrigen.codRecursoAPU := codRecursoGenerado;
+      APUOrigen.Categoria := FieldByName('categoriaAPU').AsString;
+      APUOrigen.codAPU := FieldByName('codAPU').AsString; // Revisar codigo
+      APUOrigen.descripcion := FieldByName('descripcion').AsString;
+      APUOrigen.unidad := FieldByName('unidad').AsString;
+      APUOrigen.rendimiento := FieldByName('rendimiento').AsString;
+      APUOrigen.fechaHoraCreacion := FieldByName('fechaHoraCreacoion')
+        .AsDateTime;
+      APUOrigen.fechaHoraActualizacion := FieldByName('ultimaModificacion')
+        .AsDateTime;
+      tmpstr := FieldByName('costoDirectoTotal').AsString;
+      costoDirectoAPU := SafeStrToFloat(decimal_correcto(tmpstr));
+      APUOrigen.precio := tmpstr;
+      CostoTotalConIndirectos := costoDirectoAPU *
+        (porcentajeIndirectos / 100);
+      APUOrigen.porcentajeIndirectos := FloatToStr(porcentajeIndirectos);
+      APUOrigen.totalConIndirectos := FloatToStr(CostoTotalConIndirectos);
+      APUOrigen.rendimientoHUnidad :=
+        FieldByName('rendimientoHUnidad').AsString;
+      APUOrigen.HCuadrillas := FieldByName('nhCuadrillas').AsString;
+      APUOrigen.anidado := FieldByName('anidado').AsBoolean;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('INSERT INTO apus ( ' + '  codBase, ' + '  codCategoriaAPU, ' +
+        '  codRecursoAPU, ' + '  CategoriaAPU, ' + '  codAPU, ' +
+        '  Descripcion, ' + '  Unidad, ' + '  Rendimiento, ' +
+        '  RendimientoTodoAnalisis, ' + '  RendimientoTodoEscenario, ' +
+        '  FechaHoraCreacion, ' + '  CostoDirectoTotal, ' +
+        '  CostoIndirectoTotal, ' + '  PorcentajeCostoIndirecto, ' +
+        '  PrecioUnitarioTotal, ' + '  moneda, ' + '  codCPC, ' +
+        '  ultimaModificacion, ' + '  pendienteRevision, ' +
+        '  rendimientoHUnidad, ' + '  nhCuadrillas, ' + '  anidado) ' +
+        'VALUES ( ' + '  :codBase, ' + '  :codCategoriaAPU, ' +
+        '  :codRecursoAPU, ' + '  :CategoriaAPU, ' + '  :codAPU, ' +
+        '  :Descripcion, ' + '  :Unidad, ' + '  :Rendimiento, ' +
+        '  :RendimientoTodoAnalisis, ' + '  :RendimientoTodoEscenario, ' +
+        '  :FechaHoraCreacion, ' + '  :CostoDirectoTotal, ' +
+        '  :costoIndirectoTotal, ' + '  :PorcentajeCostoIndirecto, ' +
+        '  :PrecioUnitarioTotal, ' + '  :moneda, ' + '  :codCPC, ' +
+        '  :ultimaModificacion, ' + '  :pendienteRevision, ' +
+        '  :rendimientoHUnidad, ' + '  :nhCuadrillas, ' + '  :anidado)');
+      { *) }
+      Prepare;
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codCategoriaAPU').AsString := APUOrigen.codCategoriaApu;
+      ParamByName('codRecursoAPU').AsString := APUOrigen.codRecursoAPU;
+      ParamByName('categoriaAPU').AsString := APUOrigen.Categoria;
+      ParamByName('codAPU').AsString := APUOrigen.codAPU;
+      ParamByName('descripcion').AsString := APUOrigen.descripcion;
+      ParamByName('unidad').AsString := APUOrigen.unidad;
+      ParamByName('rendimiento').AsString := APUOrigen.rendimiento;
+      ParamByName('rendimientoTodoAnalisis').AsString := '1';
+      ParamByName('rendimientoTodoEscenario').AsString := '1';
+      ParamByName('fechaHoraCreacion').AsDateTime :=
+        APUOrigen.fechaHoraCreacion;
+      ParamByName('CostoDirectoTotal').AsString := APUOrigen.precio;
+      ParamByName('PorcentajeCostoIndirecto').AsString :=
+        APUOrigen.porcentajeIndirectos;
+      ParamByName('precioUnitarioTotal').AsString := APUOrigen.precio;
+      ParamByName('moneda').AsString := base_activa.moneda;
+      ParamByName('codCpc').AsString := '';
+      ParamByName('ultimaModificacion').AsDateTime :=
+        APUOrigen.fechaHoraActualizacion;
+      ParamByName('pendienteRevision').AsString := '0';
+      ParamByName('rendimientoHUnidad').AsString :=
+        APUOrigen.rendimientoHUnidad;
+      ParamByName('nhCuadrillas').AsString := APUOrigen.HCuadrillas;
+      ParamByName('anidado').AsBoolean := APUOrigen.anidado;
+      ExecSQL;
+      { FIN de Creacion de APU }
+      { Creacion de los Items de APU }
+      x := 0;
+      SetLength(itemsAPU, x);
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT * ' + '  FROM apus_Items ' +
+        ' WHERE codBase = :codBase ' + '   AND codAPU = :codApu');
+      { *) }
+      ParamByName('codbase').AsString := codBaseOrigen;
+      ParamByName('codAPU').AsString := codAPUOrigen;
+      Prepare;
+      Open;
+      while not Eof do
+      begin
+        SetLength(itemsAPU, x + 1);
+        itemsAPU[x].codBase := base_activa.codBase;
+        itemsAPU[x].codAPU := APUOrigen.codAPU;
+        Inc(x);
+        Next;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Opera sobre datos de APU en daCodApusActualizar.
+/// </summary>
+procedure daCodApusActualizar(listadoAPU: TStringList;
+  idUnicoRecurso: string);
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  posicion: Integer;
+  codApuActualizar: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { }
+      SQL.Add('SELECT codAPU ' + '  FROM Apus_items ' +
+        ' WHERE codBase = :codBase ' +
+        '   AND idUnicoRecurso = :idUnicoRecurso');
+      { }
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('idUnicoRecurso').AsString := idUnicoRecurso;
+      Prepare;
+      Open;
+      while not Eof do
+      begin
+        listadoAPU.Sort;
+        codApuActualizar := FieldByName('codAPU').AsString;
+        posicion := listadoAPU.IndexOf(codApuActualizar);
+        if posicion = -1 then
+        begin
+          listadoAPU.Add(codApuActualizar);
+          listadoAPU.Sort;
+        end;
+        Next;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de daCodigoRecursoDestinoImportar.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="codSubCategoria">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCodigoRecursoDestinoImportar.
+/// </summary>
+function daCodigoRecursoDestinoImportar(CodCategoria, codSubCategoria
+  : string): string;
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  tmpint: Integer;
+begin
+  Result := '';
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT codRecurso ' + ' FROM recursos ' +
+        'WHERE codBase = :codBase ' +
+        '  AND codCategoriaBase = :codCategoriaBase ' +
+        '  AND codSubCategoria = :codSubCategoria ' +
+        'ORDER BY codRecurso ASC');
+      { *) }
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codCategoriaBase').AsString := CodCategoria;
+      ParamByName('codSubCategoria').AsString := codSubCategoria;
+      Prepare;
+      Open;
+      Last;
+      tmpstr := FieldByName('codRecurso').AsString;
+      tmpint := StrToIntDef(tmpstr, 0);
+      Inc(tmpint);
+      Result := IntToStr(tmpint);
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de generaSiNoExisteCategoriaVarios.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaSiNoExisteCategoriaVarios.
+/// </summary>
+function generaSiNoExisteCategoriaVarios(CodCategoria: string): string;
+
+var
+  tmpstr: string;
+  qry: TUniQuery;
+  lastCiu: Integer;
+begin
+  tmpstr := '';
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT ciu ' + '  FROM categoriaApus ' +
+        ' WHERE codBase = :codBase ' +
+        '   AND categoria_base = :categoria_base ' +
+        '   AND descripcion = :descripcion');
+      { *) }
+      ParamByName('codbase').AsString := base_activa.codBase;
+      ParamByName('categoria_base').AsString := CodCategoria;
+      ParamByName('descripcion').AsString := 'Varios';
+      Prepare;
+      Open;
+      tmpstr := FieldByName('ciu').AsString;
+      if tmpstr = '' then
+      begin
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('SELECT ciu ' + '  FROM categoriaApus ' +
+          ' WHERE codBase = :codBase ' +
+          '   AND categoria_base = :categoria_base ' + ' ORDER BY ciu ASC');
+        { *) }
+        ParamByName('codbase').AsString := base_activa.codBase;
+        ParamByName('categoria_base').AsString := CodCategoria;
+        Prepare;
+        Open;
+        tmpstr := FieldByName('ciu').AsString;
+        lastCiu := StrToIntDef(tmpstr, 0);
+        Inc(lastCiu);
+        tmpstr := IntToStr(lastCiu);
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('INSERT INTO categoriaApus ( ' + '  codBase, ' +
+          '  Categoria_base, ' + '  ciu, ' + '  NombreBase, ' +
+          '  Descripcion, ' + '  sincronizada, ' + '  origen, ' +
+          '  fechaCreacion) ' + 'VALUES ( ' + '  :codBase, ' +
+          '  :Categoria_base, ' + '  :ciu, ' + '  :NombreBase, ' +
+          '  :Descripcion, ' + '  :sincronizada, ' + '  :origen, ' +
+          '  :fechaCreacion)');
+        { *) }
+        ParamByName('codbase').AsString := base_activa.codBase;
+        ParamByName('categoria_base').AsString := CodCategoria;
+        ParamByName('NombreBase').AsString := base_activa.Nombre;
+        ParamByName('ciu').AsString := tmpstr;
+        ParamByName('Descripcion').AsString := 'Varios';
+        ParamByName('sincronizada').AsBoolean := False;
+        ParamByName('fechaCreacion').AsDateTime := Now;
+        Prepare;
+        ExecSQL;
+      end;
+    end;
+  finally
+    qry.Free;
+    Result := tmpstr;
+  end;
+end;
+
+/// <summary>TODO: Descripción de existeSubCategoria.</summary>
+/// <param name="codBaseBusqueda">TODO.</param>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="descripcionBusqueda">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de existeSubCategoria.
+/// </summary>
+function existeSubCategoria(codBaseBusqueda, CodCategoria, descripcionBusqueda
+  : string): string;
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  Result := '';
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT ciu ' + '  FROM categoriaApus ' +
+        ' WHERE codBase = :codBase ' +
+        '   AND categoria_base = :categoria_base ' +
+        '   AND descripcion = :descripcion');
+      { *) }
+      ParamByName('codbase').AsString := base_activa.codBase;
+      ParamByName('categoria_base').AsString := CodCategoria;
+      ParamByName('descripcion').AsString := descripcionBusqueda;
+      Prepare;
+      Open;
+      tmpstr := FieldByName('ciu').AsString.Trim;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de daDescripcionSubCategoria.</summary>
+/// <param name="codBaseBusqueda">TODO.</param>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="codSubCategoria">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daDescripcionSubCategoria.
+/// </summary>
+function daDescripcionSubCategoria(codBaseBusqueda, CodCategoria,
+  codSubCategoria: string): string;
+
+var
+  qry: TUniQuery;
+begin
+  Result := '';
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT Descripcion ' + '  FROM categoriaApus ' +
+        ' WHERE codBase = :codBase ' +
+        '   AND categoria_base = :categoria_base ' + '   AND Ciu = :ciu');
+      { *) }
+      ParamByName('codBase').AsString := codBaseBusqueda;
+      ParamByName('categoria_base').AsString := CodCategoria;
+      ParamByName('ciu').AsString := codSubCategoria;
+      Prepare;
+      Open;
+      Result := FieldByName('Descripcion').AsString;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de daValorUltCategoria.</summary>
+/// <param name="categoriaBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daValorUltCategoria.
+/// </summary>
+function daValorUltCategoria(categoriaBase: string): Integer;
+
+var
+  qry: TUniQuery;
+  codCategoriaBase: string;
+  tmpstr: string;
+  x: Integer;
+begin
+  Result := 1;
+  if LowerCase(categoriaBase.Trim) = 'equipos y herramientas' then
+    codCategoriaBase := '1';
+  if LowerCase(categoriaBase.Trim) = 'materiales' then
+    codCategoriaBase := '2';
+  if LowerCase(categoriaBase.Trim) = 'transporte' then
+    codCategoriaBase := '3';
+  if LowerCase(categoriaBase.Trim) = 'mano de obra' then
+    codCategoriaBase := '4';
+  if LowerCase(categoriaBase.Trim) = 'seguridad industrial' then
+    codCategoriaBase := '5';
+  if LowerCase(categoriaBase.Trim) = 'precios unitarios' then
+    codCategoriaBase := '6';
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT ciu ' + '  FROM categoriaapus ' +
+        ' WHERE codBase = :codBase ' +
+        '   AND categoria_base = :categoria_base');
+      { *) }
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('categoria_base').AsString := categoriaBase;
+      Prepare;
+      Open;
+      Last;
+      tmpstr := FieldByName('ciu').AsString;
+      if tmpstr <> '' then
+      begin
+        x := SafeStrToInt(tmpstr);
+        Inc(x);
+      end
+      else
+        x := 1;
+      Result := x;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de AjustaCurvaS.</summary>
+procedure AjustaCurvaS();
+
+var
+  CurvaS: string;
+  TcurvaS: Double;
+  x: Integer;
+  S: TTMSFNCChartSerie;
+  an: TTMSFNCChartAnnotation;
+begin
+  frmMain.chart_CurvaS.BeginUpdate;
+  frmMain.chart_CurvaS.Clear;
+  frmMain.chart_CurvaS.Series.Clear;
+  frmMain.chart_CurvaS.Series.Add;
+  S := frmMain.chart_CurvaS.Series[0];
+  S.AddPoint(0);
+  an := S.Points[0].Annotations.Add;
+  an.Text := base_activa.simboloMoneda + '0';
+  for x := 0 to frmMain.grid_CronoTotales.columns.Count - 2 do
+  begin
+    CurvaS := frmMain.grid_CronoTotales.cells[x, 2];
+    CurvaS := ReplaceStr(CurvaS, base_activa.simboloMoneda, '').Trim;
+    TcurvaS := StrToFloatDef(CurvaS, 0);
+    S.AddPoint(TcurvaS);
+    an := S.Points[x + 1].Annotations.Add;
+    an.Text := base_activa.simboloMoneda + CurvaS;
+  end;
+  frmMain.chart_CurvaS.EndUpdate;
+end;
+
+/// <summary>TODO: Descripción de calculaResumenFpolCuadrilla.</summary>
+procedure calculaResumenFpolCuadrilla();
+
+type
+  dat_tmp = record
+    indice: string;
+    precio: string;
+    descripcion: string;
+    coeficiente: string;
+  end;
+
+var
+  x: Integer;
+  sumaTotal: Double;
+  tmpstr: string;
+  valorIndice: Double;
+  indice: Double;
+  FPolCuadrilla: string;
+  listadoFpolCuadrillaT: array of dat_tmp;
+begin
+  sumaTotal := 0;
+  frmMain.lbl_FpolCuadrilla.Text := '';
+  frmMain.lbl_FpolCuadrilla.Hint := '';
+  for x := 1 to frmMain.grid_FpolCuadrillaTipo.RowCount - 1 do
+  begin
+    tmpstr := frmMain.grid_FpolCuadrillaTipo.cells[8, x];
+    tmpstr := decimal_correcto(tmpstr);
+    sumaTotal := sumaTotal + StrToFloatDef(tmpstr, 0);
+  end;
+  for x := 1 to frmMain.grid_FpolCuadrillaTipo.RowCount - 1 do
+  begin
+    SetLength(listadoFpolCuadrillaT, x);
+    listadoFpolCuadrillaT[x - 1].indice :=
+      frmMain.grid_FpolCuadrillaTipo.cells[3, x];
+    listadoFpolCuadrillaT[x - 1].descripcion :=
+      frmMain.grid_FpolCuadrillaTipo.cells[4, x];
+    listadoFpolCuadrillaT[x - 1].coeficiente :=
+      frmMain.grid_FpolCuadrillaTipo.cells[9, x];
+  end;
+  // Ordenar Array of record
+  TArray.Sort<dat_tmp>(listadoFpolCuadrillaT, TComparer<dat_tmp>.Construct(
+    function(const Left, Right: dat_tmp): Integer
+    begin
+      Result := CompareText(Left.indice, Right.indice);
+    end));
+
+  // Genera Cadena de Formula
+  FPolCuadrilla := '';
+  for x := 0 to Length(listadoFpolCuadrillaT) - 1 do
+  begin
+    FPolCuadrilla := FPolCuadrilla + listadoFpolCuadrillaT[x].coeficiente +
+      '(SHR ' + listadoFpolCuadrillaT[x].descripcion + ')i + ';
+  end;
+  FPolCuadrilla := Copy(FPolCuadrilla, 1, Length(FPolCuadrilla) - 2);
+  FPolCuadrilla := 'Bi= ' + FPolCuadrilla;
+  frmMain.lbl_FpolCuadrilla.Text := FPolCuadrilla;
+  frmMain.lbl_FpolCuadrilla.Hint := FPolCuadrilla;
+  frmMain.lbl_FpolCuadrilla.ShowHint := True;
+end;
+
+/// <summary>TODO: Descripción de calculaResumenFpol.</summary>
+procedure calculaResumenFpol();
+
+type
+  dat_tmp = record
+    indice: string;
+    precio: string;
+    coeficiente: string;
+  end;
+
+var
+  fPolGeneral: string;
+  x, Y, z: Integer;
+  indice, coeficiente: string;
+  tmpstr: string;
+  sumaTotal: Double;
+  valorIndice: Double;
+  Tcoeficiente: Double;
+  listadoFpolGeneral: array of dat_tmp;
+  nuevo: Boolean;
+  tfloat: Double;
+begin
+  // Formula General
+  sumaTotal := 0;
+  frmMain.lbl_FpolGeneral.Text := '';
+  frmMain.lbl_FpolGeneral.Hint := '';
+  // Calcula Total
+  for x := 0 to Length(listadoRecursosFP) - 1 do
+  begin
+    tmpstr := listadoRecursosFP[x].total;
+    sumaTotal := sumaTotal + StrToFloatDef(tmpstr, 0);
+  end;
+  // Calcula Indices
+  for x := 1 to frmMain.grid_FpolIndicesDisponibles.RowCount - 1 do
+  begin
+    SetLength(listadoFpolGeneral, x);
+    listadoFpolGeneral[x - 1].indice :=
+      frmMain.grid_FpolIndicesDisponibles.cells[1, x];
+    listadoFpolGeneral[x - 1].coeficiente :=
+      frmMain.grid_FpolIndicesDisponibles.cells[5, x];
+  end;
+  // Ordenar Array of record
+  TArray.Sort<dat_tmp>(listadoFpolGeneral, TComparer<dat_tmp>.Construct(
+    function(const Left, Right: dat_tmp): Integer
+    begin
+      Result := CompareText(Left.indice, Right.indice);
+    end));
+
+  // Genera Cadena Formula
+  // PR = P0 (0,278B1/B0 + 0,057D1/D0 + 0,177E1/E0 + 0,257M1/M0 + 0,073P1/P0 + 0,158X1/X0)
+  fPolGeneral := '';
+  for x := 0 to Length(listadoFpolGeneral) - 1 do
+  begin
+    fPolGeneral := fPolGeneral + listadoFpolGeneral[x].coeficiente +
+      listadoFpolGeneral[x].indice + '1/' + listadoFpolGeneral[x]
+      .indice + '0 + ';
+  end;
+  fPolGeneral := Copy(fPolGeneral, 1, Length(fPolGeneral) - 2);
+  fPolGeneral := 'PR = P0 (' + fPolGeneral + ')';
+  frmMain.lbl_FpolGeneral.Text := fPolGeneral;
+  frmMain.lbl_FpolGeneral.Hint := fPolGeneral;
+  frmMain.lbl_FpolGeneral.ShowHint := True;
+end;
+
+/// <summary>TODO: Descripción de ComprobarInconsistenciaCuadrillas.</summary>
+procedure ComprobarInconsistenciaCuadrillas();
+
+var
+  x: Integer;
+  tmpstr: string;
+  inconsistencia: Boolean;
+begin
+  inconsistencia := False;
+  x := 1;
+  while (x < frmMain.grid_FpolCuadrillaTipo.RowCount) and
+    (not inconsistencia) do
+  begin
+    tmpstr := frmMain.grid_FpolCuadrillaTipo.cells[10, x];
+    if tmpstr <> '' then
+      inconsistencia := True;
+    Inc(x);
+  end;
+  if inconsistencia then
+    frmMain.grid_FpolCuadrillaTipo.columns[10].width := 100
+  else
+    frmMain.grid_FpolCuadrillaTipo.columns[10].width := 0;
+end;
+
+/// <summary>TODO: Descripción de activa_gridCuadrillaTipo.</summary>
+procedure activa_gridCuadrillaTipo();
+
+type
+  dat_fpolCuadrilla = record
+    codSubCategoria: string;
+    descripcionSubCategoria: string;
+    horasLaboradas: string;
+    precioBase: string;
+    inconsistencia: Boolean;
+  end;
+
+var
+  listaIndicesB: array of dat_fpol2;
+  tmpstr: string;
+  x, Y: Integer;
+  salir: Boolean;
+  TvalHoras: Double;
+  TotalPrecio: Double;
+  TotalTrabajo: Double;
+  listadoHorasCuadrillas: array of dat_fpolCuadrilla;
+  precio1, precio2: string;
+  coeficiente: Double;
+begin
+  frmMain.grid_FpolCuadrillaTipo.ClearNormalCells;
+  frmMain.grid_FpolCuadrillaTipo.cells[0, 0] := '#';
+  frmMain.grid_FpolCuadrillaTipo.cells[1, 0] := 'Término';
+  frmMain.grid_FpolCuadrillaTipo.cells[2, 0] := 'Código';
+  frmMain.grid_FpolCuadrillaTipo.cells[3, 0] := 'Descripción de Indices';
+  frmMain.grid_FpolCuadrillaTipo.cells[4, 0] := 'SubCategoría';
+  frmMain.grid_FpolCuadrillaTipo.cells[5, 0] := 'S.H.M.';
+  frmMain.grid_FpolCuadrillaTipo.cells[6, 0] := 'S.H.R.';
+  frmMain.grid_FpolCuadrillaTipo.cells[7, 0] := 'Trabajo';
+  frmMain.grid_FpolCuadrillaTipo.cells[8, 0] := 'C. Directo';
+  frmMain.grid_FpolCuadrillaTipo.cells[9, 0] := 'Coeficiente';
+  frmMain.grid_FpolCuadrillaTipo.cells[10, 0] := 'Inconsistencia Precios';
+  SetLength(listaIndicesB, 0);
+  Y := 0;
+  for x := 0 to Length(listadoRecursosFP) - 1 do
+  begin
+    tmpstr := listadoRecursosFP[x].indice;
+    if tmpstr = 'B' then
+    begin
+      SetLength(listaIndicesB, Y + 1);
+      listaIndicesB[Y].codUnicoRecurso := listadoRecursosFP[x].codRecurso;
+      listaIndicesB[Y].codSubCategoria := listadoRecursosFP[x].subcategoria;
+      listaIndicesB[Y].cantidad := listadoRecursosFP[x].cantidad;
+      listaIndicesB[Y].precioBase := listadoRecursosFP[x].precio;
+      Inc(Y);
+    end;
+  end;
+  { ORDENACION DE ARRAY DE RECORDS }
+  TArray.Sort<dat_fpol2>(listaIndicesB, TComparer<dat_fpol2>.Construct(
+    function(const Left, Right: dat_fpol2): Integer
+    begin
+      Result := CompareText(Left.codSubCategoria, Right.codSubCategoria);
+    end));
+
+  SetLength(listadoHorasCuadrillas, 0);
+  for x := 0 to Length(listaIndicesB) - 1 do
+  begin
+    tmpstr := listaIndicesB[x].codSubCategoria;
+    Y := 0;
+    salir := False;
+    while (not salir) and (Y < Length(listadoHorasCuadrillas)) do
+    begin
+      if tmpstr = listadoHorasCuadrillas[Y].codSubCategoria then
+      begin
+        salir := True;
+        TvalHoras := SafeStrToFloat(listadoHorasCuadrillas[Y].horasLaboradas);
+        TvalHoras := TvalHoras + SafeStrToFloat(listaIndicesB[x].cantidad);
+        listadoHorasCuadrillas[Y].horasLaboradas := FloatToStr(TvalHoras);
+        precio1 := listadoHorasCuadrillas[Y].precioBase;
+        precio2 := listaIndicesB[x].precioBase;
+        if precio1 <> precio2 then
+        begin
+          listadoHorasCuadrillas[Y].inconsistencia := True;
+        end;
+      end;
+      Inc(Y);
+    end;
+    if not salir then
+    begin
+      Y := Length(listadoHorasCuadrillas);
+      SetLength(listadoHorasCuadrillas, Y + 1);
+      listadoHorasCuadrillas[Y].codSubCategoria := tmpstr;
+      listadoHorasCuadrillas[Y].descripcionSubCategoria :=
+        daNombreSubcategoriaFpol('4', tmpstr);
+      listadoHorasCuadrillas[Y].horasLaboradas := listaIndicesB[x].cantidad;
+      listadoHorasCuadrillas[Y].precioBase := listaIndicesB[x].precioBase;
+      listadoHorasCuadrillas[Y].inconsistencia := False;
+    end;
+  end;
+  TotalPrecio := 0;
+  TotalTrabajo := 0;
+  TvalHoras := 0;
+  frmMain.grid_FpolCuadrillaTipo.columns[10].width := 0;
+  for x := 0 to Length(listadoHorasCuadrillas) - 1 do
+  begin
+    frmMain.grid_FpolCuadrillaTipo.RowCount := x + 1;
+    frmMain.grid_FpolCuadrillaTipo.cells[0, x + 1] :=
+      ponerCerosInicio(IntToStr(x + 1), 3);
+    frmMain.grid_FpolCuadrillaTipo.cells[1, x + 1] := 'B';
+    frmMain.grid_FpolCuadrillaTipo.cells[4, x + 1] := listadoHorasCuadrillas
+      [x].descripcionSubCategoria;
+    frmMain.grid_FpolCuadrillaTipo.cells[5, x + 1] :=
+      ForzarCadenaNDecimales(listadoHorasCuadrillas[x].precioBase,
+      ndecimalesMoneda);
+    frmMain.grid_FpolCuadrillaTipo.cells[6, x + 1] :=
+      ForzarCadenaNDecimales(listadoHorasCuadrillas[x].precioBase,
+      ndecimalesMoneda);
+    TvalHoras := SafeStrToFloat
+      (ForzarCadenaNDecimales(listadoHorasCuadrillas[x].precioBase, 2));
+    frmMain.grid_FpolCuadrillaTipo.cells[7, x + 1] :=
+      ForzarCadenaNDecimales(listadoHorasCuadrillas[x].horasLaboradas,
+      ndecimalesMoneda);
+    TotalTrabajo := TotalTrabajo +
+      StrToFloatDef(listadoHorasCuadrillas[x].horasLaboradas, 0);
+    TvalHoras := TvalHoras * StrToFloatDef
+      (listadoHorasCuadrillas[x].horasLaboradas, 0);
+    TotalPrecio := TotalPrecio + TvalHoras;
+    frmMain.grid_FpolCuadrillaTipo.cells[8, x + 1] :=
+      ForzarCadenaNDecimales(FloatToStr(TvalHoras), ndecimalesMoneda);
+    if listadoHorasCuadrillas[x].inconsistencia then
+    begin
+      frmMain.grid_FpolCuadrillaTipo.cells[10, x + 1] := 'Revisar';
+    end;
+  end;
+  frmMain.grid_FpolCuadrillaTipo.RowCount := x + 1;
+  frmMain.lbl_CuadrillaTrabajo.Text :=
+    ForzarCadenaNDecimales(FloatToStr(TotalTrabajo), ndecimalesPresupuesto);
+  frmMain.lbl_CuadrillaCosto.Text := ForzarCadenaNDecimales
+    (FloatToStr(TotalPrecio), ndecimalesMoneda);
+  frmMain.lbl_CuadrillaIndice.Text := decimal_correcto('1,000');
+  for x := 1 to frmMain.grid_FpolCuadrillaTipo.RowCount - 1 do
+  begin
+    TvalHoras := StrToFloatDef(frmMain.grid_FpolCuadrillaTipo.cells[8, x], 0);
+    coeficiente := TvalHoras / TotalPrecio;
+    frmMain.grid_FpolCuadrillaTipo.cells[9, x] :=
+      ForzarCadenaNDecimales(FloatToStr(coeficiente), ndecimalesMoneda);
+  end;
+  ComprobarInconsistenciaCuadrillas();
+end;
+
+/// <summary>
+/// Devuelve información calculada o consultada en daNombreSubcategoriaFpol.
+/// </summary>
+function daNombreSubcategoriaFpol(CodCategoria, codSubCategoria
+  : string): string;
+
+var
+  qry: TUniQuery;
+begin
+  Result := '';
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT Descripcion ' + '  FROM categoriaApus ' +
+        ' WHERE codBase = :codBase ' +
+        '   AND categoria_base = :categoria_base ' + '   AND ciu = :ciu');
+      { *) }
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('ciu').AsString := codSubCategoria;
+      ParamByName('categoria_base').AsString := CodCategoria;
+      Prepare;
+      Open;
+      Result := FieldByName('Descripcion').AsString;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de estadoIndices.</summary>
+procedure estadoIndices();
+
+var
+  recursosSinAsignar: Integer;
+  x: Integer;
+  tmpstr: string;
+begin
+  recursosSinAsignar := 0;
+  for x := 0 to Length(listadoRecursosFP) - 1 do
+  begin
+    tmpstr := listadoRecursosFP[x].indice;
+    if tmpstr = '' then
+    begin
+      Inc(recursosSinAsignar);
+    end;
+  end;
+  frmMain.lbl_RecursosPorAsignar.Text := 'Recursos por Asignar: ' +
+    IntToStr(recursosSinAsignar);
+  if recursosSinAsignar = 0 then
+  begin
+    calculaResumenFpol();
+  end
+  else
+  begin
+    frmMain.lbl_FpolGeneral.Text := '';
+  end;
+end;
+
+/// <summary>TODO: Descripción de sincronizaIndiceyCoeficientes.</summary>
+procedure sincronizaIndiceyCoeficientes();
+
+var
+  x, Y: Integer;
+  IndiceS: string;
+  totalIndice: Double;
+  resilencia: Double;
+  porcentaje: Double;
+  tmpstr: string;
+begin
+  for x := 1 to frmMain.grid_FpolIndicesDisponibles.RowCount - 1 do
+  begin
+    IndiceS := frmMain.grid_FpolIndicesDisponibles.cells[1, x];
+    if IndiceS <> '' then
+    begin
+      totalIndice := 0;
+      for Y := 0 to Length(listadoRecursosFP) - 1 do
+      begin
+        if IndiceS = listadoRecursosFP[Y].indice then
+        begin
+          tmpstr := listadoRecursosFP[Y].total;
+          tmpstr := decimal_correcto(tmpstr);
+          totalIndice := totalIndice + StrToFloatDef(tmpstr, 0);
+        end;
+      end;
+      frmMain.grid_FpolIndicesDisponibles.cells[4, x] :=
+        base_activa.simboloMoneda + FloatToStr(totalIndice);
+    end;
+  end;
+  totalIndice := 0;
+  for x := 1 to frmMain.grid_FpolIndicesDisponibles.RowCount - 1 do
+  begin
+    tmpstr := frmMain.grid_FpolIndicesDisponibles.cells[4, x];
+    tmpstr := ReplaceStr(tmpstr, base_activa.simboloMoneda, '');
+    totalIndice := totalIndice + StrToFloatDef(tmpstr, 0);
+  end;
+  tmpstr := FloatToStr(totalIndice);
+  frmMain.lbl_ValorTotalIndice.Text := base_activa.simboloMoneda + tmpstr;
+  resilencia := 0;
+  for x := 1 to frmMain.grid_FpolIndicesDisponibles.RowCount - 2 do
+  begin
+    tmpstr := frmMain.grid_FpolIndicesDisponibles.cells[4, x];
+    tmpstr := ReplaceStr(tmpstr, base_activa.simboloMoneda, '');
+    porcentaje := SafeStrToFloat(tmpstr);
+    porcentaje := porcentaje / totalIndice;
+    resilencia := resilencia + porcentaje;
+    tmpstr := FloatToStr(porcentaje);
+    frmMain.grid_FpolIndicesDisponibles.cells[5, x] := tmpstr;
+  end;
+  porcentaje := 1 - resilencia;
+  tmpstr := FloatToStr(porcentaje);
+  frmMain.grid_FpolIndicesDisponibles.cells[5, x] := tmpstr;
+  frmMain.lbl_CoeficienteTotalFpol.Text := decimal_correcto('1.000');
+end;
+
+/// <summary>
+/// Implementa la lógica principal de addlog.
+/// </summary>
+procedure addlog(Texto: string);
+
+var
+  listaLog: TStringList;
+  ficheroLog: string;
+  datos: string;
+begin
+{$IFDEF DEBUG}
+  listaLog := TStringList.Create;
+  rutaApp := ExtractFilePath(rutaApp);
+  ficheroLog := rutaApp;
+  if RightStr(ficheroLog, 1) <> '\' then
+    ficheroLog := ficheroLog + '\';
+  ficheroLog := ficheroLog + 'GiProy_' + FormatDateTime('yyyymmdd',
+    Now) + '.log';
+  if FileExists(ficheroLog) then
+    listaLog.LoadFromFile(ficheroLog);
+  datos := FormatDateTime('dd/mm/yy hh:nn:ss', Now);
+  datos := datos + ' --> ' + Texto;
+  listaLog.Add(datos);
+  listaLog.SaveToFile(ficheroLog);
+{$ENDIF}
+end;
+
+/// <summary>TODO: Descripción de borraDBDatosDervicacion.</summary>
+procedure borraDBDatosDervicacion();
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      {(*}
+      SQL.Text:=
+        'DELETE FROM presupuestos_cronogramas ' +
+        'WHERE ' +
+        '  codBase = :codBase AND '+
+        '  codPresupuesto = :codPresupuesto AND ' +
+        '  revision = :revision';
+        ;
+      {*)}
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+function cargarDatosDerivacion(LForm: Tfrm_CronoDerivaciones): Boolean;
+var
+  qry: TUniQuery;
+  sqlstr: string;
+  listadoDistribucion: TStringList;
+  x: Integer;
+  tmpstr: string;
+  derivado: Boolean;
+  ndistribuciones: Integer;
+  cantidad1, cantidad2: Double;
+begin
+  Result := False;
+  try
+    qry := TUniQuery.Create(nil);
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        {(*}
+        sql.Text :=
+          'SELECT ' +
+          '  Derivacion ' +
+          'FROM presupuestos_cronogramas ' +
+          'WHERE ' +
+          '  codBase            = :codBase ' +
+          '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision       = :Revision ' +
+          '  AND codUnicoItems  = :codUnicoItems';
+        {*)}
+        for x := 1 to frmMain.grid_crono0.RowCount - 1 do
+        begin
+          if frmMain.grid_crono0.cells[10, x] <> '' then
+          begin
+            ParamByName('codBase').AsString := base_activa.codBase;
+            ParamByName('codPresupuesto').AsString := codProyecto;
+            ParamByName('revision').AsString := revision;
+            ParamByName('codUnicoItems').AsString :=
+              frmMain.grid_crono0.cells[10, x];
+            Open;
+            frmMain.grid_crono0.cells[11, x] :=
+              FieldByName('Derivacion').AsString;
+          end;
+        end;
+        Close;
+        SQL.Clear;
+        {(*}
+        sql.Text :=
+          'SELECT * ' +
+          'FROM presupuestos_cronogramas ' +
+          'WHERE ' +
+          '  codBase            = :codBase ' +
+          '  AND codPresupuesto = :codPresupuesto ' +
+          '  AND revision       = :Revision ' +
+          '  AND codUnicoItems IS NOT NULL ' +
+          'LIMIT 1';
+        {*)}
+        SQL.Add(sqlstr);
+        ParamByName('codBase').AsString := base_activa.codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revision;
+        Open;
+        tmpstr := FieldByName('tipoPeriodo').AsString;
+        if tmpstr <> '' then
+        begin
+          posicionaCombo(frmMain.cbb_cronoTipoPeriodo, tmpstr);
+          frmMain.lbl_cronogramaNPeriodos.Text :=
+            FieldByName('periodos').AsString;
+          tmpstr := FieldByName('tipoDerivacion').AsString;
+          LForm.chkHomogenea.IsChecked := False;
+          LForm.chkCustom.IsChecked := False;
+          if tmpstr = 'Homogenea' then
+          begin
+            LForm.chkHomogenea.IsChecked := True;
+            listadoDistribucion := TStringList.Create;
+            listadoDistribucion.Text := FieldByName('derivacion').AsString;
+            LForm.grid_DefDerivacion.ColumnCount := listadoDistribucion.Count;
+            for x := 0 to listadoDistribucion.Count - 1 do
+            begin
+              LForm.grid_DefDerivacion.cells[x, 1] := listadoDistribucion[x];
+              AjustaFloatGrid(LForm.grid_DefDerivacion, x);
+            end;
+          end
+          else
+          begin
+            LForm.chkCustom.IsChecked := True;
+          end;
+        end
+        else
+        begin
+          frmMain.cbb_cronoTipoPeriodo.itemindex := 3;
+          LForm.chkHomogenea.IsChecked := True;
+          LForm.chkCustom.IsChecked := False;
+          listadoDistribucion := TStringList.Create;
+          calculaPlazosCronograma();
+          ndistribuciones :=
+            SafeStrToInt(frmMain.lbl_cronogramaNPeriodos.Text);
+          cantidad2 := 0;
+          cantidad1 := (100 / ndistribuciones);
+          cantidad2 := 100 - (cantidad1 * (ndistribuciones - 1));
+          for x := 1 to ndistribuciones - 1 do
+          begin
+            listadoDistribucion.Add(FloatToStr(cantidad1));
+          end;
+          listadoDistribucion.Add(FloatToStr(cantidad2));
+          for x := 0 to listadoDistribucion.Count - 1 do
+          begin
+            LForm.grid_DefDerivacion.cells[x, 1] := listadoDistribucion[x];
+            AjustaFloatGrid(LForm.grid_DefDerivacion, x);
+          end;
+        end;
+        Result := True;
+      end;
+    finally
+      if faltaDatosDerivacion = 0 then
+      begin
+        calculaPlazosCronograma();
+      end;
+      qry.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+function compruebaEleccionBase(): Boolean;
+
+var
+  qry: TUniQuery;
+  codProyecto: string;
+  revision: string;
+  contador: Integer;
+begin
+  Result := False;
+  codProyecto := frmMain.edt_CodigoPresupuesto1.Text;
+  revision := frmMain.lbl_RevisionPresupuesto.Text;
+  if revision = '0' then
+  begin
+    qry := TUniQuery.Create(nil);
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('SELECT COUNT(*) AS Contador ' +
+          '  FROM presupuestos_DatosGenerales ' +
+          ' WHERE codPresupuesto = :codPresupuesto');
+        { *) }
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        Prepare;
+        Open;
+        contador := FieldByName('contador').AsInteger;
+        if contador > 1 then
+          Result := False
+        else
+        begin
+          Result := True;
+        end;
+      end;
+    finally
+      qry.Free;
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de totalizaValoresIndice.</summary>
+procedure totalizaValoresIndice();
+
+var
+  qry: TUniQuery;
+  listadoIndices: TStringList;
+  listadoPrecioIndices: TStringList;
+  x, Y: Integer;
+  indice: string;
+  salir: Boolean;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  listadoIndices := TStringList.Create;
+  listadoPrecioIndices := TStringList.Create;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT termino ' + '  FROM presupuestos_IndicesSeleccionados '
+        + ' WHERE codBase = :codBase ' +
+        '   AND codPresupuesto = :codPresupuesto ' +
+        '   AND revision = :revision');
+      { *) }
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      Open;
+      First;
+      while not Eof do
+      begin
+        tmpstr := FieldByName('termino').AsString;
+        listadoIndices.Add(tmpstr);
+        Next;
+      end;
+      for x := 0 to listadoIndices.Count - 1 do
+      begin
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('SELECT SUM(CantidadUnidad) AS cantidadRecurso ' +
+          '  FROM apus_Items ' + ' WHERE codBase = :codBase ' +
+          '   AND termino = :termino');
+        { *) }
+        ParamByName('codBase').AsString := base_activa.codBase;
+        ParamByName('termino').AsString := listadoIndices[x];
+        Prepare;
+        Open;
+        tmpstr := FieldByName('cantidadRecurso').AsString;
+        if tmpstr = '' then
+          tmpstr := '0';
+        tmpstr := decimal_correcto(tmpstr);
+        listadoPrecioIndices.Add(tmpstr);
+      end;
+    end;
+  finally
+    for x := 1 to frmMain.grid_FpolIndicesDisponibles.RowCount - 1 do
+    begin
+      indice := frmMain.grid_FpolIndicesDisponibles.cells[1, x];
+      salir := False;
+      Y := 0;
+      while (not salir) and (Y < listadoIndices.Count) do
+      begin
+        if indice = listadoIndices[Y] then
+        begin
+          salir := True;
+          tmpstr := listadoPrecioIndices[Y];
+          frmMain.grid_FpolIndicesDisponibles.cells[4, x] := tmpstr;
+        end;
+        Inc(Y);
+      end;
+    end;
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de calculaValoresIndices.</summary>
+/// <param name="ARow">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de calculaValoresIndices.
+/// </summary>
+procedure calculaValoresIndices(ARow: Integer);
+
+var
+  x: Integer;
+  valorAnterior: Double;
+  tmpfloat: Double;
+  indice: string;
+  tmpstr: string;
+  codUnicoItem: string;
+begin
+  indice := frmMain.grid_Fpolinomica.cells[1, ARow];
+  valorAnterior := 0;
+  if indice <> '' then
+  begin
+    for x := 0 to frmMain.grid_Fpolinomica.RowCount - 1 do
+    begin
+      if indice = frmMain.grid_Fpolinomica.cells[1, x] then
+      begin
+        tmpstr := frmMain.grid_Fpolinomica.cells[7, x];
+        tmpstr := ReplaceStr(tmpstr, base_activa.simboloMoneda, '');
+        tmpstr := decimal_correcto(tmpstr);
+        valorAnterior := valorAnterior + StrToFloatDef(tmpstr, 0);
+      end;
+    end;
+    ajustaValorIndice(indice, valorAnterior);
+    codUnicoItem := frmMain.grid_Fpolinomica.cells[9, ARow];
+    sincronizaIndices(indice, codUnicoItem);
+  end;
+  estadoIndices();
+end;
+
+/// <summary>TODO: Descripción de cargaTablaIndicesSeleccionados.</summary>
+/// <param name="modo">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de cargaTablaIndicesSeleccionados.
+/// </summary>
+procedure cargaTablaIndicesSeleccionados(modo: string);
+
+const
+  cCaseStrings: array[0..3] of string = ('E', 'B', 'OTROS', 'TODOS');
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  tmpstr: string;
+  SQLText: string;
+  entrar: Boolean;
+begin
+  qry := TUniQuery.Create(nil);
+  modo := AnsiUpperCase(modo);
+  limpia_gridFpolIndices();
+  entrar := True;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select count(*) as nItems from presupuestos_indicesSeleccionados where codPresupuesto='
+        + quotedstr(codProyecto) + ' and codBase=' +
+        quotedstr(base_activa.codBase) + ' and revision=' +
+        quotedstr(revision));
+      Prepare;
+      Open;
+      tmpstr := FieldByName('nItems').AsString;
+      x := StrToIntDef(tmpstr, 0);
+      if x > 0 then
+        entrar := False;
+      Close;
+      SQL.Clear;
+      case IndexStr(modo, cCaseStrings) of
+        0:
+          begin
+            SQLText :=
+              'select * from presupuestos_indicesSeleccionados where codPresupuesto='
+              + quotedstr(codProyecto) + ' and codBase=' +
+              quotedstr(base_activa.codBase) + ' and revision=' +
+              quotedstr(revision) + ' and termino=' + quotedstr(modo);
+          end;
+        1:
+          begin
+            SQLText :=
+              'select * from presupuestos_indicesSeleccionados where codPresupuesto='
+              + quotedstr(codProyecto) + ' and codBase=' +
+              quotedstr(base_activa.codBase) + ' and revision=' +
+              quotedstr(revision) + ' and termino=' + quotedstr(modo);
+          end;
+        2:
+          begin
+            SQLText :=
+              'select * from presupuestos_indicesSeleccionados where codPresupuesto='
+              + quotedstr(codProyecto) + ' and codBase=' +
+              quotedstr(base_activa.codBase) + ' and revision=' +
+              quotedstr(revision) + ' and termino<>' + quotedstr('E') +
+              ' and termino<>' + quotedstr('B');
+          end;
+        3:
+          begin
+            SQLText :=
+              'select * from presupuestos_indicesSeleccionados where codPresupuesto='
+              + quotedstr(codProyecto) + ' and codBase=' +
+              quotedstr(base_activa.codBase) + ' and revision=' +
+              quotedstr(revision);
+          end;
+      end;
+      SQL.Add(SQLText);
+      Prepare;
+      Open;
+      x := 1;
+      while not Eof do
+      begin
+        frmMain.grid_FpolIndicesDisponibles.RowCount := x + 1;
+        frmMain.grid_FpolIndicesDisponibles.cells[0, x] :=
+          ponerCerosInicio(IntToStr(x), 3);
+        frmMain.grid_FpolIndicesDisponibles.cells[1, x] :=
+          FieldByName('termino').AsString;
+        frmMain.grid_FpolIndicesDisponibles.cells[2, x] :=
+          FieldByName('codIndice').AsString;
+        frmMain.grid_FpolIndicesDisponibles.cells[3, x] :=
+          FieldByName('descripcion').AsString;
+        Next;
+        Inc(x);
+      end;
+    end;
+    if frmMain.grid_FpolIndicesDisponibles.RowCount = 1 then
+    begin
+      frmMain.grid_FpolIndicesDisponibles.cells[0, 1] := '001';
+      frmMain.grid_FpolIndicesDisponibles.cells[1, 1] := 'E';
+      frmMain.grid_FpolIndicesDisponibles.cells[2, 1] := '90';
+      frmMain.grid_FpolIndicesDisponibles.cells[3, 1] :=
+        'Equipo y maquinaria de Construc. vial';
+      frmMain.grid_FpolIndicesDisponibles.cells[0, 2] := '002';
+      frmMain.grid_FpolIndicesDisponibles.cells[1, 2] := 'B';
+      frmMain.grid_FpolIndicesDisponibles.cells[2, 2] := '75';
+      frmMain.grid_FpolIndicesDisponibles.cells[3, 2] := 'Cuadrilla Tipo';
+      frmMain.grid_FpolIndicesDisponibles.RowCount := 3;
+      guardaTablaIndicesSeleccionados;
+    end;
+  finally
+    frmMain.grid_Fpolinomica.columns[1].ComboItems.Clear;
+    for x := 1 to frmMain.grid_FpolIndicesDisponibles.RowCount - 1 do
+    begin
+      tmpstr := frmMain.grid_FpolIndicesDisponibles.cells[1, x];
+      if tmpstr <> '' then
+      begin
+        tmpstr := UpperCase(tmpstr);
+        frmMain.grid_FpolIndicesDisponibles.cells[1, x] := tmpstr;
+        frmMain.grid_Fpolinomica.columns[1].ComboItems.Add(tmpstr);
+      end;
+    end;
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de actualizaComboIndices.</summary>
+procedure actualizaComboIndices();
+
+var
+  x: Integer;
+  tmpstr: string;
+begin
+  cargaOpcionesIndices();
+  frmMain.grid_Fpolinomica.columns[1].ComboItems.Clear;
+  frmMain.grid_FpolCuadrillaTipo.columns[1].ComboItems.Clear;
+  for x := 1 to frmMain.grid_FpolIndicesDisponibles.RowCount - 1 do
+  begin
+    tmpstr := frmMain.grid_FpolIndicesDisponibles.cells[1, x];
+    if tmpstr <> '' then
+    begin
+      tmpstr := UpperCase(tmpstr);
+      frmMain.grid_Fpolinomica.columns[1].ComboItems.Add(tmpstr);
+      frmMain.grid_FpolCuadrillaTipo.columns[1].ComboItems.Add(tmpstr);
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de guardaTablaIndicesCuadrilla.</summary>
+procedure guardaTablaIndicesCuadrilla();
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  salarioMinimo: string;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from Presupuestos_FpolCuadrillas where codBase=' +
+        quotedstr(base_activa.codBase) + ' and codPresupuesto=' +
+        quotedstr(codProyecto) + ' and revision=' + quotedstr(revision));
+      Prepare;
+      ExecSQL;
+      Close;
+      SQL.Clear;
+      SQL.Add('insert into Presupuestos_FpolCuadrillas (codBase, codPresupuesto, revision, indice, codIndice, descripcion, salarioMinimo, SHR, Trabajo, Coeficiente, costoDirecto) ');
+      SQL.Add('Values (:codBase, :codPresupuesto, :revision,  :codIndice, :indice, :descripcion, :salarioMinimo, :SHR, :Trabajo, :Coeficiente, :costoDirecto)');
+      for x := 1 to frmMain.grid_FpolCuadrillaTipo.RowCount - 1 do
+      begin
+        if frmMain.grid_FpolCuadrillaTipo.cells[3, x] <> '' then
+        begin
+          Prepare;
+          ParamByName('codBase').AsString := base_activa.codBase;
+          ParamByName('codPresupuesto').AsString := codProyecto;
+          ParamByName('revision').AsString := revision;
+          ParamByName('Indice').AsString :=
+            frmMain.grid_FpolCuadrillaTipo.cells[2, x];
+          ParamByName('codIndice').AsString :=
+            frmMain.grid_FpolCuadrillaTipo.cells[3, x];
+          ParamByName('descripcion').AsString :=
+            frmMain.grid_FpolCuadrillaTipo.cells[4, x];
+          salarioMinimo := frmMain.grid_FpolCuadrillaTipo.cells[5, x];
+          salarioMinimo := decimal_correcto(salarioMinimo);
+          ParamByName('salarioMinimo').AsFloat :=
+            StrToFloatDef(salarioMinimo, 0);
+          tmpstr := decimal_correcto
+            (frmMain.grid_FpolCuadrillaTipo.cells[6, x]);
+          ParamByName('SHR').AsFloat := StrToFloatDef(tmpstr, 0);
+          tmpstr := decimal_correcto
+            (frmMain.grid_FpolCuadrillaTipo.cells[7, x]);
+          ParamByName('trabajo').AsFloat := StrToFloatDef(tmpstr, 0);
+          tmpstr := decimal_correcto
+            (frmMain.grid_FpolCuadrillaTipo.cells[8, x]);
+          ParamByName('costoDirecto').AsFloat := StrToFloatDef(tmpstr, 0);
+          tmpstr := decimal_correcto
+            (frmMain.grid_FpolCuadrillaTipo.cells[9, x]);
+          ParamByName('coeficiente').AsFloat := StrToFloatDef(tmpstr, 0);
+          ExecSQL;
+        end;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de cargarValoresCuadrillaTipo.</summary>
+procedure cargarValoresCuadrillaTipo();
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  tmpstr: string;
+  descripcion, codIndice, indice, salarioMinimo: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from Presupuestos_FpolCuadrillas where codBase=' +
+        quotedstr(base_activa.codBase) + ' and codPresupuesto=' +
+        quotedstr(codProyecto) + ' and revision=' + quotedstr(revision) +
+        ' and descripcion=:descripcion');
+      for x := 1 to frmMain.grid_FpolCuadrillaTipo.RowCount - 1 do
+      begin
+        Prepare;
+        descripcion := frmMain.grid_FpolCuadrillaTipo.cells[4, x];
+        if descripcion <> '' then
+        begin
+          ParamByName('descripcion').AsString := descripcion;
+          Open;
+          indice := FieldByName('indice').AsString;
+          codIndice := FieldByName('codIndice').AsString;
+          salarioMinimo := FieldByName('salarioMinimo').AsString;
+          salarioMinimo := decimal_correcto(salarioMinimo);
+          frmMain.grid_FpolCuadrillaTipo.cells[2, x] := codIndice;
+          frmMain.grid_FpolCuadrillaTipo.cells[3, x] := indice;
+          if salarioMinimo <> '' then
+            frmMain.grid_FpolCuadrillaTipo.cells[5, x] :=
+              ForzarCadenaNDecimales(salarioMinimo, ndecimalesMoneda);
+        end;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary> Implementa la lógica principal de guardaTablaIndicesSeleccionados. </summary>
+function guardaTablaIndicesSeleccionados(): Boolean;
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  IndiceS: string;
+begin
+  qry := TUniQuery.Create(nil);
+  Result := True;
+  try
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        SQL.Add('delete from presupuestos_indicesSeleccionados where codPresupuesto='
+          + quotedstr(codProyecto) + ' and codBase=' +
+          quotedstr(base_activa.codBase) + ' and revision=' +
+          quotedstr(revision));
+        Prepare;
+        ExecSQL;
+        Close;
+        SQL.Clear;
+        SQL.Add('insert into presupuestos_indicesSeleccionados (codBase, codPresupuesto, revision, codIndice, descripcion, termino) VALUES (:codBase, :codPresupuesto, :revision, :codIndice, :descripcion, :termino)');
+        Prepare;
+        for x := 1 to frmMain.grid_FpolIndicesDisponibles.RowCount - 1 do
+        begin
+          IndiceS := frmMain.grid_FpolIndicesDisponibles.cells[1, x];
+          if IndiceS <> '' then
+          begin
+            ParamByName('codBase').AsString := base_activa.codBase;
+            ParamByName('codPresupuesto').AsString := codProyecto;
+            ParamByName('revision').AsString :=
+              frmMain.lbl_RevisionPresupuesto.Text;
+            ParamByName('codIndice').AsString :=
+              frmMain.grid_FpolIndicesDisponibles.cells[2, x];
+            ParamByName('descripcion').AsString :=
+              frmMain.grid_FpolIndicesDisponibles.cells[3, x];
+            ParamByName('termino').AsString := IndiceS;
+            ExecSQL;
+          end;
+        end;
+      end;
+    finally
+      qry.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de sincronizaIndices.</summary>
+/// <param name="indice">TODO.</param>
+/// <param name="codUnicoItem">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de sincronizaIndices.
+/// </summary>
+procedure sincronizaIndices(indice, codUnicoItem: string);
+
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('update apus_items set termino=:termino where idUnicoRecurso=' +
+        quotedstr(codUnicoItem) + ' and codBase=' +
+        quotedstr(base_activa.codBase));
+      Prepare;
+      ParamByName('termino').AsString := indice;
+      ExecSQL;
+      Close;
+      SQL.Clear;
+      SQL.Add('update presupuestos_recursos set termino=:termino where idUnicoRecurso='
+        + quotedstr(codUnicoItem) + ' and codBase=' +
+        quotedstr(base_activa.codBase));
+      Prepare;
+      ParamByName('termino').AsString := indice;
+      ExecSQL;
+    end;
+  finally
+    actualizaIndiceEnTabla(codUnicoItem, indice);
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de actualizaIndiceEnTabla.</summary>
+/// <param name="codUnicoIndice">TODO.</param>
+/// <param name="IndiceS">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de actualizaIndiceEnTabla.
+/// </summary>
+procedure actualizaIndiceEnTabla(codUnicoIndice, IndiceS: string);
+
+var
+  x: Integer;
+  salir: Boolean;
+begin
+  salir := False;
+  x := 0;
+  while (not salir) and (x < Length(listadoRecursosFP)) do
+  begin
+    if codUnicoIndice = listadoRecursosFP[x].codRecurso then
+    begin
+      salir := True;
+      listadoRecursosFP[x].indice := IndiceS;
+    end;
+    Inc(x);
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ajustaValorIndice.
+/// </summary>
+procedure ajustaValorIndice(indice: string; valor: Double);
+
+var
+  x: Integer;
+  tmpstr: string;
+  sumador: Double;
+  coeficiente: Double;
+  sumador2: Double;
+begin
+  sumador := 0;
+  for x := 1 to frmMain.grid_FpolIndicesDisponibles.RowCount - 1 do
+  begin
+    if frmMain.grid_FpolIndicesDisponibles.cells[1, x] = indice then
+    begin
+      tmpstr := FloatToStr(valor);
+      frmMain.grid_FpolIndicesDisponibles.cells[4, x] :=
+        base_activa.simboloMoneda + tmpstr;
+    end;
+    tmpstr := frmMain.grid_FpolIndicesDisponibles.cells[4, x];
+    tmpstr := ReplaceStr(tmpstr, base_activa.simboloMoneda, '');
+    tmpstr := decimal_correcto(tmpstr);
+    sumador := sumador + StrToFloatDef(tmpstr, 0);
+  end;
+  tmpstr := FloatToStr(sumador);
+  frmMain.lbl_ValorTotalIndice.Text := base_activa.simboloMoneda + tmpstr;
+  coeficiente := 0;
+  sumador2 := 0;
+  for x := 1 to frmMain.grid_FpolIndicesDisponibles.RowCount - 1 do
+  begin
+    tmpstr := frmMain.grid_FpolIndicesDisponibles.cells[4, x];
+    if tmpstr <> '' then
+    begin
+      tmpstr := ReplaceStr(tmpstr, base_activa.simboloMoneda, '');
+      tmpstr := decimal_correcto(tmpstr);
+      coeficiente := SafeStrToFloat(tmpstr);
+      coeficiente := coeficiente / sumador;
+      sumador2 := sumador2 + coeficiente;
+      tmpstr := FloatToStr(coeficiente);
+      frmMain.grid_FpolIndicesDisponibles.cells[5, x] := tmpstr;
+    end;
+  end;
+  tmpstr := FloatToStr(sumador2);
+  frmMain.lbl_CoeficienteTotalFpol.Text := tmpstr;
+end;
+
+/// <summary>TODO: Descripción de cargaOpcionesIndices.</summary>
+procedure cargaOpcionesIndices();
+
+var
+  qry: TUniQuery;
+  codigo: string;
+  descripcion: string;
+  x: Integer;
+  tmpstr: string;
+  Categoria: string;
+begin
+  qry := TUniQuery.Create(nil);
+  frmMain.grid_FpolIndicesDisponibles.columns[3].ComboItems.Clear;
+  frmMain.grid_FpolIndicesDisponibles.columns[2].ComboItems.Clear;
+  frmMain.grid_FpolCuadrillaTipo.columns[2].ComboItems.Clear;
+  frmMain.grid_FpolCuadrillaTipo.columns[3].ComboItems.Clear;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from IndicesPrecios order by descripcion');
+      Prepare;
+      Open;
+      x := 0;
+      SetLength(listadoIndiceFpol, x);
+      while not Eof do
+      begin
+        SetLength(listadoIndiceFpol, x + 1);
+        codigo := FieldByName('codIndice').AsString;
+        descripcion := FieldByName('descripcion').AsString;
+        listadoIndiceFpol[x].codigo := codigo;
+        listadoIndiceFpol[x].descripcion := descripcion;
+        frmMain.grid_FpolIndicesDisponibles.columns[3].ComboItems.Add
+          (descripcion);
+        Categoria := FieldByName('categoria').AsString;
+        if Categoria = '2' then
+          frmMain.grid_FpolCuadrillaTipo.columns[3].ComboItems.Add
+            (descripcion);
+        Inc(x);
+        Next;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de buscacodigoIndiceFpol.</summary>
+/// <param name="descripcion">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de buscacodigoIndiceFpol.
+/// </summary>
+function buscacodigoIndiceFpol(descripcion: string): string;
+
+var
+  salir: Boolean;
+  x: Integer;
+  tmpstr: string;
+begin
+  x := 0;
+  salir := False;
+  Result := '';
+  while (not salir) and (x < Length(listadoIndiceFpol) - 1) do
+  begin
+    tmpstr := listadoIndiceFpol[x].descripcion;
+    if tmpstr = descripcion then
+    begin
+      Result := listadoIndiceFpol[x].codigo;
+      salir := True;
+    end;
+    Inc(x);
+  end;
+end;
+
+/// <summary>TODO: Descripción de limpia_gridFpolIndices.</summary>
+procedure limpia_gridFpolIndices();
+begin
+  frmMain.grid_FpolIndicesDisponibles.ClearNormalCells;
+  frmMain.grid_FpolIndicesDisponibles.cells[0, 0] := '#';
+  frmMain.grid_FpolIndicesDisponibles.cells[1, 0] := 'Término';
+  frmMain.grid_FpolIndicesDisponibles.cells[2, 0] := 'Código';
+  frmMain.grid_FpolIndicesDisponibles.cells[3, 0] := 'Descripción de Indice';
+  frmMain.grid_FpolIndicesDisponibles.cells[4, 0] := 'C. Directo';
+  frmMain.grid_FpolIndicesDisponibles.cells[5, 0] := 'Coeficiente';
+  frmMain.grid_FpolIndicesDisponibles.RowCount := 1;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de IsConnected: Integer.
+/// </summary>
+function IsConnected: Integer;
+
+var
+  dwFlags: DWORD;
+begin
+  Result := -1;
+  if InternetGetConnectedState(@dwFlags, 0) then
+  begin
+    if (dwFlags and INTERNET_CONNECTION_MODEM) = INTERNET_CONNECTION_MODEM then
+      Result := 0 // Modem Connection
+    else if (dwFlags and INTERNET_CONNECTION_LAN) = INTERNET_CONNECTION_LAN then
+      Result := 1 // LAN Connection
+    else if (dwFlags and INTERNET_CONNECTION_PROXY) = INTERNET_CONNECTION_PROXY
+      then
+      Result := 2 // Connection thru Proxy
+    else if (dwFlags and INTERNET_CONNECTION_OFFLINE) =
+      INTERNET_CONNECTION_OFFLINE then
+      Result := -1 // Local system in offline mode
+    else if (dwFlags and INTERNET_CONNECTION_CONFIGURED) =
+      INTERNET_CONNECTION_CONFIGURED then
+      Result := 4
+        // Valid connection exists, but might or might not be connected
+  end
+  else
+    Result := -1; // Not Connected.
+end;
+
+/// <summary>TODO: Descripción de actualizaTablasIndices.</summary>
+procedure actualizaTablasIndices();
+
+type
+  dat_indice = record
+    codIndice: Integer;
+    descripcion: string;
+  end;
+
+  dat_valorIndice = record
+    codIndice: Integer;
+    mesAnio: string;
+    valor: string;
+  end;
+
+var
+  qry2: TUniQuery;
+  IndiceS: array of dat_indice;
+  valores: array of dat_valorIndice;
+  x: Integer;
+
+  // HTTP
+  J1, J2: TJSONObject;
+  ListaPrecios: TArray<TIndicePrecioItem>;
+  ListaValores: TArray<TIndiceValorItem>;
+  OkHTTP1, OkHTTP2: Boolean;
+begin
+  qry2 := TUniQuery.Create(nil);
+  J1 := nil;
+  J2 := nil;
+  try
+    if IsConnected > -1 then
+    begin
+      // =======================
+      // OBTENER INDICESPRECIOS
+      // =======================
+      SetLength(IndiceS, 0);
+      OkHTTP1 := False;
+      try
+        OkHTTP1 := ConsultarIndicesPreciosTipado(GlobalAuthToken,
+          ListaPrecios, J1);
+      except
+        OkHTTP1 := False;
+      end;
+
+      if OkHTTP1 and (Length(ListaPrecios) > 0) then
+      begin
+        SetLength(IndiceS, Length(ListaPrecios));
+        for x := 0 to High(ListaPrecios) do
+        begin
+          IndiceS[x].codIndice := StrToIntDef(ListaPrecios[x].codIndice, 0);
+          IndiceS[x].descripcion := ListaPrecios[x].descripcion;
+        end;
+      end
+      else
+      begin
+        // Si falla la API, dejamos el array vacío (no hay fallback SQL)
+        SetLength(IndiceS, 0);
+      end;
+
+      // ====================
+      // OBTENER INDICESVALOR
+      // ====================
+      SetLength(valores, 0);
+      OkHTTP2 := False;
+      try
+        OkHTTP2 := ConsultarIndicesValorTipado(GlobalAuthToken,
+          ListaValores, J2);
+      except
+        OkHTTP2 := False;
+      end;
+
+      if OkHTTP2 and (Length(ListaValores) > 0) then
+      begin
+        SetLength(valores, Length(ListaValores));
+        for x := 0 to High(ListaValores) do
+        begin
+          valores[x].codIndice := ListaValores[x].codIndice;
+          valores[x].mesAnio := ListaValores[x].mesAnio;
+          valores[x].valor := ListaValores[x].valor;
+        end;
+      end
+      else
+      begin
+        // Si falla la API, dejamos el array vacío (no hay fallback SQL)
+        SetLength(valores, 0);
+      end;
+
+      // ======================
+      // VOLCADO A con2 (DEST)
+      // ======================
+      with qry2 do
+      begin
+        Connection := DModule_1.con2;
+
+        // Limpieza
+        Close;
+        SQL.Clear;
+        SQL.Add('delete from indicesPrecios');
+        Prepare;
+        ExecSQL;
+        Close;
+        SQL.Clear;
+        SQL.Add('delete from indicesValor');
+        Prepare;
+        ExecSQL;
+
+        // Insertar precios
+        if Length(IndiceS) > 0 then
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('insert into indicesPrecios (codIndice, descripcion) values (:codIndice, :descripcion)');
+          Prepare;
+          for x := 0 to High(IndiceS) do
+          begin
+            ParamByName('codIndice').AsInteger := IndiceS[x].codIndice;
+            ParamByName('descripcion').AsString := IndiceS[x].descripcion;
+            ExecSQL;
+          end;
+        end;
+
+        // Insertar valores
+        if Length(valores) > 0 then
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('insert into indicesValor (codIndice, mesAnio, valor) values (:codIndice, :mesAnio, :valor)');
+          Prepare;
+          for x := 0 to High(valores) do
+          begin
+            ParamByName('codIndice').AsInteger := valores[x].codIndice;
+            ParamByName('mesAnio').AsString := valores[x].mesAnio;
+            ParamByName('valor').AsString := valores[x].valor;
+            ExecSQL;
+          end;
+        end;
+      end;
+    end;
+  finally
+    J1.Free;
+    J2.Free;
+    qry2.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de limpiaGridFpolinomica.</summary>
+procedure limpiaGridFpolinomica();
+begin
+  frmMain.grid_Fpolinomica.ClearNormalCells;
+  frmMain.grid_Fpolinomica.cells[0, 0] := '#';
+  frmMain.grid_Fpolinomica.cells[1, 0] := 'Término';
+  frmMain.grid_Fpolinomica.cells[2, 0] := 'Código';
+  frmMain.grid_Fpolinomica.cells[3, 0] := 'Descripción';
+  frmMain.grid_Fpolinomica.cells[4, 0] := 'Unidad';
+  frmMain.grid_Fpolinomica.cells[5, 0] := 'Precio';
+  frmMain.grid_Fpolinomica.cells[6, 0] := 'Cantidad';
+  frmMain.grid_Fpolinomica.cells[7, 0] := 'C. Directo';
+  frmMain.grid_Fpolinomica.cells[8, 0] := '% Incidencia';
+  frmMain.grid_Fpolinomica.RowCount := 1;
+end;
+
+/// <summary>TODO: Descripción de DatosRecursosFpolinomica.</summary>
+procedure DatosRecursosFpolinomica;
+var
+  qry: TUniQuery;
+  posgrid: Integer;
+  codAPU: string;
+  x, Y: Integer;
+  cantidadAPU: Double;
+  tmpstr: string;
+  codApuCompleto: string;
+  listadoControlRecursos: TStringList;
+  codUnicoRecursoFP: string;
+  salir: Boolean;
+  dCantidadAnterior: Double;
+  dCantidadActualizada: Double;
+  dCantidadRecursoTotal: Double;
+  dCantidadRecurso: Double;
+  dRendimientoRecurso: Double;
+  dCantidadPresupuesto: Double;
+  dCostoDirectoTotal: Double;
+  dPrecioRecurso: Double;
+  IndiceS: string;
+  CodCategoria: string;
+  listadoE: TStringList;
+  listadoB: TStringList;
+  subcategoria: string;
+begin
+  listadoE := TStringList.Create;
+  listadoB := TStringList.Create;
+  listadoControlRecursos := TStringList.Create;
+
+  listadoControlRecursos.Sorted := True;
+  listadoControlRecursos.Duplicates := dupIgnore;
+
+  SetLength(listadoApusEnGrid, 0);
+  SetLength(listadoRecursosFP, 0);
+
+  try
+
+    {================================================}
+    { APUS USADAS EN EL GRID                         }
+    {================================================}
+
+    for posgrid := 1 to frmMain.grid_Presupuestos.RowCount - 1 do
+    begin
+      with DMPresupuesto.dsTpresupuestosItems.DataSet do
+      begin
+        DisableControls;
+        try
+          First;
+          MoveBy(posgrid - 1);
+
+          codAPU := FieldByName('codAPU').AsString;
+
+          if codAPU <> '' then
+          begin
+            tmpstr := decimal_correcto(FieldByName('Cantidad').AsString);
+            cantidadAPU := StrToFloatDef(tmpstr, 0);
+
+            codApuCompleto := codAPU;
+
+            adicionaSumaApusEnGrid(codApuCompleto, cantidadAPU);
+          end;
+
+        finally
+          EnableControls;
+        end;
+      end;
+    end;
+
+    {================================================}
+    { CONSULTA RECURSOS                              }
+    {================================================}
+
+    qry := TUniQuery.Create(nil);
+    try
+      qry.Connection := DModule_1.con2;
+
+      qry.SQL.Text :=
+        'SELECT ' +
+        'ai.codBase, ' +
+        'ai.CodAPU, ' +
+        'ai.codAPUAlternativo, ' +
+        'ai.CodCategoria, ' +
+        'ai.codSubCategoria, ' +
+        'ai.idUnicoRecurso, ' +
+        'ai.codRecurso, ' +
+        'ai.codRecursoCompleto, ' +
+        'ai.Descripcion, ' +
+        'ai.Unidad, ' +
+        'ai.Precio, ' +
+        'ai.moneda, ' +
+        'ai.CantidadUnidad, ' +
+        'ai.Rendimiento, ' +
+        'ai.Total, ' +
+        'ai.porcentaje, ' +
+        'ai.codCPC, ' +
+        'ai.TipoCPC, ' +
+        'ai.porcentajeCPC, ' +
+        'ai.termino ' +
+        'FROM apus_items ai ' +
+        'WHERE ai.codAPU = :codAPU ' +
+        'AND ai.codBase = :codBase ' +
+        'ORDER BY ai.descripcion ASC';
+
+      qry.Prepare;
+
+      for x := 0 to Length(listadoApusEnGrid) - 1 do
+      begin
+        qry.Close;
+
+        qry.ParamByName('codAPU').AsString :=
+          listadoApusEnGrid[x].codUnicoAPU;
+
+        qry.ParamByName('codBase').AsString :=
+          base_activa.codBase;
+
+        qry.Open;
+
+        while not qry.Eof do
+        begin
+
+          codUnicoRecursoFP := qry.FieldByName('idUnicoRecurso').AsString;
+
+          CodCategoria := qry.FieldByName('codCategoria').AsString;
+
+          subcategoria := qry.FieldByName('codSubCategoria').AsString;
+
+          dCantidadRecurso :=
+            qry.FieldByName('cantidadUnidad').AsFloat;
+
+          dRendimientoRecurso :=
+            qry.FieldByName('rendimiento').AsFloat;
+
+          dPrecioRecurso :=
+            qry.FieldByName('precio').AsFloat;
+
+          dCantidadPresupuesto :=
+            listadoApusEnGrid[x].cantidad;
+
+          dCantidadRecursoTotal :=
+            dCantidadRecurso *
+            dRendimientoRecurso *
+            dCantidadPresupuesto;
+
+          IndiceS := qry.FieldByName('termino').AsString;
+
+          if (CodCategoria = '1') and (IndiceS = '') then
+          begin
+            listadoE.Add(codUnicoRecursoFP);
+            IndiceS := 'E';
+          end;
+
+          if (CodCategoria = '4') and (IndiceS = '') then
+          begin
+
+            listadoB.Add(codUnicoRecursoFP);
+            IndiceS := 'B';
+
+            if listadoControlRecursos.Add(codUnicoRecursoFP) <> -1 then
+            begin
+
+              Y := Length(listadoRecursosFP);
+              SetLength(listadoRecursosFP, Y + 1);
+
+              listadoRecursosFP[Y].codRecurso := codUnicoRecursoFP;
+              listadoRecursosFP[Y].subcategoria := subcategoria;
+              listadoRecursosFP[Y].cantidad :=
+                FloatToStr(dCantidadRecursoTotal);
+              listadoRecursosFP[Y].precio := FloatToStr(dPrecioRecurso);
+              listadoRecursosFP[Y].total :=
+                FloatToStr(dCantidadRecursoTotal * dPrecioRecurso);
+              listadoRecursosFP[Y].indice := IndiceS;
+
+            end
+            else
+            begin
+
+              salir := False;
+              Y := 0;
+
+              while (not salir) and (Y < Length(listadoRecursosFP)) do
+              begin
+
+                if codUnicoRecursoFP =
+                  listadoRecursosFP[Y].codRecurso then
+                begin
+
+                  salir := True;
+
+                  dCantidadAnterior :=
+                    StrToFloatDef(
+                    decimal_correcto(listadoRecursosFP[Y].cantidad), 0);
+
+                  dCantidadActualizada :=
+                    dCantidadAnterior + dCantidadRecursoTotal;
+
+                  listadoRecursosFP[Y].cantidad :=
+                    FloatToStr(dCantidadActualizada);
+
+                  dCostoDirectoTotal :=
+                    dCantidadActualizada * dPrecioRecurso;
+
+                  listadoRecursosFP[Y].total :=
+                    FloatToStr(dCostoDirectoTotal);
+
+                end;
+
+                Inc(Y);
+
+              end;
+
+            end;
+
+          end;
+
+          qry.Next;
+
+        end;
+
+      end;
+
+    finally
+      qry.Free;
+    end;
+
+    {================================================}
+    { SINCRONIZAR INDICES                            }
+    {================================================}
+
+    for x := 0 to listadoE.Count - 1 do
+      sincronizaIndices('E', listadoE[x]);
+
+    for x := 0 to listadoB.Count - 1 do
+      sincronizaIndices('B', listadoB[x]);
+
+  finally
+
+    listadoE.Free;
+    listadoB.Free;
+    listadoControlRecursos.Free;
+
+  end;
+end;
+
+/// <summary>
+/// Opera sobre datos de APU en adicionaSumaApusEnGrid.
+/// </summary>
+procedure adicionaSumaApusEnGrid(codUnicoAPU: string; cantidad: Double);
+
+var
+  x: Integer;
+  salir: Boolean;
+  nuevoAPU: Boolean;
+  cantidadFinal: Double;
+begin
+  x := 0;
+  salir := False;
+  nuevoAPU := True;
+  while (not salir) and (x < Length(listadoApusEnGrid)) do
+  begin
+    if listadoApusEnGrid[x].codUnicoAPU = codUnicoAPU then
+    begin
+      nuevoAPU := False;
+      salir := True;
+      cantidadFinal := listadoApusEnGrid[x].cantidad;
+      cantidadFinal := cantidadFinal + cantidad;
+      listadoApusEnGrid[x].cantidad := cantidadFinal;
+    end;
+    Inc(x);
+  end;
+  if nuevoAPU then
+  begin
+    x := Length(listadoApusEnGrid);
+    SetLength(listadoApusEnGrid, x + 1);
+    listadoApusEnGrid[x].codUnicoAPU := codUnicoAPU;
+    listadoApusEnGrid[x].cantidad := cantidad;
+  end;
+end;
+
+/// <summary>TODO: Descripción de muestraRecursosFpolinomica.</summary>
+/// <param name="categoria">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de muestraRecursosFpolinomica.
+/// </summary>
+procedure muestraRecursosFpolinomica(const Categoria: string);
+var
+  qry: TUniQuery;
+  x: Integer;
+  tmpstr: string;
+  codUnicoRecursoFP: string;
+begin
+  limpiaGridFpolinomica();
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    qry.SQL.Text :=
+      'SELECT ' +
+      'termino, codRecursoCompleto, descripcion, unidad, idUnicoRecurso ' +
+      'FROM presupuestos_recursos ' +
+      'WHERE codBase = :codBase ' +
+      'AND codCategoria = :codCategoria ' +
+      'AND revision = :revision ' +
+      'ORDER BY descripcion';
+
+    qry.ParamByName('codBase').AsString := base_activa.codBase;
+    qry.ParamByName('codCategoria').AsString := Categoria;
+    qry.ParamByName('revision').AsString := revision;
+
+    qry.Open;
+
+    x := 1;
+
+    frmMain.grid_Fpolinomica.BeginUpdate;
+    try
+      while not qry.Eof do
+      begin
+        frmMain.grid_Fpolinomica.RowCount := x + 1;
+
+        frmMain.grid_Fpolinomica.Cells[0, x] :=
+          ponerCerosInicio(IntToStr(x), 4);
+
+        tmpstr := UpperCase(qry.FieldByName('termino').AsString);
+
+        if (tmpstr = '') and (Categoria = '1') then
+          tmpstr := 'E';
+
+        if (tmpstr = '') and (Categoria = '4') then
+          tmpstr := 'B';
+
+        frmMain.grid_Fpolinomica.Cells[1, x] := tmpstr;
+
+        frmMain.grid_Fpolinomica.Cells[2, x] :=
+          qry.FieldByName('codRecursoCompleto').AsString;
+
+        frmMain.grid_Fpolinomica.Cells[3, x] :=
+          qry.FieldByName('descripcion').AsString;
+
+        frmMain.grid_Fpolinomica.Cells[4, x] :=
+          qry.FieldByName('unidad').AsString;
+
+        frmMain.grid_Fpolinomica.Cells[5, x] := '';
+        frmMain.grid_Fpolinomica.Cells[6, x] := '';
+        frmMain.grid_Fpolinomica.Cells[7, x] := '';
+
+        frmMain.grid_Fpolinomica.Cells[8, x] :=
+          qry.FieldByName('termino').AsString;
+
+        codUnicoRecursoFP :=
+          qry.FieldByName('idUnicoRecurso').AsString;
+
+        frmMain.grid_Fpolinomica.Cells[9, x] := codUnicoRecursoFP;
+
+        Inc(x);
+        qry.Next;
+      end;
+
+    finally
+      frmMain.grid_Fpolinomica.EndUpdate;
+    end;
+
+  finally
+    qry.Free;
+
+    frmMain.grid_Fpolinomica.Columns[9].Width := 0;
+
+    completagridGeneralFP();
+  end;
+end;
+
+procedure completagridGeneralFP;
+
+var
+  x, Y: Integer;
+  idRecursoBusqueda: string;
+  TotalCalculo: Double;
+  tmpstr: string;
+  tmpfloat1, tmpfloat2: Double;
+  Residual: Double;
+begin
+  TotalCalculo := 0;
+
+  frmMain.grid_Fpolinomica.BeginUpdate;
+  try
+
+    {--------------------------------}
+    { CARGA PRECIOS Y TOTALES        }
+    {--------------------------------}
+
+    for x := 0 to frmMain.grid_Fpolinomica.RowCount - 1 do
+    begin
+      idRecursoBusqueda := frmMain.grid_Fpolinomica.Cells[9, x];
+
+      if idRecursoBusqueda = '' then
+        Continue;
+
+      for Y := 0 to High(listadoRecursosFP) do
+      begin
+        if listadoRecursosFP[Y].codRecurso = idRecursoBusqueda then
+        begin
+          frmMain.grid_Fpolinomica.Cells[5, x] :=
+            base_activa.simboloMoneda + listadoRecursosFP[Y].precio;
+
+          frmMain.grid_Fpolinomica.Cells[6, x] :=
+            listadoRecursosFP[Y].cantidad;
+
+          frmMain.grid_Fpolinomica.Cells[7, x] :=
+            base_activa.simboloMoneda + listadoRecursosFP[Y].total;
+
+          tmpstr := decimal_correcto(listadoRecursosFP[Y].total);
+
+          TotalCalculo :=
+            TotalCalculo + StrToFloatDef(tmpstr, 0);
+
+          Break;
+        end;
+      end;
+    end;
+
+    {--------------------------------}
+    { CALCULO PORCENTAJES            }
+    {--------------------------------}
+
+    Residual := 0;
+
+    if TotalCalculo > 0 then
+    begin
+
+      for x := 0 to frmMain.grid_Fpolinomica.RowCount - 2 do
+      begin
+        tmpstr := frmMain.grid_Fpolinomica.Cells[9, x];
+
+        if tmpstr = '' then
+          Continue;
+
+        tmpstr := frmMain.grid_Fpolinomica.Cells[7, x];
+        tmpstr := ReplaceStr(tmpstr, base_activa.simboloMoneda, '');
+
+        tmpfloat1 := SafeStrToFloat(tmpstr);
+
+        tmpfloat2 := (tmpfloat1 / TotalCalculo) * 100;
+
+        frmMain.grid_Fpolinomica.Cells[8, x] :=
+          FloatToStr(tmpfloat2) + '%';
+
+        Residual := Residual + tmpfloat2;
+      end;
+
+      Residual := 100 - Residual;
+
+      x := frmMain.grid_Fpolinomica.RowCount - 1;
+
+      tmpstr := frmMain.grid_Fpolinomica.Cells[9, x];
+
+      if tmpstr <> '' then
+        frmMain.grid_Fpolinomica.Cells[8, x] :=
+          FloatToStr(Residual) + '%';
+    end;
+
+  finally
+    frmMain.grid_Fpolinomica.EndUpdate;
+  end;
+
+end;
+
+/// <summary>TODO: Descripción de iniciaDBPresupuestosRecursos.</summary>
+procedure iniciaDBPresupuestosRecursos();
+
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from presupuestos_Recursos');
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de sincronizaDesagCPC.</summary>
+procedure sincronizaDesagCPC();
+
+var
+  ARow: Integer;
+  codAPUDes: string;
+  PrecioUnitario: string;
+begin
+  ARow := frmMain.grid_DesagregacionAPUS.Selection.StartRow;
+  if ARow > -1 then
+  begin
+    codAPUDes := frmMain.grid_DesagregacionAPUS.cells[10, ARow];
+    PrecioUnitario := frmMain.grid_DesagregacionAPUS.cells[5, ARow];
+    if codAPUDes <> '' then
+    begin
+      PresentarRecursosDesagregacion(codAPUDes, PrecioUnitario);
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de sincronizaFooterDesagregacion.</summary>
+procedure sincronizaFooterDesagregacion();
+
+var
+  x: Integer;
+  sizenew: Double;
+begin
+  for x := 0 to frmMain.grid_DesagregacionAPUSHeader.columns.Count - 1 do
+  begin
+    frmMain.grid_DesagregacionAPUS.columns[x].width :=
+      frmMain.grid_DesagregacionAPUSHeader.columns[x].width;
+  end;
+
+  sizenew := 0;
+  for x := 0 to 5 do
+  begin
+    sizenew := sizenew + frmMain.grid_DesagregacionAPUS.columns[x].width;
+  end;
+  frmMain.lyt_DESGTotal0.width := sizenew;
+  frmMain.lyt_DESGTotal1.width :=
+    frmMain.grid_DesagregacionAPUS.columns[6].width;
+  frmMain.lyt_DESGTotal2.width :=
+    frmMain.grid_DesagregacionAPUS.columns[7].width;
+  frmMain.lyt_DESGTotal3.width :=
+    frmMain.grid_DesagregacionAPUS.columns[8].width;
+  frmMain.lyt_DESGTotal4.width :=
+    frmMain.grid_DesagregacionAPUS.columns[9].width;
+end;
+
+/// <summary>TODO: Descripción de calculaTotalesRecursosDesagregacion.</summary>
+procedure calculaTotalesRecursosDesagregacion();
+
+var
+  subtotal: Double;
+  cantidadIndirecto: Double;
+  porcentaje1, porcentaje2: Double;
+  total: Double;
+  x: Integer;
+  tmpstr: string;
+  node: TTMSFNCTreeViewNode;
+begin
+  subtotal := 0;
+  porcentaje1 := 0;
+  porcentaje2 := 0;
+  x := 0;
+  node := frmMain.trvw_RecursosDesagregacion.Nodes[0];
+  while Assigned(node) do
+  begin
+    tmpstr := node.Text[6];
+    tmpstr := decimal_correcto(tmpstr);
+    subtotal := subtotal + StrToFloatDef(tmpstr, 0);
+    tmpstr := node.Text[7];
+    tmpstr := ReplaceStr(tmpstr, '%', '');
+    tmpstr := decimal_correcto(tmpstr);
+    porcentaje1 := porcentaje1 + StrToFloatDef(tmpstr, 0);
+    tmpstr := node.Text[11];
+    tmpstr := ReplaceStr(tmpstr, '%', '');
+    tmpstr := decimal_correcto(tmpstr);
+    porcentaje2 := porcentaje2 + StrToFloatDef(tmpstr, 0);
+    node := node.GetNext;
+  end;
+  tmpstr := FloatToStr(subtotal);
+  tmpstr := base_activa.simboloMoneda + tmpstr;
+  frmMain.lbl_DesgRecursoSubtotal.Text := tmpstr;
+  tmpstr := FloatToStr(porcentaje1);
+  tmpstr := forzarNdecimales(porcentaje1, 2);
+  frmMain.lbl_DesgRecursoPorcentaje1.Text := tmpstr + '%';
+  tmpstr := FloatToStr(porcentaje2);
+  tmpstr := forzarNdecimales(porcentaje2, 2);
+  frmMain.lbl_DesgRecursoPorcentaje2.Text := tmpstr + '%';
+  cantidadIndirecto := (IndirectosPresupuesto * subtotal) / 100;
+  tmpstr := FloatToStr(cantidadIndirecto);
+  frmMain.lbl_DesgRecursoIndirectos.Text := base_activa.simboloMoneda
+    + tmpstr;
+  total := subtotal + cantidadIndirecto;
+  tmpstr := FloatToStr(total);
+  frmMain.lbl_DesgRecursoCostoTotal.Text := base_activa.simboloMoneda
+    + tmpstr;
+  frmMain.lbl_DesgRecursoValorOfertado.Text :=
+    base_activa.simboloMoneda + tmpstr;
+end;
+
+/// <summary>TODO: Descripción de actualizaCodigoRecursosCompletos.</summary>
+procedure actualizaCodigoRecursosCompletos();
+
+var
+  tabla: TUniTable;
+  codCategoriaBase, codSubCategoria, codRecurso: string;
+  codRecursoCompleto: string;
+begin
+  tabla := TUniTable.Create(nil);
+  tabla := DModule_1.untbl4;
+  tabla.Active := True;
+  tabla.First;
+  while not tabla.Eof do
+  begin
+    codCategoriaBase := tabla.FieldByName('codCategoria').AsString;
+    codSubCategoria := tabla.FieldByName('codSubCategoria').AsString;
+    codRecurso := tabla.FieldByName('codRecurso').AsString;
+    codRecursoCompleto := generaCodigoRecurso(codCategoriaBase,
+      codSubCategoria, codRecurso);
+    tabla.Edit;
+    tabla.FieldByName('codRecursoCompleto').AsString := codRecursoCompleto;
+    tabla.Post;
+    tabla.Next;
+  end;
+end;
+
+/// <summary>TODO: Descripción de treeviewDesagregacionManualSize.</summary>
+procedure treeviewDesagregacionManualSize();
+
+var
+  NewSize: Double;
+  offset: Double;
+begin
+  offset := 20;
+  NewSize := frmMain.trvw_RecursosDesagregacion.width;
+  frmMain.trvw_RecursosDesagregacion.columns[0].width := 130;
+  frmMain.trvw_RecursosDesagregacion.columns[1].width := NewSize -
+    910 - offset;
+  frmMain.trvw_RecursosDesagregacion.columns[2].width := 70;
+  frmMain.trvw_RecursosDesagregacion.columns[3].width := 80;
+  frmMain.trvw_RecursosDesagregacion.columns[4].width := 60;
+  frmMain.trvw_RecursosDesagregacion.columns[5].width := 80;
+  frmMain.trvw_RecursosDesagregacion.columns[6].width := 60;
+  frmMain.trvw_RecursosDesagregacion.columns[7].width := 70;
+  frmMain.trvw_RecursosDesagregacion.columns[8].width := 100;
+  frmMain.trvw_RecursosDesagregacion.columns[9].width := 70;
+  frmMain.trvw_RecursosDesagregacion.columns[10].width := 50;
+  frmMain.trvw_RecursosDesagregacion.columns[11].width := 100;
+  frmMain.trvw_RecursosDesagregacion.columns[12].width := 0;
+  frmMain.trvw_RecursosDesagregacion.columns[13].width := 0;
+end;
+
+/// <summary>TODO: Descripción de PresentarRecursosDesagregacion.</summary>
+/// <param name="codAPUDes">TODO.</param>
+/// <param name="PrecioUnitarioAPU">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de PresentarRecursosDesagregacion.
+/// </summary>
+procedure PresentarRecursosDesagregacion(codAPUDes, PrecioUnitarioAPU
+  : string);
+
+var
+  qry: TUniQuery;
+  tipoRecurso: Integer;
+  x: Integer;
+  codRecursoCompleto: string;
+  codRecurso: string;
+  codCategoriaBase: Integer;
+  codSubCategoria: string;
+  descripcion: string;
+  unidad: string;
+  precio: string;
+  fPrecio: Double;
+  fTotal: Double;
+  moneda: string;
+  cantidad: string;
+  rendimiento: string;
+  total: string;
+  codCPC: string;
+  tipoCPC: string;
+  porcentajeCPC: string;
+  idUnicoRecurso: string;
+  node: TTMSFNCTreeViewNode;
+  N: TTMSFNCTreeViewNode;
+  porcentaje: string;
+  fPorcentaje: Double;
+  VAECalculado: string;
+  vae1, vae2: Double;
+  nnodos: Integer;
+  precioRelativo: Double;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  nnodos := 3;
+  if base_activa.SeguridadIndustrial then
+    nnodos := 4;
+  for x := 0 to nnodos do
+  begin
+    node := frmMain.trvw_RecursosDesagregacion.Nodes[x];
+    node.RemoveChildren;
+  end;
+  frmMain.trvw_RecursosDesagregacion.BeginUpdate;
+  porcentaje := '';
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from apus where codBase=' +
+        quotedstr(base_activa.codBase) + ' and codApu=' +
+        quotedstr(codAPUDes));
+      Prepare;
+      Open;
+      PrecioUnitarioAPU := FieldByName('CostoDirectoTotal').AsString;
+      PrecioUnitarioAPU := decimal_correcto(PrecioUnitarioAPU);
+      fTotal := SafeStrToFloat(PrecioUnitarioAPU);
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from apus_items where codBase=' +
+        quotedstr(base_activa.codBase) + ' and codAPU=' + quotedstr(codAPUDes)
+        + ' order by codCategoria, descripcion');
+      Prepare;
+      Open;
+      while not Eof do
+      begin
+        codCategoriaBase := FieldByName('codCategoria').AsInteger;
+        codRecursoCompleto := FieldByName('codRecursoCompleto').AsString;
+        descripcion := FieldByName('descripcion').AsString;
+        unidad := FieldByName('unidad').AsString;
+        cantidad := FieldByName('cantidadUnidad').AsString;
+        cantidad := decimal_correcto(cantidad);
+        precio := FieldByName('Precio').AsString;
+        precio := decimal_correcto(precio);
+        tmpstr := FieldByName('total').AsString.Trim;
+        tmpstr := decimal_correcto(tmpstr);
+        precioRelativo := StrToFloatDef(tmpstr, 0);
+        rendimiento := FieldByName('rendimiento').AsString;
+        rendimiento := decimal_correcto(rendimiento);
+        rendimiento := forzarNdecimales(SafeStrToFloat(rendimiento), 2);
+        idUnicoRecurso := FieldByName('idUnicoRecurso').AsString;
+        codCPC := FieldByName('codCPC').AsString;
+        tipoCPC := FieldByName('tipoCPC').AsString;
+        porcentajeCPC := FieldByName('porcentajeCPC').AsString;
+        if codCategoriaBase = 6 then
+          codCategoriaBase := 2;
+        N := frmMain.trvw_RecursosDesagregacion.Nodes[codCategoriaBase - 1];
+        node := frmMain.trvw_RecursosDesagregacion.addnode(N);
+        node.Text[0] := codRecursoCompleto;
+        node.Text[1] := descripcion;
+        node.Text[2] := unidad;
+        node.Text[3] := forzarNdecimales(SafeStrToFloat(cantidad), 2);
+        node.Text[4] := forzarNdecimales(SafeStrToFloat(precio), 2);
+        node.Text[5] := '';
+        fPorcentaje := (precioRelativo / fTotal) * 100;
+        porcentaje := FloatToStr(fPorcentaje);
+        case codCategoriaBase of
+          1:
+            begin
+              node.Text[5] := rendimiento;
+            end;
+          3:
+            begin
+              node.Text[5] := rendimiento;
+            end;
+          4:
+            begin
+              node.Text[5] := rendimiento;
+            end;
+        end;
+        node.Text[6] := forzarNdecimales(precioRelativo, 2);
+        vae1 := StrToFloatDef(porcentaje, 0);
+        node.Text[7] := forzarNdecimales(SafeStrToFloat(porcentaje), 2) + '%';
+        node.Text[8] := 'N/D';
+        node.Text[9] := '';
+        node.Text[10] := '';
+        node.Text[11] := '';
+        if codCPC <> '' then
+        begin
+          vae2 := SafeStrToFloat(porcentajeCPC);
+          vae2 := vae2 / 100;
+          vae2 := vae1 * vae2;
+          VAECalculado := forzarNdecimales(vae2, 2);
+          node.Text[8] := codCPC;
+          node.Text[9] := tipoCPC;
+          node.Text[10] := forzarNdecimales
+            (SafeStrToFloat(porcentajeCPC), 2) + '%';
+          node.Text[11] := VAECalculado + '%';
+        end;
+        node.Text[12] := idUnicoRecurso;
+        node.Text[13] := IntToStr(codCategoriaBase);
+        Next;
+      end;
+    end;
+  finally
+    frmMain.trvw_RecursosDesagregacion.EndUpdate;
+    qry.Free;
+    calculaTotalesRecursosDesagregacion();
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de calcularTotalRecursoDesagregacion.
+/// </summary>
+function calcularTotalRecursoDesagregacion(cantidad, precio,
+  rendimiento: string; categoriaBase: Integer): string;
+
+var
+  Tcantidad: Double;
+  Tprecio: Double;
+  TRendimiento: Double;
+  Ttotal: Double;
+  tipoBase: Integer;
+begin
+  Result := '0';
+  tipoBase := 1;
+  if base_activa.TRendimiento = 'Rendimiento Unitario (Tiempo/Unidad)' then
+  begin
+    tipoBase := 1;
+  end
+  else
+  begin
+    tipoBase := 2
+  end;
+  Tcantidad := SafeStrToFloat(decimal_correcto(cantidad));
+  Tprecio := SafeStrToFloat(decimal_correcto(precio));
+  if rendimiento <> '' then
+  begin
+    TRendimiento := SafeStrToFloat(decimal_correcto(rendimiento));
+  end
+  else
+  begin
+    TRendimiento := 1;
+  end;
+  if tipoBase = 2 then
+  begin
+    TRendimiento := 1 / TRendimiento;
+  end;
+  Ttotal := 0;
+  Ttotal := Tcantidad * Tprecio;
+  Ttotal := Ttotal * TRendimiento;
+  Result := decimal_correcto(FloatToStr(Ttotal));
+end;
+
+/// <summary>TODO: Descripción de generaDesagregacionAPUS.</summary>
+/// <param name="codAPUSDes">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en generaDesagregacionAPUS.
+/// </summary>
+function generaDesagregacionAPUS(codAPUSDes: string): Double;
+
+type
+  dat_recurdesg = record
+    codUnicoRecurso: string;
+    CostoRecurso: Double;
+    codCPC: string;
+    tipo: string;
+    porcentajeCPC: Double;
+    pesoRelativo: Double;
+    VAE: Double;
+  end;
+
+var
+  qry: TUniQuery;
+  costoDirectoAPU: Double;
+  CostoRecurso: Double;
+  tmpstr: string;
+  x: Integer;
+  calcular: Double;
+  listadoRecursosDESG: array of dat_recurdesg;
+  sumar: Boolean;
+begin
+  Result := -1;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from APUS where codAPU=' + quotedstr(codAPUSDes) +
+        ' and codbase=' + quotedstr(base_activa.codBase));
+      Prepare;
+      Open;
+      tmpstr := FieldByName('costoDirectoTotal').AsString;
+      tmpstr := decimal_correcto(tmpstr);
+      costoDirectoAPU := StrToFloatDef(tmpstr, -1);
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from APUS_items where codAPU=' + quotedstr(codAPUSDes)
+        + ' and codBase=' + quotedstr(base_activa.codBase));
+      Prepare;
+      Open;
+      x := 0;
+      sumar := True;
+      while not Eof do
+      begin
+        SetLength(listadoRecursosDESG, x + 1);
+        listadoRecursosDESG[x].codUnicoRecurso :=
+          FieldByName('idUnicoRecurso').AsString;
+        tmpstr := FieldByName('codCPC').AsString;
+        if tmpstr <> '' then
+        begin
+          listadoRecursosDESG[x].codCPC := tmpstr;
+          listadoRecursosDESG[x].tipo := FieldByName('tipoCPC').AsString;
+          tmpstr := FieldByName('porcentajeCPC').AsString;
+          tmpstr := decimal_correcto(tmpstr);
+          listadoRecursosDESG[x].porcentajeCPC := SafeStrToFloat(tmpstr);
+          tmpstr := FieldByName('Total').AsString;
+          tmpstr := decimal_correcto(tmpstr);
+          listadoRecursosDESG[x].CostoRecurso := SafeStrToFloat(tmpstr);
+          // Peso Relativo
+          CostoRecurso := SafeStrToFloat(tmpstr);
+          calcular := (CostoRecurso / costoDirectoAPU) * 100;
+          calcular := RoundTo(calcular, -2);
+          listadoRecursosDESG[x].pesoRelativo := calcular;
+          // VAE
+          calcular := listadoRecursosDESG[x].pesoRelativo *
+            listadoRecursosDESG[x].porcentajeCPC;
+          listadoRecursosDESG[x].VAE := calcular;
+        end
+        else
+        begin
+          sumar := False;
+          Result := -1;
+        end;
+        Inc(x);
+        Next;
+      end;
+    end;
+    if sumar then
+    begin
+      calcular := 0;
+      for x := 0 to Length(listadoRecursosDESG) - 1 do
+      begin
+        calcular := calcular + (listadoRecursosDESG[x].VAE / 100);
+      end;
+      Result := calcular;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de limpiaGridDesagregacion.</summary>
+procedure limpiaGridDesagregacion();
+begin
+  frmMain.grid_DesagregacionAPUSHeader.ClearNormalCells;
+  frmMain.grid_DesagregacionAPUS.ClearNormalCells;
+  frmMain.grid_DesagregacionAPUS.AutoSizeRow(2);
+  frmMain.grid_DesagregacionAPUS.RowCount := 0;
+  frmMain.grid_DesagregacionAPUSHeader.cells[0, 0] := 'Item';
+  frmMain.grid_DesagregacionAPUSHeader.cells[1, 0] := 'Código';
+  frmMain.grid_DesagregacionAPUSHeader.cells[2, 0] := 'Descripción del Rubro';
+  frmMain.grid_DesagregacionAPUSHeader.cells[3, 0] := 'Unidad';
+  frmMain.grid_DesagregacionAPUSHeader.cells[4, 0] := 'Cantidad';
+  frmMain.grid_DesagregacionAPUSHeader.cells[5, 0] :=
+    'Precio Unitario del Rubro (' + base_activa.simboloMoneda + ')';
+  frmMain.grid_DesagregacionAPUSHeader.cells[6, 0] :=
+    'Precio Global del Rubro (' + base_activa.simboloMoneda + ')';
+  frmMain.grid_DesagregacionAPUSHeader.cells[7, 0] :=
+    'Peso Relativo del Rubro (%)';
+  frmMain.grid_DesagregacionAPUSHeader.cells[8, 0] :=
+    'Agregado Ecuatoriano del Rubro (%)';
+  frmMain.grid_DesagregacionAPUSHeader.cells[9, 0] :=
+    'Agregado Ecuatoriano Ponderado (%)';
+  frmMain.grid_DesagregacionAPUS.columns[0].width :=
+    frmMain.grid_DesagregacionAPUSHeader.columns[0].width;
+  frmMain.grid_DesagregacionAPUS.columns[1].width :=
+    frmMain.grid_DesagregacionAPUSHeader.columns[1].width;
+  frmMain.grid_DesagregacionAPUS.columns[2].width :=
+    frmMain.grid_DesagregacionAPUSHeader.columns[2].width;
+  frmMain.grid_DesagregacionAPUS.columns[3].width :=
+    frmMain.grid_DesagregacionAPUSHeader.columns[3].width;
+  frmMain.grid_DesagregacionAPUS.columns[4].width :=
+    frmMain.grid_DesagregacionAPUSHeader.columns[4].width;
+  frmMain.grid_DesagregacionAPUS.columns[5].width :=
+    frmMain.grid_DesagregacionAPUSHeader.columns[5].width;
+  frmMain.grid_DesagregacionAPUS.columns[6].width :=
+    frmMain.grid_DesagregacionAPUSHeader.columns[6].width;
+  frmMain.grid_DesagregacionAPUS.columns[7].width :=
+    frmMain.grid_DesagregacionAPUSHeader.columns[7].width;
+  frmMain.grid_DesagregacionAPUS.columns[8].width :=
+    frmMain.grid_DesagregacionAPUSHeader.columns[8].width;
+  frmMain.grid_DesagregacionAPUS.columns[9].width :=
+    frmMain.grid_DesagregacionAPUSHeader.columns[9].width;
+  frmMain.grid_DesagregacionAPUS.columns[10].width := 0;
+  sincronizaFooterDesagregacion();
+end;
+
+/// <summary>TODO: Descripción de sincronizaDesagregacion.</summary>
+procedure sincronizaDesagregacion();
+
+var
+  x, Y: Integer;
+  totalSinIva: Double;
+  TotalItem: Double;
+  tmpstr: string;
+  pesoRelativo: Double;
+  ValorUnitarioAPU: Double;
+  Agregado: Double;
+  AgregadoPonderado: Double;
+  codApuDesg: string;
+  TAgregadoPonderado: Double;
+  TAgregado: Double;
+begin
+  tmpstr := frmMain.lbl_SubtotalPresupuesto.Text;
+  tmpstr := AnsiReplaceStr(tmpstr, base_activa.simboloMoneda, '').Trim;
+  tmpstr := quitaSignoMiles(tmpstr);
+  tmpstr := decimal_correcto(tmpstr);
+  totalSinIva := StrToFloatDef(tmpstr, 0);
+  frmMain.grid_DesagregacionAPUS.columns[11].width := 0;
+  TAgregadoPonderado := 0;
+  TAgregado := 0;
+  for Y := 1 to frmMain.grid_Presupuestos.RowCount - 1 do
+  begin
+    with DMPresupuesto.dsTpresupuestosItems.DataSet do
+    begin
+      DisableControls;
+      First;
+      MoveBy(Y - 1);
+      EnableControls;
+    end;
+    frmMain.grid_DesagregacionAPUS.RowCount := Y;
+    frmMain.grid_DesagregacionAPUS.cells[0, Y - 1] :=
+      ponerCerosInicio(IntToStr(Y), 6);
+    frmMain.grid_DesagregacionAPUS.cells[1, Y - 1] :=
+      DMPresupuesto.QTPresupuestosItems.FieldByName('codAPUGenerico').AsString;
+    frmMain.grid_DesagregacionAPUS.cells[2, Y - 1] :=
+      DMPresupuesto.QTPresupuestosItems.FieldByName('descripcion').AsString;
+    frmMain.grid_DesagregacionAPUS.cells[3, Y - 1] :=
+      DMPresupuesto.QTPresupuestosItems.FieldByName('unidad').AsString;
+    frmMain.grid_DesagregacionAPUS.cells[4, Y - 1] :=
+      DMPresupuesto.QTPresupuestosItems.FieldByName('Cantidad').AsString;
+    frmMain.grid_DesagregacionAPUS.cells[5, Y - 1] :=
+      FormatFloat(cadenaCurrency,
+      DMPresupuesto.QTPresupuestosItems.FieldByName('PUnitario').AsFloat);
+    frmMain.grid_DesagregacionAPUS.cells[6, Y - 1] :=
+      FormatFloat(cadenaCurrency,
+      DMPresupuesto.QTPresupuestosItems.FieldByName('Ptotal').AsFloat);
+    frmMain.grid_DesagregacionAPUS.cells[11, Y - 1] :=
+      DMPresupuesto.QTPresupuestosItems.FieldByName('codAPU').AsString;
+    frmMain.grid_DesagregacionAPUS.AutoSizeRow(Y - 1);
+
+    if DMPresupuesto.QTPresupuestosItems.FieldByName('PUnitario').AsString <> ''
+      then
+    begin
+      // Peso Relativo
+      tmpstr :=
+        DMPresupuesto.QTPresupuestosItems.FieldByName('Ptotal').AsString;
+      tmpstr := quitaSignoMiles(tmpstr);
+      tmpstr := decimal_correcto(tmpstr);
+      TotalItem := StrToFloatDef(tmpstr, 0);
+      pesoRelativo := TotalItem / totalSinIva;
+      pesoRelativo := pesoRelativo * 100;
+      pesoRelativo := RoundTo(pesoRelativo, -2);
+      tmpstr := FloatToStr(pesoRelativo);
+      frmMain.grid_DesagregacionAPUS.cells[7, Y - 1] := tmpstr + '%';
+      codApuDesg :=
+        DMPresupuesto.QTPresupuestosItems.FieldByName('codAPU').AsString;
+      frmMain.grid_DesagregacionAPUS.cells[10, Y - 1] := codApuDesg;
+      Agregado := generaDesagregacionAPUS(codApuDesg);
+      if Agregado > -1 then
+      begin
+
+        tmpstr := FloatToStr(Agregado);
+        tmpstr := tmpstr + '%';
+        frmMain.grid_DesagregacionAPUS.cells[8, Y - 1] := tmpstr;
+        AgregadoPonderado := Agregado * (pesoRelativo / 100);
+        tmpstr := FloatToStr(AgregadoPonderado);
+        frmMain.grid_DesagregacionAPUS.cells[9, Y - 1] := tmpstr + '%';
+      end;
+      tmpstr := frmMain.grid_DesagregacionAPUS.cells[7, Y - 1];
+      tmpstr := ReplaceStr(tmpstr, '%', '');
+      tmpstr := Trim(tmpstr);
+      TAgregado := TAgregado + StrToFloatDef(tmpstr, 0);
+      tmpstr := frmMain.grid_DesagregacionAPUS.cells[9, Y - 1];
+      tmpstr := ReplaceStr(tmpstr, '%', '');
+      tmpstr := Trim(tmpstr);
+      TAgregadoPonderado := TAgregadoPonderado + StrToFloatDef(tmpstr, 0);
+    end;
+  end;
+
+  frmMain.lbl_DesagPrecioTotalRubro.Text := FormatFloat(cadenaCurrency,
+    totalSinIva);
+  frmMain.lbl_DesgPesoRelativoRublo.Text := FormatFloat(cadenaDecimales,
+    TAgregado) + '%';
+  frmMain.lbl_DesgAgregadoPonderado.Text := FormatFloat(cadenaDecimales,
+    TAgregadoPonderado) + '%';
+end;
+
+/// <summary>TODO: Descripción de verRecursoDesagregacion.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de verRecursoDesagregacion.
+/// </summary>
+procedure verRecursoDesagregacion(CodCategoria: Integer);
+
+var
+  filtro: string;
+begin
+  DModule_1.untbl2.Active := False;
+  frmMain.dbGridConnect_Desagregacion.Active := True;
+  DModule_1.untbl2.Filtered := False;
+  DModule_1.untbl2.FilterSQL := '';
+  filtro := 'codCategoria=' + IntToStr(CodCategoria) + ' and codBase=' +
+    quotedstr(base_activa.codBase);
+  if frmMain.chkRecursosSoloFaltantes.IsChecked then
+  begin
+    filtro := filtro + ' and (codCPC is Null or codCPC=' +
+      quotedstr('') + ')';
+  end;
+  DModule_1.untbl2.FilterSQL := filtro;
+  DModule_1.untbl2.Filtered := True;
+  DModule_1.untbl2.Active := True;
+  DModule_1.untbl2.First;
+end;
+
+/// <summary>TODO: Descripción de resalta_desgPanelCategoria.</summary>
+/// <param name="Panel">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de resalta_desgPanelCategoria.
+/// </summary>
+procedure resalta_desgPanelCategoria(Panel: Integer);
+begin
+  frmMain.rct_desgEquiposHerramientas.fill.Color := $FF606060;
+  frmMain.rct_desgMateriales.fill.Color := $FF606060;
+  frmMain.rct_desgTransporte.fill.Color := $FF606060;
+  frmMain.rct_desgManoObra.fill.Color := $FF606060;
+  frmMain.rct_desgSeguridadIndustrial.fill.Color := $FF606060;
+  case Panel of
+    1:
+      begin
+        frmMain.rct_desgEquiposHerramientas.fill.Color := $FFE94E1B;
+      end;
+    2:
+      begin
+        frmMain.rct_desgMateriales.fill.Color := $FFE94E1B;
+      end;
+    3:
+      begin
+        frmMain.rct_desgTransporte.fill.Color := $FFE94E1B;
+      end;
+    4:
+      begin
+        frmMain.rct_desgManoObra.fill.Color := $FFE94E1B;
+      end;
+    5:
+      begin
+        frmMain.rct_desgSeguridadIndustrial.fill.Color := $FFE94E1B;
+      end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de resalta_FpoliPanelCategoria.</summary>
+/// <param name="Panel">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de resalta_FpoliPanelCategoria.
+/// </summary>
+procedure resalta_FpoliPanelCategoria(Panel: Integer);
+begin
+  if not Assigned(frmMain) then
+    Exit;
+
+  if Assigned(frmMain.rect_FpoliEquiposyHerramientas) then
+    frmMain.rect_FpoliEquiposyHerramientas.Fill.Color := $FF606060;
+
+  if Assigned(frmMain.rect_FpoliMateriales) then
+    frmMain.rect_FpoliMateriales.Fill.Color := $FF606060;
+
+  if Assigned(frmMain.rect_FpoliTransporte) then
+    frmMain.rect_FpoliTransporte.Fill.Color := $FF606060;
+
+  if Assigned(frmMain.rect_FpoliManoObra) then
+    frmMain.rect_FpoliManoObra.Fill.Color := $FF606060;
+
+  if Assigned(frmMain.rect_FpoliSeguridadIndustrial) then
+    frmMain.rect_FpoliSeguridadIndustrial.Fill.Color := $FF606060;
+
+  case Panel of
+    1:
+      begin
+        frmMain.rect_FpoliEquiposyHerramientas.Fill.Color := $FFE94E1B;
+        cargaTablaIndicesSeleccionados('E');
+      end;
+
+    2:
+      begin
+        frmMain.rect_FpoliMateriales.Fill.Color := $FFE94E1B;
+        cargaTablaIndicesSeleccionados('OTROS');
+      end;
+
+    3:
+      begin
+        frmMain.rect_FpoliTransporte.Fill.Color := $FFE94E1B;
+        cargaTablaIndicesSeleccionados('OTROS');
+      end;
+
+    4:
+      begin
+        frmMain.rect_FpoliManoObra.Fill.Color := $FFE94E1B;
+        cargaTablaIndicesSeleccionados('B');
+      end;
+
+    5:
+      begin
+        frmMain.rect_FpoliSeguridadIndustrial.Fill.Color := $FFE94E1B;
+      end;
+  end;
+
+  muestraRecursosFpolinomica(IntToStr(Panel));
+end;
+
+/// <summary>TODO: Descripción de limpiaLista.</summary>
+/// <param name="Lista">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de limpiaLista.
+/// </summary>
+procedure limpiaLista(Lista: TListView);
+begin
+  Lista.Items.Clear;
+end;
+
+/// <summary>TODO: Descripción de generaRecursosPresupuesto.</summary>
+procedure generaRecursosPresupuesto();
+begin
+  DModule_1.uProcSql_GeneraRecursos.ParamByName('icodBase').AsString :=
+    base_activa.codBase;
+  DModule_1.uProcSql_GeneraRecursos.ParamByName('icodPresupuesto').AsString :=
+    codProyecto;
+  DModule_1.uProcSql_GeneraRecursos.ParamByName('irevision').AsString
+    := revision;
+  DModule_1.uProcSql_GeneraRecursos.Execute;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ItemEnLista.
+/// </summary>
+function ItemEnLista(AItem: string; Lista: TStringList): Boolean;
+
+var
+  k: Integer;
+begin
+  Result := False;
+  for k := 0 to Lista.Count - 1 do
+  begin
+    Result := AItem = Lista[k];
+    if Result then
+      break;
+  end;
+end;
+
+/// <summary>TODO: Descripción de EditarCPC.</summary>
+procedure EditarCPC();
+
+var
+  codCPCEditar: string;
+  x, Y: Integer;
+  tipo: string;
+  porcentaje: string;
+  LForm: Tfrm_AddEditCPC;
+begin
+  LForm := Tfrm_AddEditCPC.Create(Application);
+  try
+    DModule_1.untbl1.DisableControls;
+    DModule_1.untbl1.First;
+    Y := 0;
+    x := frmMain.grid_desagregacionCPC.Selection.StartRow;
+    if x > -1 then
+    begin
+      if frmMain.grid_desagregacionCPC.RowSelect[x] then
+      begin
+        DModule_1.untbl1.MoveBy(x - 1 - Y);
+        codCPCEditar := DModule_1.untbl1.FieldByName('codCPC').AsString;
+        Y := x - 1;
+        if codCPCEditar <> '' then
+        begin
+          LForm.lbl_modo.Text := '2';
+          LForm.edt_codCPC.Text := DModule_1.untbl1.FieldByName
+            ('codCPC').AsString;
+          LForm.edt_codCPC.ReadOnly := True;
+          LForm.edt_DescripcionCPC.Text := DModule_1.untbl1.FieldByName
+            ('descripcion').AsString;
+          tipo := DModule_1.untbl1.FieldByName('tipo').AsString;
+          porcentaje := DModule_1.untbl1.FieldByName('porcentaje').AsString;
+          if tipo = 'NP' then
+          begin
+            LForm.cbb_tipo.itemindex := 0;
+            LForm.lbl_porcentaje.Text := '0 %';
+          end;
+          if tipo = 'EP' then
+          begin
+            LForm.cbb_tipo.itemindex := 1;
+            LForm.lbl_porcentaje.Text := '100 %';
+          end;
+          if tipo = 'ND' then
+          begin
+            LForm.cbb_tipo.itemindex := 2;
+            LForm.lbl_porcentaje.Text := '40 %';
+          end;
+          LForm.lbl_1.Text := 'Editar CPC';
+          LForm.lbl_2.Text := 'Edición CPC';
+          LForm.ShowModal;
+        end;
+      end;
+    end;
+    DModule_1.untbl1.EnableControls;
+  finally
+    LForm.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de borrarCPC.</summary>
+procedure borrarCPC();
+
+var
+  x, Y: Integer;
+  tmpstr: string;
+  listadoBorrar: TStringList;
+  qry: TUniQuery;
+begin
+  DModule_1.untbl1.DisableControls;
+  DModule_1.untbl1.First;
+  listadoBorrar := TStringList.Create;
+  Y := 0;
+  for x := frmMain.grid_desagregacionCPC.Selection.StartRow to frmMain.
+    grid_desagregacionCPC.Selection.EndRow do
+  begin
+    if frmMain.grid_desagregacionCPC.RowSelect[x] then
+    begin
+      DModule_1.untbl1.MoveBy(x - 1 - Y);
+      tmpstr := DModule_1.untbl1.FieldByName('codCPC').AsString;
+      listadoBorrar.Add(tmpstr);
+      Y := x - 1;
+    end;
+  end;
+  for x := 0 to listadoBorrar.Count - 1 do
+  begin
+    if DModule_1.untbl1.Locate('codCPC', listadoBorrar[x], []) then
+    begin
+      DModule_1.untbl1.Edit;
+      DModule_1.untbl1.Delete;
+    end;
+  end;
+  DModule_1.untbl1.EnableControls;
+  DModule_1.untbl1.First;
+end;
+
+/// <summary>TODO: Descripción de ParetoTiempoCuentaPaquete.</summary>
+procedure ParetoTiempoCuentaPaquete();
+
+var
+  nItemsPareto: Integer;
+  codTempProyecto: string;
+  valor: Double;
+  qry: TUniQuery;
+  listadoFiltrado: TStringList;
+  x: Integer;
+  tmpstr: string;
+  listadoEdtCapitulos: TStringList;
+begin
+  listadoFiltrado := TStringList.Create;
+  codTempProyecto := frmMain.lbl_codUnicoTemporal.Text;
+  listadoEdtCapitulos := TStringList.Create;
+  listadoEdtCapitulos := generalistadoEDTCapitulos();
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      for x := 0 to listadoEdtCapitulos.Count - 1 do
+      begin
+        nItemsPareto := da20ParetoTiempo(listadoEdtCapitulos[x]);
+        Close;
+        SQL.Clear;
+        SQL.Add('select * from TGrid2Items where codTempProyecto=' +
+          quotedstr(codTempProyecto) + ' and codEDT like ' +
+          quotedstr(Trim(listadoEdtCapitulos[x]) + '%') +
+          ' order by valor desc Limit ' + IntToStr(nItemsPareto));
+        Prepare;
+        Open;
+        while not Eof do
+        begin
+          tmpstr := FieldByName('codUnicoItem').AsString;
+          listadoFiltrado.Add(tmpstr);
+          Next;
+        end;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+  // aplicaParetoTiempo(listadoFiltrado);
+end;
+
+/// <summary>TODO: Descripción de ParetoGeneralTiempo.</summary>
+procedure ParetoGeneralTiempo();
+
+var
+  NitemsTotales: Integer;
+  nItemsPareto: Integer;
+  codTempProyecto: string;
+  valor: Double;
+  qry: TUniQuery;
+  listadoFiltrado: TStringList;
+  x: Integer;
+  tmpstr: string;
+begin
+  NitemsTotales := cuentaItemsRealesGridTiempo();
+  valor := (NitemsTotales * 20) / 100;
+  nItemsPareto := Trunc(valor);
+  valor := frac(valor);
+  if valor > 0 then
+    Inc(nItemsPareto);
+  listadoFiltrado := TStringList.Create;
+  codTempProyecto := frmMain.lbl_codUnicoTemporal.Text;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from TGrid2Items where codTempProyecto=' +
+        quotedstr(codTempProyecto) + ' order by valor desc');
+      Prepare;
+      Open;
+      for x := 0 to nItemsPareto - 1 do
+      begin
+        tmpstr := FieldByName('CodUnicoItem').AsString;
+        listadoFiltrado.Add(tmpstr);
+        Next;
+      end;
+    end;
+  finally
+    qry.Free;
+    // aplicaParetoTiempo(listadoFiltrado);
+  end;
+end;
+
+/// <summary>TODO: Descripción de cuentaItemsRealesGridTiempo.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cuentaItemsRealesGridTiempo.
+/// </summary>
+function cuentaItemsRealesGridTiempo(): Integer;
+
+var
+  qry: TUniQuery;
+  codTempProyecto: string;
+begin
+  qry := TUniQuery.Create(nil);
+  Result := -1;
+  codTempProyecto := frmMain.lbl_codUnicoTemporal.Text;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select count(*) as counter from TGrid2Items where codTempProyecto='
+        + quotedstr(codTempProyecto));
+      Prepare;
+      Open;
+      Result := FieldByName('counter').AsInteger;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de guardaGridTiempoTemporal.</summary>
+procedure guardaGridTiempoTemporal();
+
+var
+  qry: TUniQuery;
+  codTemporalPresupuesto: string;
+  codigoUnicoItem: string;
+  x: Integer;
+  codEDTGrid: string;
+  valor: Double;
+  tmpstr: string;
+begin
+  codTemporalPresupuesto := frmMain.lbl_codUnicoTemporal.Text;
+  listadoCodigoUnicosEDT := TStringList.Create;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from TGridItems where codTempProyecto=' +
+        quotedstr(codTemporalPresupuesto));
+      Prepare;
+      ExecSQL;
+    end;
+    for x := 1 to frmMain.grid_crono01.RowCount - 1 do
+    begin
+      if frmMain.grid_crono01.cells[1, x] <> '' then
+      begin
+        codEDTGrid := Trim(frmMain.grid_crono01.cells[1, x]);
+        tmpstr := frmMain.grid_crono01.cells[10, x];
+        listadoCodigoUnicosEDT.Add(tmpstr);
+      end;
+      if frmMain.grid_calcTiempos.cells[9, x] <> '' then
+      begin
+        codigoUnicoItem := frmMain.grid_calcTiempos.cells[9, x];
+        tmpstr := frmMain.grid_calcTiempos.cells[4, x];
+        tmpstr := quitaSignoMiles(tmpstr);
+        valor := SafeStrToFloat(tmpstr);
+        with qry do
+        begin
+          Connection := DModule_1.con2;
+          Close;
+          SQL.Clear;
+          SQL.Add('insert into tGrid2Items (codTempProyecto, codEDT, codUnicoItem, valor) ');
+          SQL.Add('VALues (:codTempProyecto, :codEDT, :codUnicoItem, :valor)');
+          Prepare;
+          ParamByName('codTempProyecto').AsString := codTemporalPresupuesto;
+          ParamByName('codEdt').AsString := codEDTGrid;
+          ParamByName('codUnicoItem').AsString := codigoUnicoItem;
+          ParamByName('valor').AsFloat := valor;
+          ExecSQL;
+        end;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de borrarAnotacion.</summary>
+/// <param name="codItem">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de borrarAnotacion.
+/// </summary>
+procedure borrarAnotacion(codItem: string);
+
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from TAnotaciones where idItem=' + quotedstr(codItem));
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de OSExecute.
+/// </summary>
+procedure OSExecute(const ACommand: string);
+begin
+  ShellExecute(0, 'OPEN', PChar(ACommand), '', '', SW_SHOWNORMAL);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de IsAlphaNumeric.
+/// </summary>
+function IsAlphaNumeric(C: Char): Boolean;
+begin
+  Result := CharInSet(C, ['a'..'z', 'A'..'Z', '0'..'9']);
+end;
+
+/// <summary>TODO: Descripción de registrarUsuario.</summary>
+procedure registrarUsuario();
+begin
+  frmMain.edt_RIdFiscal.Text := '';
+  cargaPaisesRegistro();
+  ActivaCamposRegistroUsuario(False);
+  frmMain.tbc_PreciosUnitarios.ActiveTab := frmMain.tab_registroUsuario;
+  frmMain.edt_RIdFiscal.SetFocus;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de SoloLetrasYNumeros.
+/// </summary>
+function SoloLetrasYNumeros(const Texto: string): string;
+begin
+  // \p{L} = letras Unicode, \p{N} = números Unicode
+  Result := TRegEx.Replace(Texto, '[^\p{L}\p{N}]+', '');
+end;
+
+/// <summary>TODO: Descripción de realizarRegistro.</summary>
+function realizarRegistro(out error: string): Boolean;
+
+type
+  TUsuarioNuevo = record
+    nombres: string;
+    Apellidos: string;
+    Alias: string;
+    Nacionalidad: string;
+    profesion: string;
+    idfiscal: string;
+    empresa: string;
+    Ciudad: string;
+    Provincia: string;
+    Pais: string;
+    Movil: string;
+    email: string;
+    password: string;
+  end;
+
+var
+  CBackendTokenWSRuc: string;
+  hayInternet: Boolean;
+  UsuarioNuevo: TUsuarioNuevo;
+  R: TFiscalDigitRule;
+  Ok: Boolean;
+  err: string;
+  // HTTP check
+  J: TJSONObject;
+  Existe: Boolean;
+  // WP
+  WpMsg: string;
+  TokenWP: string;
+  JTok: TJSONObject;
+  OkToken: Boolean;
+  // Backend
+  OkIns: Boolean;
+  NuevoID: Integer;
+  EmailEco, Msg: string;
+  // Control
+  WPCreado: Boolean;
+  // Email
+  cuerpo: TStringList;
+  activationBase, activationToken, activationLink: string;
+begin
+  // 0) Incicializar Token de trabajo
+  Result := False;
+  Ok := ObtenerTokenWebServiceRUC(CBackendTokenWSRuc, err);
+  if not Ok then
+  begin
+    error := err;
+    Exit;
+  end;
+  // 1) Recoger datos UI
+  UsuarioNuevo.nombres := frmMain.edt_RNombre.Text.Trim;
+  UsuarioNuevo.Apellidos := frmMain.edt_RApellidos.Text.Trim;
+  UsuarioNuevo.Nacionalidad := frmMain.edt_RNacionalidad.Text.Trim;
+  UsuarioNuevo.profesion := frmMain.edt_RProfesion.Text.Trim;
+  UsuarioNuevo.idfiscal := SoloLetrasYNumeros
+    (frmMain.edt_RIdFiscal.Text.Trim);
+  UsuarioNuevo.empresa := frmMain.edt_REmpresa.Text.Trim;
+  UsuarioNuevo.Ciudad := frmMain.edt_RCiudad.Text.Trim;
+  UsuarioNuevo.Provincia := frmMain.edt_RProvincia.Text.Trim;
+  UsuarioNuevo.Pais := frmMain.cbb_RPais.Items
+    [frmMain.cbb_RPais.itemindex].Trim;
+  UsuarioNuevo.Movil := frmMain.edt_RMovil.Text.Trim;
+  UsuarioNuevo.email := frmMain.edt_REmail.Text.Trim.ToLower;
+  UsuarioNuevo.password := frmMain.edt_RPassword.Text.Trim;
+  UsuarioNuevo.Alias := frmMain.edt_RAlias.Text.Trim;
+
+  // 2) Validaciones UI
+
+  if not validar_correo_electronico(UsuarioNuevo.email) then
+  begin
+    error := 'El correo electrónico no es válido.';
+    Exit;
+  end;
+
+  // 3) Validación IdFiscal Local (Reglas)
+  Ok := GetFiscalDigitsRule(UsuarioNuevo.Pais, R);
+  if not Ok then
+  begin
+    error := 'País no válido para reglas de IdFiscal.';
+    Exit;
+  end;
+
+  if not FiscalIdMatchesDigitsForCountry(UsuarioNuevo.Pais,
+    UsuarioNuevo.idfiscal, R) then
+  begin
+    error := 'IdFiscal no válido para el país seleccionado.';
+    Exit;
+  end;
+
+  // 4) Comprobar IdFiscal Backend (Pre-check)
+  Ok := ExisteIdFiscal(UsuarioNuevo.idfiscal, err);
+  if Ok then
+  begin
+    if err <> '' then
+      error := 'Error al verificar IdFiscal: ' + err
+    else
+      error := 'El IdFiscal ya está registrado.';
+    Exit;
+  end;
+
+  // 5) Check Email (Pre-check)
+  if CompruebaUsuarioPorEmail(UsuarioNuevo.email) then
+  begin
+    error := 'El email ya está registrado.';
+    Exit;
+  end;
+
+  // 6) Crear usuario Backend PHP
+  { (* }
+  OkIns := CrearUsuarioNuevo(UrlCreaUsuarioNuevo, CBackendTokenWSRuc,
+    UsuarioNuevo.nombres, UsuarioNuevo.Apellidos, UsuarioNuevo.Alias,
+    UsuarioNuevo.email, UsuarioNuevo.password, UsuarioNuevo.idfiscal,
+    UsuarioNuevo.Pais, UsuarioNuevo.Ciudad, UsuarioNuevo.Provincia,
+    UsuarioNuevo.profesion, UsuarioNuevo.Movil, UsuarioNuevo.Nacionalidad,
+    UsuarioNuevo.empresa, NuevoID, Msg);
+  { *) }
+  if (not OkIns) or (NuevoID <= 0) then
+  begin
+    error := 'No se pudo completar el registro: ' + Msg;
+    Exit;
+  end;
+
+  // 7) WordPress (Sync)
+  TokenWP := '';
+  WPCreado := False;
+  OkToken := ObtenerTokenWP(UsuarioNuevo.email, UsuarioNuevo.password,
+    TokenWP, JTok);
+  if (not OkToken) or (TokenWP = '') then
+  begin
+    WpMsg := 'Error obteniendo Token WP';
+    if Assigned(JTok) then
+      WpMsg := WpMsg + ': ' + JTok.GetValue<string>('error',
+        'Error desconocido');
+    error := WpMsg;
+    Exit;
+  end;
+
+  if not CrearUsuarioWordPressAsync(TokenWP, UsuarioNuevo.nombres + ' ' +
+    UsuarioNuevo.Apellidos, UsuarioNuevo.password, UsuarioNuevo.email,
+    'customer') then
+  begin
+    error := 'Error registro WordPress.';
+    Exit;
+  end;
+  WPCreado := True;
+  // 8) Fin
+  error := 'Registro realizado. Revisa tu email para activar la cuenta.';
+  Result := True;
+
+end;
+
+/// <summary>
+/// Implementa la lógica principal de validar_correo_electronico.
+/// </summary>
+function validar_correo_electronico(correo_electronico: string): Boolean;
+
+var
+  regex: TRegEx;
+begin
+  regex := TRegEx.Create('^[^\s@]+@[^\s@]+\.[^\s@]+$');
+  Result := regex.IsMatch(correo_electronico);
+end;
+
+function creaDataBaseDesdePadre(BasePadre: string): string;
+var
+  qry: TUniQuery;
+  nPresupuesto: string;
+  codNuevaBase: string;
+  nombreBase: string;
+  descripcionBase: string;
+begin
+  nPresupuesto := frmMain.edt_CodigoPresupuesto1.Text.Trim;
+  descripcionBase := frmMain.edt_descripcionPresupuesto.Text.Trim;
+  codNuevaBase := 'DB' + generaCodigoUnicoShort;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    {--------------------------------}
+    { Obtener nombre base padre }
+    {--------------------------------}
+    qry.SQL.Text := 'SELECT nombre FROM bases WHERE codBase = :cod';
+    qry.ParamByName('cod').AsString := BasePadre;
+    qry.Open;
+
+    if qry.IsEmpty then
+      raise Exception.Create('Base padre no existe');
+
+    nombreBase := qry.FieldByName('nombre').AsString +
+      ' P:' + nPresupuesto;
+    qry.Close;
+
+    {--------------------------------}
+    { Llamada al Stored Procedure }
+    {--------------------------------}
+    qry.SQL.Text :=
+      'CALL sp_clonar_base(' +
+      ':basePadre,' +
+      ':nuevaBase,' +
+      ':presupuesto,' +
+      ':nombreBase,' +
+      ':descripcion)';
+
+    qry.ParamByName('basePadre').AsString := BasePadre;
+    qry.ParamByName('nuevaBase').AsString := codNuevaBase;
+    qry.ParamByName('presupuesto').AsString := nPresupuesto;
+    qry.ParamByName('nombreBase').AsString := nombreBase;
+    qry.ParamByName('descripcion').AsString := descripcionBase;
+
+    qry.ExecSQL;
+
+  finally
+    qry.Free;
+  end;
+
+  Result := codNuevaBase;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de addheadercrono01.
+/// </summary>
+procedure addheadercrono01;
+begin
+  frmMain.grid_calcTiemposheader.cells[0, 0] := 'Trabajo ' + #13 + 'Total';
+  frmMain.grid_calcTiemposheader.cells[1, 0] := 'Unidades' + #13 +
+    'Asignación';
+  frmMain.grid_calcTiemposheader.cells[2, 0] := 'Duración' + #13 + '(Horas)';
+  frmMain.grid_calcTiemposheader.cells[3, 0] := 'Nº Hombres' + #13 +
+    'Cuadrilla';
+  frmMain.grid_calcTiemposheader.cells[4, 0] := 'Días' + #13 + 'Utiles';
+  frmMain.grid_calcTiemposheader.cells[5, 0] := 'Factor' + #13 + 'Conversión';
+  frmMain.grid_calcTiemposheader.cells[6, 0] := 'Días' + #13 + 'Calendario';
+end;
+
+/// <summary>TODO: Descripción de calculaTiempoAPUS.</summary>
+procedure calculaTiempoAPUS();
+
+var
+  RendimientoUnitatioTotalEquipo: Double;
+  TrabajoEquipo: Double;
+  RendimientoUnitarioTotalManoObra: Double;
+  TrabajoManoObra: Double;
+  TrabajoTotal: Double;
+  UnidadesRecurso: Double;
+  DiasUtiles: Double;
+  DiasCalendarios: Double;
+  duracionActividad: Double;
+  tmpstr: string;
+  qry: TUniQuery;
+  x, Y, z: Integer;
+  codAPU: string;
+  cantidadPresupuesto: Double;
+  duracionHoras: Double;
+  hombresCuadrilla: Double;
+  horasLaborales: Double;
+  costoDirecto: Double;
+  unidades: Double;
+  PrecioTotal: Double;
+  valorIndirecto: Double;
+  anidado: Boolean;
+  tmptime: TTime;
+  SQLText: string;
+begin
+  frmMain.grid_calcTiempos.RowCount := frmMain.grid_crono01.RowCount - 1;
+  qry := TUniQuery.Create(nil);
+  qry.Connection := DModule_1.con2;
+  try
+    SetLength(listadoRecursosAsumidos, 0);
+    for x := 1 to frmMain.grid_crono01.RowCount - 1 do
+    begin
+      codAPU := frmMain.grid_crono01.cells[14, x];
+      if codAPU <> '' then
+      begin
+        anidado := False;
+        RendimientoUnitatioTotalEquipo := daRendimiento(codAPU, '1');
+        tmpstr := frmMain.grid_crono01.cells[5, x];
+        tmpstr := AnsiReplaceStr(tmpstr, base_activa.simboloMoneda, '');
+        tmpstr := quitaSignoMiles(tmpstr).Trim;
+        tmpstr := decimal_correcto(tmpstr);
+        cantidadPresupuesto := SafeStrToFloat(tmpstr);
+        TrabajoEquipo := daTrabajo(codAPU, '1');
+        TrabajoEquipo := TrabajoEquipo * cantidadPresupuesto;
+        RendimientoUnitarioTotalManoObra := daRendimiento(codAPU, '4');
+        TrabajoManoObra := daTrabajo(codAPU, '4');
+        TrabajoManoObra := TrabajoManoObra * cantidadPresupuesto;
+        TrabajoTotal := TrabajoEquipo + TrabajoManoObra;
+        if RendimientoUnitatioTotalEquipo > RendimientoUnitarioTotalManoObra
+          then
+        begin
+          duracionActividad := RendimientoUnitatioTotalEquipo;
+        end
+        else
+        begin
+          duracionActividad := RendimientoUnitarioTotalManoObra;
+        end;
+        UnidadesRecurso := daPorcentajeTiempo(codAPU, duracionActividad);
+        duracionHoras := TrabajoTotal / UnidadesRecurso;
+        hombresCuadrilla := daNHcuardillas(codAPU);
+        tmpstr := frmMain.edt_HorasJornada.Text;
+        horasLaborales := StrToFloatDef(tmpstr, 8);
+        DiasUtiles := duracionHoras / horasLaborales;
+
+        DiasCalendarios := DiasUtiles * factorConversionDias;
+
+        frmMain.grid_calcTiempos.cells[0, x - 1] := FloatToStr(TrabajoTotal);
+        frmMain.grid_calcTiempos.cells[1, x - 1] :=
+          FloatToStr(UnidadesRecurso);
+        frmMain.grid_calcTiempos.cells[2, x - 1] := FloatToStr(duracionHoras);
+        frmMain.grid_calcTiempos.cells[3, x - 1] :=
+          FloatToStr(hombresCuadrilla);
+        frmMain.grid_calcTiempos.cells[4, x - 1] := FloatToStr(DiasUtiles);
+        frmMain.grid_calcTiempos.cells[5, x - 1] :=
+          FloatToStr(factorConversionDias);
+        frmMain.grid_calcTiempos.cells[6, x - 1] :=
+          FloatToStr(DiasCalendarios);
+        frmMain.grid_calcTiempos.cells[9, x - 1] :=
+          frmMain.grid_crono01.cells[10, x];
+        with qry do
+        begin
+          Close;
+          SQL.Clear;
+          { (* }
+          SQLText := 'SELECT ' + 'items.anidado, ' +
+            'IF(tanteo.CostoDirectoTotal IS NULL, items.CostoDirectoTotal, tanteo.CostoDirectoTotal) AS CostoDirectoTotal '
+            + 'FROM ' + 'apus items ' +
+            'LEFT JOIN presupuestos_tanteo_apus tanteo ON ( ' +
+            'tanteo.codBase = items.codBase ' +
+            'AND tanteo.CodAPU = items.CodAPU ' +
+            'AND tanteo.codPresupuesto = :codPresupuesto ' +
+            'AND tanteo.revision = :revision ' + ') ' + 'WHERE ' +
+            'items.codBase = :codBase ' + 'AND items.codAPU = :codAPU';
+          { *) }
+          SQL.Add(SQLText);
+          ParamByName('codBase').AsString := base_activa.codBase;
+          ParamByName('codApu').AsString := codAPU;
+          ParamByName('codPresupuesto').AsString := codProyecto;
+          ParamByName('revision').AsString := revision;
+          Prepare;
+          Open;
+          anidado := FieldByName('anidado').AsBoolean;
+          tmpstr := FieldByName('CostoDirectoTotal').AsString;
+          tmpstr := decimal_correcto(tmpstr);
+          costoDirecto := StrToFloatDef(tmpstr, 0);
+          tmpstr := frmMain.grid_crono01.cells[5, x];
+          tmpstr := AnsiReplaceStr(tmpstr, base_activa.simboloMoneda, '');
+          tmpstr := quitaSignoMiles(tmpstr).Trim;
+          tmpstr := decimal_correcto(tmpstr);
+          unidades := StrToFloatDef(tmpstr, 0);
+          costoDirecto := costoDirecto * unidades;
+          tmpstr := FloatToStr(costoDirecto);
+          frmMain.grid_calcTiempos.cells[7, x - 1] := tmpstr;
+          // Costo Directo Completo
+          costoDirecto := SafeStrToFloat(tmpstr);
+          tmpstr := frmMain.grid_crono01.cells[7, x];
+          tmpstr := AnsiReplaceStr(tmpstr, base_activa.simboloMoneda, '');
+          tmpstr := quitaSignoMiles(tmpstr).Trim;
+          tmpstr := decimal_correcto(tmpstr);
+          PrecioTotal := SafeStrToFloat(tmpstr);
+          valorIndirecto := PrecioTotal - costoDirecto;
+          tmpstr := FloatToStr(valorIndirecto);
+          frmMain.grid_calcTiempos.cells[8, x - 1] := tmpstr;
+          // costo Indirecto Completo
+          frmMain.grid_calcTiempos.columns[7].width := 0;
+          frmMain.grid_calcTiempos.columns[8].width := 0;
+          frmMain.grid_calcTiempos.columns[9].width := 0;
+        end;
+        if anidado then
+        begin
+          actualizaaRecursoAnidado(x, codAPU);
+        end;
+      end
+      else
+      begin
+        for z := 0 to frmMain.grid_calcTiempos.columns.Count do
+          frmMain.grid_calcTiempos.Colors[z, x - 1] := $FFE0E0E0;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de actualizaaRecursoAnidado.
+/// </summary>
+procedure actualizaaRecursoAnidado(posgrid: Integer; codAPU: string);
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  listadoRecursosPrincipal: arrayRecursos;
+  listaRecursosAnidados: arrayRecursos;
+  listaRecursosInternaAnidados: arrayRecursos;
+  x, Y, z: Integer;
+  cantidadPrincipal: Double;
+  rendimientoRecursoAnidadoRecalculado: Double;
+  idRecursoAnidado: string;
+  PrecioRecurso: Double;
+  CantidadRecurso: Double;
+  nuevoTotalRecurso: Double;
+  nuevoRendimiento: Double;
+  nuevaCantidad: Double;
+  nuevoTotal: Double;
+  precioBase: Double;
+  duracionActividad: Double;
+  SQLText: string;
+begin
+  // Realizar con Matrices
+  qry := TUniQuery.Create(nil);
+  SetLength(listadoRecursosPrincipal, 0);
+  SetLength(listaRecursosInternaAnidados, 0);
+  with qry do
+  begin
+    Connection := DModule_1.con2;
+    Close;
+    SQL.Clear;
+    { (* }
+    SQLText := 'SELECT ' + 'items.idUnicoRecurso, ' + 'items.Descripcion, ' +
+      'IF(tanteo.Total IS NULL, items.Total, tanteo.Total) AS Total, ' +
+      'items.precio, ' +
+      'IF(tanteo.Rendimiento IS NULL, items.Rendimiento, tanteo.Rendimiento) AS Rendimiento, '
+      + 'items.CodCategoria, ' + 'items.CantidadUnidad ' + 'FROM ' +
+      'apus_items items ' +
+      'LEFT JOIN presupuestos_tanteo_recursos tanteo ON tanteo.codBase = items.codBase '
+      + 'AND tanteo.CodAPU = items.CodAPU ' +
+      'AND tanteo.codPresupuesto = :codPresupuesto ' +
+      'AND tanteo.revision = :revision ' +
+      'AND tanteo.idUnicoRecurso = items.idUnicoRecurso ' + 'WHERE ' +
+      'items.codBase = :codBase ' + 'AND items.codAPU = :codAPU ' +
+      'AND items.CodCategoria IN (1, 4)';
+    { *) }
+    SQL.Add(SQLText);
+    ParamByName('codBase').AsString := base_activa.codBase;
+    ParamByName('codApu').AsString := codAPU;
+    ParamByName('codPresupuesto').AsString := codProyecto;
+    ParamByName('revision').AsString := revision;
+    Prepare;
+    Open;
+    x := 0;
+    while not Eof do
+    begin
+      SetLength(listadoRecursosPrincipal, x + 1);
+      tmpstr := FieldByName('idUnicoRecurso').AsString;
+      listadoRecursosPrincipal[x].codUnicoRecurso := tmpstr;
+      listadoRecursosPrincipal[x].descripcion :=
+        FieldByName('descripcion').AsString;
+      tmpstr := FieldByName('total').AsString;
+      tmpstr := decimal_correcto(tmpstr);
+      listadoRecursosPrincipal[x].PrecioTotal := tmpstr;
+      tmpstr := FieldByName('precio').AsString;
+      tmpstr := decimal_correcto(tmpstr);
+      listadoRecursosPrincipal[x].PrecioCosto := tmpstr;
+      tmpstr := FieldByName('rendimiento').AsString;
+      tmpstr := decimal_correcto(tmpstr);
+      listadoRecursosPrincipal[x].rendimiento := tmpstr;
+      listadoRecursosPrincipal[x].tipoRecurso :=
+        FieldByName('codCategoria').AsString;
+      tmpstr := FieldByName('cantidadUnidad').AsString;
+      tmpstr := decimal_correcto(tmpstr);
+      listadoRecursosPrincipal[x].cantidad := tmpstr;
+      listadoRecursosPrincipal[x].tipoRecurso :=
+        FieldByName('codCategoria').AsString;
+      Inc(x);
+      Next;
+    end;
+    Close;
+    SQL.Clear;
+    SQL.Add('select * from apus_items where (codAPU=' + quotedstr(codAPU) +
+      ' and codBase=' + quotedstr(base_activa.codBase) +
+      ' and codCategoria=6)');
+    Prepare;
+    Open;
+    x := 0;
+    while not Eof do
+    begin
+      tmpstr := FieldByName('idUnicoRecurso').AsString;
+      tmpstr := ReplaceStr(tmpstr, 'APU: ', '');
+      SetLength(listaRecursosAnidados, x + 1);
+      listaRecursosAnidados[x].codAPU := tmpstr;
+      tmpstr := FieldByName('cantidadUnidad').AsString;
+      tmpstr := decimal_correcto(tmpstr);
+      listaRecursosAnidados[x].cantidad := tmpstr;
+      listaRecursosAnidados[x].descripcion :=
+        FieldByName('descripcion').AsString;
+      Inc(x);
+      Next;
+    end;
+    Y := 0;
+    for x := 0 to Length(listaRecursosAnidados) - 1 do
+    begin
+      Close;
+      SQL.Clear;
+      { (* }
+      SQLText := 'SELECT ' + 'items.idUnicoRecurso, ' + 'items.precio, ' +
+        'IF(tanteo.Rendimiento IS NULL, items.Rendimiento, tanteo.Rendimiento) AS Rendimiento, '
+        + 'items.CantidadUnidad ' + 'FROM ' + 'apus_items items ' +
+        'LEFT JOIN presupuestos_tanteo_recursos tanteo ON tanteo.codBase = items.codBase '
+        + 'AND tanteo.CodAPU = items.CodAPU ' +
+        'AND tanteo.codPresupuesto = codPresupuesto ' +
+        'AND tanteo.revision = :revision ' +
+        'AND tanteo.idUnicoRecurso = items.idUnicoRecurso ' + 'WHERE ' +
+        'items.codBase = :codBase ' + 'AND items.codAPU = :codAPU ' +
+        'AND items.CodCategoria IN (1, 4)';
+      { *) }
+      SQL.Add(SQLText);
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codApu').AsString := codAPU;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      Open;
+      cantidadPrincipal := SafeStrToFloat(listaRecursosAnidados[x].cantidad);
+      while not Eof do
+      begin
+        SetLength(listaRecursosInternaAnidados, Y + 1);
+        listaRecursosInternaAnidados[Y].codUnicoRecurso :=
+          FieldByName('idUnicoRecurso').AsString;
+        tmpstr := FieldByName('rendimiento').AsString;
+        tmpstr := decimal_correcto(tmpstr);
+        rendimientoRecursoAnidadoRecalculado := SafeStrToFloat(tmpstr) *
+          cantidadPrincipal;
+        rendimientoRecursoAnidadoRecalculado :=
+          RoundTo(rendimientoRecursoAnidadoRecalculado, -4);
+        listaRecursosInternaAnidados[Y].rendimiento :=
+          FloatToStr(rendimientoRecursoAnidadoRecalculado);
+        tmpstr := FieldByName('precio').AsString;
+        tmpstr := decimal_correcto(tmpstr);
+        PrecioRecurso := SafeStrToFloat(tmpstr);
+        tmpstr := FieldByName('cantidadUnidad').AsString;
+        tmpstr := decimal_correcto(tmpstr);
+        listaRecursosInternaAnidados[Y].cantidad := tmpstr;
+        CantidadRecurso := SafeStrToFloat(tmpstr);
+        nuevoTotalRecurso := rendimientoRecursoAnidadoRecalculado *
+          PrecioRecurso * CantidadRecurso;
+        nuevoTotalRecurso := RoundTo(nuevoTotalRecurso, -2);
+        listaRecursosInternaAnidados[Y].PrecioTotal :=
+          FloatToStr(nuevoTotalRecurso);
+
+        Inc(Y);
+        Next;
+      end;
+    end;
+  end;
+  for x := 0 to Length(listadoRecursosPrincipal) - 1 do
+  begin
+    tmpstr := listadoRecursosPrincipal[x].PrecioCosto;
+    tmpstr := decimal_correcto(tmpstr);
+    precioBase := SafeStrToFloat(tmpstr);
+    tmpstr := dasumaCantidadItemAnidados(listaRecursosInternaAnidados,
+      listadoRecursosPrincipal[x].codUnicoRecurso,
+      listadoRecursosPrincipal[x].cantidad);
+    listadoRecursosPrincipal[x].cantidad := tmpstr;
+    nuevaCantidad := SafeStrToFloat(tmpstr);
+    tmpstr := dasumaTotalesItemAnidados(listaRecursosInternaAnidados,
+      listadoRecursosPrincipal[x].codUnicoRecurso,
+      listadoRecursosPrincipal[x].PrecioTotal);
+    listadoRecursosPrincipal[x].PrecioTotal := tmpstr;
+    nuevoTotal := SafeStrToFloat(tmpstr);
+    nuevoRendimiento := nuevoTotal / nuevaCantidad;
+    nuevoRendimiento := nuevoRendimiento / precioBase;
+    nuevoRendimiento := RoundTo(nuevoRendimiento, -4);
+    listadoRecursosPrincipal[x].rendimiento := FloatToStr(nuevoRendimiento);
+  end;
+  duracionActividad := daDuracionActividadAnidados(listadoRecursosPrincipal);
+  recalculaTiemposAnidados(listadoRecursosPrincipal,
+    duracionActividad, posgrid);
+end;
+
+/// <summary>
+/// Devuelve información calculada o consultada en daRendimiento.
+/// </summary>
+function daRendimiento(codAPU: string; CodCategoria: string): Double;
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  SQLText: string;
+begin
+  Result := 0;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQLText := 'SELECT ' +
+        'SUM(IF(tanteo.Rendimiento IS NULL, items.Rendimiento, tanteo.Rendimiento)) AS Srendimiento '
+        + 'FROM ' + 'apus_items items ' +
+        'LEFT JOIN presupuestos_tanteo_recursos tanteo ON ( ' +
+        'tanteo.codBase = items.codBase ' +
+        'AND tanteo.CodAPU = items.CodAPU ' +
+        'AND tanteo.codPresupuesto = :codPresupuesto ' +
+        'AND tanteo.revision = :revision ' +
+        'AND tanteo.idUnicoRecurso = items.idUnicoRecurso ' + ') ' + 'WHERE '
+        + 'items.codBase = :codBase ' + 'AND items.CodAPU = :codAPU ' +
+        'AND items.CodCategoria = :codCategoria';
+      { *) }
+      SQL.Add(SQLText);
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codAPU').AsString := codAPU;
+      ParamByName('codpresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      ParamByName('codCategoria').AsString := CodCategoria;
+      Prepare;
+      Open;
+      tmpstr := FieldByName('SRendimiento').AsString;
+      if tmpstr = '' then
+        tmpstr := '0';
+      tmpstr := decimal_correcto(tmpstr);
+      Result := SafeStrToFloat(tmpstr);
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de daTrabajo.</summary>
+/// <param name="codApu">TODO.</param>
+/// <param name="codCategoria">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daTrabajo.
+/// </summary>
+function daTrabajo(codAPU, CodCategoria: string): Double;
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  SQLText: string;
+begin
+  Result := 0;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQLText := 'SELECT ' +
+        'sum(IF(tanteo.Rendimiento IS NULL, items.Rendimiento * items.CantidadUnidad, tanteo.CantidadUnidad * tanteo.Rendimiento)) AS Suma '
+        + 'FROM ' + 'apus_items items ' +
+        'LEFT JOIN presupuestos_tanteo_recursos tanteo ON ( ' +
+        'tanteo.codBase = items.codBase ' +
+        'AND tanteo.CodAPU = items.CodAPU ' +
+        'AND tanteo.codPresupuesto = :codPresupuesto ' +
+        'AND tanteo.revision = :revision ' +
+        'AND tanteo.idUnicoRecurso = items.idUnicoRecurso ' + ') ' + 'WHERE '
+        + 'items.codBase = :codBase ' + 'AND items.codAPU = :codAPU ' +
+        'AND items.codCategoria = :codCategoria';
+      { *) }
+      SQL.Add(SQLText);
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codAPU').AsString := codAPU;
+      ParamByName('codpresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      ParamByName('codCategoria').AsString := CodCategoria;
+      Prepare;
+      Open;
+      tmpstr := FieldByName('Suma').AsString;
+      if tmpstr = '' then
+        tmpstr := '0';
+      tmpstr := decimal_correcto(tmpstr);
+      Result := SafeStrToFloat(tmpstr);
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Devuelve información calculada o consultada en daPorcentajeTiempo.
+/// </summary>
+function daPorcentajeTiempo(codAPU: string;
+  duracionActividad: Double): Double;
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  x: Integer;
+  porcentajeTiempo: Double;
+  CantidadRecurso: Double;
+  UnidadesRecurso: Double;
+  sumatoriaAsumidos: Double;
+  SQLText: string;
+begin
+  x := Length(listadoRecursosAsumidos);
+  sumatoriaAsumidos := 0;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQLText := 'SELECT ' + 'items.idUnicoRecurso, ' +
+        'IF(tanteo.Rendimiento IS NULL, items.Rendimiento, tanteo.Rendimiento) AS Rendimiento, '
+        + 'IF(tanteo.CantidadUnidad IS NULL, items.CantidadUnidad, tanteo.CantidadUnidad) AS CantidadUnidad, '
+        + 'items.Descripcion ' + 'FROM ' + 'apus_items items ' +
+        'LEFT JOIN presupuestos_tanteo_recursos tanteo ON ( ' +
+        'tanteo.codBase = items.codBase ' +
+        'AND tanteo.CodAPU = items.CodAPU ' +
+        'AND tanteo.codPresupuesto = :codPresupuesto ' +
+        'AND tanteo.revision = :revision ' +
+        'AND tanteo.idUnicoRecurso = items.idUnicoRecurso ' + ') ' + 'WHERE '
+        + 'items.codBase = :codBase ' + 'AND items.CodAPU = :codApu ' +
+        'AND items.codCategoria IN (1, 4)';
+      { *) }
+      SQL.Add(SQLText);
+      ParamByName('codbase').AsString := base_activa.codBase;
+      ParamByName('codAPU').AsString := codAPU;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      Open;
+      while not Eof do
+      begin
+        SetLength(listadoRecursosAsumidos, x + 1);
+        listadoRecursosAsumidos[x].codAPU := codAPU;
+        listadoRecursosAsumidos[x].idUnicoRecurso :=
+          FieldByName('idUnicoRecurso').AsString;
+        tmpstr := FieldByName('Rendimiento').AsString;
+        if tmpstr = '' then
+          tmpstr := '0';
+        tmpstr := decimal_correcto(tmpstr);
+        porcentajeTiempo := SafeStrToFloat(tmpstr);
+        porcentajeTiempo := porcentajeTiempo / duracionActividad;
+        tmpstr := FieldByName('cantidadUnidad').AsString;
+        if tmpstr = '' then
+          tmpstr := '0';
+        tmpstr := decimal_correcto(tmpstr);
+        CantidadRecurso := SafeStrToFloat(tmpstr);
+        UnidadesRecurso := CantidadRecurso * porcentajeTiempo;
+        listadoRecursosAsumidos[x].unidadesRecursos := UnidadesRecurso;
+        sumatoriaAsumidos := sumatoriaAsumidos + UnidadesRecurso;
+        Next;
+        Inc(x);
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+  Result := sumatoriaAsumidos;
+end;
+
+/// <summary>TODO: Descripción de limpiagridCrono.</summary>
+/// <param name="Grid">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de limpiagridCrono.
+/// </summary>
+procedure limpiagridCrono(Grid: TTMSFNCGrid);
+
+var
+  x: Integer;
+begin
+  Grid.ClearNormalCells;
+  Grid.Options.ColumnSize.StretchAll := True;
+end;
+
+procedure showHeader(AGrid: TTMSFNCGrid; const NPeriodos: Integer);
+var
+  i: Integer;
+  ColsNecesarias: Integer;
+begin
+  if not Assigned(AGrid) then
+    Exit;
+
+  if NPeriodos <= 0 then
+    Exit;
+
+  // Asegura mínimo estructura válida
+  ColsNecesarias := NPeriodos + 1; // tu diseño: 1 col base + periodos
+  if AGrid.ColumnCount < ColsNecesarias then
+    AGrid.ColumnCount := ColsNecesarias;
+
+  if AGrid.RowCount < 2 then
+    AGrid.RowCount := 2;
+
+  // Asegura FixedRows (si usas header en fila 0)
+  if AGrid.FixedRows < 1 then
+    AGrid.FixedRows := 1;
+
+  AGrid.BeginUpdate;
+  try
+    // Header base
+    if (0 >= 0) and (0 < AGrid.ColumnCount) then
+      AGrid.Cells[0, 0] := 'ITEM';
+
+    // Headers de periodos
+    for i := 1 to NPeriodos do
+    begin
+      if i < AGrid.ColumnCount then
+        AGrid.Cells[i, 0] := 'P' + i.ToString;
+    end;
+  finally
+    AGrid.EndUpdate;
+  end;
+end;
+
+/// <summary>TODO: Descripción de diasLaborables.</summary>
+/// <param name="diaInicio">TODO.</param>
+/// <param name="diaFin">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de diasLaborables.
+/// </summary>
+function diasLaborables(diaInicio, diaFin: TDateTime): Integer;
+
+var
+  diastotales: Integer;
+  finSemana: Integer;
+begin
+  diastotales := DaysBetween(diaInicio, diaFin);
+  finSemana := WeeksBetween(diaInicio, diaFin);
+  finSemana := finSemana * 2;
+  Result := diastotales - finSemana;
+end;
+
+/// <summary>TODO: Descripción de SeleccionaTabCrono.</summary>
+/// <param name="tabsel">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de SeleccionaTabCrono.
+/// </summary>
+procedure SeleccionaTabCrono(tabsel: Integer);
+begin
+  frmMain.rect_tab1.fill.Color := $FF606060;
+  frmMain.rect_tab2.fill.Color := $FF606060;
+  frmMain.rect_tab3.fill.Color := $FF606060;
+  frmMain.rect_tab4.fill.Color := $FF606060;
+  frmMain.rect_tab5.fill.Color := $FF606060;
+  case tabsel of
+    1:
+      begin
+        frmMain.rect_tab1.fill.Color := $FFF39200;
+      end;
+    2:
+      begin
+        frmMain.rect_tab2.fill.Color := $FFF39200;
+      end;
+    3:
+      begin
+        frmMain.rect_tab3.fill.Color := $FFF39200;
+      end;
+    4:
+      begin
+        frmMain.rect_tab4.fill.Color := $FFF39200;
+      end;
+    5:
+      begin
+        frmMain.rect_tab5.fill.Color := $FFF39200;
+      end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de SendText.</summary>
+/// <param name="Value">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de SendText.
+/// </summary>
+procedure SendText(const Value: WideString);
+
+var
+  I: Integer;
+  S: WideString;
+  TI: TInput;
+  KI: TKeybdInput;
+
+const
+  KEYEVENTF_UNICODE = $0004;
+begin
+  S := WideUpperCase(Value);
+  TI.Itype := INPUT_KEYBOARD;
+  for I := 1 to Length(S) do
+  begin
+    KI.wVk := 0;
+    KI.dwFlags := KEYEVENTF_UNICODE;
+    KI.wScan := Ord(S[I]);
+    TI.KI := KI;
+    SendInput(1, TI, SizeOf(TI));
+  end;
+end;
+
+/// <summary>TODO: Descripción de da20ParetoTiempo.</summary>
+/// <param name="codCapitulo">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en da20ParetoTiempo.
+/// </summary>
+function da20ParetoTiempo(codCapitulo: string): Integer;
+
+var
+  qry: TUniQuery;
+  codTempProyecto: string;
+  itemsSubCapitulos: Integer;
+  valor: Double;
+begin
+  qry := TUniQuery.Create(nil);
+  Result := -1;
+  codCapitulo := Trim(codCapitulo);
+  codTempProyecto := frmMain.lbl_codUnicoTemporal.Text;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select count(*) as counter from TGrid2Items where codTempProyecto='
+        + quotedstr(codTempProyecto) + ' and codEDT like ' +
+        quotedstr(codCapitulo + '%'));
+      Prepare;
+      Open;
+      itemsSubCapitulos := FieldByName('counter').AsInteger;
+    end;
+  finally
+    qry.Free;
+  end;
+  valor := (itemsSubCapitulos * 20) / 100;
+  Result := Trunc(valor);
+  valor := frac(valor);
+  if valor > 0 then
+    Inc(Result);
+end;
+
+/// <summary>TODO: Descripción de generalistadoEDTCapitulos.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generalistadoEDTCapitulos.
+/// </summary>
+function generalistadoEDTCapitulos(): TStringList;
+
+var
+  nodo: TTMSFNCTreeViewNode;
+  tmpstr: string;
+  listadoEdtCapitulos: TStringList;
+begin
+  nodo := frmMain.Trvw_EDT.Nodes[0];
+  nodo := nodo.GetFirstChild;
+  listadoEdtCapitulos := TStringList.Create;
+  if Assigned(nodo) then
+  begin
+    while nodo <> nil do
+    begin
+      tmpstr := nodo.Text[0];
+      if tmpstr <> '' then
+      begin
+        listadoEdtCapitulos.Add(tmpstr);
+      end;
+      nodo := nodo.GetNextSibling;
+    end;
+  end;
+  Result := listadoEdtCapitulos;
+end;
+
+/// <summary>TODO: Descripción de cuentaItemsRealesGrid.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cuentaItemsRealesGrid.
+/// </summary>
+function cuentaItemsRealesGrid(): Integer;
+
+var
+  qry: TUniQuery;
+  codTempProyecto: string;
+begin
+  qry := TUniQuery.Create(nil);
+  Result := -1;
+  codTempProyecto := frmMain.lbl_codUnicoTemporal.Text;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select count(*) as counter from TGridItems where codTempProyecto='
+        + quotedstr(codTempProyecto));
+      Prepare;
+      Open;
+      Result := FieldByName('counter').AsInteger;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de encuentraItemenCuenta.
+/// </summary>
+function encuentraItemenCuenta(Grid: TTMSFNCGrid; filaRef: Integer;
+  Columna: Integer; textoBuscar: string; CaseSensitive: Boolean): Integer;
+
+var
+  x: Integer;
+  filaInicio, filaFin: Integer;
+  tmpstr: string;
+  salir: Boolean;
+  textoComparar: string;
+begin
+  Result := -1;
+  // encontrar FilaInicio
+  x := filaRef;
+  salir := False;
+  while (not salir) and (x > 0) do
+  begin
+    if Grid.cells[1, x] <> '' then
+    begin
+      filaInicio := x;
+      salir := True;
+    end;
+    x := x - 1;
+  end;
+  // enctronrar FilaFin
+  x := filaInicio + 1;
+  salir := False;
+  filaFin := Grid.RowCount;
+  while (not salir) and (x < Grid.RowCount) do
+  begin
+    if Grid.cells[1, x] <> '' then
+    begin
+      filaFin := x;
+      salir := True;
+    end;
+    x := x + 1;
+  end;
+
+  x := filaInicio;
+  salir := False;
+  while (x <= filaFin) and (not salir) do
+  begin
+    textoComparar := Grid.cells[Columna, x];
+    if not CaseSensitive then
+    begin
+      textoComparar := LowerCase(textoComparar);
+      textoBuscar := LowerCase(textoBuscar);
+    end;
+    if textoComparar = textoBuscar then
+    begin
+      Result := x;
+      salir := True;
+    end;
+    Inc(x);
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de encuentraItemGrid.
+/// </summary>
+function encuentraItemGrid(Grid: TTMSFNCGrid; Columna: Integer;
+  textoBuscar: string; CaseSensitive: Boolean): Integer;
+
+var
+  x: Integer;
+  salir: Boolean;
+  textoComparar: string;
+begin
+  Result := -1;
+  x := 0;
+  salir := False;
+  while (x < Grid.RowCount) and (not salir) do
+  begin
+    textoComparar := Grid.cells[Columna, x];
+    if not CaseSensitive then
+    begin
+      textoComparar := LowerCase(textoComparar);
+      textoBuscar := LowerCase(textoBuscar);
+    end;
+    if textoComparar = textoBuscar then
+    begin
+      Result := x;
+      salir := True;
+    end;
+    Inc(x);
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de colorRow.
+/// </summary>
+procedure colorRow(Grid: TTMSFNCGrid; row: Integer; background: TAlphaColor;
+  FontColor: TAlphaColor);
+
+var
+  x: Integer;
+begin
+  for x := 0 to Grid.columns.Count - 1 do
+  begin
+    Grid.Colors[x, row] := background;
+    Grid.FontColors[x, row] := FontColor;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de searchGrid.
+/// </summary>
+function searchGrid(Grid: TTMSFNCGrid; Columna: Integer;
+  datosBusqueda: string): Integer;
+
+var
+  x: Integer;
+  salir: Boolean;
+begin
+  Result := -1;
+  x := 0;
+  salir := False;
+  while (x < Grid.RowCount) and (not salir) do
+  begin
+    if Trim(Grid.cells[Columna, x]) = Trim(datosBusqueda) then
+    begin
+      salir := True;
+      Result := x;
+    end;
+    Inc(x);
+  end;
+end;
+
+/// <summary>TODO: Descripción de generaTablaEDTValores.</summary>
+procedure generaTablaEDTValores();
+
+var
+  nodo: TTMSFNCTreeViewNode;
+  edt, descripcion, valor: string;
+  qry: TUniQuery;
+  codBase: string;
+begin
+  codBase := base_activa.codBase;
+  qry := TUniQuery.Create(nil);
+  nodo := frmVisorEDT.Trvw_VisorEDT.Nodes[0];
+  qry.Connection := DModule_1.con2;
+  with qry do
+  begin
+    Close;
+    SQL.Clear;
+    { (* }
+    SQL.Add('DELETE ' + 'FROM ' + 'TvaloresEDT ' + 'WHERE ' +
+      'codBase = :codBase ' + 'AND codPresupuesto = :codPresupuesto ' +
+      'AND revision = :revision');
+    { *) }
+    ParamByName('codbase').AsString := codBase;
+    ParamByName('codPresupuesto').AsString := codProyecto;
+    ParamByName('revision').AsString := revision;
+    Prepare;
+    ExecSQL;
+  end;
+  try
+    if Assigned(nodo) then
+    begin
+      while nodo <> nil do
+      begin
+        edt := nodo.Text[0];
+        descripcion := nodo.Text[1];
+        valor := quitaSignoMiles(nodo.Text[2]);
+        if valor = '' then
+          valor := decimal_correcto('0.00');
+        if edt <> '' then
+        begin
+          with qry do
+          begin
+            Close;
+            SQL.Clear;
+            { (* }
+            SQL.Add('INSERT INTO TvaloresEDT (codBase, ' + 'codPresupuesto, '
+              + 'revision, ' + 'EDT, ' + 'Valor) ' + 'VALUES ' + '(:codBase, '
+              + ':codPresupuesto, ' + ':revision, ' + ':EDT, ' + ':Valor)');
+            { *) }
+            ParamByName('codbase').AsString := codBase;
+            ParamByName('codPresupuesto').AsString := codProyecto;
+            ParamByName('revision').AsString := revision;
+            ParamByName('EDT').AsString := edt;
+            ParamByName('Valor').AsFloat := SafeStrToFloat(valor);
+            Prepare;
+            ExecSQL;
+          end;
+        end;
+        nodo := nodo.GetNext;
+      end;
+    end;
+  finally
+    qry.Free
+  end;
+end;
+
+/// <summary>TODO: Descripción de dasumaValoresEDT.</summary>
+/// <param name="EDTFiltro">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en dasumaValoresEDT.
+/// </summary>
+function dasumaValoresEDT(EDTFiltro: string): Double;
+
+var
+  tmpstr: string;
+  qry: TUniQuery;
+  codBase: string;
+begin
+  Result := 0;
+  qry := TUniQuery.Create(nil);
+  codBase := base_activa.codBase;
+
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select sum(valor) as SumaEDT from TvaloresEDT where (EDT like '
+        + quotedstr(EDTFiltro + '%') +
+        ') and (codBase=:codBase and codPresupuesto=:codPresupuesto and revision=:revision)');
+      ParamByName('codbase').AsString := codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      Open;
+      tmpstr := FieldByName('SumaEDT').AsString;
+      tmpstr := decimal_correcto(tmpstr);
+      Result := StrToFloatDef(tmpstr, 0);
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de getLastMemoLineNumber.</summary>
+/// <param name="Memo">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en getLastMemoLineNumber.
+/// </summary>
+function getLastMemoLineNumber(const Memo: TMemo): Integer;
+
+var
+  oldCaretPosition: TCaretPosition;
+begin
+  Assert(Assigned(Memo));
+  oldCaretPosition := Memo.CaretPosition;
+
+  try
+    Memo.GoToTextEnd();
+    Result := Memo.CaretPosition.Line;
+  finally
+    Memo.CaretPosition := oldCaretPosition;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de cuentaCaracteres.
+/// </summary>
+function cuentaCaracteres(cadena: string; caracter: string): Integer;
+
+var
+  x, Y: Integer;
+  tchar: string;
+begin
+  Y := 0;
+  for x := 0 to Length(cadena) - 1 do
+  begin
+    tchar := MidStr(cadena, x, Length(caracter));
+    if tchar = caracter then
+      Inc(Y);
+  end;
+  Result := Y;
+end;
+
+/// <summary>TODO: Descripción de iniciaTablaMemoria.</summary>
+procedure iniciaTablaMemoria();
+
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from TAnotaciones');
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free
+  end;
+end;
+
+/// <summary>TODO: Descripción de daPaqueteItem.</summary>
+/// <param name="posgrid">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daPaqueteItem.
+/// </summary>
+function daPaqueteItem(posgrid: Integer): string;
+
+var
+  paquete: string;
+  tmpstr: string;
+begin
+  paquete := '';
+  while (paquete = '') and (posgrid > 0) do
+  begin
+    with DMPresupuesto.dsTpresupuestosItems.DataSet do
+    begin
+      DisableControls;
+      First;
+      MoveBy(posgrid - 1);
+      EnableControls;
+    end;
+
+    tmpstr := DMPresupuesto.QTPresupuestosItems.FieldByName('unidad').AsString;
+    if tmpstr = '' then
+    begin
+      paquete :=
+        DMPresupuesto.QTPresupuestosItems.FieldByName('descripcion').AsString;
+    end;
+    posgrid := posgrid - 1;
+  end;
+  paquete := ReplaceStr(paquete, '<b>', '');
+  paquete := ReplaceStr(paquete, '</b>', '');
+  Result := paquete;
+end;
+
+/// <summary>TODO: Descripción de daCodEDT.</summary>
+/// <param name="posgrid">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daCodEDT.
+/// </summary>
+function daCodEDT(posgrid: Integer): string;
+
+var
+  paquete: string;
+  tmpstr: string;
+begin
+  paquete := '';
+  while (paquete = '') and (posgrid > 0) do
+  begin
+    with DMPresupuesto.dsTpresupuestosItems.DataSet do
+    begin
+      DisableControls;
+      First;
+      MoveBy(posgrid - 1);
+      EnableControls;
+    end;
+    tmpstr := DMPresupuesto.QTPresupuestosItems.FieldByName('unidad').AsString;
+    if tmpstr = '' then
+    begin
+      paquete :=
+        DMPresupuesto.QTPresupuestosItems.FieldByName('codEDT').AsString;
+    end;
+    posgrid := posgrid - 1;
+  end;
+  paquete := ReplaceStr(paquete, '<b>', '');
+  paquete := ReplaceStr(paquete, '</b>', '');
+  Result := paquete;
+end;
+
+/// <summary>TODO: Descripción de CargaProyectosDisponibles.</summary>
+/// <param name="fechaInicio">TODO.</param>
+/// <param name="FechaFinal">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de CargaProyectosDisponibles.
+/// </summary>
+procedure CargaProyectosDisponibles(FechaInicio, FechaFinal: TDateTime;
+  LForm: TfrmAbrirPresupuesto);
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  tmpstr: string;
+  TFecha: string;
+  valor: TDateTime;
+  f1, f2: string;
+  nodo, subnodo: TTMSFNCTreeViewNode;
+  nRevision: string;
+  codProyecto: string;
+  descripcion: string;
+  codReferencial: string;
+  subtotal, iva, total: string;
+  codBase: string;
+  tmpD: Double;
+begin
+  LForm.Trvw_ProyectosDisponibles.ClearNodes;
+  LForm.Trvw_ProyectosDisponibles.columns[0].Text := 'Proyecto';
+  LForm.Trvw_ProyectosDisponibles.columns[1].Text := 'Subtotal';
+  LForm.Trvw_ProyectosDisponibles.columns[2].Text := 'IVA';
+  LForm.Trvw_ProyectosDisponibles.columns[3].Text := 'Total';
+  LForm.Trvw_ProyectosDisponibles.columns[4].Text := 'Fecha';
+  LForm.Trvw_ProyectosDisponibles.columns[5].width := 0;
+  if (FechaInicio > 0) then
+  begin
+    f1 := FloatToStr(FechaInicio);
+    f1 := ReplaceStr(f1, ',', '.');
+    f2 := FloatToStr(FechaFinal);
+    f2 := ReplaceStr(f2, ',', '.');
+    qry := TUniQuery.Create(nil);
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        SQL.Add('select * from Presupuestos_DatosGenerales where (fechaModificacion between '
+          + f1 + ' and ' + f2 + ') and activo=1');
+        Prepare;
+        Open;
+        while not Eof do
+        begin
+          nRevision := 'Rev. ' + FieldByName('revision').AsString;
+          codProyecto := FieldByName('codPresupuesto').AsString;
+          codProyecto := '<B>' + codProyecto + '</B>';
+          codBase := FieldByName('codBase').AsString;
+          codReferencial := FieldByName('codReferencial').AsString;
+          descripcion := FieldByName('descripcion').AsString;
+          descripcion := '<B>' + descripcion + '</B>';
+          tmpstr := FieldByName('subtotal').AsString;
+          if tmpstr = '' then
+            tmpstr := '0';
+          subtotal := tmpstr;
+          tmpstr := FieldByName('iva').AsString;
+          if tmpstr = '' then
+            tmpstr := '0';
+          iva := tmpstr;
+          tmpstr := FieldByName('total').AsString;
+          if tmpstr = '' then
+            tmpstr := '0';
+          total := tmpstr;
+          valor := FieldByName('fechaModificacion').AsDateTime;
+          TFecha := FormatDateTime('dd/mm/yyyy', valor);
+          if codReferencial <> '' then
+          begin
+            codReferencial := '(' + codReferencial + ')';
+            codProyecto := codProyecto + '  ' + codReferencial + '  ' +
+              descripcion;
+          end
+          else
+          begin
+            codProyecto := codProyecto + '  ' + descripcion;
+          end;
+          if nRevision = 'Rev. ' + '0' then
+          begin
+            nodo := LForm.Trvw_ProyectosDisponibles.addnode;
+            nodo.Extended := True;
+            nodo.Text[0] := codProyecto;
+          end
+          else
+          begin
+            nodo := posicionaNodo(LForm.Trvw_ProyectosDisponibles,
+              codProyecto, 0, True);
+          end;
+          subnodo := LForm.Trvw_ProyectosDisponibles.addnode(nodo);
+          subnodo.Text[0] := nRevision;
+          subnodo.Text[1] := subtotal;
+          subnodo.Text[2] := iva;
+          subnodo.Text[3] := total;
+          subnodo.Text[4] := TFecha;
+          subnodo.Text[5] := codBase;
+          Next;
+        end;
+      end;
+    finally
+      qry.Free;
+    end;
+  end
+  else
+  begin
+    qry := TUniQuery.Create(nil);
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        SQL.Add('SELECT * FROM Presupuestos_DatosGenerales WHERE activo=1');
+        Prepare;
+        Open;
+        while not Eof do
+        begin
+          nRevision := 'Rev. ' + FieldByName('revision').AsString;
+          codProyecto := FieldByName('codPresupuesto').AsString;
+          codProyecto := '<B>' + codProyecto + '</B>';
+          codBase := FieldByName('codBase').AsString;
+          codReferencial := FieldByName('codReferencial').AsString;
+          descripcion := FieldByName('descripcion').AsString;
+          descripcion := '<B>' + descripcion + '</B>';
+          tmpstr := decimal_correcto(FieldByName('subtotal').AsString);
+          if tmpstr = '' then
+            tmpstr := '0';
+          subtotal := tmpstr;
+          tmpstr := decimal_correcto(FieldByName('iva').AsString);
+          if tmpstr = '' then
+            tmpstr := '0';
+          iva := tmpstr;
+          tmpstr := decimal_correcto(FieldByName('total').AsString);
+          if tmpstr = '' then
+            tmpstr := '0';
+          total := tmpstr;
+          valor := FieldByName('fechaModificacion').AsDateTime;
+          TFecha := FormatDateTime('dd/mm/yyyy', valor);
+          if codReferencial <> '' then
+          begin
+            codReferencial := '(' + codReferencial + ')';
+            codProyecto := codProyecto + '  ' + codReferencial + '  ' +
+              descripcion;
+          end
+          else
+          begin
+            codProyecto := codProyecto + '  ' + descripcion;
+          end;
+          if nRevision = 'Rev. ' + '0' then
+          begin
+            nodo := LForm.Trvw_ProyectosDisponibles.addnode;
+            nodo.Extended := True;
+            nodo.Text[0] := codProyecto;
+          end
+          else
+          begin
+            nodo := posicionaNodo(LForm.Trvw_ProyectosDisponibles,
+              codProyecto, 0, True);
+          end;
+          subnodo := LForm.Trvw_ProyectosDisponibles.addnode(nodo);
+          subnodo.Text[0] := nRevision;
+          subnodo.Text[1] := subtotal;
+          subnodo.Text[2] := iva;
+          subnodo.Text[3] := total;
+          subnodo.Text[4] := TFecha;
+          subnodo.Text[5] := codBase;
+          Next;
+        end;
+      end;
+    finally
+      qry.Free;
+      LForm.Trvw_ProyectosDisponibles.columns[5].width := 0;
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de DaSeleccionRolesStake.</summary>
+procedure DaSeleccionRolesStake();
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  frmMain.grid_stakesAsignados.columns[6].ComboItems.Clear;
+  frmMain.grid_EDOStakes.Columns[3].ComboItems.Clear;
+
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT * FROM rolesstakes ORDER BY id');
+      Prepare;
+      Open;
+      while not Eof do
+      begin
+        tmpstr := FieldByName('descripcion').AsString;
+        frmMain.grid_stakesAsignados.columns[6].ComboItems.Add(tmpstr);
+        frmMain.grid_EDOStakes.Columns[3].ComboItems.Add(tmpstr);
+        Next;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de DaSeleccionRolesStake2.</summary>
+procedure DaSeleccionRolesStake2();
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  frmMain.grid_EDOStakes.columns[3].ComboItems.Clear;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT * FROM rolesstakes ORDER BY id');
+      Prepare;
+      Open;
+      while not Eof do
+      begin
+        tmpstr := FieldByName('descripcion').AsString;
+        frmMain.grid_EDOStakes.columns[3].ComboItems.Add(tmpstr);
+        Next;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+function RecalculaApuAnidado(nuevoPrecioAnidado, codAPUanidado,
+  codAPU: string; guardar: Boolean): Double;
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  SQLText: string;
+  strComparacion: string;
+  cantidadUnidad, precio, rendimiento, TotalAPU: Double;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  SetLength(listadoRecursosTanteoAnidado, 0);
+  x := 0;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQLText := 'SELECT ' + 'items.descripcion, ' + 'items.Precio, ' +
+        'items.idUnicoRecurso, ' +
+        'IF(tanteo.descripcion IS NULL, items.CantidadUnidad, tanteo.CantidadUnidad) AS CantidadUnidad, '
+        + 'IF(tanteo.descripcion IS NULL, items.Rendimiento, tanteo.Rendimiento) AS Rendimiento '
+        + 'FROM ' + 'apus_items items ' +
+        'LEFT JOIN presupuestos_tanteo_recursos tanteo ON ( ' +
+        'tanteo.codBase = items.codBase ' +
+        'AND tanteo.idUnicoRecurso = items.idUnicoRecurso ' +
+        'AND tanteo.CodAPU = items.CodAPU ' +
+        'AND tanteo.codPresupuesto = :codPresupuesto ' +
+        'AND tanteo.revision = :revision ' + ') ' + 'WHERE ' +
+        'items.CodAPU = :codAPUAnidado ' + 'AND items.codBase = :codBase';
+      { *) }
+      SQL.Add(SQLText);
+      ParamByName('codAPUAnidado').AsString := codAPUanidado;
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      Open;
+      strComparacion := 'APU: ' + codAPU;
+      TotalAPU := 0;
+      while not Eof do
+      begin
+        if FieldByName('idUnicoRecurso').AsString = strComparacion then
+          precio := SafeStrToFloat(decimal_correcto(nuevoPrecioAnidado))
+        else
+          precio := FieldByName('precio').AsFloat;
+        cantidadUnidad := FieldByName('cantidadUnidad').AsFloat;
+        tmpstr := decimal_correcto(FieldByName('rendimiento').AsString);
+        rendimiento := StrToFloatDef(tmpstr, 1);
+        TotalAPU := TotalAPU + (precio * cantidadUnidad * rendimiento);
+        if guardar then
+        begin
+          SetLength(listadoRecursosTanteoAnidado, x + 1);
+          listadoRecursosTanteoAnidado[x].codAPU := codAPUanidado;
+          listadoRecursosTanteoAnidado[x].descripcion :=
+            FieldByName('descripcion').AsString;
+          listadoRecursosTanteoAnidado[x].idUnicoRecurso :=
+            FieldByName('idUnicoRecurso').AsString;
+          listadoRecursosTanteoAnidado[x].precio := FloatToStr(precio);
+          listadoRecursosTanteoAnidado[x].cantidadUnidad :=
+            FloatToStr(cantidadUnidad);
+          listadoRecursosTanteoAnidado[x].rendimiento :=
+            FloatToStr(rendimiento);
+          listadoRecursosTanteoAnidado[x].total :=
+            FloatToStr((precio * cantidadUnidad * rendimiento));
+        end;
+        Inc(x);
+        Next;
+      end;
+    end;
+  finally
+    qry.Free;
+    if guardar then
+      guardarTanteo_recursosApuAnidado();
+    Result := TotalAPU;
+  end;
+end;
+
+/// <summary>TODO: Descripción de guardarTanteo_recursosApuAnidado.</summary>
+procedure guardarTanteo_recursosApuAnidado();
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  SQLText: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQLText :=
+        'delete from presupuestos_tanteo_recursos where codBase=:codBase and codPresupuesto=:codPresupuesto and revision=:revision and codAPU=:codApu';
+      SQL.Add(SQLText);
+      ParamByName('codAPU').AsString := listadoRecursosTanteoAnidado
+        [0].codAPU;
+      ParamByName('codBase').AsString := base_activa.codBase;
+      ParamByName('codPresupuesto').AsString := codProyecto;
+      ParamByName('revision').AsString := revision;
+      Prepare;
+      ExecSQL;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQLText := 'INSERT INTO presupuestos_tanteo_recursos ' + '( ' +
+        'codBase, ' + 'codPresupuesto, ' + 'revision, ' + 'codApu, ' +
+        'descripcion, ' + 'idUnicoRecurso, ' + 'Precio, ' + 'CantidadUnidad, '
+        + 'Rendimiento, ' + 'Total) ' + 'VALUES ' + '( ' + ':codBase, ' +
+        ':codPresupuesto, ' + ':revision, ' + ':codApu, ' + ':descripcion, ' +
+        ':idUnicoRecurso, ' + ':Precio, ' + ':CantidadUnidad, ' +
+        ':Rendimiento, ' + ':Total ' + ')';
+      { *) }
+      SQL.Add(SQLText);
+      Prepare;
+      for x := 0 to Length(listadoRecursosTanteoAnidado) - 1 do
+      begin
+        ParamByName('codAPU').AsString := listadoRecursosTanteoAnidado
+          [x].codAPU;
+        ParamByName('codBase').AsString := base_activa.codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revision;
+        ParamByName('descripcion').AsString := listadoRecursosTanteoAnidado[x]
+          .descripcion;
+        ParamByName('idUnicoRecurso').AsString := listadoRecursosTanteoAnidado
+          [x].idUnicoRecurso;
+        ParamByName('Precio').AsFloat :=
+          SafeStrToFloat(decimal_correcto(listadoRecursosTanteoAnidado
+          [x].precio));
+        ParamByName('CantidadUnidad').AsFloat :=
+          SafeStrToFloat(decimal_correcto(listadoRecursosTanteoAnidado[x]
+          .cantidadUnidad));
+        ParamByName('Rendimiento').AsFloat :=
+          SafeStrToFloat(decimal_correcto(listadoRecursosTanteoAnidado[x]
+          .rendimiento));
+        ParamByName('Total').AsFloat :=
+          SafeStrToFloat(decimal_correcto(listadoRecursosTanteoAnidado
+          [x].total));
+        ExecSQL;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de nApusAnidados.</summary>
+/// <param name="codAPU">TODO.</param>
+/// <param name="codAPUanidado">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en nApusAnidados.
+/// </summary>
+function nApusAnidados(codAPU, codAPUanidado: string): Integer;
+
+var
+  qry: TUniQuery;
+  SQLText: string;
+  x: Integer;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQLText := 'SELECT count(*) as nAnidado FROM' +
+        '  apus_items items WHERE items.CodAPU = :codApu ' +
+        '  AND items.codBase = :codBase ' +
+        '  AND items.idUnicoRecurso = CONCAT(''APU: '', :codApuAnidado)';
+      SQL.Add(SQLText);
+      ParamByName('codAPU').AsString := codAPU;
+      ParamByName('codAPUAnidado').AsString := codAPUanidado;
+      ParamByName('codBase').AsString := base_activa.codBase;
+      Prepare;
+      Open;
+      Result := FieldByName('nAnidado').AsInteger;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de presupuestoCalculaTotalesCrono01.</summary>
+procedure presupuestoCalculaTotalesCrono01();
+
+var
+  cantidad: Double;
+  total: Double;
+  totalSinIva: Double;
+  porcentaje: Double;
+  tmpstr: string;
+  x: Integer;
+  ivaPresupuesto: Double;
+  PrecioReferencia: Double;
+  control: string;
+begin
+  cantidad := 0;
+  total := 0;
+  ivaPresupuesto := StrToFloatDef
+    (frmMain.edt_porcentajeIVANuevoPresupuesto.Text, 12);
+  tmpstr := frmMain.edt_NPresupuestoPrecioReferencia.Text;
+  tmpstr := quitaSignoMiles(tmpstr);
+  PrecioReferencia := StrToFloatDef(tmpstr, 0);
+  for x := 1 to frmMain.grid_crono01.RowCount - 1 do
+  begin
+    tmpstr := frmMain.grid_crono01.cells[7, x];
+    control := frmMain.grid_crono01.cells[6, x];
+    if (tmpstr <> '') and (control <> '') then
+    begin
+      tmpstr := quitaSignoMiles(tmpstr);
+      tmpstr := AnsiReplaceStr(tmpstr, base_activa.simboloMoneda, '').Trim;
+      cantidad := SafeStrToFloat(tmpstr);
+      total := total + cantidad;
+    end;
+  end;
+  total := RoundTo(total, (0 - ndecimalesMoneda));
+  totalSinIva := total;
+  frmMain.lbl_APUT2SubTotal.Text := FormatFloat(cadenaCurrency, total);
+  ivaPresupuesto := (total * ivaPresupuesto) / 100;
+  ivaPresupuesto := RoundTo(ivaPresupuesto, (0 - ndecimalesMoneda));
+  frmMain.lbl_APUT2Iva.Text := FormatFloat(cadenaCurrency, ivaPresupuesto);
+  total := total + ivaPresupuesto;
+  total := RoundTo(total, (0 - ndecimalesMoneda));
+  cantidad := totalSinIva - PrecioReferencia;
+  frmMain.lbl_PresupuestoDiferencia.Text := FormatFloat(cadenaCurrency,
+    cantidad);
+  if PrecioReferencia <> 0 then
+  begin
+    porcentaje := (100 * cantidad) / PrecioReferencia;
+    frmMain.lbl_PresupuestoDiferenciaPorcentaje.Text :=
+      FloatToStr(porcentaje) + '%';
+  end
+  else
+  begin
+    frmMain.lbl_PresupuestoDiferenciaPorcentaje.Text := '0%';
+  end;
+  frmMain.lbl_APUT2Total.Text := FormatFloat(cadenaCurrency, total);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de quitaSignoMiles.
+/// </summary>
+function quitaSignoMiles(datos: string): string;
+
+var
+  caracterDecimal: string;
+  caracterMiles: string;
+begin
+  caracterDecimal := decimal_correcto(',');
+  if caracterDecimal = ',' then
+    caracterMiles := '.'
+  else
+    caracterMiles := ',';
+  Result := ReplaceStr(datos, caracterMiles, '');
+end;
+
+/// <summary>TODO: Descripción de quitaHtmlNegritas.</summary>
+/// <param name="datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de quitaHtmlNegritas.
+/// </summary>
+function quitaHtmlNegritas(datos: string): string;
+begin
+  datos := ReplaceStr(datos, '<b>', '');
+  datos := ReplaceStr(datos, '</b>', '');
+  datos := ReplaceStr(datos, '<B>', '');
+  datos := ReplaceStr(datos, '</B>', '');
+  Result := datos;
+end;
+
+function pasaFormatoCompleto(datos: Double): string;
+
+var
+  partedecimal: Double;
+  parteEntera: Integer;
+  Tentero: Integer;
+  Tdecimal: Integer;
+  x, Y: Integer;
+  tmpstr: string;
+begin
+  parteEntera := Trunc(datos);
+  partedecimal := frac(datos);
+  tmpstr := IntToStr(parteEntera);
+  Tentero := Length(tmpstr);
+  tmpstr := FloatToStr(partedecimal);
+  Tdecimal := Length(tmpstr) - 2;
+  if Tdecimal > ndecimalesMoneda then
+  begin
+    partedecimal := partedecimal;
+  end;
+  tmpstr := FloatToStr(partedecimal);
+  tmpstr := Copy(tmpstr, 3, Length(tmpstr));
+  if tmpstr = '' then
+    tmpstr := ponerCerosInicio('', ndecimalesMoneda - 1);
+  Result := FloatToStrF(parteEntera, ffNumber, Tentero, 0);
+  Result := Result + decimal_correcto(',');
+  Result := Result + tmpstr;
+end;
+
+function quitaSimboloMoneda(datos: string): string;
+begin
+  if base_activa.simboloMoneda = '' then
+    base_activa.simboloMoneda := '$';
+  datos := AnsiReplaceStr(datos, base_activa.simboloMoneda, '');
+  Result := datos;
+end;
+
+procedure calcularPorCentajeEjecucionObras;
+
+var
+  nperiodos, amplitudItems: Integer;
+  derivacion: TStringList;
+  x, y, z: Integer;
+  porcentajeEjecucion: Double;
+  dblTmp, resilente: Double;
+begin
+  nperiodos := SafeStrToInt(frmMain.lbl_cronogramaNPeriodos.Text);
+  if nperiodos <= 0 then
+    nperiodos := 1;
+
+  amplitudItems := frmMain.grid_crono0.RowCount;
+
+  frmMain.grid_Crono1.ColumnCount := nperiodos;
+  frmMain.grid_Crono1.RowCount := amplitudItems; // fila 0 = header
+
+  for x := 1 to amplitudItems - 1 do
+  begin
+    if frmMain.grid_crono0.Cells[10, x].Trim <> '' then
+    begin
+      derivacion := TStringList.Create;
+      try
+        derivacion.Text := frmMain.grid_crono0.Cells[11, x];
+
+        if derivacion.Count <> nperiodos then
+        begin
+          derivacion.Clear;
+          derivacion.Text := CronoDerivacionHomogeneaTexto(nperiodos);
+        end;
+
+        resilente := 0;
+        z := 0;
+
+        for y := 0 to nperiodos - 2 do
+        begin
+          porcentajeEjecucion := SafeStrToFloat(derivacion[z]);
+          Inc(z);
+
+          dblTmp := RoundTo(porcentajeEjecucion,
+            (0 - ndecimalesMoneda));
+
+          resilente := resilente + dblTmp;
+
+          frmMain.grid_Crono1.Cells[y, x] :=
+            FloatToStr(dblTmp) + '%';
+        end;
+
+        dblTmp := 100 - resilente;
+
+        frmMain.grid_Crono1.Cells[nperiodos - 1, x] :=
+          FloatToStr(dblTmp) + '%';
+
+      finally
+        derivacion.Free;
+      end;
+    end;
+  end;
+end;
+
+procedure calcularInversion;
+
+var
+  nperiodos: Integer;
+  amplitudItems: Integer;
+  derivacion: TStringList;
+  tmpstr: string;
+  x, y, z: Integer;
+  valorEjecucion: string;
+  valor: Double;
+  dblTmp: Double;
+  porcentajeEjecucion: Double;
+  resilente: Double;
+  totalSinIva: Double;
+  sumaColumnas: array of Double;
+  porcentajeParcial: array of Double;
+  porcentajeAcumulado: array of Double;
+  valorAcumulado: array of Double;
+  acumuladoTmp: Double;
+begin
+  if base_activa.simboloMoneda = '' then
+    base_activa.simboloMoneda := '$';
+
+  nperiodos := SafeStrToInt(frmMain.lbl_cronogramaNPeriodos.Text);
+  if nperiodos <= 0 then
+    nperiodos := 1;
+
+  amplitudItems := frmMain.grid_crono0.RowCount;
+
+  frmMain.grid_Crono2.ColumnCount := nperiodos;
+  frmMain.grid_GBarras.ColumnCount := nperiodos;
+
+  // Fila 0 = header
+  frmMain.grid_Crono2.RowCount := amplitudItems;
+  frmMain.grid_GBarras.RowCount := amplitudItems;
+
+  SetLength(sumaColumnas, nperiodos);
+  SetLength(porcentajeParcial, nperiodos);
+  SetLength(porcentajeAcumulado, nperiodos);
+  SetLength(valorAcumulado, nperiodos);
+
+  tmpstr := frmMain.lbl_SubtotalPresupuesto.Text;
+  tmpstr := AnsiReplaceStr(tmpstr, base_activa.simboloMoneda, '');
+  tmpstr := quitaSignoMiles(tmpstr).Trim;
+  totalSinIva := StrToFloatDef(tmpstr, 0);
+  if totalSinIva = 0 then
+    totalSinIva := 1;
+
+  for x := 1 to amplitudItems - 1 do
+  begin
+    if frmMain.grid_crono0.Cells[10, x].Trim <> '' then
+    begin
+      derivacion := TStringList.Create;
+      try
+        derivacion.Text := frmMain.grid_crono0.Cells[11, x];
+
+        if derivacion.Count <> nperiodos then
+        begin
+          derivacion.Clear;
+          derivacion.Text := CronoDerivacionHomogeneaTexto(nperiodos);
+        end;
+
+        valorEjecucion :=
+          quitaSignoMiles(
+          quitaHtmlNegritas(frmMain.grid_crono0.Cells[7, x]));
+        valorEjecucion := quitaSimboloMoneda(valorEjecucion);
+
+        if valorEjecucion <> '' then
+        begin
+          valor := SafeStrToFloat(valorEjecucion);
+          resilente := 0;
+          z := 0;
+
+          for y := 0 to nperiodos - 2 do
+          begin
+            porcentajeEjecucion := SafeStrToFloat(derivacion[z]);
+            Inc(z);
+
+            dblTmp := RoundTo((porcentajeEjecucion * valor) / 100,
+              (0 - ndecimalesMoneda));
+
+            resilente := resilente + dblTmp;
+
+            frmMain.grid_Crono2.Cells[y, x] :=
+              FormatFloat(cadenaCurrency, dblTmp);
+
+            sumaColumnas[y] := sumaColumnas[y] + dblTmp;
+          end;
+
+          dblTmp := RoundTo(valor - resilente,
+            (0 - ndecimalesMoneda));
+
+          frmMain.grid_Crono2.Cells[nperiodos - 1, x] :=
+            FormatFloat(cadenaCurrency, dblTmp);
+
+          sumaColumnas[nperiodos - 1] :=
+            sumaColumnas[nperiodos - 1] + dblTmp;
+        end;
+      finally
+        derivacion.Free;
+      end;
+    end;
+  end;
+
+  acumuladoTmp := 0;
+
+  for y := 0 to nperiodos - 1 do
+  begin
+    porcentajeParcial[y] :=
+      RoundTo((sumaColumnas[y] / totalSinIva) * 100,
+      (0 - ndecimalesMoneda));
+
+    acumuladoTmp := acumuladoTmp + porcentajeParcial[y];
+    porcentajeAcumulado[y] := acumuladoTmp;
+
+    if y = 0 then
+      valorAcumulado[y] := sumaColumnas[y]
+    else
+      valorAcumulado[y] := valorAcumulado[y - 1] + sumaColumnas[y];
+
+    frmMain.grid_CronoTotales.Cells[y, 0] :=
+      FormatFloat(cadenaCurrency, sumaColumnas[y]);
+
+    frmMain.grid_CronoTotales.Cells[y, 1] :=
+      FloatToStr(porcentajeParcial[y]) + '%';
+
+    frmMain.grid_CronoTotales.Cells[y, 2] :=
+      FormatFloat(cadenaCurrency, valorAcumulado[y]);
+
+    frmMain.grid_CronoTotales.Cells[y, 3] :=
+      FloatToStr(porcentajeAcumulado[y]) + '%';
+  end;
+
+  frmMain.grid_GBarras.BeginUpdate;
+  try
+    for x := 1 to amplitudItems - 1 do
+      for y := 0 to nperiodos - 1 do
+      begin
+        frmMain.grid_GBarras.Cells[y, x] :=
+          frmMain.grid_Crono2.Cells[y, x];
+
+        dblTmp :=
+          StrToFloatDef(
+          ReplaceStr(frmMain.grid_GBarras.Cells[y, x],
+          base_activa.simboloMoneda, ''), 0);
+
+        if dblTmp > 0 then
+          frmMain.grid_GBarras.Colors[y, x] := $FF648EA9;
+      end;
+  finally
+    frmMain.grid_GBarras.EndUpdate;
+  end;
+end;
+
+procedure calcularCantidadesObras;
+
+var
+  nperiodos, amplitudItems: Integer;
+  derivacion: TStringList;
+  tmpstr: string;
+  x, y, z: Integer;
+  valor, porcentajeEjecucion: Double;
+  dblTmp, resilente: Double;
+begin
+  nperiodos := SafeStrToInt(frmMain.lbl_cronogramaNPeriodos.Text);
+  if nperiodos <= 0 then
+    nperiodos := 1;
+
+  amplitudItems := frmMain.grid_crono0.RowCount;
+
+  frmMain.grid_Crono3.ColumnCount := nperiodos;
+  frmMain.grid_Crono3.RowCount := amplitudItems; // fila 0 = header
+
+  for x := 1 to amplitudItems - 1 do
+  begin
+    if frmMain.grid_crono0.Cells[10, x].Trim <> '' then
+    begin
+      derivacion := TStringList.Create;
+      try
+        derivacion.Text := frmMain.grid_crono0.Cells[11, x];
+
+        if derivacion.Count <> nperiodos then
+        begin
+          derivacion.Clear;
+          derivacion.Text := CronoDerivacionHomogeneaTexto(nperiodos);
+        end;
+
+        tmpstr :=
+          quitaSignoMiles(
+          quitaHtmlNegritas(frmMain.grid_crono0.Cells[5, x]));
+        valor := SafeStrToFloat(tmpstr);
+
+        resilente := 0;
+        z := 0;
+
+        for y := 0 to nperiodos - 2 do
+        begin
+          porcentajeEjecucion := SafeStrToFloat(derivacion[z]);
+          Inc(z);
+
+          dblTmp := RoundTo((porcentajeEjecucion * valor) / 100,
+            (0 - ndecimalesPresupuesto));
+
+          resilente := resilente + dblTmp;
+
+          frmMain.grid_Crono3.Cells[y, x] :=
+            FloatToStr(dblTmp);
+        end;
+
+        dblTmp := RoundTo(valor - resilente,
+          (0 - ndecimalesPresupuesto));
+
+        frmMain.grid_Crono3.Cells[nperiodos - 1, x] :=
+          FloatToStr(dblTmp);
+
+      finally
+        derivacion.Free;
+      end;
+    end;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de RunCmdAndWait.
+/// </summary>
+function RunCmdAndWait(hWnd: hWnd; aParameters: string): Cardinal;
+
+var
+  sei: TShellExecuteInfo;
+  aFile, dir: string;
+begin
+  Result := 0;
+  dir := rutaApp;
+  SetCurrentDir(dir);
+  FillChar(sei, SizeOf(sei), 0);
+  sei.cbSize := SizeOf(sei);
+  sei.Wnd := hWnd;
+  sei.fMask := { SEE_MASK_FLAG_NO_UI or }SEE_MASK_NOCLOSEPROCESS;
+  sei.lpVerb := 'open';
+  aFile := 'cmd';
+  sei.lpFile := PChar(aParameters);
+  sei.lpParameters := ''; // PChar(aParameters);
+  sei.lpDirectory := PChar(dir);
+  sei.nShow := SW_SHOWNORMAL;
+
+  if not ShellExecuteEx(@sei) then
+  begin
+    RaiseLastOSError;
+  end;
+  if sei.hProcess <> 0 then
+  begin
+    while WaitForSingleObject(sei.hProcess, 250) = WAIT_TIMEOUT do
+      Application.ProcessMessages;
+    GetExitCodeProcess(sei.hProcess, Result);
+    CloseHandle(sei.hProcess);
+  end;
+end;
+
+/// <summary>TODO: Descripción de cronogramasSincronizaItemsPresupuesto.</summary>
+procedure cronogramasSincronizaItemsPresupuesto();
+
+var
+  ficheroIntercambio: string;
+  tmpstr: string;
+  Y, z: Integer;
+begin
+  limpiaStringGrid(frmMain.grid_crono0);
+  limpiaStringGrid(frmMain.grid_crono01);
+  ficheroIntercambio := ExtractFilePath(ParamStr(0)) + 'gridtmp.dat';
+  frmMain.dbGridConnect_TPresupuestosItems.LoadAllDataAndDisconnect;
+  frmMain.grid_Presupuestos.SaveToFile(ficheroIntercambio);
+  frmMain.dbGridConnect_TPresupuestosItems.Active := True;
+  frmMain.grid_crono0.LoadFromFile(ficheroIntercambio);
+  frmMain.grid_crono01.LoadFromFile(ficheroIntercambio);
+  DeleteFile(PWideChar(ficheroIntercambio));
+
+  frmMain.grid_crono0.columns[9].width := 0;
+  frmMain.grid_crono0.columns[10].width := 0;
+  frmMain.grid_crono0.columns[11].width := 0;
+  frmMain.grid_crono0.columns[12].width := 0;
+  frmMain.grid_crono0.columns[13].width := 0;
+
+  frmMain.grid_crono0.cells[0, 0] := 'Cod. EDT';
+  frmMain.grid_crono0.cells[1, 0] := 'Items';
+  frmMain.grid_crono0.cells[2, 0] := 'Cod. APU';
+  frmMain.grid_crono0.cells[3, 0] := 'Descripción';
+  frmMain.grid_crono0.cells[4, 0] := 'Unidad';
+  frmMain.grid_crono0.cells[5, 0] := 'Cantidad';
+  frmMain.grid_crono0.cells[6, 0] := 'P. Unitario';
+  frmMain.grid_crono0.cells[7, 0] := 'P. Total';
+  frmMain.grid_crono0.columns[1].HorzAlignment := TTextAlign.Center;
+  frmMain.grid_crono0.columns[2].HorzAlignment := TTextAlign.Center;
+  frmMain.grid_crono0.columns[4].HorzAlignment := TTextAlign.Center;
+  frmMain.grid_crono0.columns[5].HorzAlignment := TTextAlign.Center;
+  frmMain.grid_crono0.columns[6].HorzAlignment := TTextAlign.Trailing;
+  frmMain.grid_crono0.columns[7].HorzAlignment := TTextAlign.Trailing;
+
+  frmMain.grid_crono01.cells[0, 0] := 'Cod. EDT';
+  frmMain.grid_crono01.cells[1, 0] := 'Items';
+  frmMain.grid_crono01.cells[2, 0] := 'Cod. APU';
+  frmMain.grid_crono01.cells[3, 0] := 'Descripción';
+  frmMain.grid_crono01.cells[4, 0] := 'Unidad';
+  frmMain.grid_crono01.cells[5, 0] := 'Cantidad';
+  frmMain.grid_crono01.cells[6, 0] := 'P. Unitario';
+  frmMain.grid_crono01.cells[7, 0] := 'P. Total';
+  frmMain.grid_crono01.columns[8].width := 0;
+  frmMain.grid_crono01.columns[9].width := 0;
+  frmMain.grid_crono01.columns[10].width := 0; // CodUnicoItems
+  frmMain.grid_crono01.columns[11].width := 0;
+  frmMain.grid_crono01.columns[12].width := 0;
+
+  for Y := 0 to frmMain.grid_crono0.RowCount - 1 do
+  begin
+    if frmMain.grid_crono0.cells[0, Y] <> '' then
+    begin
+      for z := 0 to frmMain.grid_crono0.columns.Count do
+      begin
+        if (z = 3) or (z = 7) then
+        begin
+          tmpstr := frmMain.grid_crono0.cells[z, Y];
+          tmpstr := ReplaceStr(tmpstr, '<b>', '');
+          tmpstr := ReplaceStr(tmpstr, '</b>', '');
+          frmMain.grid_crono0.cells[z, Y] := tmpstr;
+          frmMain.grid_crono01.cells[z, Y] := tmpstr;
+        end;
+        frmMain.grid_crono0.Colors[z, Y] := $FFE0E0E0;
+        frmMain.grid_crono01.Colors[z, Y] := $FFE0E0E0;
+      end;
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de calculaPlazosCronograma.</summary>
+procedure calculaPlazosCronograma;
+var
+  tipoCrono: Integer;
+  nDias: Integer;
+  divisorPeriodo: Integer;
+  Periodos: Integer;
+  tmpstr: string;
+begin
+  tmpstr := frmMain.grid_crono0.Cells[11, 1];
+  if tmpstr = '' then
+    tipoCrono := 3
+  else
+    tipoCrono := frmMain.cbb_cronoTipoPeriodo.ItemIndex;
+  nDias := StrToIntDef(frmMain.lbl_cronoPlazoEjecucion.Text, 0);
+
+  if nDias <= 0 then
+    Exit;
+
+  case tipoCrono of
+    0: divisorPeriodo := 1; // Diario
+    1: divisorPeriodo := 7; // Semanal
+    2: divisorPeriodo := 15; // Quincenal
+    3: divisorPeriodo := 30; // Mensual
+    4: divisorPeriodo := 60; // Bimensual
+    5: divisorPeriodo := 90; // Trimestral
+    6: divisorPeriodo := 180; // Semestral
+    7: divisorPeriodo := 360; // Anual
+  else
+    divisorPeriodo := 30; // Valor seguro por defecto (mensual)
+  end;
+
+  if divisorPeriodo <= 0 then
+    Exit;
+
+  // División redondeando hacia arriba
+  Periodos := (nDias + divisorPeriodo - 1) div divisorPeriodo;
+
+  frmMain.lbl_cronogramaNPeriodos.Text := IntToStr(Periodos);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de StringGridDeleteRow.
+/// </summary>
+procedure StringGridDeleteRow(Grid: TStringGrid; ARow: Integer);
+
+var
+  I, J: Integer;
+begin
+  for I := ARow to Grid.RowCount - 2 do
+    for J := 0 to Grid.ColumnCount - 1 do
+      Grid.cells[J, I] := Grid.cells[J, I + 1];
+  Grid.RowCount := Grid.RowCount - 1;
+end;
+
+/// <summary>TODO: Descripción de SincronizaCronogramas.</summary>
+procedure SincronizaCronogramas();
+begin
+  limpiaStringGrid(frmMain.grid_crono0);
+  frmMain.grid_crono0.Options.ScrollBar.VerticalScrollBarVisible := False;
+
+  frmMain.grid_crono0.columns[0].width := 68;
+  frmMain.grid_crono0.columns[1].width := 68;
+  frmMain.grid_crono0.columns[2].width := 140;
+  frmMain.grid_crono0.columns[3].width := 300;
+  frmMain.grid_crono0.columns[4].width := 68;
+  frmMain.grid_crono0.columns[5].width := 68;
+  frmMain.grid_crono0.columns[6].width := 68;
+  frmMain.grid_crono0.columns[7].width := 68;
+  frmMain.grid_crono0.columns[8].width := 0;
+  frmMain.grid_crono0.columns[9].width := 0;
+  limpiaStringGrid(frmMain.grid_crono01);
+  frmMain.grid_crono01.Options.ScrollBar.VerticalScrollBarVisible := False;
+
+  frmMain.grid_crono01.columns[0].width := 68;
+  frmMain.grid_crono01.columns[1].width := 68;
+  frmMain.grid_crono01.columns[2].width := 140;
+  frmMain.grid_crono01.columns[3].width := 300;
+  frmMain.grid_crono01.columns[4].width := 68;
+  frmMain.grid_crono01.columns[5].width := 68;
+  frmMain.grid_crono01.columns[6].width := 68;
+  frmMain.grid_crono01.columns[7].width := 68;
+  frmMain.grid_crono01.columns[8].width := 0;
+  frmMain.grid_crono01.columns[9].width := 0;
+end;
+
+/// <summary>TODO: Descripción de limpiaStringGrid.</summary>
+/// <param name="Grid">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de limpiaStringGrid.
+/// </summary>
+procedure limpiaStringGrid(Grid: TTMSFMXGrid);
+
+var
+  x, Y: Integer;
+begin
+  for x := 1 to Grid.RowCount - 1 do
+  begin
+    for Y := 0 to Grid.ColumnCount - 1 do
+      Grid.cells[Y, x] := '';
+  end;
+  Grid.RowCount := 1;
+end;
+
+procedure limpiaStringGridCol(Grid: TTMSFMXGrid);
+
+var
+  x: Integer;
+begin
+  for x := 1 to Grid.ColumnCount - 1 do
+  begin
+    Grid.DeleteColumn(0);
+  end;
+end;
+
+function generaCodigoPresupuesto(): string;
+
+var
+  part1, part2, part3: string;
+  qry: TUniQuery;
+  x: Integer;
+  cnt: Integer;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT * FROM configuracion WHERE email=:email ');
+      Prepare;
+      ParamByName('email').AsString := ID_usuario;
+      Open;
+      part1 := FieldByName('presupuestoValor1').AsString;
+      part2 := FieldByName('PresupuestoValor2').AsString;
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT codPresupuesto FROM presupuestos_datosgenerales ORDER BY codPresupuesto DESC LIMIT 1');
+      Prepare;
+      Open;
+      part3 := FieldByName('codPresupuesto').AsString;
+      if part3 <> '' then
+      begin
+        part3 := AnsiReverseString(part3);
+        x := AnsiPos('-', part3);
+        part3 := Copy(part3, 1, x - 1);
+        part3 := AnsiReverseString(part3);
+        cnt := StrToIntDef(part3, 0);
+      end
+      else
+      begin
+        cnt := 0;
+      end;
+      Inc(cnt);
+      part3 := ponerCerosInicio(IntToStr(cnt), 5);
+      Close;
+      SQL.Clear;
+      SQL.Add('UPDATE configuracion SET presupuestoValor3=:presupuestoValor3 WHERE email=:email');
+      ParamByName('presupuestoValor3').AsString := part3;
+      ParamByName('email').AsString := ID_usuario;
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+  Result := part1 + '-' + part2 + '-' + part3;
+end;
+
+/// <summary>TODO: Descripción de generaCodigoPresupuestoNuevo.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaCodigoPresupuestoNuevo.
+/// </summary>
+function generaCodigoPresupuestoNuevo(): string;
+var
+  part1, part2, part3: string;
+  qry: TUniQuery;
+begin {  frmMain.edt_PresupuestoSerie1.Text := part1;
+  frmMain.edt_PresupuestoSerie2.Text := part2;
+  frmMain.edt_PresupuestoSerie3.Text := part3; }
+  Randomize;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT presupuestoValor1, presupuestoValor2 FROM configuracion WHERE email=:email ');
+      Prepare;
+      ParamByName('email').AsString := ID_usuario;
+      Open;
+      part1 := FieldByName('presupuestoValor1').AsString;
+      part2 := FieldByName('PresupuestoValor2').AsString;
+    end;
+  finally
+    qry.Free;
+  end;
+  part3 := 'T' + IntToStr(Random(99999));
+  Result := part1 + '-' + part2 + '-' + part3;
+end;
+
+/// <summary>TODO: Descripción de borrarPresupuesto.</summary>
+/// <param name="codPresupuesto">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de borrarPresupuesto.
+/// </summary>
+procedure borrarPresupuesto(codPresupuesto: string);
+
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('DELETE FROM Presupuestos_DatosProyecto WHERE codPresupuesto=' +
+        quotedstr(codPresupuesto));
+      Close;
+      SQL.Clear;
+      SQL.Add('DELETE FROM Presupuestos_StokeHolders WHERE codPresupuesto=' +
+        quotedstr(codPresupuesto));
+      Close;
+      SQL.Clear;
+      SQL.Add('DELETE FROM Presupuestos_EDT WHERE codPresupuesto=' +
+        quotedstr(codPresupuesto));
+      Close;
+      SQL.Clear;
+      SQL.Add('DELETE FROM Presupuestos_EDO WHERE codPresupuesto=' +
+        quotedstr(codPresupuesto));
+      Close;
+      SQL.Clear;
+      SQL.Add('DELETE FROM Presupuestos_Items WHERE codPresupuesto=' +
+        quotedstr(codPresupuesto));
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de limpiaBaseDatos.</summary>
+procedure limpiaBaseDatos();
+
+var
+  tmplst: TStringList;
+begin
+  tmplst := TStringList.Create;
+  base_activa.codBase := '';
+  base_activa.Nombre := '';
+  base_activa.descripcion := '';
+  base_activa.indirectos := 0;
+  base_activa.TRendimiento := '';
+  base_activa.UMedida := '';
+  base_activa.Pais := '';
+  base_activa.SeguridadIndustrial := False;
+  base_activa.moneda := '';
+  base_activa.simboloMoneda := '';
+  base_activa.observaciones := '';
+  tmplst.Text := '';
+  base_activa.BasesPadres := tmplst;
+  frmMain.lbl_BaseActiva.Text := '';
+  codProyecto := '';
+  revision := '';
+end;
+
+function CargaProyecto(codBase: string): string;
+var
+  correcto: Boolean;
+  errorPos: Integer;
+  errorsite: string;
+begin
+
+  frmMain.rct_1Presupuesto.Fill.Color := $FFE94E1B;
+  frmMain.rct_1Presupuesto.Fill.Color := $FF606060;
+  frmMain.rct_2Presupuesto.Fill.Color := $FF606060;
+  frmMain.rct_3Presupuesto.Fill.Color := $FF606060;
+  frmMain.rct_4Presupuesto.Fill.Color := $FF606060;
+  frmMain.rct_5Presupuesto.Fill.Color := $FFE94E1B;
+  frmMain.rct_6Presupuesto.Fill.Color := $FF606060;
+  frmMain.rct_7Presupuesto.Fill.Color := $FF606060;
+  frmMain.rct_8Presupuesto.Fill.Color := $FF606060;
+
+  if not DModule_1.con2.InTransaction then
+    DModule_1.con2.StartTransaction;
+
+  try
+
+    correcto := True;
+    errorPos := 1;
+    frmMain.iGlow_OPC2_CrearPresupuesto.Enabled := True;
+
+    { DATOS GENERALES }
+    errorsite := 'Datos Generales';
+    if correcto then
+    begin
+      correcto := activa_DatosGeneralesProyecto(codBase);
+      Inc(errorPos);
+    end;
+
+    { DATOS PROYECTO }
+    if correcto then
+    begin
+      correcto := cargar_DatosProyecto(codBase);
+      Inc(errorPos);
+      errorsite := 'Datos Proyecto';
+    end;
+
+    { STAKEHOLDERS }
+    if correcto then
+    begin
+      correcto := cargar_StakeHolders(codBase);
+      Inc(errorPos);
+      errorsite := 'Datos Stakeholders Disponibles';
+    end;
+
+    { EDO }
+    if correcto then
+    begin
+      correcto := cargar_EDO(codBase);
+      Inc(errorPos);
+      errorsite := 'EDO';
+    end;
+
+    { EDT }
+    if correcto then
+    begin
+      correcto := cargar_EDT(codBase);
+      Inc(errorPos);
+      errorsite := 'EDT';
+    end;
+
+    { INDIRECTOS }
+    if correcto then
+    begin
+      correcto := cargar_indirectos(codBase);
+      Inc(errorPos);
+      errorsite := 'Indirectos';
+    end;
+
+    { CARGAR ITEMS PRESUPUESTO }
+    if correcto then
+    begin
+      correcto := cargar_Items(codBase);
+
+      Inc(errorPos);
+      errorsite := 'Items Presupuestos';
+    end;
+
+    { ACTIVAR PRESUPUESTO }
+    if correcto then
+    begin
+      DMPresupuesto.activar_presupuesto;
+    end;
+
+    { ANOTACIONES }
+    if correcto then
+    begin
+      correcto := cargarAnotaciones(codBase);
+      Inc(errorPos);
+      errorsite := 'Anotaciones';
+    end;
+
+    { POSICIONAMIENTO INICIAL }
+    if correcto then
+    begin
+      frmMain.tbc_PreciosUnitarios.ActiveTab :=
+        frmMain.tab_PresupuestosGeneral;
+
+      frmMain.tbcPresupuestos.ActiveTab :=
+        frmMain.tab_1PresupuestoDatos;
+
+      Inc(errorPos);
+      errorsite := 'Posicionamiento Inicial';
+    end;
+
+    { IMAGENES }
+    if correcto then
+    begin
+      cargaImagenesProyecto;
+      Inc(errorPos);
+      errorsite := 'Imagenes Proyecto';
+    end;
+
+    { CONFIG REPORTES }
+    if correcto then
+    begin
+      IniciaReportes(codProyecto);
+      Inc(errorPos);
+      errorsite := 'Configuración Reportes';
+    end;
+
+    { FORMULA POLINOMICA }
+    if correcto then
+      cargaTablaIndicesSeleccionados('TODOS');
+
+    Result := '0';
+
+    DModule_1.con2.Commit;
+
+  except
+    on E: Exception do
+    begin
+      if DModule_1.con2.InTransaction then
+        DModule_1.con2.Rollback;
+      raise;
+    end;
+  end;
+
+  { ACTIVAR DATASOURCES }
+  DMPresupuesto.activaSubcategoriayApusPresupuesto;
+
+  frmMain.dbGridConnect_TPresupuestosItems.DataSource :=
+    DMPresupuesto.dsTpresupuestosItems;
+
+  with DMPresupuesto.QTPresupuestosItems do
+  begin
+    DisableControls;
+    try
+      Close;
+
+      if Params.FindParam('icodBase') <> nil then
+        ParamByName('icodBase').AsString := base_activa.codBase;
+
+      if Params.FindParam('icodPresupuesto') <> nil then
+        ParamByName('icodPresupuesto').AsString := codProyecto;
+
+      if Params.FindParam('irevision') <> nil then
+        ParamByName('irevision').AsString := revision;
+
+      Open;
+
+    finally
+      EnableControls;
+    end;
+  end;
+
+  DMPresupuesto.dsTpresupuestosItems.Enabled := True;
+  frmMain.dbGridConnect_TPresupuestosItems.Enabled := True;
+
+  DMPresupuesto.calculaTotal;
+
+end;
+
+procedure cargarConfiguracionReportesProyecto();
+begin
+
+end;
+
+/// <summary>TODO: Descripción de cargarTablaIndicesFPolinomica.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargarTablaIndicesFPolinomica.
+/// </summary>
+function cargarTablaIndicesFPolinomica(): Boolean;
+begin
+  Result := False;
+  try
+    Result := True;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de cargaImagenesProyecto.</summary>
+procedure cargaImagenesProyecto();
+
+var
+  imagenReferenciaProyecto: string;
+begin
+  imagenReferenciaProyecto := dirImagenReferencia + base_activa.codBase +
+    codProyecto + '.jpg';
+  if not FileExists(imagenReferenciaProyecto) then
+  begin
+    imagenReferenciaProyecto := dirImagenReferencia + base_activa.codBase +
+      codProyecto + '.png';
+  end;
+  if FileExists(imagenReferenciaProyecto) then
+    frmMain.imgReferencial.Bitmap.LoadFromFile(imagenReferenciaProyecto);
+end;
+
+/// <summary>TODO: Descripción de addImagenesReferencia.</summary>
+procedure addImagenesReferencia();
+
+var
+  OpenDialog: TOpenDialog;
+  imagenSeleccionada: string;
+  imagenReferenciaProyecto: string;
+begin
+  OpenDialog := TOpenDialog.Create(nil);
+  try
+    OpenDialog.Filter := 'Archivos de imagen|*.jpg;*.png';
+    if OpenDialog.Execute then
+    begin
+      imagenSeleccionada := OpenDialog.FileName;
+      if (imagenSeleccionada <> '') and (FileExists(imagenSeleccionada)) then
+      begin
+        if not DirectoryExists(dirImagenReferencia) then
+          CreateDir(PWideChar(dirImagenReferencia));
+        imagenReferenciaProyecto := base_activa.codBase + codProyecto +
+          ExtractFileExt(imagenSeleccionada);
+        CopyFile(PWideChar(imagenSeleccionada),
+          PWideChar(dirImagenReferencia + imagenReferenciaProyecto), False);
+      end;
+    end;
+  finally
+    OpenDialog.Free;
+    cargaImagenesProyecto();
+  end;
+end;
+
+/// <summary>TODO: Descripción de exportaImagenRevisiones.</summary>
+/// <param name="codProyecto">TODO.</param>
+/// <param name="revision">TODO.</param>
+/// <param name="nuevarevision">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de exportaImagenRevisiones.
+/// </summary>
+procedure exportaImagenRevisiones(codProyecto, revision,
+  nuevarevision: string);
+
+var
+  imgReferencial, imgGeoReferencia: string;
+  NimgReferencial, NimgGeoReferencia: string;
+  extension: string;
+  x: Integer;
+  tmpstr: string;
+begin
+  imgReferencial := dirImagenReferencia + '\' + 'imgREF' + codProyecto + '-'
+    + revision;
+  imgGeoReferencia := dirGeoreferencia + '\' + 'imgGEO' + codProyecto + '-'
+    + revision;
+  tmpstr := ReverseString(imgReferencial);
+  x := AnsiPos('-', tmpstr);
+  tmpstr := Copy(tmpstr, x + 1, Length(tmpstr));
+  tmpstr := ReverseString(tmpstr);
+  tmpstr := tmpstr + '-' + nuevarevision;
+
+  if FileExists(imgReferencial + '.jpg') then
+  begin
+    NimgReferencial := tmpstr;
+    imgReferencial := imgReferencial + '.jpg';
+    NimgReferencial := NimgReferencial + '.jpg';
+  end
+  else if FileExists(imgReferencial + '.png') then
+  begin
+    NimgReferencial := tmpstr;
+    imgReferencial := imgReferencial + '.png';
+    NimgReferencial := NimgReferencial + '.png';
+  end;
+
+  tmpstr := ReverseString(imgGeoReferencia);
+  x := AnsiPos('-', tmpstr);
+  tmpstr := Copy(tmpstr, x + 1, Length(tmpstr));
+  tmpstr := ReverseString(tmpstr);
+  tmpstr := tmpstr + '-' + nuevarevision;
+  if FileExists(imgGeoReferencia + '.jpg') then
+  begin
+    NimgGeoReferencia := tmpstr;
+    imgGeoReferencia := imgGeoReferencia + '.jpg';
+    NimgGeoReferencia := NimgGeoReferencia + '.jpg';
+  end
+  else if FileExists(imgGeoReferencia + '.png') then
+  begin
+    NimgGeoReferencia := tmpstr;
+    imgGeoReferencia := imgGeoReferencia + '.png';
+    NimgGeoReferencia := NimgGeoReferencia + '.png';
+  end;
+
+  if FileExists(imgReferencial) then
+  begin
+    if FileExists(NimgReferencial) then
+      DeleteFile(PWideChar(NimgReferencial));
+    TFile.Copy(imgReferencial, NimgReferencial);
+  end;
+
+  if FileExists(imgGeoReferencia) then
+  begin
+    if FileExists(NimgGeoReferencia) then
+      DeleteFile(PWideChar(NimgGeoReferencia));
+    TFile.Copy(imgGeoReferencia, NimgGeoReferencia);
+  end;
+end;
+
+function cargarAnotaciones(codBase: string): Boolean;
+var
+  qry: TUniQuery;
+  Stream: TMemoryStream;
+  tmpstr: string;
+begin
+  Result := False;
+
+  qry := TUniQuery.Create(nil);
+  Stream := TMemoryStream.Create;
+
+  try
+
+    {--------------------------------------}
+    { Cargar anotaciones árbol (P2) }
+    {--------------------------------------}
+
+    qry.Connection := DModule_1.con2;
+
+    qry.SQL.Text :=
+      'SELECT DatosAnotaciones ' +
+      'FROM Presupuestos_AnotacionesP2 ' +
+      'WHERE codPresupuesto = :codPresupuesto ' +
+      'AND revision = :revision ';
+
+    if codBase <> '' then
+      qry.SQL.Add('AND codBase = :codBase');
+
+    qry.ParamByName('codPresupuesto').AsString := codProyecto;
+    qry.ParamByName('revision').AsString := revision;
+
+    if codBase <> '' then
+      qry.ParamByName('codBase').AsString := codBase;
+
+    qry.Open;
+
+    if not qry.Eof then
+    begin
+      tmpstr := qry.FieldByName('DatosAnotaciones').AsString;
+
+      if tmpstr <> '' then
+      begin
+        Stream.Size := 0;
+        WriteStreamStr(Stream, tmpstr);
+        Stream.Position := 0;
+
+        frmVisorNotas.Trvw_VisorAnotaciones.LoadFromJSONStream(Stream);
+      end;
+    end;
+
+    Result := True;
+
+  finally
+    qry.Free;
+    Stream.Free;
+  end;
+end;
+
+function cargar_Items(const codBase: string): Boolean;
+var
+  qry: TUniQuery;
+  StartedHere: Boolean;
+
+begin
+  Result := False;
+
+  if codBase = '' then
+    Exit;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    // 🔥 Control inteligente de transacción
+    StartedHere := not DModule_1.con2.InTransaction;
+
+    if StartedHere then
+      DModule_1.con2.StartTransaction;
+
+    try
+      // =========================
+      // BORRAR ITEMS TRABAJO
+      // =========================
+      qry.SQL.Text :=
+        'DELETE FROM presupuestos_items_trabajo ' +
+        'WHERE codBase = :codBase ' +
+        'AND codPresupuesto = :codPresupuesto ' +
+        'AND revision = :revision';
+
+      qry.ParamByName('codBase').AsString := codBase;
+      qry.ParamByName('codPresupuesto').AsString := codProyecto;
+      qry.ParamByName('revision').AsString := revision;
+      qry.ExecSQL;
+
+      // =========================
+      // INSERTAR DESDE PRESUPUESTOS_ITEMS
+      // =========================
+      qry.SQL.Text :=
+        'INSERT INTO presupuestos_items_trabajo ( ' +
+        'codBase, codPresupuesto, revision, codEdt, codItems, ' +
+        'codUnicoItems, codAPUGenerico, codAPU, descripcion, unidad, ' +
+        'notas, rendimientoHUnidad, nhCuadrillas, anidado, posgrid, ' +
+        'cantidad, PUnitario, Ptotal, CostoBase ) ' +
+        'SELECT ' +
+        'codBase, codPresupuesto, revision, codEdt, codItems, ' +
+        'codUnicoItems, codAPUGenerico, codAPU, descripcion, unidad, ' +
+        'notas, rendimientoHUnidad, nhCuadrillas, anidado, posgrid, ' +
+        'cantidad, PUnitario, Ptotal, PUnitario ' +
+        'FROM presupuestos_items ' +
+        'WHERE codBase = :codBase ' +
+        'AND codPresupuesto = :codPresupuesto ' +
+        'AND revision = :revision';
+
+      qry.ParamByName('codBase').AsString := codBase;
+      qry.ParamByName('codPresupuesto').AsString := codProyecto;
+      qry.ParamByName('revision').AsString := revision;
+      qry.ExecSQL;
+
+      if StartedHere then
+        DModule_1.con2.Commit;
+
+    except
+      on E: Exception do
+      begin
+        if StartedHere and DModule_1.con2.InTransaction then
+          DModule_1.con2.Rollback;
+        raise;
+      end;
+    end;
+
+    // 🔥 Refrescar dataset fuera de la transacción propia
+    with DMPresupuesto.QTPresupuestosItems do
+    begin
+      DisableControls;
+      try
+        Close;
+
+        if Params.FindParam('ndec') <> nil then
+          ParamByName('ndec').AsInteger := nDecimalesMoneda;
+
+        if Params.FindParam('icodBase') <> nil then
+          ParamByName('icodBase').AsString := codBase;
+
+        if Params.FindParam('icodPresupuesto') <> nil then
+          ParamByName('icodPresupuesto').AsString := codProyecto;
+
+        if Params.FindParam('irevision') <> nil then
+          ParamByName('irevision').AsString := revision;
+
+        Open;
+
+      finally
+        EnableControls;
+      end;
+    end;
+
+    Result := not DMPresupuesto.QTPresupuestosItems.IsEmpty;
+
+  finally
+    qry.Free;
+  end;
+end;
+
+function PasaStrtoPorcentaje(str: string): currency;
+begin
+  result := 0;
+  str := replacestr(str, '%', '').Trim;
+  result := strtocurrdef(str, 0);
+end;
+
+function cargar_indirectos(codBase: string): Boolean;
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  x: Integer;
+  sqlstr: string;
+  porcentajeIndirecto: currency;
+begin
+  qry := TUniQuery.Create(nil);
+  IndirectosPresupuesto := 0;
+  try
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        sqlstr :=
+          'SELECT ' +
+          '  cuenta, ' +
+          '  codCuenta, ' +
+          '  observaciones, ' +
+          '  valor ' +
+          'FROM presupuestos_indirectos ' +
+          'WHERE ' +
+          '  codPresupuesto = :codPresupuesto ' +
+          '  AND revision = :revision ';
+        if codBase <> '' then
+          sqlstr := sqlstr + ' AND codBase = :codBase ';
+        sqlstr := sqlstr + 'ORDER BY cuenta ';
+        SQL.Add(sqlstr);
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('Revision').AsString := revision;
+        if codBase <> '' then
+          ParamByName('codBase').AsString := codBase;
+        Open;
+        x := 0;
+        SetLength(listadoIndirectos, x);
+        while not Eof do
+        begin
+          SetLength(listadoIndirectos, x + 1);
+          listadoIndirectos[x].cuenta := FieldByName('cuenta').AsString;
+          listadoIndirectos[x].codCuenta := FieldByName('codCuenta').AsString;
+          listadoIndirectos[x].observaciones :=
+            FieldByName('observaciones').AsString;
+          listadoIndirectos[x].porcentaje := FieldByName('valor').AsString;
+          IndirectosPresupuesto := IndirectosPresupuesto +
+            PasaStrToPorcentaje(FieldByName('valor').AsString);
+          Inc(x);
+          Next;
+        end;
+        Result := True;
+      end;
+    finally
+      qry.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de activa_DatosGeneralesProyecto.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de activa_DatosGeneralesProyecto.
+/// </summary>
+function activa_DatosGeneralesProyecto(codBase: string): Boolean;
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  sqlstr: string;
+  tndecimales, tnmoneda: Integer;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        sqlstr := 'SELECT  * FROM presupuestos_datosGenerales WHERE codPresupuesto='
+          + quotedstr(codProyecto) + ' AND revision=' + quotedstr(revision);
+        if codBase <> '' then
+          sqlstr := sqlstr + ' and codBase=' + quotedstr(codBase);
+        SQL.Add(sqlstr);
+        Prepare;
+        Open;
+        frmMain.lbl_SubtotalPresupuesto.Text :=
+          FieldByName('subtotal').AsString;
+        frmMain.lbl_CantIVAPresupuestos.Text := FieldByName('iva').AsString;
+        frmMain.lbl_TotalIVAPresupuestos.Text := FieldByName('total')
+          .AsString;
+        frmMain.edt_porcentajeIVANuevoPresupuesto.Text :=
+          FloatToStr(FieldByName('porcentajeIVA').AsFloat);
+        tmpstr := FieldByName('indirectos').AsString;
+        tmpstr := decimal_correcto(tmpstr);
+        IndirectosPresupuesto := StrToFloatDef(tmpstr, 15);
+        frmMain.lbl_PresupuestoDiferenciaPorcentaje.Text := tmpstr + '%';
+        codBase := FieldByName('codBase').AsString;
+        ndecimalesPresupuesto := FieldByName('ndecimales').AsInteger;
+        ndecimalesMoneda := FieldByName('ndecimalesMoneda').AsInteger;
+        tndecimales := ndecimalesPresupuesto;
+        tnmoneda := ndecimalesMoneda;
+      end;
+      Result := True;
+    finally
+      if codBase <> '' then
+        activaBaseDatos(codBase);
+      ndecimalesPresupuesto := tndecimales;
+      ndecimalesMoneda := tnmoneda;
+      crearCadenacurrency;
+      actualizaEstadoDecimales();
+      DMPresupuesto.qryParetoCantidad.DisplayFormat := '#.##';
+      DMPresupuesto.qryParetoPUnitario.DisplayFormat := cadenaCurrency;
+      DMPresupuesto.qryParetoPtotal.DisplayFormat := cadenaCurrency;
+      DMPresupuesto.qryPCapituloCantidad.DisplayFormat := '#.##';
+      DMPresupuesto.qryPCapituloPUnitario.DisplayFormat := cadenaCurrency;
+      DMPresupuesto.qryPCapituloPtotal.DisplayFormat := cadenaCurrency;
+      qry.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de cargar_EDT.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargar_EDT.
+/// </summary>
+
+function cargar_EDT(codBase: string): Boolean;
+type
+  DatNodo = record
+    codEDT: string;
+    descripcion: string;
+    Responsable: string;
+    Definicion: string;
+    codigoUnicoItemPresupuesto: string;
+  end;
+
+  function NormalizaCodEDT(const S: string): string;
+  var
+    R: string;
+  begin
+    // Quita espacios y tabs dentro y fuera, y deja el punto "pegado"
+    R := StringReplace(S, #9, '', [rfReplaceAll]);
+    R := Trim(R);
+    R := StringReplace(R, ' .', '.', [rfReplaceAll]);
+    R := StringReplace(R, '. ', '.', [rfReplaceAll]);
+    R := StringReplace(R, ' ', '', [rfReplaceAll]);
+    Result := R;
+  end;
+
+  function CodEDT_Padre(const Cod: string): string;
+  var
+    p: Integer;
+  begin
+    p := LastDelimiter('.', Cod);
+
+    if p > 0 then
+      Result := Copy(Cod, 1, p - 1)
+    else
+      Result := '';
+  end;
+
+var
+  qry: TUniQuery;
+  NodoBase, ParentNode, NewNode: TTMSFNCTreeViewNode;
+  datosNodo: TArray<DatNodo>;
+  i: Integer;
+  CodNorm, PadreNorm: string;
+  NodeByCod: TDictionary<string, TTMSFNCTreeViewNode>;
+begin
+  Result := False;
+
+  qry := TUniQuery.Create(nil);
+  NodeByCod := TDictionary<string, TTMSFNCTreeViewNode>.Create;
+  try
+    qry.Connection := DModule_1.con2;
+    qry.Close;
+    qry.SQL.Text :=
+      'SELECT ' +
+      '  CodEDT, ' +
+      '  Descripcion, ' +
+      '  Responsable, ' +
+      '  Definicion, ' +
+      '  codUnicoItemPresupuesto ' +
+      'FROM presupuestos_edt ' +
+      'WHERE ' +
+      '  codBase = :codBase ' +
+      '  AND codPresupuesto = :codPresupuesto ' +
+      '  AND Revision = :Revision ' +
+      'ORDER BY ' +
+      '  LENGTH(CodEDT), CodEDT';
+
+    qry.ParamByName('codbase').AsString := codBase;
+    qry.ParamByName('codPresupuesto').AsString := codProyecto;
+    qry.ParamByName('revision').AsString := revision;
+    qry.Open;
+
+    SetLength(datosNodo, 0);
+    while not qry.Eof do
+    begin
+      SetLength(datosNodo, Length(datosNodo) + 1);
+      i := High(datosNodo);
+
+      datosNodo[i].codEDT := qry.FieldByName('CodEDT').AsString;
+      datosNodo[i].descripcion := qry.FieldByName('Descripcion').AsString;
+      datosNodo[i].Responsable := qry.FieldByName('Responsable').AsString;
+      datosNodo[i].Definicion := qry.FieldByName('Definicion').AsString;
+      datosNodo[i].codigoUnicoItemPresupuesto :=
+        qry.FieldByName('codUnicoItemPresupuesto').AsString;
+
+      qry.Next;
+    end;
+
+    frmMain.Trvw_EDT.ClearNodes;
+
+    if Length(datosNodo) = 0 then
+      Exit(True);
+
+    NodoBase := frmMain.Trvw_EDT.AddNode;
+    NodoBase.Text[1] := frmMain.edt_descripcionPresupuesto.Text;
+
+    // Si quieres, registra el root como '' para simplificar
+    NodeByCod.AddOrSetValue('', NodoBase);
+
+    for i := 0 to High(datosNodo) do
+    begin
+      CodNorm := NormalizaCodEDT(datosNodo[i].codEDT);
+      if CodNorm = '' then
+        Continue;
+
+      PadreNorm := CodEDT_Padre(CodNorm);
+
+      if not NodeByCod.TryGetValue(PadreNorm, ParentNode) then
+        ParentNode := NodoBase;
+      // padre no existe => cuelga del root, pero sin crash
+
+      NewNode := frmMain.Trvw_EDT.AddNode(ParentNode);
+
+      // Guarda siempre el código normalizado para que coincidan búsquedas
+      NewNode.Text[0] := CodNorm;
+      NewNode.Text[1] := datosNodo[i].descripcion;
+      NewNode.Text[2] := datosNodo[i].Responsable;
+      NewNode.Text[3] := datosNodo[i].Definicion;
+      NewNode.Text[4] := datosNodo[i].codigoUnicoItemPresupuesto;
+
+      NodeByCod.AddOrSetValue(CodNorm, NewNode);
+    end;
+
+    frmMain.Trvw_EDT.ExpandAll;
+    Result := True;
+  except
+    Result := False;
+  end;
+
+  NodeByCod.Free;
+  qry.Free;
+end;
+
+/// <summary>TODO: Descripción de cargar_EDO.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargar_EDO.
+/// </summary>
+function cargar_EDO(codBase: string): Boolean;
+
+var
+  nodo: TTMSFNCTreeViewNode;
+begin
+  Result := False;
+  try
+    frmMain.Trvw_EDO.ClearNodes;
+    nodo := frmMain.Trvw_EDO.addnode;
+    nodo.Text[0] := frmMain.edt_descripcionPresupuesto.Text;
+    nodo.Extended := True;
+    cargarHitoTreeView;
+    cargarEDOCompleta;
+    Result := True;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de cargar_StakeHolders.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Gestiona información de stakeholders en cargar_StakeHolders.
+/// </summary>
+function cargar_StakeHolders(codBase: string): Boolean;
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  TFecha: Tdate;
+  x: Integer;
+  sqlstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  limpiaGridStakeAsignados;
+
+  try
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        sqlstr := 'SELECT * FROM Presupuestos_stakeHolders WHERE codPresupuesto='
+          + quotedstr(codProyecto) + ' AND revision=' + quotedstr(revision);
+        if codBase <> '' then
+          sqlstr := sqlstr + ' and codBase=' + quotedstr(codBase);
+        SQL.Add(sqlstr);
+        Prepare;
+        Open;
+        x := 1;
+        while not Eof do
+        begin
+          frmMain.grid_stakesAsignados.RowCount := x + 1;
+          frmMain.grid_stakesAsignados.cells[0, x] :=
+            FieldByName('idGrid').AsString;
+          frmMain.grid_stakesAsignados.cells[1, x] :=
+            FieldByName('idFiscal').AsString;
+          frmMain.grid_stakesAsignados.cells[2, x] :=
+            FieldByName('nombre').AsString;
+          frmMain.grid_stakesAsignados.cells[3, x] :=
+            FieldByName('apellidos').AsString;
+          frmMain.grid_stakesAsignados.cells[4, x] :=
+            FieldByName('email').AsString;
+          frmMain.grid_stakesAsignados.cells[5, x] :=
+            FieldByName('titulacion').AsString;
+          frmMain.grid_stakesAsignados.cells[6, x] :=
+            FieldByName('rolpresupuesto').AsString;
+          frmMain.grid_stakesAsignados.cells[7, x] :=
+            FieldByName('idUnico').AsString;
+          Inc(x);
+          Next;
+        end;
+        Result := True;
+      end;
+    finally
+      qry.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+function asignarDBProyecto(codProyecto, codBase: string): Boolean;
+const
+  TABLAS: array[0..15] of string = (
+    'presupuestos_Anotaciones',
+    'presupuestos_AnotacionesP2',
+    'presupuestos_asignacionTerminos',
+    'presupuestos_Cronogramas',
+    'presupuestos_DatosGenerales',
+    'presupuestos_DatosProyecto',
+    'presupuestos_Desagregacion',
+    'presupuestos_EDO',
+    'presupuestos_EDT',
+    'presupuestos_Fpolinomica',
+    'presupuestos_indicesSeleccionados',
+    'presupuestos_indirectos',
+    'presupuestos_items',
+    'presupuestos_NotasRevision',
+    'presupuestos_Recursos',
+    'Presupuestos_StakeHolders'
+    );
+var
+  qry: TUniQuery;
+  i: Integer;
+begin
+  Result := False;
+
+  if (codProyecto = '') or (codBase = '') then
+    Exit;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    if not DModule_1.con2.InTransaction then
+      DModule_1.con2.StartTransaction;
+
+    try
+      for i := Low(TABLAS) to High(TABLAS) do
+      begin
+        qry.SQL.Text :=
+          'UPDATE ' + TABLAS[i] + ' ' +
+          'SET codBase = :codBase ' +
+          'WHERE codPresupuesto = :codProyecto ' +
+          'AND revision = :revision';
+
+        qry.ParamByName('codBase').AsString := codBase;
+        qry.ParamByName('codProyecto').AsString := codProyecto;
+        qry.ParamByName('revision').AsString := '0';
+
+        qry.ExecSQL;
+      end;
+
+      if DModule_1.con2.InTransaction then
+        DModule_1.con2.Commit;
+
+      Result := True;
+
+    except
+      if DModule_1.con2.InTransaction then
+        DModule_1.con2.Rollback;
+      raise;
+    end;
+
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de cargar_DatosProyecto.</summary>
+/// <param name="codBase">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de cargar_DatosProyecto.
+/// </summary>
+function cargar_DatosProyecto(codBase: string): Boolean;
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  TFecha: Tdate;
+  img: Tbitmap;
+  sqlstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  img := Tbitmap.Create;
+  try
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        sqlstr := 'SELECT * FROM presupuestos_datosProyecto WHERE codPresupuesto='
+          + quotedstr(codProyecto) + ' AND revision=' + quotedstr(revision);
+        if codBase <> '' then
+          sqlstr := sqlstr + ' and codBase=' + quotedstr(codBase);
+        SQL.Add(sqlstr);
+        Prepare;
+        Open;
+        frmMain.edt_CodigoPresupuesto1.Text := codProyecto;
+        frmMain.lbl_RevisionPresupuesto.Text := revision;
+        frmMain.edt_descripcionPresupuesto.Text :=
+          FieldByName('descripcion').AsString;
+        frmMain.edt_NPresupuestoCodReferencial.Text :=
+          FieldByName('codReferencial').AsString;
+        tmpstr := FieldByName('TipoProyecto').AsString;
+        posicionaCombo(frmMain.cbb_TProyectosPrespuesto, tmpstr);
+        tmpstr := FieldByName('categoria').AsString;
+        posicionaCombo(frmMain.cbb_CategoriaPresupuesto, tmpstr);
+        tmpstr := FieldByName('TipoConstruccion').AsString;
+        posicionaCombo(frmMain.cbb_TConstruccion, tmpstr);
+        tmpstr := FieldByName('ambitoContratacion').AsString;
+        posicionaCombo(frmMain.cbb_ambitoContratacion, tmpstr);
+        tmpstr := FieldByName('TipoContrato').AsString;
+        posicionaCombo(frmMain.cbb_TipoContrato, tmpstr);
+        frmMain.edt_AreaTerrenoPresupuesto.Text :=
+          FieldByName('ATerreno').AsString;
+        frmMain.edt_AConstruccionPresupuesto.Text :=
+          FieldByName('AConstruccion').AsString;
+        frmMain.dedt_PresentacionPresupuesto.Date :=
+          FieldByName('fechaInicio').AsDateTime;
+        tmpstr := FieldByName('PlazoEjecucion').AsString;
+        frmMain.edt_PlazoEjecucionPresupuesto.Text := tmpstr;
+        frmMain.lbl_PresupuestoFinalizacion.Text :=
+          FormatDateTime('dd/mm/yyyy', FieldByName('FechaFinalizacion')
+          .AsDateTime);
+        frmMain.edt_NPresupuestoDireccion.Text :=
+          FieldByName('direccion').AsString;
+        frmMain.edt_NPresupuestoCiudad.Text := FieldByName('ciudad').AsString;
+        frmMain.edt_NPresupuestoProvincia.Text :=
+          FieldByName('Provincia').AsString;
+        tmpstr := FieldByName('pais').AsString;
+        posicionaCombo(frmMain.cbb_paisNPresupuesto, tmpstr);
+        frmMain.mmo_ObjetoPresupuesto.Text :=
+          FieldByName('ObjetoContrato').AsString;
+        frmMain.edt_ValidezPresupuesto.Text :=
+          decimal_correcto(FieldByName('ValidezPropuesta').AsString);
+        tmpstr := FieldByName('latitud').AsString;
+        if tmpstr <> '' then
+        begin
+          frmMain.edt_Latitud.Text := tmpstr;
+          frmMain.lbl_nProyectoLatitud.Text := 'Latitud: ' + tmpstr;
+        end
+        else
+        begin
+          frmMain.edt_Latitud.Text := '0';
+        end;
+        tmpstr := FieldByName('longitud').AsString;
+        if tmpstr <> '' then
+        begin
+          frmMain.edt_longitud.Text := tmpstr;
+        end
+        else
+        begin
+          frmMain.edt_longitud.Text := '0';
+        end;
+        Result := True;
+      end;
+    finally
+      qry.Free;
+      img.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de ReadStreamInt.</summary>
+/// <param name="Stream">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ReadStreamInt.
+/// </summary>
+function ReadStreamInt(Stream: TStream): Integer;
+{ returns an integer from stream }
+begin
+  Stream.ReadBuffer(Result, SizeOf(Integer));
+end;
+
+/// <summary>TODO: Descripción de ReadStreamStr.</summary>
+/// <param name="Stream">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ReadStreamStr.
+/// </summary>
+function ReadStreamStr(Stream: TStream): string;
+
+var
+  SS: TStringStream;
+begin
+  if Stream <> nil then
+  begin
+    SS := TStringStream.Create('');
+    try
+      SS.CopyFrom(Stream, 0);
+      // No need to position at 0 nor provide size
+      Result := SS.DataString;
+    finally
+      SS.Free;
+    end;
+  end
+  else
+  begin
+    Result := '';
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de WriteStreamStr.
+/// </summary>
+procedure WriteStreamStr(Stream: TStream; Str: string);
+{ writes a string to the stream }
+
+var
+  StringStream: TStringStream;
+begin
+  StringStream := TStringStream.Create(Str);
+  try
+    Stream.CopyFrom(StringStream, 0);
+  finally
+    StringStream.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de WriteStreamInt.
+/// </summary>
+procedure WriteStreamInt(Stream: TStream; Num: Integer);
+{ writes an integer to the stream }
+begin
+  Stream.WriteBuffer(Num, SizeOf(Integer));
+end;
+
+/// <summary>TODO: Descripción de ReservarCodPresupuesto.</summary>
+procedure ReservarCodPresupuesto();
+
+var
+  part1, part2, part3: string;
+  qry: TUniQuery;
+  x: Integer;
+  codProyectoT: string;
+begin
+  codProyectoT := codProyecto;
+  x := AnsiPos('-', codProyectoT);
+  part1 := Copy(codProyectoT, 1, x - 1);
+  codProyectoT := Copy(codProyectoT, x + 1, Length(codProyectoT));
+  x := AnsiPos('-', codProyectoT);
+  part2 := Copy(codProyectoT, 1, x - 1);
+  part3 := Copy(codProyectoT, x + 1, Length(codProyectoT));
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('UPDATE configuracion SET PresupuestoValor1=:PresupuestoValor1, PresupuestoValor2=:PresupuestoValor2, PresupuestoValor3=:PresupuestoValor3');
+      SQL.Add(' WHERE id_usuario=' + quotedstr(ID_usuario));
+      Prepare;
+      ParamByName('PresupuestoValor1').AsString := part1;
+      ParamByName('PresupuestoValor2').AsString := part2;
+      ParamByName('PresupuestoValor3').AsString := part3;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de GuardarProyecto.</summary>
+procedure GuardarProyecto;
+var
+  qry: TUniQuery;
+  fechaCreacion: TDateTime;
+  correcto: Boolean;
+  errorPos: Integer;
+  StartedHere: Boolean;
+begin
+  guardando := True;
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    // 🔥 Control inteligente de transacción
+    StartedHere := not DModule_1.con2.InTransaction;
+
+    if StartedHere then
+      DModule_1.con2.StartTransaction;
+
+    try
+      // =========================
+      // FECHA CREACIÓN
+      // =========================
+      if not proyectoNuevo then
+      begin
+        qry.SQL.Text :=
+          'SELECT fechaHoraCreacion ' +
+          'FROM Presupuestos_datosProyecto ' +
+          'WHERE codPresupuesto = :codPresupuesto ' +
+          'AND revision = :revision ' +
+          'AND codBase = :codBase';
+
+        qry.ParamByName('codPresupuesto').AsString := codProyecto;
+        qry.ParamByName('revision').AsString := revision;
+        qry.ParamByName('codBase').AsString := base_activa.codBase;
+
+        qry.Open;
+
+        if qry.IsEmpty then
+          raise Exception.Create('Proyecto no encontrado.');
+
+        fechaCreacion :=
+          qry.FieldByName('fechaHoraCreacion').AsDateTime;
+      end
+      else
+        fechaCreacion := Now;
+
+      correcto := True;
+      errorPos := 0;
+
+      if correcto then
+      begin
+        correcto := borrado_tablasProyecto;
+        Inc(errorPos);
+      end;
+      if correcto then
+      begin
+        correcto := Guardar_DatosGenerales(fechaCreacion);
+        Inc(errorPos);
+      end;
+      if correcto then
+      begin
+        correcto := Guardar_DatosProyecto(fechaCreacion);
+        Inc(errorPos);
+      end;
+      if correcto then
+      begin
+        correcto := Guardar_StakeHolders;
+        Inc(errorPos);
+      end;
+      if correcto then
+      begin
+        correcto := Guardar_EDO;
+        Inc(errorPos);
+      end;
+      if correcto then
+      begin
+        correcto := Guardar_EDT;
+        Inc(errorPos);
+      end;
+      if correcto then
+      begin
+        correcto := Guardar_Indirectos;
+        Inc(errorPos);
+      end;
+      if correcto then
+      begin
+        correcto := guardar_ItemsPresupuesto;
+        Inc(errorPos);
+      end;
+      if correcto then
+      begin
+        correcto := guardar_Anotaciones;
+        Inc(errorPos);
+      end;
+      if correcto then
+      begin
+        correcto := guardaTablaIndicesSeleccionados;
+        Inc(errorPos);
+      end;
+
+      if not correcto then
+        raise Exception.Create(
+          'Error en GuardarProyecto. Paso: ' + IntToStr(errorPos)
+          );
+
+      with DModule_1.unsql_ActualizarDatosGenerales do
+      begin
+        ParamByName('icodPresupuesto').AsString := codProyecto;
+        ParamByName('iRevision').AsString := revision;
+        ParamByName('iCodBase').AsString := base_activa.codBase;
+        Execute;
+      end;
+
+      // 🔥 Commit solo si esta rutina inició la transacción
+      if StartedHere then
+        DModule_1.con2.Commit;
+
+    except
+      on E: Exception do
+      begin
+        if StartedHere and DModule_1.con2.InTransaction then
+          DModule_1.con2.Rollback;
+        raise;
+      end;
+    end;
+
+  finally
+    qry.Free;
+    guardando := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de proyectoGuardado.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de proyectoGuardado.
+/// </summary>
+function proyectoGuardado(): Boolean;
+
+var
+  qry: TUniQuery;
+  proyectoGuardado: Boolean;
+  tmpstr: string;
+  codBase: string;
+begin
+  qry := TUniQuery.Create(nil);
+  codBase := base_activa.codBase;
+  proyectoGuardado := False;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT * FROM Presupuestos_DatosGenerales WHERE codBase=' +
+        quotedstr(codBase) + ' AND codPresupuesto=' + quotedstr(codProyecto) +
+        ' AND revision=' + quotedstr(revision));
+      Prepare;
+      Open;
+      tmpstr := FieldByName('codPresupuesto').AsString;
+      if tmpstr <> '' then
+        proyectoGuardado := True;
+    end;
+  finally
+    qry.Free;
+  end;
+  Result := proyectoGuardado;
+end;
+
+/// <summary>TODO: Descripción de ProyectocumpleRequisitosMinimos.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de ProyectocumpleRequisitosMinimos.
+/// </summary>
+function ProyectocumpleRequisitosMinimos(): Boolean;
+var
+  cumpleRequisitos: Boolean;
+begin
+  cumpleRequisitos := True;
+  if frmMain.edt_descripcionPresupuesto.Text = '' then
+    cumpleRequisitos := False;
+  if frmMain.edt_AreaTerrenoPresupuesto.Text = '' then
+    cumpleRequisitos := False;
+  if frmMain.edt_AConstruccionPresupuesto.Text = '' then
+    cumpleRequisitos := False;
+  if frmMain.edt_NPresupuestoDireccion.Text = '' then
+    cumpleRequisitos := False;
+  if frmMain.edt_NPresupuestoCiudad.Text = '' then
+    cumpleRequisitos := False;
+  if frmMain.edt_NPresupuestoProvincia.Text = '' then
+    cumpleRequisitos := False;
+  Result := cumpleRequisitos;
+end;
+
+/// <summary>TODO: Descripción de borrado_tablasProyecto.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de borrado_tablasProyecto.
+/// </summary>
+function borrado_tablasProyecto: Boolean;
+const
+  TABLAS: array[0..10] of string = (
+    'presupuestos_datosProyecto',
+    'Presupuestos_StakeHolders',
+    'Presupuestos_EDO',
+    'Presupuestos_EDT',
+    'presupuestos_indirectos',
+    'presupuestos_Anotaciones',
+    'presupuestos_AnotacionesP2',
+    'presupuestos_indicesSeleccionados',
+    'presupuestos_Recursos',
+    'presupuestos_NotasRevision',
+    'presupuestos_FPolinomica'
+    );
+var
+  qry: TUniQuery;
+  i: Integer;
+begin
+  Result := False;
+
+  if (codProyecto = '') or (revision = '') or (base_activa.codBase = '') then
+    Exit;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    for i := Low(TABLAS) to High(TABLAS) do
+    begin
+      qry.SQL.Text :=
+        'DELETE FROM ' + TABLAS[i] + ' ' +
+        'WHERE codPresupuesto = :codPresupuesto ' +
+        'AND revision = :revision ' +
+        'AND codBase = :codBase';
+
+      qry.ParamByName('codPresupuesto').AsString := codProyecto;
+      qry.ParamByName('revision').AsString := revision;
+      qry.ParamByName('codBase').AsString := base_activa.codBase;
+
+      qry.ExecSQL;
+    end;
+
+    Result := True;
+
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de guardar_Anotaciones.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de guardar_Anotaciones.
+/// </summary>
+function guardar_Anotaciones: Boolean;
+var
+  qry: TUniQuery;
+begin
+  Result := False;
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    qry.SQL.Text :=
+      'INSERT INTO presupuestos_anotaciones ' +
+      '(codBase, codPresupuesto, revision, idItem, fecha, codEdt, paquete, descripcion, nota, autor, tipoNota, notaReferencia) ' +
+      'SELECT ' +
+      ':codBase, :codPresupuesto, :revision, ' +
+      'idItem, fecha, codEdt, paquete, descripcion, nota, autor, tiponota, notaReferencia ' +
+      'FROM tanotaciones';
+
+    qry.ParamByName('codBase').AsString := base_activa.codBase;
+    qry.ParamByName('codPresupuesto').AsString := codProyecto;
+    qry.ParamByName('revision').AsString := revision;
+
+    qry.ExecSQL;
+
+    Result := True;
+  finally
+    qry.Free;
+  end;
+end;
+
+function guardar_ItemsPresupuesto(): Boolean;
+var
+  qry: TUniQuery;
+begin
+  Result := False;
+  try
+    qry := TUniquery.Create(nil);
+    try
+      with qry do
+      begin
+        connection := DModule_1.con2;
+        close;
+        sql.Text :=
+          'CALL guardarItemsProyecto(:iCodBase, :iCodPresupuesto, :iRevision)';
+        ParamByName('icodBase').AsString := base_activa.codBase;
+        ParamByName('icodPresupuesto').AsString := codProyecto;
+        ParamByName('iRevision').AsString := revision;
+        Execute;
+        Result := True;
+      end;
+    finally
+      qry.free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+function Guardar_Indirectos(): Boolean;
+var
+  qry: TUniQuery;
+  x: Integer;
+  tmpstr: string;
+begin
+  // Indirectos
+  qry := TUniQuery.Create(nil);
+  Result := False;
+  try
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        SQL.Add('insert into presupuestos_indirectos (codBase, codPresupuesto, revision, cuenta, codCuenta, observaciones, valor) ');
+        SQL.Add('VALUES (:codBase, :codPresupuesto, :revision,:cuenta, :codCuenta, :observaciones, :valor) ');
+        Prepare;
+        for x := 0 to Length(listadoIndirectos) - 1 do
+        begin
+          ParamByName('codBase').AsString := base_activa.codBase;
+          ParamByName('codPresupuesto').AsString := codProyecto;
+          ParamByName('revision').AsString := revision;
+          ParamByName('codCuenta').AsString := listadoIndirectos[x].codCuenta;
+          ParamByName('cuenta').AsString := listadoIndirectos[x].cuenta;
+          ParamByName('valor').AsString := listadoIndirectos[x].porcentaje;
+          ParamByName('observaciones').AsString := listadoIndirectos[x]
+            .observaciones;
+          ExecSQL;
+        end;
+        Result := True;
+      end;
+    finally
+      qry.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de Guardar_DatosGenerales.
+/// </summary>
+function Guardar_DatosGenerales(fechaCreacion: TDateTime): Boolean;
+var
+  qry: TUniQuery;
+  codBase: string;
+  codProyectoRevisado: string;
+  fechaModificacion: TDateTime;
+begin
+  { Datos Generales Presupuesto }
+  qry := TUniQuery.Create(nil);
+  codBase := base_activa.codBase;
+  Result := False;
+  if proyectoNuevo then
+    fechaCreacion := Now;
+  fechaModificacion := Now;
+  try
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        if (proyectoNuevo) then
+        begin
+          // Nuevo Proyecto
+          if revision = '0' then
+          begin
+            codProyectoRevisado := compruebaCodigoProyectoRevisado();
+            frmMain.edt_CodigoPresupuesto1.Text := codProyectoRevisado;
+            codProyecto := codProyectoRevisado;
+          end;
+          Close;
+          SQL.Clear;
+          SQL.Add('insert into presupuestos_datosGenerales (codBase, codPresupuesto, codReferencial, revision, descripcion, subtotal, iva, indirectos, total, fechaCreacion, fechamodificacion, ndecimales, ndecimalesMoneda, porcentajeIVA, activo) ');
+          SQL.Add('Values (:codBase, :codPresupuesto, :codReferencial, :revision, :descripcion, :subtotal, :iva, :indirectos, :total, :fechaCreacion, :fechamodificacion, :ndecimales, :ndecimalesMoneda, :porcentajeIVA, :activo)');
+          Prepare;
+          ParamByName('codBase').AsString := codBase;
+          ParamByName('codPresupuesto').AsString := codProyecto;
+          ParamByName('revision').AsString := revision;
+          ParamByName('codReferencial').AsString :=
+            frmMain.edt_NPresupuestoCodReferencial.Text;
+          ParamByName('descripcion').AsString :=
+            frmMain.edt_descripcionPresupuesto.Text;
+
+          if frmMain.lbl_SubtotalPresupuesto.Text = '' then
+            frmMain.lbl_SubtotalPresupuesto.Text := '0';
+
+          ParamByName('subtotal').AsFloat :=
+            quitaFormatFloat(frmMain.lbl_SubtotalPresupuesto.Text);
+          if frmMain.lbl_CantIVAPresupuestos.Text = '' then
+            frmMain.lbl_CantIVAPresupuestos.Text := '0';
+
+          ParamByName('iva').AsFloat :=
+            quitaFormatFloat(frmMain.lbl_CantIVAPresupuestos.Text);
+
+          ParamByName('indirectos').AsFloat := IndirectosPresupuesto;
+
+          if frmMain.lbl_TotalIVAPresupuestos.Text = '' then
+            frmMain.lbl_TotalIVAPresupuestos.Text := '0';
+          ParamByName('total').AsFloat :=
+            quitaFormatFloat(frmMain.lbl_TotalIVAPresupuestos.Text);
+
+          ParamByName('fechaCreacion').AsDateTime := fechaCreacion;
+          ParamByName('fechaModificacion').AsDateTime := fechaModificacion;
+          ParamByName('ndecimales').AsInteger := ndecimalesPresupuesto;
+          ParamByName('porcentajeIVA').AsFloat :=
+            StrToFloatDef(frmMain.edt_porcentajeIVANuevoPresupuesto.Text, 15);
+          ParamByName('activo').AsBoolean := True;
+          ParamByName('ndecimalesmoneda').AsInteger := ndecimalesMoneda;
+          ExecSQL;
+          Result := True;
+        end
+        else
+        begin
+          // Actualizar Proyecto
+          Close;
+          SQL.Clear;
+          SQL.Add('update presupuestos_datosGenerales set codReferencial=:codReferencial, descripcion=:descripcion, subtotal=:subtotal, iva=:iva, indirectos=:indirectos, total=:total, fechamodificacion=:fechaModificacion, porcentajeIVA=:porcentajeIVA ');
+          SQL.Add('where codPresupuesto=' + quotedstr(codProyecto) +
+            ' and codBase=' + quotedstr(codBase) + ' and revision=' +
+            quotedstr(revision));
+          ParamByName('porcentajeIVA').AsFloat :=
+            StrToFloatDef(frmMain.edt_porcentajeIVANuevoPresupuesto.Text, 15);
+          ParamByName('codReferencial').AsString :=
+            frmMain.edt_NPresupuestoCodReferencial.Text;
+          ParamByName('descripcion').AsString :=
+            frmMain.edt_descripcionPresupuesto.Text;
+
+          ParamByName('subtotal').AsFloat :=
+            quitaFormatFloat(frmMain.lbl_SubtotalPresupuesto.Text);
+          ParamByName('iva').AsFloat :=
+            quitaFormatFloat(frmMain.lbl_CantIVAPresupuestos.Text);
+          ParamByName('indirectos').AsFloat := IndirectosPresupuesto;
+          ParamByName('total').AsFloat :=
+            quitaFormatFloat(frmMain.lbl_TotalIVAPresupuestos.Text);
+          ParamByName('fechaModificacion').AsDateTime := fechaModificacion;
+          Prepare;
+          ExecSQL;
+          Result := True;
+        end;
+      end;
+    finally
+      qry.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de compruebaCodigoProyectoRevisado.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de compruebaCodigoProyectoRevisado.
+/// </summary>
+function compruebaCodigoProyectoRevisado(): string;
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  salir: Boolean;
+  codPart: string;
+  codPart3: string;
+  iCodPart3: Integer;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from presupuestos_DatosProyecto where codPresupuesto='
+        + quotedstr(codProyecto));
+      Prepare;
+      Open;
+      tmpstr := FieldByName('codPresupuesto').AsString;
+      if tmpstr = '' then
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('update configuracion set PresupuestoValor3=PresupuestoValor3+1');
+        Prepare;
+        ExecSQL;
+        Result := codProyecto;
+      end
+      else
+      begin
+        codPart3 := RightStr(codProyecto, 4);
+        codPart := ReplaceStr(codProyecto, codPart3, '');
+        iCodPart3 := StrToIntDef(codPart3, 1);
+        Inc(iCodPart3);
+        codProyecto := codPart + ponerCerosInicio(IntToStr(iCodPart3), 3);
+        tmpstr := compruebaCodigoProyectoRevisado();
+        if tmpstr = codProyecto then
+          Result := codProyecto;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+function Guardar_EDT(): Boolean;
+
+  function NormalizaCodEDT(const S: string): string;
+  var
+    R: string;
+  begin
+    R := StringReplace(S, #9, '', [rfReplaceAll]);
+    R := Trim(R);
+    R := StringReplace(R, ' .', '.', [rfReplaceAll]);
+    R := StringReplace(R, '. ', '.', [rfReplaceAll]);
+    R := StringReplace(R, ' ', '', [rfReplaceAll]);
+    Result := R;
+  end;
+
+var
+  qryDel, qryIns, qryOrden: TUniQuery;
+  nodo: TTMSFNCTreeViewNode;
+  codEdtNorm: string;
+
+begin
+  Result := False;
+
+  qryDel := TUniQuery.Create(nil);
+  qryIns := TUniQuery.Create(nil);
+  qryOrden := TUniQuery.Create(nil);
+
+  try
+    qryDel.Connection := DModule_1.con2;
+    qryIns.Connection := DModule_1.con2;
+    qryOrden.Connection := DModule_1.con2;
+
+    try
+      // 1) Borrar EDT
+      qryDel.SQL.Text :=
+        'DELETE FROM presupuestos_edt ' +
+        'WHERE codBase=:codBase AND codPresupuesto=:codPresupuesto AND Revision=:Revision';
+
+      qryDel.ParamByName('codBase').AsString := base_activa.codBase;
+      qryDel.ParamByName('codPresupuesto').AsString := codProyecto;
+      qryDel.ParamByName('Revision').AsString := revision;
+      qryDel.ExecSQL;
+
+      // 2) Insertar EDT
+      qryIns.SQL.Text :=
+        'INSERT INTO presupuestos_edt ' +
+        '(codBase,codPresupuesto,Revision,CodEDT,Descripcion,Responsable,Definicion,codUnicoItemPresupuesto) ' +
+        'VALUES ' +
+        '(:codBase,:codPresupuesto,:Revision,:CodEDT,:Descripcion,:Responsable,:Definicion,:codUnicoItemPresupuesto)';
+
+      qryIns.Prepare;
+
+      qryIns.ParamByName('codBase').AsString := base_activa.codBase;
+      qryIns.ParamByName('codPresupuesto').AsString := codProyecto;
+      qryIns.ParamByName('Revision').AsString := revision;
+
+      if frmMain.Trvw_EDT.Nodes.Count > 0 then
+        nodo := frmMain.Trvw_EDT.Nodes[0]
+      else
+        nodo := nil;
+
+      while Assigned(nodo) do
+      begin
+        codEdtNorm := NormalizaCodEDT(nodo.Text[0]);
+
+        if codEdtNorm <> '' then
+        begin
+          qryIns.ParamByName('CodEDT').AsString := codEdtNorm;
+          qryIns.ParamByName('Descripcion').AsString := nodo.Text[1];
+          qryIns.ParamByName('Responsable').AsString := nodo.Text[2];
+          qryIns.ParamByName('Definicion').AsString := nodo.Text[3];
+          qryIns.ParamByName('codUnicoItemPresupuesto').AsString :=
+            nodo.Text[4];
+
+          qryIns.ExecSQL;
+        end;
+
+        nodo := nodo.GetNext;
+      end;
+
+      // 3) Recalcular orden jerárquico
+      qryOrden.SQL.Text :=
+        'CALL ActualizaOrdenJerarquicoEDT(:codBase,:codPresupuesto,:revision)';
+
+      qryOrden.ParamByName('codBase').AsString := base_activa.codBase;
+      qryOrden.ParamByName('codPresupuesto').AsString := codProyecto;
+      qryOrden.ParamByName('revision').AsString := revision;
+
+      qryOrden.ExecSQL;
+
+      Result := True;
+
+    except
+      Result := False;
+      raise;
+    end;
+
+  finally
+    qryOrden.Free;
+    qryIns.Free;
+    qryDel.Free;
+  end;
+
+end;
+
+/// <summary>TODO: Descripción de Guardar_EDO.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de Guardar_EDO.
+/// </summary>
+function Guardar_EDO(): Boolean;
+begin
+  { Guardar EDO }
+  Result := False;
+  try
+    ActualizaHitosyEdos(frmMain.Trvw_EDO);
+    Result := True;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de Guardar_StakeHolders.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Gestiona información de stakeholders en Guardar_StakeHolders.
+/// </summary>
+function Guardar_StakeHolders(): Boolean;
+
+var
+  qry: TUniQuery;
+  x: Integer;
+begin
+  { Stake Asignados }
+  qry := TUniQuery.Create(nil);
+  Result := False;
+  try
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        SQL.Add('delete from presupuestos_stakeholders where codbase = :codbase and codPresupuesto = :codPresupuesto and revision = :revision');
+        ParamByName('codBase').AsString := base_activa.codBase;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revision;
+        Prepare;
+        ExecSQL;
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('INSERT INTO Presupuestos_StakeHolders ' + '( ' + 'codBase, '
+          + 'codPresupuesto, ' + 'revision, ' + 'idGrid, ' +
+          'rolPresupuesto, ' + 'idFiscal, ' + 'nombre, ' + 'apellidos, ' +
+          'titulacion, ' + 'email, ' + 'idUnico) ' + 'VALUES ' + '( ' +
+          ':codBase, ' + ':codPresupuesto, ' + ':revision, ' + ':idGrid, ' +
+          ':rolPresupuesto, ' + ':idFiscal, ' + ':nombre, ' + ':apellidos, ' +
+          ':titulacion, ' + ':email, ' + ':idUnico ' + ')');
+        { *) }
+        Prepare;
+        for x := 1 to frmMain.grid_stakesAsignados.RowCount - 1 do
+        begin
+          ParamByName('codBase').AsString := base_activa.codBase;
+          ParamByName('codPresupuesto').AsString := codProyecto;
+          ParamByName('revision').AsString := revision;
+          ParamByName('idGrid').AsString :=
+            frmMain.grid_stakesAsignados.cells[0, x];
+          ParamByName('idFiscal').AsString :=
+            frmMain.grid_stakesAsignados.cells[1, x];
+          ParamByName('nombre').AsString :=
+            frmMain.grid_stakesAsignados.cells[2, x];
+          ParamByName('apellidos').AsString :=
+            frmMain.grid_stakesAsignados.cells[3, x];
+          ParamByName('email').AsString :=
+            frmMain.grid_stakesAsignados.cells[4, x];
+          ParamByName('titulacion').AsString :=
+            frmMain.grid_stakesAsignados.cells[5, x];
+          ParamByName('rolPresupuesto').AsString :=
+            frmMain.grid_stakesAsignados.cells[6, x];
+          ParamByName('idUnico').AsString :=
+            frmMain.grid_stakesAsignados.cells[7, x];
+          ExecSQL;
+        end;
+        Result := True;
+      end;
+    finally
+      qry.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de Guardar_DatosProyecto.</summary>
+/// <param name="fechaCreacion">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de Guardar_DatosProyecto.
+/// </summary>
+function Guardar_DatosProyecto(fechaCreacion: TDateTime): Boolean;
+
+var
+  qry: TUniQuery;
+  codBase: string;
+  fechaModificacion: TDateTime;
+  img: Tbitmap;
+  tmpstr: string;
+  x: Integer;
+begin
+  { Datos Generales Proyecto }
+  qry := TUniQuery.Create(nil);
+  codBase := base_activa.codBase;
+  Result := False;
+  img := Tbitmap.Create;
+  if fechaCreacion = strtodatetime(fecha0) then
+    fechaCreacion := Now;
+  fechaModificacion := Now;
+  try
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('INSERT INTO Presupuestos_DatosProyecto ' + '( ' + 'codBase, '
+          + 'codPresupuesto, ' + 'codReferencial, ' + 'revision, ' +
+          'descripcion, ' + 'tipoProyecto, ' + 'categoria, ' +
+          'tipoConstruccion, ' + 'AmbitoContratacion, ' + 'tipoContrato, ' +
+          'fechaInicio, ' + 'PlazoEjecucion, ' + 'fechaFinalizacion, ' +
+          'direccion, ' + 'ciudad, ' + 'provincia, ' + 'pais, ' +
+          'objetoContrato, ' + 'validezPropuesta, ' + 'Foto1, ' + 'Foto2, ' +
+          'latitud, ' + 'longitud, ' + 'fechaHoraCreacion, ' +
+          'UltModificacion, ' + 'ATerreno, ' + 'AConstruccion ' + ') ' +
+          'VALUES ' + '( ' + ':codBase, ' + ':codPresupuesto, ' +
+          ':CodReferencial, ' + ':revision, ' + ':descripcion, ' +
+          ':tipoProyecto, ' + ':categoria, ' + ':tipoConstruccion, ' +
+          ':AmbitoContratacion, ' + ':tipoContrato, ' + ':fechaInicio, ' +
+          ':PlazoEjecucion, ' + ':fechaFinalizacion, ' + ':direccion, ' +
+          ':ciudad, ' + ':provincia, ' + ':pais, ' + ':objetoContrato, ' +
+          ':validezPropuesta, ' + ':Foto1, ' + ':Foto2, ' + ':latitud, ' +
+          ':longitud, ' + ':fechaHoraCreacion, ' + ':UltModificacion, ' +
+          ':ATerreno, ' + ':AConstruccion ' + ')');
+        { *) }
+        Prepare;
+        ParamByName('codPresupuesto').AsString := codProyecto;
+        ParamByName('revision').AsString := revision;
+        ParamByName('codBase').AsString := codBase;
+        ParamByName('codReferencial').AsString :=
+          frmMain.edt_NPresupuestoCodReferencial.Text;
+        ParamByName('descripcion').AsString :=
+          frmMain.edt_descripcionPresupuesto.Text;
+        ParamByName('tipoProyecto').AsString :=
+          frmMain.cbb_TProyectosPrespuesto.Items
+          [frmMain.cbb_TProyectosPrespuesto.itemindex];
+        ParamByName('categoria').AsString :=
+          frmMain.cbb_CategoriaPresupuesto.Items
+          [frmMain.cbb_CategoriaPresupuesto.itemindex];
+        ParamByName('TipoConstruccion').AsString :=
+          frmMain.cbb_TConstruccion.Items
+          [frmMain.cbb_TConstruccion.itemindex];
+        ParamByName('AmbitoContratacion').AsString :=
+          frmMain.cbb_ambitoContratacion.Items
+          [frmMain.cbb_ambitoContratacion.itemindex];
+        ParamByName('TipoContrato').AsString := frmMain.cbb_TipoContrato.Items
+          [frmMain.cbb_TipoContrato.itemindex];
+        ParamByName('fechaInicio').AsDateTime :=
+          frmMain.dedt_PresentacionPresupuesto.Date;
+        ParamByName('PlazoEjecucion').AsString :=
+          frmMain.edt_PlazoEjecucionPresupuesto.Text;
+        ParamByName('fechaFinalizacion').AsDateTime :=
+          strtodatetime(frmMain.lbl_PresupuestoFinalizacion.Text);
+        ParamByName('direccion').AsString :=
+          frmMain.edt_NPresupuestoDireccion.Text;
+        ParamByName('ciudad').AsString := frmMain.edt_NPresupuestoCiudad.Text;
+        ParamByName('provincia').AsString :=
+          frmMain.edt_NPresupuestoProvincia.Text;
+        ParamByName('pais').AsString := frmMain.cbb_paisNPresupuesto.Items
+          [frmMain.cbb_paisNPresupuesto.itemindex];
+        ParamByName('objetoContrato').AsString :=
+          frmMain.mmo_ObjetoPresupuesto.Text;
+        ParamByName('validezPropuesta').AsString :=
+          frmMain.edt_ValidezPresupuesto.Text;
+        ParamByName('fechaHoraCreacion').AsDateTime := fechaCreacion;
+        ParamByName('UltModificacion').AsDateTime := fechaModificacion;
+        ParamByName('ATerreno').AsString :=
+          frmMain.edt_AreaTerrenoPresupuesto.Text;
+        ParamByName('AConstruccion').AsString :=
+          frmMain.edt_AConstruccionPresupuesto.Text;
+
+        { Fin }
+        tmpstr := frmMain.edt_Latitud.Text.Trim;
+        if tmpstr = '' then
+          tmpstr := '0';
+        ParamByName('latitud').AsFloat := StrToFloatDef(tmpstr, 0);
+        tmpstr := frmMain.edt_longitud.Text;
+        if tmpstr = '' then
+          tmpstr := '0';
+        ParamByName('longitud').AsFloat := StrToFloatDef(tmpstr, 0);
+        ExecSQL;
+        Result := True;
+      end;
+    finally
+      qry.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+/// <summary>TODO: Descripción de BitmapToString.</summary>
+/// <param name="img">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de BitmapToString.
+/// </summary>
+function BitmapToString(img: Tbitmap): string;
+
+var
+  tms: TMemoryStream;
+  tss: TStringStream;
+  ts: string;
+begin
+  tms := TMemoryStream.Create;
+  img.SaveToStream(tms);
+  tss := TStringStream.Create('');
+  tms.Position := 0;
+  Encoder.EncodeStream(tms, tss);
+  ts := tss.DataString;
+  tms.Free;
+  tss.Free;
+  Result := ts;
+end;
+
+/// <summary>TODO: Descripción de StringToBitmap.</summary>
+/// <param name="imgStr">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de StringToBitmap.
+/// </summary>
+function StringToBitmap(imgStr: string): Tbitmap;
+
+var
+  tms: TMemoryStream;
+  Bitmap: Tbitmap;
+begin
+  tms := TMemoryStream.Create;
+  Decoder.DecodeStream(imgStr, tms);
+  tms.Position := 0;
+  Bitmap := Tbitmap.Create;
+  Bitmap.LoadFromStream(tms);
+  tms.Free;
+  Result := Bitmap;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de posicionaNodo.
+/// </summary>
+function posicionaNodo(trvw: TTMSFNCTreeView; Texto: string; Columna: Integer;
+  aCase: Boolean): TTMSFNCTreeViewNode;
+
+var
+  x: Integer;
+  salir: Boolean;
+  nodoConsulta: TTMSFNCTreeViewNode;
+  tmpstr: string;
+begin
+  salir := False;
+  x := trvw.Nodes.Count;
+  if x > 0 then
+  begin
+    nodoConsulta := trvw.Nodes[0];
+
+    while (not salir) and (Assigned(nodoConsulta)) do
+    begin
+      tmpstr := nodoConsulta.Text[Columna];
+      if aCase then
+      begin
+        tmpstr := LowerCase(tmpstr);
+        Texto := LowerCase(tmpstr);
+      end;
+      if Texto = tmpstr then
+      begin
+        salir := True;
+        Result := nodoConsulta;
+      end;
+      nodoConsulta := nodoConsulta.GetNext;
+    end;
+    if not salir then
+    begin
+      nodoConsulta := nil;
+      Result := nodoConsulta;
+    end;
+  end
+  else
+  begin
+    nodoConsulta := TTMSFNCTreeViewNode.Create(nil);
+    nodoConsulta := nil;
+    Result := nodoConsulta;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de posicionaNodoDesc.
+/// </summary>
+function posicionaNodoDesc(trvw: TTMSFNCTreeView; Texto: string;
+  Columna: Integer; aCase: Boolean): TTMSFNCTreeViewNode;
+
+var
+  x: Integer;
+  salir: Boolean;
+  nodoConsulta: TTMSFNCTreeViewNode;
+  tmpstr: string;
+  descNodo: string;
+begin
+  salir := False;
+  nodoConsulta := trvw.Nodes[0];
+  while (not salir) and (Assigned(nodoConsulta)) do
+  begin
+    tmpstr := nodoConsulta.Text[Columna];
+    x := AnsiPos(' ', tmpstr);
+    tmpstr := Copy(tmpstr, x + 1, Length(tmpstr));
+    if aCase then
+    begin
+      tmpstr := LowerCase(tmpstr);
+      Texto := LowerCase(Texto);
+    end;
+    if Texto = tmpstr then
+    begin
+      salir := True;
+      Result := nodoConsulta;
+    end;
+    nodoConsulta := nodoConsulta.GetNext;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de posicionPrimerItem.
+/// </summary>
+function posicionPrimerItem(Grid: TTMSFNCGrid; codItem: string): Integer;
+
+var
+  fnc: TTMSFNCGridFindParams;
+  rv: TPoint;
+  tmpstr: string;
+  x: Integer;
+  salir: Boolean;
+
+const
+  CResultInvalidInt = -1;
+begin
+  Result := -1;
+  fnc := [TTMSFNCGridFindParameters.fnAutoGoto,
+    TTMSFNCGridFindParameters.fnFindInPresetCol,
+    TTMSFNCGridFindParameters.fnMatchFull];
+  Result := -1;
+  if codItem <> '' then
+  begin
+    Grid.FindCol := 10;
+    rv := Grid.FindFirst(codItem, fnc);
+    tmpstr := Grid.cells[10, rv.Y];
+    if rv.Y <> -1 then
+      Result := rv.Y;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de existeNodo.
+/// </summary>
+function existeNodo(trvw: TTMSFNCTreeView; textoBuscar: string): Boolean;
+
+var
+  salir: Boolean;
+  subnodo: TTMSFNCTreeViewNode;
+  tmpstr: string;
+  x: Integer;
+begin
+  subnodo := trvw.Nodes[0];
+  salir := False;
+  Result := False;
+  while (subnodo <> nil) and (not salir) do
+  begin
+    tmpstr := subnodo.Text[0];
+    x := AnsiPos(' ', tmpstr);
+    tmpstr := Copy(tmpstr, x + 1, Length(tmpstr));
+    tmpstr := Trim(tmpstr);
+    if tmpstr = textoBuscar then
+    begin
+      Result := True;
+      salir := True;
+    end;
+    subnodo := subnodo.GetNext;
+  end;
+end;
+
+/// <summary>TODO: Descripción de generaCodEDT.</summary>
+/// <param name="node">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de generaCodEDT.
+/// </summary>
+procedure generaCodEDT(node: TTMSFNCTreeViewNode);
+
+var
+  subNode, Tnode: TTMSFNCTreeViewNode;
+  x, Y: Integer;
+  tmpstr: string;
+  codigo: string;
+  prefijo: string;
+  root: Boolean;
+begin
+  prefijo := '';
+  subNode := node.GetParent;
+  if not Assigned(subNode) then
+  begin
+    subNode := frmMain.Trvw_EDT.Nodes[0];
+    root := True;
+  end
+  else
+  begin
+    Tnode := subNode.GetParent;
+    if not Assigned(Tnode) then
+      root := True
+    else
+      root := False;
+  end;
+  if Assigned(subNode) then
+  begin
+    if not root then
+      prefijo := subNode.Text[0];
+    x := 1;
+    subNode := subNode.GetFirstChild;
+    while subNode <> nil do
+    begin
+      if prefijo = '' then
+        codigo := IntToStr(x)
+      else
+        codigo := prefijo + '.' + IntToStr(x);
+      Inc(x);
+      Y := subNode.GetChildCount;
+      subNode.Text[0] := codigo;
+      if Y > 0 then
+      begin
+        generaCodEDT(subNode.GetNext);
+      end;
+      subNode := subNode.GetNextSibling;
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de populaResponsableEDT.</summary>
+procedure populaResponsableEDT(LForm: TfrmOpcionesEDT);
+
+var
+  x: Integer;
+  tmpstr: string;
+begin
+  LForm.cbb_EDTResponsable.Clear;
+  for x := 1 to frmMain.grid_stakesAsignados.RowCount - 1 do
+  begin
+    tmpstr := Trim(frmMain.grid_stakesAsignados.cells[1, x]) + ' - ' +
+      Trim(frmMain.grid_stakesAsignados.cells[2, x]) + ' ' +
+      Trim(frmMain.grid_stakesAsignados.cells[3, x]) + ' (' +
+      Trim(frmMain.grid_stakesAsignados.cells[4, x]) + ')';
+    LForm.cbb_EDTResponsable.Items.Add(tmpstr);
+  end;
+  LForm.cbb_EDTResponsable.itemindex := -1;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de addNodeEDT.
+/// </summary>
+function addNodeEDT(node: TTMSFNCTreeViewNode; Texto: string)
+  : TTMSFNCTreeViewNode;
+
+var
+  subNode: TTMSFNCTreeViewNode;
+begin
+  subNode := frmMain.Trvw_EDO.addnode(node);
+  subNode.Text[1] := '1';
+  subNode.Text[2] := Texto;
+  subNode.Text[3] := '';
+  subNode.Text[4] := '';
+  subNode.Text[5] := '';
+  Result := subNode;
+end;
+
+/// <summary>
+/// Devuelve información calculada o consultada en daValorUltimoNodoRama.
+/// </summary>
+function daValorUltimoNodoRama(nodo: TTMSFNCTreeViewNode; extendido: Boolean)
+  : TTMSFNCTreeViewNode;
+
+var
+  subnodo: TTMSFNCTreeViewNode;
+  I: Integer;
+  x: Integer;
+begin
+  Result := nil;
+  I := nodo.Nodes.Count - 1;
+  for x := 1 to I do
+  begin
+    nodo := nodo.GetNext;
+    if extendido then
+    begin
+      if nodo.Extended then
+        Result := nodo;
+    end
+    else
+    begin
+      Result := nodo;
+    end;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de addHito.
+/// </summary>
+procedure addHito(NodoBase: TTMSFNCTreeViewNode; nombreHito: string);
+
+var
+  codHito: string;
+  nodo: TTMSFNCTreeViewNode;
+  subnodo: TTMSFNCTreeViewNode;
+  x: Integer;
+  prefijo: string;
+  sufijo: string;
+  nodoLevel: Integer;
+begin
+  if not NodoBase.Extended then
+  begin
+    NodoBase := NodoBase.GetPreviousSibling;
+  end;
+  nodoLevel := NodoBase.VirtualNode.Level;
+  nodo := frmMain.Trvw_EDO.addnode(NodoBase);
+  nodo.Extended := True;
+  x := nodoLevel;
+  if x = 0 then
+  begin
+    NodoBase := daValorUltimoNodoRama(NodoBase, True);
+    if Assigned(NodoBase) then
+      codHito := NodoBase.Text[0]
+    else
+      codHito := '';
+    if codHito = '' then
+      codHito := '001'
+    else
+    begin
+
+      x := AnsiPos(' - ', codHito);
+      codHito := Copy(codHito, 1, x - 1).Trim;
+      x := StrToIntDef(codHito, 0);
+      Inc(x);
+      codHito := ponerCerosInicio(IntToStr(x), 3);
+    end;
+    codHito := codHito + ' - ' + nombreHito;
+  end
+  else
+  begin
+    subnodo := daValorUltimoNodoRama(NodoBase, True);
+    if Assigned(subnodo) then
+    begin
+      sufijo := subnodo.Text[0];
+
+      x := AnsiPos(' - ', sufijo);
+      sufijo := Copy(sufijo, 1, x - 1).Trim;
+      prefijo := AnsiReverseString(sufijo);
+      x := AnsiPos('.', prefijo);
+      if x > 0 then
+      begin
+        sufijo := Copy(prefijo, x + 1, Length(prefijo));
+        prefijo := Copy(prefijo, 1, x - 1).Trim;
+
+        sufijo := AnsiReverseString(sufijo).Trim;
+        prefijo := AnsiReverseString(prefijo);
+        x := StrToIntDef(prefijo, 0);
+        Inc(x);
+        prefijo := ponerCerosInicio(IntToStr(x), 3);
+      end
+      else
+      begin
+        prefijo := '001';
+      end;
+
+    end
+    else
+    begin
+      prefijo := '001';
+    end;
+    codHito := sufijo + '.' + prefijo + ' - ' + nombreHito;
+  end;
+
+  nodo.Text[0] := codHito;
+  nodo.Expand(True);
+end;
+
+/// <summary>TODO: Descripción de sincronizarEDO.</summary>
+procedure sincronizarEDO();
+
+type
+  dat_edoP = record
+    valor: string;
+    idStaker: string;
+    Nombre: string;
+    rol: string;
+    idUnico: string;
+  end;
+
+var
+  listadoEDO: TStringList;
+  x, Y, z: Integer;
+  nodoPadre, subnodo: TTMSFNCTreeViewNode;
+  tmpstr: string;
+  idStake: string;
+  nombreStake: string;
+  codStake: string;
+  tmpint: Integer;
+  encontrado: Boolean;
+  rolStakeAsignado: string;
+  listadoEdoT: array of dat_edoP;
+begin
+  // Stakes Sin Asignar
+  try
+    limpiaGridEDOStakes;
+    Y := 0;
+    z := 0;
+    for x := 1 to frmMain.grid_stakesAsignados.RowCount - 1 do
+    begin
+      rolStakeAsignado := Trim(frmMain.grid_stakesAsignados.cells[6, x]);
+      Y := frmMain.grid_EDOStakes.RowCount;
+      frmMain.grid_EDOStakes.RowCount := Y + 1;
+      frmMain.grid_EDOStakes.cells[0, Y] :=
+        ponerCerosInicio(frmMain.grid_stakesAsignados.cells[0, x], 2);
+      frmMain.grid_EDOStakes.cells[1, Y] :=
+        Trim(frmMain.grid_stakesAsignados.cells[1, x]);
+      frmMain.grid_EDOStakes.cells[2, Y] :=
+        Trim(frmMain.grid_stakesAsignados.cells[2, x]) + ' ' +
+        Trim(frmMain.grid_stakesAsignados.cells[3, x]);
+      frmMain.grid_EDOStakes.cells[3, Y] :=
+        frmMain.grid_stakesAsignados.cells[6, x];
+      frmMain.grid_EDOStakes.cells[4, Y] :=
+        frmMain.grid_stakesAsignados.cells[7, x];
+    end;
+    DaSeleccionRolesStake2();
+    if frmMain.Trvw_EDO.Nodes.Count > 0 then
+    begin
+      if frmMain.Trvw_EDO.Nodes[0].Text[0] <>
+        frmMain.edt_descripcionPresupuesto.Text then
+      begin
+        nodoPadre := frmMain.Trvw_EDO.addnode;
+        nodoPadre.Extended := True;
+        nodoPadre.Text[0] := frmMain.edt_descripcionPresupuesto.Text;
+      end;
+    end;
+    frmMain.Trvw_EDO.columns[5].Visible := False;
+    frmMain.Trvw_EDO.ExpandAll;
+  finally
+    AjustaGrid_EDOStake();
+  end;
+end;
+
+procedure AjustaGrid_EDOStake();
+begin
+  hideCol(frmMain.grid_EDOStakes, 4);
+  FitCols(frmMain.grid_EDOStakes, [0, 1, 2, 3], 5);
+  FillCols(frmMain.grid_EDOStakes, [2]);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de AsignaRolEdo.
+/// </summary>
+procedure AsignaRolEdo(subnodo: TTMSFNCTreeViewNode;
+  rolSinAsignar, AValue: string);
+
+var
+  x: Integer;
+  tmpstr: string;
+  posgrid: Integer;
+begin
+  x := AnsiPos(' - ', rolSinAsignar);
+  tmpstr := Copy(rolSinAsignar, 1, x - 1);
+  tmpstr := Trim(tmpstr);
+  posgrid := SafeStrToInt(tmpstr);
+  frmMain.grid_stakesAsignados.cells[1, posgrid] := AValue;
+  AValue := tmpstr + ' - ' + AValue;
+  subnodo.Text[0] := AValue;
+end;
+
+/// <summary>TODO: Descripción de limpiaGridEDOStakes.</summary>
+procedure limpiaGridEDOStakes();
+begin
+  frmMain.grid_EDOStakes.ClearNormalCells;
+  frmMain.grid_EDOStakes.cells[0, 0] := '#';
+  frmMain.grid_EDOStakes.cells[1, 0] := 'Id Stakeholder';
+  frmMain.grid_EDOStakes.cells[2, 0] := 'Nombre';
+  frmMain.grid_EDOStakes.cells[3, 0] := 'Rol';
+  frmMain.grid_EDOStakes.RowCount := 1;
+end;
+
+/// <summary>TODO: Descripción de iniciaEDO.</summary>
+procedure iniciaEDO();
+
+var
+  nombreProyecto: string;
+  subNode: TTMSFNCTreeViewNode;
+begin
+  historicoEDO := TStringList.Create;
+  posEDO := 0;
+  frmMain.Trvw_EDO.ClearNodes;
+  frmMain.Trvw_EDO.columns[0].Text := '#';
+  frmMain.Trvw_EDO.columns[1].Text := 'Rol Proyecto';
+  frmMain.Trvw_EDO.columns[2].Text := 'Id Stake';
+  frmMain.Trvw_EDO.columns[3].Text := 'Nombre';
+  frmMain.Trvw_EDO.columns[4].Text := 'Actividades Clave';
+  frmMain.Trvw_EDO.ExpandAll;
+end;
+
+/// <summary>TODO: Descripción de iniciaEDT.</summary>
+procedure iniciaEDT();
+
+var
+  nombreProyecto: string;
+  subNode: TTMSFNCTreeViewNode;
+begin
+  historicoEDT := TStringList.Create;
+  posEDT := 0;
+  frmMain.Trvw_EDT.ClearNodes;
+  frmMain.Trvw_EDT.columns[0].Text := 'Cod. EDT';
+  frmMain.Trvw_EDT.columns[1].Text := 'Descripción';
+  frmMain.Trvw_EDT.columns[2].Text := 'Responsable';
+  frmMain.Trvw_EDT.columns[3].Text := 'Definición';
+  frmMain.Trvw_EDT.columns[4].width := 0;
+  nombreProyecto := frmMain.edt_descripcionPresupuesto.Text;
+  if nombreProyecto = '' then
+    nombreProyecto := 'Descripción del Proyecto sin definir';
+  subNode := frmMain.Trvw_EDT.addnode();
+
+  subNode.Text[1] := nombreProyecto;
+  frmMain.Trvw_EDT.SelectNode(subNode);
+  frmMain.Trvw_EDT.ExpandAll;
+end;
+
+/// <summary>TODO: Descripción de populaRolStake.</summary>
+procedure populaRolStake(LForm: TfrmRolProyecto);
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from RolesStakes');
+      Prepare;
+      Open;
+      LForm.cbb_RolesStakes.Clear;
+      while not Eof do
+      begin
+        tmpstr := FieldByName('descripcion').AsString;
+        LForm.cbb_RolesStakes.Items.Add(tmpstr);
+        Next;
+      end;
+    end;
+  finally
+    qry.Free;
+    LForm.cbb_RolesStakes.itemindex := 0;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de trimExp.
+/// </summary>
+function trimExp(cadena: string): string;
+begin
+  Result := ReplaceStr(cadena, ' ', '');
+end;
+
+/// <summary>
+/// Gestiona información de stakeholders en addStakeHolder.
+/// </summary>
+procedure addStakeHolder(codSTK: string);
+
+var
+  posNgrid: Integer;
+begin
+  DMPresupuesto.QBuscarStake.Close;
+  DMPresupuesto.QBuscarStake.ParamByName('codSTK').AsString := codSTK;
+  DMPresupuesto.QBuscarStake.Open;
+  posNgrid := frmMain.grid_stakesAsignados.RowCount;
+  frmMain.grid_stakesAsignados.RowCount := posNgrid + 1;
+  frmMain.grid_stakesAsignados.cells[0, posNgrid] :=
+    ponerCerosInicio(IntToStr(posNgrid), 3);
+  frmMain.grid_stakesAsignados.cells[1, posNgrid] :=
+    DMPresupuesto.QBuscarStakeidFiscal.AsString;
+  frmMain.grid_stakesAsignados.cells[2, posNgrid] :=
+    DMPresupuesto.QBuscarStakeNombre.AsString;
+  frmMain.grid_stakesAsignados.cells[3, posNgrid] :=
+    DMPresupuesto.QBuscarStakeApellidos.AsString;
+  frmMain.grid_stakesAsignados.cells[4, posNgrid] :=
+    DMPresupuesto.QBuscarStakeemail.AsString;
+  frmMain.grid_stakesAsignados.cells[5, posNgrid] :=
+    DMPresupuesto.QBuscarStakeTitulacion.AsString;
+  frmMain.grid_stakesAsignados.cells[6, posNgrid] := 'Sin Asignar';
+  frmMain.grid_stakesAsignados.cells[7, posNgrid] := generaGUID;
+  //frmMain.grid_stakesAsignados.columns[7].width := 0;
+  // 1. Ocultar primero
+  HideCol(frmMain.grid_stakesAsignados, 7);
+
+  // 2. Ajustar contenido
+  FitCols(frmMain.grid_stakesAsignados, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10], 15);
+
+  // 3. Repartir el espacio restante
+  FillCols(frmMain.grid_stakesAsignados, [2, 3, 4]);
+end;
+
+/// <summary>TODO: Descripción de limpiaGridStakeAsignados.</summary>
+procedure limpiaGridStakeAsignados();
+begin
+  frmMain.grid_stakesAsignados.ClearNormalCells;
+  frmMain.grid_stakesAsignados.RowCount := 1;
+  frmMain.grid_stakesAsignados.cells[0, 0] := '#';
+  frmMain.grid_stakesAsignados.cells[1, 0] := 'Id';
+  frmMain.grid_stakesAsignados.cells[2, 0] := 'Nombres';
+  frmMain.grid_stakesAsignados.cells[3, 0] := 'Apellidos';
+  frmMain.grid_stakesAsignados.cells[4, 0] := 'e-mail';
+  frmMain.grid_stakesAsignados.cells[5, 0] := 'Profesión';
+  frmMain.grid_stakesAsignados.cells[6, 0] := 'Rol Asignado';
+  //frmMain.grid_stakesAsignados.columns[7].width := 0;
+  DaSeleccionRolesStake();
+  // 1. Ocultar primero
+  HideCol(frmMain.grid_stakesAsignados, 7);
+
+  // 2. Ajustar contenido
+  FitCols(frmMain.grid_stakesAsignados, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10], 15);
+
+  // 3. Repartir el espacio restante
+  FillCols(frmMain.grid_stakesAsignados, [2, 3, 4]);
+end;
+
+/// <summary>TODO: Descripción de cargaStakeAsignados.</summary>
+procedure cargaStakeAsignados();
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT *');
+      SQL.Add('FROM stakeholdersAsignados');
+      SQL.Add('WHERE codProyecto = :codProyecto');
+      SQL.Add('ORDER BY apellidos ASC');
+      Prepare;
+      ParamByName('codProyecto').AsString := codProyecto;
+      Open;
+      limpiaGridStakeAsignados;
+      x := 1;
+      while not Eof do
+      begin
+        frmMain.grid_stakesAsignados.RowCount := x + 1;
+        frmMain.grid_stakesAsignados.cells[0, x] :=
+          ponerCerosInicio(IntToStr(x), 3);
+        frmMain.grid_stakesAsignados.cells[1, x] := FieldByName('idFiscal')
+          .AsString + espaciosFinales;
+        frmMain.grid_stakesAsignados.cells[2, x] := FieldByName('nombre')
+          .AsString + espaciosFinales;
+        frmMain.grid_stakesAsignados.cells[3, x] := FieldByName('Apellidos')
+          .AsString + espaciosFinales;
+        frmMain.grid_stakesAsignados.cells[4, x] := FieldByName('profesion')
+          .AsString + espaciosFinales;
+        frmMain.grid_stakesAsignados.cells[5, x] := FieldByName('rolproyectp')
+          .AsString + espaciosFinales;
+        frmMain.grid_stakesAsignados.cells[6, x] := FieldByName('localidad')
+          .AsString + espaciosFinales;
+        frmMain.grid_stakesAsignados.cells[7, x] := FieldByName('provincia')
+          .AsString + espaciosFinales;
+        frmMain.grid_stakesAsignados.cells[8, x] := FieldByName('pais')
+          .AsString + espaciosFinales;
+        frmMain.grid_stakesAsignados.cells[9, x] :=
+          normalizarTelefono(FieldByName('telefono').AsString) +
+          espaciosFinales;
+        frmMain.grid_stakesAsignados.cells[10, x] :=
+          FieldByName('Institucion').AsString + espaciosFinales;
+        Next;
+        Inc(x);
+      end;
+    end;
+  finally
+    // 1. Ocultar primero
+    HideCol(frmMain.grid_stakesAsignados, 7);
+
+    // 2. Ajustar contenido
+    FitCols(frmMain.grid_stakesAsignados, [0, 1, 2, 3, 4, 5, 6, 8, 9, 10], 15);
+
+    // 3. Repartir el espacio restante
+    FillCols(frmMain.grid_stakesAsignados, [2, 3, 4]);
+    qry.Free;
+  end;
+end;
+
+procedure CargarPrefijosPaises;
+var
+  Q: TUniQuery;
+  Pref: string;
+begin
+  PrefijosPaises := TDictionary<string, string>.Create;
+
+  Q := TUniQuery.Create(nil);
+  try
+    Q.Connection := DModule_1.con2;
+    Q.SQL.Text := 'SELECT prefijo FROM paises WHERE prefijo IS NOT NULL';
+    Q.Open;
+
+    while not Q.Eof do
+    begin
+      Pref := Q.FieldByName('prefijo').AsString.Trim;
+
+      // Guardar sin +
+      if Pref.StartsWith('+') then
+        Delete(Pref, 1, 1);
+
+      if (Pref <> '') and not PrefijosPaises.ContainsKey(Pref) then
+        PrefijosPaises.Add(Pref, Pref);
+
+      Q.Next;
+    end;
+
+  finally
+    Q.Free;
+  end;
+end;
+
+function NormalizarTelefono(const Tel: string): string;
+var
+  S, Digitos, PrefijoPais, Numero: string;
+  i, LenNum: Integer;
+  TieneInternacional: Boolean;
+
+  function DetectarPrefijo(const Num: string): string;
+  var
+    L: Integer;
+    P: string;
+  begin
+    Result := '';
+
+    // Prefijos internacionales tienen 1 a 3 dígitos
+    for L := 1 to 3 do
+    begin
+      if Length(Num) >= L then
+      begin
+        P := Copy(Num, 1, L);
+        if Assigned(PrefijosPaises) and PrefijosPaises.ContainsKey(P) then
+        begin
+          Result := P;
+          Exit;
+        end;
+      end;
+    end;
+  end;
+
+begin
+  Result := '';
+
+  if Trim(Tel) = '' then
+    Exit;
+
+  // 1. Limpiar caracteres
+  S := '';
+  for i := 1 to Length(Tel) do
+    if CharInSet(Tel[i], ['0'..'9', '+']) then
+      S := S + Tel[i];
+
+  if S = '' then
+    Exit;
+
+  // 2. Detectar formato internacional
+  TieneInternacional := False;
+
+  if Copy(S, 1, 2) = '00' then
+  begin
+    S := '+' + Copy(S, 3, MaxInt);
+    TieneInternacional := True;
+  end;
+
+  if S.StartsWith('+') then
+    TieneInternacional := True;
+
+  // 3. Obtener dígitos sin +
+  if TieneInternacional then
+    Digitos := Copy(S, 2, MaxInt)
+  else
+    Digitos := S;
+
+  // 4. Detectar prefijo país desde tabla
+  PrefijoPais := DetectarPrefijo(Digitos);
+
+  if PrefijoPais <> '' then
+    Numero := Copy(Digitos, Length(PrefijoPais) + 1, MaxInt)
+  else
+  begin
+    // No detectado → asumir país local
+    PrefijoPais := PrefijoPaisLocal;
+
+    Numero := Digitos;
+    if (Length(Numero) > 0) and (Numero[1] = '0') then
+      Delete(Numero, 1, 1);
+  end;
+
+  // 5. Presentación nacional si es país local
+  if PrefijoPais = PrefijoPaisLocal then
+  begin
+    Numero := '0' + Numero;
+    PrefijoPais := '';
+  end
+  else
+    PrefijoPais := '+' + PrefijoPais;
+
+  // 6. Formatear en grupos (E.123)
+  LenNum := Length(Numero);
+  S := '';
+  i := 1;
+
+  while i <= LenNum do
+  begin
+    if (LenNum - i + 1) > 4 then
+      S := S + Copy(Numero, i, 3) + ' '
+    else if (LenNum - i + 1) > 2 then
+      S := S + Copy(Numero, i, 2) + ' '
+    else
+      S := S + Copy(Numero, i, LenNum);
+
+    if (LenNum - i + 1) > 4 then
+      Inc(i, 3)
+    else if (LenNum - i + 1) > 2 then
+      Inc(i, 2)
+    else
+      Break;
+  end;
+
+  S := Trim(S);
+
+  if PrefijoPais <> '' then
+    Result := PrefijoPais + ' ' + S
+  else
+    Result := S;
+end;
+
+/// <summary>TODO: Descripción de populaStakesDisponibles.</summary>
+/// <param name="filtro">TODO.</param>
+/// <summary>
+/// Gestiona información de stakeholders en populaStakesDisponibles.
+/// </summary>
+procedure populaStakesDisponibles(const filtro: string);
+var
+  qry: TUniQuery;
+  nodo, subnodo: TTMSFNCTreeViewNode;
+
+  idFiscal, nombre, apellidos, titulacion,
+    direccion, localidad, provincia, pais,
+    telefono, email, institucion: string;
+
+  procedure AddSubNode(const ATitle, AValue: string);
+  begin
+    if AValue.Trim = '' then
+      Exit; // no crear nodos vacíos
+
+    subnodo := frmMain.Trvw_StakeHolderDisponibles.AddNode(nodo);
+    subnodo.Extended := False;
+    subnodo.Text[0] := ATitle;
+    subnodo.Text[1] := AValue;
+  end;
+
+begin
+  qry := TUniQuery.Create(nil);
+  frmMain.Trvw_StakeHolderDisponibles.BeginUpdate;
+  try
+    frmMain.Trvw_StakeHolderDisponibles.ClearNodes;
+
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+
+      if not Connection.Connected then
+        Connection.Connect;
+
+      SQL.Clear;
+      SQL.Add('SELECT');
+      SQL.Add(' idFiscal, nombre, apellidos, titulacion,');
+      SQL.Add(' direccion, localidad, provincia, pais,');
+      SQL.Add(' telefono, email, institucion');
+      SQL.Add('FROM stakeholders');
+
+      if filtro.Trim <> '' then
+      begin
+        SQL.Add('WHERE nombre LIKE :filtro');
+        SQL.Add('   OR apellidos LIKE :filtro');
+        ParamByName('filtro').AsString := '%' + filtro + '%';
+      end;
+
+      SQL.Add('ORDER BY apellidos ASC');
+
+      Open;
+
+      // Cache de campos (rendimiento)
+      while not Eof do
+      begin
+        idFiscal := FieldByName('idFiscal').AsString;
+        nombre := FieldByName('nombre').AsString;
+        apellidos := FieldByName('apellidos').AsString;
+        titulacion := FieldByName('titulacion').AsString;
+        direccion := FieldByName('direccion').AsString;
+        localidad := FieldByName('localidad').AsString;
+        provincia := FieldByName('provincia').AsString;
+        pais := FieldByName('pais').AsString;
+        telefono := NormalizarTelefono(FieldByName('telefono').AsString);
+        email := FieldByName('email').AsString;
+        institucion := FieldByName('institucion').AsString;
+
+        // Nodo principal
+        nodo := frmMain.Trvw_StakeHolderDisponibles.AddNode;
+        nodo.Extended := True;
+        nodo.Text[0] := idFiscal + ' - ' + nombre + ' ' + apellidos;
+
+        // Subnodos
+        AddSubNode('Profesión:', titulacion);
+        AddSubNode('Dirección:', direccion);
+        AddSubNode('Localidad:', localidad);
+        AddSubNode('Provincia:', provincia);
+        AddSubNode('País:', pais);
+        AddSubNode('Móvil:', telefono);
+        AddSubNode('E-Mail:', email);
+        AddSubNode('Institución:', institucion);
+
+        Next;
+      end;
+    end;
+
+  finally
+    frmMain.Trvw_StakeHolderDisponibles.EndUpdate;
+    frmMain.Trvw_StakeHolderDisponibles.CollapseAll;
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de existeCadena.
+/// </summary>
+function existeCadena(Lista: TStringList; cadena: string): Boolean;
+
+var
+  posicion: Integer;
+begin
+  Lista.Sort;
+  existeCadena := Lista.Find(cadena, posicion);
+end;
+
+/// <summary>TODO: Descripción de RellenaPertenencia.</summary>
+/// <param name="idUnicoRecurso">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de RellenaPertenencia.
+/// </summary>
+procedure RellenaPertenencia(idUnicoRecurso: string; LForm: TfrmPertenencia);
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  listadoApus: TStringList;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  listadoApus := TStringList.Create;
+  LForm.grid_Pertenencia.ClearNormalCells;
+  LForm.grid_Pertenencia.cells[0, 0] := '#';
+  LForm.grid_Pertenencia.cells[1, 0] := 'Codigo APUS';
+  LForm.grid_Pertenencia.cells[2, 0] := 'Categiria APUS';
+  LForm.grid_Pertenencia.cells[3, 0] := 'Descripcion';
+  LForm.grid_Pertenencia.cells[4, 0] := 'Unidad';
+  LForm.grid_Pertenencia.cells[5, 0] := 'Precio';
+  LForm.grid_Pertenencia.RowCount := 1;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from APUS_items where idUnicoRecurso=' +
+        quotedstr(idUnicoRecurso));
+      Prepare;
+      Open;
+      while not Eof do
+      begin
+        tmpstr := FieldByName('codAPU').AsString;
+        if not existeCadena(listadoApus, tmpstr) then
+        begin
+          listadoApus.Add(tmpstr);
+        end;
+        Next;
+      end;
+    end;
+    for x := 0 to listadoApus.Count - 1 do
+    begin
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        SQL.Add('select * from APUS where codApu=' +
+          quotedstr(listadoApus[x]));
+        Prepare;
+        Open;
+        while not Eof do
+        begin
+          LForm.grid_Pertenencia.RowCount := x + 1;
+          LForm.grid_Pertenencia.cells[0, x + 1] := IntToStr(x + 1);
+          LForm.grid_Pertenencia.cells[1, x + 1] := listadoApus[x];
+          LForm.grid_Pertenencia.cells[2, x + 1] :=
+            FieldByName('CategoriaApu').AsString;
+          LForm.grid_Pertenencia.cells[3, x + 1] :=
+            FieldByName('Descripcion').AsString;
+          LForm.grid_Pertenencia.cells[4, x + 1] :=
+            FieldByName('Unidad').AsString;
+          LForm.grid_Pertenencia.cells[5, x + 1] :=
+            FieldByName('PrecioUnitarioTotal').AsString;
+          LForm.grid_Pertenencia.cells[5, x + 1] :=
+            decimal_correcto(LForm.grid_Pertenencia.cells[4, x + 1]);
+        end;
+      end;
+    end;
+  finally
+    LForm.grid_Pertenencia.StretchColumn(0);
+    LForm.grid_Pertenencia.StretchColumn(1);
+    LForm.grid_Pertenencia.StretchColumn(2);
+    LForm.grid_Pertenencia.StretchColumn(3);
+    LForm.grid_Pertenencia.StretchColumn(4);
+    LForm.grid_Pertenencia.StretchColumn(5);
+
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de redondeaquitar.
+/// </summary>
+function redondeaquitar(cantidad: Double; redondeo: Integer): Double;
+var
+  parteEntera, partedecimal: string;
+  tmpstr: string;
+  tmpstr2: string;
+  separadorDecimal: string;
+  x, Y: Integer;
+  Tdecimal: Double;
+  posicionRendodeo: Integer;
+  strDecimalTratar: string;
+  decimalTratar: Integer;
+begin
+  separadorDecimal := decimal_correcto(',');
+  tmpstr := FloatToStr(cantidad);
+  x := AnsiPos(separadorDecimal, tmpstr);
+  if x > 0 then
+  begin
+    parteEntera := Copy(tmpstr, 1, x - 1).Trim;
+    partedecimal := Copy(tmpstr, x + 1, Length(tmpstr)).Trim;
+    if partedecimal = '' then
+    begin
+      partedecimal := '0';
+    end;
+    partedecimal := '0' + separadorDecimal + partedecimal;
+    Tdecimal := SafeStrToFloat(partedecimal);
+    if Tdecimal > 0 then
+    begin
+      x := Length(partedecimal) - 2;
+      while x > redondeo do
+      begin
+        strDecimalTratar := RightStr(partedecimal, 1);
+        decimalTratar := SafeStrToInt(strDecimalTratar);
+        partedecimal := Copy(partedecimal, 1, Length(partedecimal) - 1);
+        case decimalTratar of
+          5..9:
+            begin
+              decimalTratar := SafeStrToInt(RightStr(partedecimal, 1));
+              Inc(decimalTratar);
+
+              if (decimalTratar < 10) then
+              begin
+                partedecimal := Copy(partedecimal, 1,
+                  Length(partedecimal) - 1) + IntToStr(decimalTratar);
+              end
+              else
+              begin
+                if x = redondeo + 2 then
+                begin
+                  Tdecimal := SafeStrToFloat(partedecimal);
+                  Tdecimal := RoundTo(Tdecimal, 0 - redondeo);
+                  partedecimal := FloatToStr(Tdecimal);
+                  x := 0;
+                end;
+              end;
+            end;
+        end;
+        dec(x);
+      end;
+    end;
+  end
+  else
+  begin
+    parteEntera := tmpstr;
+    partedecimal := '0';
+  end;
+  Result := SafeStrToFloat(parteEntera) + SafeStrToFloat(partedecimal);
+end;
+
+/// <summary>TODO: Descripción de cargaTipoProyectoPresupuesto.</summary>
+procedure cargaTipoProyectoPresupuesto();
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from TProyectos');
+      Prepare;
+      Open;
+      frmMain.cbb_TProyectosPrespuesto.Clear;
+      x := 0;
+
+      while not Eof do
+      begin
+        SetLength(listado_tipoProyectos, x + 1);
+        listado_tipoProyectos[x].codigo := FieldByName('codigo').AsString;
+        tmpstr := FieldByName('descripcion').AsString;
+        listado_tipoProyectos[x].descripcion := tmpstr;
+        frmMain.cbb_TProyectosPrespuesto.Items.Add(tmpstr);
+        Next;
+        Inc(x);
+      end;
+    end;
+  finally
+    frmMain.cbb_TProyectosPrespuesto.itemindex := 0;
+    cargaCategoriaProyectos('01');
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de cargaCategoriaProyectos.</summary>
+/// <param name="codigo">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de cargaCategoriaProyectos.
+/// </summary>
+procedure cargaCategoriaProyectos(codigo: string);
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from TProyectosItems where codCategoriaBase=' +
+        quotedstr(codigo));
+      Prepare;
+      Open;
+      frmMain.cbb_CategoriaPresupuesto.Clear;
+      while not Eof do
+      begin
+        tmpstr := FieldByName('codigoItem').AsString + ' - ' +
+          FieldByName('descripcion').AsString;
+        frmMain.cbb_CategoriaPresupuesto.Items.Add(tmpstr);
+        Next;
+      end;
+    end;
+  finally
+    qry.Free;
+    frmMain.cbb_CategoriaPresupuesto.itemindex := 0;
+  end;
+end;
+
+/// <summary>TODO: Descripción de addlistadoStakeOtros.</summary>
+/// <param name="idFiscalStake">TODO.</param>
+/// <summary>
+/// Gestiona información de stakeholders en addlistadoStakeOtros.
+/// </summary>
+procedure addlistadoStakeOtros(idFiscalStake: string);
+
+var
+  nStake: Integer;
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  nStake := Length(listado_PresupuestoStake);
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from Stakeholders where idFiscal=' +
+        quotedstr(idFiscalStake));
+      Prepare;
+      Open;
+      tmpstr := FieldByName('idFiscal').AsString;
+      if tmpstr <> '' then
+      begin
+        SetLength(listado_PresupuestoStake, nStake + 1);
+        listado_PresupuestoStake[nStake].idfiscal := tmpstr;
+        listado_PresupuestoStake[nStake].cargo :=
+          FieldByName('cargo').AsString;
+        listado_PresupuestoStake[nStake].Nombre :=
+          FieldByName('nombre').AsString;
+        listado_PresupuestoStake[nStake].Apellidos :=
+          FieldByName('apellidos').AsString;
+        listado_PresupuestoStake[nStake].direccion :=
+          FieldByName('direccion').AsString;
+        listado_PresupuestoStake[nStake].localidad :=
+          FieldByName('localidad').AsString;
+        listado_PresupuestoStake[nStake].Provincia :=
+          FieldByName('provincia').AsString;
+        listado_PresupuestoStake[nStake].Pais := FieldByName('pais').AsString;
+        listado_PresupuestoStake[nStake].telefono :=
+          FieldByName('telefono').AsString;
+        listado_PresupuestoStake[nStake].email :=
+          FieldByName('telefono').AsString;
+        listado_PresupuestoStake[nStake].titulacion :=
+          FieldByName('titulacion').AsString;
+        listado_PresupuestoStake[nStake].institucion :=
+          FieldByName('institucion').AsString;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+procedure BorrarDB(const codBaseBorrar: string);
+var
+  qry: TUniQuery;
+begin
+  if codBaseBorrar = '' then
+    Exit;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    // IMPORTANTE:
+    // No se hace StartTransaction aquí.
+    // Debe respetar la transacción externa (cambiaBaseDatos).
+
+    // Orden correcto: primero hijos, luego padre
+
+    // apus_items (depende de apus)
+    qry.SQL.Text :=
+      'DELETE FROM apus_items WHERE codBase = :codBase';
+    qry.ParamByName('codBase').AsString := codBaseBorrar;
+    qry.ExecSQL;
+
+    // apus
+    qry.SQL.Text :=
+      'DELETE FROM apus WHERE codBase = :codBase';
+    qry.ParamByName('codBase').AsString := codBaseBorrar;
+    qry.ExecSQL;
+
+    // recursos
+    qry.SQL.Text :=
+      'DELETE FROM recursos WHERE codBase = :codBase';
+    qry.ParamByName('codBase').AsString := codBaseBorrar;
+    qry.ExecSQL;
+
+    // categoriaapus
+    qry.SQL.Text :=
+      'DELETE FROM categoriaapus WHERE codBase = :codBase';
+    qry.ParamByName('codBase').AsString := codBaseBorrar;
+    qry.ExecSQL;
+
+    // bases (tabla padre al final)
+    qry.SQL.Text :=
+      'DELETE FROM bases WHERE codBase = :codBase';
+    qry.ParamByName('codBase').AsString := codBaseBorrar;
+    qry.ExecSQL;
+
+  finally
+    qry.Free;
+
+    // Limpieza estado en memoria (esto sí es correcto dejarlo aquí)
+    base_activa.codBase := '';
+    base_activa.Nombre := '';
+    base_activa.descripcion := '';
+    base_activa.indirectos := 0;
+    base_activa.TRendimiento := '';
+    base_activa.UMedida := '';
+    base_activa.SeguridadIndustrial := False;
+    base_activa.observaciones := '';
+
+    frmMain.lbl_BaseActiva.Text := 'Base Activa: ';
+    frmMain.lbl_APUSRendimiento.Text := '';
+  end;
+end;
+
+procedure sincronizarCodigosCategorias(codBase: string);
+
+var
+  listadoTemporal: TStringList;
+  qry: TUniQuery;
+  Y: Integer;
+  ct1: Integer;
+  z: Integer;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    for Y := 0 to 6 do
+    begin
+      listadoTemporal := TStringList.Create;
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        SQL.Add('select * from categoriaapus where codBase=' +
+          quotedstr(codBase) + ' and categoria_Base=' + IntToStr(Y));
+        Prepare;
+        Open;
+        while not Eof do
+        begin
+          tmpstr := FieldByName('id').AsString;
+          listadoTemporal.Add(tmpstr);
+          Next;
+        end;
+      end;
+      ct1 := 1;
+      for z := 0 to listadoTemporal.Count - 1 do
+      begin
+        with qry do
+        begin
+          Connection := DModule_1.con2;
+          Close;
+          SQL.Clear;
+          SQL.Add('update categoriaapus set ciu=:ciu where id=' +
+            listadoTemporal[z]);
+          Prepare;
+          ParamByName('ciu').AsInteger := ct1;
+          ExecSQL;
+          Inc(ct1);
+        end;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de daDatosMonedaPais.</summary>
+/// <param name="codPais">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daDatosMonedaPais.
+/// </summary>
+function daDatosMonedaPais(codPais: string): string;
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  Result := 'Sin Datos';
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from currency where  CurrencyISO=' +
+        quotedstr(codPais));
+      Prepare;
+      Open;
+      Result := FieldByName('CurrencyName').AsString;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de cargaPaisesRegistro.</summary>
+procedure cargaPaisesRegistro();
+
+var
+  x: Integer;
+  paisAdd: string;
+  posicionEcuador: Integer;
+begin
+  frmMain.cbb_RPais.Items.Clear;
+  posicionEcuador := posicionLista(listadoPaises, 'Ecuador');
+  for x := 0 to listadoPaises.Count - 1 do
+  begin
+    paisAdd := listadoPaises[x];
+    frmMain.cbb_RPais.Items.Add(paisAdd);
+  end;
+  frmMain.cbb_RPais.itemindex := posicionEcuador;
+end;
+
+/// <summary>TODO: Descripción de cargaComboPaises.</summary>
+procedure cargaComboPaises();
+
+var
+  tmpstr: string;
+  x: Integer;
+begin
+  listadoCodigoPaises := TStringList.Create;
+  listadoPaises := TStringList.Create;
+  listadoMonedas := TStringList.Create;
+  if FileExists(rutaApp + 'paises.dat') then
+    listadoPaises.LoadFromFile(rutaApp + 'paises.dat');
+  if FileExists(rutaApp + 'CodMoneda.dat') then
+    listadoCodigoPaises.LoadFromFile(rutaApp + 'CodMoneda.dat');
+  if FileExists(rutaApp + 'Moneda.dat') then
+    listadoMonedas.LoadFromFile(rutaApp + 'Moneda.dat');
+  posicionEcuador := posicionLista(listadoPaises, 'Ecuador');
+end;
+
+/// <summary>
+/// Implementa la lógica principal de posicionLista.
+/// </summary>
+function posicionLista(lst: TStringList; cadena: string): Integer;
+
+var
+  x: Integer;
+  salir: Boolean;
+begin
+  Result := -1;
+  x := 0;
+  salir := False;
+  while (not salir) and (x < lst.Count - 1) do
+  begin
+    if cadena = lst[x] then
+    begin
+      Result := x;
+      salir := True;
+    end;
+    Inc(x);
+  end;
+end;
+
+procedure cargaDatosBase(LForm: TfrmNuevaBase);
+
+var
+  x: Integer;
+begin
+  CambiaEstadoBase(False, LForm);
+  LForm.edt_NombreBase.Text := base_activa.Nombre;
+  LForm.edt_Descripcion.Text := base_activa.descripcion;
+  LForm.edt_Indirectos.Text := FloatToStr(base_activa.indirectos);
+  if base_activa.TRendimiento = 'Rendimiento Unitario (Tiempo/Unidad)' then
+    LForm.cbb_Rendimiento.itemindex := 0
+  else
+    LForm.cbb_Rendimiento.itemindex := 1;
+  LForm.cbb_UTiempos.itemindex := 0;
+  for x := 0 to LForm.cbb_UTiempos.Items.Count - 1 do
+  begin
+    if base_activa.UMedida = LForm.cbb_UTiempos.Items[x] then
+    begin
+      LForm.cbb_UTiempos.itemindex := x;
+    end;
+  end;
+  LForm.lbl_moneda.Text := '';
+  posicionaCombo(LForm.cbb_pais, base_activa.Pais);
+  LForm.mmo_Observaciones.Text := base_activa.observaciones;
+  LForm.chk_SeguridadIndustrial.IsChecked := base_activa.SeguridadIndustrial;
+end;
+
+procedure CambiaEstadoBase(estado: Boolean; LForm: TfrmNuevaBase);
+begin
+  LForm.edt_NombreBase.ReadOnly := not estado;
+  LForm.cbb_Rendimiento.Enabled := False;
+  LForm.cbb_UTiempos.Enabled := False;
+end;
+
+procedure mueveAPUS(const categoriaDrop, codUnicoAPU: string);
+
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    DModule_1.con2.AutoCommit := False;
+    DModule_1.con2.StartTransaction;
+    try
+      qry.SQL.Text :=
+        'CALL actualizarCategoriaAPU(:p_codAPU, :p_codBase, :p_codCategoriaAPUNueva)';
+      qry.ParamByName('p_codAPU').AsString := codUnicoAPU;
+      qry.ParamByName('p_codBase').AsString := base_activa.codBase;
+      qry.ParamByName('p_codCategoriaAPUNueva').AsString := categoriaDrop;
+
+      qry.ExecSQL;
+
+      DModule_1.con2.Commit;
+    except
+      DModule_1.con2.Rollback;
+      EndGuardarAPU;
+      raise;
+    end;
+  finally
+    DModule_1.con2.AutoCommit := True;
+    qry.Free;
+  end;
+end;
+
+function nuevoCodigoRecurso(Categoria, subcategoria: string): string;
+
+var
+  qry: TUniQuery;
+  x: Integer;
+begin
+  // Valor por defecto: empezamos en 1
+  x := 1;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.Close;
+    qry.SQL.Clear;
+
+    // Más eficiente y robusto: obtenemos directamente el máximo
+    { (* }
+    qry.SQL.Add('select max(codRecurso) as MaxCod ' + 'from Recursos ' +
+      'where codCategoriaBase = :Categoria ' +
+      '  and codSubCategoria  = :SubCategoria ' +
+      '  and codBase          = :CodBase');
+    { *) }
+    qry.ParamByName('Categoria').AsString := Categoria;
+    qry.ParamByName('SubCategoria').AsString := subcategoria;
+    qry.ParamByName('CodBase').AsString := base_activa.codBase;
+
+    // SELECT -> Open
+    qry.Open;
+
+    // Si hay algún registro, calculamos MAX + 1
+    if not qry.FieldByName('MaxCod').IsNull then
+      x := qry.FieldByName('MaxCod').AsInteger + 1;
+
+    // Si está Null, nos quedamos con el valor inicial x = 1
+  finally
+    Result := Format('%.3d', [x]);
+    qry.Free;
+  end;
+end;
+
+function NcaracteresDelante(datos: string; ncaracteres: Integer): string;
+
+var
+  x: Integer;
+begin
+  Result := '';
+  for x := 1 to ncaracteres - Length(datos) do
+  begin
+    Result := Result + '0';
+  end;
+  Result := Result + datos;
+end;
+
+procedure MueveRecurso(const codRecursoCompleto: string;
+  const codUnicoRecurso: string; const nuevaPosicion: string);
+
+var
+  qry: TUniQuery;
+  codCategoriaBase: Integer;
+begin
+  codCategoriaBase := StrToIntDef(daDatoCodigo(codRecursoCompleto, 1), 0);
+
+  if (codCategoriaBase = 0) or (nuevaPosicion = '') then
+    Exit;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.SQL.Text := 'CALL mueveRecurso_mysql(:b, :c, :s, :u)';
+    qry.ParamByName('b').AsString := base_activa.codBase;
+    qry.ParamByName('c').AsInteger := codCategoriaBase;
+    qry.ParamByName('s').AsInteger := StrToInt(nuevaPosicion);
+    qry.ParamByName('u').AsString := codUnicoRecurso;
+    qry.ExecSQL;
+  finally
+    qry.Free;
+  end;
+end;
+
+procedure ActualizaDescripcionAPU(codAPU, DescripcionAPU, UnidadAPU: string);
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from apus where descripcion=' +
+        quotedstr(DescripcionAPU) + ' and unidad=' + quotedstr(UnidadAPU) +
+        ' and codbase=' + quotedstr(base_activa.codBase));
+      Prepare;
+      Open;
+      tmpstr := FieldByName('descripcion').AsString;
+      if tmpstr = '' then
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('update APUS set descripcion=:descripcion, Unidad=:unidad where codAPU='
+          + quotedstr(codAPU));
+        Prepare;
+        ParamByName('descripcion').AsString := DescripcionAPU;
+        ParamByName('unidad').AsString := UnidadAPU;
+        ExecSQL;
+        Close;
+        SQL.Clear;
+        SQL.Add('update Recursos set descripcion=:descripcion, Unidad=:unidad where Especificaciones='
+          + quotedstr('APU: ' + codAPU));
+        Prepare;
+        ParamByName('descripcion').AsString := DescripcionAPU;
+        ParamByName('unidad').AsString := UnidadAPU;
+        ExecSQL;
+      end
+      else
+      begin
+        MuestraMensajeGiproy('Error',
+          'Error 0011: Descripción y unidad ya usada.')
+      end;
+    end;
+  finally
+    refrescalistaAPUsDisponibles();
+    limpia_APUSVisor();
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de BorrarAPU.</summary>
+/// <param name="codApu">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en BorrarAPU.
+/// </summary>
+procedure BorrarAPU(codAPU: string);
+
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from APUS where codAPU=' + quotedstr(codAPU) +
+        ' and codBase=' + quotedstr(base_activa.codBase));
+      Prepare;
+      ExecSQL;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from APUS_Items where codAPU=' + quotedstr(codAPU) +
+        ' and codBase=' + quotedstr(base_activa.codBase));
+      Prepare;
+      ExecSQL;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from recursos where codBase=' +
+        quotedstr(base_activa.codBase) + ' and especificaciones=' +
+        quotedstr('APU: ' + codAPU));
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Opera sobre datos de APU en daNuevoNombreAPU.
+/// </summary>
+function daNuevoNombreAPU(nombreBase: string): string;
+
+var
+  x: Integer;
+  salir: Boolean;
+  nombreNuevo: string;
+
+  /// <summary>TODO: Descripción de compruebaNombreAPUUsado.</summary>
+  /// <param name="nombreNuevo">TODO.</param>
+  /// <returns>TODO.</returns>
+
+  /// <summary>
+  /// Opera sobre datos de APU en compruebaNombreAPUUsado.
+  /// </summary>
+
+  function compruebaNombreAPUUsado(nombreNuevo: string): Boolean;
+
+  var
+    salir2: Boolean;
+    I: Integer;
+  begin
+    Result := False;
+    I := 1;
+    salir2 := False;
+    while (not salir2) and (I < frmMain.grid_APUSRecursos.RowCount) do
+    begin
+      if nombreNuevo = frmMain.grid_APUSRecursos.cells[2, I] then
+      begin
+        Result := True;
+        salir2 := True;
+      end;
+      Inc(I);
+    end;
+  end;
+
+begin
+  x := 1;
+  salir := False;
+  while not salir do
+  begin
+    nombreNuevo := nombreBase + '_(' + IntToStr(x) + ')';
+    if not compruebaNombreAPUUsado(nombreNuevo) then
+    begin
+      Result := nombreNuevo;
+      salir := True;
+    end;
+    Inc(x);
+  end;
+end;
+
+function DuplicarAPU_Completo(const ACodAPUOrigen: string;
+  const ANuevaDescripcion: string): string;
+
+var
+  Q: TUniQuery;
+begin
+  Result := '';
+
+  if Trim(ACodAPUOrigen) = '' then
+    Exit;
+  if Trim(ANuevaDescripcion) = '' then
+    Exit;
+  if not Assigned(DModule_1.con2) or not DModule_1.con2.Connected then
+    raise Exception.Create('Conexión MySQL no válida');
+
+  Q := TUniQuery.Create(nil);
+  try
+    Q.Connection := DModule_1.con2;
+    Q.SQL.Text :=
+      'CALL duplicar_apu_completo(:pCodAPUOrigen, :pNuevaDescripcion, @pNuevoCodAPU)';
+
+    Q.ParamByName('pCodAPUOrigen').AsString := ACodAPUOrigen;
+    Q.ParamByName('pNuevaDescripcion').AsString := ANuevaDescripcion;
+
+    Q.ExecSQL;
+
+    Q.SQL.Clear;
+    Q.SQL.Text := 'SELECT @pNuevoCodAPU AS NuevoCodAPU';
+    Q.Open;
+
+    if not Q.IsEmpty then
+      Result := Q.FieldByName('NuevoCodAPU').AsString;
+  finally
+    Q.Free;
+  end;
+end;
+
+/// <summary>
+/// Opera sobre datos de APU en GeneraCodUnicoAPU: string.
+/// </summary>
+function GeneraCodUnicoAPU: string;
+
+var
+  tmpstr: string;
+  test: Integer;
+begin
+  test := Random($7FFFFFFF);
+  tmpstr := FormatDateTime('yyyymmddhhnnss', Now);
+  tmpstr := 'APUsr' + tmpstr + IntToStr(test);
+  Result := tmpstr;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de posicionaCombo.
+/// </summary>
+procedure posicionaCombo(cbb: TComboBox; itm: string) overload;
+
+var
+  x: Integer;
+  salir: Boolean;
+begin
+  x := 0;
+  salir := False;
+  while (x < cbb.Items.Count) and not salir do
+  begin
+    if LowerCase(itm) = LowerCase(cbb.Items[x]) then
+    begin
+      cbb.itemindex := x;
+      salir := True;
+    end;
+    x := x + 1;
+  end;
+end;
+
+procedure posicionaComboEx(const cbb: TComboBox; const itm: string); overload;
+
+var
+  I, P: Integer;
+  baseItem, target: string;
+
+  function BaseTexto(const S: string): string;
+
+  var
+    k: Integer;
+    T: string;
+  begin
+    T := S.Trim;
+    k := Pos('(', T);
+    if k > 0 then
+      Result := Copy(T, 1, k - 1).Trim
+    else
+      Result := T;
+  end;
+
+  function CodigoTexto(const S: string): string;
+
+  var
+    I, J: Integer;
+    T: string;
+  begin
+    T := S.Trim;
+    I := AnsiPos('(', T);
+    if I > 0 then
+    begin
+      T := Copy(T, I + 1, Length(T));
+      T := AnsiReplaceStr(T, ')', '').Trim;
+    end;
+    Result := T;
+  end;
+
+begin
+  if (cbb = nil) then
+    Exit;
+
+  target := itm.Trim;
+  if target = '' then
+  begin
+    cbb.itemindex := -1;
+    Exit;
+  end;
+
+  // 1) Coincidencia exacta (case-insensitive) con el texto base
+  for I := 0 to cbb.Items.Count - 1 do
+  begin
+    baseItem := CodigoTexto(cbb.Items[I]);
+    if SameText(baseItem, target) then
+    begin
+      cbb.itemindex := I;
+      Exit;
+    end;
+  end;
+
+  // 2) Plan B: coincide si el target está contenido en el item completo o base
+  for I := 0 to cbb.Items.Count - 1 do
+  begin
+    baseItem := CodigoTexto(cbb.Items[I]);
+    if ContainsText(baseItem, target) or ContainsText(cbb.Items[I], target) then
+    begin
+      cbb.itemindex := I;
+      Exit;
+    end;
+  end;
+  // ???
+
+  // 4) No encontrado
+
+  cbb.itemindex := -1;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de posicionaComboFNC.
+/// </summary>
+procedure posicionaComboFNC(cbb: TTMSFNCComboBox; itm: string) overload;
+
+var
+  x: Integer;
+  salir: Boolean;
+begin
+  x := 0;
+  salir := False;
+  while (x < cbb.Items.Count) and not salir do
+  begin
+    if itm = cbb.Items[x] then
+    begin
+      cbb.itemindex := x;
+      salir := True;
+    end;
+    x := x + 1;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de interpretaCodigoRecurso.
+/// </summary>
+function interpretaCodigoRecurso(codRecurso: string;
+  posicion: Integer): string;
+
+var
+  x: Integer;
+  tmpstr: string;
+begin
+  Result := '';
+  if codRecurso <> '' then
+  begin
+    case posicion of
+      1:
+        begin
+          Result := LeftStr(codRecurso, 1);
+        end;
+      2:
+        begin
+          tmpstr := MidStr(codRecurso, 2, 4);
+          x := SafeStrToInt(tmpstr);
+          Result := IntToStr(x);
+        end;
+      3:
+        begin
+          tmpstr := RightStr(codRecurso, 5);
+          x := SafeStrToInt(tmpstr);
+          Result := IntToStr(x);
+        end;
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de limpiaNuevaCategoria.</summary>
+procedure limpiaNuevaCategoria(LForm: TfrmNuevaCategoria);
+begin
+  LForm.edt_Descripcion.Text := '';
+  LForm.mmo_Observaciones.Text := '';
+end;
+
+/// <summary>TODO: Descripción de categoriaExistente.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="Descripcion">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de categoriaExistente.
+/// </summary>
+function categoriaExistente(CodCategoria, descripcion: string): Boolean;
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  Result := False;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from categoriaapus where descripcion=' +
+        quotedstr(descripcion) + ' and categoria_base=' +
+        quotedstr(CodCategoria) + ' and codBase=' +
+        quotedstr(base_activa.codBase));
+      Prepare;
+      Open;
+      tmpstr := FieldByName('descripcion').AsString;
+      if tmpstr <> '' then
+        Result := True
+      else
+        Result := False;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de renombraUnidad.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="nombreanterior">TODO.</param>
+/// <param name="nombreNuevo">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de renombraUnidad.
+/// </summary>
+procedure renombraUnidad(CodCategoria, nombreanterior, nombreNuevo: string);
+
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('update unidades set descripcion=:descripcion where subCategoria='
+        + quotedstr(CodCategoria) + ' and descripcion=' +
+        quotedstr(nombreanterior));
+      Prepare;
+      ParamByName('descripcion').AsString := nombreNuevo;
+      ExecSQL;
+      Close;
+      SQL.Clear;
+      SQL.Add('update recursos set unidad=:unidad where codCategoriaBase=' +
+        quotedstr(CodCategoria) + ' and unidad=' + quotedstr(nombreanterior) +
+        ' and codBase=' + quotedstr(base_activa.codBase));
+      Prepare;
+      ParamByName('unidad').AsString := nombreNuevo;
+      ExecSQL;
+      Close;
+      SQL.Clear;
+      SQL.Add('update APUS_Items set unidad=:unidad where codCategoria=' +
+        quotedstr(CodCategoria) + ' and unidad=' + quotedstr(nombreanterior) +
+        ' and codBase=' + quotedstr(base_activa.codBase));
+      Prepare;
+      ParamByName('unidad').AsString := nombreNuevo;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de VerRecursosCompleto.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de VerRecursosCompleto.
+/// </summary>
+procedure VerRecursosCompleto(const CodCategoria: string);
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  codRecursoCompleto: string;
+  espec: string;
+
+  function Pad3(const N: Integer): string;
+  begin
+    Result := Format('%.3d', [N]);
+  end;
+
+  function Money2(const V: Double): string;
+  begin
+    // Ajusta separador si quieres coma en pantalla
+    Result := base_activa.simboloMoneda + FormatFloat('0.00', V, FS);
+  end;
+
+begin
+  // Validaciones mínimas
+  if Trim(CodCategoria) = '' then
+    Exit;
+  if (DModule_1 = nil) or (DModule_1.con2 = nil) then
+    raise Exception.Create('Conexión DB no disponible.');
+
+  limpiaGridRecursos;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    // Solo campos usados (más rápido y más seguro)
+    { (* }
+
+    qry.SQL.Text := 'SELECT ' + '  codCategoriaBase, ' +
+      '  codSubcategoria, ' + '  codRecurso, ' + '  descripcion, ' +
+      '  unidad, ' + '  precio, ' + '  codCPC, ' + '  especificaciones2, ' +
+      '  idUnico, ' + '  ultimaModificacion ' + 'FROM recursos ' + 'WHERE '
+      + '  codCategoriaBase = :codCategoriaBase AND' +
+      '  codBase          = :codBase ' + 'ORDER BY descripcion ASC';
+    { *) }
+    qry.Prepare;
+    qry.ParamByName('codCategoriaBase').AsString := Trim(CodCategoria);
+    qry.ParamByName('codBase').AsString := base_activa.codBase;
+
+    qry.Open;
+
+    frmMain.grid_Recursos.BeginUpdate;
+    try
+      x := 1;
+
+      while not qry.Eof do
+      begin
+        // Asegurar filas
+        if frmMain.grid_Recursos.RowCount < x + 1 then
+          frmMain.grid_Recursos.RowCount := x + 1;
+
+        frmMain.grid_Recursos.cells[0, x] := Pad3(x);
+
+        codRecursoCompleto := generaCodigoRecurso
+          (qry.FieldByName('codCategoriaBase').AsString,
+          qry.FieldByName('codSubcategoria').AsString,
+          qry.FieldByName('codRecurso').AsString);
+        frmMain.grid_Recursos.cells[1, x] := codRecursoCompleto;
+
+        frmMain.grid_Recursos.cells[2, x] :=
+          qry.FieldByName('descripcion').AsString;
+        frmMain.grid_Recursos.cells[3, x] :=
+          qry.FieldByName('unidad').AsString;
+
+        // Precio robusto (2 decimales)
+        if qry.FieldByName('precio').IsNull then
+          frmMain.grid_Recursos.cells[4, x] := Money2(0)
+        else
+          frmMain.grid_Recursos.cells[4, x] :=
+            Money2(qry.FieldByName('precio').AsFloat);
+
+        frmMain.grid_Recursos.cells[7, x] :=
+          qry.FieldByName('codCPC').AsString;
+
+        espec := qry.FieldByName('especificaciones2').AsString;
+        espec := Trim(espec);
+        if espec = '' then
+          espec := 'Sin Especificaciones';
+        if Length(espec) > 30 then
+          espec := Copy(espec, 1, 30) + '...';
+        frmMain.grid_Recursos.cells[8, x] := espec;
+
+        frmMain.grid_Recursos.cells[9, x] :=
+          qry.FieldByName('idUnico').AsString;
+        frmMain.grid_Recursos.cells[10, x] :=
+          datetimetostr(qry.FieldByName('ultimaModificacion').AsDateTime);
+
+        Inc(x);
+        qry.Next;
+      end;
+
+      // Ajustar RowCount final
+      frmMain.grid_Recursos.RowCount := x;
+
+    finally
+      frmMain.grid_Recursos.EndUpdate;
+    end;
+
+  finally
+    qry.Free;
+
+    // Ajustes visuales (fuera de BeginUpdate)
+    frmMain.grid_Recursos.AutoSizeColumn(0, True, 10);
+    frmMain.grid_Recursos.AutoSizeColumn(1, True, 10);
+    frmMain.grid_Recursos.AutoSizeColumn(2, True, 10);
+    frmMain.grid_Recursos.AutoSizeColumn(3, True, 10);
+    frmMain.grid_Recursos.AutoSizeColumn(4, True, 10);
+    frmMain.grid_Recursos.AutoSizeColumn(7, True, 10);
+    frmMain.grid_Recursos.AutoSizeColumn(8, True, 10);
+    frmMain.grid_Recursos.AutoSizeColumn(10, True, 10);
+
+    if frmMain.grid_Recursos.ColumnCount > 5 then
+      frmMain.grid_Recursos.columns[5].width := 0;
+    if frmMain.grid_Recursos.ColumnCount > 6 then
+      frmMain.grid_Recursos.columns[6].width := 0;
+    if frmMain.grid_Recursos.ColumnCount > 9 then
+      frmMain.grid_Recursos.columns[9].width := 0;
+  end;
+end;
+
+/// <summary>TODO: Descripción de populaPaises.</summary>
+procedure populaPaises();
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from paises where nombre_pais is not null order by nombre_pais asc');
+      Prepare;
+      Open;
+      frmNuevaBase.cbb_pais.Clear;
+      frmMain.cbb_paisNPresupuesto.Clear;
+      while not Eof do
+      begin
+        tmpstr := FieldByName('nombre_pais').AsString;
+        frmNuevaBase.cbb_pais.Items.Add(tmpstr);
+        frmMain.cbb_paisNPresupuesto.Items.Add(tmpstr);
+        Next;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de EnviarAltTab.</summary>
+procedure EnviarAltTab();
+begin
+  SimKey(VK_LWIN, True);
+  SimKey(VK_TAB, True);
+  SimKey(VK_LWIN, False);
+  Application.ProcessMessages;
+  Sleep(80);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de SimKey.
+/// </summary>
+procedure SimKey(VK: BYTE; Down: Boolean);
+
+var
+  Input: TInput;
+begin
+  ZeroMemory(@Input, SizeOf(Input));
+  Input.Itype := INPUT_KEYBOARD;
+  Input.KI.wVk := VK;
+  Input.KI.wScan := MapVirtualKey(VK, 0);
+  Input.KI.dwFlags := KEYEVENTF_EXTENDEDKEY;
+  if not Down then
+    Input.KI.dwFlags := Input.KI.dwFlags or KEYEVENTF_KEYUP;
+  Windows.SendInput(1, tagINPUT(Input), SizeOf(TInput));
+end;
+
+/// <summary>
+/// Implementa la lógica principal de AjustaFloatGrid.
+/// </summary>
+procedure AjustaFloatGrid(Grid: TTMSFNCGrid; Columna: Integer);
+begin
+  Grid.columns[Columna].Editor := TTMSFNCGridEditorType.etFloatEdit;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ocultaColumnasGrids.
+/// </summary>
+procedure ocultaColumnasGrids(Grid: TTMSFNCGrid; ColumnaInicial: Integer);
+
+var
+  x: Integer;
+begin
+  for x := ColumnaInicial to Grid.columns.Count - 1 do
+  begin
+    Grid.columns[x].width := 0;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ocultaColumnasGridsT2.
+/// </summary>
+procedure ocultaColumnasGridsT2(Grid: TTMSFMXGrid; ColumnaInicial: Integer);
+
+var
+  x: Integer;
+begin
+  for x := ColumnaInicial to Grid.columns.Count - 1 do
+  begin
+    Grid.columns[x].width := 0;
+  end;
+end;
+
+/// <summary>TODO: Descripción de creaSangria.</summary>
+/// <param name="datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de creaSangria.
+/// </summary>
+function creaSangria(datos: string): string;
+
+var
+  x: Integer;
+  N: Integer;
+begin
+  Result := '';
+  N := 0;
+  for x := 1 to Length(datos) do
+  begin
+    if datos[x] = '.' then
+      N := N + 1;
+  end;
+  for x := 1 to N do
+  begin
+    Result := Result + '   ';
+  end;
+end;
+
+/// <summary>TODO: Descripción de daSQLQueryText.</summary>
+/// <param name="Nconsulta">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Devuelve información calculada o consultada en daSQLQueryText.
+/// </summary>
+function daSQLQueryText(Nconsulta: Integer): string;
+
+var
+  valorQry: string;
+begin
+  valorQry := '';
+  case Nconsulta of
+    {(*}
+    1:
+      begin
+        valorQry := 'SELECT  ' + '  a.codCategoriaAPU, ' +
+          '  a.codRecursoAPU, ' + '  a.CodAPU, ' + '  a.Descripcion, ' +
+          '  COALESCE(b.CostoDirectoTotal, a.CostoDirectoTotal) AS CostoDirecto, '
+          + '  a.Unidad, ' + '  a.rendimientoHUnidad, ' + '  a.nhCuadrillas '
+          + 'FROM apus a ' + 'LEFT JOIN presupuestos_tanteo_apus b ' +
+          '  ON b.codBase = a.codBase ' + '  AND b.CodAPU = a.CodAPU ' +
+          '  AND b.revision = :revision ' + 'WHERE a.codBase = :codBase ' +
+          '  AND a.CodAPU = :codAPU ' + 'ORDER BY a.descripcion ASC';
+
+      end;
+    2:
+      begin
+        valorQry := 'SELECT apu.codCategoriaAPU, ' +
+          '       apu.codRecursoAPU, ' + '       apu.CodAPU, ' +
+          '       apu.Descripcion, ' + '       apu.anidado, ' +
+          '       apu.Unidad, ' + '       apu.rendimientoHUnidad, ' +
+          '       apu.nhCuadrillas ' + '  FROM apus apu ' +
+          ' WHERE apu.codBase = :codBase ' +
+          '   AND apu.codCategoriaAPU = :codCategoriaAPU ' +
+          ' ORDER BY apu.descripcion ASC ';
+
+      end;
+    3:
+      begin
+        valorQry := 'SELECT apu.codCategoriaAPU, ' +
+          '       apu.codRecursoAPU, ' + '       apu.CodAPU, ' +
+          '       apu.Descripcion, ' + '       apu.anidado, ' +
+          '       apu.Unidad, ' + '       apu.rendimientoHUnidad, ' +
+          '       apu.nhCuadrillas ' + '  FROM apus apu ' +
+          ' WHERE apu.codBase = :codBase ' + ' ORDER BY apu.descripcion ASC ';
+
+      end;
+    4:
+      begin
+        valorQry := 'SELECT items.CodCategoria, ' +
+          '       items.codSubCategoria, ' + '       items.codRecurso, ' +
+          '       items.Descripcion, ' + '       items.Unidad, ' +
+          '       IF ' +
+          '       (tanteo.CodAPU IS NULL, items.CantidadUnidad, tanteo.CantidadUnidad) CantidadUnidad, '
+          + '       IF ' +
+          '       (tanteo.CodAPU IS NULL, items.Precio, tanteo.Precio) AS Precio, '
+          + '       IF ' +
+          '       (tanteo.CodAPU IS NULL, items.Rendimiento, tanteo.Rendimiento) Rendimiento, '
+          + '       IF ' +
+          '       (tanteo.CodAPU IS NULL, items.total, tanteo.total) total, '
+          + '       items.porcentaje, ' + '       items.idUnicoRecurso ' +
+          '  FROM APUS_Items items ' +
+          '    LEFT JOIN presupuestos_tanteo_recursos tanteo ' + '      ON ( '
+          + '        tanteo.codPresupuesto = :codPresupuesto ' +
+          '        AND tanteo.revision = :revision ' +
+          '        AND tanteo.CodAPU = items.CodAPU ' +
+          '        AND tanteo.codBase = items.codBase ' +
+          '        AND tanteo.idUnicoRecurso = items.idUnicoRecurso ' +
+          '     ) ' + ' WHERE items.codBase = :codBase ' +
+          '   AND items.codAPU = :codAPU ';
+      end;
+    5:
+      begin
+        valorQry := 'SELECT ' + '  apu.codCategoriaAPU, ' +
+          '  apu.codRecursoAPU, ' + '  apu.Descripcion, ' + '  apu.Unidad, ' +
+          '  COALESCE(apuTanteo.CostoDirectoTotal, apu.CostoDirectoTotal) AS CostoDirectoTotal, '
+          + '  apu.CostoIndirectoTotal, ' + '  apu.PrecioUnitarioTotal, ' +
+          '  apu.CodAPU, ' + '  CASE ' +
+          '    WHEN apuTanteo.CostoDirectoTotal IS NOT NULL THEN TRUE ' +
+          '    ELSE FALSE ' + '  END AS ajusteTanteo ' + 'FROM APUS apu ' +
+          'LEFT JOIN presupuestos_tanteo_apus apuTanteo ' +
+          '  ON apuTanteo.codBase = :codBase ' +
+          '     AND apuTanteo.codPresupuesto = :codPresupuesto ' +
+          '     AND apuTanteo.revision = :revision ' +
+          '     AND apuTanteo.codAPU = apu.CodAPU ' +
+          'WHERE apu.codCategoriaAPU = :codCategoriaAPU ' +
+          '  AND apu.codBase = :codBase ' + 'ORDER BY apu.descripcion ASC ';
+
+      end;
+    6:
+      begin
+        valorQry := 'SELECT ' +
+          '  apu.codCategoriaAPU, ' +
+          '  apu.codRecursoAPU, ' +
+          '  apu.Descripcion, ' +
+          '  apu.Unidad, ' +
+          '  COALESCE(apuTanteo.CostoDirectoTotal, apu.CostoDirectoTotal) AS CostoDirectoTotal, ' +
+          '  apu.CostoIndirectoTotal, ' +
+          '  apu.PrecioUnitarioTotal, ' +
+          '  apu.CodAPU, ' +
+          '  CASE ' +
+          '    WHEN apuTanteo.CostoDirectoTotal IS NOT NULL THEN TRUE ' +
+          '    ELSE FALSE ' +
+          '  END AS ajusteTanteo, ' +
+          '  apu.ultimaModificacion, ' +
+          '  apu.pendienteRevision ' +
+          'FROM APUS apu ' +
+          'LEFT JOIN presupuestos_tanteo_apus apuTanteo ' +
+          '  ON apuTanteo.codBase = :codBase ' +
+          '     AND apuTanteo.codPresupuesto = :codPresupuesto ' +
+          '     AND apuTanteo.revision = :revision ' +
+          '     AND apuTanteo.CodAPU = apu.CodAPU ' +
+          'WHERE apu.codBase = :codBase ' +
+          'ORDER BY apu.Descripcion ASC ';
+      end;
+    7:
+      begin
+        ValorQry:=
+          'SELECT ' +
+          '  ai.CodCategoria, ' +
+          '  ai.codSubCategoria, ' +
+          '  ai.codRecurso, ' +
+          '  ai.Descripcion, ' +
+          '  ai.Unidad, ' +
+          '  -- CantidadUnidad con dg.ndecimales ' +
+          '  REPLACE(FORMAT(IFNULL(tr.CantidadUnidad, 0), dg.ndecimales, ''en_US''), '','', '''') AS CantidadUnidad, ' +
+          '  -- Precio con dg.ndecimalesMoneda ' +
+          '  REPLACE(FORMAT(IFNULL(tr.Precio, 0), dg.ndecimalesMoneda, ''en_US''), '','', '''') AS Precio, ' +
+          '  -- Rendimiento con dg.ndecimales ' +
+          '  REPLACE(FORMAT(IFNULL(tr.Rendimiento, 0), dg.ndecimales, ''en_US''), '','', '''') AS Rendimiento, ' +
+          '  -- Total con dg.ndecimalesMoneda ' +
+          '  REPLACE(FORMAT(IFNULL(tr.Total, 0), dg.ndecimalesMoneda, ''en_US''), '','', '''') AS Total, ' +
+          '  -- porcentaje con dg.ndecimalesMoneda ' +
+          '  REPLACE(FORMAT(IFNULL(ai.porcentaje, 0), dg.ndecimalesMoneda, ''en_US''), '','', '''') AS porcentaje ' +
+          'FROM apus_items ai ' +
+          'INNER JOIN presupuestos_tanteo_recursos tr ' +
+          '  ON tr.codBase = ai.codBase ' +
+          ' AND tr.CodAPU  = ai.CodAPU ' +
+          'INNER JOIN presupuestos_datosgenerales dg ' +
+          '  ON dg.codBase         = ai.codBase ' +
+          ' AND dg.codPresupuesto  = tr.codPresupuesto ' +
+          ' AND dg.revision        = tr.revision ' +
+          'WHERE ai.codAPU         = :codAPU ' +
+          '  AND ai.codBase        = :codBase ' +
+          '  AND tr.codPresupuesto = :codPresupuesto ' +
+          '  AND tr.revision       = :revision;';
+      end;
+    8:
+      begin
+        valorQry := 'SELECT ' + '  items.CodCategoria, ' +
+          '  items.codSubCategoria, ' + '  items.codRecurso, ' +
+          '  items.Descripcion, ' + '  items.Unidad, ' +
+          '  COALESCE(tanteoRecursos.CantidadUnidad, items.CantidadUnidad) AS CantidadUnidad, '
+          + '  items.Precio, ' +
+          '  COALESCE(tanteoRecursos.Rendimiento, items.Rendimiento) AS Rendimiento, '
+          + '  items.Total, ' + '  items.porcentaje ' +
+          'FROM apus_items items ' +
+          'LEFT JOIN presupuestos_tanteo_recursos tanteoRecursos ' +
+          '  ON tanteoRecursos.codBase = items.codBase ' +
+          '     AND tanteoRecursos.CodAPU = items.CodAPU ' +
+          '     AND tanteoRecursos.codPresupuesto = :codPresupuesto ' +
+          '     AND tanteoRecursos.revision = :revision ' +
+          '     AND tanteoRecursos.idUnicoRecurso = items.idUnicoRecurso ' +
+          'WHERE items.CodAPU = :codAPU ' + '  AND items.codBase = :codBase ';
+
+      end;
+    9:
+      begin
+        valorQry := 'SELECT ' + '  items.CodCategoria, ' +
+          '  items.codSubCategoria, ' + '  items.codRecurso, ' +
+          '  items.Descripcion, ' + '  items.Unidad, ' +
+          '  COALESCE(recursoTanteo.CantidadUnidad, items.CantidadUnidad) AS CantidadUnidad, '
+          + '  items.Precio, ' +
+          '  COALESCE(recursoTanteo.Rendimiento, items.Rendimiento) AS Rendimiento, '
+          + '  items.porcentaje, ' + '  items.idUnicoRecurso ' +
+          'FROM apus_items items ' +
+          'LEFT JOIN presupuestos_tanteo_recursos recursoTanteo ' +
+          '  ON recursoTanteo.codBase = items.codBase ' +
+          '     AND recursoTanteo.CodAPU = items.CodAPU ' +
+          '     AND recursoTanteo.codPresupuesto = :codPresupuesto ' +
+          '     AND recursoTanteo.revision = :revision ' +
+          '     AND recursoTanteo.idUnicoRecurso = items.idUnicoRecurso ' +
+          'WHERE items.CodAPU = :codApu ' + '  AND items.codBase = :codBase ';
+
+      end;
+    {*)}
+  end;
+  Result := valorQry;
+end;
+
+/// <summary>TODO: Descripción de codigoUnicoItemPresupuesto.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de codigoUnicoItemPresupuesto.
+/// </summary>
+function codigoUnicoItemPresupuesto(): string;
+
+var
+  codItem: string;
+begin
+  codItem := FormatDateTime('ddmmyyyyhhmmsszzz', Now);
+  codItem := 'I' + codItem;
+  Result := codItem;
+end;
+
+/// <summary>TODO: Descripción de borrarImagenReferencial.</summary>
+procedure borrarImagenReferencial();
+
+var
+  imagenReferenciaProyecto: string;
+begin
+  imagenReferenciaProyecto := dirImagenReferencia + base_activa.codBase +
+    codProyecto + '.jpg';
+  if not FileExists(imagenReferenciaProyecto) then
+  begin
+    imagenReferenciaProyecto := dirImagenReferencia + base_activa.codBase +
+      codProyecto + '.png';
+  end;
+  if FileExists(imagenReferenciaProyecto) then
+    DeleteFile(PWideChar(imagenReferenciaProyecto));
+end;
+
+/// <summary>TODO: Descripción de AbrirImagenConVisor.</summary>
+procedure AbrirImagenConVisor();
+var
+  imagenReferenciaProyecto: string;
+begin
+  imagenReferenciaProyecto := dirImagenReferencia + base_activa.codBase +
+    codProyecto + '.jpg';
+  if not FileExists(imagenReferenciaProyecto) then
+  begin
+    imagenReferenciaProyecto := dirImagenReferencia + base_activa.codBase +
+      codProyecto + '.png';
+  end;
+  if FileExists(imagenReferenciaProyecto) then
+    ShellExecute(0, 'open', PChar(imagenReferenciaProyecto), nil, nil,
+      SW_SHOWNORMAL);
+end;
+
+procedure GuardaSeriesPresupuestos();
+var
+  qry: TUniQuery;
+  part1, part2, part3: string;
+  x: integer;
+  TcodProyecto: string;
+begin
+  TCodProyecto := codProyecto.Trim;
+  if tcodProyecto = '' then
+    exit;
+
+  x := ansipos('-', tcodProyecto);
+  part1 := copy(TcodProyecto, 1, x - 1);
+  tcodProyecto := copy(tcodProyecto, x + 1, Length(tcodProyecto));
+  x := ansipos('-', tcodProyecto);
+  part2 := copy(TcodProyecto, 1, x - 1);
+  part3 := copy(TcodProyecto, x + 1, length(TcodProyecto));
+
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      close;
+      sql.Clear;
+      sql.Add('SELECT * FROM configuracion');
+      Prepare;
+      Open;
+      First;
+      part1 := FieldByName('PresupuestoValor1').asstring;
+      if part1 <> '' then
+      begin
+        close;
+        sql.Clear;
+        sql.Add('UPDATE configuracion SET PresupuestoValor1=:PresupuestoValor1, PresupuestoValor2=:PresupuestoValor2, PresupuestoValor3=:PresupuestoValor3');
+        sql.Add(' WHERE id_usuario=' + quotedstr(ID_usuario));
+        Prepare;
+        ParamByName('PresupuestoValor1').AsString := part1;
+        ParamByName('PresupuestoValor2').asInteger := strtointdef(part2,
+          YearOf(Now));
+        ParamByName('PresupuestoValor3').AsInteger := strtointdef(part3, 1);
+        ExecSql;
+      end
+      else
+      begin
+        close;
+        sql.Clear;
+        sql.Add('INSERT INTO configuracion (id_usuario ,PresupuestoValor1, PresupuestoValor2, PresupuestoValor3) ');
+        sql.Add('VALUES (:id_usuario ,:PresupuestoValor1, :PresupuestoValor2, :PresupuestoValor3) ');
+        ParamByName('id_usuario').AsInteger := codigo_usuario;
+        ParamByName('PresupuestoValor1').AsString := part1;
+        ParamByName('PresupuestoValor2').asInteger := strtointdef(part2,
+          YearOf(Now));
+        ParamByName('PresupuestoValor3').AsInteger := strtointdef(part3, 1);
+        ExecSql;
+        Prepare;
+        ExecSql;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+procedure cargaValoresSeriePresupuesto();
+var
+  qry: TUniQuery;
+  SQLText: string;
+  part1, part2, part3: string;
+  npart3: Integer;
+begin
+  if proyectoNuevo then
+  begin
+    qry := TUniQuery.Create(nil);
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        close;
+        sql.Clear;
+        sql.Add('select * from configuracion');
+        Prepare;
+        Open;
+        if not eof then
+        begin
+          part1 := FieldByName('PresupuestoValor1').AsString;
+          part2 := FieldByName('PresupuestoValor2').AsString;
+          part3 := FieldByName('PresupuestoValor3').AsString;
+          close;
+          sql.Clear;
+          if not (base_activa.codBase = '') then
+          begin
+            SQLText :=
+              'SELECT * FROM presupuestos_datosGenerales WHERE codBase=:codBase AND (codPresupuesto like '
+              + quotedstr(part1 + '-' + part2 + '%') + ')';
+            sql.Add(SQLText);
+
+            ParamByName('codBase').asstring := base_activa.codBase;
+          end
+          else
+          begin
+            SQLText :=
+              'SELECT * FROM presupuestos_datosGenerales WHERE codPresupuesto LIKE '
+              + quotedstr(part1 + '-' + part2 + '%');
+            sql.Add(SQLText);
+          end;
+          Open;
+          Last;
+          part3 := FieldByName('codPresupuesto').asstring;
+          part3 := RightStr(part3, 4);
+        end
+        else
+        begin
+          part1 := 'GIPROY';
+          part2 := inttostr(YearOf(Now));
+          part3 := '0';
+        end;
+      end;
+
+      npart3 := StrToIntDef(part3, 0);
+      Inc(npart3);
+      part3 := IntToStr(npart3);
+      part3 := ponerCerosInicio(part3, 3);
+      codProyecto := part1 + '-' + part2 + '-' + part3;
+      revision := '0';
+    finally
+      qry.Free;
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de IniciaNuevoProyecto.</summary>
+procedure IniciaNuevoProyecto();
+begin
+  frmMain.imgReferencial.Bitmap := nil;
+  iniciaTablaMemoria();
+  frmMain.lbl_codUnicoTemporal.Text := generaCodigoUnico;
+  IndirectosPresupuesto := 0;
+  derivacionPresupuesto := TStringList.Create;
+  cargaValoresSeriePresupuesto();
+  frmMain.edt_CodigoPresupuesto1.Text := codProyecto;
+  frmMain.lbl_RevisionPresupuesto.Text := revision;
+  autocalcularfechaspresupuesto := False;
+  frmMain.dedt_PresentacionPresupuesto.Date := Now;
+  autocalcularfechaspresupuesto := True;
+  frmMain.edt_descripcionPresupuesto.Text := '';
+  frmMain.mmo_ObjetoPresupuesto.Text := '';
+  frmMain.edt_PlazoEjecucionPresupuesto.Text := '180';
+  frmMain.edt_ValidezPresupuesto.Text := '30';
+  frmMain.edt_descripcionPresupuesto.SetFocus;
+  frmMain.edt_NPresupuestoCodReferencial.Text := '';
+  frmMain.edt_AreaTerrenoPresupuesto.Text := '';
+  frmMain.edt_AConstruccionPresupuesto.Text := '';
+  frmMain.edt_NPresupuestoDireccion.Text := '';
+  frmMain.edt_NPresupuestoProvincia.Text := '';
+  frmMain.edt_NPresupuestoCiudad.Text := '';
+  FGroupedPresupuesto := False;
+  frmMain.lbl_porcentajesIndirectos.Text := '0%';
+  frmMain.popupItem_Pareto_SinAplicar.IsChecked := True;
+  frmMain.popupItem_Pareto_Global.IsChecked := False;
+  frmMain.popupItem_Pareto_Cuenta.IsChecked := False;
+  frmMain.iGlow_Pareto.Enabled := False;
+  frmMain.iGlow_NotasGenerales.Enabled := False;
+  frmMain.iGlow_AbrirTanteo.Enabled := False;
+  frmMain.iGlow_Presupuestos_SeleccionarIndirectos.Enabled := False;
+  frmMain.lyt_Tanteo.Height := 0;
+  cancelarDerivacion := '';
+  SetLength(listadoNotas, 0);
+  frmMain.iGlow_OPC2_CrearPresupuesto.Enabled := True;
+  SetLength(listado_PresupuestoStake, 0);
+  frmMain.cbb_paisNPresupuesto.Clear;
+  frmMain.cbb_paisNPresupuesto.Items.Text := listadoPaises.Text;
+  frmMain.cbb_paisNPresupuesto.itemindex := posicionEcuador;
+  frmMain.edt_porcentajeIVANuevoPresupuesto.Text := '15';
+  cargaTipoProyectoPresupuesto;
+  frmMain.cbb_TConstruccion.itemindex := 0;
+  frmMain.cbb_ambitoContratacion.itemindex := 0;
+  frmMain.cbb_TipoContrato.itemindex := 0;
+  limpiaGridStakeAsignados();
+  iniciaEDO();
+  populaStakesDisponibles('');
+  iniciaEDT();
+  historicoEDO := TStringList.Create;
+  posEDO := -1;
+  historicoEDT := TStringList.Create;
+  posEDT := -1;
+  iniciaDBPresupuestosRecursos();
+end;
+
+/// <summary>
+/// Implementa la lógica principal de FindComponentRecursive.
+/// </summary>
+function FindComponentRecursive(AParent: TFmxObject; const AName: string):
+  TFmxObject;
+var
+  I: Integer;
+begin
+  if AParent.Name = AName then
+    Exit(AParent);
+
+  for I := 0 to AParent.ChildrenCount - 1 do
+  begin
+    Result := FindComponentRecursive(AParent.Children[I], AName);
+    if Assigned(Result) then
+      Exit;
+  end;
+
+  Result := nil;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de CargarTiendaOnline.
+/// </summary>
+procedure CargarTiendaOnline;
+
+var
+  matrizProductos: TArray<string>;
+  Productos: TArray<TProductoWCInfo>;
+  Ok: Boolean;
+  error: string;
+  x, Y: Integer;
+  Slug: string;
+  Param: TParametroValor;
+  ColumnaLV: Integer;
+  Item: TListBoxItem;
+  img: Tbitmap;
+  frmProductoTienda: TfrmProductoTienda;
+  LvTienda: TFmxObject; // TListBox;
+begin
+  MostrarTienda := False;
+  Slug := 'Error';
+
+  // 1) Obtener slug
+  Ok := ObtenerParametroDesdePHP(GlobalAuthToken, 5, Param, error);
+  if Ok then
+    Slug := Param.valor;
+  if Slug = 'Error' then
+    Exit;
+
+  // 2) Matriz de prefijos -> nº de columnas
+  DarMatrizProductosWP(matrizProductos);
+  x := 1;
+
+  for x := Low(matrizProductos) to High(matrizProductos) do
+  begin
+    crearPanelTienda(IntToStr(x), matrizProductos[x], 320);
+    LvTienda := FindComponentRecursive(frmMain.lyt_Tienda,
+      'LVTienda_' + IntToStr(x));
+    Ok := ObtenerListadoProductosPorPrefijoTipadoWC(Slug, matrizProductos[x],
+      100, 1, Productos, error);
+    if Ok then
+    begin
+      for Y := Low(Productos) to High(Productos) do
+      begin
+        if Assigned(LvTienda) and (LvTienda is TListBox) then
+        begin
+          CargarProductoEnLista_v2((LvTienda as TListBox), Y,
+            Productos[Y].Title, Productos[Y].PriceRaw, Productos[Y].Image,
+            Productos[Y].ImagenURL, Productos[Y].Permalink);
+        end;
+      end;
+    end;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de EjecutarCargaTiendaOnlineEnThread.
+/// </summary>
+procedure EjecutarCargaTiendaOnlineEnThread;
+begin
+  TThread.CreateAnonymousThread(
+    procedure
+    var
+      matrizProductos: TArray<string>;
+      Productos: TArray<TProductoWCInfo>;
+      Ok: Boolean;
+      error: string;
+      x, Y: Integer;
+      Slug: string;
+      Param: TParametroValor;
+      LvTienda: TFmxObject;
+      prefijo: string;
+    begin
+      MostrarTienda := False;
+      Slug := 'Error';
+
+      // 1) Obtener slug
+      Ok := ObtenerParametroDesdePHP(GlobalAuthToken, 5, Param, error);
+      if Ok then
+        Slug := Param.valor;
+      if Slug = 'Error' then
+        Exit;
+      // 2) Matriz de prefijos
+      DarMatrizProductosWP(matrizProductos);
+
+      for x := Low(matrizProductos) to High(matrizProductos) do
+      begin
+        prefijo := matrizProductos[x];
+
+        // Crear panel en el hilo principal
+        TThread.Synchronize(nil,
+          procedure
+          begin
+            crearPanelTienda(IntToStr(x), prefijo, 320);
+          end);
+
+        LvTienda := nil;
+        TThread.Synchronize(nil,
+          procedure
+          begin
+            LvTienda := FindComponentRecursive(frmMain.lyt_Tienda,
+              'LVTienda_' + IntToStr(x));
+          end);
+
+        Ok := ObtenerListadoProductosPorPrefijoTipadoWC(Slug, prefijo, 100, 1,
+          Productos, error);
+        if Ok then
+        begin
+          for Y := Low(Productos) to High(Productos) do
+          begin
+            if Assigned(LvTienda) and (LvTienda is TListBox) then
+            begin
+              TThread.Synchronize(nil,
+                procedure
+                begin
+                  CargarProductoEnLista_v2((LvTienda as TListBox), Y,
+                    Productos[Y].Title, Productos[Y].PriceRaw,
+                    Productos[Y].Image, Productos[Y].ImagenURL,
+                    Productos[Y].Permalink);
+                end);
+            end;
+          end;
+        end;
+      end;
+    end).Start;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de CargarProductoEnLista_v2.
+/// </summary>
+procedure CargarProductoEnLista_v2(LvTienda: TListBox; const x: Integer;
+  const NombreProducto, precio: string; const ImagenBase64, ImagenURL,
+  urlLink: string);
+
+var
+  Item: TListBoxItem;
+  frmProductoTienda: TfrmProductoTienda2;
+  img: Tbitmap;
+  ImgError: string;
+  tmpstr: string;
+begin
+  LvTienda.BeginUpdate;
+  try
+    Item := TListBoxItem.Create(nil);
+    frmProductoTienda := TfrmProductoTienda2.Create(nil);
+    frmProductoTienda.Name := 'productoID_' + IntToStr(x);
+    frmProductoTienda.lblProducto.Text := NombreProducto;
+    frmProductoTienda.lblPrecio.Text := 'Precio: USD ' + precio;
+    frmProductoTienda.lblLink.Text := urlLink;
+
+    img := nil;
+    if ImagenBase64 <> '' then
+    begin
+      img := BitmapFromBase64(tmpstr, ImgError);
+    end;
+
+    if (img = nil) and (ImagenURL <> '') then
+      img := DownloadBitmapFromUrl(ImagenURL, ImgError, 320, 320, bsmCover);
+    if img = nil then
+      img := frmMain.BitmapIconoGenerico.Bitmap;
+    img := ResizeBitmapProportional(img, 320, 320, bsmCover);
+    frmProductoTienda.imgProducto.Bitmap := img;
+
+    frmProductoTienda.Margins.Bottom := 5;
+    frmProductoTienda.Align := TAlignLayout.Client;
+    frmProductoTienda.Parent := Item;
+
+    Item.Height := 440;
+    Item.Parent := LvTienda;
+  finally
+    LvTienda.EndUpdate;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de CargarProductoEnLista.
+/// </summary>
+procedure CargarProductoEnLista(LvTienda: TListBox; const x: Integer;
+  const NombreProducto, descripcion, precio: string;
+  const ImagenBase64, ImagenURL: string);
+
+var
+  Item: TListBoxItem;
+  frmProductoTienda: TfrmProductoTienda;
+  img: Tbitmap;
+  ImgError: string;
+  tmpstr: string;
+begin
+  LvTienda.Items.Clear;
+  LvTienda.BeginUpdate;
+  try
+    Item := TListBoxItem.Create(nil);
+    frmProductoTienda := TfrmProductoTienda.Create(nil);
+    frmProductoTienda.Name := 'productoID_' + IntToStr(x);
+    frmProductoTienda.lbl_Producto.Text := NombreProducto;
+    frmProductoTienda.mmo_descripcion.Text := descripcion;
+    frmProductoTienda.lblPrecio.Text := 'Precio: USD ' + precio;
+
+    img := nil;
+    if ImagenBase64 <> '' then
+    begin
+      img := BitmapFromBase64(tmpstr, ImgError);
+    end;
+
+    if (img = nil) and (ImagenURL <> '') then
+      img := DownloadBitmapFromUrl(ImagenURL, ImgError, 110, 112, bsmFit);
+    if img = nil then
+      img := frmMain.BitmapIconoGenerico.Bitmap;
+    img := ResizeBitmapProportional(img, 110, 112, bsmFit);
+    frmProductoTienda.img1.Bitmap := img;
+
+    frmProductoTienda.Margins.Bottom := 5;
+    frmProductoTienda.Align := TAlignLayout.Client;
+    frmProductoTienda.Parent := Item;
+
+    Item.Height := 120;
+    Item.Parent := LvTienda;
+  finally
+    LvTienda.EndUpdate;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de crearPanelTienda.
+/// </summary>
+procedure crearPanelTienda(nPanel, TextoTitulo: string; Wlayout: Integer);
+
+var
+  Lyt: TLayout;
+  Rcttitulo: TRectangle;
+  Titulo: TLabel;
+  LV: TListBox;
+begin
+  // Creo Layout contenedor y le doy el tamaño;
+  Lyt := TLayout.Create(nil);
+  Lyt.Name := 'LytTienda_' + nPanel;
+  Lyt.Align := TAlignLayout.Left;
+  Lyt.width := Wlayout;
+  Lyt.Parent := frmMain.lyt_Tienda;
+
+  Rcttitulo := TRectangle.Create(nil);
+  Rcttitulo.Name := 'RctTitulo_' + nPanel;
+  Rcttitulo.fill.Kind := TBrushKind.Solid;
+  Rcttitulo.fill.Color := $FFE94E1B;
+  Rcttitulo.Align := TAlignLayout.Top;
+  Rcttitulo.Stroke.Thickness := 0;
+  Rcttitulo.Height := 40;
+  Rcttitulo.XRadius := 10;
+  Rcttitulo.YRadius := 10;
+  Rcttitulo.Margins.Left := 5;
+  Rcttitulo.Margins.Right := 5;
+  Rcttitulo.Corners := [TCorner.TopLeft, TCorner.TopRight];
+
+  Rcttitulo.Parent := Lyt;
+
+  Titulo := TLabel.Create(nil);
+  Titulo.Name := 'Titulo_' + nPanel;
+  Titulo.Align := TAlignLayout.Client;
+  Titulo.Text := TextoTitulo;
+  Titulo.StyleLookup := ''; // Evita estilos visuales
+  Titulo.StyledSettings := []; // Desactiva herencia de estilo
+  Titulo.TextSettings.HorzAlign := TTextAlign.Center;
+  Titulo.TextSettings.Font.Size := 18;
+  Titulo.TextSettings.FontColor := TAlphaColorRec.White;
+  Titulo.TextSettings.Font.Family := 'Poppins Bold';
+  Titulo.Parent := Rcttitulo;
+
+  Titulo.Parent := Rcttitulo;
+
+  LV := TListBox.Create(nil);
+  LV.Name := 'LVTienda_' + nPanel;
+  LV.Margins.Left := 5;
+  LV.Margins.Right := 5;
+  LV.Align := TAlignLayout.Client;
+  LV.Parent := Lyt;
+end;
+
+procedure rellenaAPUSVisor(const cod_completoAPU: string);
+var
+  qry: TUniQuery;
+  x: Integer;
+  node, subNode: TTMSFMXTreeViewNode;
+  CodCategoria, codSubCategoria, codRecurso: string;
+  costoDirecto, indirecto: Double;
+  cantidad, precio, rendimiento, totalRecurso: Double;
+  usarTanteo: Boolean;
+
+  procedure ProcesarFila;
+  begin
+    x := qry.Fields[0].AsInteger; // codCategoria
+
+    if x = 6 then
+      x := 2;
+
+    if (not base_activa.SeguridadIndustrial) and (x = 5) then
+      Exit;
+
+    Dec(x);
+
+    if (x < 0) or (x >= frmMain.trvw_APUSVisor.Nodes.Count) then
+      Exit;
+
+    node := frmMain.trvw_APUSVisor.Nodes[x];
+    subNode := frmMain.trvw_APUSVisor.AddNode(node);
+
+    CodCategoria := qry.Fields[0].AsString;
+    codSubCategoria := qry.Fields[1].AsString;
+    codRecurso := qry.Fields[2].AsString;
+
+    subNode.Text[0] := generaCodigoRecurso(CodCategoria, codSubCategoria,
+      codRecurso);
+    subNode.Text[1] := qry.Fields[3].AsString;
+    subNode.Text[2] := qry.Fields[4].AsString;
+
+    cantidad := qry.Fields[5].AsFloat;
+    precio := qry.Fields[6].AsFloat;
+
+    subNode.Text[3] := FormatFloat(cadenaDecimales, cantidad);
+    subNode.Text[4] := FormatFloat(cadenaCurrency, precio);
+
+    if (CodCategoria = '1') or (CodCategoria = '4') then
+    begin
+      rendimiento := qry.Fields[7].AsFloat;
+      subNode.Text[5] := FormatFloat(cadenaDecimales, rendimiento);
+    end
+    else
+    begin
+      rendimiento := 1;
+      subNode.Text[5] := '';
+    end;
+
+    totalRecurso := cantidad * precio * rendimiento;
+
+    subNode.Text[6] := FormatFloat(cadenaCurrency, totalRecurso);
+    subNode.Text[7] := qry.Fields[9].AsString + '%';
+
+    costoDirecto := costoDirecto + totalRecurso;
+  end;
+
+begin
+  if (cod_completoAPU = '') or (base_activa.codBase = '') then
+    Exit;
+
+  qry := TUniQuery.Create(nil);
+  costoDirecto := 0;
+
+  try
+    qry.Connection := DModule_1.con2;
+
+    usarTanteo := contieneTanteo;
+
+    if not usarTanteo then
+    begin
+      qry.SQL.Text :=
+        'SELECT codCategoria, codSubCategoria, codRecurso, descripcion, Unidad, ' +
+        'CantidadUnidad, Precio, Rendimiento, total, porcentaje ' +
+        'FROM APUS_Items ' +
+        'WHERE codAPU = :codAPU AND codBase = :codBase';
+
+      qry.ParamByName('codAPU').AsString := cod_completoAPU;
+      qry.ParamByName('codBase').AsString := base_activa.codBase;
+    end
+    else
+    begin
+      qry.SQL.Text :=
+        'SELECT ' +
+        '  ai.CodCategoria, ' +
+        '  ai.codSubCategoria, ' +
+        '  ai.codRecurso, ' +
+        '  ai.Descripcion, ' +
+        '  ai.Unidad, ' +
+        '  tr.CantidadUnidad, ' +
+        '  tr.Precio, ' +
+        '  tr.Rendimiento, ' +
+        '  tr.Total, ' +
+        '  ai.porcentaje ' +
+        'FROM apus_items ai ' +
+        'INNER JOIN presupuestos_tanteo_recursos tr ' +
+        '  ON tr.codBase = ai.codBase ' +
+        ' AND tr.CodAPU  = ai.CodAPU ' +
+        'INNER JOIN presupuestos_datosgenerales dg ' +
+        '  ON dg.codBase         = ai.codBase ' +
+        ' AND dg.codPresupuesto  = tr.codPresupuesto ' +
+        ' AND dg.revision        = tr.revision ' +
+        'WHERE ai.codAPU         = :codAPU ' +
+        '  AND ai.codBase        = :codBase ' +
+        '  AND tr.codPresupuesto = :codPresupuesto ' +
+        '  AND tr.revision       = :revision';
+
+      qry.ParamByName('codAPU').AsString := cod_completoAPU;
+      qry.ParamByName('codBase').AsString := base_activa.codBase;
+      qry.ParamByName('codPresupuesto').AsString := codProyecto;
+      qry.ParamByName('revision').AsString := revision;
+    end;
+
+    qry.Open;
+
+    frmMain.trvw_APUSVisor.BeginUpdate;
+    try
+      while not qry.Eof do
+      begin
+        ProcesarFila;
+        qry.Next;
+      end;
+    finally
+      frmMain.trvw_APUSVisor.EndUpdate;
+    end;
+
+  finally
+    qry.Free;
+  end;
+
+  frmMain.lbl_APUMCostoDirectoTotal.Text :=
+    FormatFloat(cadenaCurrency, costoDirecto);
+
+  indirecto := calculaIndirectos(costoDirecto);
+
+  frmMain.lbl_APUMCostoIndirectoTotal.Text :=
+    FormatFloat(cadenaCurrency, indirecto);
+
+  frmMain.lbl_APUMPrecioUnitarioTotal.Text :=
+    FormatFloat(cadenaCurrency, costoDirecto + indirecto);
+
+  if costoDirecto > 0 then
+    calculaPorcentajePrecio(frmMain.trvw_APUSVisor, 7, costoDirecto);
+end;
+
+/// <summary>TODO: Descripción de quitaFormatFloat.</summary>
+/// <param name="datos">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de quitaFormatFloat.
+/// </summary>
+function quitaFormatFloat(datos: string): Double;
+
+var
+  SCurrency: string;
+  simboloMiles: string;
+begin
+  SCurrency := base_activa.simboloMoneda;
+  if SCurrency = '' then
+    SCurrency := '$';
+  datos := ReplaceStr(datos, SCurrency, '');
+  simboloMiles := '0.0';
+  simboloMiles := decimal_correcto(simboloMiles);
+  simboloMiles := ReplaceStr(simboloMiles, '0', '');
+  if simboloMiles = ',' then
+    simboloMiles := '.'
+  else
+    simboloMiles := ',';
+  datos := ReplaceStr(datos, simboloMiles, '');
+  datos := Trim(datos);
+  Result := StrToFloatDef(datos, 0);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de calculaPorcentajePrecio.
+/// </summary>
+procedure calculaPorcentajePrecio(trvw: TTMSFMXTreeView;
+  posicionMuestra: Integer; costoTotal: Double);
+
+var
+  nodo: TTMSFMXTreeViewNode;
+  PorcentajeEjecutado: Double;
+  costoParcial: Double;
+  tmpstr: string;
+  calculo: Double;
+begin
+  nodo := trvw.Nodes[0];
+  PorcentajeEjecutado := 0;
+  while Assigned(nodo) do
+  begin
+    if not nodo.Extended then
+    begin
+      tmpstr := nodo.Text[6].Trim;
+      costoParcial := quitaFormatFloat(tmpstr);
+      calculo := (costoParcial * 100) / costoTotal;
+      PorcentajeEjecutado := PorcentajeEjecutado + calculo;
+      tmpstr := FloatToStr(calculo);
+      nodo.Text[7] := tmpstr + '%';
+    end;
+    nodo := nodo.GetNext;
+  end;
+  nodo := trvw.GetLastNode;
+  while (nodo.Extended) do
+  begin
+    nodo := nodo.GetPrevious;
+  end;
+  PorcentajeEjecutado := SafeStrToFloat(FloatToStr(PorcentajeEjecutado));
+  PorcentajeEjecutado := 100 - PorcentajeEjecutado;
+  tmpstr := nodo.Text[7];
+  tmpstr := ReplaceStr(tmpstr, '%', '').Trim;
+  calculo := SafeStrToFloat(tmpstr);
+  calculo := calculo + PorcentajeEjecutado;
+  nodo.Text[7] := FloatToStr(calculo) + '%';
+end;
+
+/// <summary>TODO: Descripción de calculaIndirectos.</summary>
+/// <param name="costoDirecto">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de calculaIndirectos.
+/// </summary>
+function calculaIndirectos(costoDirecto: Double): Double;
+
+var
+  indirectoCalculo: Double;
+  calculo: Double;
+begin
+  indirectoCalculo := base_activa.indirectos;
+  calculo := (costoDirecto * indirectoCalculo) / 100;
+  Result := calculo;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ponerCerosInicio.
+/// </summary>
+function ponerCerosInicio(datos: string; ceros: Integer): string;
+
+var
+  x: Integer;
+begin
+  Result := datos;
+  for x := 1 to ceros - Length(datos) do
+  begin
+    Result := '0' + Result;
+  end;
+end;
+
+/// <summary>TODO: Descripción de limpia_APUSVisor.</summary>
+procedure limpia_APUSVisor();
+
+var
+  node: TTMSFMXTreeViewNode;
+  x: Integer;
+  procedure CargarValoresInicialesTrvwint(trvw: TTMSFMXTreeView);
+
+  var
+    nodo: TTMSFMXTreeViewNode;
+    x: Integer;
+  begin
+    trvw.ClearNodes;
+    nodo := trvw.addnode;
+    nodo.Text[0] := 'Equipos y Herramientas';
+    nodo.Extended := True;
+    nodo := trvw.addnode;
+    nodo.Text[0] := 'Materiales';
+    nodo.Extended := True;
+    nodo := trvw.addnode;
+    nodo.Text[0] := 'Transporte';
+    nodo.Extended := True;
+    nodo := trvw.addnode;
+    nodo.Text[0] := 'Mano de Obra';
+    nodo.Extended := True;
+    { if base_activa.SeguridadIndustrial then
+      begin
+      nodo := trvw.addnode;
+      nodo.Text[0] := 'Seguridad Industrial';
+      nodo.Extended := True;
+      end; }
+    trvw.ExpandAll;
+  end;
+begin
+  CargarValoresInicialesTrvwint(frmMain.trvw_APUSVisor);
+  frmMain.edt_APUSDescripcion.Text := '';
+  frmMain.edt_APUSUnidad.Text := '';
+  frmMain.lbl_APUSRendimiento.Text := '';
+  frmMain.lbl_APUMCostoDirectoTotal.Text := '0,00';
+  frmMain.lbl_APUMCostoIndirectoTotal.Text := '0,00';
+  frmMain.lbl_APUMPrecioUnitarioTotal.Text := '0,00';
+end;
+
+/// <summary>TODO: Descripción de Limpia_gridAPUSDisponibles.</summary>
+procedure Limpia_gridAPUSDisponibles();
+begin
+  frmMain.grid_APUSRecursos.ClearNormalCells;
+  frmMain.grid_APUSRecursos.RowCount := 1;
+  frmMain.grid_APUSRecursos.cells[0, 0] := '#';
+  frmMain.grid_APUSRecursos.cells[1, 0] := 'Cod. APU';
+  frmMain.grid_APUSRecursos.cells[2, 0] := 'Descripción';
+  frmMain.grid_APUSRecursos.cells[3, 0] := 'Unidad';
+  // frmMain.grid_APUSRecursos.cells[4, 0] := 'Rendimiento';
+  frmMain.grid_APUSRecursos.cells[4, 0] := 'C. Directo';
+  frmMain.grid_APUSRecursos.cells[5, 0] := 'C. Indirecto';
+  frmMain.grid_APUSRecursos.cells[6, 0] := 'P. Unitario';
+  frmMain.grid_APUSRecursos.cells[7, 0] := 'Cod C.P.C.';
+  frmMain.grid_APUSRecursos.cells[11, 0] := 'F. Actualización';
+end;
+
+/// <summary>TODO: Descripción de refrescalistaAPUscompleta.</summary>
+procedure refrescalistaAPUscompleta;
+var
+  qry: TUniQuery;
+  row: Integer;
+  subcategoria, codRecurso, codigoCompleto, esTanteo: string;
+  porcentajeIndirectosBase: Double;
+  costoDirecto, costoIndirecto, PrecioUnitario: Double;
+
+  procedure InitGrid;
+  begin
+    Limpia_gridAPUSDisponibles;
+    frmMain.grid_APUSRecursos.BeginUpdate;
+    frmMain.grid_APUSRecursos.RowCount := 2; // header + 1
+  end;
+
+  procedure FinalizeGrid(LastRow: Integer);
+  begin
+    frmMain.grid_APUSRecursos.RowCount := LastRow;
+    frmMain.grid_APUSRecursos.columns[8].width := 0;
+    frmMain.grid_APUSRecursos.columns[9].width := 0;
+    frmMain.grid_APUSRecursos.columns[10].width := 0;
+    frmMain.grid_APUSRecursos.EndUpdate;
+  end;
+
+  procedure FillRow(ARow: Integer);
+  begin
+    frmMain.grid_APUSRecursos.cells[0, ARow] :=
+      ponerCerosInicio(IntToStr(ARow), 3);
+
+    subcategoria := qry.FieldByName('codCategoriaAPU').AsString;
+    codRecurso := qry.FieldByName('codRecursoAPU').AsString;
+
+    codigoCompleto := generaCodigoRecurso('6', subcategoria, codRecurso);
+
+    frmMain.grid_APUSRecursos.cells[1, ARow] := codigoCompleto;
+    frmMain.grid_APUSRecursos.cells[2, ARow] :=
+      qry.FieldByName('descripcion').AsString;
+    frmMain.grid_APUSRecursos.cells[3, ARow] :=
+      qry.FieldByName('Unidad').AsString;
+
+    costoDirecto := qry.FieldByName('CostoDirectoTotal').AsFloat;
+    frmMain.grid_APUSRecursos.cells[4, ARow] :=
+      FormatFloat(cadenaCurrency, costoDirecto);
+
+    if not contieneTanteo then
+    begin
+      costoIndirecto := qry.FieldByName('CostoIndirectoTotal').AsFloat;
+      PrecioUnitario := qry.FieldByName('PrecioUnitarioTotal').AsFloat;
+    end
+    else
+    begin
+      esTanteo := qry.FieldByName('ajusteTanteo').AsString;
+      if esTanteo <> '1' then
+      begin
+        costoIndirecto := qry.FieldByName('CostoIndirectoTotal').AsFloat;
+        PrecioUnitario := qry.FieldByName('PrecioUnitarioTotal').AsFloat;
+      end
+      else
+      begin
+        costoIndirecto := (costoDirecto * porcentajeIndirectosBase) / 100;
+        PrecioUnitario := costoDirecto + costoIndirecto;
+      end;
+    end;
+
+    frmMain.grid_APUSRecursos.cells[5, ARow] :=
+      FormatFloat(cadenaCurrency, costoIndirecto);
+    frmMain.grid_APUSRecursos.cells[6, ARow] :=
+      FormatFloat(cadenaCurrency, PrecioUnitario);
+    frmMain.grid_APUSRecursos.cells[11, ARow] :=
+      FormatDateTime('dd/mm/yyyy hh:nn', qry.FieldByName('ultimaModificacion')
+      .AsDateTime);
+
+    // ocultos / internos
+    frmMain.grid_APUSRecursos.cells[8, ARow] := subcategoria;
+    frmMain.grid_APUSRecursos.cells[9, ARow] :=
+      qry.FieldByName('CodAPU').AsString;
+    frmMain.grid_APUSRecursos.cells[10, ARow] :=
+      qry.FieldByName('pendienteRevision').AsString;
+  end;
+
+begin
+  porcentajeIndirectosBase := base_activa.indirectos;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.SQL.Clear;
+
+    if not contieneTanteo then
+    begin
+      {(*}
+      qry.SQL.Text :=
+        'SELECT ' +
+        '  CodAPU, ' +
+        '  codCategoriaAPU, ' +
+        '  codRecursoAPU, ' +
+        '  descripcion, ' +
+        '  Unidad, ' +
+        '  CostoDirectoTotal, ' +
+        '  CostoIndirectoTotal, ' +
+        '  PrecioUnitarioTotal, ' +
+        '  pendienteRevision, ' +
+        '  ultimaModificacion ' +
+        'FROM apus ' +
+        'WHERE ' +
+        '  codBase = :codBase ' +
+        'ORDER BY ' +
+        '  descripcion ASC';
+      {*)}
+      qry.ParamByName('codBase').AsString := base_activa.codBase;
+    end
+    else
+    begin
+      qry.SQL.Text := daSQLQueryText(6);
+      qry.ParamByName('codBase').AsString := base_activa.codBase;
+      qry.ParamByName('codPresupuesto').AsString := codProyecto;
+      qry.ParamByName('revision').AsString := revision;
+    end;
+
+    qry.Prepare;
+    qry.Open;
+
+    InitGrid;
+
+    row := 1;
+    while not qry.Eof do
+    begin
+      if frmMain.grid_APUSRecursos.RowCount <= row then
+        frmMain.grid_APUSRecursos.RowCount := row + 1;
+
+      FillRow(row);
+
+      Inc(row);
+      qry.Next;
+    end;
+
+    FinalizeGrid(row);
+
+  finally
+    qry.Free;
+    frmMain.CachearAPUSGrid;
+  end;
+end;
+
+/// <summary>TODO: Descripción de refrescalistaAPUsDisponibles.</summary>
+procedure refrescalistaAPUsDisponibles;
+
+var
+  qry: TUniQuery;
+  x: Integer;
+  tmpstr, subcategoria, codRecurso, SQLText, esTanteo: string;
+  porcentajeIndirectosBase: Double;
+  costoDirectoTanteo, costoIndirectoTanteo, precioUnitarioTanteo: Double;
+
+  procedure HideColSafe(ACol: Integer);
+  begin
+    if (ACol >= 0) and (ACol < frmMain.grid_APUSRecursos.ColumnCount) then
+      frmMain.grid_APUSRecursos.columns[ACol].width := 0;
+  end;
+
+  procedure EnsureRowCount(ARows: Integer);
+  begin
+    if ARows < 2 then
+      ARows := 2; // al menos header+1 si tu grid lo requiere
+    if frmMain.grid_APUSRecursos.RowCount <> ARows then
+      frmMain.grid_APUSRecursos.RowCount := ARows;
+  end;
+
+  procedure LogUniError(const Q: TUniQuery; const E: Exception);
+
+  var
+    I: Integer;
+    S: string;
+  begin
+    S := 'refrescalistaAPUsDisponibles ERROR: ' + E.ClassName + ' - ' +
+      E.Message + sLineBreak;
+
+    if E is EUniError then
+      S := S + Format('ErrorCode=%d', [EUniError(E).ErrorCode]) + sLineBreak;
+
+    if Assigned(Q) then
+    begin
+      S := S + 'SQL:' + sLineBreak + Q.SQL.Text + sLineBreak;
+
+      if Q.Params.Count > 0 then
+      begin
+        S := S + 'Params:' + sLineBreak;
+        for I := 0 to Q.Params.Count - 1 do
+          S := S + Format('  %s=%s (DataType=%s)',
+            [Q.Params[I].Name, Q.Params[I].AsString,
+              GetEnumName(TypeInfo(TFieldType), Ord(Q.Params[I].DataType))]) +
+          sLineBreak;
+      end;
+    end;
+
+    addlog(S);
+  end;
+
+  procedure FillGridFromCurrentRow(ARow: Integer);
+  begin
+    frmMain.grid_APUSRecursos.cells[0, ARow] :=
+      ponerCerosInicio(IntToStr(ARow), 3);
+
+    subcategoria := qry.FieldByName('codCategoriaAPU').AsString;
+    codRecurso := qry.FieldByName('codRecursoAPU').AsString;
+
+    tmpstr := generaCodigoRecurso('6', subcategoria, codRecurso);
+
+    frmMain.grid_APUSRecursos.cells[1, ARow] := tmpstr;
+    frmMain.grid_APUSRecursos.cells[2, ARow] :=
+      qry.FieldByName('descripcion').AsString;
+    frmMain.grid_APUSRecursos.cells[3, ARow] :=
+      qry.FieldByName('Unidad').AsString;
+
+    // Costo directo
+    if not contieneTanteo then
+      frmMain.grid_APUSRecursos.cells[4, ARow] :=
+        FormatFloat(cadenaCurrency,
+        qry.FieldByName('CostoDirectoTotal').AsFloat)
+    else
+    begin
+      tmpstr := qry.FieldByName('CostoDirectoTotal').AsString;
+      frmMain.grid_APUSRecursos.cells[4, ARow] := tmpstr;
+    end;
+
+    // Indirectos y P.U.
+    if not contieneTanteo then
+    begin
+      frmMain.grid_APUSRecursos.cells[5, ARow] :=
+        FormatFloat(cadenaCurrency,
+        qry.FieldByName('CostoIndirectoTotal').AsFloat);
+      frmMain.grid_APUSRecursos.cells[6, ARow] :=
+        FormatFloat(cadenaCurrency,
+        qry.FieldByName('PrecioUnitarioTotal').AsFloat);
+    end
+    else
+    begin
+      esTanteo := qry.FieldByName('ajusteTanteo').AsString;
+
+      if esTanteo <> '1' then
+      begin
+        frmMain.grid_APUSRecursos.cells[5, ARow] :=
+          FormatFloat(cadenaCurrency,
+          qry.FieldByName('CostoIndirectoTotal').AsFloat);
+        frmMain.grid_APUSRecursos.cells[6, ARow] :=
+          FormatFloat(cadenaCurrency,
+          qry.FieldByName('PrecioUnitarioTotal').AsFloat);
+      end
+      else
+      begin
+        costoDirectoTanteo :=
+          SafeStrToFloat(decimal_correcto(frmMain.grid_APUSRecursos.cells
+          [4, ARow]));
+        costoIndirectoTanteo :=
+          (costoDirectoTanteo * porcentajeIndirectosBase) / 100;
+        precioUnitarioTanteo := costoDirectoTanteo + costoIndirectoTanteo;
+
+        frmMain.grid_APUSRecursos.cells[5, ARow] :=
+          FormatFloat(cadenaCurrency, costoIndirectoTanteo);
+        frmMain.grid_APUSRecursos.cells[6, ARow] :=
+          FormatFloat(cadenaCurrency, precioUnitarioTanteo);
+      end;
+    end;
+    // F. Ultima Actualizacion
+    frmMain.grid_APUSRecursos.cells[11, ARow] :=
+      FormatDateTime('dd/mm/yyyy hh:nn', qry.FieldByName('ultimaModificacion')
+      .AsDateTime);
+
+    // ocultas
+    frmMain.grid_APUSRecursos.cells[8, ARow] := subcategoria;
+    frmMain.grid_APUSRecursos.cells[9, ARow] :=
+      qry.FieldByName('CodAPU').AsString;
+    frmMain.grid_APUSRecursos.cells[10, ARow] :=
+      qry.FieldByName('pendienteRevision').AsString;
+  end;
+
+begin
+  Limpia_gridAPUSDisponibles;
+
+  porcentajeIndirectosBase := base_activa.indirectos;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    qry.Close;
+    qry.SQL.Clear;
+    qry.Params.Clear;
+
+    if not contieneTanteo then
+    begin
+      // Campos explícitos (ajusta si tu tabla tiene otros nombres)
+      { (* }
+      qry.SQL.Text := 'SELECT ' + '  CodAPU, ' + '  codCategoriaAPU, ' +
+        '  codRecursoAPU, ' + '  descripcion, ' + '  Unidad, ' +
+        '  CostoDirectoTotal, ' + '  CostoIndirectoTotal, ' +
+        '  PrecioUnitarioTotal, ' + '  pendienteRevision, ' +
+        '  ultimaModificacion ' + 'FROM APUS ' + 'WHERE ' +
+        '  codCategoriaAPU = :codCategoriaAPU ' + '  AND codBase = :codBase '
+        + 'ORDER BY descripcion ASC';
+      { *) }
+      qry.ParamByName('codBase').AsString := base_activa.codBase;
+      qry.ParamByName('codCategoriaAPU').AsString :=
+        codCategoriaAPUSeleccionada;
+    end
+    else
+    begin
+      SQLText := daSQLQueryText(5);
+      qry.SQL.Text := SQLText;
+
+      qry.ParamByName('codBase').AsString := base_activa.codBase;
+      qry.ParamByName('codPresupuesto').AsString := codProyecto;
+      qry.ParamByName('revision').AsString := revision;
+      qry.ParamByName('codCategoriaAPU').AsString :=
+        codCategoriaAPUSeleccionada;
+    end;
+
+    try
+      qry.Prepare;
+      qry.Open;
+    except
+      on E: Exception do
+      begin
+        LogUniError(qry, E);
+        raise;
+      end;
+    end;
+
+    frmMain.grid_APUSRecursos.BeginUpdate;
+    try
+      x := 1;
+
+      // si puedes estimar filas para evitar realocaciones:
+      // EnsureRowCount(qry.RecordCount + 1); // ojo: RecordCount puede ser caro según provider
+      EnsureRowCount(2);
+
+      while not qry.Eof do
+      begin
+        // Asegura espacio para la fila x
+        if frmMain.grid_APUSRecursos.RowCount <= x then
+          frmMain.grid_APUSRecursos.RowCount := x + 1;
+
+        FillGridFromCurrentRow(x);
+
+        Inc(x);
+        qry.Next;
+      end;
+
+      // Ajuste final de filas usadas
+      frmMain.grid_APUSRecursos.RowCount := x;
+
+      HideColSafe(8);
+      HideColSafe(9);
+      HideColSafe(10);
+    finally
+      frmMain.grid_APUSRecursos.EndUpdate;
+    end;
+
+  finally
+    if frmMain.grid_APUSRecursos.cells[1, 1] = '' then
+      frmMain.grid_APUSRecursos.cells[0, 1] := '';
+
+    qry.Free;
+  end;
+end;
+
+function daDatoCodigo(codigo: string; modo: Integer): string;
+
+var
+  x: Integer;
+  tmpstr: string;
+begin
+  Result := '';
+  case modo of
+    1:
+      begin
+        Result := LeftStr(codigo, 1);
+      end;
+    2:
+      begin
+        Result := Copy(codigo, 2, 4);
+      end;
+    3:
+      begin
+        Result := RightStr(codigo, 5);
+      end;
+  end;
+  if Result <> '' then
+  begin
+    x := SafeStrToInt(Result);
+    Result := IntToStr(x);
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de ForzarCadenaNDecimales.
+/// </summary>
+function ForzarCadenaNDecimales(datos: string; nDecimales: Integer): string;
+
+var
+  valorFloat: Double;
+begin
+  valorFloat := StrToFloatDef(datos, 0);
+  Result := forzarNdecimales(valorFloat, nDecimales);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de PasarCadenaNDecimalesquitar.
+/// </summary>
+function PasarCadenaNDecimalesquitar(datos: string;
+  nDecimales: Integer): string;
+begin
+  datos := ReplaceStr(datos, base_activa.simboloMoneda, '').Trim;
+  datos := QuitarEspeciales(datos);
+  Result := decimal_correcto(datos);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de hacerPregunta.
+/// </summary>
+function hacerPregunta(Pregunta, Encabezado, modo, adicional: string;
+  LForm2: TfrmNuevoRecurso): string;
+var
+  LForm: TfrmPregunta;
+begin
+  LForm := TfrmPregunta.Create(Application);
+  try
+    LForm.lbl_Pregunta.Text := Pregunta;
+    LForm.lbl_banner1.Text := Encabezado;
+    LForm.modoTrabajo := StrToInt(modo);
+    LForm.adicional := adicional;
+    LForm.LForm := LForm2;
+    LForm.Height := 125;
+    LForm.CentrarSobre(frmMain.tbc_PreciosUnitarios);
+    LForm.ShowModal;
+    if LForm.ModalResult = mrOK then
+      Result := LForm.Respuesta
+    else
+      Result := '';
+  finally
+    LForm.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de grabaNuevaUnidadMedidaRecursos.
+/// </summary>
+procedure grabaNuevaUnidadMedidaRecursos(subcategoria, unidad: string;
+  LForm: TfrmNuevoRecurso);
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT descripcion ' + '  FROM unidades ' +
+        ' WHERE subCategoria = :subCategoria ' +
+        '   AND descripcion = :descripcion ');
+      { *) }
+      ParamByName('subcategoria').AsString := subcategoria;
+      ParamByName('descripcion').AsString := unidad;
+      Prepare;
+      Open;
+      tmpstr := FieldByName('descripcion').AsString;
+      if tmpstr = '' then
+      begin
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('INSERT INTO ' + '  unidades ( ' + '  descripcion, ' +
+          '  subcategoria, ' + '  fechaHora) ' + 'VALUES ( ' +
+          '  :descripcion,  ' + '  :subcategoria,  ' + '  :fechaHora) ');
+        { *) }
+        Prepare;
+        ParamByName('descripcion').AsString := unidad;
+        ParamByName('subcategoria').AsString := subcategoria;
+        ParamByName('fechahora').AsDateTime := Now;
+        Open;
+      end;
+    end;
+  finally
+    LForm.populaUnidadesRecursos(subcategoria);
+    LForm.cbb_UTiempos.itemindex := LForm.cbb_UTiempos.Items.Count - 2;
+    qry.Free;
+  end;
+end;
+
+procedure editarUnidadMedida(newDescripcion, oldDescripcion,
+  subcategoria: string; LForm: TfrmNuevoRecurso);
+
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('UPDATE ' + ' unidades ' + 'SET descripcion = :newDescripcion) '
+        + 'WHERE ' + ' descripcion = :oldDescripcion');
+      { *) }
+      Prepare;
+      ParamByName('newDescripcion').AsString := newDescripcion;
+      ParamByName('oldDescripcion').AsString := oldDescripcion;
+      Open;
+    end;
+  finally
+    LForm.populaUnidadesRecursos(subcategoria);
+    LForm.cbb_UTiempos.itemindex := 0;
+    qry.Free;
+  end;
+end;
+
+procedure rellenaAPUSCategoria(tOrdenacion: Integer);
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  x: Integer;
+  itm: TListViewItem;
+  filtro: string;
+begin
+  frmMain.lv_APUSCategoria.Items.Clear;
+  filtro := frmMain.edt_filtroLVApusCategoria.Text;
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      case tOrdenacion of
+        { (* }
+        1:
+          SQL.Add('SELECT ' + '  ciu, ' + '  descripcion ' +
+            'FROM categoriaapus ' + 'WHERE ' + '  categoria_base = 6 AND ' +
+            '  codBase = :codBase ' + 'ORDER BY ' + '  descripcion ASC ');
+        2:
+          SQL.Add('SELECT ' + '  ciu, ' + '  descripcion ' +
+            'FROM categoriaapus ' + 'WHERE ' + '  categoria_base = 6 AND' +
+            '  codBase = :codBase ' + 'ORDER BY ' + '  descripcion DESC ');
+        { *) }
+      end;
+      if filtro <> '' then
+      begin
+        filtro := '%' + LowerCase(filtro.Trim) + '%';
+        AddWhere(' LOWER(Descripcion) like ' + quotedstr(filtro));
+      end;
+      ParamByName('codBase').AsString := base_activa.codBase;
+      Prepare;
+      Open;
+      frmMain.lv_APUSCategoria.BeginUpdate;
+      while not Eof do
+      begin
+        itm := frmMain.lv_APUSCategoria.Items.Add;
+        itm.Detail := FieldByName('ciu').AsString;
+        itm.Text := FieldByName('Descripcion').AsString;
+        Next;
+      end;
+      frmMain.lv_APUSCategoria.EndUpdate;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+procedure posicionaAPUSCategoria(const codCategoriaBaseEnvio: string);
+
+var
+  x: Integer;
+begin
+  frmMain.lv_APUSCategoria.ShowSelection := True;
+  for x := 0 to frmMain.lv_APUSCategoria.Items.Count - 1 do
+  begin
+    if frmMain.lv_APUSCategoria.Items[x].Detail = codCategoriaBaseEnvio then
+    begin
+      // Selección REAL en FMX
+      frmMain.lv_APUSCategoria.itemindex := x;
+
+      // Forzar refresco visual
+      frmMain.lv_APUSCategoria.Repaint;
+
+      // Variables de estado
+      codCategoriaAPUSeleccionada := frmMain.lv_APUSCategoria.Items[x].Detail;
+      CategoriaAPUSeleccionada := frmMain.lv_APUSCategoria.Items[x].Text;
+
+      Exit;
+    end;
+  end;
+end;
+
+/// <summary>TODO: Descripción de daCodigoAPUSRecurso.</summary>
+/// <param name="codCompleto">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en daCodigoAPUSRecurso.
+/// </summary>
+function daCodigoAPUSRecurso(codCompleto: string): string;
+
+var
+  tmpstr: string;
+begin
+  tmpstr := RightStr(codCompleto, 5);
+  Result := tmpstr;
+end;
+
+/// <summary>TODO: Descripción de daCodigoAPUSSubCategoriaRecurso.</summary>
+/// <param name="codCompleto">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Opera sobre datos de APU en daCodigoAPUSSubCategoriaRecurso.
+/// </summary>
+function daCodigoAPUSSubCategoriaRecurso(codCompleto: string): string;
+
+var
+  x: Integer;
+  tmpstr: string;
+begin
+  tmpstr := Copy(codCompleto, 2, 4);
+  Result := tmpstr;
+end;
+
+/// <summary>TODO: Descripción de muestraOPC.</summary>
+/// <param name="estado">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de muestraOPC.
+/// </summary>
+procedure muestraOPC(estado: Boolean);
+begin
+  frmMain.lyt_OPC1Recursos.Visible := estado;
+  frmMain.lyt_OPC1_APUS.Visible := estado;
+  frmMain.lyt_OPC1_Subcategorias.Visible := estado;
+end;
+
+/// <summary>TODO: Descripción de BorrarRecurso.</summary>
+/// <param name="codCategoria">TODO.</param>
+/// <param name="codSubCategoria">TODO.</param>
+/// <param name="codRecurso">TODO.</param>
+/// <summary>
+/// Implementa la lógica principal de BorrarRecurso.
+/// </summary>
+procedure BorrarRecurso(CodCategoria, codSubCategoria, codRecurso: string);
+
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      SQL.Add('delete from recursos where codBase=' +
+        quotedstr(base_activa.codBase) + ' and codRecurso=' + codRecurso +
+        ' and codCategoriaBase=' + CodCategoria + ' and codSubCategoria=' +
+        codSubCategoria);
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de cargarEditCloneRecurso.
+/// </summary>
+procedure cargarEditCloneRecurso(cod_categoria, cod_subcategoria,
+  cod_Recurso: string; modo: Integer);
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('SELECT * ' + '  FROM recursos ' +
+        ' WHERE codCategoriaBase = :cod_categoria ' +
+        '   AND codSubCategoria = :cod_subcategoria ' +
+        '   AND codRecurso = :cod_Recurso ' + '   AND codBase = :codBase ');
+      { *) }
+      ParamByName('cod_categoria').AsString := cod_categoria;
+      ParamByName('cod_subcategoria').AsString := cod_subcategoria;
+      ParamByName('cod_recurso').AsString := cod_Recurso;
+      ParamByName('codBase').AsString := base_activa.codBase;
+
+      Prepare;
+      Open;
+      cod_Recurso := FieldByName('codRecurso').AsString;
+      if cod_Recurso <> '' then
+      begin
+        frmNuevoRecurso.edt_Descripcion.Text :=
+          FieldByName('descripcion').AsString;
+        tmpstr := FieldByName('precio').AsString;
+        frmNuevoRecurso.edt_Precio.Text := decimal_correcto(tmpstr);
+        frmNuevoRecurso.edt_codCPC.Text := FieldByName('codCPC').AsString;
+        frmNuevoRecurso.mmo_Especificaciones.Text :=
+          FieldByName('especificaciones').AsString;
+        case modo of
+          1:
+            begin
+              frmNuevoRecurso.lbl_modo.Text := 'editar';
+              frmNuevoRecurso.lbl_Codcategoria.Text := cod_categoria;
+              frmNuevoRecurso.lbl_codSubcategoria.Text := cod_subcategoria;
+              frmNuevoRecurso.lbl_codRecurso.Text := cod_Recurso;
+              frmNuevoRecurso.lbl_banner1.Text := 'Editar Recurso';
+              frmNuevoRecurso.lbl_banner2.Text := 'Edicción de Recurso';
+            end;
+          2:
+            begin
+              frmNuevoRecurso.lbl_modo.Text := 'clonar';
+              frmNuevoRecurso.lbl_Codcategoria.Text := cod_categoria;
+              frmNuevoRecurso.lbl_codSubcategoria.Text := cod_subcategoria;
+              frmNuevoRecurso.lbl_banner1.Text := 'Duplicar Recurso';
+              frmNuevoRecurso.lbl_banner2.Text := 'Duplicación de Recurso';
+            end;
+        end;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+procedure MuestraRecursosGrid(const Categoria, subcategoria: string);
+
+var
+  qry: TUniQuery;
+  row: Integer;
+  Grid: TTMSFNCGrid;
+  codRecurso, tmpstr: string;
+
+  fCatBase, fSubCat, fCodRec, fDesc, fUnidad, fPrecio, fCPC, fEsp, fId,
+    fFecha: TField;
+begin
+  limpiaGridRecursos;
+  Grid := frmMain.grid_Recursos;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.SQL.Text :=
+      { (* }
+    'SELECT ' + '  codCategoriaBase, ' + '  codSubCategoria, ' +
+      '  codRecurso, ' + '  descripcion, ' + '  unidad, ' + '  precio, ' +
+      '  codCPC, ' + '  especificaciones2, ' + '  idUnico, ' +
+      '  ultimaModificacion ' + 'FROM recursos ' + 'WHERE ' +
+      '  codCategoriaBase     = :cat ' + '  AND codSubCategoria  = :sub ' +
+      '  AND codBase          = :base ' + 'ORDER BY descripcion';
+    { *) }
+    qry.ParamByName('cat').AsString := Categoria;
+    qry.ParamByName('sub').AsString := subcategoria;
+    qry.ParamByName('base').AsString := base_activa.codBase;
+    qry.Open;
+
+    // Cache de campos
+    fCatBase := qry.FieldByName('codCategoriaBase');
+    fSubCat := qry.FieldByName('codSubCategoria');
+    fCodRec := qry.FieldByName('codRecurso');
+    fDesc := qry.FieldByName('descripcion');
+    fUnidad := qry.FieldByName('unidad');
+    fPrecio := qry.FieldByName('precio');
+    fCPC := qry.FieldByName('codCPC');
+    fEsp := qry.FieldByName('especificaciones2');
+    fId := qry.FieldByName('idUnico');
+    fFecha := qry.FieldByName('ultimaModificacion');
+
+    Grid.BeginUpdate;
+    try
+      row := 1;
+      Grid.RowCount := qry.RecordCount + 1;
+
+      while not qry.Eof do
+      begin
+        Grid.cells[0, row] := Format('%.3d', [row]);
+
+        codRecurso := generaCodigoRecurso(fCatBase.AsString, fSubCat.AsString,
+          fCodRec.AsString);
+        Grid.cells[1, row] := codRecurso;
+
+        Grid.cells[2, row] := fDesc.AsString;
+        Grid.cells[3, row] := fUnidad.AsString;
+
+        Grid.cells[4, row] := base_activa.simboloMoneda +
+          FormatFloat('0.00', fPrecio.AsFloat, FS);
+
+        Grid.cells[7, row] := fCPC.AsString;
+
+        tmpstr := fEsp.AsString;
+        if tmpstr = '' then
+          tmpstr := 'Sin Especificaciones';
+
+        if Length(tmpstr) > 30 then
+          tmpstr := Copy(tmpstr, 1, 30) + '...';
+
+        Grid.cells[8, row] := tmpstr;
+        Grid.cells[9, row] := fId.AsString;
+        Grid.cells[10, row] := datetimetostr(fFecha.AsDateTime);
+
+        Inc(row);
+        qry.Next;
+      end;
+
+      Grid.RowCount := row;
+
+      // Ajustes de columnas
+      Grid.AutoSizeColumn(0, True, 10);
+      Grid.AutoSizeColumn(1, True, 10);
+      Grid.AutoSizeColumn(2, True, 10);
+      Grid.AutoSizeColumn(3, True, 10);
+      Grid.AutoSizeColumn(4, True, 10);
+      Grid.AutoSizeColumn(7, True, 10);
+      Grid.AutoSizeColumn(8, True, 10);
+
+      Grid.columns[5].width := 0;
+      Grid.columns[6].width := 0;
+      Grid.columns[9].width := 0;
+      Grid.AutoSizeColumn(10, True, 10);
+    finally
+      Grid.EndUpdate;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de generaCodigoRecurso.
+/// </summary>
+function generaCodigoRecurso(codCategoriaBase, codSubCategoria,
+  codRecurso: string): string;
+
+var
+  x: Integer;
+  tmpstr: string;
+begin
+  Result := codCategoriaBase;
+  tmpstr := codSubCategoria;
+  for x := 0 to 3 - Length(codSubCategoria) do
+  begin
+    tmpstr := '0' + tmpstr;
+  end;
+  Result := Result + tmpstr;
+  tmpstr := codRecurso;
+  for x := 0 to 4 - Length(codRecurso) do
+  begin
+    tmpstr := '0' + tmpstr;
+  end;
+  Result := Result + tmpstr;
+end;
+
+/// <summary>
+/// Devuelve información calculada o consultada en daCodigoParcialRecurso.
+/// </summary>
+function daCodigoParcialRecurso(datos: string): string;
+
+var
+  x: Integer;
+  tmpstr: string;
+begin
+  Result := '';
+  tmpstr := RightStr(datos, 5);
+  try
+    x := SafeStrToInt(tmpstr);
+    Result := IntToStr(x);
+  except
+    Result := '';
+  end;
+end;
+
+/// <summary>TODO: Descripción de limpiaGridRecursos.</summary>
+procedure limpiaGridRecursos();
+begin
+  frmMain.grid_Recursos.ClearNormalCells;
+  frmMain.grid_Recursos.RowCount := 1;
+  frmMain.grid_Recursos.cells[1, 0] := 'Código';
+  frmMain.grid_Recursos.cells[2, 0] := 'Descripción';
+  frmMain.grid_Recursos.cells[3, 0] := 'Unidad';
+  frmMain.grid_Recursos.cells[4, 0] := 'Precio';
+  frmMain.grid_Recursos.cells[5, 0] := 'Termino';
+  frmMain.grid_Recursos.cells[6, 0] := 'Cod. Alternativo';
+  frmMain.grid_Recursos.cells[7, 0] := 'Cod. CPC';
+  frmMain.grid_Recursos.cells[8, 0] := 'Especificaciones';
+  frmMain.grid_Recursos.cells[10, 0] := 'F. Actualización';
+  frmMain.grid_Recursos.columns[5].width := 0;
+  frmMain.grid_Recursos.columns[6].width := 0;
+  frmMain.grid_Recursos.columns[9].width := 0;
+  frmMain.grid_Recursos.columns[10].width := 100;
+end;
+
+/// <summary>
+/// Devuelve información calculada o consultada en daCodigoSubCategoriaRecursos.
+/// </summary>
+function daCodigoSubCategoriaRecursos(codCategoriaRecursos: string): string;
+
+var
+  qry: TUniQuery;
+  descripcionRecurso: string;
+  lst: TListView;
+  x: Integer;
+begin
+  x := SafeStrToInt(codCategoriaRecursos);
+  Result := '1';
+  try
+    case x of
+      1:
+        begin
+          lst := frmMain.lvOPCRec1;
+        end;
+      2:
+        begin
+          lst := frmMain.lvOPCRec2;
+        end;
+      3:
+        begin
+          lst := frmMain.lvOPCRec3;
+        end;
+      4:
+        begin
+          lst := frmMain.lvOPCRec4;
+        end;
+      5:
+        begin
+          lst := frmMain.lvOPCRec5;
+        end;
+    end;
+    if lst.ItemCount < 1 then
+      Exit;
+    if lst.itemindex < 0 then
+      Exit;
+
+    descripcionRecurso := lst.Items[lst.itemindex].Text;
+    qry := TUniQuery.Create(nil);
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('select ciu ' + '  from categoriaapus ' +
+          '  where descripcion = :descripcion ' +
+          '   and categoria_base = :categoria_base ' +
+          '   and codBase = :codBase');
+        { *) }
+        ParamByName('codBase').AsString := base_activa.codBase;
+        ParamByName('descripcion').AsString := descripcionRecurso;
+        ParamByName('categoria_base').AsString := codCategoriaRecursos;
+        Open;
+        Result := FieldByName('ciu').AsString;
+        if Result = '' then
+          Result := '0';
+      end;
+    finally
+      qry.Free;
+    end;
+  except
+    Result := '0';
+  end;
+end;
+
+/// <summary>
+/// Devuelve información calculada o consultada en daCodigoCategoriaRecursos.
+/// </summary>
+function daCodigoCategoriaRecursos(): string;
+begin
+  Result := '0';
+  if frmMain.rect_opcrec1.fill.Color = $FFE94E1B then
+  begin
+    Result := '1';
+  end;
+  if frmMain.rect_opcrec2.fill.Color = $FFE94E1B then
+  begin
+    Result := '2';
+  end;
+  if frmMain.rect_opcrec3.fill.Color = $FFE94E1B then
+  begin
+    Result := '3';
+  end;
+  if frmMain.rect_opcrec4.fill.Color = $FFE94E1B then
+  begin
+    Result := '4';
+  end;
+  if frmMain.rect_opcrec5.fill.Color = $FFE94E1B then
+  begin
+    Result := '5';
+  end;
+end;
+
+/// <summary>
+/// Opera sobre datos de APU en daCodigoAPUSCategoriaRecurso.
+/// </summary>
+function daCodigoAPUSCategoriaRecurso(codCompleto: string): string;
+
+var
+  tmpstr: string;
+begin
+  tmpstr := Copy(codCompleto, 1, 1);
+  Result := tmpstr;
+end;
+
+/// <summary>TODO: Descripción de IniciaNuevoRecurso.</summary>
+procedure IniciaNuevoRecurso(LForm: TfrmNuevoRecurso);
+begin
+  LForm.edt_Descripcion.Text := '';
+  LForm.edt_Precio.Text := decimal_correcto('0.00');
+  LForm.edt_codCPC.Text := '';
+  LForm.cbb_UTiempos.itemindex := 0;
+  LForm.mmo_Especificaciones.Text := '';
+end;
+
+/// <summary>
+/// Implementa la lógica principal de activaBaseDatos.
+/// </summary>
+procedure activaBaseDatos(codBase: string);
+var
+  qry: TUniQuery;
+  x: Integer;
+  tmpstr: string;
+  BasesPadres: string;
+  tmplst: TStringList;
+begin
+  qry := TUniQuery.Create(nil);
+  tmplst := TStringList.Create;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      {(*}
+      SQL.Add(
+        'select * ' +
+        '  from bases ' +
+        '  where codBase=:codBase');
+      {*)}
+      ParamByName('codBase').AsString := codBase;
+      Prepare;
+      Open;
+      base_activa.codBase := codBase;
+      base_activa.Nombre := FieldByName('nombre').AsString;
+      base_activa.descripcion := FieldByName('descripcion').AsString;
+      base_activa.indirectos := FieldByName('indirectos').AsFloat;
+      base_activa.TRendimiento := FieldByName('TRendimiento').AsString;
+      base_activa.UMedida := FieldByName('UTiempo').AsString;
+      base_activa.Pais := FieldByName('pais').AsString;
+      base_activa.moneda := FieldByName('moneda').AsString;
+      base_activa.simboloMoneda := FieldByName('simboloMoneda').AsString;
+      x := FieldByName('seguridadIndustrial').AsInteger;
+      if x = 1 then
+        base_activa.SeguridadIndustrial := True
+      else
+        base_activa.SeguridadIndustrial := False;
+      base_activa.observaciones := FieldByName('observaciones').AsString;
+
+      tmpstr := FieldByName('basesPadres').AsString;
+      tmplst := TStringList.Create;
+      tmplst.Text := tmpstr;
+      base_activa.BasesPadres := tmplst;
+      crearCadenacurrency;
+    end;
+  finally
+    qry.Free;
+  end;
+  if base_activa.Nombre <> '' then
+  begin
+    frmMain.lbl_BaseActiva.Text := 'Base Activa: ' + base_activa.Nombre;
+    frmMain.lbl_APUSRendimiento.Text := base_activa.TRendimiento;
+    frmMain.edt_CodigoPresupuesto1.Text := codProyecto;
+    frmMain.lbl_RevisionPresupuesto.Text := revision;
+
+    if base_activa.simboloMoneda = '' then
+    begin
+      base_activa.simboloMoneda := FormatSettings.CurrencyString;
+      ActualizaSimboloMonedaenDB();
+    end;
+    frmMain.lbl_CostoIndirectoAPUS.Text := 'Costo Indirecto Total (' +
+      FloatToStr(base_activa.indirectos) + '%):';
+    DMPresupuesto.QTPresupuestosItems.Active := True;
+    DMPresupuesto.dsTpresupuestosItems.Enabled := True;
+    frmMain.dbGridConnect_TPresupuestosItems.Enabled := True;
+    DMPresupuesto.QTPresupuestosItems.Refresh;
+  end
+  else
+  begin
+    frmMain.lbl_BaseActiva.Text := '';
+  end;
+end;
+
+/// <summary>TODO: Descripción de ActualizaSimboloMonedaenDB.</summary>
+procedure ActualizaSimboloMonedaenDB();
+
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('update bases ' + '   set simboloMoneda=:simboloMoneda ' +
+        '  where codBase=:codBase ');
+      { *) }
+      ParamByName('simboloMoneda').AsString := FormatSettings.CurrencyString;
+      ParamByName('codBase').AsString := base_activa.codBase;
+      Prepare;
+      ExecSQL;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+procedure contieneTanteos(const CodAPU: string);
+var
+  qry: TUniQuery;
+begin
+  contieneTanteo := False;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    qry.SQL.Text :=
+      'SELECT 1 ' +
+      'FROM presupuestos_tanteo_recursos ' +
+      'WHERE codBase        = :codBase ' +
+      '  AND codPresupuesto = :codPresupuesto ' +
+      '  AND revision       = :revision ' +
+      '  AND codAPU         = :codAPU ' +
+      'LIMIT 1';
+
+    qry.ParamByName('codBase').AsString := base_activa.codBase;
+    qry.ParamByName('codPresupuesto').AsString := codProyecto;
+    qry.ParamByName('revision').AsString := revision;
+    qry.ParamByName('codAPU').AsString := CodAPU;
+
+    qry.Open;
+
+    contieneTanteo := not qry.IsEmpty;
+
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de GuardaNuevaBase.
+/// </summary>
+procedure GuardaNuevaBase;
+var
+  qry: TUniQuery;
+  codBase: string;
+  tmpStr: string;
+begin
+  if Trim(frmNuevaBase.edt_NombreBase.Text) = '' then
+    Exit;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    // 🔹 Verificar si ya existe
+    qry.SQL.Text :=
+      'SELECT 1 FROM bases WHERE nombre = :nombre LIMIT 1';
+
+    qry.ParamByName('nombre').AsString :=
+      Trim(frmNuevaBase.edt_NombreBase.Text);
+
+    qry.Open;
+
+    if not qry.IsEmpty then
+      raise Exception.Create('Ya existe una base con ese nombre.');
+
+    qry.Close;
+
+    // 🔹 Insertar nueva base
+    {(*}
+    qry.SQL.Text :=
+      'INSERT INTO bases ( ' +
+      '  codBase, ' +
+      '  nombre, ' +
+      '  descripcion, ' +
+      '  indirectos, ' +
+      '  TRendimiento, ' +
+      '  UTiempo, ' +
+      '  SeguridadIndustrial, ' +
+      '  Observaciones, ' +
+      '  fechaHoraCreacion, ' +
+      '  fechaHoraModificacion, ' +
+      '  sincronizada ) ' +
+      'VALUES ( ' +
+      '  :codBase, ' +
+      '  :nombre, ' +
+      '  :descripcion, ' +
+      '  :indirectos, ' +
+      '  :TRendimiento, ' +
+      '  :UTiempo, ' +
+      '  :SeguridadIndustrial, ' +
+      '  :Observaciones, ' +
+      '  :fechaHoraCreacion, ' +
+      '  :fechaHoraModificacion, '+
+      '  :sincronizada )';
+    {*)}
+    codBase := 'DB' + generaCodigoUnicoShort;
+
+    qry.ParamByName('codBase').AsString := codBase;
+    qry.ParamByName('nombre').AsString :=
+      Trim(frmNuevaBase.edt_NombreBase.Text);
+    qry.ParamByName('descripcion').AsString :=
+      frmNuevaBase.edt_Descripcion.Text;
+
+    try
+      tmpStr := decimal_correcto(frmNuevaBase.edt_Indirectos.Text);
+    except
+      tmpStr := '0';
+    end;
+
+    qry.ParamByName('indirectos').AsFloat :=
+      SafeStrToFloat(tmpStr);
+
+    qry.ParamByName('TRendimiento').AsString :=
+      frmNuevaBase.cbb_Rendimiento.Items[
+      frmNuevaBase.cbb_Rendimiento.ItemIndex
+    ];
+
+    qry.ParamByName('UTiempo').AsString :=
+      frmNuevaBase.cbb_UTiempos.Items[
+      frmNuevaBase.cbb_UTiempos.ItemIndex
+    ];
+
+    qry.ParamByName('Observaciones').AsString :=
+      frmNuevaBase.mmo_Observaciones.Text;
+
+    qry.ParamByName('FechaHoraCreacion').AsDateTime := Now;
+    qry.ParamByName('FechaHoraModificacion').AsDateTime := Now;
+
+    qry.ParamByName('SeguridadIndustrial').AsBoolean :=
+      frmNuevaBase.chk_SeguridadIndustrial.IsChecked;
+
+    qry.ParamByName('Sincronizada').AsBoolean := False;
+
+    qry.ExecSQL;
+
+  finally
+    qry.Free;
+  end;
+
+  // 🔹 Activar solo si se creó correctamente
+  activaBaseDatos(codBase);
+end;
+
+/// <summary>TODO: Descripción de limpiaOPC1.</summary>
+procedure limpiaOPC1();
+begin
+  frmMain.rect_OPC1_Opciones.fill.Bitmap.Bitmap :=
+    frmMain.img_OPC1_Opciones.MultiResBitmap[1].Bitmap;
+  frmMain.rect_OPC1_Subcategorias.fill.Bitmap.Bitmap :=
+    frmMain.img_OPC1_Subcategorias.MultiResBitmap[1].Bitmap;
+  frmMain.rect_OPC1_Recursos.fill.Bitmap.Bitmap :=
+    frmMain.img_OPC1_Recursos.MultiResBitmap[1].Bitmap;
+  frmMain.rect_OPC1_APUS.fill.Bitmap.Bitmap :=
+    frmMain.img_OPC1_Apus.MultiResBitmap[1].Bitmap;
+end;
+
+/// <summary>TODO: Descripción de limpiaOPC2.</summary>
+procedure limpiaOPC2();
+begin
+  frmMain.rect_OPC2_CrearPresupuesto.fill.Bitmap.Bitmap :=
+    frmMain.img_OPC2_CrearPresupuestos.MultiResBitmap[1].Bitmap;
+  frmMain.rect_OPC2_HistoricoPresupuestos.fill.Bitmap.Bitmap :=
+    frmMain.img_OPC2_HistoricoPresupuestos.MultiResBitmap[1].Bitmap;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de decimal_correcto.
+/// </summary>
+function decimal_correcto(datos: string): string;
+
+var
+  FSettings: TFormatSettings;
+  separador: Char;
+begin
+  FSettings := TFormatSettings.Create();
+  separador := FSettings.DecimalSeparator;
+  if separador = '.' then
+  begin
+    datos := AnsiReplaceStr(datos, ',', '.');
+  end
+  else
+  begin
+    datos := AnsiReplaceStr(datos, '.', ',');
+  end;
+  Result := datos;
+end;
+
+/// <summary>TODO: Descripción de limpiasub3db.</summary>
+procedure limpiasub3db();
+begin
+  frmMain.rect_sub3DB1.fill.Color := $007B7B7B;
+  frmMain.rect_sub3DB2.fill.Color := $007B7B7B;
+  frmMain.rect_sub3DB4.fill.Color := $007B7B7B;
+  frmMain.rect_sub3DB5.fill.Color := $007B7B7B;
+end;
+
+/// <summary>TODO: Descripción de limpiaOpc.</summary>
+procedure limpiaOpc();
+begin
+  frmMain.glow_Opc2.Enabled := False;
+  frmMain.glow_Opc3.Enabled := False;
+  frmMain.rect_Opc1.fill.Gradient := frmMain.rect_OpcBase.fill.Gradient;
+  frmMain.rect_Opc2.fill.Gradient := frmMain.rect_OpcBase.fill.Gradient;
+  frmMain.rect_Opc3.fill.Gradient := frmMain.rect_OpcBase.fill.Gradient;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de borraDBCategoria.
+/// </summary>
+procedure borraDBCategoria(const codItem: string);
+var
+  codCategoria, ciu: Integer;
+  qry: TUniQuery;
+begin
+  if Length(codItem) < 4 then
+    Exit;
+
+  codCategoria := SafeStrToInt(LeftStr(codItem, 1));
+  ciu := SafeStrToInt(RightStr(codItem, 3));
+
+  if (codCategoria <= 0) or (ciu <= 0) then
+    Exit;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    DModule_1.con2.StartTransaction;
+    try
+      // 🔹 Borrar recursos asociados (si aplica)
+      {(*}
+      qry.SQL.Text :=
+        'DELETE FROM recursosapu ' +
+        'WHERE categoria_base = :categoria ' +
+        '  AND ciu = :ciu ' +
+        '  AND codBase = :codBase';
+      {*)}
+      qry.ParamByName('categoria').AsInteger := codCategoria;
+      qry.ParamByName('ciu').AsInteger := ciu;
+      qry.ParamByName('codBase').AsString := base_activa.codBase;
+
+      qry.ExecSQL;
+
+      // 🔹 Borrar categoría
+      {(*}
+      qry.SQL.Text :=
+        'DELETE FROM categoriaapus ' +
+        'WHERE categoria_base = :categoria ' +
+        '  AND ciu = :ciu ' +
+        '  AND codBase = :codBase';
+      {*)}
+      qry.ExecSQL;
+
+      DModule_1.con2.Commit;
+
+    except
+      DModule_1.con2.Rollback;
+      raise;
+    end;
+
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de quitaHTML.
+/// </summary>
+function quitaHTML(datos: string): string;
+
+var
+  x, Y: Integer;
+  tmpstr: string;
+begin
+  x := AnsiPos('<', datos);
+  Y := AnsiPos('>', datos);
+  if (x > 0) and (Y > 0) then
+  begin
+    tmpstr := Copy(datos, x, Y - x + 1);
+    datos := ReplaceStr(datos, tmpstr, '');
+    datos := quitaHTML(datos);
+  end;
+  Result := Trim(datos);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de GuardaCategoria.
+/// </summary>
+procedure GuardaCategoria(const datos: item_twvr; const origen: string);
+var
+  qry: TUniQuery;
+begin
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+
+    DModule_1.con2.StartTransaction;
+    try
+      // 🔹 Verificar si ya existe
+      {(*}
+      qry.SQL.Text :=
+        'SELECT 1 ' +
+        'FROM categoriaapus ' +
+        'WHERE categoria_base = :categoria_base ' +
+        '  AND ciu = :ciu ' +
+        '  AND codBase = :codBase ' +
+        'LIMIT 1';
+      {*)}
+
+      qry.ParamByName('categoria_base').AsInteger :=
+        SafeStrToInt(datos.Categoria);
+
+      qry.ParamByName('ciu').AsInteger :=
+        SafeStrToInt(datos.codigo);
+
+      qry.ParamByName('codBase').AsString :=
+        base_activa.codBase;
+
+      qry.Open;
+
+      if not qry.IsEmpty then
+      begin
+        DModule_1.con2.Commit;
+        Exit; // ya existe
+      end;
+
+      qry.Close;
+
+      // 🔹 Insertar nueva categoría
+      {(*}
+      qry.SQL.Text :=
+        'INSERT INTO categoriaapus ( ' +
+        '  categoria_base, ' +
+        '  ciu, ' +
+        '  descripcion, ' +
+        '  codExterno, ' +
+        '  comentarios, ' +
+        '  usado, ' +
+        '  fechaCreacion, ' +
+        '  sincronizada, ' +
+        '  origen, ' +
+        '  codBase, ' +
+        '  nombreBase ) ' +
+        'VALUES ( ' +
+        '  :categoria_base, ' +
+        '  :ciu, ' +
+        '  :descripcion, ' +
+        '  :codExterno, ' +
+        '  :comentarios, ' +
+        '  :usado, ' +
+        '  :fechaCreacion, ' +
+        '  :sincronizada, ' +
+        '  :origen, ' +
+        '  :codBase, ' +
+        '  :nombreBase )';
+      {*)}
+
+      qry.ParamByName('descripcion').AsString := datos.descripcion;
+      qry.ParamByName('codExterno').AsString := datos.codExt;
+      qry.ParamByName('comentarios').AsString := datos.comentarios;
+      qry.ParamByName('usado').AsBoolean := False;
+      qry.ParamByName('fechaCreacion').AsDateTime := Now;
+      qry.ParamByName('sincronizada').AsBoolean := False;
+      qry.ParamByName('origen').AsString := origen;
+      qry.ParamByName('nombreBase').AsString := base_activa.Nombre;
+
+      qry.ExecSQL;
+
+      DModule_1.con2.Commit;
+
+    except
+      DModule_1.con2.Rollback;
+      raise;
+    end;
+
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de connectaDBEmb.
+/// </summary>
+procedure connectaDBEmb;
+begin
+  DModule_1.con2.Close;
+  DModule_1.con2.connect;
+  if DModule_1.con2.Connected then
+  begin
+    frmMain.led_LocalDB.State := True;
+  end
+  else
+  begin
+    frmMain.led_LocalDB.State := False;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de generaCodigoUnico.
+/// </summary>
+function generaCodigoUnico(): string;
+
+var
+  datos: string;
+  test: Integer;
+begin
+  test := Random($7FFFFFFF);
+  datos := FormatDateTime('yyyymmddhhnnss', Now);
+  Result := IntToStr(test) + datos;
+end;
+
+/// <summary>TODO: Descripción de generaCodigoUnicoConfig.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaCodigoUnicoConfig.
+/// </summary>
+function generaCodigoUnicoConfig(): string;
+
+var
+  datos: string;
+  test: Integer;
+begin
+  test := Random($7F);
+  datos := FormatDateTime('yyyymmddhhnnss', Now);
+  Result := IntToStr(test) + datos;
+end;
+
+/// <summary>TODO: Descripción de generaCodigoUnicoShort.</summary>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de generaCodigoUnicoShort.
+/// </summary>
+function generaCodigoUnicoShort(): string;
+
+var
+  datos: string;
+begin
+  datos := FormatDateTime('yyyymmddhhnnss', Now);
+  Result := datos;
+end;
+
+/// <summary>TODO: Descripción de RefreshCategorias.</summary>
+procedure RefreshCategorias;
+var
+  qry: TUniQuery;
+  RootNode: TTMSFNCTreeViewNode;
+  datos: item_twvr;
+  modo, ciu: Integer;
+
+  function Pad3(const N: Integer): string;
+  begin
+    Result := Format('%.3d', [N]);
+  end;
+
+  function GetTree(const AModo: Integer): TTMSFNCTreeView;
+  begin
+    Result := nil;
+    case AModo of
+      1: Result := frmMain.trvw_cat1EquiposHerramientas;
+      2: Result := frmMain.trvw_cat2Materiales;
+      3: Result := frmMain.trvw_cat3Transporte;
+      4: Result := frmMain.trvw_cat4ManodeObra;
+      5: Result := frmMain.trvw_cat5SeguridadIndustrial;
+      6: Result := frmMain.trvw_cat6PreciosUnitarios;
+    end;
+  end;
+
+  procedure BeginAll;
+  begin
+    frmMain.trvw_cat1EquiposHerramientas.BeginUpdate;
+    frmMain.trvw_cat2Materiales.BeginUpdate;
+    frmMain.trvw_cat3Transporte.BeginUpdate;
+    frmMain.trvw_cat4ManodeObra.BeginUpdate;
+    frmMain.trvw_cat5SeguridadIndustrial.BeginUpdate;
+    frmMain.trvw_cat6PreciosUnitarios.BeginUpdate;
+  end;
+
+  procedure EndAll;
+  begin
+    frmMain.trvw_cat1EquiposHerramientas.EndUpdate;
+    frmMain.trvw_cat2Materiales.EndUpdate;
+    frmMain.trvw_cat3Transporte.EndUpdate;
+    frmMain.trvw_cat4ManodeObra.EndUpdate;
+    frmMain.trvw_cat5SeguridadIndustrial.EndUpdate;
+    frmMain.trvw_cat6PreciosUnitarios.EndUpdate;
+  end;
+
+begin
+  limpiatrvwApus;
+
+  if base_activa.codBase = '' then
+    Exit;
+
+  if not DModule_1.con2.Connected then
+    DModule_1.con2.Connect;
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.SQL.Text :=
+      'SELECT Categoria_base, descripcion, codExterno, comentarios, ciu ' +
+      'FROM categoriaapus ' +
+      'WHERE codBase = :codBase ' +
+      'ORDER BY Categoria_base, ciu';
+
+    qry.ParamByName('codBase').AsString := base_activa.codBase;
+    qry.Open;
+
+    BeginAll;
+    try
+      while not qry.Eof do
+      begin
+        modo := qry.Fields[0].AsInteger; // más rápido que FieldByName
+        if (modo >= 1) and (modo <= 6) then
+        begin
+          datos.descripcion := qry.Fields[1].AsString;
+          datos.codExt := qry.Fields[2].AsString;
+          datos.comentarios := qry.Fields[3].AsString;
+
+          ciu := qry.Fields[4].AsInteger;
+          datos.codigo := IntToStr(modo) + Pad3(ciu);
+          datos.accion := 'nuevo';
+
+          with GetTree(modo) do
+          begin
+            if (Nodes.Count > 0) then
+            begin
+              RootNode := Nodes[0];
+              addItemTrvw(GetTree(modo), RootNode, datos);
+            end;
+          end;
+        end;
+
+        qry.Next;
+      end;
+    finally
+      EndAll;
+    end;
+
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de addItemTrvw.
+/// </summary>
+procedure addItemTrvw(trvw: TTMSFNCTreeView; node: TTMSFNCTreeViewNode;
+  DatNodo: item_twvr);
+
+var
+  subn: TTMSFNCTreeViewNode;
+begin
+  trvw.BeginUpdate;
+  subn := trvw.addnode(node);
+  subn.Text[0] := '<font color"#191919">' + DatNodo.Categoria + DatNodo.codigo
+    + '</font>';
+  subn.Text[1] := '<font color"#191919">' + DatNodo.descripcion + '</font>';
+  subn.Text[2] := '<font color"#191919">' + DatNodo.codExt + '</font>';
+  subn.Text[3] := '<font color"#191919">' + DatNodo.comentarios + '</font>';
+  subn.Text[4] := DatNodo.codUnico;
+  subn.Text[5] := DatNodo.accion;
+  trvw.EndUpdate;
+end;
+
+/// <summary>TODO: Descripción de Capitalize.</summary>
+/// <param name="Str">TODO.</param>
+/// <returns>TODO.</returns>
+/// <summary>
+/// Implementa la lógica principal de Capitalize.
+/// </summary>
+function Capitalize(Str: string): string;
+
+var
+  Index: Cardinal;
+begin
+  for Index := 1 to Length(Str) do
+    if (Index = 1) or (Str[Index - 1] = ' ') then
+      if Str[Index] in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+        'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
+        'z', 'á', 'é', 'í', 'ó', 'ú', 'ñ'] then
+        dec(Str[Index], 32)
+      else
+    else if Str[Index] in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+      'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+      'Y', 'Z', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Ñ'] then
+      Inc(Str[Index], 32);
+  Result := Str;
+end;
+
+/// <summary>TODO: Descripción de limpiatrvwApus.</summary>
+
+procedure ResetOneTree(trvw: TTMSFMXTreeView; const idTRVW: Integer;
+  const HideExtCol: Boolean);
+
+var
+  C: TTMSFMXTreeViewColumn;
+  pn: TTMSFMXTreeViewNode;
+  Titulo: string;
+
+  function TreeTitleFromId(const idTRVW: Integer): string;
+  begin
+    case idTRVW of
+      1:
+        Result := 'Equipos y Herramientas';
+      2:
+        Result := 'Materiales';
+      3:
+        Result := 'Transporte';
+      4:
+        Result := 'Mano de Obra';
+      5:
+        Result := 'Seguridad Industrial';
+      6:
+        Result := 'Precios Unitarios';
+    else
+      Result := '';
+    end;
+  end;
+
+begin
+  if trvw = nil then
+    Exit;
+  if (csDestroying in trvw.ComponentState) or
+    (csLoading in trvw.ComponentState) then
+    Exit;
+
+  Titulo := TreeTitleFromId(idTRVW);
+
+  trvw.BeginUpdate;
+  try
+    // ORDEN crítico: primero nodos, luego columnas
+    trvw.ClearNodes;
+    trvw.columns.Clear;
+
+    C := trvw.columns.Add;
+    C.Text := 'Código';
+    C.width := 150;
+    C := trvw.columns.Add;
+    C.Text := 'Descripción';
+    C.width := 350;
+    C.WordWrapping := True;
+    C := trvw.columns.Add;
+    C.Text := 'Cod. Ext';
+    C.width := 150;
+    C := trvw.columns.Add;
+    C.Text := 'Observaciones';
+    C.width := 300;
+
+    trvw.ColumnsAppearance.StretchAll := False;
+
+    // Configuración de columna dentro del mismo BeginUpdate
+    if HideExtCol and (trvw.columns.Count > 2) then
+      trvw.columns[2].width := 0;
+
+    pn := trvw.addnode;
+    pn.Expanded := True;
+
+    pn.Text[0] := Format('<font color="#191919">%s</font>', [Titulo]);
+    if trvw.columns.Count > 1 then
+      pn.Text[1] := '';
+    if trvw.columns.Count > 2 then
+      pn.Text[2] := '';
+    if trvw.columns.Count > 3 then
+      pn.Text[3] := '';
+  finally
+    trvw.EndUpdate;
+  end;
+end;
+
+procedure limpiatrvwApus;
+begin
+  limpia_trvw(frmMain.trvw_cat1EquiposHerramientas, 1);
+  limpia_trvw(frmMain.trvw_cat2Materiales, 2);
+  limpia_trvw(frmMain.trvw_cat3Transporte, 3);
+  limpia_trvw(frmMain.trvw_cat4ManodeObra, 4);
+  limpia_trvw(frmMain.trvw_cat5SeguridadIndustrial, 5);
+  limpia_trvw(frmMain.trvw_cat6PreciosUnitarios, 6);
+end;
+
+procedure ExpandTreeDeferred(trvw: TTMSFNCTreeView);
+begin
+  if trvw = nil then
+    Exit;
+  TThread.Queue(nil,
+    procedure
+    begin
+      if (trvw = nil) then
+        Exit;
+      if (csDestroying in trvw.ComponentState) or
+        (csLoading in trvw.ComponentState) then
+        Exit;
+      try
+        trvw.BeginUpdate;
+        try
+          trvw.ExpandAll;
+        finally
+          trvw.EndUpdate;
+        end;
+      except
+      end;
+    end);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de login OFFLINE.
+/// - Comprueba que existe el archivo INI encriptado de usuarios (Unit_UsersIni).
+/// - Valida usuario/contraseña contra frmMain.users (datos guardados en login online).
+/// - Lee datos del usuario en la BD local (tabla "usuarios").
+/// - Controla que no hayan pasado más de 72 horas desde la última conexión online.
+/// - Verifica que la suscripción no esté caducada.
+/// - Si todo es correcto, deja el sistema listo para trabajar en modo offline.
+/// </summary>
+function compruebaUSuarioOffline_old(User, password: string): Boolean;
+var
+  qry: TUniQuery;
+  FechaFinStr: string;
+  UltConexionStr: string;
+  UltimaConexionDT: TDateTime;
+  HorasSinConexion: Integer;
+  diasSubcripcion: Integer;
+  tmpstr: string;
+begin
+  frmMain.rct_btnLogin.Enabled := False;
+  Result := False;
+
+  // 1) Normalizamos el usuario (igual que en login online)
+  User := LowerCase(User);
+
+  // 2) Limpiamos variables globales de usuario
+  Nombre_usuario := '';
+  Apellidos_usuario := '';
+  Alias_usuario := '';
+  ID_usuario := '';
+  CodUnicoEmpresaActiva := '';
+
+  // 3) Comprobar existencia del archivo INI encriptado de usuarios offline.
+  // Si no existe, no es seguro trabajar offline -> obligamos a cerrar.
+  // (Esto evita que alguien borre el archivo para intentar "reseteos".)
+  //
+  // Ejemplo de uso directo:
+  // if not TUsersIni.Exists then
+  // Application.Terminate;
+  if not TUsersIni.Exists then
+  begin
+    MuestraMensajeGiproy('Advertencia',
+      'No se ha encontrado el archivo de usuarios offline.' + sLineBreak +
+      'Debe iniciar sesión al menos una vez con conexión a internet ' +
+      'para poder usar el modo sin conexión.');
+    Application.Terminate;
+    Exit;
+  end;
+
+  // 4) Validar credenciales contra el INI (usuario offline).
+  // - Este usuario se creó/actualizó en compruebaUsuario (login online).
+
+  // Por robustez: si por algún motivo Users no está creado, lo creamos SIN crear archivo.
+  if not Assigned(frmMain.users) then
+    frmMain.users := TUsersIni.Create; // ACreateIfMissing = False
+
+  if not frmMain.users.CheckCredentials(User, password) then
+    Exit; // No hay usuario en INI o contraseña incorrecta/inactivo
+
+  // 5) Leer datos del usuario en la tabla local "usuarios"
+  qry := TUniQuery.Create(nil);
+  try
+    try
+      with qry do
+      begin
+        Connection := DModule_1.con2;
+        Close;
+        SQL.Clear;
+
+        // Consulta a la BD local por email y estado activo
+        SQL.Add('select * ' + '  from usuarios ' + ' where email = :email ' +
+          '   and estado = 1');
+
+        ParamByName('email').AsString := User;
+        Open;
+
+        if IsEmpty then
+          Exit; // No hay registro local para este usuario
+
+        // 5.1) Cargar datos básicos del usuario desde la tabla local
+        codigo_usuario := FieldByName('idUsuario').AsInteger;
+        Nombre_usuario := FieldByName('nombre').AsString;
+        Apellidos_usuario := FieldByName('apellidos').AsString;
+
+        // 5.2) Alias: sólo si la columna 'alias' existe en la tabla
+        if FieldDefs.IndexOf('alias') <> -1 then
+          Alias_usuario := FieldByName('alias').AsString
+        else
+          Alias_usuario := '';
+
+        ID_usuario := FieldByName('email').AsString;
+
+        // El tipo de usuario está encriptado; lo desencriptamos
+        TUsuario := DModule_1.SalsaEnc_1.Decrypt
+          (FieldByName('tipo').AsString);
+
+        // Cadena encriptada con la fecha fin de inscripción
+        FechaFinStr := FieldByName('FechaFinInscripcion').AsString;
+
+        // 6) Control centralizado de 72 horas sin validación online (uLicenciasPermisos)
+        // - Usa OnGetUltimaVerifLicencias / OnSetUltimaVerifLicencias (DM1) y la
+        // constante MAX_HORAS_SIN_VERIF_LICENCIAS = 72.
+        // - Si devuelve False, no podemos trabajar offline.
+        var
+        HorasDesdeUlt: Double;
+        var
+        EstadoHora: TEstadoHoraSegura;
+        if not PuedeUsarSistemaPorLicencias(HorasDesdeUlt, EstadoHora) then
+          Exit;
+
+        // Cadena encriptada con la última conexión online
+        UltConexionStr := FieldByName('UltConexion').AsString;
+
+        // 5.3) Configuración de empresa activa (para cargar luego)
+        CodUnicoEmpresaActiva := FieldByName('configBase').AsString;
+
+        // 6) Control de 72 horas sin validación online (licencia)
+        // - UltConexion se guarda encriptada como un TDateTime (Double).
+        tmpstr := DModule_1.SalsaEnc_1.Decrypt(UltConexionStr);
+        UltimaConexionDT := SafeStrToFloat(tmpstr); // TDateTime = Double
+
+        if UltimaConexionDT = 0 then
+          Exit; // No tenemos una fecha válida -> obligamos login online
+
+        HorasSinConexion := HoursBetween(Now, UltimaConexionDT);
+        if HorasSinConexion > 72 then
+          Exit; // Más de 72 horas sin validación online -> no permitimos offline
+
+        // 7) Comprobar que la suscripción sigue vigente
+        // - FechaFinInscripcion está encriptada y guardada como TDateTime.
+        tmpstr := DModule_1.SalsaEnc_1.Decrypt(FechaFinStr);
+        diasSubcripcion := Trunc(SafeStrToFloat(tmpstr)) - Trunc(Now);
+        if diasSubcripcion <= 0 then
+          Exit; // Suscripción caducada -> no permitimos offline
+
+        // 8) Si todo es correcto, dejamos el sistema listo como en login online
+        if ID_usuario <> '' then
+        begin
+          // 8.1) Mostrar alias si existe, si no nombre y apellidos
+          if Alias_usuario <> '' then
+            frmMain.lbl_NUsuario.Text := Alias_usuario
+          else
+            frmMain.lbl_NUsuario.Text := 'Usuario: ' + Apellidos_usuario +
+              ', ' + Nombre_usuario;
+
+          // 8.2) Mostrar tipo de suscripción
+          frmMain.lbl_TSuscripcion.Text := 'Tipo: ' + Capitalize(TUsuario);
+
+          // 8.3) Ajustar parámetros numéricos y cadenas de formato
+          ndecimalesMoneda := 2;
+          ndecimalesPresupuesto := 4;
+          crearCadenacurrency;
+          crearCadenaDecimales;
+
+          // 8.4) Login offline correcto
+          Result := True;
+        end;
+      end;
+    except
+      on E: Exception do
+      begin
+        // Cualquier error (BD, desencriptado, etc.) -> devolvemos False
+        Result := False;
+      end;
+    end;
+  finally
+    qry.Free;
+    SincronizarSecuenciasAPU();
+    IniciaReportes('1');
+    CargarDecimalesTrabajo;
+    CargarPrefijosPaises;
+    frmMain.rct_btnLogin.Enabled := True;
+    {  ---- Obsoleto
+    if CodUnicoEmpresaActiva <> '' then
+      rellenaConfigEmpresa();   }
+  end;
+end;
+
+function compruebaUsuarioOffline(
+  User, Password: string): Boolean;
+var
+  DBUserLocal, DBPassLocal: string;
+begin
+  Result := False;
+
+  User := Trim(LowerCase(User));
+
+  if not TGiProyUserManager_v1_0_2.ValidateOfflineLogin(User) then
+    Exit;
+
+  if not TGiProyUserManager_v1_0_2.UserHasDatabase(
+    User, DBUserLocal, DBPassLocal) then
+    Exit;
+
+  try
+    Result := TGiProyDBActivator_v1_0.ActivateUserDatabase(
+      User,
+      DModule_1.con2
+      );
+  except
+    Result := False;
+  end;
+end;
+
+function compruebaUsuario(
+  User, Password: string;
+  out MensajeError: string
+  ): Boolean;
+var
+  esOk: Boolean;
+  DBUserLocal, DBPassLocal: string;
+begin
+  Result := False;
+  MensajeError := '';
+
+  User := Trim(LowerCase(User));
+
+  if (User = '') or (Password = '') then
+  begin
+    MensajeError := 'Usuario o contraseña vacíos.';
+    Exit;
+  end;
+
+  try
+
+    // 1) Login contra API
+    esOk := LoginUsuario(User, Password, UsuarioGiproy);
+
+    if not esOk then
+    begin
+      MensajeError :=
+        'Usuario o contraseña incorrectos. Verifique sus datos.';
+      Exit;
+    end;
+
+    // 2) Intentar migración legacy
+    TGiProyMigration_v1_0_2.TryMigrateLegacy(
+      UsuarioGiproy.email,
+      UsuarioGiproy.idUsuario
+      );
+
+    // 3) Validación hardware
+    if (UsuarioGiproy.computerIDPrincipal <> '') and
+      (UsuarioGiproy.computerIDPrincipal <> HardwareKey) then
+    begin
+      MensajeError :=
+        'Este usuario está vinculado a otro equipo.';
+      Exit;
+    end;
+
+    // 4) Verificar si ya existe base local
+    if not TGiProyUserManager_v1_0_2.UserHasDatabase(
+      User, DBUserLocal, DBPassLocal) then
+    begin
+      // No existe → pedir al servidor
+      if recibeCodigoDBInstalacion(User, Password) <> 'ok' then
+      begin
+        MensajeError :=
+          'No se pudieron obtener credenciales de base de datos.';
+        Exit;
+      end;
+
+      // Guardar credenciales recibidas
+      TGiProyUserManager_v1_0_2.AddOrUpdateUser(
+        UsuarioGiproy.idUsuario,
+        UsuarioGiproy.email,
+        UserDB,
+        PasswordDB
+        );
+    end
+    else
+    begin
+      // Ya existe → usar credenciales locales
+      UserDB := DBUserLocal;
+      PasswordDB := DBPassLocal;
+    end;
+
+    // 5) Activar base de datos
+    if not TGiProyDBActivator_v1_0.ActivateUserDatabase(
+      UsuarioGiproy.email,
+      DModule_1.con2
+      ) then
+    begin
+      MensajeError :=
+        'No se pudo activar la base de datos del usuario.';
+      Exit;
+    end;
+
+    Result := True;
+
+  except
+    on E: Exception do
+    begin
+      MensajeError := E.Message;
+      Result := False;
+    end;
+  end;
+end;
+
+function compruebaUsuario_old(User, password: string;
+  out MensajeError: string): Boolean;
+
+var
+  conDB: TUniConnection;
+  qry: TUniQuery;
+  FechaInicio, FechaFin: TDateTime;
+  FechaUltimoReporteExpress: TDateTime;
+  HardwareIDOnline, HardwareIDMudanza: string;
+  estadoEntrar: Integer;
+  MudanzaActiva: Integer;
+  BackUpActivo: Integer;
+  tmpstr: string;
+  esOk: Boolean;
+  IniFilePath: string;
+begin
+  frmMain.rct_btnLogin.Enabled := False;
+  Result := False;
+
+  // 1) Normalizar usuario (trabajamos siempre en minúsculas para evitar problemas)
+  User := LowerCase(User);
+
+  // 2) Limpiar datos globales de usuario por si venimos de un intento fallido
+  Nombre_usuario := '';
+  Apellidos_usuario := '';
+
+  // 3) Llamamos a la API para validar usuario/contraseña
+  esOk := LoginUsuario(User, password, UsuarioGiproy);
+
+  try
+    try
+      if esOk then
+      begin
+        // 4) Copiamos datos del objeto UsuarioGiproy a variables globales
+        estadoEntrar := 0;
+        Nombre_usuario := UsuarioGiproy.Nombre;
+        codigo_usuario := UsuarioGiproy.idUsuario;
+        Alias_usuario := UsuarioGiproy.Alias;
+        Apellidos_usuario := UsuarioGiproy.Apellidos;
+        ID_usuario := UsuarioGiproy.email;
+        TUsuario := UsuarioGiproy.descripcion;
+        FechaInicio := UsuarioGiproy.FechaInicio;
+        FechaFin := UsuarioGiproy.FechaFin;
+        FechaUltimoReporteExpress := UsuarioGiproy.FechaUltimoReporteExpress;
+        CodUnicoEmpresaActiva := '';
+        codIDUSuario := UsuarioGiproy.idUsuario;
+        // 5) Comprobar si la suscripción está caducada
+        var
+        I := CompareDate(Trunc(FechaFin), Trunc(Now));
+        if I < 0 then
+        begin
+          ID_usuario := '';
+        end;
+
+        // 6) Sólo continuamos si el usuario sigue siendo válido
+        if ID_usuario <> '' then
+        begin
+          // 6.1) Guardamos user/password en variables globales
+          usuarioP := User;
+          passwordP := password;
+
+          // 6.2) Obtenemos código de encriptación actual
+          codSalsaExt := recibeCodigoActualEncriptacion(usuarioP, passwordP);
+          codSalsaExt := AnsiReplaceStr(codSalsaExt, #$A, '');
+
+          // 6.3) Sincronizar usuario OFFLINE en el INI encriptado
+          // Asegurar ruta del archivo INI
+          if archivoIni = '' then
+            IniFilePath := TPath.Combine(TPath.GetDocumentsPath,
+              ChangeFileExt(ExtractFileName(ParamStr(0)), '.ini'))
+          else
+            IniFilePath := archivoIni;
+
+          // Crear o reutilizar el objeto TUsersIni
+          if not Assigned(frmMain.users) then
+          begin
+            frmMain.users := TUsersIni.Create(IniFilePath, True);
+          end
+          else if frmMain.users.FilePath <> IniFilePath then
+          begin
+            frmMain.users.Free;
+            frmMain.users := TUsersIni.Create(IniFilePath, True);
+          end;
+
+          // Verificar si el usuario existe en el INI
+          // En la sección de sincronización offline, añade esto para depurar:
+          if frmMain.users.UserExists(usuarioP) then
+          begin
+            // Usuario ya existe -> verificar si la contraseña coincide
+            if not frmMain.users.CheckCredentials(usuarioP, passwordP) then
+            begin
+              // Si no coincide, actualizamos la contraseña offline
+              frmMain.users.ChangePasswordDirect(usuarioP, passwordP);
+            end;
+          end
+          else
+          begin
+            // Primera vez: crear usuario offline
+            frmMain.users.AddUser(usuarioP, passwordP, TUsuario, True);
+          end;
+
+          // Sincronizar la fecha del último reporte Exprés
+          if FechaUltimoReporteExpress > 0 then
+          begin
+            frmMain.users.SetLastReportDate(usuarioP,
+              FechaUltimoReporteExpress);
+          end;
+
+          // IMPORTANTE: Guardar cambios inmediatamente en el archivo original
+          frmMain.users.UpdateFile;
+
+          // Solo hacer copia de seguridad si es necesario
+          if archivoIni <> '' then
+          begin
+            try
+              // Esperar un momento para liberar el archivo
+              Sleep(10);
+              // Simplemente asegura que los cambios están guardados:
+              frmMain.users.UpdateFile;
+            except
+              on E: Exception do
+              begin
+                // Si falla la copia, continuamos sin ella
+                // LogError('No se pudo guardar copia del INI: ' + E.Message);
+              end;
+            end;
+          end;
+
+          // 6.4) Datos de mudanza/backup y hardware
+          BackUpActivo := UsuarioGiproy.BackUpActivo;
+          MudanzaActiva := UsuarioGiproy.MudanzaActiva;
+          HardwareIDOnline := UsuarioGiproy.computerIDPrincipal;
+          HardwareIDMudanza := UsuarioGiproy.computerIDMudanza;
+
+          // 7) Si todavía no hay HardwareID principal registrado en servidor
+          if HardwareIDOnline = '' then
+          begin
+            if BackUpActivo = 1 then
+            begin
+              estadoEntrar := PreguntarSiRestaurarBackUp();
+            end
+            else
+            begin
+              recibeCodigoDBInstalacion(usuarioP, passwordP);
+              estadoEntrar := InicializaDBGiProy();
+            end;
+          end
+          else
+          begin
+            estadoEntrar := 0;
+            if (HardwareKey = HardwareIDOnline) and (MudanzaActiva = 0) then
+              estadoEntrar := 1;
+
+            if (HardwareKey = HardwareIDOnline) and (MudanzaActiva = 1) then
+              estadoEntrar := PreguntarSiEjecutarMudanza();
+
+            if (HardwareKey = HardwareIDMudanza) and (MudanzaActiva = 1) then
+              estadoEntrar := 1;
+
+            if (HardwareKey <> HardwareIDOnline) and (HardwareIDMudanza <> '')
+              then
+              estadoEntrar := 0;
+          end;
+
+          // 9) Ejecutar acción según estadoEntrar
+          case estadoEntrar of
+            0:
+              begin
+                MensajeError :=
+                  'El sistema no cumple requisitos de acceso 1.';
+                Result := False;
+                Exit;
+              end;
+            1:
+              begin
+                if not activaDBUsuario() then
+                begin
+                  MensajeError :=
+                    'El sistema no cumple requisitos de acceso 2.';
+                  Result := False;
+                  Exit;
+                end;
+
+                TThread.Synchronize(nil,
+                  procedure
+                  begin
+                    connectaDBEmb;
+                    GuardaFechaHoraEntrada();
+                    //  generaBackUP(True);      deshabilitar termporal, chequear comportamiento mas adelante.
+                  end);
+              end;
+            2:
+              begin
+                if not RestaurarMudanzaSistema() then
+                  Exit;
+              end;
+            3:
+              begin
+                if not RestaurarBackup() then
+                  Exit;
+              end;
+          end;
+          // 10.5) Registrar verificación online de licencias
+          RegistrarVerificacionLicenciasOnline(Now);
+
+          // --- Cargar licencias/módulos del usuario actual ---
+          DModule_1.CargarLicenciasUsuario;
+          Result := True;
+
+          // 11) Actualizar interfaz de usuario
+          TThread.Synchronize(nil,
+            procedure
+            begin
+              if Alias_usuario <> '' then
+                frmMain.lbl_NUsuario.Text := Alias_usuario
+              else
+                frmMain.lbl_NUsuario.Text := 'Usuario: ' + Apellidos_usuario +
+                  ', ' + Nombre_usuario;
+
+              frmMain.lbl_TSuscripcion.Text := 'Tipo: ' +
+                Capitalize(TUsuario);
+
+              ndecimalesMoneda := 2;
+              ndecimalesPresupuesto := 4;
+              crearCadenacurrency;
+              crearCadenaDecimales;
+
+              RegistraLogUsuario(codIDUSuario, 1, tmpstr);
+              guardacofiguracionDatosLocalUsuario(User, FechaInicio,
+                FechaFin);
+            end);
+
+          // Sincronizar fecha del último reporte Exprés
+          if (UsuarioGiproy.FechaUltimoReporteExpress > 0) then
+          begin
+            if Assigned(frmMain.users) then
+              frmMain.users.SetLastReportDate(ID_usuario,
+                UsuarioGiproy.FechaUltimoReporteExpress);
+          end;
+        end
+        else
+        begin
+          MensajeError := 'La suscripción ha caducado';
+          Result := False;
+        end;
+      end
+      else
+      begin
+        MensajeError :=
+          'Usuario o contraseña incorrectos. Por favor, verifique sus datos e intente de nuevo.';
+        Result := False;
+        Exit;
+      end;
+    except
+      on E: Exception do
+      begin
+        MensajeError := 'Error no identificado: ' + E.Message;
+        Result := False;
+      end;
+    end;
+  finally
+    TThread.Synchronize(nil,
+      procedure
+      begin
+        frmMain.rct_btnLogin.enabled := True;
+        SincronizarSecuenciasAPU();
+        IniciaReportes('1');
+        CargarDecimalesTrabajo;
+        CargarPrefijosPaises;
+      end);
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de guardacofiguracionDatosLocalUsuario.
+/// </summary>
+procedure guardacofiguracionDatosLocalUsuario(email: string;
+  FechaInicio, FechaFin: TDateTime);
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+  fechaUltimaConexion: Double;
+begin
+  qry := TUniQuery.Create(nil);
+  if FechaHoraInternet > 0 then
+    fechaUltimaConexion := FechaHoraInternet
+  else
+    fechaUltimaConexion := Now;
+  try
+    with qry do
+    begin
+      Connection := DModule_1.con2;
+      Close;
+      SQL.Clear;
+      { (* }
+      SQL.Add('select email ' + '  from usuarios ' + ' where email=:email');
+      { *) }
+      ParamByName('email').AsString := email;
+      Prepare;
+      Open;
+      tmpstr := FieldByName('email').AsString;
+      if tmpstr = '' then
+      begin
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('INSERT INTO usuarios ( ' + '  id, ' + '  nombre, ' +
+          '  apellidos, ' + '  alias, ' + '  email, ' + '  password, ' +
+          '  id_usuario, ' + '  tipo, ' + '  UltConexion, ' +
+          '  fechaInicioInscripcion, ' + '  fechaFinInscripcion, ' +
+          '  estado) ' + 'VALUES ( ' + '  :id, ' + '  :nombre, ' +
+          '  :apellidos, ' + '  :alias, ' + '  :email, ' + '  :password, ' +
+          '  :id_usuario, ' + '  :tipo, ' + '  :UltConexion, ' +
+          '  :fechaInicioInscripcion, ' + '  :fechaFinInscripcion, ' +
+          '  :estado)');
+        { *) }
+        ParamByName('id').AsInteger := codigo_usuario;
+        ParamByName('nombre').AsString := Nombre_usuario;
+        ParamByName('apellidos').AsString := Apellidos_usuario;
+        ParamByName('alias').AsString := Alias_usuario;
+        ParamByName('email').AsString := frmMain.edt_UUsuario.Text;
+        tmpstr := DModule_1.SalsaEnc_1.Encrypt(frmMain.edt_UPassword.Text);
+        ParamByName('password').AsString := tmpstr;
+        ParamByName('id_usuario').AsString := ID_usuario;
+        ParamByName('tipo').AsString := TUsuario;
+        tmpstr := DModule_1.SalsaEnc_1.Encrypt
+          (FloatToStr(fechaUltimaConexion));
+        ParamByName('UltConexion').AsString := tmpstr;
+        ParamByName('fechaInicioInscripcion').AsDateTime := FechaInicio;
+        ParamByName('fechaFinInscripcion').AsDateTime := FechaFin;
+        ParamByName('estado').AsInteger := 1;
+        Prepare;
+        ExecSQL;
+      end
+      else
+      begin
+        Close;
+        SQL.Clear;
+        { (* }
+        SQL.Add('UPDATE usuarios ' + '   SET password = :password, ' +
+          '       tipo = :tipo, ' + '       ultConexion = :ultConexion, ' +
+          '       fechaInicioInscripcion = :fechaInicioInscripcion, ' +
+          '       fechaFinInscripcion = :fechaFinInscripcion ' +
+          'WHERE email = :email');
+        { *) }
+        ParamByName('email').AsString := email;
+        ParamByName('password').AsString := DModule_1.SalsaEnc_1.Encrypt
+          (frmMain.edt_UPassword.Text);
+        ParamByName('tipo').AsString := TUsuario;
+        tmpstr := DModule_1.SalsaEnc_1.Encrypt
+          (FloatToStr(fechaUltimaConexion));
+        ParamByName('UltConexion').AsString := tmpstr;
+        ParamByName('fechaInicioInscripcion').AsDateTime := FechaInicio;
+        ParamByName('fechaFinInscripcion').AsDateTime := FechaFin;
+        Prepare;
+        ExecSQL;
+      end;
+    end;
+  finally
+    qry.Free;
+  end;
+end;
+
+/// <summary>TODO: Descripción de limpia_trvwAPUS.</summary>
+/// <param name="trvw">TODO.</param>
+/// <summary>
+/// Opera sobre datos de APU en limpia_trvwAPUS.
+/// </summary>
+
+procedure limpia_trvwAPUS(trvw: TTMSFMXTreeView);
+
+var
+  C: TTMSFMXTreeViewColumn;
+  pn: TTMSFMXTreeViewNode;
+  x: Integer;
+begin
+  trvw.ClearColumns;
+  trvw.ClearNodes;
+
+  trvw.BeginUpdate;
+  C := trvw.columns.Add;
+  C.Text := 'Código';
+  C.width := 150;
+  C := trvw.columns.Add;
+  C.Text := 'Descripción';
+  C.width := 350;
+  C.WordWrapping := True;
+  C := trvw.columns.Add;
+  C.Text := 'Cod. Ext';
+  C.width := 150;
+  C := trvw.columns.Add;
+  C.Text := 'Observaciones';
+  C.width := 300;
+  trvw.ColumnsAppearance.StretchAll := False;
+  for x := 1 to 5 do
+  begin
+    pn := trvw.addnode();
+    case x of
+      1:
+        pn.Text[0] := '<font color"#191919">Equipos y Herramientas</font>';
+      2:
+        pn.Text[0] := '<font color"#191919">Materiales</font>';
+      3:
+        pn.Text[0] := '<font color"#191919">Transporte</font>';
+      4:
+        pn.Text[0] := '<font color"#191919">Mano de Obra</font>';
+      5:
+        pn.Text[0] := '<font color"#191919">Seguridad Industrial</font>';
+      6:
+        pn.Text[0] := '<font color"#191919">Precios Unitarios</font>';
+    end;
+  end;
+
+  pn.Extended := True;
+  trvw.EndUpdate;
+  trvw.ExpandAll;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de limpia_trvw.
+/// </summary>
+procedure limpia_trvw(var trvw: TTMSFNCTreeView; const idTRVW: Integer);
+
+var
+  C: TTMSFNCTreeViewColumn;
+  pn: TTMSFNCTreeViewNode;
+  Titulo: string;
+
+  procedure RecreateTreeView(var ATv: TTMSFNCTreeView;
+    const TemplateTV: TTMSFNCTreeView);
+
+  var
+    OldTV, NewTV: TTMSFNCTreeView;
+    AOwner: TComponent;
+    AParent: TFmxObject;
+
+    // estado visual básico
+    AAlign: TAlignLayout;
+    APos: TPointF;
+    ASize: TSizeF;
+    AVisible: Boolean;
+    AEnabled: Boolean;
+    AHitTest: Boolean;
+
+    // eventos que usas
+    EKeyUp: TKeyEvent;
+    EDblClick: TNotifyEvent;
+  begin
+    OldTV := ATv;
+    if OldTV = nil then
+      Exit;
+
+    AOwner := OldTV.Owner; // normalmente el form/datamodule
+    AParent := OldTV.Parent; // contenedor visual
+
+    // guarda propiedades importantes
+    AAlign := OldTV.Align;
+    APos := OldTV.Position.Point;
+    ASize := TSizeF.Create(OldTV.width, OldTV.Height);
+    AVisible := OldTV.Visible;
+    AEnabled := OldTV.Enabled;
+    AHitTest := OldTV.HitTest;
+
+    // guarda eventos
+    EKeyUp := OldTV.OnKeyUp;
+    EDblClick := OldTV.OnDblClick;
+
+    // desconecta para que no dispare cosas mientras lo destruyes
+    OldTV.OnKeyUp := nil;
+    OldTV.OnDblClick := nil;
+
+    // destruye el TreeView “corrupto”
+    OldTV.Parent := nil;
+    OldTV.Free;
+
+    // crea uno nuevo limpio
+    NewTV := TTMSFNCTreeView.Create(AOwner);
+    try
+      NewTV.Parent := AParent;
+      NewTV.Align := AAlign;
+
+      // si Align=Client, Position/Size puede ignorarse; no pasa nada
+      NewTV.Position.Point := APos;
+      NewTV.SetBounds(NewTV.Position.x, NewTV.Position.Y, ASize.cx, ASize.cy);
+
+      NewTV.Visible := AVisible;
+      NewTV.Enabled := AEnabled;
+      NewTV.HitTest := AHitTest;
+
+      // restaura eventos
+      NewTV.OnKeyUp := EKeyUp;
+      NewTV.OnDblClick := EDblClick;
+
+      NewTV.PopupMenu := frmMain.pm_subCategorias;
+      // Copiar propiedades visuales válidas
+      if Assigned(TemplateTV) then
+      begin
+        // Propiedades básicas
+        NewTV.Color := TemplateTV.Color;
+        NewTV.Opacity := TemplateTV.Opacity;
+        NewTV.AdaptToStyle := TemplateTV.AdaptToStyle;
+        NewTV.HitTest := TemplateTV.HitTest;
+        NewTV.HorizontalScrollBar.Visible :=
+          TemplateTV.HorizontalScrollBar.Visible;
+        NewTV.EnableDragHighlight := TemplateTV.EnableDragHighlight;
+        NewTV.DisableFocusEffect := TemplateTV.DisableFocusEffect;
+
+        // Objetos complejos de apariencia
+        if Assigned(TemplateTV.NodesAppearance) then
+          NewTV.NodesAppearance.Assign(TemplateTV.NodesAppearance);
+
+        if Assigned(TemplateTV.GroupsAppearance) then
+          NewTV.GroupsAppearance.Assign(TemplateTV.GroupsAppearance);
+
+        if Assigned(TemplateTV.ColumnsAppearance) then
+          NewTV.ColumnsAppearance.Assign(TemplateTV.ColumnsAppearance);
+
+        if Assigned(TemplateTV.fill) then
+          NewTV.fill.Assign(TemplateTV.fill);
+
+        if Assigned(TemplateTV.GlobalFont) then
+          NewTV.GlobalFont.Assign(TemplateTV.GlobalFont);
+
+        if Assigned(TemplateTV.ColumnStroke) then
+          NewTV.ColumnStroke.Assign(TemplateTV.ColumnStroke);
+
+        if Assigned(TemplateTV.Interaction) then
+          NewTV.Interaction.Assign(TemplateTV.Interaction);
+      end;
+
+      ATv := NewTV;
+    except
+      NewTV.Free;
+      raise;
+    end;
+  end;
+
+begin
+  if trvw = nil then
+    Exit;
+  if (csDestroying in trvw.ComponentState) or
+    (csLoading in trvw.ComponentState) then
+    Exit;
+
+  case idTRVW of
+    1:
+      Titulo := 'Equipos y Herramientas';
+    2:
+      Titulo := 'Materiales';
+    3:
+      Titulo := 'Transporte';
+    4:
+      Titulo := 'Mano de Obra';
+    5:
+      Titulo := 'Seguridad Industrial';
+    6:
+      Titulo := 'Precios Unitarios';
+  else
+    Titulo := '';
+  end;
+
+  FClearingTree := True;
+  try
+    // FIX DEFINITIVO: en el TreeView 6, recrear en vez de limpiar
+    if idTRVW = 6 then
+      RecreateTreeView(trvw, frmMain.trvw_cat4ManodeObra);
+
+    trvw.BeginUpdate;
+    try
+      trvw.Nodes.Clear;
+      trvw.columns.Clear;
+
+      C := trvw.columns.Add;
+      C.Text := 'Código';
+      C.width := 150;
+      C := trvw.columns.Add;
+      C.Text := 'Descripción';
+      C.width := 350;
+      C.WordWrapping := True;
+      C := trvw.columns.Add;
+      C.Text := 'Cod. Ext';
+      C.width := 0;
+      C := trvw.columns.Add;
+      C.Text := 'Observaciones';
+      C.width := 300;
+
+      trvw.ColumnsAppearance.StretchAll := False;
+
+      pn := trvw.addnode;
+      pn.Expanded := True;
+
+      pn.Text[0] := Format('<font color="#191919">%s</font>', [Titulo]);
+      if trvw.columns.Count > 1 then
+        pn.Text[1] := '';
+      if trvw.columns.Count > 2 then
+        pn.Text[2] := '';
+      if trvw.columns.Count > 3 then
+        pn.Text[3] := '';
+    finally
+      trvw.EndUpdate;
+    end;
+  finally
+    FClearingTree := False;
+  end;
+end;
+
+/// <summary>
+/// Devuelve información calculada o consultada en DarMatrizProductosWP.
+/// </summary>
+procedure DarMatrizProductosWP(var matrizProductos: TArray<string>);
+
+var
+  Ok: Boolean;
+  error: string;
+  Param: TParametroValor;
+begin
+  Ok := ObtenerParametroDesdePHP(GlobalAuthToken, 6, Param, error);
+  if not Ok then
+    Exit;
+  matrizProductos := SplitByCommas(Param.valor);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de SplitByCommas.
+/// </summary>
+function SplitByCommas(const Input: string): TArray<string>;
+begin
+  Result := Input.Split([',']);
+end;
+
+/// <summary>
+/// Implementa la lógica principal de CSVtoMatriz.
+/// </summary>
+function CSVtoMatriz(const ArchivoCSV: string; Delimitador: Char = ',')
+  : TArray<TArray<string>>;
+
+var
+  Lineas: TStringList;
+  I: Integer;
+  Fila: TArray<string>;
+begin
+  Lineas := TStringList.Create;
+  try
+    Lineas.Text := ArchivoCSV;
+    SetLength(Result, Lineas.Count);
+
+    for I := 0 to Lineas.Count - 1 do
+    begin
+      Fila := Lineas[I].Split([Delimitador]);
+      Result[I] := Fila;
+    end;
+  finally
+    Lineas.Free;
+  end;
+end;
+
+/// <summary>
+/// Implementa la lógica principal de AbrirEnlace.
+/// </summary>
+procedure AbrirEnlace(const AUrl: string);
+begin
+  ShellExecute(0, 'open', PChar(AUrl), nil, nil, SW_SHOWNORMAL);
+end;
+
+/// <summary>
+/// Carga desde el servidor las licencias/módulos del usuario actual,
+/// rellenando FLicenciasUsuario.
+///
+/// Devuelve True si ha podido cargar al menos un módulo.
+///
+/// Ejemplo de uso:
+/// if DM1.CargarLicenciasUsuario then
+/// ShowMessage('Licencias cargadas correctamente');
+/// </summary>
+function TDModule_1.CargarLicenciasUsuario: Boolean;
+
+var
+  Complementos: TArray<Integer>;
+  Licencias: TInfoLicenciasUsuario;
+  EstadoHora: TEstadoHoraSegura;
+  HorasDesdeUlt: Double;
+  TokenActual: string;
+begin
+  Result := False;
+
+  // Precondiciones mínimas:
+  // - Debe haber un usuario logeado (codIDUSuario / usuarioP).
+  if codIDUSuario = 0 then
+    Exit;
+
+  // 1) Usamos el token JWT global que se rellena en LoginUsuario
+  // GlobalAuthToken se obtiene del JSON 'token' de la API de login.
+  //
+  // Ejemplo de uso en otro sitio:
+  // GlobalAuthToken := JSONRoot.GetValue<string>('token', '');
+  TokenActual := GlobalAuthToken;
+
+  // Si por algún motivo no hay token, no podemos llamar a la API de licencias
+  if TokenActual.Trim = '' then
+    Exit;
+
+  // 2) Antes de nada, comprobamos que el sistema sigue autorizado por la
+  // regla de las 72 horas centralizada en uLicenciasPermisos.
+  if not PuedeUsarSistemaPorLicencias(HorasDesdeUlt, EstadoHora) then
+    Exit;
+
+  // 3) Obtenemos la lista de IdComplementos que queremos evaluar
+  Complementos := ObtenerComplementosUsuarioActual;
+  if Length(Complementos) = 0 then
+    Exit;
+
+  // 4) Llamamos a uLicenciasPermisos para rellenar la estructura de licencias
+  if CargarLicenciasUsuarioPorFecha(codIDUSuario, // id de usuario actual
+    TokenActual, // GlobalAuthToken (JWT)
+    Complementos, // lista de módulos/complementos a comprobar
+    Licencias // estructura de salida
+    ) then
+  begin
+    FLicenciasUsuario := Licencias;
+    Result := True;
+  end;
+end;
+
+procedure RemovePersistentFields(DS: TDataSet);
+var
+  i: Integer;
+begin
+  if not Assigned(DS) then
+    Exit;
+  // Elimina SOLO fields persistentes (los creados en diseño)
+  for i := DS.FieldCount - 1 downto 0 do
+    if DS.Fields[i].FieldKind = fkData then
+      DS.Fields[i].Free;
+end;
+
+procedure TDModule_1.con2AfterConnect(Sender: TObject);
+begin
+  // Evita el error 1267 (mix of collations) al trabajar con parámetros/strings
+//  con2.ExecSQL('SET NAMES utf8mb4 COLLATE utf8mb4_general_ci');
+  con2.ExecSQL('SET collation_connection = ''utf8mb4_general_ci''');
+  con2.ExecSQL('SET character_set_connection = ''utf8mb4''');
+
+  // Recomendado para consistencia (opcional, pero útil)
+  con2.ExecSQL('SET sql_mode = ''ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION''');
+end;
+
+procedure TDModule_1.DataModuleCreate(Sender: TObject);
+begin
+  // Enlazar DM1 con uLicenciasPermisos para la regla de 72 horas
+  uLicenciasPermisos.OnGetUltimaVerifLicencias := GetUltimaVerifLicencias;
+  uLicenciasPermisos.OnSetUltimaVerifLicencias := SetUltimaVerifLicencias;
+  { con2.SpecificOptions.Values['UseUnicode'] := 'True';
+   con2.SpecificOptions.Values['Charset'] := 'utf8mb4'; }
+end;
+
+function TDModule_1.GetUltimaVerifLicencias: TDateTime;
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  Result := 0;
+
+  // Ejemplo de uso:
+  // var DT: TDateTime;
+  // begin
+  // DT := DM1.GetUltimaVerifLicencias;
+  // end;
+
+  if usuarioP = '' then
+    Exit; // Sin usuario actual definido
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.SQL.Text := 'select UltConexion ' + '  from usuarios ' +
+      ' where email = :email ' + '   and estado = 1';
+    qry.ParamByName('email').AsString := usuarioP;
+    qry.Open;
+
+    if qry.IsEmpty then
+      Exit;
+
+    // UltConexion está encriptado como string con un TDateTime (Double)
+    tmpstr := DModule_1.SalsaEnc_1.Decrypt(qry.FieldByName('UltConexion')
+      .AsString);
+    Result := SafeStrToFloat(tmpstr);
+  finally
+    qry.Free;
+  end;
+end;
+
+function TDModule_1.ObtenerComplementosUsuarioActual: TArray<Integer>;
+
+var
+  Lista: TList<Integer>;
+begin
+  // Ejemplo de uso interno:
+  // Complementos := ObtenerComplementosUsuarioActual;
+  //
+  // AQUÍ debes consultar tu base de datos local para saber qué IdComplementos
+  // hay que evaluar para el usuario actual (planes, packs, módulos sueltos, etc.).
+  //
+  // Ejemplo orientativo (AJUSTAR A TU ESQUEMA REAL):
+  // - Tabla "Productos" con campo "idComplementos" y "TipoProducto".
+  // - Podrías limitar a TipoProducto > 0 para módulos/licencias restringidas.
+
+  Lista := TList<Integer>.Create;
+  try
+    // TODO: sustituir este bloque por tu consulta real
+    {
+      with TUniQuery.Create(nil) do
+      try
+      Connection := DModule_1.con2;
+      SQL.Text :=
+      'select idComplementos ' +
+      '  from Productos ' +
+      ' where TipoProducto > 0'; // por ejemplo
+      Open;
+      while not Eof do
+      begin
+      Lista.Add(FieldByName('idComplementos').AsInteger);
+      Next;
+      end;
+      finally
+      Free;
+      end;
+    }
+
+    // Por ahora devolvemos lo que haya en Lista (aunque esté vacía)
+    Result := Lista.ToArray;
+  finally
+    Lista.Free;
+  end;
+end;
+
+procedure TDModule_1.SetUltimaVerifLicencias(const AValor: TDateTime);
+
+var
+  qry: TUniQuery;
+  tmpstr: string;
+begin
+  // Ejemplo de uso:
+  // begin
+  // DM1.SetUltimaVerifLicencias(Now);
+  // end;
+
+  if usuarioP = '' then
+    Exit;
+
+  tmpstr := FloatToStr(AValor); // TDateTime = Double
+
+  qry := TUniQuery.Create(nil);
+  try
+    qry.Connection := DModule_1.con2;
+    qry.SQL.Text := 'update usuarios ' + '   set UltConexion = :UltConexion '
+      + ' where email = :email ' + '   and estado = 1';
+    qry.ParamByName('email').AsString := usuarioP;
+    qry.ParamByName('UltConexion').AsString :=
+      DModule_1.SalsaEnc_1.Encrypt(tmpstr);
+    qry.ExecSQL;
+  finally
+    qry.Free;
+  end;
+end;
+
+function TDModule_1.TieneLicenciaModulo(const AIdComplemento
+  : Integer): Boolean;
+begin
+  // Ejemplo de uso:
+  // if DM1.TieneLicenciaModulo(1) then
+  // btnModulo1.Enabled := True;
+
+  Result := FLicenciasUsuario.TieneModuloActivo(AIdComplemento);
+end;
+
+end. { -- End of AutoDoc -- }
+

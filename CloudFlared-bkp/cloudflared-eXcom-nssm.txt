@@ -1,0 +1,8 @@
+nssm install cloudflared-eXcom C:\Users\dream\AppData\Local\Microsoft\WinGet\Packages\Cloudflare.cloudflared_Microsoft.Winget.Source_8wekyb3d8bbwe\cloudflared.exe
+nssm set cloudflared-eXcom AppParameters "tunnel run --token eyJhIjoiNDFiMDRjYzk2MDNiMDE4Zjc4Mjc2Mjg1MmRlMWM1OWUiLCJzIjoiTkRGak5XSXlPVFF0TjJWbE9TMDBOelkzTFdFM09UUXRZalE1T1dVMU1HVmxNV1JoIiwidCI6ImI4ZjE2MWE3LTdjMjMtNDY2ZC05YWM0LTc5ZDMxMzU4OTc2NiJ9"
+nssm set cloudflared-eXcom AppDirectory C:\Users\dream
+nssm set cloudflared-eXcom AppExit Default Restart
+nssm set cloudflared-eXcom DisplayName cloudflared-eXcom
+nssm set cloudflared-eXcom ObjectName LocalSystem
+nssm set cloudflared-eXcom Start SERVICE_AUTO_START
+nssm set cloudflared-eXcom Type SERVICE_WIN32_OWN_PROCESS

@@ -1,0 +1,125 @@
+object frmNotasRevisionExt: TfrmNotasRevisionExt
+  Size.Width = 450.000000000000000000
+  Size.Height = 130.000000000000000000
+  Size.PlatformDefault = False
+  object lyt_2: TLayout
+    Align = Client
+    Size.Width = 450.000000000000000000
+    Size.Height = 130.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object mmoNotas: TMemo
+      Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+      DataDetectorTypes = []
+      Lines.Strings = (
+        'Ejemplo de Nota de Revisi'#243'n')
+      ReadOnly = True
+      Align = Client
+      Margins.Left = 5.000000000000000000
+      Size.Width = 445.000000000000000000
+      Size.Height = 87.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Viewport.Width = 445.000000000000000000
+      Viewport.Height = 87.000000000000000000
+      object lbl_idItem: TLabel
+        Position.X = 272.000000000000000000
+        Position.Y = 24.000000000000000000
+        Text = 'lbl_idItem'
+        Visible = False
+        TabOrder = 0
+      end
+    end
+    object rect_2: TRectangle
+      Align = Top
+      Fill.Color = claDarkorange
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 3.000000000000000000
+      Position.X = 5.000000000000000000
+      Position.Y = 3.000000000000000000
+      Size.Width = 445.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Thickness = 0.000000000000000000
+      object lbl_Fecha: TLabel
+        Align = Top
+        StyledSettings = [Size, Style, FontColor]
+        Margins.Right = 10.000000000000000000
+        Size.Width = 435.000000000000000000
+        Size.Height = 20.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Family = 'Poppins'
+        TextSettings.HorzAlign = Trailing
+        Text = '12/12/2023'
+        TabOrder = 1
+      end
+      object lbl_Seccion: TLabel
+        Align = Top
+        StyledSettings = [Size]
+        Margins.Left = 10.000000000000000000
+        Position.X = 10.000000000000000000
+        Position.Y = 20.000000000000000000
+        Size.Width = 435.000000000000000000
+        Size.Height = 20.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Family = 'Poppins'
+        TextSettings.Font.StyleExt = {00050000000000000004000000}
+        TextSettings.FontColor = claWhite
+        Text = '12/12/2023'
+        TabOrder = 0
+      end
+    end
+    object lyt_1: TLayout
+      Align = Bottom
+      Position.Y = 116.000000000000000000
+      Size.Width = 450.000000000000000000
+      Size.Height = 14.000000000000000000
+      Size.PlatformDefault = False
+      Visible = False
+      TabOrder = 2
+      object rect_1: TRectangle
+        Align = Client
+        Fill.Color = claWhite
+        Size.Width = 450.000000000000000000
+        Size.Height = 14.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Thickness = 0.000000000000000000
+        object rect_3: TRectangle
+          Align = Right
+          Fill.Bitmap.Bitmap.PNG = {
+            89504E470D0A1A0A0000000D4948445200000060000000600806000000E29877
+            380000000473424954080808087C086488000002AE49444154789CED9D4D8A14
+            411085BF76A1CCA85BC58D38D71046F034E2E504D173B81157E28C0BA5D58D3F
+            38D3E288EDA2CCA54C55C50BB32AF37D90CB8AEE88D79119F968BAC118638C31
+            C618638C31C618638C31C618638CF9370F8017C04F60DFC9BAF89BF3B1A07E21
+            0E818FD42F48ADF501388814F04AE461E008B8158CB1666E03F72201A2027C09
+            3EDF025F230F6F822FBE01CE08B6E18A39076E306C47B38876C01E380DC65833
+            A7048A0F7101004E0431D64A38770B10631102F4BE05857007C4584407F42CC0
+            9B6880E8180AC36DF8BB28D69AD803D7815D2488A203CE19AEE4BDB125587CD0
+            08007D6E43929C2DC07C2C406524E3B74A801EEF02E10908DC011116B505493E
+            0D2B4322806A76DF30DC050E45F1964ED8862EA83A600FBC15C55A03611BBAA0
+            1200FA3A0764B95A80792C52809E46D1450AE00E988152809E465199004A0BF9
+            80E11B12ADDBD2121BBAA0EC801D7DD8D2121BBAA01400FA3807A4395A80E958
+            80CA2C5A801EEE028B16A0875174D102780B9A887A666FDD9696D9D0057507B4
+            6E4BCB6CE8825A00687B1B929F7116601AF2DC320468791495E7962140CBA3E8
+            2A3AC05BD00432ACE3566D69A90D5DC8E880566D69A90D5DC81000DADC8652CE
+            360B309E949C2CC07852C66B0B301E7740652C4065520EE1AC59BD355BFA0CB8
+            89D80985BC0E68CD9696DBD0852C01A0AD6D282D170B300E0B5099348BDD028C
+            23CD62B700E348CB25D3326EC596FECD6043FFC8089ED901ADD8D25B928A0FB9
+            02401BDB506A0E16E0722C406552BFE5912DC0ABE4F8FF8397B5DF40843BC02F
+            EAFFC8F6DC7541F26F636777C016789AFC1A993C013ED57E13518E806FD4FF34
+            4F5D9F81BB09F5A8C243867B41EDA28E5D3B863FA6688A6386A9A876712F5BAF
+            81FB4935A8CE35E031F01C784FFD6297F50E78063C02AEA6656F8C31C618638C
+            31C01F0331DC473164D9030000000049454E44AE426082}
+          Fill.Bitmap.WrapMode = TileStretch
+          Fill.Kind = Bitmap
+          Position.X = 436.000000000000000000
+          Size.Width = 14.000000000000000000
+          Size.Height = 14.000000000000000000
+          Size.PlatformDefault = False
+          Stroke.Thickness = 0.000000000000000000
+        end
+      end
+    end
+  end
+end

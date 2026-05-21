@@ -1,0 +1,82 @@
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
+from datetime import date, datetime
+
+class EmpresaBase(BaseModel):
+    nombre: str
+    codigo: Optional[str] = None
+    ruc: Optional[str] = None
+    direccion: Optional[str] = None
+    localidad: Optional[str] = None
+    canton: Optional[str] = None
+    provincia: Optional[str] = None
+    pais: Optional[str] = None
+    telefono: Optional[str] = None
+    email: Optional[str] = None
+    contacto_nombre: Optional[str] = None
+    contacto_email: Optional[str] = None
+    contacto_telefono: Optional[str] = None
+    logo_url: Optional[str] = None
+    activa: bool = True
+    limite_administradores: int = 1
+    limite_usuarios: int = 1
+    license_start_date: Optional[date] = None
+    license_end_date: Optional[date] = None
+    decimales_moneda: int = 2
+    decimales_calculos: int = 4
+    use_omniclass: bool = False
+    marketplace_can_sell: bool = True
+    proy_prefijo: Optional[str] = None
+    proy_periodo: Optional[str] = None
+    proy_secuencial: int = 1
+    proy_secuencial_size: int = 9
+    plantillas_config: Optional[dict] = None
+    session_timeout_minutes: int = 30
+
+
+
+class EmpresaCreate(EmpresaBase):
+    pass
+
+class EmpresaUpdate(BaseModel):
+    nombre: Optional[str] = None
+    codigo: Optional[str] = None
+    ruc: Optional[str] = None
+    direccion: Optional[str] = None
+    localidad: Optional[str] = None
+    canton: Optional[str] = None
+    provincia: Optional[str] = None
+    pais: Optional[str] = None
+    telefono: Optional[str] = None
+    email: Optional[str] = None
+    contacto_nombre: Optional[str] = None
+    contacto_email: Optional[str] = None
+    contacto_telefono: Optional[str] = None
+    logo_url: Optional[str] = None
+    activa: Optional[bool] = None
+    limite_administradores: Optional[int] = None
+    limite_usuarios: Optional[int] = None
+    license_start_date: Optional[date] = None
+    license_end_date: Optional[date] = None
+    decimales_moneda: Optional[int] = None
+    decimales_calculos: Optional[int] = None
+    use_omniclass: Optional[bool] = None
+    marketplace_can_sell: Optional[bool] = None
+    proy_prefijo: Optional[str] = None
+    proy_periodo: Optional[str] = None
+    proy_secuencial: Optional[int] = None
+    proy_secuencial_size: Optional[int] = None
+    plantillas_config: Optional[dict] = None
+    session_timeout_minutes: Optional[int] = None
+
+
+
+class EmpresaResponse(EmpresaBase):
+    id: int
+    fecha_creacion: datetime
+    license_start_date: Optional[date] = None
+    license_end_date: Optional[date] = None
+    total_administradores: int = 0
+    total_usuarios: int = 0
+
+    model_config = ConfigDict(from_attributes=True)

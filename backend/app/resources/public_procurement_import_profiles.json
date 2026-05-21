@@ -1,0 +1,92 @@
+[
+  {
+    "id": "soce_sercop_pdf_integrado_codigo_v1",
+    "name": "SOCE/SERCOP integrado por codigo",
+    "version": "2026-05-19.1",
+    "status": "active",
+    "priority": 100,
+    "description": "Modelo base para PDF integrado donde el presupuesto referencia el APU por codigo.",
+    "document_kinds": ["presupuesto_apus_integrados", "bundle_presupuesto_apus", "bundle_completo"],
+    "detection": {
+      "parser_profiles": ["soce_sercop_pdf_integrado_codigo_v1"],
+      "required_sections": ["budget", "apus"],
+      "keywords": ["ANALISIS DE PRECIOS UNITARIOS", "PRESUPUESTO", "EQUIPO", "MANO DE OBRA"],
+      "min_confidence": "media"
+    },
+    "hooks": {
+      "budget": {
+        "start_markers": ["PRESUPUESTO"],
+        "row_strategy": "codigo_unidad_cantidad_precio_total",
+        "match_strategy": "codigo"
+      },
+      "apu": {
+        "start_markers": ["ANALISIS DE PRECIOS UNITARIOS", "ANÁLISIS DE PRECIOS UNITARIOS"],
+        "end_markers": ["TOTAL", "COSTO DIRECTO"],
+        "resource_sections": ["EQUIPO", "MATERIALES", "TRANSPORTE", "MANO DE OBRA"]
+      },
+      "resources": {
+        "rendimiento_categories": ["equipo", "mano_obra"],
+        "unit_price_tolerance": "0.02"
+      }
+    },
+    "matching": {
+      "budget_to_apu": "codigo",
+      "fallback": "descripcion_unidad_precio",
+      "duplicate_policy": "first_compatible_else_block"
+    },
+    "validation": {
+      "empty_apus_allowed_with_warning": true,
+      "blocking_duplicate_apu_composition": true,
+      "economic_tolerance": "0.02"
+    },
+    "ui": {
+      "accent": "blue",
+      "editable_by_superadmin": true
+    }
+  },
+  {
+    "id": "soce_sercop_pdf_vae_resumen_v1",
+    "name": "SOCE/SERCOP VAE por descripcion, unidad y precio",
+    "version": "2026-05-19.1",
+    "status": "active",
+    "priority": 90,
+    "description": "Modelo para resumen VAE donde el codigo visible del presupuesto es CPC del rubro y el enlace se resuelve por descripcion, unidad y precio unitario.",
+    "document_kinds": ["apus_vae", "bundle_presupuesto_apus", "bundle_completo"],
+    "detection": {
+      "parser_profiles": ["soce_sercop_pdf_vae_resumen_v1"],
+      "required_sections": ["budget", "apus", "vae"],
+      "keywords": ["VAE", "DESAGREGACION TECNOLOGICA", "DESAGREGACIÓN TECNOLÓGICA", "INCIDENCIA"],
+      "min_confidence": "media"
+    },
+    "hooks": {
+      "budget": {
+        "start_markers": ["RESUMEN", "VAE", "DESAGREGACION"],
+        "row_strategy": "descripcion_unidad_precio_total",
+        "match_strategy": "descripcion_unidad_precio"
+      },
+      "apu": {
+        "start_markers": ["ANALISIS DE PRECIOS UNITARIOS", "ANÁLISIS DE PRECIOS UNITARIOS"],
+        "end_markers": ["TOTAL", "COSTO DIRECTO"],
+        "resource_sections": ["EQUIPO", "MATERIALES", "TRANSPORTE", "MANO DE OBRA"]
+      },
+      "resources": {
+        "rendimiento_categories": ["equipo", "mano_obra"],
+        "unit_price_tolerance": "0.02"
+      }
+    },
+    "matching": {
+      "budget_to_apu": "descripcion_unidad_precio",
+      "fallback": "empty_apu_from_budget",
+      "duplicate_policy": "first_compatible_else_block"
+    },
+    "validation": {
+      "empty_apus_allowed_with_warning": true,
+      "blocking_duplicate_apu_composition": true,
+      "economic_tolerance": "0.02"
+    },
+    "ui": {
+      "accent": "orange",
+      "editable_by_superadmin": true
+    }
+  }
+]

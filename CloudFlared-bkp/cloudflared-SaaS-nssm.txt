@@ -1,0 +1,8 @@
+nssm install cloudflared-SaaS C:\Users\dream\AppData\Local\Microsoft\WinGet\Packages\Cloudflare.cloudflared_Microsoft.Winget.Source_8wekyb3d8bbwe\cloudflared.exe
+nssm set cloudflared-SaaS AppParameters "tunnel run --token  eyJhIjoiNDFiMDRjYzk2MDNiMDE4Zjc4Mjc2Mjg1MmRlMWM1OWUiLCJzIjoiY29tWWJ6WnlCbk9pY3Y5WngvaUVDU1ArQ2NGTmVEdFhDckZObEFFUTIyaz0iLCJ0IjoiZWNkMzk0ZmUtMTE3OC00YWNjLTkwNDUtZTczZjFhZTMwODIzIn0="
+nssm set cloudflared-SaaS AppDirectory C:\Users\dream
+nssm set cloudflared-SaaS AppExit Default Restart
+nssm set cloudflared-SaaS DisplayName cloudflared-SaaS
+nssm set cloudflared-SaaS ObjectName LocalSystem
+nssm set cloudflared-SaaS Start SERVICE_AUTO_START
+nssm set cloudflared-SaaS Type SERVICE_WIN32_OWN_PROCESS

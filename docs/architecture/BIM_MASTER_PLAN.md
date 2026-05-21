@@ -1,0 +1,245 @@
+# Plan Maestro BIM - GiProy Network
+
+## 1. Propósito
+
+Definir una hoja de ruta completa para incorporar una capa BIM madura, profesional y operativa en GiProy Network sin escribir todavía código productivo. Este documento congela la arquitectura objetivo, las fases, los módulos, las entidades, las integraciones y la estrategia de validación.
+
+## 2. Decisión tecnológica congelada
+
+### Stack BIM recomendado
+
+- `three.js`
+- `web-ifc`
+- `@thatopen/components`
+- `@thatopen/components-front`
+- `@thatopen/fragments` / `engine_fragment`
+
+### Motivo de selección
+
+Esta combinación ofrece el mejor equilibrio entre:
+
+- licencias abiertas utilizables sin coste de licencia de producto
+- encaje con `React + Vite`
+- libertad para construir una capa BIM propia, profundamente integrada con `EDT`, `APUs` y `Presupuesto`
+- soporte técnico razonable para una evolución por fases
+
+### Fuentes oficiales de referencia
+
+- Three.js: `MIT`
+  - https://github.com/mrdoob/three.js
+  - https://threejs.org/docs/
+- That Open Components: `MIT`
+  - https://github.com/ThatOpen/engine_components
+- That Open Fragments: `MIT`
+  - https://github.com/ThatOpen/engine_fragment
+- web-ifc: `MPL-2.0`
+  - https://github.com/ThatOpen/engine_web-ifc
+  - https://thatopen.github.io/engine_web-ifc/docs/
+
+### Alternativas descartadas como base principal
+
+- `xeokit / xeokit-bim-viewer`
+  - motivo: `AGPLv3` / licencia comercial para uso propietario
+  - fuente: https://github.com/xeokit/xeokit-sdk
+- `web-ifc-three`
+  - motivo: biblioteca oficialmente marcada como `deprecated`
+  - fuente: https://github.com/ThatOpen/web-ifc-three
+
+## 3. Diagnóstico de adecuación de GiProy
+
+### Fortalezas existentes
+
+- Shell de proyecto madura y modular en `frontend/src/pages/Proyectos.jsx`
+- Dominio fuerte y valioso para BIM:
+  - `EDT`
+  - `Presupuesto`
+  - `APUs`
+  - `Cronogramas`
+  - `Desagregación`
+  - `Fórmula Polinómica`
+- Backend FastAPI + PostgreSQL adecuado para versionado, metadata y vínculos
+
+### Huecos actuales
+
+- No existe módulo BIM productivo
+- No existen dependencias BIM/3D activas en frontend
+- No existen entidades de modelo BIM, versión, elemento, vista o vínculo semántico
+- No existe pipeline de importación/versionado/optimización de modelos
+- No existe sincronización BIM <-> negocio
+
+## 3.1 Estrategia de convivencia congelada
+
+La implantación BIM no se hará como sustitución de `GiProy Clásico`, sino como capa paralela.
+
+La estrategia oficial queda fijada así:
+
+- backend único y común
+- dominio BIM aislado dentro del backend
+- frontend BIM desacoplado dentro del mismo frontend del producto
+- activación mediante `feature flags`
+- integración visible solo cuando la capa BIM sea madura
+
+Se descarta explícitamente:
+
+- crear un backend BIM separado
+- construir un producto BIM completamente ajeno a la shell de GiProy
+- mezclar de forma temprana las interacciones BIM en `EDT`, `APUs` o `Presupuesto`
+
+## 4. Objetivo funcional de la capa BIM madura
+
+La capa BIM madura de GiProy debe permitir:
+
+1. Cargar y versionar modelos BIM por empresa, base y proyecto.
+2. Visualizar modelos con navegación fluida y estructura semántica.
+3. Consultar propiedades y clasificación de elementos.
+4. Navegar por niveles, disciplinas, sistemas y grupos.
+5. Vincular elementos BIM con:
+   - `EDT`
+   - `APUs`
+   - líneas o agrupaciones de `Presupuesto`
+6. Propagar navegación cruzada:
+   - desde viewer al negocio
+   - desde negocio al viewer
+7. Persistir vistas, estados y configuraciones del viewer.
+8. Soportar versionado de modelos y gobernanza operativa.
+
+## 5. Alcance de madurez objetivo
+
+### Incluido en la visión madura
+
+- Importación IFC
+- Conversión/preparación para visualización eficiente
+- Árbol BIM
+- Propiedades
+- Selección y resaltado
+- Aislamiento por conjuntos
+- Niveles / storeys
+- Vistas persistidas
+- Vínculos con `EDT/APUs/Presupuesto`
+- Navegación bidireccional negocio-modelo
+- Permisos y auditoría básica
+
+### Fuera del alcance inicial
+
+- Authoring geométrico BIM
+- Edición de geometría IFC
+- Detección avanzada de colisiones
+- CDE documental completo
+- BCF colaborativo completo en la primera ola
+
+## 6. Fases de implantación
+
+### Fase 0 - Fundaciones y gobierno
+
+- validar licencias y política interna
+- introducir el dominio BIM en arquitectura
+- preparar storage, versionado y estados
+
+### Fase 1 - Viewer base
+
+- pestaña BIM dentro de `Proyecto`
+- carga de modelo
+- render, selección y propiedades
+- árbol semántico básico
+
+### Fase 2 - Estructura BIM operativa
+
+- niveles
+- clasificación por tipos
+- filtros básicos
+- estados persistidos del viewer
+
+### Fase 3 - Integración negocio
+
+- vínculos BIM <-> `EDT`
+- vínculos BIM <-> `APUs`
+- navegación cruzada
+
+### Fase 4 - Integración presupuestaria
+
+- vínculos BIM <-> `Presupuesto`
+- navegación visual de líneas presupuestarias
+- resaltado de elementos y grupos
+
+### Fase 5 - Madurez de producción
+
+- versionado robusto
+- rendimiento
+- auditoría
+- operaciones
+- pruebas reales
+- documentación y rollout
+
+## 7. Criterios de madurez
+
+Una capa BIM se considerará madura cuando cumpla simultáneamente:
+
+- modelos medianos/grandes se visualizan con estabilidad
+- el viewer se integra en la shell actual de `Proyecto`
+- existe persistencia de modelos, versiones y estados
+- existen vínculos reales y útiles con `EDT`, `APUs` y `Presupuesto`
+- la navegación cruzada funciona en ambos sentidos
+- existe batería de pruebas funcionales, smoke y simulación
+- existe trazabilidad operativa y criterio de rollback
+
+## 8. Módulos y dominios nuevos requeridos
+
+### Backend
+
+- `backend/app/models/bim_model.py`
+- `backend/app/models/bim_model_version.py`
+- `backend/app/models/bim_element.py`
+- `backend/app/models/bim_storey.py`
+- `backend/app/models/bim_view_state.py`
+- `backend/app/models/bim_link_edt.py`
+- `backend/app/models/bim_link_apu.py`
+- `backend/app/models/bim_link_presupuesto.py`
+- `backend/app/services/bim/`
+- `backend/app/api/endpoints/bim_models.py`
+- `backend/app/api/endpoints/bim_links.py`
+
+### Frontend
+
+- `frontend/src/components/projects/BimTab.jsx`
+- `frontend/src/components/bim/`
+- `frontend/src/hooks/bim/`
+- `frontend/src/api/bimModels.js`
+- `frontend/src/api/bimLinks.js`
+- `frontend/src/context/BimViewerContext.jsx`
+- `frontend/src/features/bim/` como perímetro lógico opcional si la implantación crece
+
+### Infraestructura lógica
+
+- almacenamiento de archivos fuente IFC
+- almacenamiento de artefactos optimizados
+- estados persistidos del viewer por usuario/proyecto
+
+## 9. Integraciones obligatorias
+
+- `Proyecto` como host principal del módulo
+- `EDT`
+- `APUs`
+- `Presupuesto`
+- `Cronogramas` opcional en segunda ola
+- `Desagregación` opcional en segunda ola
+
+## 10. Restricciones
+
+- No forzar una segunda shell visual fuera de `Proyecto`
+- No romper el patrón actual de navegación por módulos
+- No mezclar BIM con Marketplace en la primera ola
+- No introducir dependencias con licencia ambigua o copyleft fuerte no aceptado
+- No introducir divergencia visual entre la shell BIM y la identidad actual de GiProy
+- No hacer que `GiProy Clásico` dependa funcionalmente de BIM durante la incubación
+- No activar navegación cruzada visible en módulos clásicos hasta pasar gates de madurez BIM
+
+## 11. Entregables documentales de esta planificación
+
+- `docs/architecture/BIM_INDEX.md`
+- `docs/architecture/BIM_MASTER_PLAN.md`
+- `docs/architecture/BIM_CONCEPT_MAP.md`
+- `docs/architecture/BIM_INSERTION_MAP.md`
+- `docs/architecture/BIM_VALIDATION_PLAN.md`
+- `docs/architecture/BIM_EXECUTION_ROADMAP.md`
+- `docs/architecture/BIM_PARALLEL_IMPLEMENTATION_STRATEGY.md`
+- `docs/tasks/TASK-0545.md` a `TASK-0554.md`

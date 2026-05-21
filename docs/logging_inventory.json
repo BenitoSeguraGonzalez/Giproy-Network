@@ -1,0 +1,4432 @@
+{
+  "generated_at": "2026-05-21T11:54:44.007994+00:00",
+  "mode": "GIPROY CLASICO",
+  "scope": "logging inventory; read-only source scan; no product code changes",
+  "root": "E:/Repositorios/GiProy Network",
+  "totals": {
+    "scanned_files": 938,
+    "scanned_lines": 232710,
+    "matched_lines": 1674
+  },
+  "kind_counts": {
+    "python_print": 1193,
+    "python_logger": 17,
+    "frontend_console": 424,
+    "powershell_write": 40
+  },
+  "sensitive_term_counts": {
+    "password": 39,
+    "token": 24,
+    "authorization": 0,
+    "session": 33,
+    "email": 51
+  },
+  "categories": {
+    "backend_product": {
+      "description": "Backend app code: endpoints, services, repositories, middleware and core.",
+      "count": 16,
+      "samples": [
+        {
+          "path": "backend/app/api/endpoints/auth.py",
+          "line": 138,
+          "kind": "python_logger",
+          "sensitive_hits": [],
+          "text": "logger.info(\"Login attempt received; empresa_selected=%s\", bool(empresa_id))"
+        },
+        {
+          "path": "backend/app/api/endpoints/bases_trabajo.py",
+          "line": 148,
+          "kind": "python_logger",
+          "sensitive_hits": [],
+          "text": "logger.warning(\"Error recuperando codigo real de base; usando fallback: %s\", e)"
+        },
+        {
+          "path": "backend/app/api/endpoints/bases_trabajo.py",
+          "line": 219,
+          "kind": "python_logger",
+          "sensitive_hits": [],
+          "text": "logger.debug("
+        },
+        {
+          "path": "backend/app/api/endpoints/polinomica.py",
+          "line": 61,
+          "kind": "python_logger",
+          "sensitive_hits": [],
+          "text": "logger.info("
+        },
+        {
+          "path": "backend/app/core/debug_logger.py",
+          "line": 8,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error writing to debug log: {e}\")"
+        },
+        {
+          "path": "backend/app/core/session_trace.py",
+          "line": 84,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error writing auth session trace: {exc}\")"
+        },
+        {
+          "path": "backend/app/repositories/base_trabajo.py",
+          "line": 290,
+          "kind": "python_logger",
+          "sensitive_hits": [],
+          "text": "logger.debug("
+        },
+        {
+          "path": "backend/app/services/proyecto.py",
+          "line": 303,
+          "kind": "python_logger",
+          "sensitive_hits": [],
+          "text": "logger.warning(\"Error al inicializar presupuesto: %s\", e)"
+        },
+        {
+          "path": "backend/app/services/proyecto.py",
+          "line": 458,
+          "kind": "python_logger",
+          "sensitive_hits": [],
+          "text": "logger.warning(\"Error al asegurar presupuesto en revision: %s\", e)"
+        },
+        {
+          "path": "backend/app/utils/email_utils.py",
+          "line": 6,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"\\n\" + \"=\"*50)"
+        },
+        {
+          "path": "backend/app/utils/email_utils.py",
+          "line": 7,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"EMAIL MOCK PARA: {email}\")"
+        },
+        {
+          "path": "backend/app/utils/email_utils.py",
+          "line": 8,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "password"
+          ],
+          "text": "print(f\"Para restablecer su contraseña, use el siguiente enlace:\")"
+        },
+        {
+          "path": "backend/app/utils/email_utils.py",
+          "line": 9,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(reset_link)"
+        },
+        {
+          "path": "backend/app/utils/email_utils.py",
+          "line": 10,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"=\"*50 + \"\\n\")"
+        },
+        {
+          "path": "backend/app/utils/seed_licenses.py",
+          "line": 65,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Licencias inicializadas con éxito.\")"
+        },
+        {
+          "path": "backend/app/utils/seed_licenses.py",
+          "line": 67,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error al inicializar licencias: {e}\")"
+        }
+      ]
+    },
+    "frontend_product": {
+      "description": "Frontend src code: React modules, services, hooks and stores.",
+      "count": 330,
+      "samples": [
+        {
+          "path": "frontend/src/components/ErrorBoundary.jsx",
+          "line": 14,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('ErrorBoundary caught an error:', error, errorInfo);"
+        },
+        {
+          "path": "frontend/src/components/PersonnelFormFields.jsx",
+          "line": 29,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error loading provinces:\", error);"
+        },
+        {
+          "path": "frontend/src/components/PersonnelFormFields.jsx",
+          "line": 39,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error loading cantons:\", error);"
+        },
+        {
+          "path": "frontend/src/components/RegisterModal.jsx",
+          "line": 37,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error fetching paises:', err);"
+        },
+        {
+          "path": "frontend/src/components/RegisterModal.jsx",
+          "line": 87,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Registration error:\", err);"
+        },
+        {
+          "path": "frontend/src/components/TeamDashboardModal.jsx",
+          "line": 213,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al cargar resumen de usuario:\", error);"
+        },
+        {
+          "path": "frontend/src/components/precios-unitarios/ResourceEditorModal.jsx",
+          "line": 47,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error searching OmniClass:', error);"
+        },
+        {
+          "path": "frontend/src/components/precios-unitarios/ResourceEditorModal.jsx",
+          "line": 60,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error preloading OmniClass:', error);"
+        },
+        {
+          "path": "frontend/src/components/precios-unitarios/ResourceEditorModal.jsx",
+          "line": 130,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error searching CPC:', error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
+          "line": 243,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Missing IDs for APU Budget Editor:\", { apuId, projectBaseId });"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
+          "line": 260,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.log(\"No resources in revision\", projectRevision, \"falling back to master...\");"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
+          "line": 272,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.log(\"No APUs in revision\", projectRevision, \"falling back to master...\");"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
+          "line": 280,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.log(\"No subcategories in revision\", projectRevision, \"falling back to master...\");"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
+          "line": 336,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error loading APU for budget:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
+          "line": 534,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error saving APU from budget:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
+          "line": 704,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.warn('No se pudo resolver el impacto del APU anidado', error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/CatalogoApuTab.jsx",
+          "line": 95,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando datos del catálogo:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/EdtValoradaModal.jsx",
+          "line": 272,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando EDT valorada:', error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/EdtValoradaModal.jsx",
+          "line": 350,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(`Error al generar reporte EDT ${type}:`, error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/EdtValoradaModal.jsx",
+          "line": 374,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar EDT:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/EdtValoradaModal.jsx",
+          "line": 398,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar EDT PDF:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/EdtValoradaModal.jsx",
+          "line": 422,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar EDT PDF desde Excel:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/IndirectosModal.jsx",
+          "line": 119,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('No se pudo cargar indirectos:', loadError);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/IndirectosModal.jsx",
+          "line": 328,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('No se pudo guardar indirectos:', saveError);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/LineasPresupuestoTab.jsx",
+          "line": 1176,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando el árbol EDT para Presupuestos:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/LineasPresupuestoTab.jsx",
+          "line": 1850,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/LineasPresupuestoTab.jsx",
+          "line": 1981,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error moviendo rubro:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/LineasPresupuestoTab.jsx",
+          "line": 1989,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error actualizando linea:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/NotasGeneralesModal.jsx",
+          "line": 48,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando notas:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/NotasGeneralesModal.jsx",
+          "line": 80,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error guardando nota:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/NotasGeneralesModal.jsx",
+          "line": 117,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error revisando ortografía de la nota:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/ParetoModal.jsx",
+          "line": 116,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando vista Pareto:', fetchError);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+          "line": 837,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando detalle del presupuesto:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+          "line": 896,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error marcando notas generales como vistas:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+          "line": 908,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error marcando notas de línea como vistas:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+          "line": 1030,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error aplicando cantidades desde portapapeles:', error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+          "line": 1097,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al generar reporte:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+          "line": 1119,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar reporte:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+          "line": 1141,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar reporte PDF:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+          "line": 1163,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar reporte PDF desde Excel:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+          "line": 1445,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al limpiar tanteos:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/TanteoTab.jsx",
+          "line": 118,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al cargar detalle de APU para tanteo:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/TanteoTab.jsx",
+          "line": 347,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error revirtiendo tanteo:\", error);"
+        },
+        {
+          "path": "frontend/src/components/presupuestos/TanteoTab.jsx",
+          "line": 393,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error aplicando tanteo:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 7314,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.warn(`No se pudo resolver el ancla visual del hito manual \"${milestone?.id || ''}\": ${anchorId}`);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 9114,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error sincronizando Gantt desde presupuesto:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 9585,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error guardando hitos manuales del Gantt:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 11796,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error recargando Gantt tras detectar una línea inválida en drag:', reloadError);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 15186,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error confirmando cronograma Gantt:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 15235,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error restaurando cronograma confirmado:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 15255,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error recargando Gantt desde presupuesto:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 15282,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error preparando comparación con Presupuesto:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 16235,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error fusionando selección intertramo:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 16363,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error fusionando tramos entre padres distintos:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 16548,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error creando dependencia rápida de Gantt:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 16768,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error guardando configuración Gantt:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 16783,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error recargando festivos oficiales del proyecto:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 16807,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error reseteando calendario festivo del proyecto:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 16865,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error añadiendo festivo manual del proyecto:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 16883,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error quitando festivo del proyecto:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 16936,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error importando XML de Microsoft Project al Gantt:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 17562,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error reordenando hito manual del Gantt:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+          "line": 17599,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error reordenando línea del Gantt:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 3917,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error guardando configuración de cronograma de trabajo:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 3949,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error guardando línea de cronograma de trabajo:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4008,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error importando XML de Microsoft Project:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4681,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error preparando lámina de cronogramas:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4784,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error reseteando integralmente los cronogramas:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4806,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error loading project detail for cronogramas:', detailError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4810,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error loading EDT tree for cronogramas:', edtError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4816,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error loading budget list for cronogramas:', budgetError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4838,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.warn('No se pudo resolver el presupuesto operativo de fallback para cronogramas:', fallbackBudgetError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4847,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando cronogramas:', loadError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4869,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando detalle de presupuesto para cronograma:', loadError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4900,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error resolviendo presupuesto operativo fallback para Gantt:', fallbackBudgetError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4925,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando cronograma valorado:', loadError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 4958,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando motor operativo Gantt:', loadError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5046,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error al pegar distribución:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5150,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error guardando configuración del cronograma:', saveError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5198,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error recalculando cronograma valorado desde Gantt:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5255,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error calculando resumen de transición manual tras sincronizar valorado desde Gantt:', summaryError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5285,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error sincronizando cronograma valorado diferido tras guardar Gantt:', syncError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5347,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error limpiando overrides del cronograma valorado:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5375,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error recalculando flujo de caja:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5449,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error revirtiendo propuesta financiera por partidas:', rollbackError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5453,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error aplicando propuesta financiera por partidas:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5592,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error actualizando celda del cronograma:', lineError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5622,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error restaurando línea del cronograma:', lineError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5802,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error sincronizando cronograma valorado tras guardar Gantt:', syncError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5855,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error sincronizando cronograma valorado tras persistir lote Gantt:', syncError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5898,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error generando reporte de cronograma valorado:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5932,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error generando reporte de Pareto temporal:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5964,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error exportando cronograma valorado:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 5997,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error exportando cronograma Gantt a Microsoft Project:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 797,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al cargar categorías:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 804,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.log(\"Solicitando cantones al API para:\", provincia);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 806,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.log(\"Cantones recibidos:\", data);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 809,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al cargar cantones:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 901,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error loading project types:\", e);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 905,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error loading provinces:\", e);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 911,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error loading project details:\", e);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 921,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.log(\"Detalle cargado:\", detalle);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 939,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.log(\"Cargando cantones para:\", detalle.provincia);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 943,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.log(\"Datos dependientes cargados correctamente\");"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 946,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al cargar datos iniciales:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1054,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error uploading image:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1066,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando documentos del proyecto:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1098,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error subiendo documento PDF:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1119,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error abriendo visor PDF:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1141,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error descargando documento PDF:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1164,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error eliminando documento PDF:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1460,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error guardando detalle del proyecto:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1498,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error guardando nombre del proyecto:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1578,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "]).catch(e => console.error(\"Error al guardar en segundo plano (unmount)\", e));"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1683,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error georreferenciando dirección:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1723,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error generando vista previa del acta:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DatosProyecto.jsx",
+          "line": 1754,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error exportando acta de constitución:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 228,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al generar reporte VAE:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 251,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar reporte VAE:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 274,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar reporte VAE PDF:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 297,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar reporte VAE PDF desde Excel:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 356,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando CPC de APUs del proyecto:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 404,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando detalle directo de APU:\", fallbackId, result.reason);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 416,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando VAE de APUs:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 424,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando detalle directo de APU:\", fallbackId, result.reason);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 482,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando detalle directo del APU seleccionado:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 519,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando presupuestos de desagregación:\", presupuestoResult.reason);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 524,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando EDT de desagregación:\", edtResult.reason);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 536,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando datos de desagregación:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 558,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando detalle del presupuesto:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 610,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error buscando CPC:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+          "line": 673,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error guardando CPC:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edo.jsx",
+          "line": 729,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error generando vista previa de EDO:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edo.jsx",
+          "line": 754,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error exportando reporte EDO:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edo.jsx",
+          "line": 781,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error preparando lámina gráfica EDO:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edo.jsx",
+          "line": 800,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando EDO:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edo.jsx",
+          "line": 881,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 801,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error cargando EDT:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 820,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando presupuesto operativo en EDT:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 837,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error sincronizando duraciones Gantt en EDT:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 960,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error generando vista previa de EDT:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 986,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error exportando reporte EDT:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1014,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error preparando lámina gráfica EDT:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1127,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1154,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1174,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1196,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Bulk delete error:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1212,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1236,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error un drop:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1249,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al reordenar:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1272,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1296,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1321,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Edt.jsx",
+          "line": 1336,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(error);"
+        },
+        {
+          "path": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
+          "line": 130,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('[PolinomicaTab] Error resolving presupuesto:', resolveError);"
+        },
+        {
+          "path": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
+          "line": 142,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('[PolinomicaTab] Error loading indices catalog:', catalogError);"
+        },
+        {
+          "path": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
+          "line": 175,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('[PolinomicaTab] Error loading formula:', loadError);"
+        },
+        {
+          "path": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
+          "line": 217,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('[PolinomicaTab] Save assignment error:', assignmentError);"
+        },
+        {
+          "path": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
+          "line": 236,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('[PolinomicaTab] Save formula indices error:', indicesError);"
+        },
+        {
+          "path": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
+          "line": 253,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('[PolinomicaTab] Generate formula error:', generateError);"
+        },
+        {
+          "path": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
+          "line": 280,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Report generation error:', previewError);"
+        },
+        {
+          "path": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
+          "line": 307,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Report export error:', exportError);"
+        },
+        {
+          "path": "frontend/src/components/projects/GanttParetoModal.jsx",
+          "line": 171,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando Pareto temporal del Gantt:', fetchError);"
+        },
+        {
+          "path": "frontend/src/components/projects/Stakeholders.jsx",
+          "line": 128,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error loading data:\", error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Stakeholders.jsx",
+          "line": 138,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "} catch (error) { console.error(\"Error provincias:\", error); }"
+        },
+        {
+          "path": "frontend/src/components/projects/Stakeholders.jsx",
+          "line": 145,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "} catch (error) { console.error(\"Error cantones:\", error); }"
+        },
+        {
+          "path": "frontend/src/components/projects/Stakeholders.jsx",
+          "line": 192,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Submit stakeholder error:\", err);"
+        },
+        {
+          "path": "frontend/src/components/projects/Stakeholders.jsx",
+          "line": 217,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Delete stakeholder error:\", err);"
+        },
+        {
+          "path": "frontend/src/components/projects/Stakeholders.jsx",
+          "line": 267,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error generando vista previa de stakeholders:', error);"
+        },
+        {
+          "path": "frontend/src/components/projects/Stakeholders.jsx",
+          "line": 292,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error exportando reporte de stakeholders:', error);"
+        },
+        {
+          "path": "frontend/src/context/AuthContext.jsx",
+          "line": 82,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.warn(\"No se pudo cargar info de licencia:\", e.message);"
+        },
+        {
+          "path": "frontend/src/context/AuthContext.jsx",
+          "line": 93,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.log('Device ID Initialized:', id);"
+        },
+        {
+          "path": "frontend/src/context/AuthContext.jsx",
+          "line": 98,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.log('Backend Connectivity: OK');"
+        },
+        {
+          "path": "frontend/src/context/AuthContext.jsx",
+          "line": 103,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.warn('Silent warning in initialization:', error);"
+        },
+        {
+          "path": "frontend/src/context/AuthContext.jsx",
+          "line": 150,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Sesión inválida o expirada durante checkAuth\", error);"
+        },
+        {
+          "path": "frontend/src/context/AuthContext.jsx",
+          "line": 160,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.warn(\"No se pudo rehidratar la sesión actual, pero no se invalidará localmente.\", error);"
+        },
+        {
+          "path": "frontend/src/context/AuthContext.jsx",
+          "line": 241,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.warn(\"No se pudo invalidar la sesión en backend al cerrar sesión:\", error.message);"
+        },
+        {
+          "path": "frontend/src/context/AuthContext.jsx",
+          "line": 249,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.warn(\"No se pudieron desactivar las bases al cerrar sesión:\", error.message);"
+        },
+        {
+          "path": "frontend/src/context/AuthContext.jsx",
+          "line": 263,
+          "kind": "frontend_console",
+          "sensitive_hits": [
+            "token"
+          ],
+          "text": "console.log(`Sesión finalizada: ${message || 'expiración de token'}`);"
+        },
+        {
+          "path": "frontend/src/context/AuthContext.jsx",
+          "line": 284,
+          "kind": "frontend_console",
+          "sensitive_hits": [
+            "token"
+          ],
+          "text": "console.warn(\"No se pudo programar la expiración del token JWT.\");"
+        },
+        {
+          "path": "frontend/src/context/AuthContext.jsx",
+          "line": 323,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.warn(\"No se pudo renovar la sesión activa:\", error?.message || error);"
+        },
+        {
+          "path": "frontend/src/context/PresupuestoContext.jsx",
+          "line": 232,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al refrescar presupuesto:\", error);"
+        },
+        {
+          "path": "frontend/src/context/PresupuestoContext.jsx",
+          "line": 242,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al actualizar línea del presupuesto:\", error);"
+        },
+        {
+          "path": "frontend/src/context/PresupuestoContext.jsx",
+          "line": 300,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Detailed Error adding APU:\", {"
+        },
+        {
+          "path": "frontend/src/context/PresupuestoContext.jsx",
+          "line": 314,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al eliminar línea del presupuesto:\", error);"
+        },
+        {
+          "path": "frontend/src/context/PresupuestoContext.jsx",
+          "line": 328,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al mover línea del presupuesto:\", error);"
+        },
+        {
+          "path": "frontend/src/context/PresupuestoContext.jsx",
+          "line": 341,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al refrescar resumen de notas:\", error);"
+        },
+        {
+          "path": "frontend/src/context/PresupuestoContext.jsx",
+          "line": 352,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error registrando apertura del presupuesto:\", error);"
+        },
+        {
+          "path": "frontend/src/hooks/useMarketplaceOrigin.js",
+          "line": 34,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando origen marketplace:', error);"
+        },
+        {
+          "path": "frontend/src/hooks/useMarketplaceOriginsMap.js",
+          "line": 21,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando mapa de origenes marketplace:', error);"
+        },
+        {
+          "path": "frontend/src/hooks/bim/useBimFeatureAccess.js",
+          "line": 43,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.warn('No se pudo resolver la activacion BIM:', error);"
+        },
+        {
+          "path": "frontend/src/layouts/AppLayout.jsx",
+          "line": 162,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": ".catch(err => console.error(\"Error cargando empresas:\", err));"
+        },
+        {
+          "path": "frontend/src/layouts/AppLayout.jsx",
+          "line": 199,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando comunicados activos:', error);"
+        },
+        {
+          "path": "frontend/src/layouts/AppLayout.jsx",
+          "line": 233,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando mantenimiento activo:', error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 425,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error sincronizando base del APU adquirido:', error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 672,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error searching OmniClass:\", error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 685,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error preloading OmniClass:\", error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 722,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error fetching category counts:\", err);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 774,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error fetching data:\", error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 1089,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al cargar detalle del APU:\", error);"
+        }
+      ]
+    },
+    "scripts_and_tools": {
+      "description": "CLI scripts, local tools, launchers and maintenance helpers.",
+      "count": 485,
+      "samples": [
+        {
+          "path": "backend/scripts/add_activa_column.py",
+          "line": 23,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"OK - La columna 'activa' ya existe en la tabla bases_trabajo\")"
+        },
+        {
+          "path": "backend/scripts/add_activa_column.py",
+          "line": 32,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"OK - Columna 'activa' agregada exitosamente a la tabla bases_trabajo\")"
+        },
+        {
+          "path": "backend/scripts/add_apu_line_order_column.py",
+          "line": 46,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"apu_lineas.orden listo y normalizado.\")"
+        },
+        {
+          "path": "backend/scripts/add_canton_column.py",
+          "line": 11,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"🚀 Añadiendo columna 'canton' a la tabla 'usuarios'...\")"
+        },
+        {
+          "path": "backend/scripts/add_canton_column.py",
+          "line": 17,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Ejecutando: {query}\")"
+        },
+        {
+          "path": "backend/scripts/add_canton_column.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"✅ Columna 'canton' añadida correctamente.\")"
+        },
+        {
+          "path": "backend/scripts/add_canton_column.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"❌ Error al añadir columna: {e}\")"
+        },
+        {
+          "path": "backend/scripts/add_canton_to_empresa.py",
+          "line": 11,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"🚀 Añadiendo columna 'canton' a la tabla 'empresas'...\")"
+        },
+        {
+          "path": "backend/scripts/add_canton_to_empresa.py",
+          "line": 17,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Ejecutando: {query}\")"
+        },
+        {
+          "path": "backend/scripts/add_canton_to_empresa.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"✅ Columna 'canton' añadida correctamente a 'empresas'.\")"
+        },
+        {
+          "path": "backend/scripts/add_canton_to_empresa.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"❌ Error al añadir columna a 'empresas': {e}\")"
+        },
+        {
+          "path": "backend/scripts/add_omniclass_titulo_es.py",
+          "line": 37,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"OmniClass titulo_es populated rows: {count}\")"
+        },
+        {
+          "path": "backend/scripts/analyze_dump.py",
+          "line": 16,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"\\nTablas con inserciones encontradas:\")"
+        },
+        {
+          "path": "backend/scripts/analyze_dump.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\" - {table}: {count} inserciones\")"
+        },
+        {
+          "path": "backend/scripts/analyze_dump.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error: {e}\")"
+        },
+        {
+          "path": "backend/scripts/apply_base_scope_guardrails.py",
+          "line": 179,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"OK: guardrails de base_scope aplicados\")"
+        },
+        {
+          "path": "backend/scripts/audit_data_integrity.py",
+          "line": 204,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(report, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/backfill_variant_sync_tracking.py",
+          "line": 157,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(str(report_path))"
+        },
+        {
+          "path": "backend/scripts/bulk_spellcheck.py",
+          "line": 16,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Cargando diccionario de español...\")"
+        },
+        {
+          "path": "backend/scripts/bulk_spellcheck.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ALERTA: No se encontró el diccionario en {dict_path}\")"
+        },
+        {
+          "path": "backend/scripts/bulk_spellcheck.py",
+          "line": 37,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error cargando diccionario: {e}\")"
+        },
+        {
+          "path": "backend/scripts/bulk_spellcheck.py",
+          "line": 39,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Diccionario cargado con {len(words)} entradas únicas normalizadas.\")"
+        },
+        {
+          "path": "backend/scripts/bulk_spellcheck.py",
+          "line": 99,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Procesando {len(subcats)} subcategorías...\")"
+        },
+        {
+          "path": "backend/scripts/bulk_spellcheck.py",
+          "line": 110,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Procesando {len(recursos)} recursos...\")"
+        },
+        {
+          "path": "backend/scripts/bulk_spellcheck.py",
+          "line": 129,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ÉXITO: Se realizaron {sc_changes} cambios en subcategorías y {r_changes} en recursos/especificaciones.\")"
+        },
+        {
+          "path": "backend/scripts/bulk_spellcheck.py",
+          "line": 132,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ERROR: {e}\")"
+        },
+        {
+          "path": "backend/scripts/check_bases.py",
+          "line": 14,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f'Total de bases de trabajo: {count}')"
+        },
+        {
+          "path": "backend/scripts/check_bases.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print('\\n--- Bases de Trabajo ---')"
+        },
+        {
+          "path": "backend/scripts/check_bases.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f'  ID: {r[0]}, Nombre: [{r[1]}], Empresa ID: {r[2]}, Activa: {r[3]}')"
+        },
+        {
+          "path": "backend/scripts/check_bases.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print('No hay bases de trabajo registradas')"
+        },
+        {
+          "path": "backend/scripts/check_empresas.py",
+          "line": 8,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"=== EMPRESAS ===\")"
+        },
+        {
+          "path": "backend/scripts/check_empresas.py",
+          "line": 13,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  ID: {r[0]}, Nombre: {r[1]}, Codigo: {r[2]}\")"
+        },
+        {
+          "path": "backend/scripts/check_empresas.py",
+          "line": 15,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"  No hay empresas\")"
+        },
+        {
+          "path": "backend/scripts/check_empresas.py",
+          "line": 17,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"\\n=== BASES DE TRABAJO ===\")"
+        },
+        {
+          "path": "backend/scripts/check_empresas.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  ID: {r[0]}, Nombre: {r[1]}, Empresa ID: {r[2]}, Activa: {r[3]}\")"
+        },
+        {
+          "path": "backend/scripts/check_mysql.py",
+          "line": 8,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "password"
+          ],
+          "text": "print(f\"Probando conexión MySQL con password: '{pwd}'...\")"
+        },
+        {
+          "path": "backend/scripts/check_mysql.py",
+          "line": 14,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"¡Conectado a MySQL con éxito!\")"
+        },
+        {
+          "path": "backend/scripts/check_mysql.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Bases de datos MySQL:\", dbs)"
+        },
+        {
+          "path": "backend/scripts/check_mysql.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Inspeccionando 'giproynet'...\")"
+        },
+        {
+          "path": "backend/scripts/check_mysql.py",
+          "line": 25,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Tablas en giproynet:\", tables)"
+        },
+        {
+          "path": "backend/scripts/check_mysql.py",
+          "line": 29,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Tabla 'paises' encontrada con {count} registros.\")"
+        },
+        {
+          "path": "backend/scripts/check_mysql.py",
+          "line": 32,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Primeros 5 registros:\", cursor.fetchall())"
+        },
+        {
+          "path": "backend/scripts/check_mysql.py",
+          "line": 37,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "password"
+          ],
+          "text": "print(f\"Error con password '{pwd}': {e}\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_company_projects_and_bases.py",
+          "line": 116,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(payload, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/cleanup_company_projects_and_bases.py",
+          "line": 128,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(payload, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"🔍 Buscando bases de proyecto huérfanas...\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"✅ No se encontraron bases de tipo 'Base de Proyecto'.\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 29,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"✅ Se analizaron {len(project_bases)} bases y ninguna es huérfana.\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 32,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"⚠️ Bases huérfanas identificadas: {orphaned_ids}\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 37,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  - Borrando líneas de {len(apu_ids)} APUs...\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 44,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  - Borrando {len(apu_ids)} APUs...\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 51,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  - Borrando {len(recursos_ids)} recursos...\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 63,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  - Verificación: {check_apus} APUs y {check_recursos} Recursos referencian estas subcats.\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 66,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"  ❌ ERROR: Todavía hay referencias. Buscando IDs problemáticos...\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 70,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"    APUs problemáticos (id, base_id): {ext_apus}\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 73,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"    Recursos problemáticos (id, base_id): {ext_recursos}\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 75,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"  💡 Intentando limpiar referencias externas (poniendo a NULL)...\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 81,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  - Borrando {len(subcat_ids)} items de subcategoría...\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 86,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  - Borrando {len(orphaned_ids)} bases de trabajo...\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 90,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"✨ Éxito: Se eliminaron {len(orphaned_ids)} bases huérfanas.\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "line": 94,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"❌ Error durante la limpieza: {str(e)}\")"
+        },
+        {
+          "path": "backend/scripts/cleanup_training_licenses.py",
+          "line": 14,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print({\"academy_cleanup_results\": results, \"companies_processed\": len(results)})"
+        },
+        {
+          "path": "backend/scripts/create_dispositivos_table.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Creando tabla de dispositivos...\")"
+        },
+        {
+          "path": "backend/scripts/create_dispositivos_table.py",
+          "line": 26,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"[OK] Tabla 'dispositivos' creada correctamente\")"
+        },
+        {
+          "path": "backend/scripts/create_dispositivos_table.py",
+          "line": 31,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"\\nProceso completado.\")"
+        },
+        {
+          "path": "backend/scripts/create_dreams2k.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Empresa creada con ID: {empresa.id}\")"
+        },
+        {
+          "path": "backend/scripts/create_dreams2k.py",
+          "line": 38,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"Usuario {new_user.email} con rol {new_user.rol} ENCRIPTADO Y CREADO con éxito.\")"
+        },
+        {
+          "path": "backend/scripts/create_dreams2k.py",
+          "line": 40,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"El usuario {user_email} ya estaba registrado en la base de datos.\")"
+        },
+        {
+          "path": "backend/scripts/create_dreams2k.py",
+          "line": 43,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error durante el seeding: {e}\")"
+        },
+        {
+          "path": "backend/scripts/create_edo_table.py",
+          "line": 9,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Creando tabla para EDO Nodes...\")"
+        },
+        {
+          "path": "backend/scripts/create_edo_table.py",
+          "line": 11,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Tabla creada exitosamente.\")"
+        },
+        {
+          "path": "backend/scripts/create_edt_table.py",
+          "line": 9,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Creando tabla para EDT Nodes...\")"
+        },
+        {
+          "path": "backend/scripts/create_edt_table.py",
+          "line": 11,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Tabla creada exitosamente.\")"
+        },
+        {
+          "path": "backend/scripts/create_stakeholder_tables.py",
+          "line": 9,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Creando tablas para Stakeholders y Roles...\")"
+        },
+        {
+          "path": "backend/scripts/create_stakeholder_tables.py",
+          "line": 11,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Tablas creadas exitosamente.\")"
+        },
+        {
+          "path": "backend/scripts/create_subcategorias_items_table.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"OK - La tabla 'subcategorias_items' ya existe\")"
+        },
+        {
+          "path": "backend/scripts/create_subcategorias_items_table.py",
+          "line": 47,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"OK - Tabla 'subcategorias_items' creada exitosamente\")"
+        },
+        {
+          "path": "backend/scripts/curate_omniclass_titulo_es.py",
+          "line": 1893,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"OmniClass titulo_es curated rows: {updated}\")"
+        },
+        {
+          "path": "backend/scripts/debug_login.py",
+          "line": 9,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"Usuario: {user.email}\")"
+        },
+        {
+          "path": "backend/scripts/debug_login.py",
+          "line": 10,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Activo: {user.activo}\")"
+        },
+        {
+          "path": "backend/scripts/debug_login.py",
+          "line": 11,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Rol: {user.rol}\")"
+        },
+        {
+          "path": "backend/scripts/debug_login.py",
+          "line": 12,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ID Empresa: {user.empresa_id}\")"
+        },
+        {
+          "path": "backend/scripts/debug_login.py",
+          "line": 14,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Empresa: {user.empresa.nombre}\")"
+        },
+        {
+          "path": "backend/scripts/debug_login.py",
+          "line": 15,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Empresa Activa: {user.empresa.activa}\")"
+        },
+        {
+          "path": "backend/scripts/debug_login.py",
+          "line": 17,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"ERROR: El usuario NO tiene empresa vinculada.\")"
+        },
+        {
+          "path": "backend/scripts/debug_login.py",
+          "line": 19,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"ERROR: Usuario no encontrado en la DB.\")"
+        },
+        {
+          "path": "backend/scripts/diagnose_santiago_gantt_ff_item10.py",
+          "line": 182,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(result, indent=2, ensure_ascii=False))"
+        },
+        {
+          "path": "backend/scripts/export_msproject_mpp.py",
+          "line": 13,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"No se pudo cargar pywin32 para automatizar Microsoft Project: {exc}\", file=sys.stderr)"
+        },
+        {
+          "path": "backend/scripts/export_msproject_mpp.py",
+          "line": 25,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Microsoft Project no generó el archivo .mpp esperado.\", file=sys.stderr)"
+        },
+        {
+          "path": "backend/scripts/export_msproject_mpp.py",
+          "line": 43,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print("
+        },
+        {
+          "path": "backend/scripts/find_fks.py",
+          "line": 13,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"🔍 Investigando dependencias de llave foránea para 'subcategorias_items'...\")"
+        },
+        {
+          "path": "backend/scripts/find_fks.py",
+          "line": 35,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"❓ No se encontraron deependencias registradas en information_schema (esto es extraño).\")"
+        },
+        {
+          "path": "backend/scripts/find_fks.py",
+          "line": 38,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"📌 Tabla: {row[0]}, Columna: {row[1]} -> REFERENCIA: {row[2]}({row[3]})\")"
+        },
+        {
+          "path": "backend/scripts/find_fks.py",
+          "line": 41,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"❌ Error: {str(e)}\")"
+        },
+        {
+          "path": "backend/scripts/find_paises.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"\\n--- Buscando en DB: {db} ---\")"
+        },
+        {
+          "path": "backend/scripts/find_paises.py",
+          "line": 29,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"¡ENCONTRADO en {db}!\")"
+        },
+        {
+          "path": "backend/scripts/find_paises.py",
+          "line": 31,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\" - Esquema: {schema}, Tabla: {table}\")"
+        },
+        {
+          "path": "backend/scripts/find_paises.py",
+          "line": 33,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"   Filas: {row_count}\")"
+        },
+        {
+          "path": "backend/scripts/find_paises.py",
+          "line": 35,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"No se encontraron tablas relacionadas en {db}.\")"
+        },
+        {
+          "path": "backend/scripts/find_paises.py",
+          "line": 37,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error accediendo a {db}: {e}\")"
+        },
+        {
+          "path": "backend/scripts/fix_santiago_material_filtrante_category.py",
+          "line": 90,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(summary, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/get_token.py",
+          "line": 25,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "token"
+          ],
+          "text": "print(token)"
+        },
+        {
+          "path": "backend/scripts/get_token.py",
+          "line": 27,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"User not found\")"
+        },
+        {
+          "path": "backend/scripts/heal_modification_dates.py",
+          "line": 11,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Encontrados {len(recursos_null)} Recursos con fecha de modificación nula.\")"
+        },
+        {
+          "path": "backend/scripts/heal_modification_dates.py",
+          "line": 19,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Encontrados {len(apus_null)} APUs con fecha de modificación nula.\")"
+        },
+        {
+          "path": "backend/scripts/heal_modification_dates.py",
+          "line": 27,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Curación completada con éxito.\")"
+        },
+        {
+          "path": "backend/scripts/heal_modification_dates.py",
+          "line": 29,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"No se encontraron registros que requieran curación.\")"
+        },
+        {
+          "path": "backend/scripts/heal_modification_dates.py",
+          "line": 33,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error durante la curación: {e}\")"
+        },
+        {
+          "path": "backend/scripts/heal_recursos.py",
+          "line": 13,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Sanando {len(subcats)} subcategorías en Base 1...\")"
+        },
+        {
+          "path": "backend/scripts/heal_recursos.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  - Sanada Subcat {sc.codigo}: {sc.descripcion}\")"
+        },
+        {
+          "path": "backend/scripts/heal_recursos.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"BASE 1 TOTALMENTE SANEADA.\")"
+        },
+        {
+          "path": "backend/scripts/heal_recursos.py",
+          "line": 26,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"VERIFICACIÓN: Recurso 46 ahora tiene código {r46.codigo} (SubcatID {r46.subcategoria_item_id})\")"
+        },
+        {
+          "path": "backend/scripts/heal_recursos.py",
+          "line": 29,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ERROR DURANTE SANACIÓN: {str(e)}\")"
+        },
+        {
+          "path": "backend/scripts/inspect_tables.py",
+          "line": 16,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"\\n--- Tablas en {db_name} ---\")"
+        },
+        {
+          "path": "backend/scripts/inspect_tables.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\" - {schema}.{name} ({count} filas)\")"
+        },
+        {
+          "path": "backend/scripts/inspect_tables.py",
+          "line": 26,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"   >>> ENCONTRADO: {schema}.{name}\")"
+        },
+        {
+          "path": "backend/scripts/inspect_tables.py",
+          "line": 28,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\" - {schema}.{name} (Error al contar)\")"
+        },
+        {
+          "path": "backend/scripts/license_housekeeping.py",
+          "line": 14,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(result)"
+        },
+        {
+          "path": "backend/scripts/list_empresas.py",
+          "line": 6,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(row[0])"
+        },
+        {
+          "path": "backend/scripts/list_licenses.py",
+          "line": 13,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ID: {l.id} | Código: {l.codigo} | Nombre: {l.nombre}\")"
+        },
+        {
+          "path": "backend/scripts/list_tables.py",
+          "line": 8,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Tablas encontradas:\")"
+        },
+        {
+          "path": "backend/scripts/list_tables.py",
+          "line": 10,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"- {table}\")"
+        },
+        {
+          "path": "backend/scripts/manage_superuser.py",
+          "line": 23,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Empresa creada con ID: {empresa.id}\")"
+        },
+        {
+          "path": "backend/scripts/manage_superuser.py",
+          "line": 35,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Antiguo usuario 'dreams2k' eliminado.\")"
+        },
+        {
+          "path": "backend/scripts/manage_superuser.py",
+          "line": 49,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"Superusuario {user.email} CREADO con rol {user.rol}.\")"
+        },
+        {
+          "path": "backend/scripts/manage_superuser.py",
+          "line": 56,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"Superusuario {user.email} ACTUALIZADO con rol {user.rol}.\")"
+        },
+        {
+          "path": "backend/scripts/manage_superuser.py",
+          "line": 59,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error gestionando superusuario: {e}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_apus.py",
+          "line": 8,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Conectando a SQLite en: {DB_PATH}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_apus.py",
+          "line": 10,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"La base de datos no existe en esta ruta. Saliendo.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_apus.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Migrando: Agregando la columna 'apu_hijo_id' a la tabla 'apu_lineas'...\")"
+        },
+        {
+          "path": "backend/scripts/migrate_apus.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Columna añadida con éxito.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_apus.py",
+          "line": 26,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"La tabla 'apu_lineas' ya contiene la columna 'apu_hijo_id'.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_apus.py",
+          "line": 28,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Migración completada.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_apus.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error durante la migración: {e}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_base_names.py",
+          "line": 12,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Iniciando migración de nombres de bases...\")"
+        },
+        {
+          "path": "backend/scripts/migrate_base_names.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Se actualizaron {result.rowcount} registros de 'Base Padre' a 'Base Maestra'.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_base_names.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Migración completada con éxito.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_base_names.py",
+          "line": 25,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error durante la migración: {e}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_dump.py",
+          "line": 71,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ERROR: Base {TARGET_BASE_ID} no existe.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_dump.py",
+          "line": 75,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Migrando para Empresa: {emp_id}, Base: {TARGET_BASE_ID}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_dump.py",
+          "line": 77,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Limpiando datos previos...\")"
+        },
+        {
+          "path": "backend/scripts/migrate_dump.py",
+          "line": 83,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Cargando subcategorías...\")"
+        },
+        {
+          "path": "backend/scripts/migrate_dump.py",
+          "line": 119,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Mapeo de subcategorías completado. Subcategorías únicas creadas: {len(description_to_id)}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_dump.py",
+          "line": 127,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Cargando recursos...\")"
+        },
+        {
+          "path": "backend/scripts/migrate_dump.py",
+          "line": 178,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Migración: {recs_count} recursos únicos transferidos.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_dump.py",
+          "line": 183,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Renumerando códigos...\")"
+        },
+        {
+          "path": "backend/scripts/migrate_dump.py",
+          "line": 193,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"--- PROCESO FINALIZADO CON ÉXITO ---\")"
+        },
+        {
+          "path": "backend/scripts/migrate_dump.py",
+          "line": 197,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ERROR: {str(e)}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_postgres.py",
+          "line": 11,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Columna apu_hijo_id añadida.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_postgres.py",
+          "line": 13,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"La columna apu_hijo_id podría ya existir: {e}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_postgres.py",
+          "line": 19,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"recurso_id hecho nullable.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_postgres.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error al hacer nullable recurso_id: {e}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_postgres.py",
+          "line": 27,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Columna descripcion_normalizada añadida a apus.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_postgres.py",
+          "line": 29,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"La columna descripcion_normalizada podría ya existir: {e}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_postgres.py",
+          "line": 33,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Migraciones PostgreSQL aplicadas con éxito.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_postgres.py",
+          "line": 35,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error general de migración: {e}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_rounding_policy_v2.py",
+          "line": 136,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(summary, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/migrate_tanteo_columns.py",
+          "line": 12,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Migrando base de datos en: {settings.SQLALCHEMY_DATABASE_URI}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_tanteo_columns.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Columna tanteo_activo añadida.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_tanteo_columns.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Columna tanteo_activo ya existe o error: {e}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_tanteo_columns.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Columna precio_original añadida.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_tanteo_columns.py",
+          "line": 26,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Columna precio_original ya existe o error: {e}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_tanteo_columns.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Columna precio_tanteo añadida.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_tanteo_columns.py",
+          "line": 32,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Columna precio_tanteo ya existe o error: {e}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_v2.py",
+          "line": 5,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Expandiendo columnas de la tabla 'empresas'...\")"
+        },
+        {
+          "path": "backend/scripts/migrate_v2.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Columna '{col_name}' verificada/añadida.\")"
+        },
+        {
+          "path": "backend/scripts/migrate_v2.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error con '{col_name}': {e}\")"
+        },
+        {
+          "path": "backend/scripts/migrate_v2.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Actualización de esquema finalizada.\")"
+        },
+        {
+          "path": "backend/scripts/normalize_units.py",
+          "line": 90,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(str(report_path))"
+        },
+        {
+          "path": "backend/scripts/prewarm_project_holiday_calendars.py",
+          "line": 128,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Maestro Ecuador actualizado para años: {', '.join(str(year) for year in years)}\")"
+        },
+        {
+          "path": "backend/scripts/prewarm_project_holiday_calendars.py",
+          "line": 129,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Proyectos candidatos encontrados: {len(candidates)}\")"
+        },
+        {
+          "path": "backend/scripts/prewarm_project_holiday_calendars.py",
+          "line": 144,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print("
+        },
+        {
+          "path": "backend/scripts/prewarm_project_holiday_calendars.py",
+          "line": 155,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Resumen:\")"
+        },
+        {
+          "path": "backend/scripts/prewarm_project_holiday_calendars.py",
+          "line": 156,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\" - fuentes oficiales: {source_count}\")"
+        },
+        {
+          "path": "backend/scripts/prewarm_project_holiday_calendars.py",
+          "line": 157,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\" - festivos maestros: {holiday_count}\")"
+        },
+        {
+          "path": "backend/scripts/prewarm_project_holiday_calendars.py",
+          "line": 158,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\" - snapshots de proyecto: {snapshot_count}\")"
+        },
+        {
+          "path": "backend/scripts/prewarm_project_holiday_calendars.py",
+          "line": 159,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\" - proyectos precalentados: {prewarmed}\")"
+        },
+        {
+          "path": "backend/scripts/prewarm_project_holiday_calendars.py",
+          "line": 160,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print("
+        },
+        {
+          "path": "backend/scripts/purge_community_attachments.py",
+          "line": 9,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print({\"purged_attachments\": purged})"
+        },
+        {
+          "path": "backend/scripts/rebuild_apu_templates_from_examples.py",
+          "line": 81,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"OK: rebuilt {target_path.name}\")"
+        },
+        {
+          "path": "backend/scripts/rebuild_apu_templates_from_examples.py",
+          "line": 127,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"OK: rebuilt {target_path.name}\")"
+        },
+        {
+          "path": "backend/scripts/reconcile_project_bases.py",
+          "line": 99,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(str(report_path))"
+        },
+        {
+          "path": "backend/scripts/repair_presupuesto_apu_scope.py",
+          "line": 34,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(result, ensure_ascii=False, indent=2, default=str))"
+        },
+        {
+          "path": "backend/scripts/repair_presupuesto_operational_lines.py",
+          "line": 177,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"REPAIRED\", item)"
+        },
+        {
+          "path": "backend/scripts/repair_presupuesto_operational_lines.py",
+          "line": 179,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"NO_REPAIRS\")"
+        },
+        {
+          "path": "backend/scripts/repair_santiago_apu_catalog.py",
+          "line": 158,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(summary, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/repair_santiago_master_project_sync.py",
+          "line": 155,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(report, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/reset_user_password.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "password",
+            "email"
+          ],
+          "text": "print(f\"✅ Contraseña para {email} reseteada correctamente.\")"
+        },
+        {
+          "path": "backend/scripts/reset_user_password.py",
+          "line": 23,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"❌ Usuario {email} no encontrado.\")"
+        },
+        {
+          "path": "backend/scripts/reset_user_password.py",
+          "line": 25,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"❌ Error: {e}\")"
+        },
+        {
+          "path": "backend/scripts/sanitize_admin_general_duplicate_apu_codes.py",
+          "line": 77,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(summary, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/sanitize_apu_cross_integrity.py",
+          "line": 103,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(summary, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/sanitize_catalog_text_format.py",
+          "line": 63,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(counts)"
+        },
+        {
+          "path": "backend/scripts/sanitize_company_admin_profiles.py",
+          "line": 297,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps({"
+        },
+        {
+          "path": "backend/scripts/sanitize_data_integrity.py",
+          "line": 236,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(summary, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/sanitize_edt_presupuesto_sync.py",
+          "line": 42,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(summary, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/sanitize_operational_budgets.py",
+          "line": 35,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(summary, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/sanitize_project_base_sync.py",
+          "line": 44,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(result, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/sanitize_santiago_divergent_apu_codes.py",
+          "line": 103,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(summary, ensure_ascii=False, indent=2))"
+        },
+        {
+          "path": "backend/scripts/search_data.py",
+          "line": 7,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Línea {i+1}: {line[:200]}...\")"
+        }
+      ]
+    },
+    "other_source": {
+      "description": "Other source files outside primary product paths.",
+      "count": 843,
+      "samples": [
+        {
+          "path": "audit_users.py",
+          "line": 19,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"--- User Audit ---\")"
+        },
+        {
+          "path": "audit_users.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"ID: {u.id}, Email: '{u.email}' (len: {len(u.email)}), Rol: {u.rol}, Active: {u.activo}\")"
+        },
+        {
+          "path": "audit_users.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "password"
+          ],
+          "text": "print(f\"  Hash len: {len(u.hashed_password)}\")"
+        },
+        {
+          "path": "audit_users.py",
+          "line": 28,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  Verification with '{pwd}': {match}\")"
+        },
+        {
+          "path": "audit_users.py",
+          "line": 32,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  Fresh Hash: {fresh_hash}\")"
+        },
+        {
+          "path": "audit_users.py",
+          "line": 33,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "password"
+          ],
+          "text": "print(f\"  DB Hash   : {u.hashed_password}\")"
+        },
+        {
+          "path": "audit_users.py",
+          "line": 38,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"\\nWARNING: Found {len(duplicates)} potential duplicate users!\")"
+        },
+        {
+          "path": "check_blocked_devices.py",
+          "line": 19,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Found {len(blocked_devices)} blocked devices\")"
+        },
+        {
+          "path": "check_blocked_devices.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "session"
+          ],
+          "text": "print(f\"ID: {d.id}, DeviceID: {d.device_id}, Usuario: {d.usuario_id}, Intentos: {d.intentos_fallidos}\")"
+        },
+        {
+          "path": "check_blocked_devices.py",
+          "line": 28,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"\\nDevices for {user.email}:\")"
+        },
+        {
+          "path": "check_blocked_devices.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "session"
+          ],
+          "text": "print(f\"ID: {d.id}, DeviceID: {d.device_id}, Bloqueado: {d.bloqueado}, Activo: {d.activo}\")"
+        },
+        {
+          "path": "check_db_schema.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Checking indices for table 'usuarios'...\")"
+        },
+        {
+          "path": "check_db_schema.py",
+          "line": 25,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Index: {idx['name']}, Columns: {idx['column_names']}, Unique: {idx['unique']}\")"
+        },
+        {
+          "path": "check_db_schema.py",
+          "line": 27,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"\\nChecking unique constraints...\")"
+        },
+        {
+          "path": "check_db_schema.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Constraint: {const['name']}, Columns: {const['column_names']}\")"
+        },
+        {
+          "path": "check_db_schema.py",
+          "line": 32,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error: {e}\")"
+        },
+        {
+          "path": "check_detalles_db.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Success! Table exists and matches schema.\")"
+        },
+        {
+          "path": "check_detalles_db.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error querying PresupuestoDetalle:\\n{e}\")"
+        },
+        {
+          "path": "check_edt.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"{'ID':<5} | {'Nombre':<30} | {'EDT Nodes':<10}\")"
+        },
+        {
+          "path": "check_edt.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"-\" * 50)"
+        },
+        {
+          "path": "check_edt.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"{p.id:<5} | {p.nombre[:30]:<30} | {edt_count:<10}\")"
+        },
+        {
+          "path": "check_edt_detail.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"{'ID':<5} | {'Parent':<6} | {'Tipo':<15} | {'Empresa':<7} | {'Nombre':<20}\")"
+        },
+        {
+          "path": "check_edt_detail.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"-\" * 65)"
+        },
+        {
+          "path": "check_edt_detail.py",
+          "line": 23,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"{n.id:<5} | {str(n.parent_id):<6} | {n.tipo_nodo:<15} | {n.empresa_id:<7} | {n.nombre[:20] if n.nombre else '--'}\")"
+        },
+        {
+          "path": "check_presupuesto_db.py",
+          "line": 19,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Success! Table exists and matches schema.\")"
+        },
+        {
+          "path": "check_presupuesto_db.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error querying Presupuesto: {e}\")"
+        },
+        {
+          "path": "check_units.py",
+          "line": 15,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Unidades in DB:\")"
+        },
+        {
+          "path": "check_units.py",
+          "line": 17,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(u)"
+        },
+        {
+          "path": "check_units.py",
+          "line": 19,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error: {e}\")"
+        },
+        {
+          "path": "check_units.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"\\nCheck Recursos:\")"
+        },
+        {
+          "path": "check_units.py",
+          "line": 26,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(r)"
+        },
+        {
+          "path": "check_units.py",
+          "line": 28,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error: {e}\")"
+        },
+        {
+          "path": "check_units_tmp.py",
+          "line": 19,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Found {len(unidades)} units for subcategory 5\")"
+        },
+        {
+          "path": "check_units_tmp.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ID: {u.id}, Desc: {u.descripcion}, Global: {u.es_global}, Empresa: {u.empresa_id}\")"
+        },
+        {
+          "path": "check_user.py",
+          "line": 7,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"User found: {user.email}\")"
+        },
+        {
+          "path": "check_user.py",
+          "line": 8,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Active: {user.activo}\")"
+        },
+        {
+          "path": "check_user.py",
+          "line": 9,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Role: {user.rol}\")"
+        },
+        {
+          "path": "check_user.py",
+          "line": 10,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "password"
+          ],
+          "text": "print(f\"Hashed password starts with: {user.hashed_password[:10]}...\")"
+        },
+        {
+          "path": "check_user.py",
+          "line": 12,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"User not found\")"
+        },
+        {
+          "path": "check_user_status.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"User found: {user.email}\")"
+        },
+        {
+          "path": "check_user_status.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Role: {user.rol}\")"
+        },
+        {
+          "path": "check_user_status.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Is Active: {user.activo}\")"
+        },
+        {
+          "path": "check_user_status.py",
+          "line": 23,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Empresa ID: {user.empresa_id}\")"
+        },
+        {
+          "path": "check_user_status.py",
+          "line": 25,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "password"
+          ],
+          "text": "print(f\"Has Hashed Password: {bool(user.hashed_password)}\")"
+        },
+        {
+          "path": "check_user_status.py",
+          "line": 27,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"User NOT found\")"
+        },
+        {
+          "path": "clean_roles.py",
+          "line": 8,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Roles actualizados y limpios.\")"
+        },
+        {
+          "path": "clean_roles.py",
+          "line": 12,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Benito: '{row[1]}'\")"
+        },
+        {
+          "path": "clean_roles.py",
+          "line": 14,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Error:\", e)"
+        },
+        {
+          "path": "fix_pwd.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "password",
+            "email"
+          ],
+          "text": "print(f\"Updating password for {email}...\")"
+        },
+        {
+          "path": "fix_pwd.py",
+          "line": 28,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"New Hash: {new_hash}\")"
+        },
+        {
+          "path": "fix_pwd.py",
+          "line": 32,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Verification after update: {match}\")"
+        },
+        {
+          "path": "fix_pwd.py",
+          "line": 34,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"User not found\")"
+        },
+        {
+          "path": "inspect_repo.py",
+          "line": 8,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"DispositivoRepository.__init__ signature: {sig}\")"
+        },
+        {
+          "path": "inspect_repo.py",
+          "line": 10,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error: {e}\")"
+        },
+        {
+          "path": "migrate_apus.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Adding subcategoria_item_id column to apus table...\")"
+        },
+        {
+          "path": "migrate_apus.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Column added successfully.\")"
+        },
+        {
+          "path": "migrate_apus.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Column subcategoria_item_id already exists.\")"
+        },
+        {
+          "path": "migrate_apus.py",
+          "line": 31,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Assigning default subcategory ID {subcat_id} to APUs without one...\")"
+        },
+        {
+          "path": "migrate_apus.py",
+          "line": 33,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Default subcategory assigned.\")"
+        },
+        {
+          "path": "migrate_apus.py",
+          "line": 35,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"No subcategory for Cat 5 found. Please create one manually later.\")"
+        },
+        {
+          "path": "migrate_codigo_unico.py",
+          "line": 25,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Índices actuales de codigo_unico:\")"
+        },
+        {
+          "path": "migrate_codigo_unico.py",
+          "line": 27,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  - {r[0]}: {r[1]}\")"
+        },
+        {
+          "path": "migrate_codigo_unico.py",
+          "line": 31,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"✓ Índice global eliminado\")"
+        },
+        {
+          "path": "migrate_codigo_unico.py",
+          "line": 35,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"✓ Índice simple recreado\")"
+        },
+        {
+          "path": "migrate_codigo_unico.py",
+          "line": 51,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"✓ Constraint UNIQUE(codigo_unico, empresa_id) creado\")"
+        },
+        {
+          "path": "migrate_codigo_unico.py",
+          "line": 53,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"✓ El constraint ya existía, sin cambios\")"
+        },
+        {
+          "path": "migrate_codigo_unico.py",
+          "line": 56,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"\\n✅ Migración completada exitosamente\")"
+        },
+        {
+          "path": "migrate_codigo_unico.py",
+          "line": 65,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"\\nConstraints finales en bases_trabajo:\")"
+        },
+        {
+          "path": "migrate_codigo_unico.py",
+          "line": 67,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  - {c[0]} ({c[1]})\")"
+        },
+        {
+          "path": "migrate_codigo_unico.py",
+          "line": 71,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"\\n❌ Error durante la migración: {e}\")"
+        },
+        {
+          "path": "migrate_detalles.py",
+          "line": 15,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Agregada columna edt_id a presupuesto_detalles\")"
+        },
+        {
+          "path": "migrate_detalles.py",
+          "line": 17,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Skipping edt_id: {e}\")"
+        },
+        {
+          "path": "migrate_detalles.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Migracion de detalles completada exitosamente.\")"
+        },
+        {
+          "path": "migrate_detalles_full.py",
+          "line": 25,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Success: {cmd}\")"
+        },
+        {
+          "path": "migrate_detalles_full.py",
+          "line": 27,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Skipping: {cmd.split('ADD COLUMN ')[1].split(' ')[0]} - ya existe\")"
+        },
+        {
+          "path": "migrate_detalles_full.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Migracion comprehensiva completada exitosamente.\")"
+        },
+        {
+          "path": "migrate_detalles_safe.py",
+          "line": 27,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Success: {cmd}\")"
+        },
+        {
+          "path": "migrate_detalles_safe.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Skipping {col} - probably already exists\")"
+        },
+        {
+          "path": "migrate_detalles_safe.py",
+          "line": 32,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Migracion separada completada exitosamente.\")"
+        },
+        {
+          "path": "migrate_presupuestos.py",
+          "line": 16,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Agregada columna iva_aplicado\")"
+        },
+        {
+          "path": "migrate_presupuestos.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Skipping iva_aplicado: {e}\")"
+        },
+        {
+          "path": "migrate_presupuestos.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Agregada columna dec_moneda\")"
+        },
+        {
+          "path": "migrate_presupuestos.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Skipping dec_moneda: {e}\")"
+        },
+        {
+          "path": "migrate_presupuestos.py",
+          "line": 28,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Agregada columna dec_calculos\")"
+        },
+        {
+          "path": "migrate_presupuestos.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Skipping dec_calculos: {e}\")"
+        },
+        {
+          "path": "migrate_presupuestos.py",
+          "line": 33,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Migracion completada exitosamente.\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 11,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Connecting to database: {db_url}\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 16,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Adding tanteo_activo...\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 19,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Column tanteo_activo added successfully.\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Could not add tanteo_activo (might already exist): {e}\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 23,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Adding precio_original...\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 26,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Column precio_original added successfully.\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 28,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Could not add precio_original: {e}\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Adding precio_tanteo...\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 33,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Column precio_tanteo added successfully.\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 35,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Could not add precio_tanteo: {e}\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 38,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Migration failed: {e}\")"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "line": 41,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Migration script finished.\")"
+        },
+        {
+          "path": "restart_backend.py",
+          "line": 11,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Terminating process {p.pid} ({p.name()}) on port {port}\")"
+        },
+        {
+          "path": "restart_backend.py",
+          "line": 15,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Failed to terminate process {conn.pid}\")"
+        },
+        {
+          "path": "restart_backend.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Process killed. NSSM should restart it shortly.\")"
+        },
+        {
+          "path": "restart_backend.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"No process found on port 3000.\")"
+        },
+        {
+          "path": "setup_ai_architecture_toolkit.py",
+          "line": 13,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Instalando AI Architecture Toolkit...\")"
+        },
+        {
+          "path": "setup_ai_architecture_toolkit.py",
+          "line": 229,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"project_map.json generado\")"
+        },
+        {
+          "path": "setup_ai_architecture_toolkit.py",
+          "line": 272,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"ARCHITECTURE.md generado\")"
+        },
+        {
+          "path": "setup_ai_architecture_toolkit.py",
+          "line": 275,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"AI Architecture Toolkit instalado correctamente.\")"
+        },
+        {
+          "path": "setup_ai_enterprise_toolkit.py",
+          "line": 13,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Instalando AI Enterprise Toolkit...\")"
+        },
+        {
+          "path": "setup_ai_enterprise_toolkit.py",
+          "line": 220,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"project_map.json generado\")"
+        },
+        {
+          "path": "setup_ai_enterprise_toolkit.py",
+          "line": 262,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"ARCHITECTURE.md generado\")"
+        },
+        {
+          "path": "setup_ai_enterprise_toolkit.py",
+          "line": 278,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Dashboard disponible en http://localhost:8123/docs/architecture/ARCHITECTURE.md\")"
+        },
+        {
+          "path": "setup_ai_enterprise_toolkit.py",
+          "line": 283,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"AI Enterprise Toolkit instalado correctamente.\")"
+        },
+        {
+          "path": "setup_ai_pro_toolkit.py",
+          "line": 13,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Instalando AI PRO Toolkit...\")"
+        },
+        {
+          "path": "setup_ai_pro_toolkit.py",
+          "line": 261,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"project_map.json generado\")"
+        },
+        {
+          "path": "setup_ai_pro_toolkit.py",
+          "line": 303,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"ARCHITECTURE.md generado\")"
+        },
+        {
+          "path": "setup_ai_pro_toolkit.py",
+          "line": 315,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Dashboard disponible en http://localhost:8123/docs/architecture/ARCHITECTURE.md\")"
+        },
+        {
+          "path": "setup_ai_pro_toolkit.py",
+          "line": 320,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"AI PRO Toolkit instalado correctamente.\")"
+        },
+        {
+          "path": "setup_ai_project_toolkit.py",
+          "line": 12,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Creando AI Project Toolkit...\")"
+        },
+        {
+          "path": "setup_ai_project_toolkit.py",
+          "line": 214,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"project_state.json generado\")"
+        },
+        {
+          "path": "setup_ai_project_toolkit.py",
+          "line": 265,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"project_map.json generado\")"
+        },
+        {
+          "path": "setup_ai_project_toolkit.py",
+          "line": 288,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"TASK creada:\",name)"
+        },
+        {
+          "path": "setup_ai_project_toolkit.py",
+          "line": 303,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Ejecuta primero index_project.py\")"
+        },
+        {
+          "path": "setup_ai_project_toolkit.py",
+          "line": 330,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"AUTO_DOC.md generado\")"
+        },
+        {
+          "path": "setup_ai_project_toolkit.py",
+          "line": 333,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"AI Project Toolkit instalado correctamente.\")"
+        },
+        {
+          "path": "test_api_error.py",
+          "line": 17,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Status Code: {response.status_code}\")"
+        },
+        {
+          "path": "test_api_error.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Response: {response.text}\")"
+        },
+        {
+          "path": "test_api_error.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error: {e}\")"
+        },
+        {
+          "path": "test_api_error_http.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Login failed: {res.status} - {data.decode('utf-8')}\")"
+        },
+        {
+          "path": "test_api_error_http.py",
+          "line": 34,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Login failed again: {res.status} - {data.decode('utf-8')}\")"
+        },
+        {
+          "path": "test_api_error_http.py",
+          "line": 54,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"\\nSending request to create mock recurso...\")"
+        },
+        {
+          "path": "test_api_error_http.py",
+          "line": 58,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Status Code: {res.status}\")"
+        },
+        {
+          "path": "test_api_error_http.py",
+          "line": 59,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(data.decode(\"utf-8\"))"
+        },
+        {
+          "path": "test_apus_backend.py",
+          "line": 16,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Status Code: {response.status_code}\")"
+        },
+        {
+          "path": "test_apus_backend.py",
+          "line": 19,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Total APUs: {len(apus)}\")"
+        },
+        {
+          "path": "test_apus_backend.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"First APU Subcat ID: {apus[0].get('subcategoria_item_id')}\")"
+        },
+        {
+          "path": "test_edt_api.py",
+          "line": 26,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Status EDT project {proyecto_id}: {response2.status}\")"
+        },
+        {
+          "path": "test_edt_api.py",
+          "line": 27,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Found {len(data)} nodes\")"
+        },
+        {
+          "path": "test_edt_api.py",
+          "line": 28,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(json.dumps(data, indent=2))"
+        },
+        {
+          "path": "test_edt_api.py",
+          "line": 31,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error: {e}\")"
+        },
+        {
+          "path": "test_repo_error.py",
+          "line": 16,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Connecting to database: {db_url}\")"
+        },
+        {
+          "path": "test_repo_error.py",
+          "line": 32,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Attempting to create recurso via repository...\")"
+        },
+        {
+          "path": "test_repo_error.py",
+          "line": 34,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Success! Created recurso ID: {recurso.id}\")"
+        },
+        {
+          "path": "test_repo_error.py",
+          "line": 37,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Exception caught during creation: {e}\")"
+        },
+        {
+          "path": "tmp_check_proy.py",
+          "line": 9,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Total proyectos found: {len(proyectos)}\")"
+        },
+        {
+          "path": "tmp_check_proy.py",
+          "line": 11,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ID: {p.id}, Nombre: {p.nombre}, Codigo: '{p.codigo}', CodigoRoot: '{p.codigo_root}', Rev: {p.revision}\")"
+        },
+        {
+          "path": "tmp_check_proy.py",
+          "line": 15,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  Revisions found for root '{p.codigo_root}': {len(revisions)}\")"
+        },
+        {
+          "path": "tmp_check_user.py",
+          "line": 10,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"--- USERS ---\")"
+        },
+        {
+          "path": "tmp_check_user.py",
+          "line": 12,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ID: {u.id}, Nombre: {u.nombre_completo}, Rol: {u.rol}, EmpresaID: {u.empresa_id}\")"
+        },
+        {
+          "path": "tmp_check_user.py",
+          "line": 15,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"\\n--- PROJECTS ---\")"
+        },
+        {
+          "path": "tmp_check_user.py",
+          "line": 17,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"ID: {p.id}, Nombre: {p.nombre}, EmpresaID: {p.empresa_id}, Root: {p.codigo_root}\")"
+        },
+        {
+          "path": "tmp_simulate_api.py",
+          "line": 14,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"\\nSIMULATING FOR USER: {u.nombre_completo} (Rol: {u.rol}, EmpresaID: {u.empresa_id})\")"
+        },
+        {
+          "path": "tmp_simulate_api.py",
+          "line": 21,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  Projects found in root list: {[p.nombre for p in proyectos]}\")"
+        },
+        {
+          "path": "tmp_simulate_api.py",
+          "line": 28,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"  Revisions found for Project 5 (root: {proj5.codigo_root}): {len(revisions)}\")"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 9,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Original active_task:\", data.get(\"active_task\"))"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 10,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Original generated_at:\", data.get(\"generated_at\"))"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Added TASK-1414.md to latest_tasks\")"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"TASK-1414.md already in latest_tasks\")"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Added note for TASK-1414\")"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 32,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Note already exists\")"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 37,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"SUCCESS: WORK_MODE_STATE.json updated\")"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 38,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"New active_task:\", data[\"active_task\"])"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 39,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"New generated_at:\", data[\"generated_at\"])"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 40,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"latest_tasks count:\", len(data[\"latest_tasks\"]))"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 41,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"notes count:\", len(data[\"notes\"]))"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "line": 44,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"ERROR:\", str(e))"
+        },
+        {
+          "path": "verify_apus_refactor.py",
+          "line": 18,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"No APUs found for testing.\")"
+        },
+        {
+          "path": "verify_apus_refactor.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Testing with empresa_id: {empresa_id}\")"
+        },
+        {
+          "path": "verify_apus_refactor.py",
+          "line": 25,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Successfully fetched {len(apus)} APUs via repository.\")"
+        },
+        {
+          "path": "verify_apus_refactor.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Fetched APU '{apu.descripcion}' OK via service.\")"
+        },
+        {
+          "path": "verify_apus_refactor.py",
+          "line": 34,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Next generated code: {next_code}\")"
+        },
+        {
+          "path": "verify_apus_refactor.py",
+          "line": 36,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Code generation format OK.\")"
+        },
+        {
+          "path": "verify_apus_refactor.py",
+          "line": 39,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error during verification: {e}\")"
+        },
+        {
+          "path": "verify_login.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"User: {user.email}\")"
+        },
+        {
+          "path": "verify_login.py",
+          "line": 23,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"User Active: {user.activo}\")"
+        },
+        {
+          "path": "verify_login.py",
+          "line": 27,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Empresa: {empresa.nombre}\")"
+        },
+        {
+          "path": "verify_login.py",
+          "line": 28,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Empresa Active: {empresa.activa}\")"
+        },
+        {
+          "path": "verify_login.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Empresa NOT found\")"
+        },
+        {
+          "path": "verify_login.py",
+          "line": 34,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "password"
+          ],
+          "text": "print(f\"Password '{password_to_check}' matches: {matches}\")"
+        },
+        {
+          "path": "verify_login.py",
+          "line": 37,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"User NOT found\")"
+        },
+        {
+          "path": "verify_presupuestos_refactor.py",
+          "line": 19,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"No budgets found in database\")"
+        },
+        {
+          "path": "verify_presupuestos_refactor.py",
+          "line": 22,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Testing budget ID: {pres.id}\")"
+        },
+        {
+          "path": "verify_presupuestos_refactor.py",
+          "line": 37,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Successfully read budget: {result.id}\")"
+        },
+        {
+          "path": "verify_presupuestos_refactor.py",
+          "line": 38,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Subtotal: {result.subtotal}\")"
+        },
+        {
+          "path": "verify_presupuestos_refactor.py",
+          "line": 39,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Total: {result.total}\")"
+        },
+        {
+          "path": "verify_presupuestos_refactor.py",
+          "line": 40,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Number of lines: {len(result.detalle)}\")"
+        },
+        {
+          "path": "verify_presupuestos_refactor.py",
+          "line": 45,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Pareto analysis successful. Items: {len(pareto_result.items)}\")"
+        },
+        {
+          "path": "verify_presupuestos_refactor.py",
+          "line": 50,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Notas summary successful. General total: {notas_result.general_total}\")"
+        },
+        {
+          "path": "verify_presupuestos_refactor.py",
+          "line": 53,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error during verification: {e}\")"
+        },
+        {
+          "path": "verify_proyectos_refactor.py",
+          "line": 20,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"No projects found in database to test with.\")"
+        },
+        {
+          "path": "verify_proyectos_refactor.py",
+          "line": 24,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Testing with enterprise ID: {empresa_id}\")"
+        },
+        {
+          "path": "verify_proyectos_refactor.py",
+          "line": 27,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Successfully fetched {len(roots)} project roots.\")"
+        },
+        {
+          "path": "verify_proyectos_refactor.py",
+          "line": 30,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"First project: {first_root.nombre}, Revisions: {first_root.num_revisiones}\")"
+        },
+        {
+          "path": "verify_proyectos_refactor.py",
+          "line": 46,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Updated project description successfully: {updated.descripcion}\")"
+        },
+        {
+          "path": "verify_proyectos_refactor.py",
+          "line": 49,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Testing revision creation...\")"
+        },
+        {
+          "path": "verify_proyectos_refactor.py",
+          "line": 52,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Successfully created revision: {new_rev.codigo}\")"
+        },
+        {
+          "path": "verify_proyectos_refactor.py",
+          "line": 57,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Error during verification: {e}\")"
+        },
+        {
+          "path": "verify_real_fix.py",
+          "line": 37,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Need at least 2 companies in the DB to test.\")"
+        },
+        {
+          "path": "verify_real_fix.py",
+          "line": 43,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(\"Superadmin not found in DB.\")"
+        },
+        {
+          "path": "verify_real_fix.py",
+          "line": 46,
+          "kind": "python_print",
+          "sensitive_hits": [
+            "email"
+          ],
+          "text": "print(f\"Testing with Email: {email}\")"
+        },
+        {
+          "path": "verify_real_fix.py",
+          "line": 47,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Empresa 1: {emp1.nombre} (ID: {emp1.id})\")"
+        },
+        {
+          "path": "verify_real_fix.py",
+          "line": 48,
+          "kind": "python_print",
+          "sensitive_hits": [],
+          "text": "print(f\"Empresa 2: {emp2.nombre} (ID: {emp2.id})\")"
+        }
+      ]
+    }
+  },
+  "policy": {
+    "do_not_change_automatically": [
+      "authentication",
+      "multi-tenant",
+      "license middleware",
+      "database schema",
+      "BIM code or UX in MODO 1"
+    ],
+    "review_notes": [
+      "A sensitive term hit is heuristic context, not proof of leakage.",
+      "Scripts and tools may intentionally use stdout as their user interface.",
+      "Frontend console cleanup must be done module by module with build and smoke validation."
+    ]
+  }
+}

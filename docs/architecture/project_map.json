@@ -1,0 +1,167 @@
+{
+  "backend": {
+    "entrypoint": "backend/app/main.py",
+    "router": "backend/app/api/api.py",
+    "layers": {
+      "core": [
+        "backend/app/core/config.py",
+        "backend/app/core/database.py",
+        "backend/app/core/security.py",
+        "backend/app/core/utils.py",
+        "backend/app/core/debug_logger.py"
+      ],
+      "api_endpoints": [
+        "auth",
+        "usuarios",
+        "proyectos",
+        "proyecto_detalles",
+        "stakeholders",
+        "roles",
+        "maestros",
+        "empresas",
+        "paises",
+        "recursos",
+        "apus",
+        "presupuestos",
+        "bases_trabajo",
+        "subcategorias",
+        "subcategorias_items",
+        "dispositivos",
+        "edo",
+        "edt",
+        "utils"
+      ],
+      "services": [
+        "backend/app/services/usuario.py",
+        "backend/app/services/pais.py",
+        "backend/app/services/apu.py",
+        "backend/app/services/presupuesto.py"
+      ],
+      "repositories": [
+        "backend/app/repositories/usuario.py",
+        "backend/app/repositories/proyecto.py",
+        "backend/app/repositories/proyecto_detalle.py",
+        "backend/app/repositories/stakeholder.py",
+        "backend/app/repositories/subcategoria.py",
+        "backend/app/repositories/subcategoria_item.py",
+        "backend/app/repositories/recurso.py",
+        "backend/app/repositories/apu.py",
+        "backend/app/repositories/base_trabajo.py",
+        "backend/app/repositories/dispositivo.py",
+        "backend/app/repositories/edo.py",
+        "backend/app/repositories/edt.py",
+        "backend/app/repositories/unidad.py",
+        "backend/app/repositories/codcpc.py"
+      ],
+      "models": [
+        "usuario",
+        "empresa",
+        "pais",
+        "proyecto",
+        "proyecto_detalle",
+        "stakeholder",
+        "base_trabajo",
+        "recurso",
+        "unidad",
+        "codcpc",
+        "apu",
+        "presupuesto",
+        "dispositivo",
+        "edo",
+        "edt",
+        "subcategoria_item",
+        "password_reset"
+      ]
+    }
+  },
+  "frontend": {
+    "entrypoint": "frontend/src/main.jsx",
+    "app": "frontend/src/App.jsx",
+    "router": "frontend/src/routes/AppRouter.jsx",
+    "contexts": [
+      "frontend/src/context/AuthContext.jsx",
+      "frontend/src/context/PresupuestoContext.jsx"
+    ],
+    "pages": [
+      "Login",
+      "ForgotPassword",
+      "ResetPassword",
+      "Dashboard",
+      "Proyectos",
+      "PreciosUnitarios",
+      "BasesTrabajo",
+      "Subcategorias",
+      "APUs",
+      "Recursos",
+      "Presupuestos",
+      "Settings"
+    ],
+    "domain_components": {
+      "projects": [
+        "DatosProyecto",
+        "Edo",
+        "Edt",
+        "Stakeholders"
+      ],
+      "presupuestos": [
+        "PresupuestoDetail",
+        "CatalogoApuTab",
+        "LineasPresupuestoTab",
+        "TanteoTab",
+        "HerramientasTab",
+        "IndirectosModal",
+        "NotasGeneralesModal",
+        "ParetoModal"
+      ],
+      "shared": [
+        "ProtectedRoute",
+        "ErrorBoundary",
+        "RegisterModal",
+        "PersonnelFormFields"
+      ]
+    }
+  },
+  "api_surface": {
+    "prefix": "/api/v1",
+    "resource_groups": [
+      "auth",
+      "usuarios",
+      "empresas",
+      "proyectos",
+      "proyecto-detalles",
+      "stakeholders",
+      "roles",
+      "maestros",
+      "paises",
+      "recursos",
+      "apus",
+      "presupuestos",
+      "bases-trabajo",
+      "subcategorias",
+      "subcategorias-items",
+      "dispositivos",
+      "edo",
+      "edt",
+      "utils"
+    ]
+  },
+  "technical_debt": [
+    "backend/app/main.py aun puede ejecutar Base.metadata.create_all en runtime cuando `CREATE_TABLES_ON_STARTUP=true`",
+    "El repositorio conserva artefactos como .db, dist, __pycache__ y logs",
+    "Persisten rutas y vistas de alta complejidad en paginas monoliticas como `frontend/src/pages/APUs.jsx`, `frontend/src/pages/Recursos.jsx` y `frontend/src/pages/Subcategorias.jsx`"
+  ],
+  "dead_code_candidates": [],
+    "notes": [
+    "El endpoint maestros fue normalizado para eliminar rutas duplicadas.",
+    "Este archivo ya no indexa dependencias de entornos virtuales ni node_modules.",
+    "El endpoint `utils/spellcheck` ya forma parte de la superficie API montada.",
+    "Se eliminaron candidatos de dead code con evidencia fuerte de no uso sin afectar el router ni imports activos.",
+    "El modulo `frontend/src/utils/deviceId.js` ahora expone solo funciones con consumidores activos.",
+    "El frontend usa carga diferida en rutas de mayor peso y segmentacion de vendors en `vite.config.js`.",
+    "El esquema de notas de presupuesto ya no depende de creacion de tablas/columnas ad hoc en `backend/app/main.py`; queda respaldado por la revision Alembic `dcc7c6a3f3f1`.",
+    "El modulo de presupuestos expone `GET /api/v1/presupuestos/{id}/pareto` y `frontend/src/components/presupuestos/ParetoModal.jsx` ya funciona como vista Pareto operativa por lineas.",
+    "La vista Pareto soporta `view=global` y `view=capitulos`, y permite navegar por doble clic desde el ranking al editor de presupuesto.",
+    "El modulo de presupuestos ya persiste indirectos por presupuesto/revision en backend y aplica su calculo a nivel proyecto, desacoplado de `BaseTrabajo.porcentaje_indirectos`.",
+    "`ProyectoDetalle` quedo reestructurado para multiempresa: el backend ya no lo resuelve solo por `codigo_root`, sino por `empresa_id + codigo_root`, respaldado por la revision Alembic `f4c6d9b8a1e2`."
+  ]
+}

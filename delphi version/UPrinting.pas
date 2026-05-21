@@ -1,0 +1,80 @@
+unit UPrinting;
+
+interface
+
+uses
+  UProgressThread, SysUtils, FlexCel.Core, FlexCel.Render, Classes;
+
+type
+  TPrintingThread = class(TProgressThread)
+  private
+    procedure ShowProgress(const sender: TObject; const e: TPrintPageEventArgs);
+  protected
+    procedure Execute; override;
+  end;
+
+function GetPrintUseWatermark: Boolean;
+procedure SetPrintUseWatermark(Value: Boolean);
+
+implementation
+
+var
+  UseWatermarkForCurrentJob: Boolean = False;
+
+function GetPrintUseWatermark: Boolean;
+begin
+  Result := UseWatermarkForCurrentJob;
+end;
+
+procedure SetPrintUseWatermark(Value: Boolean);
+begin
+  UseWatermarkForCurrentJob := Value;
+end;
+
+{ TPrintingThread }
+
+procedure TPrintingThread.Execute;
+var
+  doc: TFlexCelPrintDocument;
+begin
+  doc := TFlexCelPrintDocument.Create(Xls);
+  try
+    doc.AfterGeneratePage := ShowProgress;
+    if AllSheets then
+    begin
+      doc.BeginPrint;
+      try
+        doc.PrintAllVisibleSheets(false);
+      finally
+        doc.EndPrint;
+      end;
+    end
+    else
+    begin
+      doc.Print;
+    end;
+  finally
+    FreeAndNil(doc);
+  end;
+end;
+
+procedure TPrintingThread.ShowProgress(const sender: TObject; const e: TPrintPageEventArgs);
+var
+  Prog: TFlexCelPrintingProgress;
+  Percent: Integer;
+  Msg: string;
+begin
+  Prog := (sender as TFlexCelPrintDocument).Progress;
+  if (Prog.TotalPage = 0) then
+    Percent := 100
+  else
+    Percent := Round(Prog.Page * 100.0 / Prog.TotalPage);
+
+  Msg := 'Page ' + IntToStr(Prog.Page) + ' of ' + IntToStr(Prog.TotalPage);
+
+  // Usar el callback de progreso
+  if Assigned(ProgressFeedback) then
+    ProgressFeedback(Percent, Msg);
+end;
+
+end.

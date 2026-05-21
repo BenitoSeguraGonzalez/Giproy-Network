@@ -1,0 +1,1190 @@
+object frmConfiguracion: TfrmConfiguracion
+  Left = 0
+  Top = 0
+  ClientHeight = 564
+  ClientWidth = 802
+  Position = OwnerFormCenter
+  StyleBook = DModule_1.stylbk_2
+  Transparency = True
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  OnShow = FormShow
+  DesignerMasterStyle = 0
+  object lyt_Background: TLayout
+    Align = Client
+    Size.Width = 802.000000000000000000
+    Size.Height = 564.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object lyt_header: TLayout
+      Align = MostTop
+      Size.Width = 802.000000000000000000
+      Size.Height = 25.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object rect_1: TRectangle
+        Align = Right
+        Corners = [TopLeft, TopRight]
+        Fill.Kind = Gradient
+        Fill.Gradient.Points = <
+          item
+            Color = xFFEF740C
+            Offset = 0.000000000000000000
+          end
+          item
+            Color = xFFF39200
+            Offset = 1.000000000000000000
+          end>
+        Fill.Gradient.StartPosition.Y = 0.500000000000000000
+        Fill.Gradient.StopPosition.X = 1.000000000000000000
+        Fill.Gradient.StopPosition.Y = 0.500000000000000000
+        Position.X = 597.000000000000000000
+        Size.Width = 205.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Thickness = 0.000000000000000000
+        XRadius = 5.000000000000000000
+        YRadius = 5.000000000000000000
+        object lbl_banner1: TLabel
+          Align = Client
+          StyledSettings = [Size]
+          Size.Width = 205.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.Font.Family = 'Poppins'
+          TextSettings.Font.StyleExt = {00050000000000000004000000}
+          TextSettings.FontColor = claWhite
+          TextSettings.HorzAlign = Center
+          Text = 'Configuraci'#243'n'
+          TabOrder = 0
+        end
+      end
+    end
+    object Rectangle1: TRectangle
+      Align = Client
+      Size.Width = 802.000000000000000000
+      Size.Height = 539.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Thickness = 0.300000011920929000
+      object lyt_Body: TLayout
+        Align = Client
+        Size.Width = 802.000000000000000000
+        Size.Height = 539.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        object lyt_footer: TLayout
+          Align = MostBottom
+          Margins.Right = 10.000000000000000000
+          Position.Y = 495.000000000000000000
+          Size.Width = 792.000000000000000000
+          Size.Height = 44.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          object lyt2: TLayout
+            Align = Right
+            Margins.Top = 2.000000000000000000
+            Position.X = 682.000000000000000000
+            Position.Y = 2.000000000000000000
+            Size.Width = 110.000000000000000000
+            Size.Height = 42.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 1
+            object rect_Aceptar: TRectangle
+              Align = Center
+              Cursor = crHandPoint
+              Fill.Kind = Gradient
+              Fill.Gradient.Points = <
+                item
+                  Color = xFFF39200
+                  Offset = 0.000000000000000000
+                end
+                item
+                  Color = xFEE94E1B
+                  Offset = 1.000000000000000000
+                end>
+              Fill.Gradient.StopPosition.X = 1.000000000000000000
+              Margins.Top = 3.000000000000000000
+              Margins.Bottom = 10.000000000000000000
+              Size.Width = 100.000000000000000000
+              Size.Height = 25.000000000000000000
+              Size.PlatformDefault = False
+              Stroke.Color = claWhite
+              Stroke.Thickness = 0.000000000000000000
+              XRadius = 5.000000000000000000
+              YRadius = 5.000000000000000000
+              OnClick = rect_AceptarClick
+              object lbl1: TLabel
+                Align = Center
+                StyledSettings = [Style]
+                Size.Width = 44.000000000000000000
+                Size.Height = 17.000000000000000000
+                Size.PlatformDefault = False
+                TextSettings.Font.Family = 'Poppins'
+                TextSettings.Font.Size = 10.000000000000000000
+                TextSettings.FontColor = claWhite
+                Text = 'ACEPTAR'
+                TabOrder = 0
+              end
+            end
+          end
+        end
+        object Layout1: TLayout
+          Align = Client
+          Size.Width = 802.000000000000000000
+          Size.Height = 495.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 1
+          object Layout2: TLayout
+            Align = MostTop
+            Size.Width = 802.000000000000000000
+            Size.Height = 50.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 0
+            object lbl_apu: TLabel
+              Align = Client
+              StyledSettings = [FontColor]
+              Size.Width = 802.000000000000000000
+              Size.Height = 50.000000000000000000
+              Size.PlatformDefault = False
+              TextSettings.Font.Family = 'Poppins'
+              TextSettings.Font.Size = 14.000000000000000000
+              TextSettings.Font.StyleExt = {00060000000000000004000000}
+              TextSettings.HorzAlign = Center
+              Text = 'Configuraci'#243'n General'
+              TabOrder = 0
+            end
+          end
+          object Layout3: TLayout
+            Align = Top
+            Margins.Left = 10.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Position.X = 10.000000000000000000
+            Position.Y = 50.000000000000000000
+            Size.Width = 782.000000000000000000
+            Size.Height = 40.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 1
+            object GridPanelLayout1: TGridPanelLayout
+              Align = Client
+              Size.Width = 782.000000000000000000
+              Size.Height = 40.000000000000000000
+              Size.PlatformDefault = False
+              TabOrder = 0
+              ColumnCollection = <
+                item
+                  Value = 33.352283208706440000
+                end
+                item
+                  Value = 33.305534235080470000
+                end
+                item
+                  Value = 33.342178996055270000
+                end>
+              ControlCollection = <
+                item
+                  Column = 0
+                  Control = lyt1
+                  Row = 0
+                end
+                item
+                  Column = 1
+                  Control = Layout5
+                  Row = 0
+                end
+                item
+                  Column = 2
+                  Control = Layout6
+                  Row = 0
+                end>
+              RowCollection = <
+                item
+                  Value = 100.000000000000000000
+                end>
+              object lyt1: TLayout
+                Align = Client
+                Size.Width = 260.814849853515600000
+                Size.Height = 40.000000000000000000
+                Size.PlatformDefault = False
+                TabOrder = 2
+                object rct_C1: TRectangle
+                  Align = Client
+                  Cursor = crHandPoint
+                  Fill.Color = xFF606060
+                  Margins.Left = 10.000000000000000000
+                  Margins.Top = 6.000000000000000000
+                  Margins.Right = 10.000000000000000000
+                  Margins.Bottom = 5.000000000000000000
+                  Size.Width = 240.814849853515600000
+                  Size.Height = 29.000000000000000000
+                  Size.PlatformDefault = False
+                  XRadius = 5.000000000000000000
+                  YRadius = 5.000000000000000000
+                  OnClick = rct_C1Click
+                  OnMouseEnter = rct_C1MouseEnter
+                  OnMouseLeave = rct_C1MouseLeave
+                  object lbl_41: TLabel
+                    Align = Client
+                    StyledSettings = []
+                    Size.Width = 240.814849853515600000
+                    Size.Height = 29.000000000000000000
+                    Size.PlatformDefault = False
+                    TextSettings.Font.Family = 'Poppins'
+                    TextSettings.Font.Size = 11.000000000000000000
+                    TextSettings.FontColor = claWhite
+                    TextSettings.HorzAlign = Center
+                    Text = 'General'
+                    TabOrder = 0
+                  end
+                end
+              end
+              object Layout5: TLayout
+                Align = Client
+                Size.Width = 260.449310302734400000
+                Size.Height = 40.000000000000000000
+                Size.PlatformDefault = False
+                TabOrder = 1
+                object rct_C2: TRectangle
+                  Align = Client
+                  Cursor = crHandPoint
+                  Fill.Color = xFF606060
+                  Margins.Left = 10.000000000000000000
+                  Margins.Top = 6.000000000000000000
+                  Margins.Right = 10.000000000000000000
+                  Margins.Bottom = 5.000000000000000000
+                  Size.Width = 240.449310302734400000
+                  Size.Height = 29.000000000000000000
+                  Size.PlatformDefault = False
+                  XRadius = 5.000000000000000000
+                  YRadius = 5.000000000000000000
+                  OnClick = rct_C2Click
+                  OnMouseEnter = rct_C2MouseEnter
+                  OnMouseLeave = rct_C2MouseLeave
+                  object Label1: TLabel
+                    Align = Client
+                    StyledSettings = []
+                    Size.Width = 240.449310302734400000
+                    Size.Height = 29.000000000000000000
+                    Size.PlatformDefault = False
+                    TextSettings.Font.Family = 'Poppins'
+                    TextSettings.Font.Size = 11.000000000000000000
+                    TextSettings.FontColor = claWhite
+                    TextSettings.HorzAlign = Center
+                    Text = 'Plantillas'
+                    TabOrder = 0
+                  end
+                end
+              end
+              object Layout6: TLayout
+                Align = Client
+                Size.Width = 260.735839843750000000
+                Size.Height = 40.000000000000000000
+                Size.PlatformDefault = False
+                TabOrder = 0
+                object rct_C3: TRectangle
+                  Align = Client
+                  Cursor = crHandPoint
+                  Fill.Color = xFF606060
+                  Margins.Left = 10.000000000000000000
+                  Margins.Top = 6.000000000000000000
+                  Margins.Right = 10.000000000000000000
+                  Margins.Bottom = 5.000000000000000000
+                  Size.Width = 240.735839843750000000
+                  Size.Height = 29.000000000000000000
+                  Size.PlatformDefault = False
+                  XRadius = 5.000000000000000000
+                  YRadius = 5.000000000000000000
+                  OnClick = rct_C3Click
+                  OnMouseEnter = rct_C3MouseEnter
+                  OnMouseLeave = rct_C3MouseLeave
+                  object Label2: TLabel
+                    Align = Client
+                    StyledSettings = []
+                    Size.Width = 240.735839843750000000
+                    Size.Height = 29.000000000000000000
+                    Size.PlatformDefault = False
+                    TextSettings.Font.Family = 'Poppins'
+                    TextSettings.Font.Size = 11.000000000000000000
+                    TextSettings.FontColor = claWhite
+                    TextSettings.HorzAlign = Center
+                    Text = 'Adicionales'
+                    TabOrder = 0
+                  end
+                end
+              end
+            end
+          end
+          object Layout4: TLayout
+            Align = Client
+            Size.Width = 802.000000000000000000
+            Size.Height = 405.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 2
+            object TabConfiguracion: TTabControl
+              Align = Client
+              Margins.Left = 2.000000000000000000
+              Margins.Right = 2.000000000000000000
+              Size.Width = 798.000000000000000000
+              Size.Height = 405.000000000000000000
+              Size.PlatformDefault = False
+              TabIndex = 0
+              TabOrder = 0
+              TabPosition = None
+              Sizes = (
+                798s
+                405s
+                798s
+                405s
+                798s
+                405s
+                798s
+                405s)
+              object TabC1: TTabItem
+                CustomIcon = <
+                  item
+                  end>
+                TextSettings.Trimming = None
+                IsSelected = True
+                Size.Width = 8.000000000000000000
+                Size.Height = 8.000000000000000000
+                Size.PlatformDefault = False
+                StyleLookup = ''
+                TabOrder = 0
+                Text = 'TabC1'
+                ExplicitSize.cx = 8.000000000000000000
+                ExplicitSize.cy = 8.000000000000000000
+                object Layout9: TLayout
+                  Align = Client
+                  Margins.Left = 20.000000000000000000
+                  Margins.Top = 10.000000000000000000
+                  Margins.Right = 10.000000000000000000
+                  Size.Width = 768.000000000000000000
+                  Size.Height = 395.000000000000000000
+                  Size.PlatformDefault = False
+                  TabOrder = 0
+                  object Layout10: TLayout
+                    Align = Top
+                    Margins.Top = 20.000000000000000000
+                    Position.Y = 20.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 2
+                    object GridPanelLayout2: TGridPanelLayout
+                      Align = Client
+                      Size.Width = 768.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TabOrder = 0
+                      ColumnCollection = <
+                        item
+                          Value = 50.000000000000000000
+                        end
+                        item
+                          Value = 50.000000000000000000
+                        end>
+                      ControlCollection = <
+                        item
+                          Column = 0
+                          Control = Layout11
+                          Row = 0
+                        end
+                        item
+                          Column = 1
+                          Control = Layout12
+                          Row = 0
+                        end>
+                      RowCollection = <
+                        item
+                          Value = 100.000000000000000000
+                        end>
+                      object Layout11: TLayout
+                        Align = Client
+                        Size.Width = 384.000000000000000000
+                        Size.Height = 25.000000000000000000
+                        Size.PlatformDefault = False
+                        TabOrder = 0
+                        object Label5: TLabel
+                          Align = Left
+                          StyledSettings = [Size, FontColor]
+                          Size.Width = 137.000000000000000000
+                          Size.Height = 25.000000000000000000
+                          Size.PlatformDefault = False
+                          TextSettings.Font.Family = 'Poppins'
+                          TextSettings.Font.StyleExt = {00020000000000000004000000}
+                          Text = 'N'#186' Decimales Calculo:'
+                          TabOrder = 0
+                        end
+                        object NB_NDecimalesPresupuesto: TNumberBox
+                          Touch.InteractiveGestures = [LongTap, DoubleTap]
+                          Align = Left
+                          TabOrder = 1
+                          Cursor = crIBeam
+                          DecimalDigits = 0
+                          Min = 1.000000000000000000
+                          Max = 6.000000000000000000
+                          Value = 4.000000000000000000
+                          TextSettings.Font.Family = 'Poppins'
+                          TextSettings.HorzAlign = Center
+                          Position.X = 137.000000000000000000
+                          Position.Y = 3.000000000000000000
+                          Margins.Top = 3.000000000000000000
+                          Margins.Bottom = 3.000000000000000000
+                          Size.Width = 35.000000000000000000
+                          Size.Height = 19.000000000000000000
+                          Size.PlatformDefault = False
+                          StyledSettings = [Size, Style]
+                          OnKeyDown = NB_NDecimalesPresupuestoKeyDown
+                          OnEnter = NB_NDecimalesPresupuestoEnter
+                          OnExit = NB_NDecimalesPresupuestoExit
+                          object Glow_NDecimalesPresupuesto: TGlowEffect
+                            Softness = 0.400000005960464500
+                            GlowColor = claBlack
+                            Opacity = 0.300000011920929000
+                            Enabled = False
+                          end
+                        end
+                      end
+                      object Layout12: TLayout
+                        Align = Client
+                        Size.Width = 384.000000000000000000
+                        Size.Height = 25.000000000000000000
+                        Size.PlatformDefault = False
+                        TabOrder = 1
+                        object Label6: TLabel
+                          Align = Left
+                          StyledSettings = [Size, FontColor]
+                          Size.Width = 145.000000000000000000
+                          Size.Height = 25.000000000000000000
+                          Size.PlatformDefault = False
+                          TextSettings.Font.Family = 'Poppins'
+                          TextSettings.Font.StyleExt = {00020000000000000004000000}
+                          Text = 'N'#186' Decimales Moneda:'
+                          TabOrder = 0
+                        end
+                        object NB_NDecimalesMoneda: TNumberBox
+                          Touch.InteractiveGestures = [LongTap, DoubleTap]
+                          Align = Left
+                          TabOrder = 1
+                          Cursor = crIBeam
+                          DecimalDigits = 0
+                          Min = 1.000000000000000000
+                          Max = 6.000000000000000000
+                          Value = 2.000000000000000000
+                          TextSettings.Font.Family = 'Poppins'
+                          TextSettings.HorzAlign = Center
+                          Position.X = 145.000000000000000000
+                          Position.Y = 3.000000000000000000
+                          Margins.Top = 3.000000000000000000
+                          Margins.Bottom = 3.000000000000000000
+                          Size.Width = 35.000000000000000000
+                          Size.Height = 19.000000000000000000
+                          Size.PlatformDefault = False
+                          StyledSettings = [Size, Style]
+                          OnKeyDown = NB_NDecimalesMonedaKeyDown
+                          OnEnter = NB_NDecimalesMonedaEnter
+                          OnExit = NB_NDecimalesMonedaExit
+                          object Glow_NDecimalesMoneda: TGlowEffect
+                            Softness = 0.400000005960464500
+                            GlowColor = claBlack
+                            Opacity = 0.300000011920929000
+                            Enabled = False
+                          end
+                        end
+                      end
+                    end
+                    object Label4: TLabel
+                      StyledSettings = [Size, FontColor]
+                      Position.Y = -20.000000000000000000
+                      TextSettings.Font.Family = 'Poppins'
+                      TextSettings.Font.StyleExt = {00050000000000000004000000}
+                      Text = 'Datos Num'#233'ricos'
+                      TabOrder = 1
+                    end
+                  end
+                  object Layout7: TLayout
+                    Align = Top
+                    Margins.Top = 20.000000000000000000
+                    Position.Y = 65.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 1
+                    object GridPanelLayout3: TGridPanelLayout
+                      Align = Client
+                      Size.Width = 768.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TabOrder = 0
+                      ColumnCollection = <
+                        item
+                          Value = 50.000000000000000000
+                        end
+                        item
+                          Value = 29.508197690107420000
+                        end
+                        item
+                          Value = 20.491801997212770000
+                        end>
+                      ControlCollection = <
+                        item
+                          Column = 0
+                          Control = Layout13
+                          Row = 0
+                        end
+                        item
+                          Column = 1
+                          Control = Layout14
+                          Row = 0
+                        end
+                        item
+                          Column = 2
+                          Control = Layout15
+                          Row = 0
+                        end>
+                      RowCollection = <
+                        item
+                          Value = 100.000000000000000000
+                        end>
+                      object Layout13: TLayout
+                        Align = Client
+                        Size.Width = 384.000000000000000000
+                        Size.Height = 25.000000000000000000
+                        Size.PlatformDefault = False
+                        TabOrder = 0
+                        object Label3: TLabel
+                          Align = Left
+                          StyledSettings = [Size, FontColor]
+                          Size.Width = 120.000000000000000000
+                          Size.Height = 25.000000000000000000
+                          Size.PlatformDefault = False
+                          TextSettings.Font.Family = 'Poppins'
+                          TextSettings.Font.StyleExt = {00020000000000000004000000}
+                          Text = 'Prefijo / Empresa:'
+                          TabOrder = 0
+                        end
+                        object edt_PrimerValor: TEdit
+                          Touch.InteractiveGestures = [LongTap, DoubleTap]
+                          Align = Left
+                          TabOrder = 1
+                          Text = 'GIPROY'
+                          TextSettings.Font.Family = 'Poppins'
+                          Position.X = 120.000000000000000000
+                          Position.Y = 3.000000000000000000
+                          Margins.Top = 3.000000000000000000
+                          Margins.Bottom = 3.000000000000000000
+                          Size.Width = 209.000000000000000000
+                          Size.Height = 19.000000000000000000
+                          Size.PlatformDefault = False
+                          StyledSettings = [Size, Style, FontColor]
+                          OnEnter = edt_PrimerValorEnter
+                          OnExit = edt_PrimerValorExit
+                          object Glow_PrimerValor: TGlowEffect
+                            Softness = 0.400000005960464500
+                            GlowColor = claBlack
+                            Opacity = 0.300000011920929000
+                            Enabled = False
+                          end
+                        end
+                      end
+                      object Layout14: TLayout
+                        Align = Client
+                        Size.Width = 226.622924804687500000
+                        Size.Height = 25.000000000000000000
+                        Size.PlatformDefault = False
+                        TabOrder = 2
+                        object Label7: TLabel
+                          Align = Left
+                          StyledSettings = [Size, FontColor]
+                          Size.Width = 129.000000000000000000
+                          Size.Height = 25.000000000000000000
+                          Size.PlatformDefault = False
+                          TextSettings.Font.Family = 'Poppins'
+                          TextSettings.Font.StyleExt = {00020000000000000004000000}
+                          Text = 'Referencia / Periodo:'
+                          TabOrder = 0
+                        end
+                        object NB_PrimerSecuencial: TNumberBox
+                          Touch.InteractiveGestures = [LongTap, DoubleTap]
+                          Align = Left
+                          TabOrder = 1
+                          Cursor = crIBeam
+                          DecimalDigits = 0
+                          Min = 1.000000000000000000
+                          Max = 9999.000000000000000000
+                          Value = 2026.000000000000000000
+                          TextSettings.Font.Family = 'Poppins'
+                          TextSettings.HorzAlign = Center
+                          Position.X = 129.000000000000000000
+                          Position.Y = 3.000000000000000000
+                          Margins.Top = 3.000000000000000000
+                          Margins.Bottom = 3.000000000000000000
+                          Size.Width = 72.000000000000000000
+                          Size.Height = 19.000000000000000000
+                          Size.PlatformDefault = False
+                          StyledSettings = [Size, Style]
+                          OnEnter = NB_PrimerSecuencialEnter
+                          OnExit = NB_PrimerSecuencialExit
+                          object Glow_PrimerSecuencial: TGlowEffect
+                            Softness = 0.400000005960464500
+                            GlowColor = claBlack
+                            Opacity = 0.300000011920929000
+                            Enabled = False
+                          end
+                        end
+                      end
+                      object Layout15: TLayout
+                        Align = Client
+                        Size.Width = 157.377075195312500000
+                        Size.Height = 25.000000000000000000
+                        Size.PlatformDefault = False
+                        TabOrder = 1
+                        object Label9: TLabel
+                          Align = Left
+                          StyledSettings = [Size, FontColor]
+                          Size.Width = 73.000000000000000000
+                          Size.Height = 25.000000000000000000
+                          Size.PlatformDefault = False
+                          TextSettings.Font.Family = 'Poppins'
+                          TextSettings.Font.StyleExt = {00020000000000000004000000}
+                          Text = 'Secuencial:'
+                          TabOrder = 0
+                        end
+                        object NB_SegundoSecuencial: TNumberBox
+                          Touch.InteractiveGestures = [LongTap, DoubleTap]
+                          Align = Left
+                          TabOrder = 1
+                          Cursor = crIBeam
+                          DecimalDigits = 0
+                          Min = 1.000000000000000000
+                          Max = 99999.000000000000000000
+                          Value = 1.000000000000000000
+                          TextSettings.Font.Family = 'Poppins'
+                          TextSettings.HorzAlign = Center
+                          Position.X = 73.000000000000000000
+                          Position.Y = 3.000000000000000000
+                          Margins.Top = 3.000000000000000000
+                          Margins.Bottom = 3.000000000000000000
+                          Size.Width = 80.000000000000000000
+                          Size.Height = 19.000000000000000000
+                          Size.PlatformDefault = False
+                          StyledSettings = [Size, Style]
+                          OnEnter = NB_SegundoSecuencialEnter
+                          OnExit = NB_SegundoSecuencialExit
+                          object Glow_SegundoSecuencial: TGlowEffect
+                            Softness = 0.400000005960464500
+                            GlowColor = claBlack
+                            Opacity = 0.300000011920929000
+                            Enabled = False
+                          end
+                        end
+                      end
+                    end
+                    object Label8: TLabel
+                      StyledSettings = [Size, FontColor]
+                      Position.Y = -20.000000000000000000
+                      Size.Width = 436.000000000000000000
+                      Size.Height = 17.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      TextSettings.Font.StyleExt = {00050000000000000004000000}
+                      Text = 'Formato C'#243'digo de Proyectos'
+                      TabOrder = 1
+                    end
+                  end
+                end
+              end
+              object TabC2: TTabItem
+                CustomIcon = <
+                  item
+                  end>
+                TextSettings.Trimming = None
+                IsSelected = False
+                Size.Width = 8.000000000000000000
+                Size.Height = 8.000000000000000000
+                Size.PlatformDefault = False
+                StyleLookup = ''
+                TabOrder = 0
+                Text = 'TabC2'
+                ExplicitSize.cx = 8.000000000000000000
+                ExplicitSize.cy = 8.000000000000000000
+                object Layout8: TLayout
+                  Align = Client
+                  Margins.Left = 20.000000000000000000
+                  Margins.Top = 10.000000000000000000
+                  Margins.Right = 10.000000000000000000
+                  Size.Width = 768.000000000000000000
+                  Size.Height = 395.000000000000000000
+                  Size.PlatformDefault = False
+                  TabOrder = 0
+                  object Layout22: TLayout
+                    Align = Top
+                    Margins.Top = 5.000000000000000000
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 5.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 12
+                    object Label11: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'Analisis de Precios (APUS):'
+                      TabOrder = 2
+                    end
+                    object cbb_cfgAnalisisPrecios: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'General con S.S.O.'
+                        'General'
+                        'SERCOP')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      StyleLookup = 'cbb_ReporteApusStyle1'
+                      TabOrder = 3
+                    end
+                  end
+                  object Layout25: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 65.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 14
+                    object Label14: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'Acta de Constituci'#243'n del Proyecto:'
+                      TabOrder = 1
+                    end
+                    object cbb_cfgActaConstitucion: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TabOrder = 2
+                    end
+                  end
+                  object Layout28: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 125.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 11
+                    object Label17: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'Equipo del Proyecto (Stakeholders):'
+                      TabOrder = 1
+                    end
+                    object cbb_cfgEquipoProyecto: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TabOrder = 2
+                    end
+                  end
+                  object Layout29: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 185.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 7
+                    object Label18: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'Estructura Descomposicion Organizacion (EDO):'
+                      TabOrder = 1
+                    end
+                    object cbb_cfgDescomposicionOrganizacion: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TabOrder = 2
+                    end
+                  end
+                  object Layout32: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 305.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 9
+                    object Label21: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'EDT - Diccionario:'
+                      TabOrder = 2
+                    end
+                    object cbb_cfgEDTDiccionario: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      StyleLookup = 'comboboxstyle'
+                      TabOrder = 3
+                    end
+                  end
+                  object Layout33: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 245.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 10
+                    object Label22: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'EDT - Listado:'
+                      TabOrder = 2
+                    end
+                    object cbb_cfgEDTListado: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      StyleLookup = 'comboboxstyle'
+                      TabOrder = 3
+                    end
+                  end
+                  object Layout34: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 365.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 8
+                    object Label23: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'EDT - Valorada:'
+                      TabOrder = 2
+                    end
+                    object cbb_cfgEDTValorada: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      StyleLookup = 'comboboxstyle'
+                      TabOrder = 3
+                    end
+                  end
+                  object Layout23: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 95.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 0
+                    object Label12: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'Presupuestos:'
+                      TabOrder = 2
+                    end
+                    object cbb_cfgPresupuestos: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      StyleLookup = 'comboboxstyle'
+                      TabOrder = 3
+                    end
+                  end
+                  object Layout24: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 155.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 3
+                    object Label13: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'Cronograma Valorado:'
+                      TabOrder = 1
+                    end
+                    object cbb_cfgCronoValorado: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      StyleLookup = 'comboboxstyle'
+                      TabOrder = 2
+                    end
+                  end
+                  object Layout26: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 215.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 6
+                    object Label15: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'Cronograma de Trabajo:'
+                      TabOrder = 1
+                    end
+                    object cbb_cfgCronoTrabajo: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TabOrder = 2
+                    end
+                  end
+                  object Layout27: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 335.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 4
+                    object Label16: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'Desagregaci'#243'n T'#233'cnologica:'
+                      TabOrder = 1
+                    end
+                    object cbb_cfgDesagrecacionTecnologica: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TabOrder = 2
+                    end
+                  end
+                  object Layout30: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 395.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 2
+                    object Label19: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'Formulas Polinomicas:'
+                      TabOrder = 1
+                    end
+                    object cbb_cfgFormulaPolinomica: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TabOrder = 2
+                    end
+                  end
+                  object Layout31: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 35.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 1
+                    object Label20: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'Porcentajes de Indirectos:'
+                      TabOrder = 2
+                    end
+                    object cbb_cfgPorcentajeIndirecto: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      StyleLookup = 'comboboxstyle'
+                      TabOrder = 3
+                    end
+                  end
+                  object Layout35: TLayout
+                    Align = Top
+                    Margins.Bottom = 5.000000000000000000
+                    Position.Y = 275.000000000000000000
+                    Size.Width = 768.000000000000000000
+                    Size.Height = 25.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 5
+                    object Label24: TLabel
+                      Align = Left
+                      StyledSettings = [Size, Style, FontColor]
+                      Size.Width = 297.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      TextSettings.Font.Family = 'Poppins'
+                      Text = 'Gesti'#243'n de Tiempos y Productividad:'
+                      TabOrder = 2
+                    end
+                    object cbb_cfgGestionTiempos: TComboBox
+                      Align = Client
+                      Items.Strings = (
+                        'Default')
+                      ItemIndex = 0
+                      Margins.Right = 10.000000000000000000
+                      Size.Width = 461.000000000000000000
+                      Size.Height = 25.000000000000000000
+                      Size.PlatformDefault = False
+                      StyleLookup = 'comboboxstyle'
+                      TabOrder = 3
+                    end
+                  end
+                end
+              end
+              object TabC3: TTabItem
+                CustomIcon = <
+                  item
+                  end>
+                TextSettings.Trimming = None
+                IsSelected = False
+                Size.Width = 8.000000000000000000
+                Size.Height = 8.000000000000000000
+                Size.PlatformDefault = False
+                StyleLookup = ''
+                TabOrder = 0
+                Text = 'TabC3'
+                ExplicitSize.cx = 8.000000000000000000
+                ExplicitSize.cy = 8.000000000000000000
+              end
+              object TabC4: TTabItem
+                CustomIcon = <
+                  item
+                  end>
+                TextSettings.Trimming = None
+                IsSelected = False
+                Size.Width = 8.000000000000000000
+                Size.Height = 8.000000000000000000
+                Size.PlatformDefault = False
+                StyleLookup = ''
+                TabOrder = 0
+                Text = 'TabC4'
+                ExplicitSize.cx = 8.000000000000000000
+                ExplicitSize.cy = 8.000000000000000000
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+end

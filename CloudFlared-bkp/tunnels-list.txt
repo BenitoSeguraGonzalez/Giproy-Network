@@ -1,0 +1,4 @@
+You can obtain more detailed information for each tunnel with `cloudflared tunnel info <name/uuid>`
+ID                                   NAME            CREATED              CONNECTIONS                                          
+b8f161a7-7c23-466d-9ac4-79d313589766 eXcom-SaaS      2026-03-15T15:01:56Z 1xmia01, 1xmia02, 1xmia04, 1xmia05                   
+ecd394fe-1178-4acc-9045-e73f1ae30823 giproy-erp-beta 2026-04-05T15:23:25Z 3xmia01, 1xmia02, 1xmia04, 1xmia05, 1xmia07, 1xmia09 

@@ -1,0 +1,87 @@
+--- BUSCANDO INCONSISTENCIAS DE VINCULACIÓN ---
+APUs con Base/Empresa inconsistente: 32
+  ID: 263 | Cod: 5-MOCK-607489-001 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 264 | Cod: 5-MOCK-607489-002 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 265 | Cod: 5-MOCK-607489-003 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 29 | Cod: 5-MOCK-070956-004 | Base: 32 vs 33 | Emp: 3 vs 1
+  ID: 30 | Cod: 5-MOCK-070956-005 | Base: 32 vs 33 | Emp: 3 vs 1
+  ID: 78 | Cod: 5-MOCK-607489-008 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 73 | Cod: 5-MOCK-607489-003 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 81 | Cod: 5-MOCK-607489-011 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 71 | Cod: 5-MOCK-607489-001 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 74 | Cod: 5-MOCK-607489-004 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 75 | Cod: 5-MOCK-607489-005 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 76 | Cod: 5-MOCK-607489-006 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 77 | Cod: 5-MOCK-607489-007 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 79 | Cod: 5-MOCK-607489-009 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 80 | Cod: 5-MOCK-607489-010 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 72 | Cod: 5-MOCK-607489-002 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 82 | Cod: 5-MOCK-607489-012 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 83 | Cod: 5-MOCK-607489-013 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 85 | Cod: 5-MOCK-607489-015 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 84 | Cod: 5-MOCK-607489-014 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 275 | Cod: 5-MOCK-607489-013 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 276 | Cod: 5-MOCK-607489-014 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 277 | Cod: 5-MOCK-607489-015 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 266 | Cod: 5-MOCK-607489-004 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 267 | Cod: 5-MOCK-607489-005 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 268 | Cod: 5-MOCK-607489-006 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 269 | Cod: 5-MOCK-607489-007 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 270 | Cod: 5-MOCK-607489-008 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 271 | Cod: 5-MOCK-607489-009 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 272 | Cod: 5-MOCK-607489-010 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 273 | Cod: 5-MOCK-607489-011 | Base: 33 vs 33 | Emp: 3 vs 1
+  ID: 274 | Cod: 5-MOCK-607489-012 | Base: 33 vs 33 | Emp: 3 vs 1
+Recursos con Base/Empresa inconsistente: 0
+APUs huérfanos (sin subcategoría válida): 51
+  ID: 26 | Cod: 5-MOCK-070956-001 | Desc: [MOCK] Zapata aislada HA f'c=210 kg/cm2 - 070956 | Base: 16 | Subcat: None
+  ID: 27 | Cod: 5-MOCK-070956-002 | Desc: [MOCK] Relleno compactado con material de préstamo - 070956 | Base: 16 | Subcat: None
+  ID: 31 | Cod: 5-MOCK-070956-006 | Desc: [MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 070956 | Base: 16 | Subcat: None
+  ID: 41 | Cod: 5-MOCK-128272-001 | Desc: [MOCK] Pintura látex acrílica exterior (2 manos) - 128272 | Base: 16 | Subcat: None
+  ID: 32 | Cod: 5-MOCK-070956-007 | Desc: [MOCK] Inodoro blanco tanque bajo económico - 070956 | Base: 16 | Subcat: None
+  ID: 50 | Cod: 5-MOCK-128272-010 | Desc: [MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 128272 | Base: 16 | Subcat: None
+  ID: 14 | Cod: 5-001-001 | Desc: Apus 0001 Prueba | Base: 1 | Subcat: None
+  ID: 16 | Cod: 5-001-001 | Desc: Apus 0001 Prueba | Base: 1 | Subcat: None
+  ID: 17 | Cod: 5-001-001 | Desc: Apus 0001 Prueba | Base: 1 | Subcat: None
+  ID: 18 | Cod: 5-001-001 | Desc: Apus 0001 Prueba | Base: 1 | Subcat: None
+  ID: 19 | Cod: 5-001-001 | Desc: Apus 0001 Prueba | Base: 1 | Subcat: None
+  ID: 21 | Cod: 5-001-001 | Desc: Apus 0001 Prueba | Base: 1 | Subcat: None
+  ID: 22 | Cod: 5-001-001 | Desc: Apus 0001 Prueba | Base: 1 | Subcat: None
+  ID: 23 | Cod: 5-001-001 | Desc: Apus 0001 Prueba | Base: 1 | Subcat: None
+  ID: 33 | Cod: 5-MOCK-070956-008 | Desc: [MOCK] Pintura látex acrílica exterior (2 manos) - 070956 | Base: 16 | Subcat: None
+  ID: 34 | Cod: 5-MOCK-070956-009 | Desc: [MOCK] Tubería PVC presión 1/2" agua potable - 070956 | Base: 16 | Subcat: None
+  ID: 35 | Cod: 5-MOCK-070956-010 | Desc: [MOCK] Encofrado y desencofrado recto (vigas/columnas) - 070956 | Base: 16 | Subcat: None
+  ID: 36 | Cod: 5-MOCK-070956-011 | Desc: [MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 070956 | Base: 16 | Subcat: None
+  ID: 37 | Cod: 5-MOCK-070956-012 | Desc: [MOCK] Punto tomacorriente doble 110V polarizado - 070956 | Base: 16 | Subcat: None
+  ID: 46 | Cod: 5-MOCK-128272-006 | Desc: [MOCK] Zapata aislada HA f'c=210 kg/cm2 - 128272 | Base: 16 | Subcat: None
+  ID: 39 | Cod: 5-MOCK-070956-014 | Desc: [MOCK] Acero de refuerzo corrugado fy=420 MPa - 070956 | Base: 16 | Subcat: None
+  ID: 40 | Cod: 5-MOCK-070956-015 | Desc: [MOCK] Muro mampostería bloque/ladrillo e=15cm - 070956 | Base: 16 | Subcat: None
+  ID: 42 | Cod: 5-MOCK-128272-002 | Desc: [MOCK] Muro mampostería bloque/ladrillo e=15cm - 128272 | Base: 16 | Subcat: None
+  ID: 43 | Cod: 5-MOCK-128272-003 | Desc: [MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 128272 | Base: 16 | Subcat: None
+  ID: 44 | Cod: 5-MOCK-128272-004 | Desc: [MOCK] Acero de refuerzo corrugado fy=420 MPa - 128272 | Base: 16 | Subcat: None
+  ID: 45 | Cod: 5-MOCK-128272-005 | Desc: [MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 128272 | Base: 16 | Subcat: None
+  ID: 38 | Cod: 5-MOCK-070956-013 | Desc: [MOCK] Cerámica esmaltada para pisos 40x40cm - 070956 | Base: 16 | Subcat: None
+  ID: 47 | Cod: 5-MOCK-128272-007 | Desc: [MOCK] Inodoro blanco tanque bajo económico - 128272 | Base: 16 | Subcat: None
+  ID: 48 | Cod: 5-MOCK-128272-008 | Desc: [MOCK] Tubería PVC presión 1/2" agua potable - 128272 | Base: 16 | Subcat: None
+  ID: 49 | Cod: 5-MOCK-128272-009 | Desc: [MOCK] Empaste y lijado en paredes interiores - 128272 | Base: 16 | Subcat: None
+  ID: 28 | Cod: 5-MOCK-070956-003 | Desc: [MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 070956 | Base: 16 | Subcat: None
+  ID: 51 | Cod: 5-MOCK-128272-011 | Desc: [MOCK] Relleno compactado con material de préstamo - 128272 | Base: 16 | Subcat: None
+  ID: 52 | Cod: 5-MOCK-128272-012 | Desc: [MOCK] Cerámica esmaltada para pisos 40x40cm - 128272 | Base: 16 | Subcat: None
+  ID: 53 | Cod: 5-MOCK-128272-013 | Desc: [MOCK] Encofrado y desencofrado recto (vigas/columnas) - 128272 | Base: 16 | Subcat: None
+  ID: 54 | Cod: 5-MOCK-128272-014 | Desc: [MOCK] Excavación manual de zanjas para cimientos - 128272 | Base: 16 | Subcat: None
+  ID: 56 | Cod: 5-MOCK-483594-001 | Desc: [MOCK] Punto tomacorriente doble 110V polarizado - 483594 | Base: 16 | Subcat: None
+  ID: 57 | Cod: 5-MOCK-483594-002 | Desc: [MOCK] Excavación manual de zanjas para cimientos - 483594 | Base: 16 | Subcat: None
+  ID: 58 | Cod: 5-MOCK-483594-003 | Desc: [MOCK] Relleno compactado con material de préstamo - 483594 | Base: 16 | Subcat: None
+  ID: 59 | Cod: 5-MOCK-483594-004 | Desc: [MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 483594 | Base: 16 | Subcat: None
+  ID: 60 | Cod: 5-MOCK-483594-005 | Desc: [MOCK] Zapata aislada HA f'c=210 kg/cm2 - 483594 | Base: 16 | Subcat: None
+  ID: 61 | Cod: 5-MOCK-483594-006 | Desc: [MOCK] Encofrado y desencofrado recto (vigas/columnas) - 483594 | Base: 16 | Subcat: None
+  ID: 62 | Cod: 5-MOCK-483594-007 | Desc: [MOCK] Pintura látex acrílica exterior (2 manos) - 483594 | Base: 16 | Subcat: None
+  ID: 63 | Cod: 5-MOCK-483594-008 | Desc: [MOCK] Cerámica esmaltada para pisos 40x40cm - 483594 | Base: 16 | Subcat: None
+  ID: 65 | Cod: 5-MOCK-483594-010 | Desc: [MOCK] Inodoro blanco tanque bajo económico - 483594 | Base: 16 | Subcat: None
+  ID: 66 | Cod: 5-MOCK-483594-011 | Desc: [MOCK] Acero de refuerzo corrugado fy=420 MPa - 483594 | Base: 16 | Subcat: None
+  ID: 67 | Cod: 5-MOCK-483594-012 | Desc: [MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 483594 | Base: 16 | Subcat: None
+  ID: 68 | Cod: 5-MOCK-483594-013 | Desc: [MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 483594 | Base: 16 | Subcat: None
+  ID: 69 | Cod: 5-MOCK-483594-014 | Desc: [MOCK] Empaste y lijado en paredes interiores - 483594 | Base: 16 | Subcat: None
+  ID: 70 | Cod: 5-MOCK-483594-015 | Desc: [MOCK] Muro mampostería bloque/ladrillo e=15cm - 483594 | Base: 16 | Subcat: None
+  ID: 55 | Cod: 5-MOCK-128272-015 | Desc: [MOCK] Punto tomacorriente doble 110V polarizado - 128272 | Base: 16 | Subcat: None
+  ID: 64 | Cod: 5-MOCK-483594-009 | Desc: [MOCK] Tubería PVC presión 1/2" agua potable - 483594 | Base: 16 | Subcat: None

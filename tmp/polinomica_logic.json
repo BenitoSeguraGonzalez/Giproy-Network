@@ -1,0 +1,801 @@
+{
+  "Agrupación de Recursos": [
+    [
+      "AGRUPACIÓN DE RECURSOS Y CÁLCULO DE PORCENTAJES DE INCIDENCIA",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "Símbolo Agrup.",
+      "Subcategoría",
+      "Descripción del Recurso",
+      "Unidad",
+      "Precio",
+      "Cantidad",
+      "Costo Directo",
+      "% Incidencia"
+    ],
+    [
+      "Categoría 1: Equipos y Herramientas",
+      "",
+      "",
+      "",
+      "",
+      "",
+      456.26,
+      0.17726
+    ],
+    [
+      "E",
+      "",
+      "Herramientas varias",
+      "Hora",
+      0.5,
+      72.547,
+      36.27,
+      0.01409
+    ],
+    [
+      "E",
+      "",
+      "Retroexcavadora",
+      "Hora",
+      20,
+      0.0982,
+      1.96,
+      0.00076
+    ],
+    [
+      "E",
+      "",
+      "Volqueta 8m3",
+      "Hora",
+      20,
+      20.0728,
+      401.46,
+      0.15597
+    ],
+    [
+      "E",
+      "",
+      "Plancha vibratoria - compactadora",
+      "Hora",
+      3.5,
+      4.734,
+      16.57,
+      0.00644
+    ],
+    [
+      "Categoría 2: Materiales",
+      "",
+      "",
+      "",
+      "",
+      "",
+      1402.9799999999998,
+      0.54506
+    ],
+    [
+      "D",
+      "",
+      "Cemento Portland Tipo 1",
+      "saco 50kg",
+      7.25,
+      20.35,
+      147.54,
+      0.05732
+    ],
+    [
+      "X",
+      "",
+      "Agua",
+      "l",
+      0.01,
+      508.75,
+      5.09,
+      0.00198
+    ],
+    [
+      "X",
+      "",
+      "Pago por concepto de disposición de materiales en escombrera",
+      "m3",
+      0.4,
+      1003.64,
+      401.46,
+      0.15597
+    ],
+    [
+      "M",
+      "",
+      "Bloque de 40x20x15cm",
+      "u",
+      0.5,
+      1322.75,
+      661.38,
+      0.25695
+    ],
+    [
+      "P",
+      "",
+      "Arena Puesta en Obra",
+      "m3",
+      20.5,
+      2.3403,
+      47.98,
+      0.01864
+    ],
+    [
+      "P",
+      "",
+      "Mejoramiento cribado puesto en obra",
+      "m3",
+      13.5,
+      10.3359,
+      139.53,
+      0.05421
+    ],
+    [
+      "Categoría 3: Transporte",
+      "",
+      "",
+      "",
+      "",
+      "",
+      0,
+      0
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "Categoría 4: Mano de Obra",
+      "",
+      "",
+      "",
+      "",
+      "",
+      714.73,
+      0.27768
+    ],
+    [
+      "B",
+      "",
+      "Peón",
+      "Hora",
+      3.46,
+      72.7434,
+      251.69,
+      0.09778
+    ],
+    [
+      "B",
+      "",
+      "Albañil",
+      "Hora",
+      4.29,
+      67.7137,
+      290.49,
+      0.11286
+    ],
+    [
+      "B",
+      "",
+      "Maestro Mayor",
+      "Hora",
+      5.11,
+      14.0555,
+      71.82,
+      0.0279
+    ],
+    [
+      "B",
+      "",
+      "Operador de retroexcavadora",
+      "Hora",
+      3.8,
+      0.0982,
+      0.37,
+      0.00014
+    ],
+    [
+      "B",
+      "",
+      "Chofer volquetas",
+      "Hora",
+      5,
+      20.0728,
+      100.36,
+      0.03899
+    ],
+    [
+      "Categoría 5: Seguridad Industrial",
+      "",
+      "",
+      "",
+      "",
+      "",
+      0,
+      0
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "TOTALES",
+      "",
+      "",
+      "",
+      "",
+      "",
+      2573.97,
+      1
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "Pr = Po(p1B1/B0+p2C1/C0+p3D1/D0+p4E1/E0… pnZ1/Z0 + pxX1/X0)\n\n• Pr = Valor reajustado del anticipo o de la planilla.\n• Po = Valor del anticipo o de la planilla calculada con las cantidades de obra ejecutada a los precios unitarios contractuales descontada la parte proporcional del anticipo, de haberlo pagado.\n• p1 = Coeficiente del componente mano de obra.\n• p2, p3, p4… pn = Coeficiente de los demás componentes principales.\n• px = Coeficiente de los otros componentes, considerados como “no principales”, cuyo valor no excederá de 0,200 lo que equivale al 20% de incidencia del costo directo.\n\nLos coeficientes de la fórmula se expresan y aplican al milésimo y la suma de aquellos debe ser igual a la unidad.\n\n• B0 = Sueldos y salarios mínimos de una cuadrilla tipo, más remuneraciones adicionales y obligaciones patronales; esta cuadrilla tipo estará conformada en base a los análisis de precios unitarios de la oferta adjudicada, vigentes treinta días antes de la fecha de cierre para la presentación de las ofertas.\n• B1 = …; esta cuadrilla tipo estará conformada sobre la base de los análisis de precios unitarios de la oferta adjudicada, vigente a la fecha de pago del anticipo o de las planillas de ejecución de obra.\n• C0, D0, E0,…Z0 = Los precios o índices de precios de los componentes principales vigentes treinta días antes de la fecha de cierre para la presentación de las ofertas, fecha que constará en el contrato.\n• C1, D1, E1,…Z1 = Los precios o los índices de precios de los componentes principales a la fecha de pago del anticipo o de las planillas de ejecución de obras.\n• X0 = Índice de componentes no principales correspondiente al tipo de obra y a la falta de éste, el índice de precios al consumidor treinta días antes de la fecha de cierre de la presentación de las ofertas.\n• X1 = Índice de componentes no principales correspondiente al tipo de obra y a falta de éste, el índice de precios al consumidor a la fecha de pago del anticipo o de las planillas de ejecución de obras.\n\nBajo la normativa ecuatoriana, la conformación de los monomios o llamados también términos de la fórmula, no podrá exceder de 11 términos incluido el término X de saldos o varios el mismo que puede agrupar a recursos de diversa naturaleza, el resto de los términos deben agrupar recursos de similar naturaleza según la agrupación de los índices de precios del Instituto Nacional de Estadísticas y Censos (INEC) del Ecuador.",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "Indices y Coeficientes": [
+    [
+      "ASIGNACIÓN DE ÍNDICES Y CÁLCULO DE COEFICIENTES DE LA FÓRMULA POLINÓMICA",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "Símbolo Agrup.",
+      "Índice",
+      "Descripción",
+      "Costo Directo",
+      "Coeficiente"
+    ],
+    [
+      "B",
+      0,
+      "Cuadrilla Tipo (incluye Mecánico de Mantenimiento)",
+      760.356,
+      0.295
+    ],
+    [
+      "C",
+      28,
+      "Combustibles (O)",
+      45.626000000000005,
+      0.018
+    ],
+    [
+      "D",
+      23,
+      "Cemento Portland - Tipo I - Sacos",
+      147.54,
+      0.057
+    ],
+    [
+      "E",
+      37,
+      "Equipo y maquinaria de Construc. Vial",
+      319.38199999999995,
+      0.124
+    ],
+    [
+      "M",
+      53,
+      "Madera aserrada, cepillada y/o escuadrada (preparada)",
+      661.38,
+      0.257
+    ],
+    [
+      "P",
+      304,
+      "Materiales pétreos (Azuay)",
+      187.51,
+      0.073
+    ],
+    [
+      "R",
+      83,
+      "Repuestos para maquinaria de construcción",
+      45.626000000000005,
+      0.018
+    ],
+    [
+      "X",
+      822,
+      "Indice de Precios al Consumidor Urbano - Cuenca",
+      406.54999999999995,
+      0.158
+    ],
+    [
+      "TOTALES",
+      "",
+      "",
+      2573.9700000000003,
+      1
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "Pr = Po(p1B1/B0+p2C1/C0+p3D1/D0+p4E1/E0… pnZ1/Z0 + pxX1/X0)\n\n• Pr = Valor reajustado del anticipo o de la planilla.\n• Po = Valor del anticipo o de la planilla calculada con las cantidades de obra ejecutada a los precios unitarios contractuales descontada la parte proporcional del anticipo, de haberlo pagado.\n• p1 = Coeficiente del componente mano de obra.\n• p2, p3, p4… pn = Coeficiente de los demás componentes principales.\n• px = Coeficiente de los otros componentes, considerados como “no principales”, cuyo valor no excederá de 0,200 lo que equivale al 20% de incidencia del costo directo.\n\nLos coeficientes de la fórmula se expresan y aplican al milésimo y la suma de aquellos debe ser igual a la unidad.\n\n• B0 = Sueldos y salarios mínimos de una cuadrilla tipo, más remuneraciones adicionales y obligaciones patronales; esta cuadrilla tipo estará conformada en base a los análisis de precios unitarios de la oferta adjudicada, vigentes treinta días antes de la fecha de cierre para la presentación de las ofertas.\n• B1 = …; esta cuadrilla tipo estará conformada sobre la base de los análisis de precios unitarios de la oferta adjudicada, vigente a la fecha de pago del anticipo o de las planillas de ejecución de obra.\n• C0, D0, E0,…Z0 = Los precios o índices de precios de los componentes principales vigentes treinta días antes de la fecha de cierre para la presentación de las ofertas, fecha que constará en el contrato.\n• C1, D1, E1,…Z1 = Los precios o los índices de precios de los componentes principales a la fecha de pago del anticipo o de las planillas de ejecución de obras.\n• X0 = Índice de componentes no principales correspondiente al tipo de obra y a la falta de éste, el índice de precios al consumidor treinta días antes de la fecha de cierre de la presentación de las ofertas.\n• X1 = Índice de componentes no principales correspondiente al tipo de obra y a falta de éste, el índice de precios al consumidor a la fecha de pago del anticipo o de las planillas de ejecución de obras.\n\nBajo la normativa ecuatoriana, la conformación de los monomios o llamados también términos de la fórmula, no podrá exceder de 11 términos incluido el término X de saldos o varios el mismo que puede agrupar a recursos de diversa naturaleza, el resto de los términos deben agrupar recursos de similar naturaleza según la agrupación de los índices de precios del Instituto Nacional de Estadísticas y Censos (INEC) del Ecuador.",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "Cuadrilla Tipo": [
+    [
+      "ASIGNACIÓN DE ÍNDICES Y CÁLCULO DE COEFICIENTES DE LA CUADRILLA TIPO",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "Símbolo Agrup.",
+      "Índice",
+      "Descripción",
+      "Subcategoría",
+      "Salario Hora Mínimo\n(SHM)",
+      "Salario Hora Real\n(SHR)",
+      "Trabajo \n(h-H)",
+      "Costo Directo",
+      "Coeficiente"
+    ],
+    [
+      "B",
+      1010,
+      "ESTRUCTURA OCUPACIONAL E2",
+      "ESTRUCTURA OCUPACIONAL E2",
+      3.26,
+      3.46,
+      72.7434,
+      251.69,
+      0.331
+    ],
+    [
+      "B",
+      1020,
+      "ESTRUCTURA OCUPACIONAL D2",
+      "ESTRUCTURA OCUPACIONAL D2",
+      3.3,
+      4.29,
+      67.7137,
+      290.49,
+      0.382
+    ],
+    [
+      "B",
+      1030,
+      "ESTRUCTURA OCUPACIONAL C1",
+      "ESTRUCTURA OCUPACIONAL C1",
+      3.66,
+      5.11,
+      14.0555,
+      71.82,
+      0.0945
+    ],
+    [
+      "B",
+      1030,
+      "ESTRUCTURA OCUPACIONAL C1",
+      "ESTRUCTURA OCUPACIONAL C1 (Grupo I)",
+      3.66,
+      3.8,
+      12.10504210526316,
+      45.996,
+      0.0605
+    ],
+    [
+      "B",
+      1145,
+      "CHOFERES - (Estr.Op C1)",
+      "CHOFERES - (Estr.Op C1)",
+      4.79,
+      5,
+      20.0728,
+      100.36,
+      0.132
+    ],
+    [
+      "TOTALES",
+      "",
+      "",
+      "",
+      "",
+      "",
+      186.69044210526314,
+      760.356,
+      1
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "Pr = Po(p1B1/B0+p2C1/C0+p3D1/D0+p4E1/E0… pnZ1/Z0 + pxX1/X0)\n\n• Pr = Valor reajustado del anticipo o de la planilla.\n• Po = Valor del anticipo o de la planilla calculada con las cantidades de obra ejecutada a los precios unitarios contractuales descontada la parte proporcional del anticipo, de haberlo pagado.\n• p1 = Coeficiente del componente mano de obra.\n• p2, p3, p4… pn = Coeficiente de los demás componentes principales.\n• px = Coeficiente de los otros componentes, considerados como “no principales”, cuyo valor no excederá de 0,200 lo que equivale al 20% de incidencia del costo directo.\n\nLos coeficientes de la fórmula se expresan y aplican al milésimo y la suma de aquellos debe ser igual a la unidad.\n\n• B0 = Sueldos y salarios mínimos de una cuadrilla tipo, más remuneraciones adicionales y obligaciones patronales; esta cuadrilla tipo estará conformada en base a los análisis de precios unitarios de la oferta adjudicada, vigentes treinta días antes de la fecha de cierre para la presentación de las ofertas.\n• B1 = …; esta cuadrilla tipo estará conformada sobre la base de los análisis de precios unitarios de la oferta adjudicada, vigente a la fecha de pago del anticipo o de las planillas de ejecución de obra.\n• C0, D0, E0,…Z0 = Los precios o índices de precios de los componentes principales vigentes treinta días antes de la fecha de cierre para la presentación de las ofertas, fecha que constará en el contrato.\n• C1, D1, E1,…Z1 = Los precios o los índices de precios de los componentes principales a la fecha de pago del anticipo o de las planillas de ejecución de obras.\n• X0 = Índice de componentes no principales correspondiente al tipo de obra y a la falta de éste, el índice de precios al consumidor treinta días antes de la fecha de cierre de la presentación de las ofertas.\n• X1 = Índice de componentes no principales correspondiente al tipo de obra y a falta de éste, el índice de precios al consumidor a la fecha de pago del anticipo o de las planillas de ejecución de obras.\n\nBajo la normativa ecuatoriana, la conformación de los monomios o llamados también términos de la fórmula, no podrá exceder de 11 términos incluido el término X de saldos o varios el mismo que puede agrupar a recursos de diversa naturaleza, el resto de los términos deben agrupar recursos de similar naturaleza según la agrupación de los índices de precios del Instituto Nacional de Estadísticas y Censos (INEC) del Ecuador.",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ],
+  "Resumen": [
+    [
+      "FÓRMULA POLINÓMICA",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "Símbolo Agrup.",
+      "Índice",
+      "Descripción",
+      "",
+      "",
+      "",
+      "Costo Directo",
+      "Coeficiente"
+    ],
+    [
+      "B",
+      0,
+      "Cuadrilla Tipo (incluye Mecánico de Mantenimiento)",
+      "",
+      "",
+      "",
+      760.356,
+      0.295
+    ],
+    [
+      "C",
+      28,
+      "Combustibles (O)",
+      "",
+      "",
+      "",
+      45.626000000000005,
+      0.018
+    ],
+    [
+      "D",
+      23,
+      "Cemento Portland - Tipo I - Sacos",
+      "",
+      "",
+      "",
+      147.54,
+      0.057
+    ],
+    [
+      "E",
+      37,
+      "Equipo y maquinaria de Construc. Vial",
+      "",
+      "",
+      "",
+      319.38199999999995,
+      0.124
+    ],
+    [
+      "M",
+      53,
+      "Madera aserrada, cepillada y/o escuadrada (preparada)",
+      "",
+      "",
+      "",
+      661.38,
+      0.257
+    ],
+    [
+      "P",
+      304,
+      "Materiales pétreos (Azuay)",
+      "",
+      "",
+      "",
+      187.51,
+      0.073
+    ],
+    [
+      "R",
+      83,
+      "Repuestos para maquinaria de construcción",
+      "",
+      "",
+      "",
+      45.626000000000005,
+      0.018
+    ],
+    [
+      "X",
+      822,
+      "Indice de Precios al Consumidor Urbano - Cuenca",
+      "",
+      "",
+      "",
+      406.54999999999995,
+      0.158
+    ],
+    [
+      "TOTALES",
+      "",
+      "",
+      "",
+      "",
+      "",
+      2573.9700000000003,
+      1
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "PR = P0 (0,278B1/B0 + 0,057D1/D0 + 0,177E1/E0 + 0,257M1/M0 + 0,073P1/P0 + 0,158X1/X0)",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "FÓRMULA DE LA CUADRILLA TIPO",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "Símbolo Agrup.",
+      "Índice",
+      "Descripción",
+      "SHM",
+      "SHR",
+      "Trabajo (h-H)",
+      "Costo Directo",
+      "Coeficiente"
+    ],
+    [
+      "B",
+      1010,
+      "ESTRUCTURA OCUPACIONAL E2",
+      3.26,
+      3.46,
+      72.7434,
+      251.69,
+      0.331
+    ],
+    [
+      "B",
+      1020,
+      "ESTRUCTURA OCUPACIONAL D2",
+      3.3,
+      4.29,
+      67.7137,
+      290.49,
+      0.382
+    ],
+    [
+      "B",
+      1030,
+      "ESTRUCTURA OCUPACIONAL C1",
+      3.66,
+      5.11,
+      14.0555,
+      71.82,
+      0.0945
+    ],
+    [
+      "B",
+      1030,
+      "ESTRUCTURA OCUPACIONAL C1",
+      3.66,
+      3.8,
+      12.10504210526316,
+      45.996,
+      0.0605
+    ],
+    [
+      "B",
+      1145,
+      "CHOFERES - (Estr.Op C1)",
+      4.79,
+      5,
+      20.0728,
+      100.36,
+      0.132
+    ],
+    [
+      "TOTALES",
+      "",
+      "",
+      "",
+      "",
+      186.69044210526314,
+      760.356,
+      1
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "Bi = 0.352 (SHR ESTRUCTURA OCUPACIONAL E2)i + 0.406 (SHR ESTRUCTURA OCUPACIONAL D2)i + 0.101 (SHR ESTRUCTURA OCUPACIONAL C1)i + 0.001 (SHR ESTRUCTURA OCUPACIONAL C1)i + 0.140 (SHR CHOFERES - (Estr.Op C1))i",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ]
+}

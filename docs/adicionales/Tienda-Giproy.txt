@@ -1,0 +1,1719 @@
+Actúa como arquitecto senior Full-Stack (Python FastAPI + React + MySQL/PostgreSQL) y experto en diseño de productos tipo marketplace SaaS.
+
+CONTEXTO
+
+Ya existe una aplicación en producción con:
+
+Backend: Python + FastAPI
+Frontend: React
+Base de datos: relacional
+UI ya definida (DEBES reutilizar estilos, componentes y patrones existentes)
+
+Tu objetivo es diseñar e implementar un sistema completo de ventas integrado en esta app, inspirado en el comportamiento de WooCommerce, pero adaptado a un entorno SaaS técnico (licencias, APUs, proyectos, recursos digitales).
+
+OBJETIVO GENERAL
+
+Construir un sistema modular de ventas con:
+
+Marketplace (Ventas)
+Gestión de usuario vendedor (Administrador)
+Panel de Superadministrador (control total + comisiones)
+REGLAS CLAVE
+NO reinventar UI → reutilizar componentes existentes
+Código limpio, modular, escalable
+API REST bien estructurada
+Preparado para multiusuario
+Seguridad (roles, permisos, validación)
+Todas las ventas generan automáticamente:
+20% comisión para el superadministrador
+80% para el vendedor
+🧩 MÓDULO 1: MARKETPLACE (VENTA)
+Funcionalidades tipo WooCommerce:
+Catálogo de productos por:
+Categorías
+Subcategorías
+Etiquetas
+Tipos de productos:
+Licencias
+Addons
+Recursos
+APUs
+Proyectos completos
+Características:
+Listado tipo grid + filtros
+Buscador
+Detalle de producto:
+Descripción
+Imágenes
+Precio
+Autor (vendedor)
+Carrito de compra
+Checkout
+Historial de compras del usuario
+Backend:
+endpoints:
+/products
+/categories
+/cart
+/orders
+/checkout
+🧑‍💼 MÓDULO 2: ADMIN (VENDEDOR)
+
+Acceso solo si el usuario es administrador/vendedor
+
+Funcionalidades:
+Crear productos:
+Tipo: licencia / addon / APU / proyecto
+Subir:
+Archivos
+JSON (APUs)
+Proyectos completos
+Gestionar:
+Precios
+Stock (si aplica)
+Versiones
+Ver ventas realizadas
+Dashboard:
+Total vendido
+Comisión aplicada
+Ingresos netos (80%)
+Endpoints:
+/admin/products
+/admin/orders
+/admin/stats
+👑 MÓDULO 3: SUPERADMIN
+
+Control total del sistema
+
+Funcionalidades:
+Gestión global:
+Usuarios
+Productos
+Categorías
+Moderación:
+Aprobar/rechazar productos
+Finanzas:
+Ver TODAS las ventas
+Ver comisiones generadas (20%)
+Dashboard global:
+Total ventas
+Total comisiones
+Top vendedores
+Endpoints:
+/superadmin/users
+/superadmin/products
+/superadmin/analytics
+/superadmin/commissions
+💰 LÓGICA DE NEGOCIO (CRÍTICO)
+
+Cada venta debe:
+
+total = precio
+comision_superadmin = total * 0.20
+ingreso_vendedor = total * 0.80
+
+Guardar en BD:
+
+order_total
+commission_amount
+seller_amount
+🧱 MODELO DE DATOS (BASE)
+
+Tablas mínimas:
+
+users
+id
+role (user/admin/superadmin)
+products
+id
+name
+type
+price
+user_id (vendedor)
+status (pending/approved)
+categories
+id
+name
+parent_id
+orders
+id
+user_id (comprador)
+total
+commission
+seller_amount
+status
+order_items
+id
+order_id
+product_id
+price
+🎨 FRONTEND (REACT)
+Requisitos:
+Mantener diseño actual
+Crear vistas:
+Marketplace
+Producto detalle
+Carrito
+Dashboard vendedor
+Dashboard superadmin
+Componentes clave:
+ProductCard
+ProductGrid
+CartPanel
+AdminDashboard
+SuperAdminDashboard
+⚙️ ENTREGABLES ESPERADOS
+Estructura completa de backend
+Endpoints implementados
+Modelos de BD
+Frontend funcional (mínimo viable)
+Lógica de comisiones funcionando
+Ejemplo de flujo completo:
+Crear producto
+Comprar
+Calcular comisión
+
+Ampliacion 1
+Actúa como arquitecto senior fullstack (FastAPI + React + DB relacional).
+
+NO expliques nada.
+NO generes teoría.
+SOLO ejecuta tareas paso a paso.
+
+🧠 CONTEXTO
+
+El sistema YA tiene implementado:
+
+Bases maestras
+APUs
+Proyectos
+
+El objetivo es construir una capa de marketplace tipo WooCommerce (multi-vendor) donde múltiples usuarios venden recursos dentro de una misma plataforma
+
+🎯 OBJETIVO
+
+Extender el sistema para permitir:
+
+Publicar entidades existentes (bases, APUs, proyectos) como productos
+Gestionar ventas tipo marketplace
+Aplicar comisión automática del 20%
+⚙️ TAREAS A EJECUTAR (EN ORDEN)
+1. MODELO DE PRODUCTO REFERENCIADO
+Extender modelo products
+Añadir concepto:
+producto puede ser:
+manual
+referenciado
+Acciones:
+Añadir campos:
+source_type
+source_id
+No duplicar datos existentes
+Mantener relación directa con entidad original
+2. CAPA DE PUBLICACIÓN
+
+Crear funcionalidad:
+
+"Publicar en Marketplace"
+Acciones:
+Añadir endpoint para crear producto desde entidad existente
+Validar:
+usuario es propietario
+entidad existe
+no está ya publicada
+3. SELECTOR DINÁMICO EN FRONTEND
+
+Crear componente reutilizable:
+
+EntitySelector
+Acciones:
+Detectar tipo:
+base_maestra
+apu
+proyecto
+Cargar listado desde backend
+Permitir:
+búsqueda
+selección
+preview
+4. INTEGRACIÓN CON UI EXISTENTE
+NO crear nuevo diseño
+Reutilizar:
+grids
+cards
+modales
+Insertar opción:
+botón “Publicar en Marketplace”
+5. MARKETPLACE (LISTADO)
+Acciones:
+Mostrar productos agrupados por:
+categoría
+tipo
+Cargar datos dinámicos desde entidad origen
+Mostrar:
+nombre real
+autor
+precio
+tipo (base/apu/proyecto)
+6. DETALLE DE PRODUCTO
+Acciones:
+Resolver producto:
+si es referenciado → cargar datos reales
+Mostrar metadata:
+estructura APU
+info proyecto
+info base
+7. PROCESO DE COMPRA
+Acciones:
+
+Cuando se compra:
+
+NO compartir referencia
+CLONAR entidad
+Reglas:
+base_maestra → clonar base completa
+apu → copiar APU
+proyecto → clonar proyecto completo
+8. LÓGICA DE COMISIONES
+Acciones:
+
+En cada orden:
+
+calcular:
+20% superadmin
+80% vendedor
+guardar en orden:
+total
+comisión
+neto vendedor
+
+Esto sigue modelo típico marketplace donde la plataforma retiene parte del ingreso
+
+9. DASHBOARD VENDEDOR
+Acciones:
+listar productos publicados
+listar ventas
+mostrar:
+ingresos
+comisiones
+permitir:
+activar/desactivar producto
+10. DASHBOARD SUPERADMIN
+Acciones:
+ver todas las ventas
+ver comisiones totales
+métricas:
+ventas por tipo:
+bases
+apus
+proyectos
+aprobar/rechazar productos
+11. SEGURIDAD
+Acciones:
+validar roles:
+user
+admin (vendedor)
+superadmin
+restringir:
+publicación
+edición
+eliminación
+12. RESTRICCIONES CRÍTICAS
+NO duplicar estructuras existentes
+NO modificar lógica interna de APUs/proyectos
+SOLO extender con capa comercial
+TODO debe ser desacoplado
+13. CASOS DE PRUEBA
+
+Ejecutar:
+
+publicar APU → aparece en marketplace
+comprar APU → se clona correctamente
+comisión calculada correctamente
+usuario no puede vender recursos ajenos
+14. OUTPUT ESPERADO
+
+Generar:
+
+endpoints completos
+integración frontend
+flujo funcional end-to-end
+
+Ampliacion 2
+
+BLOQUE CRÍTICO — NO ROMPER EL SISTEMA ACTUAL
+
+Actúa sobre el proyecto existente con criterio de cirugía controlada.
+
+Reglas obligatorias de ejecución
+NO romper ninguna funcionalidad existente.
+NO reemplazar módulos actuales si no es estrictamente necesario.
+NO reescribir partes amplias del sistema por comodidad.
+NO cambiar contratos actuales de API, componentes, modelos o flujos ya usados, salvo que sea imprescindible y compatible.
+NO eliminar código existente sin justificarlo dentro del plan de cambios.
+NO modificar comportamiento actual de bases maestras, APUs y proyectos fuera de la nueva capa comercial.
+TODO cambio debe ser incremental, compatible y reversible.
+Forma de trabajo obligatoria
+
+Antes de tocar código:
+
+Analiza la estructura actual del proyecto.
+Detecta dependencias reales entre backend, frontend, modelos, servicios y base de datos.
+Identifica qué partes ya existen y cuáles deben extenderse.
+Propón la solución menos invasiva posible.
+Reutiliza componentes, servicios, hooks, endpoints, esquemas y estilos existentes antes de crear otros nuevos.
+Estrategia de implementación
+Trabaja mediante extensión, no sustitución.
+Añade nuevas piezas desacopladas.
+Mantén compatibilidad hacia atrás.
+Evita side effects.
+Si hay lógica delicada, encapsúlala en servicios nuevos.
+Si hace falta cambiar algo existente, hazlo con adaptación compatible y mínimo impacto.
+Validación obligatoria tras cada cambio
+
+Cada modificación debe dejar el sistema:
+
+compilando
+ejecutando
+navegable
+sin errores de tipado
+sin romper imports
+sin romper rutas
+sin romper endpoints existentes
+sin romper componentes ya usados
+sin romper autenticación, permisos ni flujos actuales
+Obligación de verificación
+
+Después de cada bloque de cambios:
+
+revisar errores de compilación
+revisar imports rotos
+revisar referencias no resueltas
+revisar incompatibilidades de tipos
+revisar regresiones funcionales
+revisar que la UI siga consistente con el diseño actual
+revisar que backend y frontend sigan integrados correctamente
+Política de prudencia
+
+Si detectas que una modificación puede romper algo:
+
+detente
+busca una alternativa menos invasiva
+prioriza wrappers, adapters, servicios intermedios o nuevas rutas
+evita tocar lógica crítica existente si puede resolverse por composición
+Requisito de robustez
+
+Todo lo que implementes debe quedar:
+
+funcional
+consistente
+integrado con el código actual
+listo para continuar desarrollo encima
+sin dejar código huérfano, duplicado innecesario o parches improvisados
+Prioridad absoluta
+
+La prioridad no es “hacerlo rápido”.
+La prioridad es:
+
+no romper nada
+mantener compatibilidad
+dejar el sistema estable
+implementar la nueva funcionalidad correctamente
+Instrucción final para ejecución
+
+Implementa el sistema nuevo con extremo cuidado, validando continuamente que el proyecto actual siga funcionando exactamente como antes en todo lo no relacionado con marketplace, ventas, comisiones y publicación comercial.
+
+Ampliacion 3
+
+🧩 RESUMEN EJECUTIVO DEL SISTEMA DEFINIDO
+🎯 OBJETIVO GENERAL
+
+Implementar un sistema de marketplace interno tipo WooCommerce dentro de tu aplicación actual (FastAPI + React), permitiendo vender:
+
+Licencias
+Addons
+Recursos
+Bases maestras
+APUs
+Proyectos completos
+
+Con modelo multi-vendedor y comisión automática del 20% para superadmin.
+
+🧠 ENFOQUE CLAVE (ARQUITECTURA)
+NO crear sistema independiente
+NO duplicar datos existentes
+TODO funciona como capa comercial sobre entidades actuales
+Uso de productos referenciados (no copias internas)
+🧩 ESTRUCTURA DEL SISTEMA
+1. MÓDULO MARKETPLACE
+Catálogo de productos por categorías
+Productos pueden ser:
+Manuales
+Referenciados (base, APU, proyecto)
+Funcionalidades:
+Listado
+Filtros
+Detalle
+Carrito
+Compra
+2. MÓDULO ADMIN (VENDEDOR)
+Puede:
+Publicar productos
+Seleccionar entidades existentes (bases/APUs/proyectos)
+Definir precio
+Dashboard:
+Ventas
+Ingresos (80%)
+Estado de productos
+3. MÓDULO SUPERADMIN
+Control total:
+Usuarios
+Productos
+Ventas
+Métricas:
+Total ventas
+Comisiones (20%)
+Top vendedores
+Moderación:
+Aprobar/rechazar productos
+🔗 CONCEPTO CLAVE: PRODUCTO REFERENCIADO
+Un producto apunta a:
+base_maestra
+apu
+proyecto
+NO se duplican datos
+Se usa:
+source_type
+source_id
+🧠 PUBLICACIÓN DE CONTENIDO
+
+Nuevo flujo:
+
+Usuario crea APU / Base / Proyecto
+Usa:
+→ “Publicar en Marketplace”
+Selecciona entidad
+Define precio
+Se crea producto vinculado
+🛒 PROCESO DE COMPRA
+
+Cuando se compra:
+
+❌ NO compartir referencia
+✅ SIEMPRE clonar
+Resultado:
+Base → copia completa
+APU → copia independiente
+Proyecto → clon completo
+💰 MODELO DE NEGOCIO
+
+Por cada venta:
+
+20% → superadmin
+80% → vendedor
+
+Se registra:
+
+total
+comisión
+neto vendedor
+🖥️ FRONTEND
+Reutiliza UI existente (NO rediseñar)
+Nuevo componente:
+EntitySelector
+Nuevas vistas:
+Marketplace
+Detalle producto
+Dashboard vendedor
+Dashboard superadmin
+⚙️ BACKEND
+Extensión de endpoints existentes
+Nuevos endpoints:
+publicación desde entidad
+marketplace
+órdenes
+comisiones
+🔐 SEGURIDAD
+
+Roles:
+
+user → compra
+admin → vende
+superadmin → controla todo
+
+Validaciones:
+
+solo vender recursos propios
+evitar duplicados
+control de acceso por rol
+🚫 RESTRICCIÓN CRÍTICA
+NO romper el sistema actual
+NO modificar lógica existente de:
+APUs
+Bases
+Proyectos
+SOLO añadir capa comercial
+🧪 PRUEBAS CLAVE
+Publicación correcta
+Compra → clonación correcta
+Comisión correcta
+Integridad de datos
+UI sin romper
+🧱 ESTADO ACTUAL
+
+Ya tienes definido:
+
+Arquitectura completa
+Flujo funcional
+Reglas de negocio
+Integración con sistema existente
+Restricciones de seguridad y estabilidad
+
+Ampliacion 4
+
+🔥 BLOQUE AÑADIDO — DEFINICIÓN DE FRONTEND (ESTILO WOOCOMMERCE ADAPTADO)
+
+Añade este bloque al prompt principal.
+Está diseñado para que Codex implemente el frontend con comportamiento tipo WooCommerce, sin romper tu UI actual.
+
+🎨 CAPA FRONTEND — EXPERIENCIA TIPO WOOCOMMERCE (ADAPTADA)
+
+Actúa como senior frontend architect en React.
+Diseña la experiencia de usuario inspirada en WooCommerce, pero integrada al diseño actual del sistema.
+
+🎯 OBJETIVO
+
+Construir un frontend de marketplace:
+
+Familiar (tipo WooCommerce)
+Rápido (flujo directo)
+Integrado (mismo diseño actual)
+Modular (componentes reutilizables)
+🧠 PRINCIPIOS DE DISEÑO
+NO cambiar identidad visual actual
+NO introducir estilos externos incompatibles
+REUTILIZAR:
+grids
+cards
+botones
+modales
+Mantener coherencia con el resto del sistema
+🧩 ESTRUCTURA DE PANTALLAS
+1. 🛍️ MARKETPLACE (TIENDA)
+
+Inspirado en WooCommerce Shop
+
+Layout:
+Sidebar izquierda:
+Categorías
+Filtros
+Contenido:
+Grid de productos
+Top:
+Buscador
+Ordenar (precio, popularidad, reciente)
+Funcionalidades:
+Filtrar por:
+tipo (base, apu, proyecto)
+precio
+Paginación o scroll infinito
+2. 📦 TARJETA DE PRODUCTO (ProductCard)
+
+Debe mostrar:
+
+Nombre
+Precio
+Tipo (badge: APU / PROYECTO / BASE)
+Autor
+Botón:
+Ver detalle
+Añadir al carrito
+
+Debe reutilizar el estilo actual de cards
+
+3. 📄 DETALLE DE PRODUCTO
+
+Inspirado en WooCommerce Product Page
+
+Estructura:
+Izquierda:
+Info principal
+Derecha:
+Precio
+Botón comprar
+Info vendedor
+Secciones:
+Descripción
+Información técnica:
+Si APU → estructura resumida
+Si proyecto → resumen
+Si base → contenido
+4. 🛒 CARRITO
+
+Panel lateral o página
+
+Funcionalidades:
+Ver productos
+Cambiar cantidades (si aplica)
+Eliminar productos
+Ver total
+
+Botón:
+→ Checkout
+
+5. 💳 CHECKOUT
+
+Flujo simple:
+
+Resumen compra
+Confirmación
+
+(NO implementar pagos complejos aún)
+
+6. 📊 DASHBOARD VENDEDOR
+
+Inspirado en WooCommerce Vendor Dashboard
+
+Secciones:
+Mis productos
+Crear producto
+Ventas
+Estadísticas
+Funcionalidades:
+Publicar:
+abrir selector de entidades
+Editar productos
+Activar/desactivar
+7. 👑 DASHBOARD SUPERADMIN
+
+Panel de control global
+
+Secciones:
+Usuarios
+Productos
+Ventas
+Comisiones
+Visualización:
+métricas en tarjetas
+tablas filtrables
+🔧 COMPONENTES CLAVE
+
+Crear (o reutilizar):
+
+ProductGrid
+ProductCard
+ProductDetail
+CartPanel
+CheckoutView
+EntitySelector
+SellerDashboard
+SuperAdminDashboard
+🧠 COMPONENTE CRÍTICO: ENTITY SELECTOR
+
+Debe permitir:
+
+elegir:
+base_maestra
+apu
+proyecto
+mostrar lista existente
+búsqueda rápida
+preview
+
+Debe integrarse en:
+
+→ "Crear producto"
+
+🧭 NAVEGACIÓN
+
+Añadir rutas:
+
+/marketplace
+/product/:id
+/cart
+/checkout
+/dashboard/seller
+/dashboard/admin
+⚡ EXPERIENCIA DE USUARIO
+Flujo rápido (máx 2–3 clics para comprar)
+Feedback visual:
+loading
+éxito
+Estados:
+vacío
+error
+cargando
+🔐 CONTROL POR ROLES (UI)
+user:
+compra
+admin:
+compra + vende
+superadmin:
+control total
+
+Ocultar vistas según rol
+
+🚫 RESTRICCIONES
+NO romper diseño actual
+NO duplicar componentes existentes
+NO crear estilos inconsistentes
+NO modificar layout global
+🎯 RESULTADO ESPERADO
+
+Frontend que:
+
+se siente como WooCommerce
+pero visualmente es 100% tu sistema
+integrado sin fricciones
+listo para escalar 
+
+Ampliacion 5
+
+🔴 CORRECCIÓN — VISUALIZACIÓN DE TIPOS DE PRODUCTO EN FRONTEND
+
+Actualmente faltan en la UI los tipos:
+
+licencias
+addons
+adicionales (recursos u otros definidos)
+
+Esto es obligatorio en toda la capa marketplace.
+
+🎯 OBJETIVO
+
+Asegurar que TODOS los productos muestren claramente su tipo:
+
+base_maestra
+apu
+proyecto
+licencia
+addon
+adicional
+🧩 CAMBIOS A IMPLEMENTAR
+1. 🧱 MODELO FRONTEND
+Asegurar que cada producto tenga:
+type o source_type
+Normalizar valores:
+licencia
+addon
+adicional
+base_maestra
+apu
+proyecto
+2. 🏷️ PRODUCTCARD (CRÍTICO)
+
+Modificar tarjeta de producto para incluir:
+
+Badge visible (obligatorio)
+Mostrar tipo como etiqueta visual
+Ubicación:
+esquina superior o junto al nombre
+Ejemplos:
+LICENCIA → color distintivo
+ADDON → color distinto
+ADICIONAL → otro color
+APU / PROYECTO / BASE → ya definidos
+3. 🎨 REGLA VISUAL
+Badge pequeño, consistente con diseño actual
+NO usar estilos externos
+Reutilizar sistema de tags/badges existente si existe
+4. 🛍️ MARKETPLACE (FILTROS)
+
+Añadir filtro por tipo:
+
+licencias
+addons
+adicionales
+bases
+apus
+proyectos
+5. 📄 DETALLE DE PRODUCTO
+
+Mostrar tipo de producto:
+
+visible en encabezado
+visible cerca del precio
+6. 🧑‍💼 DASHBOARD VENDEDOR
+
+En listado de productos:
+
+mostrar tipo
+permitir filtrar por tipo
+7. 👑 DASHBOARD SUPERADMIN
+
+Añadir métricas por tipo:
+
+ventas por licencias
+ventas por addons
+ventas por adicionales
+ventas por bases/apus/proyectos
+🔐 VALIDACIÓN
+ningún producto debe renderizarse sin tipo
+fallback:
+mostrar "OTRO" si no definido
+🚫 RESTRICCIÓN
+NO hardcodear valores en frontend
+SIEMPRE usar valor proveniente del backend
+🔴 INSTRUCCIÓN FINAL
+
+Corrige la UI para que todos los productos del marketplace muestren su tipo de forma clara, consistente y filtrable, incluyendo licencias, addons y adicionales, integrados visualmente con el diseño actual.
+
+Ampliacion 6 
+
+🧠 MEJORAS ESTRATÉGICAS (ALTO IMPACTO)
+1. 🧾 CLARIDAD COMERCIAL (CRÍTICO)
+Problema típico:
+
+El usuario no entiende qué está comprando (APU vs base vs addon vs licencia)
+
+Solución:
+Añadir subtítulo claro en cada producto:
+“Incluye: 1 APU listo para usar”
+“Incluye: proyecto completo editable”
+Añadir bloque:
+✅ Qué incluye
+❌ Qué NO incluye
+
+👉 Reduce reclamaciones y aumenta conversión
+
+2. 📦 “VISTA PREVIA REAL” DEL CONTENIDO
+
+Antes de comprar:
+
+APU → ver estructura (sin precios completos)
+Proyecto → ver resumen (capítulos, items)
+Base → ver categorías
+
+👉 Esto es lo que hace WooCommerce con previews indirectos
+
+3. ⭐ SISTEMA DE CONFIANZA
+
+Añadir:
+
+Valoración del producto (estrellas)
+Nº de ventas
+“Top vendido”
+“Nuevo”
+
+👉 Impacto directo en ventas
+
+4. 🧑‍💼 PERFIL DEL VENDEDOR
+
+Cada producto debe mostrar:
+
+Nombre del vendedor
+Nº de ventas
+Rating promedio
+
+👉 Genera confianza tipo marketplace real
+
+5. 🔁 PRODUCTOS RELACIONADOS
+
+En detalle de producto:
+
+“Otros productos del mismo vendedor”
+“Productos similares”
+
+👉 Aumenta ticket medio
+
+6. 🏷️ ETIQUETAS COMERCIALES
+
+Añadir badges:
+
+NUEVO
+TOP
+OFERTA
+MÁS VENDIDO
+
+👉 Visualmente potente y sin complejidad técnica
+
+7. 📊 ENFOQUE EN VALOR (NO SOLO PRECIO)
+
+Mostrar:
+
+“Ahorra X horas de trabajo”
+“Usado en proyectos reales”
+“Optimizado”
+
+👉 Esto vende mucho más que solo precio
+
+8. 🔒 MENSAJE DE SEGURIDAD
+
+En checkout:
+
+“El producto se clonará en tu sistema”
+“No perderás información”
+“Compra segura”
+
+👉 Reduce fricción
+
+9. 📁 ORGANIZACIÓN POR USO REAL
+
+En lugar de solo categorías técnicas:
+
+Añadir navegación por:
+
+Construcción
+Ingeniería
+Presupuestos
+Plantillas
+
+👉 Mejora descubrimiento
+
+10. 🎯 CTA CLAROS
+
+Botones:
+
+“Comprar ahora”
+“Añadir a mi sistema”
+“Usar en mi proyecto”
+
+👉 Mejor que “Add to cart” genérico
+
+11. 🧠 EDUCACIÓN DEL USUARIO
+
+Añadir pequeños textos:
+
+“¿Qué es un APU?”
+“¿Qué es una base maestra?”
+
+👉 Reduce soporte
+
+12. 📈 VISIBILIDAD DE GANANCIAS (VENDEDOR)
+
+En dashboard:
+
+“Has ganado hoy”
+“Este producto generó X”
+
+👉 Motiva a vender más
+
+13. 🔄 ESTADO DEL PRODUCTO
+
+Mostrar:
+
+Activo
+Pendiente aprobación
+Rechazado
+
+👉 Evita confusión del vendedor
+
+14. 🧪 MODO DEMO (OPCIONAL)
+
+Permitir:
+
+ver producto sin comprar (limitado)
+
+👉 Muy potente en este tipo de software
+
+15. 🧭 ONBOARDING SIMPLE
+
+Primera vez:
+
+“Publica tu primer APU”
+“Gana dinero con tus proyectos”
+
+👉 Activa vendedores
+
+Ampliacion 7 
+
+🧑‍💼 RESUMEN — INTERFAZ Y FUNCIONES DEL VENDEDOR (ADMIN)
+🎯 OBJETIVO DEL VENDEDOR
+
+Permitir que un usuario admin:
+
+Publique recursos (APUs, proyectos, bases, licencias, addons, adicionales)
+Genere ingresos
+Controle sus productos y ventas
+🖥️ INTERFAZ DEL VENDEDOR (DASHBOARD)
+
+Ruta principal:
+
+/dashboard/seller
+🧭 ESTRUCTURA DEL PANEL
+1. 📊 RESUMEN GENERAL (HOME)
+
+Vista inicial con KPIs:
+
+💰 Ingresos totales
+📦 Total ventas
+📈 Ventas recientes
+🏆 Producto más vendido
+
+👉 Diseño en tarjetas (cards reutilizadas del sistema)
+
+2. 📦 MIS PRODUCTOS
+
+Listado completo:
+
+Nombre
+Tipo (badge obligatorio)
+Precio
+Estado:
+activo
+inactivo
+pendiente aprobación
+Nº de ventas
+Acciones:
+Editar
+Activar / Desactivar
+Eliminar (si no tiene ventas)
+3. ➕ CREAR / PUBLICAR PRODUCTO
+
+Funcionalidad clave:
+
+Flujo:
+Seleccionar tipo:
+base_maestra
+apu
+proyecto
+licencia
+addon
+adicional
+Abrir EntitySelector (si es referenciado)
+Configurar:
+precio
+título comercial
+descripción
+etiquetas
+Publicar
+🧠 COMPORTAMIENTO CLAVE
+Solo puede vender lo que es suyo
+No puede duplicar el mismo recurso
+Publicación puede requerir aprobación (superadmin)
+4. 💰 MIS VENTAS
+
+Listado de ventas:
+
+Fecha
+Producto
+Tipo
+Precio
+Comisión (20%)
+Neto recibido (80%)
+5. 📊 ESTADÍSTICAS
+
+Visualización:
+
+ingresos por periodo
+ventas por tipo:
+bases
+apus
+proyectos
+licencias
+addons
+adicionales
+6. 🧾 DETALLE DE VENTA
+
+Al entrar a una venta:
+
+producto vendido
+comprador
+fecha
+precio total
+comisión aplicada
+ingreso neto
+7. 🔄 GESTIÓN DE ESTADO DE PRODUCTOS
+
+Cada producto puede estar:
+
+activo (visible en marketplace)
+inactivo (oculto)
+pendiente (en revisión)
+rechazado
+8. 🧠 VISIBILIDAD DE RENDIMIENTO
+
+Mostrar:
+
+“Este producto ha generado X ingresos”
+“Top producto del vendedor”
+
+👉 Motivación directa
+
+9. 🏷️ TIPOS DE PRODUCTO (OBLIGATORIO EN UI)
+
+Todos los productos deben mostrar badge:
+
+LICENCIA
+ADDON
+ADICIONAL
+BASE
+APU
+PROYECTO
+10. ⚡ ACCIONES RÁPIDAS
+
+Desde dashboard:
+
+“Publicar nuevo APU”
+“Publicar proyecto”
+“Ver ventas”
+🔐 RESTRICCIONES
+No puede ver ventas de otros
+No puede modificar comisiones
+No puede publicar recursos ajenos
+🎨 UX CLAVE
+Todo en máximo 2–3 clics
+Feedback claro:
+publicado
+vendido
+Sin sobrecarga visual
+🧩 RESULTADO FINAL
+
+El vendedor tiene:
+
+control total de sus productos
+visibilidad clara de ingresos
+flujo simple de publicación
+experiencia tipo marketplace real
+⚠️ LO MÁS IMPORTANTE
+
+Si solo se hace bien esto:
+
+Publicar producto fácil
+Ver ingresos claro
+Ver ventas simple
+
+→ el sistema funciona comercialmente
+
+Ampliacion 8 
+
+🛒 RESUMEN — INTERFAZ Y FUNCIONES DEL COMPRADOR
+🎯 OBJETIVO DEL COMPRADOR
+
+Permitir que el usuario:
+
+Explore productos (APUs, proyectos, bases, licencias, addons, adicionales)
+Compre fácilmente
+Acceda a lo comprado
+Gestione pedidos y facturación
+🖥️ INTERFAZ DEL COMPRADOR
+🛍️ 1. MARKETPLACE (TIENDA)
+
+Ruta:
+
+/marketplace
+Funciones:
+Ver catálogo completo
+Filtros:
+tipo (licencia, addon, adicional, base, apu, proyecto)
+precio
+Buscador
+Ordenar:
+precio
+popularidad
+recientes
+📦 2. TARJETA DE PRODUCTO
+
+Cada producto muestra:
+
+Nombre
+Precio
+Tipo (badge obligatorio)
+Vendedor
+Nº ventas / rating
+Acciones:
+Ver detalle
+Añadir al carrito
+📄 3. DETALLE DE PRODUCTO
+
+Ruta:
+
+/product/:id
+Contenido:
+Descripción
+Precio
+Vendedor
+Tipo de producto
+Bloques clave:
+✅ Qué incluye
+❌ Qué no incluye
+Vista previa:
+APU → estructura
+Proyecto → resumen
+Base → categorías
+Acciones:
+Comprar ahora
+Añadir al carrito
+🛒 4. CARRITO
+
+Ruta:
+
+/cart
+Funciones:
+Ver productos añadidos
+Eliminar productos
+Ver total
+Acción:
+
+→ Ir a checkout
+
+💳 5. CHECKOUT
+
+Ruta:
+
+/checkout
+Flujo:
+Confirmar compra
+Mostrar resumen
+Confirmación
+Mensajes clave:
+“El recurso se clonará en tu sistema”
+“Compra segura”
+✅ 6. POST-COMPRA
+
+Después de comprar:
+
+Redirigir a:
+/pedido/:id
+
+Mostrar:
+
+compra realizada
+acceso directo al recurso
+👤 7. PANEL “MI CUENTA”
+
+Ruta:
+
+/mi-cuenta
+📦 7.1 MIS PEDIDOS
+
+Ruta:
+
+/mis-pedidos
+Funciones:
+Listado de compras
+Estado:
+pendiente
+completado
+cancelado
+📄 7.2 DETALLE DE PEDIDO
+
+Ruta:
+
+/pedido/:id
+Mostrar:
+productos comprados
+fecha
+total
+vendedor
+🧾 7.3 FACTURAS
+
+Ruta:
+
+/facturas
+Funciones:
+ver facturas
+descargar
+📥 7.4 MIS RECURSOS (CRÍTICO)
+
+Ruta:
+
+/mis-descargas
+Funciones:
+acceder a:
+APUs comprados
+proyectos
+bases
+acciones:
+“abrir en sistema”
+“usar en proyecto”
+
+👉 Aquí se ve el valor real del sistema
+
+⭐ 7.5 VALORACIONES
+valorar productos comprados
+estrellas + comentario
+📊 7.6 HISTORIAL
+
+Mostrar:
+
+total gastado
+nº compras
+🔁 7.7 RECOMPRA
+botón:
+volver a comprar
+sugerencias relacionadas
+🎨 UX CLAVE DEL COMPRADOR
+Flujo rápido:
+→ ver → entender → comprar
+Máximo 2–3 clics para comprar
+Información clara antes de pagar
+🧠 ELEMENTOS DE CONVERSIÓN
+
+Obligatorios:
+
+badges (tipo producto)
+rating
+nº ventas
+vendedor visible
+productos relacionados
+mensajes de valor:
+“ahorra tiempo”
+mensajes de seguridad
+🔐 SEGURIDAD
+solo ve sus pedidos
+solo accede a sus recursos
+acceso controlado por usuario
+🧩 RESULTADO FINAL
+
+El comprador tiene:
+
+experiencia tipo WooCommerce
+acceso claro a lo comprado
+confianza en la compra
+reutilización directa en su sistema
+⚠️ LO MÁS IMPORTANTE
+
+Si se implementa bien:
+
+Vista previa clara
+Acceso fácil a recursos comprados
+Historial simple
+
+→ el sistema se vuelve usable y comercial
+
+Ampliacion 8 
+
+👑 RESUMEN — INTERFAZ Y FUNCIONES DEL ADMINISTRADOR (SUPERADMIN + VENDEDOR)
+🎯 OBJETIVO DEL ADMINISTRADOR
+
+El administrador es:
+
+Control total del sistema (superadmin)
+También vendedor (puede comercializar licencias, addons, adicionales, etc.)
+
+👉 Es un rol híbrido: gestiona + monetiza
+
+🖥️ INTERFAZ GENERAL
+
+Ruta base:
+
+/dashboard/admin
+
+Debe tener dos contextos claros:
+
+🧑‍💼 Modo Vendedor
+👑 Modo Administración
+🧭 ESTRUCTURA DEL PANEL
+👑 1. PANEL GLOBAL (SUPERADMIN)
+📊 1.1 DASHBOARD GENERAL
+
+Vista inicial con métricas globales:
+
+💰 Total ventas plataforma
+💸 Total comisiones (20%)
+📦 Nº total pedidos
+👥 Nº vendedores activos
+🏆 Top vendedores
+👥 1.2 GESTIÓN DE USUARIOS
+
+Funciones:
+
+listar usuarios
+cambiar roles:
+user
+admin (vendedor)
+superadmin
+activar / desactivar cuentas
+📦 1.3 GESTIÓN DE PRODUCTOS (GLOBAL)
+
+Ver TODOS los productos:
+
+nombre
+tipo (badge obligatorio)
+vendedor
+estado:
+activo
+pendiente
+rechazado
+Acciones:
+aprobar / rechazar
+editar
+eliminar
+🔍 1.4 MODERACIÓN
+
+Control de calidad:
+
+productos pendientes de aprobación
+revisión manual
+💰 1.5 FINANZAS Y COMISIONES
+
+Vista completa:
+
+todas las ventas
+comisión generada por venta
+total acumulado
+📊 1.6 ANALÍTICAS
+
+Métricas:
+
+ventas por tipo:
+licencias
+addons
+adicionales
+bases
+apus
+proyectos
+tendencias
+🧑‍💼 2. MODO VENDEDOR (ADMIN COMO SELLER)
+📦 2.1 MIS PRODUCTOS
+
+El admin también puede vender:
+
+licencias
+addons
+adicionales
+cualquier recurso propio
+Funciones:
+crear productos
+editar
+activar / desactivar
+➕ 2.2 CREAR PRODUCTO
+
+Tipos:
+
+licencia
+addon
+adicional
+base_maestra
+apu
+proyecto
+Flujo:
+seleccionar tipo
+usar EntitySelector (si aplica)
+definir precio
+publicar
+💰 2.3 MIS VENTAS
+listado de ventas propias
+ingresos
+comisión aplicada
+📊 2.4 MIS ESTADÍSTICAS
+ingresos totales
+ventas por producto
+producto más vendido
+🔁 3. CAMBIO DE CONTEXTO
+
+El admin debe poder cambiar fácilmente entre:
+
+“Vista plataforma”
+“Vista como vendedor”
+
+👉 Selector tipo toggle o pestañas
+
+🏷️ TIPOS DE PRODUCTO (CRÍTICO)
+
+Todos los productos deben mostrar claramente:
+
+LICENCIA
+ADDON
+ADICIONAL
+BASE
+APU
+PROYECTO
+⚙️ FUNCIONALIDADES CLAVE
+✔️ APROBACIÓN DE PRODUCTOS
+opcional (configurable)
+flujo:
+vendedor publica
+admin aprueba
+✔️ CONTROL DE CALIDAD
+eliminar productos inválidos
+bloquear usuarios
+✔️ VISIBILIDAD TOTAL
+ver todas las ventas
+ver comportamiento de vendedores
+✔️ MONETIZACIÓN
+control total de comisiones
+visibilidad de ingresos plataforma
+🔐 RESTRICCIONES
+admin ve todo
+vendedor solo lo suyo
+separación de contexto clara
+🎨 UX CLAVE
+panel claro y no saturado
+métricas visibles
+acciones rápidas
+sin duplicar vistas innecesarias
+🧩 RESULTADO FINAL
+
+El administrador tiene:
+
+control total del marketplace
+capacidad de moderar
+visibilidad financiera completa
+capacidad de vender como cualquier usuario
+⚠️ LO MÁS IMPORTANTE
+
+Si esto funciona bien:
+
+Control de productos (aprobación)
+Visibilidad de dinero (comisiones)
+Capacidad de vender directamente
+
+→ tienes un marketplace real y sostenible
+
+Ampliacion 9
+
+🔐 DEFINICIÓN — ROLES Y PERMISOS (EXTENSIÓN NO INVASIVA)
+🎯 OBJETIVO
+
+Extender el sistema actual de roles/permisos sin modificar ni romper lo existente, añadiendo capacidades para el marketplace:
+
+Compra
+Venta
+Administración del marketplace
+🧠 PRINCIPIO CLAVE
+❌ NO modificar roles actuales
+❌ NO cambiar permisos existentes
+✅ SOLO añadir nuevos permisos
+✅ Integrar con sistema actual (RBAC existente)
+
+👉 Todo debe ser aditivo y compatible
+
+🧩 NUEVOS PERMISOS (AGRUPADOS POR MÓDULO)
+🛒 1. PERMISOS DE COMPRADOR
+
+Asignables a cualquier usuario existente
+
+marketplace.view → ver marketplace
+marketplace.buy → realizar compras
+orders.view_own → ver sus pedidos
+orders.view_detail_own → ver detalle
+orders.download_invoice → descargar facturas
+orders.access_resources → acceder a recursos comprados
+reviews.create → valorar productos
+🧑‍💼 2. PERMISOS DE VENDEDOR
+
+Se asignan a usuarios tipo admin (sin cambiar su rol base)
+
+seller.publish → publicar productos
+seller.edit_own → editar productos propios
+seller.delete_own → eliminar productos (sin ventas)
+seller.view_own_products → ver catálogo propio
+seller.view_sales → ver ventas propias
+seller.view_stats → ver estadísticas propias
+seller.activate_product → activar/desactivar
+👑 3. PERMISOS DE SUPERADMIN (MARKETPLACE)
+
+Añadidos al rol admin existente (sin modificar su base)
+
+marketplace.manage_all_products → ver todos los productos
+marketplace.approve_products → aprobar/rechazar
+marketplace.delete_any_product → eliminar cualquiera
+marketplace.view_all_sales → ver todas las ventas
+marketplace.view_commissions → ver comisiones
+marketplace.view_analytics → ver métricas globales
+users.manage_roles_marketplace → asignar permisos marketplace
+🧠 MAPEO DE ROLES (SIN CAMBIAR LOS EXISTENTES)
+👤 USER (EXISTENTE)
+
+Añadir:
+
+permisos de comprador
+
+👉 Resultado:
+Usuario puede comprar pero no vender
+
+🧑‍💼 ADMIN (EXISTENTE)
+
+Añadir:
+
+permisos de vendedor
+opcionalmente algunos de superadmin
+
+👉 Resultado:
+Puede vender + (opcionalmente) gestionar marketplace
+
+👑 SUPERADMIN (EXISTENTE O ADMIN AVANZADO)
+
+Añadir:
+
+TODOS los permisos marketplace
+
+👉 Resultado:
+Control total + puede vender
+
+🔄 MODELO FLEXIBLE (CLAVE)
+
+NO crear roles nuevos obligatorios
+
+👉 Usar combinación de permisos:
+
+Ejemplo:
+
+Usuario normal + seller.publish → vendedor
+Admin + approve_products → moderador
+Admin + todos permisos → superadmin
+🧱 AGRUPACIÓN LÓGICA (RECOMENDADO)
+
+Para facilitar gestión:
+
+Grupo: marketplace_buyer
+Grupo: marketplace_seller
+Grupo: marketplace_admin
+
+👉 Solo agrupan permisos, no reemplazan roles
+
+🔐 VALIDACIONES OBLIGATORIAS
+Publicar producto
+
+Requiere:
+
+seller.publish
+Comprar
+
+Requiere:
+
+marketplace.buy
+Ver ventas propias
+
+Requiere:
+
+seller.view_sales
+Ver TODAS las ventas
+
+Requiere:
+
+marketplace.view_all_sales
+Aprobar productos
+
+Requiere:
+
+marketplace.approve_products
+🚫 RESTRICCIONES CRÍTICAS
+Un vendedor NO puede:
+ver ventas de otros
+modificar comisiones
+Un comprador NO puede:
+publicar productos
+Un admin sin permisos marketplace:
+NO accede a funciones de marketplace
+🧠 INTEGRACIÓN CON UI
+
+Mostrar u ocultar:
+
+botones (publicar, comprar, aprobar)
+dashboards (seller, admin)
+
+👉 Basado en permisos, no roles
+
+⚙️ IMPLEMENTACIÓN (CONCEPTUAL)
+No tocar tablas existentes de roles
+Añadir permisos nuevos en sistema actual
+Asociar permisos a roles existentes
+Evaluar permisos en backend y frontend
+🧩 RESULTADO FINAL
+
+Sistema con:
+
+control granular
+sin romper estructura actual
+escalable
+flexible
+⚠️ CLAVE
+
+El sistema NO depende de roles rígidos
+👉 Depende de permisos combinables
+
+
+

@@ -1,0 +1,90 @@
+{
+  "generated_at": "2026-03-25T14:25:15.664849Z",
+  "bases": [
+    {
+      "base_id": 1,
+      "empresa_id": 1,
+      "source_base_id": null,
+      "apus": {
+        "native": 4,
+        "inherited_synced": 0,
+        "inherited_diverged": 0,
+        "local": 0
+      },
+      "recursos": {
+        "native": 15,
+        "inherited_synced": 0,
+        "inherited_diverged": 0,
+        "local": 0
+      }
+    },
+    {
+      "base_id": 16,
+      "empresa_id": 1,
+      "source_base_id": 1,
+      "apus": {
+        "native": 0,
+        "inherited_synced": 0,
+        "inherited_diverged": 4,
+        "local": 43
+      },
+      "recursos": {
+        "native": 0,
+        "inherited_synced": 8,
+        "inherited_diverged": 7,
+        "local": 49
+      }
+    },
+    {
+      "base_id": 33,
+      "empresa_id": 1,
+      "source_base_id": 16,
+      "apus": {
+        "native": 0,
+        "inherited_synced": 1,
+        "inherited_diverged": 46,
+        "local": 17
+      },
+      "recursos": {
+        "native": 0,
+        "inherited_synced": 64,
+        "inherited_diverged": 0,
+        "local": 0
+      }
+    },
+    {
+      "base_id": 32,
+      "empresa_id": 3,
+      "source_base_id": null,
+      "apus": {
+        "native": 50,
+        "inherited_synced": 0,
+        "inherited_diverged": 0,
+        "local": 0
+      },
+      "recursos": {
+        "native": 211,
+        "inherited_synced": 0,
+        "inherited_diverged": 0,
+        "local": 0
+      }
+    },
+    {
+      "base_id": 34,
+      "empresa_id": 3,
+      "source_base_id": 32,
+      "apus": {
+        "native": 0,
+        "inherited_synced": 48,
+        "inherited_diverged": 2,
+        "local": 14
+      },
+      "recursos": {
+        "native": 0,
+        "inherited_synced": 207,
+        "inherited_diverged": 4,
+        "local": 0
+      }
+    }
+  ]
+}

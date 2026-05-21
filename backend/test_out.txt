@@ -1,0 +1,106 @@
+Traceback (most recent call last):
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 2119, in _exec_insertmany_context
+    dialect.do_execute(
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.ForeignKeyViolation: inserci¾n o actualizaci¾n en la tabla ½recursos╗ viola la llave forßnea ½recursos_subcategoria_item_id_fkey╗
+DETAIL:  La llave (subcategoria_item_id)=(1) no estß presente en la tabla ½subcategorias_items╗.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Repositorios\GiProy Network\backend\scripts\test_apu_logic.py", line 46, in test_apu_logic
+    db.commit()
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 1972, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 1257, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 1232, in _prepare_impl
+    self.session.flush()
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 4296, in flush
+    self._flush(objects)
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 4431, in _flush
+    with util.safe_reraise():
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 4392, in _flush
+    flush_context.execute()
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1143, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1421, in execute
+    return meth(
+           ^^^^^
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\sql\elements.py", line 514, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1847, in _execute_context
+    return self._exec_insertmany_context(dialect, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 2127, in _exec_insertmany_context
+    self._handle_dbapi_exception(
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 2356, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 2119, in _exec_insertmany_context
+    dialect.do_execute(
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.ForeignKeyViolation) inserci¾n o actualizaci¾n en la tabla ½recursos╗ viola la llave forßnea ½recursos_subcategoria_item_id_fkey╗
+DETAIL:  La llave (subcategoria_item_id)=(1) no estß presente en la tabla ½subcategorias_items╗.
+
+[SQL: INSERT INTO recursos (codigo, descripcion, descripcion_normalizada, precio, unidad_id, cod_cpc_id, especificaciones, subcategoria_item_id, base_trabajo_id, empresa_id, revisado, ultima_modificacion) SELECT p0::VARCHAR, p1::VARCHAR, p2::VARCHAR, p3::F ... 733 characters truncated ... n_counter) ORDER BY sen_counter RETURNING recursos.id, recursos.fecha_creacion, recursos.id AS id__1]
+[parameters: {'especificaciones__0': None, 'base_trabajo_id__0': 1, 'empresa_id__0': 1, 'ultima_modificacion__0': None, 'precio__0': 10.0, 'descripcion__0': 'Recurso Prueba 1', 'revisado__0': True, 'descripcion_normalizada__0': 'recurso prueba 1', 'subcategoria_item_id__0': 1, 'codigo__0': 'TEST_R1', 'unidad_id__0': 1, 'cod_cpc_id__0': None, 'especificaciones__1': None, 'base_trabajo_id__1': 1, 'empresa_id__1': 1, 'ultima_modificacion__1': None, 'precio__1': 20.0, 'descripcion__1': 'Recurso Prueba 2', 'revisado__1': True, 'descripcion_normalizada__1': 'recurso prueba 2', 'subcategoria_item_id__1': 1, 'codigo__1': 'TEST_R2', 'unidad_id__1': 1, 'cod_cpc_id__1': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+====== Iniciando Pruebas de L¾gica APU ======
+ERROR: (psycopg2.errors.ForeignKeyViolation) inserci¾n o actualizaci¾n en la tabla ½recursos╗ viola la llave forßnea ½recursos_subcategoria_item_id_fkey╗
+DETAIL:  La llave (subcategoria_item_id)=(1) no estß presente en la tabla ½subcategorias_items╗.
+
+[SQL: INSERT INTO recursos (codigo, descripcion, descripcion_normalizada, precio, unidad_id, cod_cpc_id, especificaciones, subcategoria_item_id, base_trabajo_id, empresa_id, revisado, ultima_modificacion) SELECT p0::VARCHAR, p1::VARCHAR, p2::VARCHAR, p3::F ... 733 characters truncated ... n_counter) ORDER BY sen_counter RETURNING recursos.id, recursos.fecha_creacion, recursos.id AS id__1]
+  File "E:\Repositorios\GiProy Network\backend\scripts\test_apu_logic.py", line 152, in <module>
+[parameters: {'especificaciones__0': None, 'base_trabajo_id__0': 1, 'empresa_id__0': 1, 'ultima_modificacion__0': None, 'precio__0': 10.0, 'descripcion__0': 'Recurso Prueba 1', 'revisado__0': True, 'descripcion_normalizada__0': 'recurso prueba 1', 'subcategoria_item_id__0': 1, 'codigo__0': 'TEST_R1', 'unidad_id__0': 1, 'cod_cpc_id__0': None, 'especificaciones__1': None, 'base_trabajo_id__1': 1, 'empresa_id__1': 1, 'ultima_modificacion__1': None, 'precio__1': 20.0, 'descripcion__1': 'Recurso Prueba 2', 'revisado__1': True, 'descripcion_normalizada__1': 'recurso prueba 2', 'subcategoria_item_id__1': 1, 'codigo__1': 'TEST_R2', 'unidad_id__1': 1, 'cod_cpc_id__1': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+    test_apu_logic()
+  File "E:\Repositorios\GiProy Network\backend\scripts\test_apu_logic.py", line 145, in test_apu_logic
+    db.query(APULinea).filter(APULinea.apu.has(APU.codigo.like("TEST_%"))).delete(synchronize_session=False)
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\query.py", line 3161, in delete
+    result: CursorResult[Any] = self.session.execute(
+                                ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 2306, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 2181, in _execute_internal
+    conn = self._connection_for_bind(bind)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 2050, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 103, in _go
+    self._raise_for_prerequisite_state(fn.__name__, current_state)
+  File "C:\Users\dream\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 928, in _raise_for_prerequisite_state
+    raise sa_exc.PendingRollbackError(
+sqlalchemy.exc.PendingRollbackError: This Session's transaction has been rolled back due to a previous exception during flush. To begin a new transaction with this Session, first issue Session.rollback(). Original exception was: (psycopg2.errors.ForeignKeyViolation) inserci¾n o actualizaci¾n en la tabla ½recursos╗ viola la llave forßnea ½recursos_subcategoria_item_id_fkey╗
+DETAIL:  La llave (subcategoria_item_id)=(1) no estß presente en la tabla ½subcategorias_items╗.
+
+[SQL: INSERT INTO recursos (codigo, descripcion, descripcion_normalizada, precio, unidad_id, cod_cpc_id, especificaciones, subcategoria_item_id, base_trabajo_id, empresa_id, revisado, ultima_modificacion) SELECT p0::VARCHAR, p1::VARCHAR, p2::VARCHAR, p3::F ... 733 characters truncated ... n_counter) ORDER BY sen_counter RETURNING recursos.id, recursos.fecha_creacion, recursos.id AS id__1]
+[parameters: {'especificaciones__0': None, 'base_trabajo_id__0': 1, 'empresa_id__0': 1, 'ultima_modificacion__0': None, 'precio__0': 10.0, 'descripcion__0': 'Recurso Prueba 1', 'revisado__0': True, 'descripcion_normalizada__0': 'recurso prueba 1', 'subcategoria_item_id__0': 1, 'codigo__0': 'TEST_R1', 'unidad_id__0': 1, 'cod_cpc_id__0': None, 'especificaciones__1': None, 'base_trabajo_id__1': 1, 'empresa_id__1': 1, 'ultima_modificacion__1': None, 'precio__1': 20.0, 'descripcion__1': 'Recurso Prueba 2', 'revisado__1': True, 'descripcion_normalizada__1': 'recurso prueba 2', 'subcategoria_item_id__1': 1, 'codigo__1': 'TEST_R2', 'unidad_id__1': 1, 'cod_cpc_id__1': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj) (Background on this error at: https://sqlalche.me/e/20/7s2a)

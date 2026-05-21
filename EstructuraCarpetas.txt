@@ -1,0 +1,1377 @@
+Listado de rutas de carpetas para el volumen eXcom Consultores
+El número de serie del volumen es D815-1C3B
+E:.
++---.runtime
+¦   +---logs
+¦   +---monitor
++---.venv
+¦   +---Include
+¦   +---Lib
+¦   ¦   +---site-packages
+¦   ¦       +---pip
+¦   ¦       ¦   +---_internal
+¦   ¦       ¦   ¦   +---cli
+¦   ¦       ¦   ¦   +---commands
+¦   ¦       ¦   ¦   +---distributions
+¦   ¦       ¦   ¦   +---index
+¦   ¦       ¦   ¦   +---locations
+¦   ¦       ¦   ¦   +---metadata
+¦   ¦       ¦   ¦   ¦   +---importlib
+¦   ¦       ¦   ¦   +---models
+¦   ¦       ¦   ¦   +---network
+¦   ¦       ¦   ¦   +---operations
+¦   ¦       ¦   ¦   ¦   +---build
+¦   ¦       ¦   ¦   ¦   +---install
+¦   ¦       ¦   ¦   +---req
+¦   ¦       ¦   ¦   +---resolution
+¦   ¦       ¦   ¦   ¦   +---legacy
+¦   ¦       ¦   ¦   ¦   +---resolvelib
+¦   ¦       ¦   ¦   +---utils
+¦   ¦       ¦   ¦   +---vcs
+¦   ¦       ¦   +---_vendor
+¦   ¦       ¦       +---cachecontrol
+¦   ¦       ¦       ¦   +---caches
+¦   ¦       ¦       +---certifi
+¦   ¦       ¦       +---dependency_groups
+¦   ¦       ¦       +---distlib
+¦   ¦       ¦       +---distro
+¦   ¦       ¦       +---idna
+¦   ¦       ¦       +---msgpack
+¦   ¦       ¦       +---packaging
+¦   ¦       ¦       ¦   +---licenses
+¦   ¦       ¦       +---pkg_resources
+¦   ¦       ¦       +---platformdirs
+¦   ¦       ¦       +---pygments
+¦   ¦       ¦       ¦   +---filters
+¦   ¦       ¦       ¦   +---formatters
+¦   ¦       ¦       ¦   +---lexers
+¦   ¦       ¦       ¦   +---styles
+¦   ¦       ¦       +---pyproject_hooks
+¦   ¦       ¦       ¦   +---_in_process
+¦   ¦       ¦       +---requests
+¦   ¦       ¦       +---resolvelib
+¦   ¦       ¦       ¦   +---resolvers
+¦   ¦       ¦       +---rich
+¦   ¦       ¦       +---tomli
+¦   ¦       ¦       +---tomli_w
+¦   ¦       ¦       +---truststore
+¦   ¦       ¦       +---urllib3
+¦   ¦       ¦           +---contrib
+¦   ¦       ¦           ¦   +---_securetransport
+¦   ¦       ¦           +---packages
+¦   ¦       ¦           ¦   +---backports
+¦   ¦       ¦           +---util
+¦   ¦       +---pip-26.0.1.dist-info
+¦   ¦       ¦   +---licenses
+¦   ¦       ¦       +---src
+¦   ¦       ¦           +---pip
+¦   ¦       ¦               +---_vendor
+¦   ¦       ¦                   +---cachecontrol
+¦   ¦       ¦                   +---certifi
+¦   ¦       ¦                   +---dependency_groups
+¦   ¦       ¦                   +---distlib
+¦   ¦       ¦                   +---distro
+¦   ¦       ¦                   +---idna
+¦   ¦       ¦                   +---msgpack
+¦   ¦       ¦                   +---packaging
+¦   ¦       ¦                   +---pkg_resources
+¦   ¦       ¦                   +---platformdirs
+¦   ¦       ¦                   +---pygments
+¦   ¦       ¦                   +---pyproject_hooks
+¦   ¦       ¦                   +---requests
+¦   ¦       ¦                   +---resolvelib
+¦   ¦       ¦                   +---rich
+¦   ¦       ¦                   +---tomli
+¦   ¦       ¦                   +---tomli_w
+¦   ¦       ¦                   +---truststore
+¦   ¦       ¦                   +---urllib3
+¦   ¦       +---pkg_resources
+¦   ¦       ¦   +---extern
+¦   ¦       ¦   +---_vendor
+¦   ¦       ¦       +---importlib_resources
+¦   ¦       ¦       +---jaraco
+¦   ¦       ¦       ¦   +---text
+¦   ¦       ¦       +---more_itertools
+¦   ¦       ¦       +---packaging
+¦   ¦       ¦       +---pyparsing
+¦   ¦       ¦           +---diagram
+¦   ¦       +---psutil
+¦   ¦       +---psutil-7.2.2.dist-info
+¦   ¦       +---PySide6
+¦   ¦       ¦   +---doc
+¦   ¦       ¦   +---glue
+¦   ¦       ¦   +---include
+¦   ¦       ¦   ¦   +---Qt3DAnimation
+¦   ¦       ¦   ¦   +---Qt3DCore
+¦   ¦       ¦   ¦   +---Qt3DExtras
+¦   ¦       ¦   ¦   +---Qt3DInput
+¦   ¦       ¦   ¦   +---Qt3DLogic
+¦   ¦       ¦   ¦   +---Qt3DRender
+¦   ¦       ¦   ¦   +---QtAxContainer
+¦   ¦       ¦   ¦   +---QtBluetooth
+¦   ¦       ¦   ¦   +---QtCharts
+¦   ¦       ¦   ¦   +---QtConcurrent
+¦   ¦       ¦   ¦   +---QtCore
+¦   ¦       ¦   ¦   +---QtDataVisualization
+¦   ¦       ¦   ¦   +---QtDBus
+¦   ¦       ¦   ¦   +---QtDesigner
+¦   ¦       ¦   ¦   +---QtGraphs
+¦   ¦       ¦   ¦   +---QtGraphsWidgets
+¦   ¦       ¦   ¦   +---QtGui
+¦   ¦       ¦   ¦   +---QtHelp
+¦   ¦       ¦   ¦   +---QtHttpServer
+¦   ¦       ¦   ¦   +---QtLocation
+¦   ¦       ¦   ¦   +---QtMultimedia
+¦   ¦       ¦   ¦   +---QtMultimediaWidgets
+¦   ¦       ¦   ¦   +---QtNetwork
+¦   ¦       ¦   ¦   +---QtNetworkAuth
+¦   ¦       ¦   ¦   +---QtNfc
+¦   ¦       ¦   ¦   +---QtOpenGL
+¦   ¦       ¦   ¦   +---QtOpenGLWidgets
+¦   ¦       ¦   ¦   +---QtPdf
+¦   ¦       ¦   ¦   +---QtPdfWidgets
+¦   ¦       ¦   ¦   +---QtPositioning
+¦   ¦       ¦   ¦   +---QtPrintSupport
+¦   ¦       ¦   ¦   +---QtQml
+¦   ¦       ¦   ¦   +---QtQuick
+¦   ¦       ¦   ¦   +---QtQuick3D
+¦   ¦       ¦   ¦   +---QtQuickControls2
+¦   ¦       ¦   ¦   +---QtQuickTest
+¦   ¦       ¦   ¦   +---QtQuickWidgets
+¦   ¦       ¦   ¦   +---QtRemoteObjects
+¦   ¦       ¦   ¦   +---QtScxml
+¦   ¦       ¦   ¦   +---QtSensors
+¦   ¦       ¦   ¦   +---QtSerialBus
+¦   ¦       ¦   ¦   +---QtSerialPort
+¦   ¦       ¦   ¦   +---QtSpatialAudio
+¦   ¦       ¦   ¦   +---QtSql
+¦   ¦       ¦   ¦   +---QtStateMachine
+¦   ¦       ¦   ¦   +---QtSvg
+¦   ¦       ¦   ¦   +---QtSvgWidgets
+¦   ¦       ¦   ¦   +---QtTest
+¦   ¦       ¦   ¦   +---QtTextToSpeech
+¦   ¦       ¦   ¦   +---QtUiTools
+¦   ¦       ¦   ¦   +---QtWebChannel
+¦   ¦       ¦   ¦   +---QtWebEngineCore
+¦   ¦       ¦   ¦   +---QtWebEngineQuick
+¦   ¦       ¦   ¦   +---QtWebEngineWidgets
+¦   ¦       ¦   ¦   +---QtWebSockets
+¦   ¦       ¦   ¦   +---QtWebView
+¦   ¦       ¦   ¦   +---QtWidgets
+¦   ¦       ¦   ¦   +---QtXml
+¦   ¦       ¦   +---lib
+¦   ¦       ¦   ¦   +---cmake
+¦   ¦       ¦   ¦       +---PySide6
+¦   ¦       ¦   +---metatypes
+¦   ¦       ¦   +---plugins
+¦   ¦       ¦   ¦   +---assetimporters
+¦   ¦       ¦   ¦   +---canbus
+¦   ¦       ¦   ¦   +---designer
+¦   ¦       ¦   ¦   +---generic
+¦   ¦       ¦   ¦   +---geometryloaders
+¦   ¦       ¦   ¦   +---geoservices
+¦   ¦       ¦   ¦   +---iconengines
+¦   ¦       ¦   ¦   +---imageformats
+¦   ¦       ¦   ¦   +---multimedia
+¦   ¦       ¦   ¦   +---networkinformation
+¦   ¦       ¦   ¦   +---platforminputcontexts
+¦   ¦       ¦   ¦   +---platforms
+¦   ¦       ¦   ¦   +---position
+¦   ¦       ¦   ¦   +---qmllint
+¦   ¦       ¦   ¦   +---qmltooling
+¦   ¦       ¦   ¦   +---renderers
+¦   ¦       ¦   ¦   +---renderplugins
+¦   ¦       ¦   ¦   +---sceneparsers
+¦   ¦       ¦   ¦   +---scxmldatamodel
+¦   ¦       ¦   ¦   +---sensors
+¦   ¦       ¦   ¦   +---sqldrivers
+¦   ¦       ¦   ¦   +---styles
+¦   ¦       ¦   ¦   +---texttospeech
+¦   ¦       ¦   ¦   +---tls
+¦   ¦       ¦   ¦   +---webview
+¦   ¦       ¦   +---qml
+¦   ¦       ¦   ¦   +---Qt
+¦   ¦       ¦   ¦   ¦   +---labs
+¦   ¦       ¦   ¦   ¦       +---animation
+¦   ¦       ¦   ¦   ¦       +---folderlistmodel
+¦   ¦       ¦   ¦   ¦       +---platform
+¦   ¦       ¦   ¦   ¦       +---qmlmodels
+¦   ¦       ¦   ¦   ¦       +---settings
+¦   ¦       ¦   ¦   ¦       +---sharedimage
+¦   ¦       ¦   ¦   ¦       +---wavefrontmesh
+¦   ¦       ¦   ¦   +---Qt3D
+¦   ¦       ¦   ¦   ¦   +---Animation
+¦   ¦       ¦   ¦   ¦   +---Core
+¦   ¦       ¦   ¦   ¦   +---Extras
+¦   ¦       ¦   ¦   ¦   +---Input
+¦   ¦       ¦   ¦   ¦   +---Logic
+¦   ¦       ¦   ¦   ¦   +---Render
+¦   ¦       ¦   ¦   +---Qt5Compat
+¦   ¦       ¦   ¦   ¦   +---GraphicalEffects
+¦   ¦       ¦   ¦   ¦       +---private
+¦   ¦       ¦   ¦   +---QtCharts
+¦   ¦       ¦   ¦   ¦   +---designer
+¦   ¦       ¦   ¦   ¦       +---default
+¦   ¦       ¦   ¦   ¦       +---images
+¦   ¦       ¦   ¦   +---QtCore
+¦   ¦       ¦   ¦   +---QtDataVisualization
+¦   ¦       ¦   ¦   ¦   +---designer
+¦   ¦       ¦   ¦   ¦       +---default
+¦   ¦       ¦   ¦   ¦       +---images
+¦   ¦       ¦   ¦   +---QtGraphs
+¦   ¦       ¦   ¦   ¦   +---designer
+¦   ¦       ¦   ¦   ¦       +---default
+¦   ¦       ¦   ¦   ¦       +---images
+¦   ¦       ¦   ¦   +---QtLocation
+¦   ¦       ¦   ¦   +---QtMultimedia
+¦   ¦       ¦   ¦   +---QtNetwork
+¦   ¦       ¦   ¦   +---QtPositioning
+¦   ¦       ¦   ¦   +---QtQml
+¦   ¦       ¦   ¦   ¦   +---Models
+¦   ¦       ¦   ¦   ¦   +---StateMachine
+¦   ¦       ¦   ¦   ¦   +---WorkerScript
+¦   ¦       ¦   ¦   ¦   +---XmlListModel
+¦   ¦       ¦   ¦   +---QtQuick
+¦   ¦       ¦   ¦   ¦   +---Controls
+¦   ¦       ¦   ¦   ¦   ¦   +---Basic
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---impl
+¦   ¦       ¦   ¦   ¦   ¦   +---designer
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---images
+¦   ¦       ¦   ¦   ¦   ¦   +---FluentWinUI3
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---dark
+¦   ¦       ¦   ¦   ¦   ¦   ¦   ¦   +---images
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---icons
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---impl
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---light
+¦   ¦       ¦   ¦   ¦   ¦   ¦       +---images
+¦   ¦       ¦   ¦   ¦   ¦   +---Fusion
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---impl
+¦   ¦       ¦   ¦   ¦   ¦   +---Imagine
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---impl
+¦   ¦       ¦   ¦   ¦   ¦   +---impl
+¦   ¦       ¦   ¦   ¦   ¦   +---Material
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---impl
+¦   ¦       ¦   ¦   ¦   ¦   +---Universal
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---impl
+¦   ¦       ¦   ¦   ¦   ¦   +---Windows
+¦   ¦       ¦   ¦   ¦   ¦       +---images
+¦   ¦       ¦   ¦   ¦   ¦       +---impl
+¦   ¦       ¦   ¦   ¦   +---Dialogs
+¦   ¦       ¦   ¦   ¦   ¦   +---quickimpl
+¦   ¦       ¦   ¦   ¦   ¦       +---qml
+¦   ¦       ¦   ¦   ¦   ¦           +---+Fusion
+¦   ¦       ¦   ¦   ¦   ¦           +---+Imagine
+¦   ¦       ¦   ¦   ¦   ¦           +---+Material
+¦   ¦       ¦   ¦   ¦   ¦           +---+Universal
+¦   ¦       ¦   ¦   ¦   +---Effects
+¦   ¦       ¦   ¦   ¦   +---Layouts
+¦   ¦       ¦   ¦   ¦   +---LocalStorage
+¦   ¦       ¦   ¦   ¦   +---NativeStyle
+¦   ¦       ¦   ¦   ¦   ¦   +---controls
+¦   ¦       ¦   ¦   ¦   ¦   +---util
+¦   ¦       ¦   ¦   ¦   +---Particles
+¦   ¦       ¦   ¦   ¦   +---Pdf
+¦   ¦       ¦   ¦   ¦   ¦   +---+Material
+¦   ¦       ¦   ¦   ¦   ¦   +---+Universal
+¦   ¦       ¦   ¦   ¦   +---Scene2D
+¦   ¦       ¦   ¦   ¦   +---Scene3D
+¦   ¦       ¦   ¦   ¦   +---Shapes
+¦   ¦       ¦   ¦   ¦   ¦   +---DesignHelpers
+¦   ¦       ¦   ¦   ¦   +---Templates
+¦   ¦       ¦   ¦   ¦   +---Timeline
+¦   ¦       ¦   ¦   ¦   ¦   +---BlendTrees
+¦   ¦       ¦   ¦   ¦   +---tooling
+¦   ¦       ¦   ¦   ¦   +---VectorImage
+¦   ¦       ¦   ¦   ¦   ¦   +---Helpers
+¦   ¦       ¦   ¦   ¦   +---VirtualKeyboard
+¦   ¦       ¦   ¦   ¦   ¦   +---Components
+¦   ¦       ¦   ¦   ¦   ¦   +---Core
+¦   ¦       ¦   ¦   ¦   ¦   +---Layouts
+¦   ¦       ¦   ¦   ¦   ¦   +---Plugins
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---Hangul
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---OpenWNN
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---Pinyin
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---TCIme
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---Thai
+¦   ¦       ¦   ¦   ¦   ¦   +---Settings
+¦   ¦       ¦   ¦   ¦   ¦   +---Styles
+¦   ¦       ¦   ¦   ¦   ¦       +---Builtin
+¦   ¦       ¦   ¦   ¦   +---Window
+¦   ¦       ¦   ¦   +---QtQuick3D
+¦   ¦       ¦   ¦   ¦   +---AssetUtils
+¦   ¦       ¦   ¦   ¦   ¦   +---designer
+¦   ¦       ¦   ¦   ¦   ¦       +---images
+¦   ¦       ¦   ¦   ¦   +---designer
+¦   ¦       ¦   ¦   ¦   ¦   +---images
+¦   ¦       ¦   ¦   ¦   ¦   +---source
+¦   ¦       ¦   ¦   ¦   +---Effects
+¦   ¦       ¦   ¦   ¦   ¦   +---designer
+¦   ¦       ¦   ¦   ¦   ¦       +---images
+¦   ¦       ¦   ¦   ¦   +---Helpers
+¦   ¦       ¦   ¦   ¦   ¦   +---designer
+¦   ¦       ¦   ¦   ¦   ¦   ¦   +---images
+¦   ¦       ¦   ¦   ¦   ¦   +---impl
+¦   ¦       ¦   ¦   ¦   ¦   +---meshes
+¦   ¦       ¦   ¦   ¦   +---lightmapviewer
+¦   ¦       ¦   ¦   ¦   +---MaterialEditor
+¦   ¦       ¦   ¦   ¦   +---ParticleEffects
+¦   ¦       ¦   ¦   ¦   ¦   +---designer
+¦   ¦       ¦   ¦   ¦   ¦       +---images
+¦   ¦       ¦   ¦   ¦   ¦       +---source
+¦   ¦       ¦   ¦   ¦   +---Particles3D
+¦   ¦       ¦   ¦   ¦   ¦   +---designer
+¦   ¦       ¦   ¦   ¦   ¦       +---images
+¦   ¦       ¦   ¦   ¦   ¦       +---source
+¦   ¦       ¦   ¦   ¦   +---SpatialAudio
+¦   ¦       ¦   ¦   ¦   +---Xr
+¦   ¦       ¦   ¦   +---QtRemoteObjects
+¦   ¦       ¦   ¦   +---QtScxml
+¦   ¦       ¦   ¦   +---QtSensors
+¦   ¦       ¦   ¦   +---QtTest
+¦   ¦       ¦   ¦   +---QtTextToSpeech
+¦   ¦       ¦   ¦   +---QtWebChannel
+¦   ¦       ¦   ¦   +---QtWebEngine
+¦   ¦       ¦   ¦   ¦   +---ControlsDelegates
+¦   ¦       ¦   ¦   +---QtWebSockets
+¦   ¦       ¦   ¦   +---QtWebView
+¦   ¦       ¦   +---QtAsyncio
+¦   ¦       ¦   +---resources
+¦   ¦       ¦   +---scripts
+¦   ¦       ¦   ¦   +---deploy_lib
+¦   ¦       ¦   ¦   +---project_lib
+¦   ¦       ¦   ¦   +---qtpy2cpp_lib
+¦   ¦       ¦   +---support
+¦   ¦       ¦   +---translations
+¦   ¦       ¦   ¦   +---qtwebengine_locales
+¦   ¦       ¦   +---typesystems
+¦   ¦       ¦       +---glue
+¦   ¦       +---pyside6-6.10.2.dist-info
+¦   ¦       ¦   +---licenses
+¦   ¦       +---pyside6_addons-6.10.2.dist-info
+¦   ¦       ¦   +---licenses
+¦   ¦       +---pyside6_essentials-6.10.2.dist-info
+¦   ¦       ¦   +---licenses
+¦   ¦       +---setuptools
+¦   ¦       ¦   +---command
+¦   ¦       ¦   +---config
+¦   ¦       ¦   ¦   +---_validate_pyproject
+¦   ¦       ¦   +---extern
+¦   ¦       ¦   +---_distutils
+¦   ¦       ¦   ¦   +---command
+¦   ¦       ¦   +---_vendor
+¦   ¦       ¦       +---importlib_metadata
+¦   ¦       ¦       +---importlib_resources
+¦   ¦       ¦       +---jaraco
+¦   ¦       ¦       ¦   +---text
+¦   ¦       ¦       +---more_itertools
+¦   ¦       ¦       +---packaging
+¦   ¦       ¦       +---pyparsing
+¦   ¦       ¦       ¦   +---diagram
+¦   ¦       ¦       +---tomli
+¦   ¦       +---setuptools-65.5.0.dist-info
+¦   ¦       +---shiboken6
+¦   ¦       ¦   +---include
+¦   ¦       ¦   +---lib
+¦   ¦       ¦       +---cmake
+¦   ¦       ¦           +---Shiboken6
+¦   ¦       +---shiboken6-6.10.2.dist-info
+¦   ¦       ¦   +---licenses
+¦   ¦       +---_distutils_hack
+¦   ¦           +---__pycache__
+¦   +---Scripts
++---assets
++---backend
+¦   +---app
+¦   ¦   +---api
+¦   ¦   ¦   +---endpoints
+¦   ¦   ¦   ¦   +---__pycache__
+¦   ¦   ¦   +---__pycache__
+¦   ¦   +---core
+¦   ¦   ¦   +---__pycache__
+¦   ¦   +---models
+¦   ¦   ¦   +---__pycache__
+¦   ¦   +---repositories
+¦   ¦   ¦   +---__pycache__
+¦   ¦   +---resources
+¦   ¦   +---schemas
+¦   ¦   ¦   +---__pycache__
+¦   ¦   +---services
+¦   ¦   ¦   +---__pycache__
+¦   ¦   +---tests
+¦   ¦   +---utils
+¦   ¦   ¦   +---__pycache__
+¦   ¦   +---__pycache__
+¦   +---scripts
+¦   +---uploads
+¦       +---logos
++---DBDump
++---docs
++---frontend
+¦   +---dist
+¦   ¦   +---assets
+¦   +---frontend
+¦   ¦   +---src
+¦   ¦       +---components
+¦   ¦           +---projects
+¦   +---node_modules
+¦   ¦   +---.bin
+¦   ¦   +---.vite
+¦   ¦   ¦   +---deps
+¦   ¦   +---.vite-temp
+¦   ¦   +---@alloc
+¦   ¦   ¦   +---quick-lru
+¦   ¦   +---@babel
+¦   ¦   ¦   +---code-frame
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   +---compat-data
+¦   ¦   ¦   ¦   +---data
+¦   ¦   ¦   +---core
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   ¦   ¦   +---config
+¦   ¦   ¦   ¦   ¦   ¦   +---files
+¦   ¦   ¦   ¦   ¦   ¦   +---helpers
+¦   ¦   ¦   ¦   ¦   ¦   +---validation
+¦   ¦   ¦   ¦   ¦   +---errors
+¦   ¦   ¦   ¦   ¦   +---gensync-utils
+¦   ¦   ¦   ¦   ¦   +---parser
+¦   ¦   ¦   ¦   ¦   ¦   +---util
+¦   ¦   ¦   ¦   ¦   +---tools
+¦   ¦   ¦   ¦   ¦   +---transformation
+¦   ¦   ¦   ¦   ¦   ¦   +---file
+¦   ¦   ¦   ¦   ¦   ¦   +---util
+¦   ¦   ¦   ¦   ¦   +---vendor
+¦   ¦   ¦   ¦   +---src
+¦   ¦   ¦   ¦       +---config
+¦   ¦   ¦   ¦           +---files
+¦   ¦   ¦   +---generator
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   ¦       +---generators
+¦   ¦   ¦   ¦       +---node
+¦   ¦   ¦   +---helper-compilation-targets
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   +---helper-globals
+¦   ¦   ¦   ¦   +---data
+¦   ¦   ¦   +---helper-module-imports
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   +---helper-module-transforms
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   +---helper-plugin-utils
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   +---helper-string-parser
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   +---helper-validator-identifier
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   +---helper-validator-option
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   +---helpers
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   ¦       +---helpers
+¦   ¦   ¦   +---parser
+¦   ¦   ¦   ¦   +---bin
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   ¦   +---typings
+¦   ¦   ¦   +---plugin-transform-react-jsx-self
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   +---plugin-transform-react-jsx-source
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   +---template
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   +---traverse
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   ¦       +---path
+¦   ¦   ¦   ¦       ¦   +---inference
+¦   ¦   ¦   ¦       ¦   +---lib
+¦   ¦   ¦   ¦       +---scope
+¦   ¦   ¦   ¦           +---lib
+¦   ¦   ¦   +---types
+¦   ¦   ¦       +---lib
+¦   ¦   ¦           +---asserts
+¦   ¦   ¦           ¦   +---generated
+¦   ¦   ¦           +---ast-types
+¦   ¦   ¦           ¦   +---generated
+¦   ¦   ¦           +---builders
+¦   ¦   ¦           ¦   +---flow
+¦   ¦   ¦           ¦   +---generated
+¦   ¦   ¦           ¦   +---react
+¦   ¦   ¦           ¦   +---typescript
+¦   ¦   ¦           +---clone
+¦   ¦   ¦           +---comments
+¦   ¦   ¦           +---constants
+¦   ¦   ¦           ¦   +---generated
+¦   ¦   ¦           +---converters
+¦   ¦   ¦           +---definitions
+¦   ¦   ¦           +---modifications
+¦   ¦   ¦           ¦   +---flow
+¦   ¦   ¦           ¦   +---typescript
+¦   ¦   ¦           +---retrievers
+¦   ¦   ¦           +---traverse
+¦   ¦   ¦           +---utils
+¦   ¦   ¦           ¦   +---react
+¦   ¦   ¦           +---validators
+¦   ¦   ¦               +---generated
+¦   ¦   ¦               +---react
+¦   ¦   +---@esbuild
+¦   ¦   ¦   +---win32-x64
+¦   ¦   +---@eslint
+¦   ¦   ¦   +---config-array
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦       +---cjs
+¦   ¦   ¦   ¦       ¦   +---std__path
+¦   ¦   ¦   ¦       +---esm
+¦   ¦   ¦   ¦           +---std__path
+¦   ¦   ¦   +---config-helpers
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦       +---cjs
+¦   ¦   ¦   ¦       +---esm
+¦   ¦   ¦   +---core
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦       +---cjs
+¦   ¦   ¦   ¦       +---esm
+¦   ¦   ¦   +---eslintrc
+¦   ¦   ¦   ¦   +---conf
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---lib
+¦   ¦   ¦   ¦   ¦   +---config-array
+¦   ¦   ¦   ¦   ¦   +---shared
+¦   ¦   ¦   ¦   ¦   +---types
+¦   ¦   ¦   ¦   +---node_modules
+¦   ¦   ¦   ¦       +---globals
+¦   ¦   ¦   +---js
+¦   ¦   ¦   ¦   +---src
+¦   ¦   ¦   ¦   ¦   +---configs
+¦   ¦   ¦   ¦   +---types
+¦   ¦   ¦   +---object-schema
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦       +---cjs
+¦   ¦   ¦   ¦       +---esm
+¦   ¦   ¦   +---plugin-kit
+¦   ¦   ¦       +---dist
+¦   ¦   ¦           +---cjs
+¦   ¦   ¦           +---esm
+¦   ¦   +---@eslint-community
+¦   ¦   ¦   +---eslint-utils
+¦   ¦   ¦   ¦   +---node_modules
+¦   ¦   ¦   ¦       +---eslint-visitor-keys
+¦   ¦   ¦   ¦           +---dist
+¦   ¦   ¦   ¦           +---lib
+¦   ¦   ¦   +---regexpp
+¦   ¦   +---@humanfs
+¦   ¦   ¦   +---core
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---src
+¦   ¦   ¦   +---node
+¦   ¦   ¦       +---dist
+¦   ¦   ¦       +---src
+¦   ¦   +---@humanwhocodes
+¦   ¦   ¦   +---module-importer
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---src
+¦   ¦   ¦   +---retry
+¦   ¦   ¦       +---dist
+¦   ¦   +---@jridgewell
+¦   ¦   ¦   +---gen-mapping
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   ¦   +---types
+¦   ¦   ¦   ¦   +---src
+¦   ¦   ¦   ¦   +---types
+¦   ¦   ¦   +---remapping
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---src
+¦   ¦   ¦   ¦   +---types
+¦   ¦   ¦   +---resolve-uri
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦       +---types
+¦   ¦   ¦   +---sourcemap-codec
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---src
+¦   ¦   ¦   ¦   +---types
+¦   ¦   ¦   +---trace-mapping
+¦   ¦   ¦       +---dist
+¦   ¦   ¦       +---src
+¦   ¦   ¦       +---types
+¦   ¦   +---@radix-ui
+¦   ¦   ¦   +---primitive
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-checkbox
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---node_modules
+¦   ¦   ¦   ¦       +---@radix-ui
+¦   ¦   ¦   ¦           +---react-primitive
+¦   ¦   ¦   ¦           ¦   +---dist
+¦   ¦   ¦   ¦           +---react-slot
+¦   ¦   ¦   ¦               +---dist
+¦   ¦   ¦   +---react-compose-refs
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-context
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-dialog
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---node_modules
+¦   ¦   ¦   ¦       +---@radix-ui
+¦   ¦   ¦   ¦           +---react-primitive
+¦   ¦   ¦   ¦           ¦   +---dist
+¦   ¦   ¦   ¦           +---react-slot
+¦   ¦   ¦   ¦               +---dist
+¦   ¦   ¦   +---react-dismissable-layer
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---node_modules
+¦   ¦   ¦   ¦       +---@radix-ui
+¦   ¦   ¦   ¦           +---react-primitive
+¦   ¦   ¦   ¦           ¦   +---dist
+¦   ¦   ¦   ¦           +---react-slot
+¦   ¦   ¦   ¦               +---dist
+¦   ¦   ¦   +---react-focus-guards
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-focus-scope
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---node_modules
+¦   ¦   ¦   ¦       +---@radix-ui
+¦   ¦   ¦   ¦           +---react-primitive
+¦   ¦   ¦   ¦           ¦   +---dist
+¦   ¦   ¦   ¦           +---react-slot
+¦   ¦   ¦   ¦               +---dist
+¦   ¦   ¦   +---react-id
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-label
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-portal
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---node_modules
+¦   ¦   ¦   ¦       +---@radix-ui
+¦   ¦   ¦   ¦           +---react-primitive
+¦   ¦   ¦   ¦           ¦   +---dist
+¦   ¦   ¦   ¦           +---react-slot
+¦   ¦   ¦   ¦               +---dist
+¦   ¦   ¦   +---react-presence
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-primitive
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-separator
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-slot
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-use-callback-ref
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-use-controllable-state
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-use-effect-event
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---src
+¦   ¦   ¦   +---react-use-escape-keydown
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-use-layout-effect
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-use-previous
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---react-use-size
+¦   ¦   ¦       +---dist
+¦   ¦   +---@react-leaflet
+¦   ¦   ¦   +---core
+¦   ¦   ¦       +---lib
+¦   ¦   +---@react-spring
+¦   ¦   ¦   +---animated
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦       +---cjs
+¦   ¦   ¦   +---core
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦       +---cjs
+¦   ¦   ¦   +---rafz
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦       +---cjs
+¦   ¦   ¦   +---shared
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦       +---cjs
+¦   ¦   ¦   +---types
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦       +---cjs
+¦   ¦   ¦   +---web
+¦   ¦   ¦       +---dist
+¦   ¦   ¦           +---cjs
+¦   ¦   +---@rolldown
+¦   ¦   ¦   +---pluginutils
+¦   ¦   ¦       +---dist
+¦   ¦   ¦           +---filter
+¦   ¦   +---@rollup
+¦   ¦   ¦   +---rollup-win32-x64-gnu
+¦   ¦   ¦   +---rollup-win32-x64-msvc
+¦   ¦   +---@tailwindcss
+¦   ¦   ¦   +---node
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---oxide
+¦   ¦   ¦   +---oxide-win32-x64-msvc
+¦   ¦   ¦   +---postcss
+¦   ¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---vite
+¦   ¦   ¦       +---dist
+¦   ¦   +---@types
+¦   ¦   ¦   +---babel__core
+¦   ¦   ¦   +---babel__generator
+¦   ¦   ¦   +---babel__template
+¦   ¦   ¦   +---babel__traverse
+¦   ¦   ¦   +---estree
+¦   ¦   ¦   +---json-schema
+¦   ¦   ¦   +---node
+¦   ¦   ¦   ¦   +---assert
+¦   ¦   ¦   ¦   +---compatibility
+¦   ¦   ¦   ¦   +---dns
+¦   ¦   ¦   ¦   +---fs
+¦   ¦   ¦   ¦   +---inspector
+¦   ¦   ¦   ¦   +---path
+¦   ¦   ¦   ¦   +---readline
+¦   ¦   ¦   ¦   +---stream
+¦   ¦   ¦   ¦   +---test
+¦   ¦   ¦   ¦   +---timers
+¦   ¦   ¦   ¦   +---ts5.6
+¦   ¦   ¦   ¦   ¦   +---compatibility
+¦   ¦   ¦   ¦   +---ts5.7
+¦   ¦   ¦   ¦   ¦   +---compatibility
+¦   ¦   ¦   ¦   +---util
+¦   ¦   ¦   ¦   +---web-globals
+¦   ¦   ¦   +---react
+¦   ¦   ¦   ¦   +---ts5.0
+¦   ¦   ¦   +---react-dom
+¦   ¦   ¦       +---test-utils
+¦   ¦   +---@vitejs
+¦   ¦   ¦   +---plugin-react
+¦   ¦   ¦       +---dist
+¦   ¦   ¦       +---types
+¦   ¦   +---acorn
+¦   ¦   ¦   +---bin
+¦   ¦   ¦   +---dist
+¦   ¦   +---acorn-jsx
+¦   ¦   +---ajv
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---lib
+¦   ¦   ¦   ¦   +---compile
+¦   ¦   ¦   ¦   +---dot
+¦   ¦   ¦   ¦   +---dotjs
+¦   ¦   ¦   ¦   +---refs
+¦   ¦   ¦   +---scripts
+¦   ¦   +---ansi-styles
+¦   ¦   +---argparse
+¦   ¦   ¦   +---lib
+¦   ¦   +---aria-hidden
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---es2015
+¦   ¦   ¦       +---es2019
+¦   ¦   ¦       +---es5
+¦   ¦   +---asynckit
+¦   ¦   ¦   +---lib
+¦   ¦   +---autoprefixer
+¦   ¦   ¦   +---bin
+¦   ¦   ¦   +---data
+¦   ¦   ¦   +---lib
+¦   ¦   ¦       +---hacks
+¦   ¦   +---axios
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---browser
+¦   ¦   ¦   ¦   +---esm
+¦   ¦   ¦   ¦   +---node
+¦   ¦   ¦   +---lib
+¦   ¦   ¦       +---adapters
+¦   ¦   ¦       +---cancel
+¦   ¦   ¦       +---core
+¦   ¦   ¦       +---defaults
+¦   ¦   ¦       +---env
+¦   ¦   ¦       ¦   +---classes
+¦   ¦   ¦       +---helpers
+¦   ¦   ¦       +---platform
+¦   ¦   ¦           +---browser
+¦   ¦   ¦           ¦   +---classes
+¦   ¦   ¦           +---common
+¦   ¦   ¦           +---node
+¦   ¦   ¦               +---classes
+¦   ¦   +---balanced-match
+¦   ¦   ¦   +---.github
+¦   ¦   +---baseline-browser-mapping
+¦   ¦   ¦   +---dist
+¦   ¦   +---brace-expansion
+¦   ¦   +---browserslist
+¦   ¦   +---call-bind-apply-helpers
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---test
+¦   ¦   +---callsites
+¦   ¦   +---caniuse-lite
+¦   ¦   ¦   +---data
+¦   ¦   ¦   ¦   +---features
+¦   ¦   ¦   ¦   +---regions
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---lib
+¦   ¦   ¦       +---unpacker
+¦   ¦   +---chalk
+¦   ¦   ¦   +---source
+¦   ¦   +---class-variance-authority
+¦   ¦   ¦   +---dist
+¦   ¦   +---clsx
+¦   ¦   ¦   +---dist
+¦   ¦   +---color-convert
+¦   ¦   +---color-name
+¦   ¦   +---combined-stream
+¦   ¦   ¦   +---lib
+¦   ¦   +---concat-map
+¦   ¦   ¦   +---example
+¦   ¦   ¦   +---test
+¦   ¦   +---convert-source-map
+¦   ¦   +---cookie
+¦   ¦   ¦   +---dist
+¦   ¦   +---cross-spawn
+¦   ¦   ¦   +---lib
+¦   ¦   ¦       +---util
+¦   ¦   +---csstype
+¦   ¦   +---debug
+¦   ¦   ¦   +---src
+¦   ¦   +---deep-is
+¦   ¦   ¦   +---example
+¦   ¦   ¦   +---test
+¦   ¦   +---delayed-stream
+¦   ¦   ¦   +---lib
+¦   ¦   +---detect-libc
+¦   ¦   ¦   +---lib
+¦   ¦   +---detect-node-es
+¦   ¦   ¦   +---es5
+¦   ¦   ¦   +---esm
+¦   ¦   +---dunder-proto
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---test
+¦   ¦   +---electron-to-chromium
+¦   ¦   +---enhanced-resolve
+¦   ¦   ¦   +---lib
+¦   ¦   ¦       +---util
+¦   ¦   +---es-define-property
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---test
+¦   ¦   +---es-errors
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---test
+¦   ¦   +---es-object-atoms
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---test
+¦   ¦   +---es-set-tostringtag
+¦   ¦   ¦   +---test
+¦   ¦   +---esbuild
+¦   ¦   ¦   +---bin
+¦   ¦   ¦   +---lib
+¦   ¦   +---escalade
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---sync
+¦   ¦   +---escape-string-regexp
+¦   ¦   +---eslint
+¦   ¦   ¦   +---bin
+¦   ¦   ¦   +---conf
+¦   ¦   ¦   +---lib
+¦   ¦   ¦   ¦   +---cli-engine
+¦   ¦   ¦   ¦   ¦   +---formatters
+¦   ¦   ¦   ¦   +---config
+¦   ¦   ¦   ¦   +---eslint
+¦   ¦   ¦   ¦   +---languages
+¦   ¦   ¦   ¦   ¦   +---js
+¦   ¦   ¦   ¦   ¦       +---source-code
+¦   ¦   ¦   ¦   ¦           +---token-store
+¦   ¦   ¦   ¦   +---linter
+¦   ¦   ¦   ¦   ¦   +---code-path-analysis
+¦   ¦   ¦   ¦   +---rule-tester
+¦   ¦   ¦   ¦   +---rules
+¦   ¦   ¦   ¦   ¦   +---utils
+¦   ¦   ¦   ¦   ¦       +---unicode
+¦   ¦   ¦   ¦   +---services
+¦   ¦   ¦   ¦   +---shared
+¦   ¦   ¦   ¦   +---types
+¦   ¦   ¦   +---messages
+¦   ¦   +---eslint-plugin-react-hooks
+¦   ¦   ¦   +---cjs
+¦   ¦   +---eslint-plugin-react-refresh
+¦   ¦   +---eslint-scope
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---lib
+¦   ¦   +---eslint-visitor-keys
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---lib
+¦   ¦   +---espree
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---lib
+¦   ¦   +---esquery
+¦   ¦   ¦   +---dist
+¦   ¦   +---esrecurse
+¦   ¦   +---estraverse
+¦   ¦   +---esutils
+¦   ¦   ¦   +---lib
+¦   ¦   +---fast-deep-equal
+¦   ¦   ¦   +---es6
+¦   ¦   +---fast-json-stable-stringify
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---benchmark
+¦   ¦   ¦   +---example
+¦   ¦   ¦   +---test
+¦   ¦   +---fast-levenshtein
+¦   ¦   +---fdir
+¦   ¦   ¦   +---dist
+¦   ¦   +---file-entry-cache
+¦   ¦   +---find-up
+¦   ¦   +---flat-cache
+¦   ¦   ¦   +---src
+¦   ¦   +---flatted
+¦   ¦   ¦   +---cjs
+¦   ¦   ¦   +---esm
+¦   ¦   ¦   +---php
+¦   ¦   ¦   +---python
+¦   ¦   ¦   +---types
+¦   ¦   +---follow-redirects
+¦   ¦   +---form-data
+¦   ¦   ¦   +---lib
+¦   ¦   +---fraction.js
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---examples
+¦   ¦   ¦   +---src
+¦   ¦   ¦   +---tests
+¦   ¦   +---framer-motion
+¦   ¦   ¦   +---client
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---cjs
+¦   ¦   ¦   ¦   +---es
+¦   ¦   ¦   ¦   ¦   +---animation
+¦   ¦   ¦   ¦   ¦   ¦   +---animate
+¦   ¦   ¦   ¦   ¦   ¦   +---animators
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---waapi
+¦   ¦   ¦   ¦   ¦   ¦   +---hooks
+¦   ¦   ¦   ¦   ¦   ¦   +---optimized-appear
+¦   ¦   ¦   ¦   ¦   ¦   +---sequence
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---utils
+¦   ¦   ¦   ¦   ¦   ¦   +---utils
+¦   ¦   ¦   ¦   ¦   +---components
+¦   ¦   ¦   ¦   ¦   ¦   +---AnimatePresence
+¦   ¦   ¦   ¦   ¦   ¦   +---LayoutGroup
+¦   ¦   ¦   ¦   ¦   ¦   +---LazyMotion
+¦   ¦   ¦   ¦   ¦   ¦   +---MotionConfig
+¦   ¦   ¦   ¦   ¦   ¦   +---Reorder
+¦   ¦   ¦   ¦   ¦   ¦       +---utils
+¦   ¦   ¦   ¦   ¦   +---context
+¦   ¦   ¦   ¦   ¦   ¦   +---MotionContext
+¦   ¦   ¦   ¦   ¦   +---events
+¦   ¦   ¦   ¦   ¦   +---gestures
+¦   ¦   ¦   ¦   ¦   ¦   +---drag
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---utils
+¦   ¦   ¦   ¦   ¦   ¦   +---pan
+¦   ¦   ¦   ¦   ¦   +---motion
+¦   ¦   ¦   ¦   ¦   ¦   +---features
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---animation
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---layout
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---viewport
+¦   ¦   ¦   ¦   ¦   ¦   +---utils
+¦   ¦   ¦   ¦   ¦   +---projection
+¦   ¦   ¦   ¦   ¦   +---render
+¦   ¦   ¦   ¦   ¦   ¦   +---components
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---m
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---motion
+¦   ¦   ¦   ¦   ¦   ¦   +---dom
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---scroll
+¦   ¦   ¦   ¦   ¦   ¦   ¦   ¦   +---offsets
+¦   ¦   ¦   ¦   ¦   ¦   ¦   ¦   +---utils
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---utils
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---viewport
+¦   ¦   ¦   ¦   ¦   ¦   +---html
+¦   ¦   ¦   ¦   ¦   ¦   ¦   +---utils
+¦   ¦   ¦   ¦   ¦   ¦   +---svg
+¦   ¦   ¦   ¦   ¦   ¦       +---utils
+¦   ¦   ¦   ¦   ¦   +---utils
+¦   ¦   ¦   ¦   ¦   ¦   +---reduced-motion
+¦   ¦   ¦   ¦   ¦   +---value
+¦   ¦   ¦   ¦   ¦       +---scroll
+¦   ¦   ¦   ¦   ¦       +---use-will-change
+¦   ¦   ¦   ¦   +---types
+¦   ¦   ¦   +---dom
+¦   ¦   ¦   ¦   +---mini
+¦   ¦   ¦   +---m
+¦   ¦   ¦   +---mini
+¦   ¦   +---function-bind
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---test
+¦   ¦   +---gensync
+¦   ¦   ¦   +---test
+¦   ¦   +---get-intrinsic
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---test
+¦   ¦   +---get-nonce
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---es2015
+¦   ¦   ¦       +---es5
+¦   ¦   +---get-proto
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---test
+¦   ¦   +---glob-parent
+¦   ¦   +---globals
+¦   ¦   +---gopd
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---test
+¦   ¦   +---graceful-fs
+¦   ¦   +---has-flag
+¦   ¦   +---has-symbols
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---test
+¦   ¦   ¦       +---shams
+¦   ¦   +---has-tostringtag
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---test
+¦   ¦   ¦       +---shams
+¦   ¦   +---hasown
+¦   ¦   ¦   +---.github
+¦   ¦   +---hermes-estree
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---generated
+¦   ¦   +---hermes-parser
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---babel
+¦   ¦   ¦       +---estree
+¦   ¦   ¦       +---generated
+¦   ¦   ¦       +---transform
+¦   ¦   ¦       +---traverse
+¦   ¦   ¦       +---utils
+¦   ¦   +---ignore
+¦   ¦   +---import-fresh
+¦   ¦   +---imurmurhash
+¦   ¦   +---inherits
+¦   ¦   +---is-extglob
+¦   ¦   +---is-glob
+¦   ¦   +---isexe
+¦   ¦   ¦   +---test
+¦   ¦   +---jiti
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---lib
+¦   ¦   +---js-tokens
+¦   ¦   +---js-yaml
+¦   ¦   ¦   +---bin
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---lib
+¦   ¦   ¦       +---schema
+¦   ¦   ¦       +---type
+¦   ¦   +---jsesc
+¦   ¦   ¦   +---bin
+¦   ¦   ¦   +---man
+¦   ¦   +---json-buffer
+¦   ¦   ¦   +---test
+¦   ¦   +---json-schema-traverse
+¦   ¦   ¦   +---spec
+¦   ¦   ¦       +---fixtures
+¦   ¦   +---json-stable-stringify-without-jsonify
+¦   ¦   ¦   +---example
+¦   ¦   ¦   +---test
+¦   ¦   +---json5
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   +---lib
+¦   ¦   +---keyv
+¦   ¦   ¦   +---src
+¦   ¦   +---leaflet
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---images
+¦   ¦   ¦   +---src
+¦   ¦   ¦       +---control
+¦   ¦   ¦       +---core
+¦   ¦   ¦       +---dom
+¦   ¦   ¦       +---geo
+¦   ¦   ¦       ¦   +---crs
+¦   ¦   ¦       ¦   +---projection
+¦   ¦   ¦       +---geometry
+¦   ¦   ¦       +---images
+¦   ¦   ¦       +---layer
+¦   ¦   ¦       ¦   +---marker
+¦   ¦   ¦       ¦   +---tile
+¦   ¦   ¦       ¦   +---vector
+¦   ¦   ¦       +---map
+¦   ¦   ¦           +---handler
+¦   ¦   +---levn
+¦   ¦   ¦   +---lib
+¦   ¦   +---lightningcss
+¦   ¦   ¦   +---node
+¦   ¦   +---lightningcss-win32-x64-msvc
+¦   ¦   +---locate-path
+¦   ¦   +---lodash.merge
+¦   ¦   +---lru-cache
+¦   ¦   +---lucide-react
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---cjs
+¦   ¦   ¦       +---esm
+¦   ¦   ¦       ¦   +---icons
+¦   ¦   ¦       ¦   +---shared
+¦   ¦   ¦       ¦       +---src
+¦   ¦   ¦       ¦           +---utils
+¦   ¦   ¦       +---umd
+¦   ¦   +---magic-string
+¦   ¦   ¦   +---dist
+¦   ¦   +---math-intrinsics
+¦   ¦   ¦   +---.github
+¦   ¦   ¦   +---constants
+¦   ¦   ¦   +---test
+¦   ¦   +---mime-db
+¦   ¦   +---mime-types
+¦   ¦   +---minimatch
+¦   ¦   +---motion-dom
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---cjs
+¦   ¦   ¦       +---es
+¦   ¦   ¦           +---animation
+¦   ¦   ¦           ¦   +---animate
+¦   ¦   ¦           ¦   +---drivers
+¦   ¦   ¦           ¦   +---generators
+¦   ¦   ¦           ¦   ¦   +---spring
+¦   ¦   ¦           ¦   ¦   +---utils
+¦   ¦   ¦           ¦   +---interfaces
+¦   ¦   ¦           ¦   +---keyframes
+¦   ¦   ¦           ¦   ¦   +---offsets
+¦   ¦   ¦           ¦   ¦   +---utils
+¦   ¦   ¦           ¦   +---optimized-appear
+¦   ¦   ¦           ¦   +---utils
+¦   ¦   ¦           ¦   +---waapi
+¦   ¦   ¦           ¦       +---easing
+¦   ¦   ¦           ¦       +---supports
+¦   ¦   ¦           ¦       +---utils
+¦   ¦   ¦           +---effects
+¦   ¦   ¦           ¦   +---attr
+¦   ¦   ¦           ¦   +---prop
+¦   ¦   ¦           ¦   +---style
+¦   ¦   ¦           ¦   +---svg
+¦   ¦   ¦           ¦   +---utils
+¦   ¦   ¦           +---events
+¦   ¦   ¦           +---frameloop
+¦   ¦   ¦           +---gestures
+¦   ¦   ¦           ¦   +---drag
+¦   ¦   ¦           ¦   ¦   +---state
+¦   ¦   ¦           ¦   +---press
+¦   ¦   ¦           ¦   ¦   +---utils
+¦   ¦   ¦           ¦   +---utils
+¦   ¦   ¦           +---layout
+¦   ¦   ¦           +---projection
+¦   ¦   ¦           ¦   +---animation
+¦   ¦   ¦           ¦   +---geometry
+¦   ¦   ¦           ¦   +---node
+¦   ¦   ¦           ¦   +---shared
+¦   ¦   ¦           ¦   +---styles
+¦   ¦   ¦           ¦   +---utils
+¦   ¦   ¦           +---render
+¦   ¦   ¦           ¦   +---dom
+¦   ¦   ¦           ¦   ¦   +---utils
+¦   ¦   ¦           ¦   +---html
+¦   ¦   ¦           ¦   ¦   +---utils
+¦   ¦   ¦           ¦   +---object
+¦   ¦   ¦           ¦   +---svg
+¦   ¦   ¦           ¦   ¦   +---utils
+¦   ¦   ¦           ¦   +---utils
+¦   ¦   ¦           ¦       +---reduced-motion
+¦   ¦   ¦           +---resize
+¦   ¦   ¦           +---scroll
+¦   ¦   ¦           +---stats
+¦   ¦   ¦           +---utils
+¦   ¦   ¦           ¦   +---mix
+¦   ¦   ¦           ¦   +---supports
+¦   ¦   ¦           +---value
+¦   ¦   ¦           ¦   +---types
+¦   ¦   ¦           ¦   ¦   +---color
+¦   ¦   ¦           ¦   ¦   +---complex
+¦   ¦   ¦           ¦   ¦   +---maps
+¦   ¦   ¦           ¦   ¦   +---numbers
+¦   ¦   ¦           ¦   ¦   +---utils
+¦   ¦   ¦           ¦   +---utils
+¦   ¦   ¦           ¦   +---will-change
+¦   ¦   ¦           +---view
+¦   ¦   ¦               +---utils
+¦   ¦   +---motion-utils
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---cjs
+¦   ¦   ¦       +---es
+¦   ¦   ¦           +---easing
+¦   ¦   ¦               +---modifiers
+¦   ¦   ¦               +---utils
+¦   ¦   +---ms
+¦   ¦   +---nanoid
+¦   ¦   ¦   +---async
+¦   ¦   ¦   +---bin
+¦   ¦   ¦   +---non-secure
+¦   ¦   ¦   +---url-alphabet
+¦   ¦   +---natural-compare
+¦   ¦   +---node-releases
+¦   ¦   ¦   +---data
+¦   ¦   ¦       +---processed
+¦   ¦   ¦       +---release-schedule
+¦   ¦   +---optionator
+¦   ¦   ¦   +---lib
+¦   ¦   +---p-limit
+¦   ¦   +---p-locate
+¦   ¦   +---parent-module
+¦   ¦   +---path
+¦   ¦   +---path-exists
+¦   ¦   +---path-key
+¦   ¦   +---picocolors
+¦   ¦   +---picomatch
+¦   ¦   ¦   +---lib
+¦   ¦   +---postcss
+¦   ¦   ¦   +---lib
+¦   ¦   +---postcss-value-parser
+¦   ¦   ¦   +---lib
+¦   ¦   +---prelude-ls
+¦   ¦   ¦   +---lib
+¦   ¦   +---process
+¦   ¦   +---proxy-from-env
+¦   ¦   +---punycode
+¦   ¦   +---react
+¦   ¦   ¦   +---cjs
+¦   ¦   +---react-dom
+¦   ¦   ¦   +---cjs
+¦   ¦   +---react-leaflet
+¦   ¦   ¦   +---lib
+¦   ¦   +---react-refresh
+¦   ¦   ¦   +---cjs
+¦   ¦   +---react-remove-scroll
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---es2015
+¦   ¦   ¦   ¦   +---es2019
+¦   ¦   ¦   ¦   +---es5
+¦   ¦   ¦   +---sidecar
+¦   ¦   ¦   +---UI
+¦   ¦   +---react-remove-scroll-bar
+¦   ¦   ¦   +---constants
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---es2015
+¦   ¦   ¦       +---es2019
+¦   ¦   ¦       +---es5
+¦   ¦   +---react-router
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---development
+¦   ¦   ¦       ¦   +---lib
+¦   ¦   ¦       ¦       +---types
+¦   ¦   ¦       +---production
+¦   ¦   ¦           +---lib
+¦   ¦   ¦               +---types
+¦   ¦   +---react-router-dom
+¦   ¦   ¦   +---dist
+¦   ¦   +---react-style-singleton
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---es2015
+¦   ¦   ¦       +---es2019
+¦   ¦   ¦       +---es5
+¦   ¦   +---resolve-from
+¦   ¦   +---rollup
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---bin
+¦   ¦   ¦       +---es
+¦   ¦   ¦       ¦   +---shared
+¦   ¦   ¦       +---shared
+¦   ¦   +---scheduler
+¦   ¦   ¦   +---cjs
+¦   ¦   +---semver
+¦   ¦   ¦   +---bin
+¦   ¦   +---set-cookie-parser
+¦   ¦   ¦   +---lib
+¦   ¦   +---shebang-command
+¦   ¦   +---shebang-regex
+¦   ¦   +---source-map-js
+¦   ¦   ¦   +---lib
+¦   ¦   +---strip-json-comments
+¦   ¦   +---supports-color
+¦   ¦   +---tailwind-merge
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---es5
+¦   ¦   ¦   +---src
+¦   ¦   ¦       +---lib
+¦   ¦   +---tailwindcss
+¦   ¦   ¦   +---dist
+¦   ¦   +---tailwindcss-animate
+¦   ¦   +---tapable
+¦   ¦   ¦   +---lib
+¦   ¦   +---tinyglobby
+¦   ¦   ¦   +---dist
+¦   ¦   +---tslib
+¦   ¦   ¦   +---modules
+¦   ¦   +---type-check
+¦   ¦   ¦   +---lib
+¦   ¦   +---undici-types
+¦   ¦   +---update-browserslist-db
+¦   ¦   +---uri-js
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---es5
+¦   ¦   ¦       +---esnext
+¦   ¦   ¦           +---schemes
+¦   ¦   +---use-callback-ref
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---es2015
+¦   ¦   ¦       +---es2019
+¦   ¦   ¦       +---es5
+¦   ¦   +---use-sidecar
+¦   ¦   ¦   +---dist
+¦   ¦   ¦       +---es2015
+¦   ¦   ¦       +---es2019
+¦   ¦   ¦       +---es5
+¦   ¦   +---util
+¦   ¦   ¦   +---support
+¦   ¦   +---vite
+¦   ¦   ¦   +---bin
+¦   ¦   ¦   +---dist
+¦   ¦   ¦   ¦   +---client
+¦   ¦   ¦   ¦   +---node
+¦   ¦   ¦   ¦       +---chunks
+¦   ¦   ¦   +---misc
+¦   ¦   ¦   +---types
+¦   ¦   ¦       +---internal
+¦   ¦   +---which
+¦   ¦   ¦   +---bin
+¦   ¦   +---word-wrap
+¦   ¦   +---yallist
+¦   ¦   +---yocto-queue
+¦   ¦   +---zod
+¦   ¦   ¦   +---locales
+¦   ¦   ¦   +---mini
+¦   ¦   ¦   +---src
+¦   ¦   ¦   ¦   +---locales
+¦   ¦   ¦   ¦   +---mini
+¦   ¦   ¦   ¦   +---v3
+¦   ¦   ¦   ¦   ¦   +---benchmarks
+¦   ¦   ¦   ¦   ¦   +---helpers
+¦   ¦   ¦   ¦   ¦   +---locales
+¦   ¦   ¦   ¦   ¦   +---tests
+¦   ¦   ¦   ¦   +---v4
+¦   ¦   ¦   ¦   ¦   +---classic
+¦   ¦   ¦   ¦   ¦   ¦   +---tests
+¦   ¦   ¦   ¦   ¦   +---core
+¦   ¦   ¦   ¦   ¦   ¦   +---tests
+¦   ¦   ¦   ¦   ¦   ¦       +---locales
+¦   ¦   ¦   ¦   ¦   +---locales
+¦   ¦   ¦   ¦   ¦   +---mini
+¦   ¦   ¦   ¦   ¦       +---tests
+¦   ¦   ¦   ¦   +---v4-mini
+¦   ¦   ¦   +---v3
+¦   ¦   ¦   ¦   +---helpers
+¦   ¦   ¦   ¦   +---locales
+¦   ¦   ¦   +---v4
+¦   ¦   ¦   ¦   +---classic
+¦   ¦   ¦   ¦   +---core
+¦   ¦   ¦   ¦   +---locales
+¦   ¦   ¦   ¦   +---mini
+¦   ¦   ¦   +---v4-mini
+¦   ¦   +---zod-validation-error
+¦   ¦       +---v3
+¦   ¦       +---v4
+¦   +---public
+¦   +---src
+¦       +---api
+¦       +---assets
+¦       +---components
+¦       ¦   +---presupuestos
+¦       ¦   +---projects
+¦       ¦   +---ui
+¦       +---constants
+¦       +---context
+¦       +---hooks
+¦       +---layouts
+¦       +---lib
+¦       +---pages
+¦       +---routes
+¦       +---utils
++---scripts
+¦   +---tools
+¦       +---nssm
++---tmp
++---tools
+    +---launcher
+        +---launcher_app
+        ¦   +---ui
+        ¦   ¦   +---__pycache__
+        ¦   +---__pycache__
+        +---scripts
+        +---tests

@@ -1,0 +1,404 @@
+
+> frontend@0.0.0 lint
+> eslint .
+
+
+E:\Repositorios\GiProy Network\frontend\src\components\PersonnelFormFields.jsx
+  11:12  error  'validatingRuc' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  12:12  error  'rucInfo' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u           no-unused-vars
+  13:22  error  'setTokenRuc' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u       no-unused-vars
+  57:11  error  'handleValidarRuc' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\components\RegisterModal.jsx
+    2:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                    no-unused-vars
+   64:21  error  'confirmPassword' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  119:47  error  'LogoGiproyCompleto' is not defined                                                              no-undef
+
+E:\Repositorios\GiProy Network\frontend\src\components\precios-unitarios\BulkDeleteConfirmModal.jsx
+  2:27  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\components\presupuestos\CatalogoApuTab.jsx
+   8:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                     no-unused-vars
+  14:61  error  'selectedNodeMeta' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  68:18  error  'error' is defined but never used                                                                 no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\components\presupuestos\LineasPresupuestoTab.jsx
+    7:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                no-unused-vars
+  318:33  error    'tanteoVisible' is defined but never used                                                                                                    no-unused-vars
+  368:8   warning  React Hook useEffect has missing dependencies: 'selectedNodeId' and 'setSelectedNodeId'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+E:\Repositorios\GiProy Network\frontend\src\components\presupuestos\PresupuestoDetail.jsx
+   19:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                    no-unused-vars
+   34:69  error    'onBack' is defined but never used                                                                                                               no-unused-vars
+   42:9   error    'selectedNodeMeta' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                 no-unused-vars
+   64:29  error    'setIsCatalogPinned' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                               no-unused-vars
+  113:8   warning  React Hook useEffect has a missing dependency: 'tanteoVisible'. Either include it or remove the dependency array                                 react-hooks/exhaustive-deps
+  149:8   warning  React Hook useEffect has missing dependencies: 'markBudgetOpened' and 'refreshNotesSummary'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+E:\Repositorios\GiProy Network\frontend\src\components\presupuestos\TanteoTab.jsx
+   13:13  error    'activeProyecto' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                               no-unused-vars
+   13:64  error    'selectedNodeMeta' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                             no-unused-vars
+   38:8   warning  React Hook useEffect has missing dependencies: 'clearTanteoSession' and 'selectedApuId'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+   47:8   warning  React Hook useEffect has a missing dependency: 'clearTanteoSession'. Either include it or remove the dependency array                        react-hooks/exhaustive-deps
+  137:8   warning  React Hook useEffect has a missing dependency: 'updateTanteoSession'. Either include it or remove the dependency array                       react-hooks/exhaustive-deps
+
+E:\Repositorios\GiProy Network\frontend\src\components\projects\Cronogramas.jsx
+    33:32  error  'appPrompt' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                       no-unused-vars
+   107:7   error  'parseDistributionText' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+   312:5   error  'selectedBudgetDetail' is defined but never used                                                       no-unused-vars
+   351:11  error  'syncRef' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                no-unused-vars
+   354:11  error  'rows' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                   no-unused-vars
+   745:52  error  'e' is defined but never used                                                                          no-unused-vars
+  1145:12  error  'lineBusyId' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u             no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\components\projects\DatosProyecto.jsx
+    1:38  error    'useMemo' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                      no-unused-vars
+    2:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                       no-unused-vars
+  117:12  error    'saving' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                              no-unused-vars
+  275:18  error    'error' is defined but never used                                                                                                                                                                                                   no-unused-vars
+  285:11  error    'handleSave' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                          no-unused-vars
+  385:12  warning  React Hook useEffect has an unnecessary dependency: 'mapZoom'. Either exclude it or remove the dependency array. Outer scope values like 'mapZoom' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps
+
+E:\Repositorios\GiProy Network\frontend\src\components\projects\DesagregacionTab.jsx
+   37:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                   no-unused-vars
+   52:12  error    'presupuestos' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                    no-unused-vars
+   68:12  error    'isSavingCpc' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                     no-unused-vars
+  125:8   warning  React Hook useEffect has a missing dependency: 'loadApusVAE'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  155:11  error    'toggleRow' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                       no-unused-vars
+  266:8   warning  React Hook useMemo has a missing dependency: 'getApuStatus'. Either include it or remove the dependency array   react-hooks/exhaustive-deps
+
+E:\Repositorios\GiProy Network\frontend\src\components\projects\Edo.jsx
+   18:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  16 |     useEffect(() => {
+  17 |         if (isOpen) {
+> 18 |             setNombre(initialData?.nombre || '');
+     |             ^^^^^^^^^ Avoid calling setState() directly within an effect
+  19 |         }
+  20 |     }, [isOpen, initialData]);
+  21 |                                                                                                                                                                                     react-hooks/set-state-in-effect
+   70:17  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  68 |         if (isOpen && project) {
+  69 |             if (isEditing && initialData) {
+> 70 |                 setFormData({
+     |                 ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  71 |                     stakeholder_id: initialData.stakeholder_id || '',
+  72 |                     rol_id: initialData.rol_id || '',
+  73 |                     actividades_claves: initialData.actividades_claves || ''  react-hooks/set-state-in-effect
+  434:8   warning  React Hook useEffect has a missing dependency: 'loadTree'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+  479:11  error    'expandAll' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               no-unused-vars
+  505:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  532:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  551:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  587:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  599:52  error    'isAtEnd' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            no-unused-vars
+  657:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  728:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\components\projects\Edt.jsx
+   20:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  18 |     useEffect(() => {
+  19 |         if (isOpen) {
+> 20 |             setNombre(initialData?.nombre || '');
+     |             ^^^^^^^^^ Avoid calling setState() directly within an effect
+  21 |             setDefinicion(initialData?.definicion || '');
+  22 |         }
+  23 |     }, [isOpen, initialData]);                                                                                                                           react-hooks/set-state-in-effect
+   87:17  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  85 |         if (isOpen && project) {
+  86 |             if (isEditing && initialData) {
+> 87 |                 setFormData({
+     |                 ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  88 |                     stakeholder_id: initialData.stakeholder_id || '',
+  89 |                     rol_id: initialData.rol_id || '',
+  90 |                     actividades_claves: initialData.actividades_claves || ''  react-hooks/set-state-in-effect
+  444:8   warning  React Hook useEffect has a missing dependency: 'loadTree'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+  510:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  537:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  556:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  591:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  602:52  error    'isAtEnd' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            no-unused-vars
+  652:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+  726:18  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\components\projects\FormulaPolinomicaTab.jsx
+   17:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                          no-unused-vars
+   58:14  error    'err' is defined but never used                                                                                        no-unused-vars
+  141:14  error    'err' is defined but never used                                                                                        no-unused-vars
+  148:46  warning  React Hook useEffect has a missing dependency: 'resolvePresupuesto'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  195:14  error    'err' is defined but never used                                                                                        no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\components\projects\RolesModal.jsx
+  39:18  error  'error' is defined but never used  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\components\projects\Stakeholders.jsx
+    8:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                no-unused-vars
+   78:8   warning  React Hook useEffect has a missing dependency: 'fetchAll'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  113:21  error    'assigned' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                     no-unused-vars
+  113:31  error    'rol_id' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                       no-unused-vars
+  113:39  error    'rol_nombre' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                   no-unused-vars
+  113:51  error    'id' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                           no-unused-vars
+  113:55  error    'codigo' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                       no-unused-vars
+  113:63  error    'empresa_id' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                   no-unused-vars
+  139:18  error    'error' is defined but never used                                                                            no-unused-vars
+  165:18  error    'error' is defined but never used                                                                            no-unused-vars
+  343:76  error    'handleDelete' is not defined                                                                                no-undef
+
+E:\Repositorios\GiProy Network\frontend\src\components\ui\AppDialogProvider.jsx
+    2:27  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 no-unused-vars
+  127:8   warning  React Hook useEffect has a missing dependency: 'openDialog'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+  131:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  129 |     useEffect(() => {
+  130 |         if (activeDialog?.type === 'prompt') {
+> 131 |             setPromptValue(activeDialog.defaultValue || '');
+      |             ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  132 |             setPromptError('');
+  133 |         }
+  134 |     }, [activeDialog]);  react-hooks/set-state-in-effect
+  270:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                react-refresh/only-export-components
+
+E:\Repositorios\GiProy Network\frontend\src\components\ui\app-modal.jsx
+  2:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\components\ui\button.jsx
+  48:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+E:\Repositorios\GiProy Network\frontend\src\components\ui\liquid-button.jsx
+  2:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\components\ui\searchable-select.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\context\AuthContext.jsx
+    7:14  error    Fast refresh only works when a file only exports components. Move your React context(s) to a separate file                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-refresh/only-export-components
+   62:62  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  60 |
+  61 |         localStorage.setItem('giproy_token', data.access_token);
+> 62 |         sessionStorage.setItem('giproy_login_session_id', `${Date.now()}`);
+     |                                                              ^^^^^^^^^^ Cannot call impure function
+  63 |         await checkAuth();
+  64 |         return data;
+  65 |     };  react-hooks/purity
+  148:8   warning  React Hook useEffect has a missing dependency: 'checkAuth'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+
+E:\Repositorios\GiProy Network\frontend\src\context\PresupuestoContext.jsx
+  7:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+E:\Repositorios\GiProy Network\frontend\src\hooks\useFormatters.js
+  26:38  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `getMonetalesDecimals`, but the source dependencies were [selectedEmpresa?.decimales_moneda]. Inferred different dependency than source.
+
+  24 |      * Ejemplo: $ 10.50 (2 decimales por defecto)
+  25 |      */
+> 26 |     const formatMoneda = useCallback((valor) => {
+     |                                      ^^^^^^^^^^^^
+> 27 |         const num = Number(valor);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 28 |         if (isNaN(num)) return '0.00';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 29 |         return num.toFixed(getMonetalesDecimals());
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 30 |     }, [selectedEmpresa?.decimales_moneda]);
+     | ^^^^^^ Could not preserve existing manual memoization
+  31 |
+  32 |     /**
+  33 |      * Formatea un valor de cantidad, rendimiento u otros c├ílculos matem├íticos  react-hooks/preserve-manual-memoization
+  30:8   warning  React Hook useCallback has a missing dependency: 'getMonetalesDecimals'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
+  36:39  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `getCalculoDecimals`, but the source dependencies were [selectedEmpresa?.decimales_calculos]. Inferred different dependency than source.
+
+  34 |      * Ejemplo: 0.0450 (4 decimales por defecto)
+  35 |      */
+> 36 |     const formatCalculo = useCallback((valor) => {
+     |                                       ^^^^^^^^^^^^
+> 37 |         const num = Number(valor);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 38 |         if (isNaN(num)) return '0.0000';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 39 |         return num.toFixed(getCalculoDecimals());
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 40 |     }, [selectedEmpresa?.decimales_calculos]);
+     | ^^^^^^ Could not preserve existing manual memoization
+  41 |
+  42 |     return {
+  43 |         formatMoneda,                                                   react-hooks/preserve-manual-memoization
+  40:8   warning  React Hook useCallback has a missing dependency: 'getCalculoDecimals'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+
+E:\Repositorios\GiProy Network\frontend\src\layouts\AppLayout.jsx
+   43:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  41 |     useEffect(() => {
+  42 |         if (window.innerWidth < 1920 || window.innerHeight < 1080) {
+> 43 |             setShowResWarning(true);
+     |             ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  44 |         }
+  45 |     }, []);
+  46 |  react-hooks/set-state-in-effect
+   64:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  62 |     useEffect(() => {
+  63 |         if (!user) {
+> 64 |             setAnnouncementQueue([]);
+     |             ^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  65 |             return;
+  66 |         }
+  67 |                                      react-hooks/set-state-in-effect
+  101:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+   99 |     useEffect(() => {
+  100 |         if (!user) {
+> 101 |             setActiveMaintenance(null);
+      |             ^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  102 |             return;
+  103 |         }
+  104 |                             react-hooks/set-state-in-effect
+
+E:\Repositorios\GiProy Network\frontend\src\pages\APUs.jsx
+    12:27  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                             no-unused-vars
+   533:18  error    'error' is defined but never used                                                                         no-unused-vars
+   647:18  error    'error' is defined but never used                                                                         no-unused-vars
+   968:8   warning  React Hook useMemo has a missing dependency: 'formApu'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  1027:18  error    'error' is defined but never used                                                                         no-unused-vars
+  1074:18  error    'error' is defined but never used                                                                         no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\pages\AdminGlobal.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\pages\AdminGlobalComunicados.jsx
+  342:8  warning  React Hook useEffect has missing dependencies: 'filters' and 'loadAnnouncements'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+E:\Repositorios\GiProy Network\frontend\src\pages\AdminGlobalGobernanza.jsx
+  22:12  error  'loading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\pages\AdminGlobalLicencias.jsx
+   77:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  75 |     useEffect(() => {
+  76 |         if (isOpen) {
+> 77 |             setConfirmStep(1);
+     |             ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  78 |         }
+  79 |     }, [isOpen, empresa?.empresa_id]);
+  80 |  react-hooks/set-state-in-effect
+  229:11  warning  The 'items' logical expression could make the dependencies of useMemo Hook (at line 237) change on every render. To fix this, wrap the initialization of 'items' in its own useMemo() Hook                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+  229:11  warning  The 'items' logical expression could make the dependencies of useMemo Hook (at line 244) change on every render. To fix this, wrap the initialization of 'items' in its own useMemo() Hook                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+
+E:\Repositorios\GiProy Network\frontend\src\pages\BasesTrabajo.jsx
+    3:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                    no-unused-vars
+  160:8   warning  React Hook useEffect has missing dependencies: 'fetchNextCode' and 'newBase.source_base_id'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  189:8   warning  React Hook useEffect has missing dependencies: 'fetchBases' and 'fetchPaises'. Either include them or remove the dependency array                react-hooks/exhaustive-deps
+
+E:\Repositorios\GiProy Network\frontend\src\pages\Dashboard.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\pages\ForgotPassword.jsx
+  7:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\pages\Login.jsx
+  9:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\pages\PreciosUnitarios.jsx
+  2:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\pages\Presupuestos.jsx
+    9:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                        no-unused-vars
+   52:8   warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array         react-hooks/exhaustive-deps
+  219:8   warning  React Hook useMemo has a missing dependency: 'getBudgetDeltaMeta'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+E:\Repositorios\GiProy Network\frontend\src\pages\Proyectos.jsx
+   11:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                 no-unused-vars
+   40:23  error    'useParams' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                              no-unused-vars
+  198:8   warning  React Hook useEffect has missing dependencies: 'fetchBasesMaestras' and 'fetchProyectos'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  374:11  error    'handleUpdateProjectConfig' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                     no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\pages\Recursos.jsx
+    1:50  error    'useCallback' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                        no-unused-vars
+    3:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                             no-unused-vars
+  356:8   warning  React Hook useEffect has missing dependencies: 'fetchSubcategorias', 'fetchUnidades', and 'navigate'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  360:8   warning  React Hook useEffect has a missing dependency: 'fetchRecursos'. Either include it or remove the dependency array                                          react-hooks/exhaustive-deps
+  448:18  error    'error' is defined but never used                                                                                                                         no-unused-vars
+  459:18  error    'error' is defined but never used                                                                                                                         no-unused-vars
+  542:18  error    'error' is defined but never used                                                                                                                         no-unused-vars
+  612:18  error    'error' is defined but never used                                                                                                                         no-unused-vars
+  648:18  error    'error' is defined but never used                                                                                                                         no-unused-vars
+  675:18  error    'error' is defined but never used                                                                                                                         no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\pages\ResetPassword.jsx
+  7:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\pages\Settings.jsx
+  164:18  error  'error' is defined but never used   no-unused-vars
+  628:22  error  '_error' is defined but never used  no-unused-vars
+
+E:\Repositorios\GiProy Network\frontend\src\pages\Subcategorias.jsx
+    3:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                             no-unused-vars
+  160:12  error    'spellSuggestions' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                          no-unused-vars
+  172:11  warning  The 'currentItems' logical expression could make the dependencies of useMemo Hook (at line 175) change on every render. To fix this, wrap the initialization of 'currentItems' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  187:8   warning  React Hook useEffect has missing dependencies: 'fetchItems' and 'navigate'. Either include them or remove the dependency array                                                                            react-hooks/exhaustive-deps
+  303:18  error    'error' is defined but never used                                                                                                                                                                         no-unused-vars
+
+Ô£û 145 problems (115 errors, 30 warnings)
+

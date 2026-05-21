@@ -1,0 +1,104 @@
+{
+  "documents": [
+    "AI_CONTEXT.md",
+    "AI_SUPER_PROMPT.md",
+    "docs/project_state.json",
+    "docs/architecture/project_map.json",
+    "docs/architecture/project_index.json",
+    "docs/HANDOFF.md",
+    "docs/CHANGELOG.md"
+  ],
+  "backend": {
+    "entrypoints": [
+      "backend/app/main.py",
+      "backend/app/api/api.py"
+    ],
+    "core": [
+      "backend/app/core/config.py",
+      "backend/app/core/database.py",
+      "backend/app/core/security.py"
+    ],
+    "api_endpoints": [
+      "backend/app/api/endpoints/auth.py",
+      "backend/app/api/endpoints/usuarios.py",
+      "backend/app/api/endpoints/empresas.py",
+      "backend/app/api/endpoints/paises.py",
+      "backend/app/api/endpoints/proyectos.py",
+      "backend/app/api/endpoints/proyecto_detalles.py",
+      "backend/app/api/endpoints/stakeholders.py",
+      "backend/app/api/endpoints/roles.py",
+      "backend/app/api/endpoints/maestros.py",
+      "backend/app/api/endpoints/recursos.py",
+      "backend/app/api/endpoints/apus.py",
+      "backend/app/api/endpoints/presupuestos.py",
+      "backend/app/api/endpoints/bases_trabajo.py",
+      "backend/app/api/endpoints/subcategorias.py",
+      "backend/app/api/endpoints/subcategorias_items.py",
+      "backend/app/api/endpoints/dispositivos.py",
+      "backend/app/api/endpoints/edo.py",
+      "backend/app/api/endpoints/edt.py"
+    ],
+    "domain_layers": [
+      "backend/app/models",
+      "backend/app/schemas",
+      "backend/app/repositories",
+      "backend/app/services"
+    ],
+    "supporting_scripts": [
+      "backend/alembic",
+      "backend/alembic/versions/dcc7c6a3f3f1_budget_notes_schema.py",
+      "backend/alembic/versions/8b0d9e1d2f44_budget_indirects_schema.py",
+      "backend/alembic/versions/f4c6d9b8a1e2_project_detail_empresa_scope.py",
+      "backend/scripts",
+      "backend/manual_migration.py",
+      "backend/test_routes.py",
+      "backend/test_endpoint.py"
+    ]
+  },
+  "frontend": {
+    "entrypoints": [
+      "frontend/src/main.jsx",
+      "frontend/src/App.jsx",
+      "frontend/src/routes/AppRouter.jsx"
+    ],
+    "contexts": [
+      "frontend/src/context/AuthContext.jsx",
+      "frontend/src/context/PresupuestoContext.jsx"
+    ],
+    "layouts": [
+      "frontend/src/layouts/AppLayout.jsx"
+    ],
+    "pages": [
+      "frontend/src/pages/Login.jsx",
+      "frontend/src/pages/ForgotPassword.jsx",
+      "frontend/src/pages/ResetPassword.jsx",
+      "frontend/src/pages/Dashboard.jsx",
+      "frontend/src/pages/Proyectos.jsx",
+      "frontend/src/pages/PreciosUnitarios.jsx",
+      "frontend/src/pages/BasesTrabajo.jsx",
+      "frontend/src/pages/Subcategorias.jsx",
+      "frontend/src/pages/APUs.jsx",
+      "frontend/src/pages/Recursos.jsx",
+      "frontend/src/pages/Presupuestos.jsx",
+      "frontend/src/pages/Settings.jsx"
+    ],
+    "domain_components": [
+      "frontend/src/components/projects",
+      "frontend/src/components/presupuestos",
+      "frontend/src/components/ui"
+    ],
+    "api_clients": [
+      "frontend/src/api/axiosConfig.js",
+      "frontend/src/api"
+    ]
+  },
+  "excluded_from_snapshot": [
+    ".venv",
+    "frontend/node_modules",
+    "frontend/dist",
+    "__pycache__",
+    ".runtime",
+    "*.db",
+    "*.log"
+  ]
+}

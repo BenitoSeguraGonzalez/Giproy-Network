@@ -1,0 +1,1176 @@
+{
+  "generated_at": "2026-03-25T14:01:24.013762Z",
+  "items": [
+    {
+      "empresa_id": 1,
+      "empresa_nombre": "Administradores Generales",
+      "project_base_id": 16,
+      "project_base_nombre": "Base: Proyecto de prueba 001",
+      "project_id": 5,
+      "project_nombre": "Proyecto de prueba 001",
+      "project_revision": 0,
+      "inferred_source": {
+        "source_base_id": 1,
+        "reason": "persisted_source_base_id",
+        "score": 1000000000
+      },
+      "status": "reconciled",
+      "result": {
+        "source_base_id": 1,
+        "target_base_id": 16,
+        "empresa_id": 1,
+        "before": {
+          "missing_subcategories": [],
+          "missing_resources": [],
+          "missing_apus": [],
+          "empty_apus": [],
+          "divergent_apus": [
+            {
+              "codigo": "5-001-0045",
+              "source_descripcion": "CUALQUIER NOMBRE",
+              "target_descripcion": "CUALQUIER NOMBRE",
+              "source_line_count": 1,
+              "target_line_count": 1,
+              "source_total": 19.2,
+              "target_total": 18.588
+            },
+            {
+              "codigo": "5-001-0046",
+              "source_descripcion": "APU PRUEBA 002",
+              "target_descripcion": "APU PRUEBA 002",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 53.652,
+              "target_total": 53.04
+            },
+            {
+              "codigo": "5-001-0047",
+              "source_descripcion": "APU PRUEBA 003",
+              "target_descripcion": "APU PRUEBA 003",
+              "source_line_count": 7,
+              "target_line_count": 7,
+              "source_total": 277.164,
+              "target_total": 285.252
+            },
+            {
+              "codigo": "5-001-0001",
+              "source_descripcion": "Apus 0001 Prueba",
+              "target_descripcion": "Apus 0001 Prueba",
+              "source_line_count": 5,
+              "target_line_count": 0,
+              "source_total": 84.648,
+              "target_total": 103.88
+            }
+          ]
+        },
+        "after": {
+          "missing_subcategories": [],
+          "missing_resources": [],
+          "missing_apus": [],
+          "empty_apus": [
+            {
+              "codigo": "5-001-0001",
+              "descripcion": "Apus 0001 Prueba",
+              "source_line_count": 5
+            }
+          ],
+          "divergent_apus": [
+            {
+              "codigo": "5-001-0045",
+              "source_descripcion": "CUALQUIER NOMBRE",
+              "target_descripcion": "CUALQUIER NOMBRE",
+              "source_line_count": 1,
+              "target_line_count": 1,
+              "source_total": 19.2,
+              "target_total": 18.588
+            },
+            {
+              "codigo": "5-001-0046",
+              "source_descripcion": "APU PRUEBA 002",
+              "target_descripcion": "APU PRUEBA 002",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 53.652,
+              "target_total": 53.04
+            },
+            {
+              "codigo": "5-001-0047",
+              "source_descripcion": "APU PRUEBA 003",
+              "target_descripcion": "APU PRUEBA 003",
+              "source_line_count": 7,
+              "target_line_count": 7,
+              "source_total": 277.164,
+              "target_total": 160.596
+            }
+          ]
+        }
+      }
+    },
+    {
+      "empresa_id": 1,
+      "empresa_nombre": "Administradores Generales",
+      "project_base_id": 33,
+      "project_base_nombre": "Rev 001: Proyecto de prueba 001",
+      "project_id": 6,
+      "project_nombre": "Proyecto de prueba 001",
+      "project_revision": 1,
+      "inferred_source": {
+        "source_base_id": 16,
+        "reason": "persisted_source_base_id",
+        "score": 1000000000
+      },
+      "status": "reconciled",
+      "result": {
+        "source_base_id": 16,
+        "target_base_id": 33,
+        "empresa_id": 1,
+        "before": {
+          "missing_subcategories": [
+            {
+              "codigo": "3-MOCK-128272",
+              "subcategoria_codigo": 3,
+              "descripcion": "[MOCK] Conjunto de APUs 128272"
+            },
+            {
+              "codigo": "5-MOCK-607489",
+              "subcategoria_codigo": 5,
+              "descripcion": "[MOCK] Conjunto de APUs 607489"
+            }
+          ],
+          "missing_resources": [],
+          "missing_apus": [],
+          "empty_apus": [],
+          "divergent_apus": [
+            {
+              "codigo": "5-001-0002",
+              "source_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 070956",
+              "target_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 070956",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 517.596,
+              "target_total": 431.33
+            },
+            {
+              "codigo": "5-001-0003",
+              "source_descripcion": "[MOCK] Relleno compactado con material de préstamo - 070956",
+              "target_descripcion": "[MOCK] Relleno compactado con material de préstamo - 070956",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 269.82,
+              "target_total": 224.85
+            },
+            {
+              "codigo": "5-001-0004",
+              "source_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 070956",
+              "target_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 070956",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 392.424,
+              "target_total": 327.02
+            },
+            {
+              "codigo": "5-001-0005",
+              "source_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 070956",
+              "target_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 070956",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 109.716,
+              "target_total": 91.43
+            },
+            {
+              "codigo": "5-001-0006",
+              "source_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 070956",
+              "target_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 070956",
+              "source_line_count": 5,
+              "target_line_count": 5,
+              "source_total": 291.06,
+              "target_total": 242.55
+            },
+            {
+              "codigo": "5-001-0007",
+              "source_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 070956",
+              "target_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 070956",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 291.864,
+              "target_total": 243.22
+            },
+            {
+              "codigo": "5-001-0008",
+              "source_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 070956",
+              "target_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 070956",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 508.68,
+              "target_total": 423.9
+            },
+            {
+              "codigo": "5-001-0009",
+              "source_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 070956",
+              "target_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 070956",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 192.804,
+              "target_total": 160.67
+            },
+            {
+              "codigo": "5-001-0010",
+              "source_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 070956",
+              "target_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 070956",
+              "source_line_count": 5,
+              "target_line_count": 5,
+              "source_total": 618.288,
+              "target_total": 515.24
+            },
+            {
+              "codigo": "5-001-0011",
+              "source_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 070956",
+              "target_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 070956",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 264.06,
+              "target_total": 220.05
+            },
+            {
+              "codigo": "5-001-0012",
+              "source_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 070956",
+              "target_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 070956",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 236.376,
+              "target_total": 196.98
+            },
+            {
+              "codigo": "5-001-0013",
+              "source_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 070956",
+              "target_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 070956",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 341.676,
+              "target_total": 284.73
+            },
+            {
+              "codigo": "5-001-0014",
+              "source_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 070956",
+              "target_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 070956",
+              "source_line_count": 5,
+              "target_line_count": 5,
+              "source_total": 2548.752,
+              "target_total": 2123.96
+            },
+            {
+              "codigo": "5-001-0015",
+              "source_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 128272",
+              "target_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 128272",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 78.576,
+              "target_total": 65.48
+            },
+            {
+              "codigo": "5-001-0016",
+              "source_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 128272",
+              "target_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 212.268,
+              "target_total": 176.89
+            },
+            {
+              "codigo": "5-001-0017",
+              "source_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 128272",
+              "target_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 128272",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 466.788,
+              "target_total": 388.99
+            },
+            {
+              "codigo": "5-001-0018",
+              "source_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 128272",
+              "target_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 128272",
+              "source_line_count": 5,
+              "target_line_count": 5,
+              "source_total": 456.456,
+              "target_total": 380.38
+            },
+            {
+              "codigo": "5-001-0019",
+              "source_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 128272",
+              "target_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 128272",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 176.928,
+              "target_total": 147.44
+            },
+            {
+              "codigo": "5-001-0020",
+              "source_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 128272",
+              "target_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 128272",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 362.952,
+              "target_total": 302.46
+            },
+            {
+              "codigo": "5-001-0021",
+              "source_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 128272",
+              "target_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 128272",
+              "source_line_count": 5,
+              "target_line_count": 5,
+              "source_total": 1614.096,
+              "target_total": 1345.08
+            },
+            {
+              "codigo": "5-001-0022",
+              "source_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 128272",
+              "target_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 317.652,
+              "target_total": 264.71
+            },
+            {
+              "codigo": "5-001-0023",
+              "source_descripcion": "[MOCK] Empaste y lijado en paredes interiores - 128272",
+              "target_descripcion": "[MOCK] Empaste y lijado en paredes interiores - 128272",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 421.464,
+              "target_total": 351.22
+            },
+            {
+              "codigo": "5-001-0024",
+              "source_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 128272",
+              "target_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 348.324,
+              "target_total": 290.27
+            },
+            {
+              "codigo": "5-001-0025",
+              "source_descripcion": "[MOCK] Relleno compactado con material de préstamo - 128272",
+              "target_descripcion": "[MOCK] Relleno compactado con material de préstamo - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 856.512,
+              "target_total": 713.76
+            },
+            {
+              "codigo": "5-001-0026",
+              "source_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 128272",
+              "target_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 128272",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 314.88,
+              "target_total": 262.4
+            },
+            {
+              "codigo": "5-001-0027",
+              "source_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 128272",
+              "target_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 286.068,
+              "target_total": 238.39
+            },
+            {
+              "codigo": "5-001-0028",
+              "source_descripcion": "[MOCK] Excavación manual de zanjas para cimientos - 128272",
+              "target_descripcion": "[MOCK] Excavación manual de zanjas para cimientos - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 385.008,
+              "target_total": 320.84
+            },
+            {
+              "codigo": "5-001-0029",
+              "source_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 128272",
+              "target_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 128272",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 215.988,
+              "target_total": 179.99
+            },
+            {
+              "codigo": "5-001-0030",
+              "source_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 483594",
+              "target_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 483594",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 284.172,
+              "target_total": 236.81
+            },
+            {
+              "codigo": "5-001-0031",
+              "source_descripcion": "[MOCK] Excavación manual de zanjas para cimientos - 483594",
+              "target_descripcion": "[MOCK] Excavación manual de zanjas para cimientos - 483594",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 233.1,
+              "target_total": 194.25
+            },
+            {
+              "codigo": "5-001-0032",
+              "source_descripcion": "[MOCK] Relleno compactado con material de préstamo - 483594",
+              "target_descripcion": "[MOCK] Relleno compactado con material de préstamo - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 462.696,
+              "target_total": 385.58
+            },
+            {
+              "codigo": "5-001-0033",
+              "source_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 483594",
+              "target_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 483594",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 257.904,
+              "target_total": 214.92
+            },
+            {
+              "codigo": "5-001-0034",
+              "source_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 483594",
+              "target_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 483594",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 191.844,
+              "target_total": 159.87
+            },
+            {
+              "codigo": "5-001-0035",
+              "source_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 483594",
+              "target_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 749.568,
+              "target_total": 624.64
+            },
+            {
+              "codigo": "5-001-0036",
+              "source_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 483594",
+              "target_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 483594",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 113.172,
+              "target_total": 94.31
+            },
+            {
+              "codigo": "5-001-0037",
+              "source_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 483594",
+              "target_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 483594",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 206.724,
+              "target_total": 172.27
+            },
+            {
+              "codigo": "5-001-0038",
+              "source_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 483594",
+              "target_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 618.588,
+              "target_total": 515.49
+            },
+            {
+              "codigo": "5-001-0039",
+              "source_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 483594",
+              "target_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 897.096,
+              "target_total": 747.58
+            },
+            {
+              "codigo": "5-001-0040",
+              "source_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 483594",
+              "target_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 172.86,
+              "target_total": 144.05
+            },
+            {
+              "codigo": "5-001-0041",
+              "source_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 483594",
+              "target_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 220.248,
+              "target_total": 183.54
+            },
+            {
+              "codigo": "5-001-0042",
+              "source_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 483594",
+              "target_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 598.476,
+              "target_total": 498.73
+            },
+            {
+              "codigo": "5-001-0043",
+              "source_descripcion": "[MOCK] Empaste y lijado en paredes interiores - 483594",
+              "target_descripcion": "[MOCK] Empaste y lijado en paredes interiores - 483594",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 151.608,
+              "target_total": 126.34
+            },
+            {
+              "codigo": "5-001-0044",
+              "source_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 483594",
+              "target_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 471.144,
+              "target_total": 392.62
+            },
+            {
+              "codigo": "5-001-0045",
+              "source_descripcion": "CUALQUIER NOMBRE",
+              "target_descripcion": "CUALQUIER NOMBRE",
+              "source_line_count": 1,
+              "target_line_count": 1,
+              "source_total": 18.588,
+              "target_total": 15.49
+            },
+            {
+              "codigo": "5-001-0046",
+              "source_descripcion": "APU PRUEBA 002",
+              "target_descripcion": "APU PRUEBA 002",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 53.04,
+              "target_total": 44.2
+            },
+            {
+              "codigo": "5-001-0047",
+              "source_descripcion": "APU PRUEBA 003",
+              "target_descripcion": "APU PRUEBA 003",
+              "source_line_count": 7,
+              "target_line_count": 7,
+              "source_total": 160.596,
+              "target_total": 225.77
+            },
+            {
+              "codigo": "5-001-0001",
+              "source_descripcion": "Apus 0001 Prueba",
+              "target_descripcion": "Apus 0001 Prueba",
+              "source_line_count": 0,
+              "target_line_count": 0,
+              "source_total": 0.0,
+              "target_total": 103.88
+            }
+          ]
+        },
+        "after": {
+          "missing_subcategories": [
+            {
+              "codigo": "3-MOCK-128272",
+              "subcategoria_codigo": 3,
+              "descripcion": "[MOCK] Conjunto de APUs 128272"
+            },
+            {
+              "codigo": "5-MOCK-607489",
+              "subcategoria_codigo": 5,
+              "descripcion": "[MOCK] Conjunto de APUs 607489"
+            }
+          ],
+          "missing_resources": [],
+          "missing_apus": [],
+          "empty_apus": [],
+          "divergent_apus": [
+            {
+              "codigo": "5-001-0002",
+              "source_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 070956",
+              "target_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 070956",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 517.596,
+              "target_total": 431.33
+            },
+            {
+              "codigo": "5-001-0003",
+              "source_descripcion": "[MOCK] Relleno compactado con material de préstamo - 070956",
+              "target_descripcion": "[MOCK] Relleno compactado con material de préstamo - 070956",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 269.82,
+              "target_total": 224.85
+            },
+            {
+              "codigo": "5-001-0004",
+              "source_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 070956",
+              "target_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 070956",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 392.424,
+              "target_total": 327.02
+            },
+            {
+              "codigo": "5-001-0005",
+              "source_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 070956",
+              "target_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 070956",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 109.716,
+              "target_total": 91.43
+            },
+            {
+              "codigo": "5-001-0006",
+              "source_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 070956",
+              "target_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 070956",
+              "source_line_count": 5,
+              "target_line_count": 5,
+              "source_total": 291.06,
+              "target_total": 242.55
+            },
+            {
+              "codigo": "5-001-0007",
+              "source_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 070956",
+              "target_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 070956",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 291.864,
+              "target_total": 243.22
+            },
+            {
+              "codigo": "5-001-0008",
+              "source_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 070956",
+              "target_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 070956",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 508.68,
+              "target_total": 423.9
+            },
+            {
+              "codigo": "5-001-0009",
+              "source_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 070956",
+              "target_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 070956",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 192.804,
+              "target_total": 160.67
+            },
+            {
+              "codigo": "5-001-0010",
+              "source_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 070956",
+              "target_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 070956",
+              "source_line_count": 5,
+              "target_line_count": 5,
+              "source_total": 618.288,
+              "target_total": 515.24
+            },
+            {
+              "codigo": "5-001-0011",
+              "source_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 070956",
+              "target_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 070956",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 264.06,
+              "target_total": 220.05
+            },
+            {
+              "codigo": "5-001-0012",
+              "source_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 070956",
+              "target_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 070956",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 236.376,
+              "target_total": 196.98
+            },
+            {
+              "codigo": "5-001-0013",
+              "source_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 070956",
+              "target_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 070956",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 341.676,
+              "target_total": 284.73
+            },
+            {
+              "codigo": "5-001-0014",
+              "source_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 070956",
+              "target_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 070956",
+              "source_line_count": 5,
+              "target_line_count": 5,
+              "source_total": 2548.752,
+              "target_total": 2123.96
+            },
+            {
+              "codigo": "5-001-0015",
+              "source_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 128272",
+              "target_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 128272",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 78.576,
+              "target_total": 65.48
+            },
+            {
+              "codigo": "5-001-0016",
+              "source_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 128272",
+              "target_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 212.268,
+              "target_total": 176.89
+            },
+            {
+              "codigo": "5-001-0017",
+              "source_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 128272",
+              "target_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 128272",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 466.788,
+              "target_total": 388.99
+            },
+            {
+              "codigo": "5-001-0018",
+              "source_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 128272",
+              "target_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 128272",
+              "source_line_count": 5,
+              "target_line_count": 5,
+              "source_total": 456.456,
+              "target_total": 380.38
+            },
+            {
+              "codigo": "5-001-0019",
+              "source_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 128272",
+              "target_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 128272",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 176.928,
+              "target_total": 147.44
+            },
+            {
+              "codigo": "5-001-0020",
+              "source_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 128272",
+              "target_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 128272",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 362.952,
+              "target_total": 302.46
+            },
+            {
+              "codigo": "5-001-0021",
+              "source_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 128272",
+              "target_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 128272",
+              "source_line_count": 5,
+              "target_line_count": 5,
+              "source_total": 1614.096,
+              "target_total": 1345.08
+            },
+            {
+              "codigo": "5-001-0022",
+              "source_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 128272",
+              "target_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 317.652,
+              "target_total": 264.71
+            },
+            {
+              "codigo": "5-001-0023",
+              "source_descripcion": "[MOCK] Empaste y lijado en paredes interiores - 128272",
+              "target_descripcion": "[MOCK] Empaste y lijado en paredes interiores - 128272",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 421.464,
+              "target_total": 351.22
+            },
+            {
+              "codigo": "5-001-0024",
+              "source_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 128272",
+              "target_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 348.324,
+              "target_total": 290.27
+            },
+            {
+              "codigo": "5-001-0025",
+              "source_descripcion": "[MOCK] Relleno compactado con material de préstamo - 128272",
+              "target_descripcion": "[MOCK] Relleno compactado con material de préstamo - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 856.512,
+              "target_total": 713.76
+            },
+            {
+              "codigo": "5-001-0026",
+              "source_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 128272",
+              "target_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 128272",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 314.88,
+              "target_total": 262.4
+            },
+            {
+              "codigo": "5-001-0027",
+              "source_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 128272",
+              "target_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 286.068,
+              "target_total": 238.39
+            },
+            {
+              "codigo": "5-001-0028",
+              "source_descripcion": "[MOCK] Excavación manual de zanjas para cimientos - 128272",
+              "target_descripcion": "[MOCK] Excavación manual de zanjas para cimientos - 128272",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 385.008,
+              "target_total": 320.84
+            },
+            {
+              "codigo": "5-001-0029",
+              "source_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 128272",
+              "target_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 128272",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 215.988,
+              "target_total": 179.99
+            },
+            {
+              "codigo": "5-001-0030",
+              "source_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 483594",
+              "target_descripcion": "[MOCK] Punto tomacorriente doble 110V polarizado - 483594",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 284.172,
+              "target_total": 236.81
+            },
+            {
+              "codigo": "5-001-0031",
+              "source_descripcion": "[MOCK] Excavación manual de zanjas para cimientos - 483594",
+              "target_descripcion": "[MOCK] Excavación manual de zanjas para cimientos - 483594",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 233.1,
+              "target_total": 194.25
+            },
+            {
+              "codigo": "5-001-0032",
+              "source_descripcion": "[MOCK] Relleno compactado con material de préstamo - 483594",
+              "target_descripcion": "[MOCK] Relleno compactado con material de préstamo - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 462.696,
+              "target_total": 385.58
+            },
+            {
+              "codigo": "5-001-0033",
+              "source_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 483594",
+              "target_descripcion": "[MOCK] Punto de iluminación (tubería PVC, cable 12/14 AWG) - 483594",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 257.904,
+              "target_total": 214.92
+            },
+            {
+              "codigo": "5-001-0034",
+              "source_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 483594",
+              "target_descripcion": "[MOCK] Zapata aislada HA f'c=210 kg/cm2 - 483594",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 191.844,
+              "target_total": 159.87
+            },
+            {
+              "codigo": "5-001-0035",
+              "source_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 483594",
+              "target_descripcion": "[MOCK] Encofrado y desencofrado recto (vigas/columnas) - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 749.568,
+              "target_total": 624.64
+            },
+            {
+              "codigo": "5-001-0036",
+              "source_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 483594",
+              "target_descripcion": "[MOCK] Pintura látex acrílica exterior (2 manos) - 483594",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 113.172,
+              "target_total": 94.31
+            },
+            {
+              "codigo": "5-001-0037",
+              "source_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 483594",
+              "target_descripcion": "[MOCK] Cerámica esmaltada para pisos 40x40cm - 483594",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 206.724,
+              "target_total": 172.27
+            },
+            {
+              "codigo": "5-001-0038",
+              "source_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 483594",
+              "target_descripcion": "[MOCK] Tubería PVC presión 1/2\" agua potable - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 618.588,
+              "target_total": 515.49
+            },
+            {
+              "codigo": "5-001-0039",
+              "source_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 483594",
+              "target_descripcion": "[MOCK] Inodoro blanco tanque bajo económico - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 897.096,
+              "target_total": 747.58
+            },
+            {
+              "codigo": "5-001-0040",
+              "source_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 483594",
+              "target_descripcion": "[MOCK] Acero de refuerzo corrugado fy=420 MPa - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 172.86,
+              "target_total": 144.05
+            },
+            {
+              "codigo": "5-001-0041",
+              "source_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 483594",
+              "target_descripcion": "[MOCK] Contrapiso de hormigón f'c=180 kg/cm2 e=10cm - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 220.248,
+              "target_total": 183.54
+            },
+            {
+              "codigo": "5-001-0042",
+              "source_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 483594",
+              "target_descripcion": "[MOCK] Losa alivianada HA f'c=210 kg/cm2 e=20cm - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 598.476,
+              "target_total": 498.73
+            },
+            {
+              "codigo": "5-001-0043",
+              "source_descripcion": "[MOCK] Empaste y lijado en paredes interiores - 483594",
+              "target_descripcion": "[MOCK] Empaste y lijado en paredes interiores - 483594",
+              "source_line_count": 2,
+              "target_line_count": 2,
+              "source_total": 151.608,
+              "target_total": 126.34
+            },
+            {
+              "codigo": "5-001-0044",
+              "source_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 483594",
+              "target_descripcion": "[MOCK] Muro mampostería bloque/ladrillo e=15cm - 483594",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 471.144,
+              "target_total": 392.62
+            },
+            {
+              "codigo": "5-001-0045",
+              "source_descripcion": "CUALQUIER NOMBRE",
+              "target_descripcion": "CUALQUIER NOMBRE",
+              "source_line_count": 1,
+              "target_line_count": 1,
+              "source_total": 18.588,
+              "target_total": 15.49
+            },
+            {
+              "codigo": "5-001-0046",
+              "source_descripcion": "APU PRUEBA 002",
+              "target_descripcion": "APU PRUEBA 002",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 53.04,
+              "target_total": 44.2
+            },
+            {
+              "codigo": "5-001-0047",
+              "source_descripcion": "APU PRUEBA 003",
+              "target_descripcion": "APU PRUEBA 003",
+              "source_line_count": 7,
+              "target_line_count": 7,
+              "source_total": 160.596,
+              "target_total": 121.89
+            }
+          ]
+        }
+      }
+    },
+    {
+      "empresa_id": 3,
+      "empresa_nombre": "Santiago Bermeo",
+      "project_base_id": 34,
+      "project_base_nombre": "Base: Proyecto Prueba Compartir",
+      "project_id": 7,
+      "project_nombre": "Proyecto Prueba Compartir 1",
+      "project_revision": 0,
+      "inferred_source": {
+        "source_base_id": 32,
+        "reason": "persisted_source_base_id",
+        "score": 1000000000
+      },
+      "status": "reconciled",
+      "result": {
+        "source_base_id": 32,
+        "target_base_id": 34,
+        "empresa_id": 3,
+        "before": {
+          "missing_subcategories": [],
+          "missing_resources": [],
+          "missing_apus": [],
+          "empty_apus": [],
+          "divergent_apus": [
+            {
+              "codigo": "5-002-0001",
+              "source_descripcion": "Excavación a mano en suelo sin clasificar",
+              "target_descripcion": "Excavación a mano en suelo sin clasificar",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 9.4501,
+              "target_total": 9.4501
+            },
+            {
+              "codigo": "5-003-0001",
+              "source_descripcion": "Base clase 3 conformación y compactación con equipo liviano",
+              "target_descripcion": "Base clase 3 conformación y compactación con equipo liviano",
+              "source_line_count": 10,
+              "target_line_count": 10,
+              "source_total": 33.517,
+              "target_total": 33.517
+            },
+            {
+              "codigo": "5-002-0005",
+              "source_descripcion": "EXCAVACIÓN A MAQUINA, ZANJA DE 0 -2 M, MATERIAL SIN CLASIFICAR",
+              "target_descripcion": "EXCAVA",
+              "source_line_count": 6,
+              "target_line_count": 4,
+              "source_total": 3.4485,
+              "target_total": 3.6421
+            },
+            {
+              "codigo": "5-001-0001",
+              "source_descripcion": "Replanteo y nivelación",
+              "target_descripcion": "Replanteo y nivelación",
+              "source_line_count": 8,
+              "target_line_count": 8,
+              "source_total": 1.0406,
+              "target_total": 1.0406
+            },
+            {
+              "codigo": "5-005-0001",
+              "source_descripcion": "Hormigón Simple f´c = 180 kg/cm2",
+              "target_descripcion": "Hormigón Simple f´c = 180 kg/cm2",
+              "source_line_count": 8,
+              "target_line_count": 8,
+              "source_total": 120.274,
+              "target_total": 0.0
+            },
+            {
+              "codigo": "5-006-0001",
+              "source_descripcion": "Mortero de cemento 1:3",
+              "target_descripcion": "Mortero de cemento 1:3",
+              "source_line_count": 7,
+              "target_line_count": 7,
+              "source_total": 128.4536,
+              "target_total": 0.0
+            },
+            {
+              "codigo": "5-007-0001",
+              "source_descripcion": "Dinteles 10cmx20cm (2Ø10 + 1Ø8 C/20 cm)",
+              "target_descripcion": "Dinteles 10cmx20cm (2Ø10 + 1Ø8 C/20 cm)",
+              "source_line_count": 7,
+              "target_line_count": 7,
+              "source_total": 23.6555,
+              "target_total": 0.0
+            },
+            {
+              "codigo": "5-008-0001",
+              "source_descripcion": "Empastado interior",
+              "target_descripcion": "Empastado interior",
+              "source_line_count": 9,
+              "target_line_count": 9,
+              "source_total": 3.6542,
+              "target_total": 0.0
+            },
+            {
+              "codigo": "5-009-0001",
+              "source_descripcion": "Aplicación de desencofrante en encofrados de madera",
+              "target_descripcion": "Aplicación de desencofrante en encofrados de madera",
+              "source_line_count": 4,
+              "target_line_count": 4,
+              "source_total": 1.0527,
+              "target_total": 0.0
+            },
+            {
+              "codigo": "5-009-0005",
+              "source_descripcion": "ENCOFRADO DE MADERA PARA LOSAS (2 USOS)",
+              "target_descripcion": "ENCOFRADO DE MADERA PARA LOSAS (2 USOS)",
+              "source_line_count": 9,
+              "target_line_count": 9,
+              "source_total": 14.6168,
+              "target_total": 10.3697
+            },
+            {
+              "codigo": "5-010-0001",
+              "source_descripcion": "Acero de refuerzo, cortado y figurado",
+              "target_descripcion": "Acero de refuerzo, cortado y figurado",
+              "source_line_count": 8,
+              "target_line_count": 8,
+              "source_total": 3.025,
+              "target_total": 0.0
+            }
+          ]
+        },
+        "after": {
+          "missing_subcategories": [],
+          "missing_resources": [],
+          "missing_apus": [],
+          "empty_apus": [],
+          "divergent_apus": [
+            {
+              "codigo": "5-002-0001",
+              "source_descripcion": "Excavación a mano en suelo sin clasificar",
+              "target_descripcion": "Excavación a mano en suelo sin clasificar",
+              "source_line_count": 3,
+              "target_line_count": 3,
+              "source_total": 9.4501,
+              "target_total": 9.4501
+            },
+            {
+              "codigo": "5-003-0001",
+              "source_descripcion": "Base clase 3 conformación y compactación con equipo liviano",
+              "target_descripcion": "Base clase 3 conformación y compactación con equipo liviano",
+              "source_line_count": 10,
+              "target_line_count": 10,
+              "source_total": 33.517,
+              "target_total": 33.517
+            },
+            {
+              "codigo": "5-002-0005",
+              "source_descripcion": "EXCAVACIÓN A MAQUINA, ZANJA DE 0 -2 M, MATERIAL SIN CLASIFICAR",
+              "target_descripcion": "EXCAVA",
+              "source_line_count": 6,
+              "target_line_count": 4,
+              "source_total": 3.4485,
+              "target_total": 3.6421
+            },
+            {
+              "codigo": "5-001-0001",
+              "source_descripcion": "Replanteo y nivelación",
+              "target_descripcion": "Replanteo y nivelación",
+              "source_line_count": 8,
+              "target_line_count": 8,
+              "source_total": 1.0406,
+              "target_total": 1.0406
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

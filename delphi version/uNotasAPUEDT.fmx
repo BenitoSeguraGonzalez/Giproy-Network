@@ -1,0 +1,266 @@
+object frmNotasAPUEDT: TfrmNotasAPUEDT
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 362
+  ClientWidth = 640
+  Position = OwnerFormCenter
+  Transparency = True
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object rect_background: TRectangle
+    Align = Client
+    Size.Width = 640.000000000000000000
+    Size.Height = 362.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Thickness = 0.300000011920929000
+    object rect_2: TRectangle
+      Align = Top
+      Fill.Color = claDarkorange
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 3.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Position.X = 5.000000000000000000
+      Position.Y = 3.000000000000000000
+      Size.Width = 630.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Thickness = 0.000000000000000000
+      object lbl_Fecha: TLabel
+        Align = Top
+        StyledSettings = [Size, Style, FontColor]
+        HitTest = True
+        Margins.Left = 10.000000000000000000
+        Margins.Right = 10.000000000000000000
+        Position.X = 10.000000000000000000
+        Size.Width = 610.000000000000000000
+        Size.Height = 20.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Family = 'Poppins'
+        TextSettings.HorzAlign = Trailing
+        TabOrder = 1
+        OnMouseDown = lbl_FechaMouseDown
+      end
+      object lbl_Seccion: TLabel
+        Align = Top
+        StyledSettings = [Size]
+        Margins.Left = 10.000000000000000000
+        Position.X = 10.000000000000000000
+        Position.Y = 20.000000000000000000
+        Size.Width = 620.000000000000000000
+        Size.Height = 20.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Family = 'Poppins'
+        TextSettings.Font.StyleExt = {00050000000000000004000000}
+        TextSettings.FontColor = claWhite
+        TextSettings.HorzAlign = Trailing
+        Text = '12/12/2023'
+        TabOrder = 0
+      end
+    end
+    object lyt_1: TLayout
+      Align = MostBottom
+      Position.Y = 336.000000000000000000
+      Size.Width = 640.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 6
+      object rect_Guardar: TRectangle
+        Align = Right
+        Fill.Color = claDarkorange
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 3.000000000000000000
+        Position.X = 584.000000000000000000
+        Size.Width = 23.000000000000000000
+        Size.Height = 23.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Thickness = 0.000000000000000000
+        XRadius = 10.000000000000000000
+        YRadius = 10.000000000000000000
+        object lbl_GuardarNota: TLabel
+          Align = Client
+          StyledSettings = [Family, FontColor]
+          Hint = 'Guardar Nota'
+          HitTest = True
+          Size.Width = 23.000000000000000000
+          Size.Height = 23.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.Font.Size = 14.000000000000000000
+          TextSettings.Font.StyleExt = {00070000000000000004000000}
+          TextSettings.HorzAlign = Center
+          Text = 'G'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          OnClick = lbl_GuardarNotaClick
+        end
+      end
+      object rect_Salir: TRectangle
+        Align = Right
+        Fill.Color = claDarkorange
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 3.000000000000000000
+        Position.X = 612.000000000000000000
+        Size.Width = 23.000000000000000000
+        Size.Height = 23.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Thickness = 0.000000000000000000
+        XRadius = 10.000000000000000000
+        YRadius = 10.000000000000000000
+        object lbl_Salir: TLabel
+          Align = Client
+          StyledSettings = [Family, FontColor]
+          Hint = 'Cerrar Nota'
+          HitTest = True
+          Size.Width = 23.000000000000000000
+          Size.Height = 23.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.Font.Size = 14.000000000000000000
+          TextSettings.Font.StyleExt = {00070000000000000004000000}
+          TextSettings.HorzAlign = Center
+          Text = 'S'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          OnClick = lbl_SalirClick
+        end
+      end
+      object rect_CopiaraTodasAPUS: TRectangle
+        Align = Right
+        Fill.Color = claDarkorange
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 3.000000000000000000
+        Position.X = 556.000000000000000000
+        Size.Width = 23.000000000000000000
+        Size.Height = 23.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Thickness = 0.000000000000000000
+        XRadius = 10.000000000000000000
+        YRadius = 10.000000000000000000
+        object lbl_CopiarTodasAPUS: TLabel
+          Align = Client
+          StyledSettings = [Family, FontColor]
+          Hint = 'Copiar a todas las APUS identicas'
+          HitTest = True
+          Size.Width = 23.000000000000000000
+          Size.Height = 23.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.Font.Size = 14.000000000000000000
+          TextSettings.Font.StyleExt = {00070000000000000004000000}
+          TextSettings.HorzAlign = Center
+          Text = 'T'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          OnClick = lbl_CopiarTodasAPUSClick
+        end
+      end
+      object rect_BorrarNota: TRectangle
+        Align = Right
+        Fill.Color = claDarkorange
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 3.000000000000000000
+        Position.X = 528.000000000000000000
+        Size.Width = 23.000000000000000000
+        Size.Height = 23.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Thickness = 0.000000000000000000
+        XRadius = 10.000000000000000000
+        YRadius = 10.000000000000000000
+        object lbl_BorrarNota: TLabel
+          Align = Client
+          StyledSettings = [Family, FontColor]
+          Hint = 'Borrar Nota'
+          HitTest = True
+          Size.Width = 23.000000000000000000
+          Size.Height = 23.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.Font.Size = 14.000000000000000000
+          TextSettings.Font.StyleExt = {00070000000000000004000000}
+          TextSettings.HorzAlign = Center
+          Text = 'B'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          OnClick = lbl_BorrarNotaClick
+        end
+      end
+    end
+    object TextoNota: TTMSFNCMemo
+      Color = claNull
+      Align = Client
+      Size.Width = 640.000000000000000000
+      Size.Height = 293.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Font.Family = 'Consolas'
+      Font.Name = 'Consolas'
+      Options.WordWrap = wwtOff
+      Options.WordWrapColumn = 80
+      Options.BracketPairColorization = False
+      CompletionList = <>
+      CustomLanguages = <>
+      CustomThemes = <>
+      LanguageFileExtensionsMap = <
+        item
+          Language = mlBat
+          Extension = '.bat'
+        end
+        item
+          Language = mlCsharp
+          Extension = '.cs'
+        end
+        item
+          Language = mlCSS
+          Extension = '.css'
+        end
+        item
+          Language = mlHtml
+          Extension = '.html'
+        end
+        item
+          Language = mlJavascript
+          Extension = '.js'
+        end
+        item
+          Language = mlJSON
+          Extension = '.json'
+        end
+        item
+          Extension = '.pas'
+        end
+        item
+          Extension = '.dpr'
+        end
+        item
+          Extension = '.dfm'
+        end
+        item
+          Extension = '.fmx'
+        end
+        item
+          Extension = '.inc'
+        end
+        item
+          Extension = '.dproj'
+        end
+        item
+          Language = mlPlainText
+          Extension = '.txt'
+        end
+        item
+          Language = mlTypeScript
+          Extension = '.ts'
+        end
+        item
+          Language = mlXml
+          Extension = '.xml'
+        end>
+      ActiveSource = -1
+      Sources = <>
+    end
+  end
+end

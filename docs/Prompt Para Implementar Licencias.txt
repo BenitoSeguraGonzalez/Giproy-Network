@@ -1,0 +1,268 @@
+ERES UN ARQUITECTO SENIOR FULL-STACK (PYTHON + FASTAPI + POSTGRESQL + REACT) ESPECIALISTA EN SAAS MULTI-TENANT, LICENCIAMIENTO ENTERPRISE Y SISTEMAS ESCALABLES.
+
+TU MISIÓN ES IMPLEMENTAR UN SISTEMA COMPLETO DE LICENCIAS, ROLES Y MEDICIÓN DE USO POR EMPRESA EN UN PROYECTO YA EXISTENTE Y FUNCIONAL, SIN ROMPER NINGUNA FUNCIONALIDAD.
+
+---
+
+# CONTEXTO DEL SISTEMA
+
+* Backend: Python (FastAPI)
+* Frontend: React
+* Base de datos: PostgreSQL
+* Sistema multi-tenant basado en EMPRESAS
+* Cada usuario pertenece a una empresa
+* Existe sección: **"Administración Global"**
+* Solo **superadministradores** pueden gestionar licencias
+
+---
+
+# OBJETIVOS
+
+1. Implementar sistema de licencias completo
+2. Definir roles por usuario dentro de cada empresa
+3. Medir uso REAL por empresa
+4. Diseñar modelo SQL robusto
+5. Implementar middleware centralizado en FastAPI
+6. Integrar sin romper funcionalidad existente
+
+---
+
+# MODELO DE LICENCIAS
+
+## PRINCIPALES
+
+Exprés:
+
+* 1 usuario
+* 3 proyectos
+* 500 MB
+
+Estándar:
+
+* 1 usuario
+* 20 proyectos
+* 5 GB
+
+Profesional:
+
+* 5 usuarios
+* 100 proyectos
+* 20 GB
+
+Empresarial:
+
+* ilimitado (uso razonable)
+* base 100 GB
+
+---
+
+## ESPECIALES
+
+Tester, Académica, Capacitación:
+
+* derivadas de Profesional / Estándar
+* con restricciones de uso
+
+---
+
+# MODELO DE ROLES
+
+* 1 ADMIN obligatorio por empresa
+* N COLABORADORES
+
+Reglas:
+
+* nunca eliminar último admin
+* usuario creador = admin
+* licencias de 1 usuario → solo admin
+
+---
+
+# MODELO SQL (OBLIGATORIO)
+
+Diseñar:
+
+* companies
+* licenses
+* company_licenses
+* company_usage
+* user_roles
+* usage_events (opcional)
+
+---
+
+# MEDICIÓN DE USO
+
+Por empresa:
+
+* almacenamiento (pg_column_size × 1.4)
+* proyectos (COUNT)
+* usuarios (COUNT)
+
+NO en tiempo real
+USAR batch / background
+
+---
+
+# 🔴 MIDDLEWARE FASTAPI (OBLIGATORIO)
+
+Debe validar:
+
+* licencia activa
+* límites
+* roles
+
+Condiciones:
+
+* centralizado
+* sin lógica en endpoints
+* diseñado por Antigravity
+* sin romper sistema
+
+---
+
+# INTEGRACIÓN
+
+Administración Global:
+
+* gestión de licencias
+* visualización de uso
+* roles
+
+---
+
+# 🚀 PLAN DE IMPLEMENTACIÓN (OBLIGATORIO)
+
+DEBES GENERAR UN PLAN COMPLETO DIVIDIDO EN FASES:
+
+## Fase 0: Análisis
+
+* revisión completa del código backend y frontend
+* identificación de riesgos
+
+## Fase 1: Diseño
+
+* modelo SQL
+* arquitectura middleware
+* estrategia de uso
+
+## Fase 2: Base de datos
+
+* migraciones
+* índices
+* relaciones
+
+## Fase 3: Backend
+
+* cálculo de uso
+* servicios
+* middleware
+
+## Fase 4: Frontend
+
+* UI en Administración Global
+* visualización y control
+
+## Fase 5: Integración
+
+* conexión completa backend/frontend
+
+## Fase 6: Testing
+
+* unitario
+* integración
+* regresión
+
+## Fase 7: Validación final
+
+* sistema estable
+* sin regresiones
+
+---
+
+# 📋 TASKS MODULARES (OBLIGATORIO)
+
+DEBES GENERAR UNA LISTA DETALLADA:
+
+Cada task debe incluir:
+
+* ID único
+* nombre
+* descripción clara
+* tipo (DB / backend / frontend / testing)
+* prioridad (P0, P1, P2)
+* dependencias
+* riesgo
+* estimación (tiempo)
+
+---
+
+# 📊 SEGUIMIENTO (OBLIGATORIO)
+
+Definir:
+
+* estado de cada task:
+
+  * pendiente
+  * en progreso
+  * completada
+  * bloqueada
+
+* métricas:
+
+  * % avance
+  * tareas críticas pendientes
+
+---
+
+# ✅ VERIFICACIÓN (OBLIGATORIO)
+
+Para cada módulo:
+
+* criterios de aceptación
+* pruebas necesarias
+* validación funcional
+
+Debe incluir:
+
+* no regresión
+* consistencia de datos
+* cumplimiento de reglas de licencia
+* cumplimiento de roles
+
+---
+
+# 🧪 TESTING
+
+* unit tests backend
+* API tests
+* E2E frontend
+* pruebas de límites
+* pruebas de roles
+* pruebas de eliminación de admin (debe fallar)
+
+---
+
+# SALIDA ESPERADA
+
+1. Análisis del sistema actual
+2. Diseño completo
+3. Modelo SQL
+4. Migraciones
+5. Middleware FastAPI
+6. Cambios frontend
+7. Plan de implementación
+8. Tasks modulares
+9. Sistema de seguimiento
+10. Estrategia de verificación
+11. Riesgos y mitigación
+
+---
+
+# REGLA FINAL
+
+NO REESCRIBIR
+NO ROMPER
+CENTRALIZAR VALIDACIONES
+MEDIR POR EMPRESA
+DISEÑAR PARA ESCALA REAL

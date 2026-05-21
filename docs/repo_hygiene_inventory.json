@@ -1,0 +1,2079 @@
+{
+  "generated_at": "2026-05-21T10:59:10.909060+00:00",
+  "mode": "GIPROY CLASICO",
+  "scope": "repo hygiene inventory; no code movement; no destructive action",
+  "root": "E:/Repositorios/GiProy Network",
+  "totals": {
+    "scanned_files": 10515,
+    "categorized_files": 7054,
+    "sample_limit_per_category": 200
+  },
+  "categories": {
+    "critical_sensitive_artifacts": {
+      "risk": "critical",
+      "description": "Credenciales, tokens, dumps, backups, trazas o binarios/licencias externas.",
+      "count": 49,
+      "samples": [
+        {
+          "path": "auth_session_trace.jsonl",
+          "reason": "traza local sensible"
+        },
+        {
+          "path": "deploy.tar.gz",
+          "reason": "archivo comprimido no fuente"
+        },
+        {
+          "path": "fatal_errors.log",
+          "reason": "traza local sensible"
+        },
+        {
+          "path": "CloudFlared-bkp/README.txt",
+          "reason": "backup local de Cloudflared"
+        },
+        {
+          "path": "CloudFlared-bkp/backup_cloudflare_tunnels.bat",
+          "reason": "backup local de Cloudflared"
+        },
+        {
+          "path": "CloudFlared-bkp/cloudflared-SaaS-nssm.txt",
+          "reason": "backup local de Cloudflared"
+        },
+        {
+          "path": "CloudFlared-bkp/cloudflared-eXcom-nssm.txt",
+          "reason": "backup local de Cloudflared"
+        },
+        {
+          "path": "CloudFlared-bkp/eXcom-SaaS-token.txt",
+          "reason": "archivo TXT con token en el nombre"
+        },
+        {
+          "path": "CloudFlared-bkp/giproy-erp-beta-token.txt",
+          "reason": "archivo TXT con token en el nombre"
+        },
+        {
+          "path": "CloudFlared-bkp/restore_cloudflare_tunnels.bat",
+          "reason": "backup local de Cloudflared"
+        },
+        {
+          "path": "CloudFlared-bkp/restore_from_backup.ps1",
+          "reason": "backup local de Cloudflared"
+        },
+        {
+          "path": "CloudFlared-bkp/tunnels-list.txt",
+          "reason": "backup local de Cloudflared"
+        },
+        {
+          "path": "CloudFlared-bkp/.cloudflared/cert.pem",
+          "reason": "backup local de Cloudflared"
+        },
+        {
+          "path": "Complementos/Aspose.Tasks for Java 20.2 (25 Feb 2020) Retail + License Key/Aspose.Total.lic",
+          "reason": "binario/licencia externa"
+        },
+        {
+          "path": "Complementos/Aspose.Tasks for Java 20.2 (25 Feb 2020) Retail + License Key/How to activate.txt",
+          "reason": "binario/licencia externa"
+        },
+        {
+          "path": "Complementos/Aspose.Tasks for Java 20.2 (25 Feb 2020) Retail + License Key/aspose-tasks-20.2-java.zip",
+          "reason": "binario/licencia externa"
+        },
+        {
+          "path": "Complementos/Aspose.Tasks for Java 20.2 (25 Feb 2020) Retail + License Key/aspose-tasks-20.2-java/readme.txt",
+          "reason": "binario/licencia externa"
+        },
+        {
+          "path": "Complementos/Aspose.Tasks for Java 20.2 (25 Feb 2020) Retail + License Key/aspose-tasks-20.2-java/doc/aspose-tasks-20.2-javadoc.jar",
+          "reason": "binario/licencia externa"
+        },
+        {
+          "path": "Complementos/Aspose.Tasks for Java 20.2 (25 Feb 2020) Retail + License Key/aspose-tasks-20.2-java/lib/aspose-tasks-20.2-jdk17.jar",
+          "reason": "binario/licencia externa"
+        },
+        {
+          "path": "Complementos/Aspose.Tasks for Java 20.2 (25 Feb 2020) Retail + License Key/aspose-tasks-20.2-java/lib/aspose-tasks-20.2-jdk18.jar",
+          "reason": "binario/licencia externa"
+        },
+        {
+          "path": "Complementos/Aspose.Tasks for Java 20.2 (25 Feb 2020) Retail + License Key/aspose-tasks-20.2-java/license/End User License Agreement.html",
+          "reason": "binario/licencia externa"
+        },
+        {
+          "path": "Complementos/Aspose.Tasks for Java 20.2 (25 Feb 2020) Retail + License Key/aspose-tasks-20.2-java/license/ThirdPartyLicenses-Aspose.Tasks for Java.pdf",
+          "reason": "binario/licencia externa"
+        },
+        {
+          "path": "DBDump/categoria_indirectos.sql",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "DBDump/codcpc.sql",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "DBDump/conceptos_indirectos.sql",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "DBDump/giproy_erp_backup_20260326_132547.dump",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "DBDump/giproy_erp_backup_20260326_132621.dump",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "DBDump/giproy_erp_backup_20260401_090205.dump",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "DBDump/giproy_erp_backup_20260402_064206.dump",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "DBDump/giproylocal_2.sql",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "DBDump/giproynet.sql",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "DBDump/tipo_categorias.sql",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "DBDump/tipo_proyectos.sql",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "DBDump/unidades.sql",
+          "reason": "dump de base de datos"
+        },
+        {
+          "path": "backend/auth_session_trace.jsonl",
+          "reason": "traza local sensible"
+        },
+        {
+          "path": "backend/backup_before_apu_migration.sql",
+          "reason": "dump o script SQL fuera de migracion formal"
+        },
+        {
+          "path": "backend/db_mirror_clon.sql",
+          "reason": "dump o script SQL fuera de migracion formal"
+        },
+        {
+          "path": "backend/fatal_errors.log",
+          "reason": "traza local sensible"
+        },
+        {
+          "path": "backups/DB-Backup.sql",
+          "reason": "backup local"
+        },
+        {
+          "path": "backups/migration_20260318_173151/apus.json",
+          "reason": "backup local"
+        },
+        {
+          "path": "backups/migration_20260318_173151/presupuesto_detalles.json",
+          "reason": "backup local"
+        },
+        {
+          "path": "backups/migration_20260318_173151/recursos.json",
+          "reason": "backup local"
+        },
+        {
+          "path": "backups/migration_20260318_173151/subcategorias_items.json",
+          "reason": "backup local"
+        },
+        {
+          "path": "delphi version/github API Key.txt",
+          "reason": "nombre de archivo sugiere API key"
+        },
+        {
+          "path": "delphi version/prueba.sql",
+          "reason": "dump o script SQL fuera de migracion formal"
+        },
+        {
+          "path": "docs/db_credentials.txt",
+          "reason": "credenciales locales documentadas"
+        },
+        {
+          "path": "tmp/codcpc.sql",
+          "reason": "dump o script SQL fuera de migracion formal"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Edge Wallet/128.18367.18366.1/Tokenized-Card/tokenized-card.bundle.js.LICENSE.txt",
+          "reason": "archivo TXT con token en el nombre"
+        },
+        {
+          "path": "tmp/edge-profile-clone/Edge Wallet/128.18367.18366.1/Tokenized-Card/tokenized-card.bundle.js.LICENSE.txt",
+          "reason": "archivo TXT con token en el nombre"
+        }
+      ]
+    },
+    "high_generated_artifacts": {
+      "risk": "high",
+      "description": "Artefactos locales, temporales, logs, DB locales o evidencias de QA.",
+      "count": 6745,
+      "samples": [
+        {
+          "path": "auth_debug.log",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "test_multicompany.db",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": ".aider.tags.cache.v4/cache.db",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": ".runtime/logs/backend-nssm.log",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": ".runtime/logs/frontend-nssm.log",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": ".runtime/logs/launcher.log",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": ".runtime/monitor/alerts.jsonl",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": ".runtime/monitor/metrics.jsonl",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "backend/auth_debug.log",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "backend/database.db",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "backend/giproy.db",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "backend/giproy_dev.db",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "backend/giproy_erp_local.db",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "backend/proyectos.db",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "backend/test_output.log",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "backend/app/core/database.db",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "frontend/apus_lint.txt",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/eslint.config.js",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/final_lint_output.txt",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/formula-responsive-harness.html",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/gantt-ff-harness.html",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/lint-results.txt",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/lint_final_check.txt",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/lint_output.txt",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/lint_output_final.txt",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/lint_output_final_2.txt",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/lint_output_global.txt",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/lint_output_new.txt",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/lint_output_phase5_final.txt",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/lint_output_phase5_intermediate.txt",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/lint_results.json",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/lint_results_final.json",
+          "reason": "salida local de QA/frontend"
+        },
+        {
+          "path": "frontend/tmp_admin_cronogramas.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_after_cronogramas_tab2.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_crono_debug.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_dom_after_login.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_dom_cronogramas_coord.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_dom_gantt_loaded.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_dom_gantt_probe.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_dom_local_proyectos.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_dom_project_after_click.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_drag_63.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_drag_63_after_fix.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_drag_dashed.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_gantt_layout_dom.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_playwright_after_click.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "frontend/tmp_playwright_cronogramas.png",
+          "reason": "artefacto temporal frontend"
+        },
+        {
+          "path": "tmp/Calculo_Holguras_Gantt.docx",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/Cronograma Valorado.xlsx",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/Desagregacion Tecnologica.xlsx",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/Formato adicional Desagregacion.xls",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/Formula Polinómica - con desglose de equipo.xlsx",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/Formula Polinómica - sin desglose de equipo.xlsx",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/analyze_budget_cats.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/audit_santiago_gantt.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/audit_santiago_gantt_full.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/audit_santiago_gantt_links.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/check_cpc_vae.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/check_cpc_vae_sync.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/check_db_state.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/check_monomios.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/cloudflared-saas-debug.log",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "tmp/company_admin_sanitize_apply_20260516_123133.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/company_admin_sanitize_dry_run_20260516_123050.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/company_admin_sanitize_dry_run_20260516_123120.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/company_admin_sanitize_dry_run_20260516_123141.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/compare_polinomica.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/compras publicas prueba1.pdf",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/compras publicas prueba2.pdf",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/debug_polinomica_resources.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/debug_redistribution.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/debug_resources.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/diagnose_api.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/dump_excel.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/excel_dump.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/find_recent_budgets.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/giproy_wordmark_preview.png",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/inspect_apu_calc.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/inspect_budgets.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/inspect_equipment.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/inspect_excel.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/inspect_form1.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/inspect_polinomica.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/list_sheets.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/msproject-minimal.mpp",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/omniclass.xlsx",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/polinomica_logic.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/rebuild_santiago_gantt_dependencies_clean.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/repair_santiago_gantt_manual_milestone_boundary.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/repair_santiago_gantt_manual_milestone_link.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/repair_santiago_gantt_schedule.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_clean_rebuild_backup_20260505_160910.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_clean_rebuild_backup_20260506_113203.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_full_rebuild_backup_20260502_201515.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_full_rebuild_backup_20260505_154838.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_full_rebuild_backup_20260506_122414.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_full_rebuild_backup_20260506_183225.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_manual_boundary_backup_20260506_122527.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_manual_boundary_backup_20260506_183435.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_manual_boundary_backup_20260506_185537.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_manual_link_backup_20260505_105143.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_manual_link_backup_20260505_105254.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_relations_snapshot_20260505_160910.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_relations_snapshot_20260506_113203.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_saneamiento_hito_backup_20260502_183935.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_gantt_saneamiento_hito_backup_20260502_184030.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_stakeholder_roles_backup_20260507_192711.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/santiago_bermeo_stakeholder_roles_backup_20260507_192720.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/test_api_response.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/test_serialization.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/trace_aggregation.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/validate_santiago_gantt_integrity.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/validate_santiago_gantt_rules_independent.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/verify_all_budgets.py",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/adicionar/001 - Acta de Constitucion - General.xlsx",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/adicionar/formulario_datos_proyecto_giproy.html",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/adicionar/giproy_gestion_proyectos_completo.html",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/BrowserMetrics-spare.pma",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/FirstLaunchAfterInstallation",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Last Browser",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Last Version",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Local State",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Variations",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/first_party_sets.db",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/first_party_sets.db-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Ad Blocking/blocklist",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/AutoLaunchProtocolsComponent/1.0.0.10/manifest.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/AutoLaunchProtocolsComponent/1.0.0.10/protocols.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Autofill/4.0.1.32/autofill_bypass_cache_forms.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Autofill/4.0.1.32/edge_autofill_global_block_list.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Autofill/4.0.1.32/manifest.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Autofill/4.0.1.32/regex_patterns.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Autofill/4.0.1.32/v1FieldTypes.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/CertificateRevocation/6498.2025.9.4/crl-set",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/CertificateRevocation/6498.2025.9.4/manifest.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Crashpad/metadata",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Crashpad/settings.dat",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Crashpad/throttle_store.dat",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Affiliation Database",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Affiliation Database-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/BookmarkMergedSurfaceOrdering",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/BrowsingTopicsSiteData",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/BrowsingTopicsSiteData-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/BrowsingTopicsState",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/DIPS",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/DashTrackerDatabase",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/DashTrackerDatabase-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Extension Cookies",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Extension Cookies-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/ExtensionActivityComp",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/ExtensionActivityEdge",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/ExtensionActivityEdge-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Favicons",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Favicons-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/History",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/History-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/HubApps",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/HubApps Icons",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/HubApps Icons-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/InterestGroups",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/LOCK",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/LOG",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/LOG.old",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Login Data",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Login Data For Account",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Login Data For Account-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Login Data-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Network Action Predictor",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Network Action Predictor-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Preferences",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/PreferredApps",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/PrivateAggregation",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/PrivateAggregation-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/README",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Secure Preferences",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/ServerCertificate",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/ServerCertificate-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/SharedStorage",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Shortcuts",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Shortcuts-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Top Sites",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Top Sites-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Vpn Tokens",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Vpn Tokens-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Web Data",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Web Data-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/arbitration_service_config.json",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/favorites_diagnostic.log",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/heavy_ad_intervention_opt_out.db",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/heavy_ad_intervention_opt_out.db-journal",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/load_statistics.db",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Asset Store/assets.db/000003.ldb",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Asset Store/assets.db/000004.log",
+          "reason": "archivo local/generado"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Asset Store/assets.db/CURRENT",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Asset Store/assets.db/LOCK",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Asset Store/assets.db/LOG",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Asset Store/assets.db/LOG.old",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/Asset Store/assets.db/MANIFEST-000001",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/AutofillAiModelCache/LOCK",
+          "reason": "artefacto temporal bajo tmp"
+        },
+        {
+          "path": "tmp/edge-gantt-debug/Default/AutofillAiModelCache/LOG",
+          "reason": "artefacto temporal bajo tmp"
+        }
+      ]
+    },
+    "medium_loose_scripts": {
+      "risk": "medium",
+      "description": "Scripts historicos/debug/ops que requieren busqueda de referencias antes de mover.",
+      "count": 201,
+      "samples": [
+        {
+          "path": "audit_users.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "check_blocked_devices.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "check_db_schema.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "check_detalles_db.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "check_edt.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "check_edt_detail.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "check_presupuesto_db.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "check_units.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "check_units_tmp.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "check_user.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "check_user_status.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "clean_roles.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "fix_pwd.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "inspect_repo.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "migrate_apus.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "migrate_codigo_unico.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "migrate_detalles.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "migrate_detalles_full.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "migrate_detalles_safe.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "migrate_presupuestos.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "migrate_recursos.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "restart_backend.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "setup_ai_architecture_toolkit.py",
+          "reason": "script Python en raiz"
+        },
+        {
+          "path": "setup_ai_enterprise_toolkit.py",
+          "reason": "script Python en raiz"
+        },
+        {
+          "path": "setup_ai_pro_toolkit.py",
+          "reason": "script Python en raiz"
+        },
+        {
+          "path": "setup_ai_project_toolkit.py",
+          "reason": "script Python en raiz"
+        },
+        {
+          "path": "test_api_error.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "test_api_error_http.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "test_api_tmp.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "test_apus_backend.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "test_edt_api.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "test_repo_error.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "tmp_check_proy.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "tmp_check_user.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "tmp_simulate_api.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "tmp_update_state.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "verify_apus_refactor.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "verify_login.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "verify_presupuestos_refactor.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "verify_proyectos_refactor.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "verify_real_fix.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "verify_recursos_refactor.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "verify_rounding.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/audit_orm.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_apus_with_lines.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_budgets.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_count.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_current_user.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_db_stats.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_lic_schema.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_omni_schema.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_omniclass_data.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_proj_revs.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_revisions.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_roles.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_schemas.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_tables.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_tables_v2.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_user.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_user_fields.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/check_users.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/debug_apus.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/debug_clean.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/debug_duplicates.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/debug_final.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/debug_links.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/debug_schema.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/fix_db_schema.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/fix_missing_budgets.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/fix_null_dates.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/fix_user.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/fix_user_constraints.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/fix_usuarios_schema.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/inspect_schema.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/inspect_specific_proy.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/seed_categories.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/seed_indices.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/test_conn.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/test_counts.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/test_endpoint.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/test_hash.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/test_routes.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/tmp_read.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/verify_api.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/verify_cleanup.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/verify_edt_assignment.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/verify_final.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/verify_reports.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/verify_serialization.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/app/core/debug_logger.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/app/services/audit_event.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/app/services/test_cronograma_trabajo_fixed.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/app/utils/seed_licenses.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/add_activa_column.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/add_apu_line_order_column.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/add_canton_column.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/add_canton_to_empresa.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/add_omniclass_titulo_es.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/analyze_dump.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/apply_base_scope_guardrails.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/audit_data_integrity.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/backfill_variant_sync_tracking.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/bulk_spellcheck.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/check_bases.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/check_empresas.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/check_mysql.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/cleanup_company_projects_and_bases.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/cleanup_orphaned_bases.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/cleanup_training_licenses.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/create_dispositivos_table.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/create_dreams2k.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/create_edo_table.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/create_edt_table.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/create_stakeholder_tables.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/create_subcategorias_items_table.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/curate_omniclass_titulo_es.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/debug_login.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/diagnose_santiago_gantt_ff_item10.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/export_msproject_mpp.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/find_fks.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/find_paises.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/fix_santiago_material_filtrante_category.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/get_token.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/heal_modification_dates.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/heal_recursos.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/inspect_tables.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/license_housekeeping.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/list_empresas.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/list_licenses.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/list_tables.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/manage_superuser.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/migrate_apus.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/migrate_base_names.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/migrate_dump.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/migrate_postgres.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/migrate_rounding_policy_v2.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/migrate_tanteo_columns.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/migrate_v2.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/normalize_units.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/prewarm_project_holiday_calendars.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/purge_community_attachments.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/rebuild_apu_templates_from_examples.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/reconcile_project_bases.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/repair_presupuesto_apu_scope.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/repair_presupuesto_operational_lines.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/repair_santiago_apu_catalog.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/repair_santiago_master_project_sync.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/reset_user_password.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/sanitize_admin_general_duplicate_apu_codes.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/sanitize_apu_cross_integrity.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/sanitize_catalog_text_format.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/sanitize_company_admin_profiles.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/sanitize_data_integrity.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/sanitize_edt_presupuesto_sync.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/sanitize_operational_budgets.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/sanitize_project_base_sync.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/sanitize_santiago_divergent_apu_codes.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/search_data.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/seed_bim_superadmin_bootstrap.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/seed_community_demo.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/seed_marketplace_system_catalog.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/seed_marketplace_system_categories.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/seed_paises.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/seed_paises_v2.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/seed_proyect_pru.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/seed_resources.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/seed_special_licenses.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/seed_stakeholders.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/seed_test_company.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/smoke_test_cronogramas_gantt_real.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/smoke_test_cronogramas_manual_milestone_lag_real.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/smoke_test_cronogramas_manual_milestone_successor_real.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/smoke_test_cronogramas_manual_milestones_real.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/smoke_test_formula_polinomica_real.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/smoke_test_presupuesto_apu_scope.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/smoke_test_reporting_apu_excel_alignment.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/smoke_test_reporting_presupuesto_excel.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/smoke_test_reporting_print_setup.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/sync_db.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/sync_santiago_bermeo_stakeholder_roles.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/test_apu_logic.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/test_bcrypt.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/test_login_api.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/update_bases_empresa.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/update_empresa_pru.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/update_usuarios_table.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "backend/scripts/verify_healing.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "backend/scripts/verify_move_fix.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "scripts/analyze_omniclass.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "scripts/apply_omniclass_db.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "scripts/backup_before_migration.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "scripts/check_maestro.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "scripts/check_omniclass_data.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "scripts/check_placeholders.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "scripts/db_test.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "scripts/debug_apus.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "scripts/migration_apu_codes.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "scripts/patch_templates_omniclass.py",
+          "reason": "script operativo historico"
+        },
+        {
+          "path": "scripts/seed_omniclass.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        },
+        {
+          "path": "scripts/verify_migration.py",
+          "reason": "script suelto con prefijo operativo/debug"
+        }
+      ]
+    },
+    "low_formal_tests_and_assets": {
+      "risk": "low",
+      "description": "Pruebas formales y assets que deben conservarse y validarse si cambian.",
+      "count": 59,
+      "samples": [
+        {
+          "path": "assets/LogoSoft.png",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "assets/MH1.jpg",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "assets/favico.png",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "backend/app/tests/conftest.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_apu_unit_integrity.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_calculation_policy.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_codcpc_search.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_community_permissions.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_cpm.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_integrated_references.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_trabajo_advanced_calendar_config.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_trabajo_cpm_metadata.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_trabajo_dependency_response.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_trabajo_duration_model.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_trabajo_full_reset_endpoint.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_trabajo_interparent_merge_endpoint.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_trabajo_ms_project.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_trabajo_operational_session_metadata.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_trabajo_repository.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronograma_trabajo_seed_contracts.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronogramas_creation_defaults.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_cronogramas_rollback_guards.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_license_service_special_flags.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_marketplace_admin_beta_access.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_marketplace_portal_import_endpoint.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_marketplace_project_sales_e2e.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_marketplace_purchase_bound_policy.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_nested_apu_integrity.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_numeric_integrity_secondary_modules.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_presupuesto_base_scope_guardrails.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_presupuesto_integrity_service.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_project_base_reconciliation.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_project_calendar_service.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_project_delete_endpoint.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_project_marketplace_exporter.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_proyecto_service.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_public_procurement_import_profile_engine.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_public_procurement_project_import_access.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_public_procurement_project_import_preview_endpoint.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_public_procurement_project_materialize_endpoint.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_public_procurement_project_materializer.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_public_procurement_technical_analysis.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_reporting_cronograma_integrated_reports.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_reporting_edo_edt_reports.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_reporting_presupuesto_indirectos.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_reporting_stakeholders_excel_pdf.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_stakeholder_role_sync.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "backend/app/tests/test_usuario_admin_profile_hierarchy.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "frontend/public/favicon.png",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "frontend/public/vite.svg",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "frontend/src/assets/GiproyIconGradient.svg",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "frontend/src/assets/GiproyWordmarkWhite.png",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "frontend/src/assets/LogoGiproyCompleto copy.png",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "frontend/src/assets/LogoGiproyCompleto.png",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "frontend/src/assets/LogoSoft.png",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "frontend/src/assets/proposal_icon_blueprint_network_1773160768536.png",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "frontend/src/assets/react.svg",
+          "reason": "asset productivo o publico"
+        },
+        {
+          "path": "tools/launcher/tests/__init__.py",
+          "reason": "prueba formal conservada"
+        },
+        {
+          "path": "tools/launcher/tests/test_ops_smoke.py",
+          "reason": "prueba formal conservada"
+        }
+      ]
+    }
+  },
+  "rules": {
+    "do_not_delete": true,
+    "move_only_by_task": true,
+    "search_references_before_move": true,
+    "validate_bim_non_interference": true
+  }
+}

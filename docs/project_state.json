@@ -1,0 +1,372 @@
+{
+  "last_update": "2026-05-21T00:00:00-05:00",
+  "mode": "GIPROY CLASICO",
+  "purpose": "Snapshot IA para evitar reanalisis completo y guiar refactor enterprise incremental.",
+  "architecture": {
+    "style": "monolito modular full-stack con backend unico comun",
+    "backend_entrypoint": "backend/app/main.py",
+    "backend_router": "backend/app/api/api.py",
+    "api_prefix": "/api/v1",
+    "frontend_entrypoint": "frontend/src/main.jsx",
+    "frontend_router": "frontend/src/routes/AppRouter.jsx",
+    "migration_tooling": "backend/alembic + backend/alembic.ini",
+    "database": "PostgreSQL",
+    "bim_strategy": "dominio aislado + feature flags + no dependencia desde GiProy Clasico"
+  },
+  "backend": {
+    "modules": {
+      "core": [
+        "config",
+        "database",
+        "security",
+        "tenant/context helpers",
+        "rounding",
+        "calculation_policy",
+        "debug_logger"
+      ],
+      "api_endpoints": [
+        "auth",
+        "usuarios",
+        "empresas",
+        "proyectos",
+        "proyecto_detalles",
+        "stakeholders",
+        "roles",
+        "maestros",
+        "paises",
+        "recursos",
+        "apus",
+        "presupuestos",
+        "bases_trabajo",
+        "subcategorias",
+        "subcategorias_items",
+        "dispositivos",
+        "edo",
+        "edt",
+        "utils",
+        "system_announcements",
+        "project_calendar_entries",
+        "personal_todos",
+        "admin_audit",
+        "admin_system",
+        "admin_import_models",
+        "admin_maintenance",
+        "admin_bim",
+        "admin_licenses",
+        "cronogramas",
+        "cronogramas_trabajo",
+        "polinomica",
+        "reporting",
+        "community",
+        "marketplace",
+        "bim",
+        "bim_models",
+        "bim_view_states",
+        "bim_links"
+      ],
+      "domains": [
+        "auth",
+        "multiempresa",
+        "proyectos",
+        "precios_unitarios",
+        "apus",
+        "presupuestos",
+        "edt",
+        "edo",
+        "stakeholders",
+        "cronogramas",
+        "reporting",
+        "marketplace",
+        "compras_publicas",
+        "administracion_global",
+        "comunidad",
+        "bim"
+      ],
+      "services": [
+        "apu",
+        "presupuesto",
+        "cronograma_trabajo",
+        "cronograma_cpm",
+        "project_calendar",
+        "reporting",
+        "marketplace",
+        "public_procurement",
+        "community",
+        "license_policy",
+        "audit_event",
+        "system_maintenance",
+        "bim"
+      ],
+      "workers": [],
+      "websocket": {
+        "present": false,
+        "notes": "No se detecto WebSocket productivo montado en el router principal."
+      }
+    },
+    "critical_tables": [
+      "usuarios",
+      "empresas",
+      "proyectos",
+      "proyecto_detalles",
+      "bases_trabajo",
+      "subcategorias_items",
+      "recursos",
+      "apus",
+      "apu_lineas",
+      "presupuestos",
+      "presupuesto_detalles",
+      "edo_nodes",
+      "edt_nodes",
+      "stakeholders",
+      "proyecto_stakeholders",
+      "cronogramas_valorados",
+      "cronogramas_trabajo",
+      "marketplace_products",
+      "marketplace_orders",
+      "marketplace_asset_origins",
+      "community_posts",
+      "community_sanctions",
+      "system_audit_events",
+      "bim_models",
+      "bim_model_versions",
+      "bim_elements",
+      "bim_view_states"
+    ],
+    "runtime_flags": {
+      "CREATE_TABLES_ON_STARTUP": "default false; no usar como sustituto de Alembic",
+      "BIM_ENABLED": "default false",
+      "BIM_ALLOWED_EMPRESA_IDS": "allowlist opcional",
+      "BIM_ALLOWED_USER_IDS": "allowlist opcional"
+    }
+  },
+  "frontend": {
+    "modules": {
+      "pages": [
+        "Login",
+        "ForgotPassword",
+        "ResetPassword",
+        "Dashboard",
+        "Proyectos",
+        "ProjectManager",
+        "PreciosUnitarios",
+        "BasesTrabajo",
+        "Subcategorias",
+        "APUs",
+        "Recursos",
+        "Presupuestos",
+        "Community",
+        "Marketplace",
+        "MarketplaceBuyerDashboard",
+        "SellerDashboard",
+        "MarketplaceAdminDashboard",
+        "Settings",
+        "AdminGlobal"
+      ],
+      "project_components": [
+        "DatosProyecto",
+        "Stakeholders",
+        "Edo",
+        "Edt",
+        "Cronogramas",
+        "CronogramaGantt",
+        "DesagregacionTab",
+        "FormulaPolinomicaTab",
+        "BimTab"
+      ],
+      "shared_components": [
+        "ui",
+        "reporting",
+        "marketplace",
+        "precios-unitarios",
+        "presupuestos",
+        "bim"
+      ],
+      "contexts": [
+        "AuthContext",
+        "PresupuestoContext"
+      ],
+      "api_clients": [
+        "axiosConfig",
+        "tenant",
+        "proyectos",
+        "proyectoDetalle",
+        "basesTrabajo",
+        "subcategoriasItems",
+        "recursos",
+        "apus",
+        "presupuestos",
+        "cronogramas",
+        "reporting",
+        "marketplace",
+        "community",
+        "bim"
+      ]
+    },
+    "routes": [
+      "/login",
+      "/forgot-password",
+      "/reset-password",
+      "/",
+      "/dashboard",
+      "/proyectos",
+      "/proyectos/gestor",
+      "/precios-unitarios",
+      "/precios-unitarios/bases",
+      "/precios-unitarios/subcategorias",
+      "/apus",
+      "/recursos",
+      "/proyectos/:proyectoId/presupuestos",
+      "/proyectos/:proyectoId/presupuestos/:presupuestoId",
+      "/servicios",
+      "/servicios/comunidad",
+      "/marketplace",
+      "/product/:productId",
+      "/pedido/:orderId",
+      "/marketplace/buyer",
+      "/dashboard/buyer",
+      "/dashboard/seller",
+      "/dashboard/admin",
+      "/settings",
+      "/admin-global",
+      "/admin-global/estado",
+      "/admin-global/sesiones",
+      "/admin-global/mantenimiento",
+      "/admin-global/bim",
+      "/admin-global/licencias",
+      "/admin-global/comunicados",
+      "/admin-global/gobernanza",
+      "/admin-global/auditoria",
+      "/admin-global/herramientas",
+      "/admin-global/modelos-importacion",
+      "/admin-global/empresa-auditada"
+    ]
+  },
+  "api_surface": {
+    "resource_groups": [
+      "auth",
+      "usuarios",
+      "empresas",
+      "proyectos",
+      "proyecto-detalles",
+      "stakeholders",
+      "roles",
+      "maestros",
+      "paises",
+      "recursos",
+      "apus",
+      "presupuestos",
+      "bases-trabajo",
+      "subcategorias",
+      "subcategorias-items",
+      "dispositivos",
+      "edo",
+      "edt",
+      "utils",
+      "system-announcements",
+      "project-calendar",
+      "personal-todos",
+      "admin",
+      "cronogramas",
+      "cronogramas-trabajo",
+      "polinomica",
+      "reporting",
+      "community",
+      "marketplace",
+      "bim"
+    ]
+  },
+  "dependencies": {
+    "backend": [
+      "fastapi",
+      "uvicorn",
+      "sqlalchemy",
+      "alembic",
+      "pydantic",
+      "pydantic-settings",
+      "psycopg2-binary",
+      "python-multipart",
+      "PyJWT",
+      "httpx",
+      "openpyxl",
+      "xlrd",
+      "reportlab",
+      "pdfplumber",
+      "language-tool-python",
+      "pywin32"
+    ],
+    "frontend": [
+      "react",
+      "vite",
+      "react-router-dom",
+      "axios",
+      "framer-motion",
+      "lucide-react",
+      "leaflet",
+      "react-leaflet",
+      "radix primitives",
+      "playwright"
+    ]
+  },
+  "sensitive_modules": [
+    "auth/security",
+    "tenant/empresa_id",
+    "proyectos/revisiones/delete/export",
+    "bases/APUs/recursos/presupuestos",
+    "EDT/EDO/stakeholders",
+    "cronogramas/Gantt/valorado/caja",
+    "marketplace compras/ventas/origen",
+    "public procurement import",
+    "community moderation",
+    "admin licenses/audit",
+    "BIM isolated domain"
+  ],
+  "technical_debt": [
+    "Muchos scripts sueltos de debug/verificacion/migracion en raiz, backend, scripts y tmp.",
+    "Artefactos peligrosos para Git: dumps, .db, logs, perfiles Edge, backups y binarios externos.",
+    "Paginas frontend y endpoints backend de alta complejidad concentrada.",
+    "Imports diferidos en servicios/repositorios senalan ciclos o acoplamientos historicos.",
+    "El snapshot historico estaba desactualizado respecto a Marketplace, Comunidad, BIM y Cronogramas avanzados."
+  ],
+  "ai_tooling": {
+    "snapshots": [
+      {
+        "path": "docs/repo_hygiene_inventory.json",
+        "generator": "tools/ai_tools/repo_hygiene_inventory.py",
+        "purpose": "Clasificar artefactos sensibles, generados, scripts sueltos y assets/pruebas para evitar limpiezas destructivas."
+      },
+      {
+        "path": "docs/logging_inventory.json",
+        "generator": "tools/ai_tools/logging_inventory.py",
+        "purpose": "Inventariar print(), logger.*, console.* y salidas PowerShell con terminos sensibles heurísticos antes de micro-refactors de logging."
+      }
+    ],
+    "baseline_validator": {
+      "path": "tools/ai_tools/validate_enterprise_baseline.py",
+      "covers": [
+        "JSON documentales",
+        "compileall backend/app",
+        "import app.main",
+        "npm run build con --include-frontend",
+        "smoke classic no-BIM con --include-frontend"
+      ]
+    }
+  },
+  "validation_policy": {
+    "backend": [
+      "py_compile focal sobre archivos tocados",
+      "pytest focal por modulo",
+      "no migraciones destructivas",
+      "auth y tenant deben conservarse"
+    ],
+    "frontend": [
+      "npm run build",
+      "smoke-classic-no-bim-contamination",
+      "validar rutas y componentes tocados"
+    ],
+    "bim": [
+      "no activar UX BIM durante trabajo clasico",
+      "feature flag apagable",
+      "sin dependencia desde componentes clasicos"
+    ]
+  }
+}

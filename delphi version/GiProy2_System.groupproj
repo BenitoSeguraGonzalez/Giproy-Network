@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{7983DF7D-915A-4926-B630-923B5C6603CA}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="GiProyV2.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\GiProy_Administrador\GiproyAdministrador.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Libro de Obras\Libro_Obras.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="GiProyV2">
+        <MSBuild Projects="GiProyV2.dproj"/>
+    </Target>
+    <Target Name="GiProyV2:Clean">
+        <MSBuild Projects="GiProyV2.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="GiProyV2:Make">
+        <MSBuild Projects="GiProyV2.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="GiproyAdministrador">
+        <MSBuild Projects="..\GiProy_Administrador\GiproyAdministrador.dproj"/>
+    </Target>
+    <Target Name="GiproyAdministrador:Clean">
+        <MSBuild Projects="..\GiProy_Administrador\GiproyAdministrador.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="GiproyAdministrador:Make">
+        <MSBuild Projects="..\GiProy_Administrador\GiproyAdministrador.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Libro_Obras">
+        <MSBuild Projects="Libro de Obras\Libro_Obras.dproj"/>
+    </Target>
+    <Target Name="Libro_Obras:Clean">
+        <MSBuild Projects="Libro de Obras\Libro_Obras.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Libro_Obras:Make">
+        <MSBuild Projects="Libro de Obras\Libro_Obras.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="GiProyV2;GiproyAdministrador;Libro_Obras"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="GiProyV2:Clean;GiproyAdministrador:Clean;Libro_Obras:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="GiProyV2:Make;GiproyAdministrador:Make;Libro_Obras:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

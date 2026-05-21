@@ -1,0 +1,80 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Backend local config and runtime
+backend/.env
+backend/uploads/
+backend/*.log
+backend/*.db
+backend/app/core/database.db
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# Runtime artifacts
+.runtime/
+logs/
+tmp/
+backups/
+uploads/
+*.log
+*.jsonl
+*.gz
+*.tar
+*.zip
+*.7z
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+docs/runtime/LAST_MODE_PROMPT.txt
+docs/runtime/WORK_MODE_STATE.local.json
+
+# Database dumps and sensitive local material
+DBDump/
+*.bak
+*.bkp
+CloudFlared-bkp/*token*.txt
+CloudFlared-bkp/
+docs/db_credentials.txt
+*API Key*.txt
+*api key*.txt
+Complementos/
+
+# Build artifacts
+dist/
+build/
+
+# Frontend generated diagnostics
+frontend/tmp_*
+frontend/*lint*.txt
+frontend/*lint*.json
+frontend/*harness.html
+
+# Local traces and service/debug files
+auth_session_trace.jsonl
+backend/auth_session_trace.jsonl
+fatal_errors.log
+auth_debug.log
+backend/fatal_errors.log
+backend/auth_debug.log
+
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/
+*.suo
+*.swp
+
+# Temporary/clutter folders
+%TEMP%/
+.aider*
