@@ -21,9 +21,9 @@ class BimSynchroParityValidatorTests(unittest.TestCase):
         result = MODULE.validate_contract(self.matrix)
         self.assertEqual([], result["errors"])
         self.assertEqual(60, result["total"])
-        self.assertEqual(73.33, result["score_percent"])
+        self.assertEqual(74.17, result["score_percent"])
         self.assertEqual(
-            {"complete": 40, "partial": 8, "absent": 12}, result["counts"]
+            {"complete": 41, "partial": 7, "absent": 12}, result["counts"]
         )
 
     def test_duplicate_and_missing_evidence_are_rejected(self) -> None:

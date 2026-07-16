@@ -94,6 +94,8 @@ from app.schemas.bim_cost_change_order import BimCostChangeOrderCreate, BimCostC
 from app.services.bim.cost_change_order_service import create_change_order, decide_change_order, list_change_orders, transition_change_order
 from app.schemas.bim_cost_actual import BimCostActualLedgerResponse
 from app.services.bim.cost_actual_service import get_actual_cost_ledger, sync_actual_cost_ledger
+from app.schemas.bim_cost_forecast import BimCostForecastCreate, BimCostForecastDecision, BimCostForecastResponse
+from app.services.bim.cost_forecast_service import create_forecast, decide_forecast, list_forecasts
 from app.services.bim.qto_service import (
     create_qto_snapshot,
     decide_qto_snapshot,
@@ -1003,6 +1005,18 @@ def get_project_bim_actual_costs(project_id: int, empresa_id: Optional[int] = No
 def sync_project_bim_actual_costs(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
     return sync_actual_cost_ledger(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id)
+
+@router.get("/projects/{project_id}/cost-forecasts", response_model=list[BimCostForecastResponse])
+def list_project_bim_cost_forecasts(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project=_resolve_project(db,project_id,current_user,empresa_id);_require_bim_access(db,project,current_user,"bim.view");return list_forecasts(db,project_id=project.id,company_id=project.empresa_id)
+
+@router.post("/projects/{project_id}/cost-forecasts", response_model=BimCostForecastResponse, status_code=status.HTTP_201_CREATED)
+def create_project_bim_cost_forecast(project_id: int, payload: BimCostForecastCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project=_resolve_project(db,project_id,current_user,empresa_id);_require_bim_access(db,project,current_user,"bim.review");return create_forecast(db,project_id=project.id,company_id=project.empresa_id,user_id=current_user.id,payload=payload)
+
+@router.post("/projects/{project_id}/cost-forecasts/{forecast_id}/decision", response_model=BimCostForecastResponse)
+def decide_project_bim_cost_forecast(project_id: int, forecast_id: int, payload: BimCostForecastDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project=_resolve_project(db,project_id,current_user,empresa_id);_require_bim_access(db,project,current_user,"bim.coordinate");return decide_forecast(db,forecast_id=forecast_id,project_id=project.id,company_id=project.empresa_id,user_id=current_user.id,payload=payload)
 
 
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)

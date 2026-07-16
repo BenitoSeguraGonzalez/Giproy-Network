@@ -880,3 +880,11 @@ intercambio end-to-end.
   1920x900/2560x1300, anti-BIM y baseline pasan.
 - F06 queda completa. Paridad: `73,33%`, con 40 completas, 8 parciales y 12
   ausentes. Programa: 33/61, 54,10% realizado y 45,90% pendiente. Sin deploy.
+## Forecast de coste final BIM - 2026-07-16
+
+- `BIM-TASK-0160` completa F07 con revisiones monetarias multi-moneda,
+  trazables y aprobables sin mutar sus fuentes.
+- PostgreSQL reversible, build, 27 smokes BIM, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- Paridad: `74,17%`, 41 completas, 7 parciales y 12 ausentes. Programa: 34/61,
+  55,74% realizado y 44,26% pendiente. Sin deploy.

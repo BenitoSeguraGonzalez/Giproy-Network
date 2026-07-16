@@ -53,6 +53,7 @@ BIM_TABLES = {
     "bim_cost_schedules_of_values",
     "bim_cost_change_orders",
     "bim_cost_actual_entries",
+    "bim_cost_forecasts",
     "bim_schedule_import_revisions",
     "bim_qto_snapshots",
     "bim_4d_resource_leveling_scenarios",
@@ -111,10 +112,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2043a1b2c3"
+        head for head in script.get_heads() if head != "de2044a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2043a1b2c3")
+    command.upgrade(config, "de2044a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -401,6 +402,8 @@ def validate(database_name: str) -> None:
         ).scalar_one()
         if actual_cost_type != "numeric" or actual_posted_type != "timestamp with time zone" or field_currency_type != "character varying":
             raise RuntimeError("El ledger de coste real BIM no usa NUMERIC/TIMESTAMPTZ/moneda explicita.")
+        forecast_type = connection.execute(text("select data_type from information_schema.columns where table_name='bim_cost_forecasts' and column_name='forecast_at_completion'" )).scalar_one()
+        if forecast_type != "numeric": raise RuntimeError("El forecast BIM no usa NUMERIC.")
 
     command.downgrade(config, "de2010a1b2c3")
     with engine.connect() as connection:
@@ -414,10 +417,10 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2043a1b2c3")
+    command.upgrade(config, "de2044a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2043a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2044a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
@@ -426,7 +429,7 @@ def validate(database_name: str) -> None:
         "unplanned_events=TIMESTAMPTZ field_resources=TIMESTAMPTZ crews_timecards=DATE "
         "cost_estimates=NUMERIC cost_contracts=NUMERIC/DATE cost_payments=NUMERIC/DATE/TIMESTAMPTZ "
         "cost_sov=NUMERIC/partial_index cost_changes=NUMERIC/TIMESTAMPTZ "
-        "actual_cost=NUMERIC/TIMESTAMPTZ/currency"
+        "actual_cost=NUMERIC/TIMESTAMPTZ/currency forecast=NUMERIC"
     )
 
 

@@ -109,7 +109,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | F04 | Schedule of Values | Completa | `BIM-TASK-0157`: asignacion completa, versionada y aprobable del compromiso contractual |
 | F05 | Ordenes y potenciales ordenes de cambio | Completa | `BIM-TASK-0158`: PCO gobernadas, decision auditable e impacto transaccional sobre contrato y SOV BIM |
 | F06 | Coste real desde campo | Completa | `BIM-TASK-0105/0159`: partes con coste acumulado y ledger incremental, inmutable, multi-moneda y tenant-aware |
-| F07 | Forecast de costo final | Parcial | existen datos base; falta forecast versionado y aprobado |
+| F07 | Forecast de costo final | Completa | `BIM-TASK-0160`: snapshot versionado/aprobable de presupuesto, compromiso, real, ETC, EAC y variacion |
 
 ### G. Entrega, commissioning y gemelo digital
 

@@ -1,5 +1,17 @@
 # HANDOFF
 
+## 2026-07-16 - Forecast de coste final BIM
+
+- `BIM-TASK-0160` cierra F07 con revisiones que congelan presupuesto aprobado,
+  compromiso, coste real, ETC, EAC y variacion por moneda.
+- La aprobacion sustituye solo el forecast aprobado anterior de la misma moneda
+  y no modifica ninguna fuente monetaria.
+- `de2044a1b2c3` es aditiva y reversible; Produccion incorpora `Forecast`.
+- Build, 27 smokes BIM, PostgreSQL, Playwright 1920x900/2560x1300 y baseline
+  pasan. GiProy Clasico permanece intacto con BIM apagado.
+- Paridad: 74,17% (41 completas, 7 parciales, 12 ausentes). Programa: 34/61,
+  55,74% realizado y 44,26% pendiente. Sin deploy.
+
 ## 2026-07-16 - Ledger de coste real desde Campo BIM
 
 - `BIM-TASK-0159` cierra F06 con un asiento inmutable por parte de Campo y

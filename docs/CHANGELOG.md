@@ -15832,3 +15832,8 @@ Cambios realizados
 - Se bloquean acumulados decrecientes y monedas mezcladas; los eventos
   validados permanecen como excepciones fuera del total para evitar duplicados.
 - F06 pasa a completa; paridad 73,33% y programa 54,10% completado.
+### 2026-07-16 - Forecast de coste final BIM (BIM-TASK-0160)
+
+- Produccion BIM V2 incorpora forecast versionado y aprobable con presupuesto,
+  compromiso, coste real, ETC, EAC y variacion congelados por moneda.
+- F07 pasa a completa; paridad 74,17% y programa 55,74% completado.

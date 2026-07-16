@@ -238,6 +238,7 @@ iniciada.
 | `BIM-TASK-0157` | Cerrada localmente: Schedule of Values BIM gobernado |
 | `BIM-TASK-0158` | Cerrada localmente: potenciales ordenes y ordenes de cambio BIM gobernadas |
 | `BIM-TASK-0159` | Cerrada localmente: ledger gobernado de coste real desde Campo BIM |
+| `BIM-TASK-0160` | Cerrada localmente: forecast versionado de coste final BIM |
 
 ## Orden de ejecucion
 

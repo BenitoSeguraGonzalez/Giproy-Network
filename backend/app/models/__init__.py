@@ -125,6 +125,7 @@ from .bim_cost_payment import BimCostPaymentApplication
 from .bim_cost_sov import BimCostScheduleOfValues
 from .bim_cost_change_order import BimCostChangeOrder
 from .bim_cost_actual import BimCostActualEntry
+from .bim_cost_forecast import BimCostForecast
 from .bim_cde import BimCdeDocument, BimCdeDocumentRevision
 from .bim_cde_rfi import BimCdeRfi, BimCdeRfiEvent
 from .bim_cde_submittal import BimCdeSubmittal, BimCdeSubmittalEvent, BimCdeSubmittalRevision
