@@ -15794,3 +15794,11 @@ Cambios realizados
   completo de rechazo, reenvio y aprobacion.
 - PostgreSQL real, suites backend/frontend, anti-BIM y baseline enterprise
   quedan verdes; C03 pasa a completa y la paridad queda en 52,50%.
+### 2026-07-16 - Contratos BIM de coste gobernados (BIM-TASK-0155)
+
+- Añadido dominio `bim_cost_contracts` tenant-aware sobre estimaciones BIM
+  aprobadas, con importes decimales, periodo y transiciones gobernadas.
+- Añadidos endpoints, cliente API y herramienta `Contratos` en Produccion BIM
+  V2, sin acoplamiento a dominios contractuales o financieros clasicos.
+- Añadidos tests focales, migracion PostgreSQL reversible y smoke Playwright
+  para 1920x900 y resoluciones superiores.

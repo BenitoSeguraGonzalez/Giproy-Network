@@ -1,5 +1,19 @@
 # HANDOFF
 
+## 2026-07-16 - Contratos BIM de coste gobernados
+
+- `BIM-TASK-0155` cierra F02 con compromisos tenant-aware derivados solo de
+  estimaciones BIM aprobadas y cuyo acumulado se limita por su subtotal.
+- `de2039a1b2c3` es aditiva y reversible; no toca proveedores, compras,
+  contratos, Presupuestos ni contabilidad clasicos.
+- Produccion incorpora `Contratos`; build, 22 smokes BIM, PostgreSQL,
+  Playwright 1920x900/2560x1300 y baseline pasan.
+- Paridad: 67,50% (36 completas, 9 parciales, 15 ausentes). Programa: 29/61,
+  47,54% realizado y 52,46% pendiente.
+- Siguiente slice: `BIM-TASK-0156`, completar F03 con solicitudes y
+  certificaciones de pago BIM contra contratos activos.
+- Esta ola no se ha desplegado.
+
 ## 2026-07-16 - Estimacion BIM gobernada
 
 - `BIM-TASK-0154` cierra F01 con estimaciones versionadas derivadas solo de

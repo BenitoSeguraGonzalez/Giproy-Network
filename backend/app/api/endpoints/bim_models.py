@@ -79,6 +79,8 @@ from app.schemas.bim_qto import (
     BimQtoSnapshotResponse,
 )
 from app.services.bim.cost_estimate_service import create_cost_estimate, decide_cost_estimate, list_cost_estimates
+from app.schemas.bim_cost_contract import BimCostContractCreate, BimCostContractResponse, BimCostContractTransition
+from app.services.bim.cost_contract_service import create_cost_contract, list_cost_contracts, transition_cost_contract
 from app.services.bim.qto_service import (
     create_qto_snapshot,
     decide_qto_snapshot,
@@ -892,6 +894,24 @@ def create_project_bim_cost_estimate(project_id: int, payload: BimCostEstimateCr
 def decide_project_bim_cost_estimate(project_id: int, estimate_id: int, payload: BimCostEstimateDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
     return decide_cost_estimate(db, estimate_id=estimate_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.get("/projects/{project_id}/cost-contracts", response_model=list[BimCostContractResponse])
+def list_project_bim_cost_contracts(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.view")
+    return list_cost_contracts(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/cost-contracts", response_model=BimCostContractResponse, status_code=status.HTTP_201_CREATED)
+def create_project_bim_cost_contract(project_id: int, payload: BimCostContractCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
+    return create_cost_contract(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/cost-contracts/{contract_id}/transition", response_model=BimCostContractResponse)
+def transition_project_bim_cost_contract(project_id: int, contract_id: int, payload: BimCostContractTransition, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
+    return transition_cost_contract(db, contract_id=contract_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
 
 
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)

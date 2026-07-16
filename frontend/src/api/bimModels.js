@@ -124,6 +124,9 @@ export const bimModelsApi = {
     listCostEstimates: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/cost-estimates`, withTenantConfig({}, empresaId))).data,
     createCostEstimate: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/cost-estimates`, payload, withTenantConfig({}, empresaId))).data,
     decideCostEstimate: async (projectId, estimateId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/cost-estimates/${estimateId}/decision`, payload, withTenantConfig({}, empresaId))).data,
+    listCostContracts: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/cost-contracts`, withTenantConfig({}, empresaId))).data,
+    createCostContract: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/cost-contracts`, payload, withTenantConfig({}, empresaId))).data,
+    transitionCostContract: async (projectId, contractId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/cost-contracts/${contractId}/transition`, payload, withTenantConfig({}, empresaId))).data,
     getCapabilities: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/capabilities`, withTenantConfig({}, empresaId));
         return response.data;

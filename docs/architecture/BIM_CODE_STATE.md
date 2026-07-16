@@ -783,6 +783,22 @@ intercambio end-to-end.
 - F01 queda completa. Paridad: `65,83%`, con 35 completas, 9 parciales y 16
   ausentes. Programa: 28/61, 45,90% realizado y 54,10% pendiente. Sin deploy.
 
+## Contratos BIM de coste - 2026-07-16
+
+- `BIM-TASK-0155` completa F02 mediante contratos derivados exclusivamente de
+  una estimacion BIM aprobada y dentro del mismo tenant/proyecto.
+- `bim_cost_contracts` persiste numero, objeto, contraparte, moneda heredada,
+  compromiso `NUMERIC`, periodo, estado, lock y trazabilidad de transicion.
+- El compromiso acumulado no cancelado no puede superar el subtotal aprobado;
+  el workflow permitido es borrador a activo/cancelado y activo a
+  cerrado/cancelado.
+- Backend, API y UI viven en BIM y no dependen de proveedores, compras,
+  contratos, Presupuestos o contabilidad clasicos.
+- PostgreSQL reversible, build, 22 smokes BIM, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- F02 queda completa. Paridad: `67,50%`, con 36 completas, 9 parciales y 15
+  ausentes. Programa: 29/61, 47,54% realizado y 52,46% pendiente. Sin deploy.
+
 ## Cuadrillas y partes de horas BIM - 2026-07-16
 
 - `BIM-TASK-0153` completa E08 con directorio de cuadrillas BIM y partes

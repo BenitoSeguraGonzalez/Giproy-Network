@@ -104,7 +104,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | ID | Capacidad | Estado | Evidencia o brecha principal |
 |---|---|---|---|
 | F01 | Estimacion basada en QTO | Completa | `BIM-TASK-0085/0154`: QTO aprobado, precios completos y estimacion BIM gobernada |
-| F02 | Contratos | Ausente | sin dominio contractual BIM/Cost |
+| F02 | Contratos | Completa | `BIM-TASK-0155`: compromisos tenant-aware sobre estimacion aprobada y workflow gobernado |
 | F03 | Solicitudes y certificaciones de pago | Ausente | no implementadas |
 | F04 | Schedule of Values | Ausente | no implementado |
 | F05 | Ordenes y potenciales ordenes de cambio | Ausente | no implementadas |

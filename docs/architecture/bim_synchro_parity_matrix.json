@@ -57,7 +57,7 @@
     {"id": "E07", "group": "perform", "status": "complete", "evidence": ["BIM-TASK-0044", "BIM-TASK-0115", "BIM-TASK-0152", "Traceable receipt consumption and return lifecycle"]},
     {"id": "E08", "group": "perform", "status": "complete", "evidence": ["BIM-TASK-0153", "Tenant-aware BIM crew directory and activity timecards"]},
     {"id": "F01", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0085", "BIM-TASK-0154", "Governed estimate from approved QTO with decimal pricing"]},
-    {"id": "F02", "group": "cost", "status": "absent", "evidence": ["BIM Cost contracts pending"]},
+    {"id": "F02", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0155", "Tenant-aware BIM cost contracts governed by approved estimates"]},
     {"id": "F03", "group": "cost", "status": "absent", "evidence": ["Payment applications pending"]},
     {"id": "F04", "group": "cost", "status": "absent", "evidence": ["Schedule of Values pending"]},
     {"id": "F05", "group": "cost", "status": "absent", "evidence": ["Change order workflow pending"]},

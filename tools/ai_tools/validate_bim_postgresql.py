@@ -48,6 +48,7 @@ BIM_TABLES = {
     "bim_4d_crews",
     "bim_4d_timecards",
     "bim_cost_estimates",
+    "bim_cost_contracts",
     "bim_schedule_import_revisions",
     "bim_qto_snapshots",
     "bim_4d_resource_leveling_scenarios",
@@ -106,10 +107,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2038a1b2c3"
+        head for head in script.get_heads() if head != "de2039a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2038a1b2c3")
+    command.upgrade(config, "de2039a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -312,6 +313,20 @@ def validate(database_name: str) -> None:
         ).scalar_one()
         if estimate_subtotal_type != "numeric":
             raise RuntimeError("La estimacion BIM no usa NUMERIC para el subtotal.")
+        contract_amount_type = connection.execute(
+            text(
+                "select data_type from information_schema.columns "
+                "where table_name='bim_cost_contracts' and column_name='committed_amount'"
+            )
+        ).scalar_one()
+        contract_start_type = connection.execute(
+            text(
+                "select data_type from information_schema.columns "
+                "where table_name='bim_cost_contracts' and column_name='start_date'"
+            )
+        ).scalar_one()
+        if contract_amount_type != "numeric" or contract_start_type != "date":
+            raise RuntimeError("El contrato BIM no usa NUMERIC/DATE para importe y periodo.")
 
     command.downgrade(config, "de2010a1b2c3")
     with engine.connect() as connection:
@@ -325,16 +340,17 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2038a1b2c3")
+    command.upgrade(config, "de2039a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2038a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2039a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
         "document_acl=BOOLEAN site_georeference=TIMESTAMPTZ cde_reviews=TIMESTAMPTZ "
         "issue_attachments=BYTEA/TIMESTAMPTZ field_inspections=JSON/TIMESTAMPTZ "
-        "unplanned_events=TIMESTAMPTZ field_resources=TIMESTAMPTZ crews_timecards=DATE cost_estimates=NUMERIC"
+        "unplanned_events=TIMESTAMPTZ field_resources=TIMESTAMPTZ crews_timecards=DATE "
+        "cost_estimates=NUMERIC cost_contracts=NUMERIC/DATE"
     )
 
 

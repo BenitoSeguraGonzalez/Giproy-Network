@@ -120,6 +120,7 @@ from .bim_4d_safety import Bim4dSafetyInspection, Bim4dSafetyPunchItem, Bim4dSaf
 from .bim_4d_event import Bim4dUnplannedEvent
 from .bim_schedule_interop import BimScheduleImportRevision
 from .bim_qto import BimCostEstimate, BimQtoSnapshot
+from .bim_cost_contract import BimCostContract
 from .bim_cde import BimCdeDocument, BimCdeDocumentRevision
 from .bim_cde_rfi import BimCdeRfi, BimCdeRfiEvent
 from .bim_cde_submittal import BimCdeSubmittal, BimCdeSubmittalEvent, BimCdeSubmittalRevision
