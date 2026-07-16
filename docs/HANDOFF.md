@@ -1,5 +1,17 @@
 # HANDOFF
 
+## 2026-07-16 - Aceptación gobernada del dossier digital BIM
+
+- `BIM-TASK-0166` completa G04 con revalidación exacta del manifiesto y
+  decisión auditable bajo locks.
+- `de2050a1b2c3` garantiza un único dossier aceptado vigente y conserva el
+  historial anterior como `superseded`.
+- 5 tests, PostgreSQL, build, 31 smokes, Playwright, anti-BIM y baseline pasan.
+- Paridad: 79,17% (45 completas, 5 parciales, 10 ausentes). Programa: 40/61,
+  65,57% realizado y 34,43% pendiente. Sin deploy.
+- Siguiente slice: `BIM-TASK-0167`, iniciar G05 con transición gobernada del
+  gemelo digital a Operaciones.
+
 ## 2026-07-16 - Ensamblado gobernado del dossier digital BIM
 
 - `BIM-TASK-0165` inicia G04 con un manifiesto SHA-256 que referencia as-built,

@@ -13,8 +13,8 @@ from app.models.bim_model_version import BimModelVersion
 from app.models.bim_punch_closure import BimPunchClosure
 from app.models.proyecto import Proyecto
 from app.models.usuario import Usuario
-from app.schemas.bim_handover_dossier import BimHandoverDossierCreate
-from app.services.bim.handover_dossier_service import create_handover_dossier, list_handover_dossiers
+from app.schemas.bim_handover_dossier import BimHandoverDossierCreate, BimHandoverDossierDecision
+from app.services.bim.handover_dossier_service import create_handover_dossier, decide_handover_dossier, list_handover_dossiers
 
 
 def _context(db, empresa, *, accepted_asset=True, with_document=True):
@@ -42,6 +42,8 @@ def test_handover_dossier_freezes_governed_manifest(db, sample_empresa):
     assert dossier["total_systems"] == dossier["total_assets"] == dossier["total_documents"] == 1
     assert dossier["manifest"]["schema"] == "giproy_bim_handover_manifest_v1"
     assert len(dossier["manifest_checksum_sha256"]) == 64
+    accepted = decide_handover_dossier(db, dossier_id=dossier["id"], project_id=project.id, company_id=sample_empresa.id, user_id=user.id, payload=BimHandoverDossierDecision(decision="accepted", reason="Paquete digital completo y verificado", expected_lock_version=1))
+    assert accepted["status"] == "accepted" and accepted["lock_version"] == 2
     assert list_handover_dossiers(db, project_id=project.id, company_id=sample_empresa.id)[0]["id"] == dossier["id"]
 
 
@@ -52,6 +54,17 @@ def test_handover_dossier_blocks_incomplete_sources(db, sample_empresa, accepted
         create_handover_dossier(db, project_id=project.id, company_id=sample_empresa.id, user_id=user.id, payload=BimHandoverDossierCreate(revision="HD-X", assembly_notes="No debe ensamblarse"))
 
 
+def test_handover_dossier_rejects_changed_manifest(db, sample_empresa):
+    user, project = _context(db, sample_empresa)
+    dossier = create_handover_dossier(db, project_id=project.id, company_id=sample_empresa.id, user_id=user.id, payload=BimHandoverDossierCreate(revision="HD-CHANGE", assembly_notes="Fuentes inicialmente conformes"))
+    asset = db.query(BimCommissioningAsset).filter(BimCommissioningAsset.proyecto_id == project.id).one()
+    asset.lock_version += 1; db.commit()
+    with pytest.raises(HTTPException, match="fuentes del dossier cambiaron"):
+        decide_handover_dossier(db, dossier_id=dossier["id"], project_id=project.id, company_id=sample_empresa.id, user_id=user.id, payload=BimHandoverDossierDecision(decision="accepted", reason="No debe aceptar cambios", expected_lock_version=1))
+
+
 def test_handover_dossier_migration_is_additive():
     source = (Path(__file__).parents[2] / "alembic" / "versions" / "de2049a1b2c3_bim_handover_dossier.py").read_text(encoding="utf-8")
     assert 'down_revision = "de2048a1b2c3"' in source and source.count('ondelete="RESTRICT"') == 2 and "alter_column" not in source
+    acceptance_source = (Path(__file__).parents[2] / "alembic" / "versions" / "de2050a1b2c3_bim_handover_acceptance.py").read_text(encoding="utf-8")
+    assert 'down_revision = "de2049a1b2c3"' in acceptance_source and "postgresql_where" in acceptance_source and "alter_column" not in acceptance_source

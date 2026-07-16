@@ -352,6 +352,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0163](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0163.md) - Protocolos y aceptacion tecnica de commissioning
 - [BIM-TASK-0164](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0164.md) - Cierre gobernado de punch list de entrega
 - [BIM-TASK-0165](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0165.md) - Ensamblado gobernado del dossier digital
+- [BIM-TASK-0166](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0166.md) - Aceptación gobernada del dossier digital
 
 ---
 

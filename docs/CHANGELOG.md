@@ -15871,3 +15871,9 @@ Cambios realizados
 - `de2049a1b2c3` permanece aislada y reversible; no duplica ni modifica datos
   clásicos o fuentes BIM gobernadas.
 - G04 pasa a parcial; paridad 78,33% y programa 63,93% completado.
+### 2026-07-16 - Aceptación del dossier digital BIM (BIM-TASK-0166)
+
+- La aceptación reconstruye y compara el manifiesto de entrega bajo locks.
+- `de2050a1b2c3` limita a uno el dossier aceptado vigente sin borrar historial
+  ni modificar fuentes BIM o datos clásicos.
+- G04 queda completa; paridad 79,17% y programa 65,57% completado.

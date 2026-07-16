@@ -244,6 +244,7 @@ iniciada.
 | `BIM-TASK-0163` | Cerrada localmente: protocolos y aceptacion tecnica de commissioning |
 | `BIM-TASK-0164` | Cerrada localmente: cierre gobernado de punch list de entrega |
 | `BIM-TASK-0165` | Cerrada localmente: ensamblado gobernado del dossier digital |
+| `BIM-TASK-0166` | Cerrada localmente: aceptación gobernada del dossier digital |
 
 ## Orden de ejecucion
 

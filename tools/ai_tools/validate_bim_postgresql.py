@@ -118,10 +118,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2049a1b2c3"
+        head for head in script.get_heads() if head != "de2050a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2049a1b2c3")
+    command.upgrade(config, "de2050a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -182,6 +182,11 @@ def validate(database_name: str) -> None:
             raise RuntimeError("El dossier digital no usa JSON/TIMESTAMPTZ.")
         if dossier_restrict_count != 2:
             raise RuntimeError("El dossier digital no preserva sus fuentes gobernadas con RESTRICT.")
+        dossier_current_index = connection.execute(text(
+            "select indexdef from pg_indexes where tablename='bim_handover_dossiers' and indexname='uq_bim_handover_dossier_current'"
+        )).scalar_one()
+        if "UNIQUE INDEX" not in dossier_current_index or "status" not in dossier_current_index or "accepted" not in dossier_current_index:
+            raise RuntimeError("Indice parcial de dossier digital vigente invalido.")
         reported_at_type = connection.execute(
             text(
                 "select data_type from information_schema.columns "
@@ -473,10 +478,10 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2049a1b2c3")
+    command.upgrade(config, "de2050a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2049a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2050a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
@@ -487,7 +492,7 @@ def validate(database_name: str) -> None:
         "cost_sov=NUMERIC/partial_index cost_changes=NUMERIC/TIMESTAMPTZ "
         "actual_cost=NUMERIC/TIMESTAMPTZ/currency forecast=NUMERIC "
         "as_built=TIMESTAMPTZ/partial_index commissioning=JSON/TIMESTAMPTZ/RESTRICT "
-        "punch_closure=JSON/TIMESTAMPTZ/partial_index handover_dossier=JSON/TIMESTAMPTZ/RESTRICT"
+        "punch_closure=JSON/TIMESTAMPTZ/partial_index handover_dossier=JSON/TIMESTAMPTZ/RESTRICT/partial_index"
     )
 
 

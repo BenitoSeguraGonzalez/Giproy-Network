@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint, text
 from sqlalchemy.sql import func
 
 from app.core.database import Base
@@ -8,6 +8,7 @@ class BimHandoverDossier(Base):
     __tablename__ = "bim_handover_dossiers"
     __table_args__ = (
         UniqueConstraint("empresa_id", "proyecto_id", "revision", name="uq_bim_handover_dossier_revision"),
+        Index("uq_bim_handover_dossier_current", "empresa_id", "proyecto_id", unique=True, postgresql_where=text("status = 'accepted'"), sqlite_where=text("status = 'accepted'")),
         CheckConstraint("status IN ('submitted','accepted','rejected','superseded')", name="ck_bim_handover_dossier_status"),
     )
 

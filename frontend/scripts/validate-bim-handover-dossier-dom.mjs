@@ -12,7 +12,7 @@ try {
     for (const viewport of [{ width: 1920, height: 900 }, { width: 2560, height: 1300 }]) {
         const page = await browser.newPage({ viewport }); await page.goto(`${url}/bim-handover-dossier-harness.html`); await page.locator('[data-bim-handover-dossier]').waitFor();
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
-        if (viewport.width === 1920) { await page.getByLabel('Revisión del dossier digital').fill('HD-1'); await page.getByLabel('Notas de ensamblado del dossier').fill('Fuentes gobernadas verificadas para entrega'); await page.getByRole('button', { name: 'Ensamblar dossier' }).click(); await page.waitForFunction(() => document.body.textContent.includes('HD-1') && document.body.textContent.includes('3documentos')); }
+        if (viewport.width === 1920) { await page.getByLabel('Revisión del dossier digital').fill('HD-1'); await page.getByLabel('Notas de ensamblado del dossier').fill('Fuentes gobernadas verificadas para entrega'); await page.getByRole('button', { name: 'Ensamblar dossier' }).click(); await page.waitForFunction(() => document.body.textContent.includes('HD-1') && document.body.textContent.includes('3documentos')); await page.getByLabel('Motivo de decisión del dossier').fill('Paquete digital completo y verificado'); await page.getByRole('button', { name: 'Aceptar' }).click(); await page.waitForFunction(() => document.body.textContent.includes('accepted')); }
         await page.close();
     }
     console.log('validate-bim-handover-dossier-dom: ok');

@@ -948,3 +948,14 @@ intercambio end-to-end.
   consulta documentos clásicos.
 - G04 queda parcial. Paridad: `78,33%`, 44 completas, 6 parciales y 10
   ausentes. Programa: 39/61, 63,93% realizado y 36,07% pendiente. Sin deploy.
+
+## Aceptación gobernada del dossier digital BIM - 2026-07-16
+
+- `BIM-TASK-0166` completa G04 reensamblando el manifiesto bajo locks y
+  rechazando cualquier diferencia frente a la huella presentada.
+- La decisión usa lock optimista, auditoría y un índice parcial PostgreSQL que
+  permite un único dossier aceptado por tenant/proyecto.
+- La interacción permanece en `Dossier digital`; no se modifica GiProy
+  Clásico con BIM apagado.
+- Paridad: `79,17%`, 45 completas, 5 parciales y 10 ausentes. Programa: 40/61,
+  65,57% realizado y 34,43% pendiente. Sin deploy.

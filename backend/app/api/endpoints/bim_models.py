@@ -102,8 +102,8 @@ from app.schemas.bim_commissioning import BimCommissioningAssetCreate, BimCommis
 from app.services.bim.commissioning_registry_service import accept_commissioning_system, create_commissioning_asset, create_commissioning_system, create_commissioning_test, decide_commissioning_asset, decide_commissioning_test, get_commissioning_registry
 from app.schemas.bim_punch_closure import BimPunchClosureCreate, BimPunchClosureDecision, BimPunchClosureResponse
 from app.services.bim.punch_closure_service import create_punch_closure, decide_punch_closure, list_punch_closures
-from app.schemas.bim_handover_dossier import BimHandoverDossierCreate, BimHandoverDossierResponse
-from app.services.bim.handover_dossier_service import create_handover_dossier, list_handover_dossiers
+from app.schemas.bim_handover_dossier import BimHandoverDossierCreate, BimHandoverDossierDecision, BimHandoverDossierResponse
+from app.services.bim.handover_dossier_service import create_handover_dossier, decide_handover_dossier, list_handover_dossiers
 from app.services.bim.qto_service import (
     create_qto_snapshot,
     decide_qto_snapshot,
@@ -1115,6 +1115,12 @@ def list_project_bim_handover_dossiers(project_id: int, empresa_id: Optional[int
 def create_project_bim_handover_dossier(project_id: int, payload: BimHandoverDossierCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
     return create_handover_dossier(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/handover-dossiers/{dossier_id}/decision", response_model=BimHandoverDossierResponse)
+def decide_project_bim_handover_dossier(project_id: int, dossier_id: int, payload: BimHandoverDossierDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
+    return decide_handover_dossier(db, dossier_id=dossier_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
 
 
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)
