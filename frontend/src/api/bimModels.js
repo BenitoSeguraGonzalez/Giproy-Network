@@ -146,6 +146,9 @@ export const bimModelsApi = {
     listAsBuiltAcceptances: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/as-built-acceptances`, withTenantConfig({}, empresaId))).data,
     createAsBuiltAcceptance: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/as-built-acceptances`, payload, withTenantConfig({}, empresaId))).data,
     decideAsBuiltAcceptance: async (projectId, acceptanceId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/as-built-acceptances/${acceptanceId}/decision`, payload, withTenantConfig({}, empresaId))).data,
+    getCommissioningRegistry: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/commissioning`, withTenantConfig({}, empresaId))).data,
+    createCommissioningSystem: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/commissioning/systems`, payload, withTenantConfig({}, empresaId))).data,
+    createCommissioningAsset: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/commissioning/assets`, payload, withTenantConfig({}, empresaId))).data,
     getCapabilities: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/capabilities`, withTenantConfig({}, empresaId));
         return response.data;

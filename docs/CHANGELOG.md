@@ -15844,3 +15844,9 @@ Cambios realizados
 - La aceptacion usa lock optimista, revalida el checksum y sustituye la
   aceptacion vigente anterior sin mutar versiones ni datos clasicos.
 - G01 pasa a completa; paridad 75,00% y programa 57,38% completado.
+### 2026-07-16 - Registro de commissioning BIM (BIM-TASK-0162)
+
+- Entrega BIM V2 incorpora sistemas y activos vinculados a versiones listas,
+  elementos y GlobalIds, con tags y datos técnicos propios de commissioning.
+- El dominio permanece aislado de inventario, mantenimiento y equipos clasicos.
+- G02 pasa a parcial; paridad 75,83% y programa 59,02% completado.

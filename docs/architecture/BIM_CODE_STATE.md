@@ -900,3 +900,13 @@ intercambio end-to-end.
   1920x900/2560x1300, anti-BIM y baseline pasan.
 - Paridad: `75,00%`, 42 completas, 6 parciales y 12 ausentes. Programa: 35/61,
   57,38% realizado y 42,62% pendiente. Sin deploy.
+## Registro de commissioning BIM - 2026-07-16
+
+- `BIM-TASK-0162` inicia G02 con sistemas y activos tenant-aware vinculados a
+  elementos y versiones BIM listas mediante claves restrictivas.
+- Cada activo conserva tag, GlobalId, sistema IFC de origen y datos técnicos;
+  no se duplica geometria ni se escribe inventario o mantenimiento clasicos.
+- Entrega incorpora `Commissioning`; PostgreSQL reversible, 3 tests focales,
+  build, 29 smokes BIM, Playwright 1920x900/2560x1300, anti-BIM y baseline pasan.
+- G02 queda parcial. Paridad: `75,83%`, 42 completas, 7 parciales y 11
+  ausentes. Programa: 36/61, 59,02% realizado y 40,98% pendiente. Sin deploy.

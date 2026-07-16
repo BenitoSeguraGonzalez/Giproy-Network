@@ -240,6 +240,7 @@ iniciada.
 | `BIM-TASK-0159` | Cerrada localmente: ledger gobernado de coste real desde Campo BIM |
 | `BIM-TASK-0160` | Cerrada localmente: forecast versionado de coste final BIM |
 | `BIM-TASK-0161` | Cerrada localmente: aceptacion gobernada de modelo as-built BIM |
+| `BIM-TASK-0162` | Cerrada localmente: registro de activos y sistemas de commissioning |
 
 ## Orden de ejecucion
 

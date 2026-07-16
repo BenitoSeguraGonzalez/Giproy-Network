@@ -55,6 +55,8 @@ BIM_TABLES = {
     "bim_cost_actual_entries",
     "bim_cost_forecasts",
     "bim_as_built_acceptances",
+    "bim_commissioning_systems",
+    "bim_commissioning_assets",
     "bim_schedule_import_revisions",
     "bim_qto_snapshots",
     "bim_4d_resource_leveling_scenarios",
@@ -113,10 +115,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2045a1b2c3"
+        head for head in script.get_heads() if head != "de2046a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2045a1b2c3")
+    command.upgrade(config, "de2046a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -144,6 +146,11 @@ def validate(database_name: str) -> None:
         ).scalar_one()
         if "UNIQUE INDEX" not in as_built_current_index or "status" not in as_built_current_index or "accepted" not in as_built_current_index:
             raise RuntimeError("Indice parcial de entrega as-built vigente invalido.")
+        commissioning_created_type = connection.execute(
+            text("select data_type from information_schema.columns where table_name='bim_commissioning_assets' and column_name='created_at'")
+        ).scalar_one()
+        if commissioning_created_type != "timestamp with time zone":
+            raise RuntimeError("commissioning.created_at no usa TIMESTAMP WITH TIME ZONE.")
         reported_at_type = connection.execute(
             text(
                 "select data_type from information_schema.columns "
@@ -435,10 +442,10 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2045a1b2c3")
+    command.upgrade(config, "de2046a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2045a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2046a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
@@ -448,7 +455,7 @@ def validate(database_name: str) -> None:
         "cost_estimates=NUMERIC cost_contracts=NUMERIC/DATE cost_payments=NUMERIC/DATE/TIMESTAMPTZ "
         "cost_sov=NUMERIC/partial_index cost_changes=NUMERIC/TIMESTAMPTZ "
         "actual_cost=NUMERIC/TIMESTAMPTZ/currency forecast=NUMERIC "
-        "as_built=TIMESTAMPTZ/partial_index"
+        "as_built=TIMESTAMPTZ/partial_index commissioning=TIMESTAMPTZ/RESTRICT"
     )
 
 

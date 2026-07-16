@@ -25,6 +25,7 @@ import BimCostChangeOrdersPanel from './BimCostChangeOrdersPanel';
 import BimActualCostLedgerPanel from './BimActualCostLedgerPanel';
 import BimCostForecastPanel from './BimCostForecastPanel';
 import BimAsBuiltAcceptancePanel from './BimAsBuiltAcceptancePanel';
+import BimCommissioningRegistryPanel from './BimCommissioningRegistryPanel';
 import BimScheduleLinkPanel from './BimScheduleLinkPanel';
 import BimScheduleInterchangePanel from './BimScheduleInterchangePanel';
 import BimCdeDocumentsPanel from './BimCdeDocumentsPanel';
@@ -699,6 +700,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             ],
             handover: [
                 { id: 'as-built', label: 'As-built', content: <BimAsBuiltAcceptancePanel projectId={project?.id} empresaId={access?.resolved_company_id} models={workspace.models} activeVersionId={activeVersionId} /> },
+                { id: 'commissioning', label: 'Commissioning', content: <BimCommissioningRegistryPanel projectId={project?.id} empresaId={access?.resolved_company_id} versionId={activeVersionId} element={selectedElement} /> },
             ],
         };
         const bottomTools = [

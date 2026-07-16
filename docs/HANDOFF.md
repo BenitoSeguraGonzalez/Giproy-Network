@@ -1,5 +1,19 @@
 # HANDOFF
 
+## 2026-07-16 - Registro de commissioning BIM
+
+- `BIM-TASK-0162` registra sistemas y activos tenant-aware con tag, GlobalId,
+  version, elemento y sistema IFC de origen.
+- `de2046a1b2c3` es aditiva y reversible; las referencias restrictivas evitan
+  perder la trazabilidad de activos de commissioning.
+- Entrega incorpora `Commissioning`; 3 tests focales, PostgreSQL, build, 29
+  smokes BIM, Playwright 1920x900/2560x1300, anti-BIM y baseline pasan.
+- G02 queda parcial hasta protocolos de prueba y aceptacion. Paridad: 75,83%
+  (42 completas, 7 parciales, 11 ausentes). Programa: 36/61, 59,02% realizado
+  y 40,98% pendiente. Sin deploy.
+- Siguiente slice: `BIM-TASK-0163`, completar G02 con protocolos, resultados y
+  aceptacion tecnica gobernada.
+
 ## 2026-07-16 - Aceptacion de modelo as-built BIM
 
 - `BIM-TASK-0161` cierra G01 con presentación y decisión gobernadas sobre una
