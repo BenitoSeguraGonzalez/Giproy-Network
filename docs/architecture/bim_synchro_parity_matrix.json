@@ -61,7 +61,7 @@
     {"id": "F03", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0156", "Governed payment applications and certification against active BIM contracts"]},
     {"id": "F04", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0157", "Versioned Schedule of Values fully reconciled to active BIM contract"]},
     {"id": "F05", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0158", "Governed potential and approved change orders"]},
-    {"id": "F06", "group": "cost", "status": "partial", "evidence": ["BIM-TASK-0105", "Actual cost ledger pending"]},
+    {"id": "F06", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0105", "BIM-TASK-0159", "Immutable actual cost ledger from governed field reports"]},
     {"id": "F07", "group": "cost", "status": "partial", "evidence": ["4D/5D data exists", "Versioned approved forecast pending"]},
     {"id": "G01", "group": "handover", "status": "partial", "evidence": ["Immutable BIM versions", "As-built acceptance pending"]},
     {"id": "G02", "group": "handover", "status": "absent", "evidence": ["Commissioning domain pending"]},

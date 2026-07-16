@@ -108,7 +108,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | F03 | Solicitudes y certificaciones de pago | Completa | `BIM-TASK-0156`: solicitud, envio y certificacion contra contrato BIM activo |
 | F04 | Schedule of Values | Completa | `BIM-TASK-0157`: asignacion completa, versionada y aprobable del compromiso contractual |
 | F05 | Ordenes y potenciales ordenes de cambio | Completa | `BIM-TASK-0158`: PCO gobernadas, decision auditable e impacto transaccional sobre contrato y SOV BIM |
-| F06 | Coste real desde campo | Parcial | productividad/EVM sin ledger de coste real completo |
+| F06 | Coste real desde campo | Completa | `BIM-TASK-0105/0159`: partes con coste acumulado y ledger incremental, inmutable, multi-moneda y tenant-aware |
 | F07 | Forecast de costo final | Parcial | existen datos base; falta forecast versionado y aprobado |
 
 ### G. Entrega, commissioning y gemelo digital

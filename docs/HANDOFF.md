@@ -1,5 +1,22 @@
 # HANDOFF
 
+## 2026-07-16 - Ledger de coste real desde Campo BIM
+
+- `BIM-TASK-0159` cierra F06 con un asiento inmutable por parte de Campo y
+  calculo incremental respecto al coste acumulado anterior de la actividad.
+- La captura y sincronizacion historica bloquean disminuciones y mezclas de
+  moneda; los eventos validados se muestran como excepciones fuera del total
+  para impedir doble contabilizacion.
+- `de2043a1b2c3` agrega moneda a partes BIM y crea el ledger de forma aditiva y
+  reversible; no toca nomina, inventario, Presupuestos o contabilidad clasicos.
+- Produccion incorpora `Reales`; build, 26 smokes BIM, PostgreSQL, Playwright
+  1920x900/2560x1300 y baseline pasan.
+- Paridad: 73,33% (40 completas, 8 parciales, 12 ausentes). Programa: 33/61,
+  54,10% realizado y 45,90% pendiente.
+- Siguiente slice: `BIM-TASK-0160`, completar F07 con forecast versionado de
+  coste final.
+- Esta ola no se ha desplegado.
+
 ## 2026-07-16 - Ordenes de cambio BIM gobernadas
 
 - `BIM-TASK-0158` cierra F05 con PCO tenant-aware, envio, aprobacion, rechazo y

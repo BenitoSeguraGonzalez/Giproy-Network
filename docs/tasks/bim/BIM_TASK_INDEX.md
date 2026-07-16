@@ -237,6 +237,7 @@ iniciada.
 | `BIM-TASK-0156` | Cerrada localmente: solicitudes y certificaciones de pago BIM |
 | `BIM-TASK-0157` | Cerrada localmente: Schedule of Values BIM gobernado |
 | `BIM-TASK-0158` | Cerrada localmente: potenciales ordenes y ordenes de cambio BIM gobernadas |
+| `BIM-TASK-0159` | Cerrada localmente: ledger gobernado de coste real desde Campo BIM |
 
 ## Orden de ejecucion
 

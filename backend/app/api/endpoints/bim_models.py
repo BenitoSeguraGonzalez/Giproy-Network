@@ -92,6 +92,8 @@ from app.schemas.bim_cost_sov import BimCostSovCreate, BimCostSovDecision, BimCo
 from app.services.bim.cost_sov_service import create_sov, decide_sov, list_sovs
 from app.schemas.bim_cost_change_order import BimCostChangeOrderCreate, BimCostChangeOrderDecision, BimCostChangeOrderResponse, BimCostChangeOrderTransition
 from app.services.bim.cost_change_order_service import create_change_order, decide_change_order, list_change_orders, transition_change_order
+from app.schemas.bim_cost_actual import BimCostActualLedgerResponse
+from app.services.bim.cost_actual_service import get_actual_cost_ledger, sync_actual_cost_ledger
 from app.services.bim.qto_service import (
     create_qto_snapshot,
     decide_qto_snapshot,
@@ -989,6 +991,18 @@ def transition_project_bim_change_order(project_id: int, change_id: int, payload
 def decide_project_bim_change_order(project_id: int, change_id: int, payload: BimCostChangeOrderDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
     return decide_change_order(db, change_id=change_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.get("/projects/{project_id}/actual-costs", response_model=BimCostActualLedgerResponse)
+def get_project_bim_actual_costs(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.view")
+    return get_actual_cost_ledger(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/actual-costs/sync", response_model=BimCostActualLedgerResponse)
+def sync_project_bim_actual_costs(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
+    return sync_actual_cost_ledger(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id)
 
 
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)

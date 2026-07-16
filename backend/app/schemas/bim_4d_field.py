@@ -17,6 +17,7 @@ class Bim4dFieldReportCreate(BaseModel):
     budget_at_completion: float = Field(ge=0)
     planned_value_to_date: float = Field(ge=0)
     actual_cost: float = Field(ge=0)
+    currency: str = Field(default="USD", min_length=3, max_length=3, pattern=r"^[A-Z]{3}$")
     daily_log: str = Field(min_length=3, max_length=10000)
 
     @model_validator(mode="after")
@@ -55,6 +56,7 @@ class Bim4dFieldReportResponse(BaseModel):
     planned_value_to_date: float
     earned_value: float
     actual_cost: float
+    currency: str
     schedule_performance_index: float | None
     cost_performance_index: float | None
     daily_log: str

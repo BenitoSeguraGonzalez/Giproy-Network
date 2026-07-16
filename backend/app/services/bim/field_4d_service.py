@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from app.models.bim_4d import Bim4dActivitySnapshot, Bim4dProgressSnapshot
 from app.models.bim_4d_field import Bim4dFieldEvidence, Bim4dFieldReport
 from app.models.bim_4d_planning import Bim4dWorkArea
+from app.services.bim.cost_actual_service import post_field_report_actual_cost
 
 
 ALLOWED_EVIDENCE_TYPES = {"image/jpeg", "image/png", "image/webp"}
@@ -40,6 +41,7 @@ def _serialize_report(db, report):
         "budget_at_completion": report.budget_at_completion,
         "planned_value_to_date": report.planned_value_to_date,
         "earned_value": report.earned_value, "actual_cost": report.actual_cost,
+        "currency": report.currency,
         "schedule_performance_index": report.schedule_performance_index,
         "cost_performance_index": report.cost_performance_index,
         "daily_log": report.daily_log, "evidence": [_serialize_evidence(item) for item in evidence],
@@ -52,7 +54,7 @@ def create_field_report(db, *, project_id, company_id, user_id, payload):
         Bim4dActivitySnapshot.id == payload.activity_snapshot_id,
         Bim4dActivitySnapshot.proyecto_id == project_id,
         Bim4dActivitySnapshot.empresa_id == company_id,
-    ).first()
+    ).with_for_update().first()
     if not activity:
         raise HTTPException(status_code=404, detail="Actividad de campo fuera del proyecto activo.")
     if payload.work_area_id:
@@ -70,6 +72,15 @@ def create_field_report(db, *, project_id, company_id, user_id, payload):
     ).order_by(Bim4dProgressSnapshot.reported_at.desc()).first()
     if latest and _utc(payload.reported_at) <= _utc(latest.reported_at):
         raise HTTPException(status_code=409, detail="El reporte de campo debe ser posterior al ultimo progreso.")
+    latest_field = db.query(Bim4dFieldReport).filter(
+        Bim4dFieldReport.activity_snapshot_id == activity.id,
+        Bim4dFieldReport.proyecto_id == project_id,
+        Bim4dFieldReport.empresa_id == company_id,
+    ).order_by(Bim4dFieldReport.reported_at.desc(), Bim4dFieldReport.id.desc()).first()
+    if latest_field and payload.actual_cost < latest_field.actual_cost:
+        raise HTTPException(status_code=422, detail="El coste real acumulado no puede disminuir respecto al parte anterior.")
+    if latest_field and payload.currency != latest_field.currency:
+        raise HTTPException(status_code=422, detail="La moneda del coste real debe coincidir con los partes anteriores de la actividad.")
     progress = Bim4dProgressSnapshot(
         empresa_id=company_id, proyecto_id=project_id, activity_snapshot_id=activity.id,
         progress_percent=payload.progress_percent, actual_start=payload.actual_start,
@@ -89,9 +100,12 @@ def create_field_report(db, *, project_id, company_id, user_id, payload):
         budget_at_completion=payload.budget_at_completion,
         planned_value_to_date=payload.planned_value_to_date, earned_value=earned_value,
         actual_cost=payload.actual_cost, schedule_performance_index=spi,
-        cost_performance_index=cpi, daily_log=payload.daily_log, created_by=user_id,
+        cost_performance_index=cpi, currency=payload.currency,
+        daily_log=payload.daily_log, created_by=user_id,
     )
-    db.add(report); db.commit(); db.refresh(report)
+    db.add(report); db.flush()
+    post_field_report_actual_cost(db, report=report, user_id=user_id)
+    db.commit(); db.refresh(report)
     return _serialize_report(db, report)
 
 

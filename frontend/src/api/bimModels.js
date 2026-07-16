@@ -138,6 +138,8 @@ export const bimModelsApi = {
     createChangeOrder: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/change-orders`, payload, withTenantConfig({}, empresaId))).data,
     transitionChangeOrder: async (projectId, changeId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/change-orders/${changeId}/transition`, payload, withTenantConfig({}, empresaId))).data,
     decideChangeOrder: async (projectId, changeId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/change-orders/${changeId}/decision`, payload, withTenantConfig({}, empresaId))).data,
+    getActualCostLedger: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/actual-costs`, withTenantConfig({}, empresaId))).data,
+    syncActualCostLedger: async (projectId, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/actual-costs/sync`, null, withTenantConfig({}, empresaId))).data,
     getCapabilities: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/capabilities`, withTenantConfig({}, empresaId));
         return response.data;

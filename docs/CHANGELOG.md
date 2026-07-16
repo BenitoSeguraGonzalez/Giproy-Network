@@ -15825,3 +15825,10 @@ Cambios realizados
 - Una aprobacion sustituye el SOV vigente y respeta el coste ya reservado por
   solicitudes de pago; el dominio permanece aislado de GiProy Clasico.
 - F05 pasa a completa; paridad 72,50% y programa 52,46% completado.
+### 2026-07-16 - Ledger de coste real BIM (BIM-TASK-0159)
+
+- Produccion BIM V2 incorpora asientos reales incrementales e inmutables desde
+  partes de Campo, con moneda explicita y conciliacion historica idempotente.
+- Se bloquean acumulados decrecientes y monedas mezcladas; los eventos
+  validados permanecen como excepciones fuera del total para evitar duplicados.
+- F06 pasa a completa; paridad 73,33% y programa 54,10% completado.

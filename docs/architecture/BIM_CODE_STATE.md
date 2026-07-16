@@ -868,3 +868,15 @@ intercambio end-to-end.
   1920x900/2560x1300, anti-BIM y baseline pasan.
 - F05 queda completa. Paridad: `72,50%`, con 39 completas, 9 parciales y 12
   ausentes. Programa: 32/61, 52,46% realizado y 47,54% pendiente. Sin deploy.
+## Ledger de coste real desde Campo BIM - 2026-07-16
+
+- `BIM-TASK-0159` completa F06 con un asiento incremental e inmutable por cada
+  parte BIM y una sincronizacion idempotente para datos historicos.
+- Los costes acumulados deben ser no decrecientes y conservar la moneda por
+  actividad; las excepciones validadas no se suman automaticamente.
+- Backend, API y herramienta `Reales` viven solo en BIM; no escriben nomina,
+  inventario, Presupuestos, contratos o contabilidad clasicos.
+- PostgreSQL reversible, build, 26 smokes BIM, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- F06 queda completa. Paridad: `73,33%`, con 40 completas, 8 parciales y 12
+  ausentes. Programa: 33/61, 54,10% realizado y 45,90% pendiente. Sin deploy.

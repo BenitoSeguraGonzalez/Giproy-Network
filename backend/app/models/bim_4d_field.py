@@ -23,6 +23,7 @@ class Bim4dFieldReport(Base):
     planned_value_to_date = Column(Float, nullable=False)
     earned_value = Column(Float, nullable=False)
     actual_cost = Column(Float, nullable=False)
+    currency = Column(String(3), nullable=False, default="USD")
     schedule_performance_index = Column(Float, nullable=True)
     cost_performance_index = Column(Float, nullable=True)
     daily_log = Column(Text, nullable=False)
