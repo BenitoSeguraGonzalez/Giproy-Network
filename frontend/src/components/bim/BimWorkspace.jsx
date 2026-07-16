@@ -17,6 +17,7 @@ import BimFederationPanel from './BimFederationPanel';
 import BimIdsPanel from './BimIdsPanel';
 import BimIssuesPanel from './BimIssuesPanel';
 import BimQuantityProposalPanel from './BimQuantityProposalPanel';
+import BimCostEstimatePanel from './BimCostEstimatePanel';
 import BimScheduleLinkPanel from './BimScheduleLinkPanel';
 import BimScheduleInterchangePanel from './BimScheduleInterchangePanel';
 import BimCdeDocumentsPanel from './BimCdeDocumentsPanel';
@@ -664,6 +665,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             ],
             production: [
                 { id: 'plan-actual', label: 'Plan vs. real', content: <BimPlanActualPanel projectId={project?.id} empresaId={access?.resolved_company_id} onOpenViewpoint={(viewpoint) => viewpoint && handleOpenIssue({ version_id: viewpoint.source_version_id, viewpoint })} /> },
+                { id: 'estimate', label: 'Estimación', content: <BimCostEstimatePanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'events', label: 'Eventos', content: <BimUnplannedEventsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'workfronts', label: 'Frentes', content: <BimWorkfrontScenarioPanel projectId={project?.id} empresaId={access?.resolved_company_id} versionId={activeVersionId} element={selectedElement} onSelectGuid={handleSelectGuid} /> },
                 { id: 'quantities', label: 'Cantidades', content: <BimQuantityProposalPanel projectId={project?.id} empresaId={access?.resolved_company_id} versionId={activeVersionId} element={selectedElement} /> },

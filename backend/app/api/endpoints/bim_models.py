@@ -70,11 +70,15 @@ from app.services.bim.issue_service import MAX_ISSUE_ATTACHMENT_BYTES, add_issue
 from app.schemas.bim_quantity import BimQuantityCandidate, BimQuantityDecisionRequest, BimQuantityProposalCreate, BimQuantityProposalResponse
 from app.services.bim.quantity_proposal_service import create_proposal, decide_proposal, quantity_candidates
 from app.schemas.bim_qto import (
+    BimCostEstimateCreate,
+    BimCostEstimateDecision,
+    BimCostEstimateResponse,
     BimQto5dPackageResponse,
     BimQtoDecisionRequest,
     BimQtoSnapshotCreate,
     BimQtoSnapshotResponse,
 )
+from app.services.bim.cost_estimate_service import create_cost_estimate, decide_cost_estimate, list_cost_estimates
 from app.services.bim.qto_service import (
     create_qto_snapshot,
     decide_qto_snapshot,
@@ -870,6 +874,24 @@ def get_project_bim_qto_5d_package(
         )
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.get("/projects/{project_id}/cost-estimates", response_model=list[BimCostEstimateResponse])
+def list_project_bim_cost_estimates(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.view")
+    return list_cost_estimates(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/cost-estimates", response_model=BimCostEstimateResponse, status_code=status.HTTP_201_CREATED)
+def create_project_bim_cost_estimate(project_id: int, payload: BimCostEstimateCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
+    return create_cost_estimate(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/cost-estimates/{estimate_id}/decision", response_model=BimCostEstimateResponse)
+def decide_project_bim_cost_estimate(project_id: int, estimate_id: int, payload: BimCostEstimateDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
+    return decide_cost_estimate(db, estimate_id=estimate_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
 
 
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)

@@ -1,5 +1,19 @@
 # HANDOFF
 
+## 2026-07-16 - Estimacion BIM gobernada
+
+- `BIM-TASK-0154` cierra F01 con estimaciones versionadas derivadas solo de
+  QTO aprobado, precios unitarios completos y subtotal decimal reproducible.
+- `de2038a1b2c3` es tenant-aware y reversible; no toca Presupuestos, APUs,
+  contratos ni contabilidad clasicos.
+- Produccion incorpora `Estimacion`; build, 21 smokes BIM, PostgreSQL,
+  Playwright 1920x900/2560x1300 y baseline pasan.
+- Paridad: 65,83% (35 completas, 9 parciales, 16 ausentes). Programa: 28/61,
+  45,90% realizado y 54,10% pendiente.
+- Siguiente slice: `BIM-TASK-0155`, iniciar F02 con contratos BIM/Cost
+  aislados, sin acoplamiento contractual clasico.
+- Esta ola no se ha desplegado.
+
 ## 2026-07-16 - Cuadrillas y partes de horas BIM
 
 - `BIM-TASK-0153` cierra E08 con directorio de cuadrillas sin identidades

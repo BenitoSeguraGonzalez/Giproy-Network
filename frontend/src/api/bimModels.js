@@ -121,6 +121,9 @@ export const bimModelsApi = {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/qto-snapshots/${snapshotId}/5d-package`, withTenantConfig({}, empresaId));
         return response.data;
     },
+    listCostEstimates: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/cost-estimates`, withTenantConfig({}, empresaId))).data,
+    createCostEstimate: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/cost-estimates`, payload, withTenantConfig({}, empresaId))).data,
+    decideCostEstimate: async (projectId, estimateId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/cost-estimates/${estimateId}/decision`, payload, withTenantConfig({}, empresaId))).data,
     getCapabilities: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/capabilities`, withTenantConfig({}, empresaId));
         return response.data;

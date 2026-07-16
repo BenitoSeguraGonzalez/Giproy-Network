@@ -340,6 +340,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0151](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0151.md) - Eventos no planificados con impacto real
 - [BIM-TASK-0152](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0152.md) - Materiales y equipos de Campo
 - [BIM-TASK-0153](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0153.md) - Cuadrillas y partes de horas BIM
+- [BIM-TASK-0154](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0154.md) - Estimacion BIM gobernada desde QTO
 
 ---
 

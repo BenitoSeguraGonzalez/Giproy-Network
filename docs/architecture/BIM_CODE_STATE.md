@@ -770,6 +770,19 @@ intercambio end-to-end.
   ausentes. Programa: 25/61 slices, 40,98% realizado y 59,02% pendiente. Sin
   deploy.
 
+## Estimacion BIM gobernada - 2026-07-16
+
+- `BIM-TASK-0154` completa F01 mediante estimaciones BIM derivadas de QTO
+  aprobado, con precio para cada fila y checksum de origen.
+- `bim_cost_estimates` persiste lineas reproducibles, subtotal `NUMERIC`,
+  revision, lock y decision; solo una aprobada puede permanecer activa.
+- Backend, API y UI viven en BIM y no leen ni escriben Presupuestos, APUs,
+  contratos o contabilidad clasicos.
+- PostgreSQL reversible, build, 21 smokes BIM, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- F01 queda completa. Paridad: `65,83%`, con 35 completas, 9 parciales y 16
+  ausentes. Programa: 28/61, 45,90% realizado y 54,10% pendiente. Sin deploy.
+
 ## Cuadrillas y partes de horas BIM - 2026-07-16
 
 - `BIM-TASK-0153` completa E08 con directorio de cuadrillas BIM y partes

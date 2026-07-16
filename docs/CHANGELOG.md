@@ -1,3 +1,11 @@
+### 2026-07-16 - Estimacion BIM gobernada (BIM-TASK-0154)
+
+- Produccion BIM V2 incorpora estimaciones versionadas desde QTO aprobado,
+  con precios completos, calculo decimal y decision auditable.
+- `de2038a1b2c3` permanece aislada y reversible; no escribe Presupuestos,
+  APUs, contratos ni contabilidad clasicos.
+- F01 pasa a completa; paridad 65,83% y programa 45,90% completado.
+
 ### 2026-07-16 - Cuadrillas y partes de horas BIM (BIM-TASK-0153)
 
 - Campo BIM V2 incorpora directorio operativo de cuadrillas y partes diarios
