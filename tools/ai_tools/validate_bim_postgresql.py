@@ -59,6 +59,7 @@ BIM_TABLES = {
     "bim_commissioning_assets",
     "bim_commissioning_tests",
     "bim_punch_closures",
+    "bim_handover_dossiers",
     "bim_schedule_import_revisions",
     "bim_qto_snapshots",
     "bim_4d_resource_leveling_scenarios",
@@ -117,10 +118,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2048a1b2c3"
+        head for head in script.get_heads() if head != "de2049a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2048a1b2c3")
+    command.upgrade(config, "de2049a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -171,6 +172,16 @@ def validate(database_name: str) -> None:
             raise RuntimeError("El cierre punch no usa JSON/TIMESTAMPTZ.")
         if "UNIQUE INDEX" not in punch_closure_index or "accepted" not in punch_closure_index:
             raise RuntimeError("Indice parcial de cierre punch vigente invalido.")
+        dossier_types = dict(connection.execute(text(
+            "select column_name, data_type from information_schema.columns where table_name='bim_handover_dossiers' and column_name in ('manifest_json','system_ids_json','asset_ids_json','cde_revision_ids_json','submitted_at','decided_at')"
+        )).all())
+        dossier_restrict_count = connection.execute(text(
+            "select count(*) from information_schema.referential_constraints rc join information_schema.table_constraints tc on tc.constraint_name=rc.constraint_name where tc.table_name='bim_handover_dossiers' and rc.delete_rule='RESTRICT'"
+        )).scalar_one()
+        if dossier_types != {"manifest_json": "json", "system_ids_json": "json", "asset_ids_json": "json", "cde_revision_ids_json": "json", "submitted_at": "timestamp with time zone", "decided_at": "timestamp with time zone"}:
+            raise RuntimeError("El dossier digital no usa JSON/TIMESTAMPTZ.")
+        if dossier_restrict_count != 2:
+            raise RuntimeError("El dossier digital no preserva sus fuentes gobernadas con RESTRICT.")
         reported_at_type = connection.execute(
             text(
                 "select data_type from information_schema.columns "
@@ -462,10 +473,10 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2048a1b2c3")
+    command.upgrade(config, "de2049a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2048a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2049a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
@@ -476,7 +487,7 @@ def validate(database_name: str) -> None:
         "cost_sov=NUMERIC/partial_index cost_changes=NUMERIC/TIMESTAMPTZ "
         "actual_cost=NUMERIC/TIMESTAMPTZ/currency forecast=NUMERIC "
         "as_built=TIMESTAMPTZ/partial_index commissioning=JSON/TIMESTAMPTZ/RESTRICT "
-        "punch_closure=JSON/TIMESTAMPTZ/partial_index"
+        "punch_closure=JSON/TIMESTAMPTZ/partial_index handover_dossier=JSON/TIMESTAMPTZ/RESTRICT"
     )
 
 

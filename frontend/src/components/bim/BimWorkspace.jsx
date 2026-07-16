@@ -26,6 +26,7 @@ import BimActualCostLedgerPanel from './BimActualCostLedgerPanel';
 import BimCostForecastPanel from './BimCostForecastPanel';
 import BimAsBuiltAcceptancePanel from './BimAsBuiltAcceptancePanel';
 import BimPunchClosurePanel from './BimPunchClosurePanel';
+import BimHandoverDossierPanel from './BimHandoverDossierPanel';
 import BimCommissioningRegistryPanel from './BimCommissioningRegistryPanel';
 import BimScheduleLinkPanel from './BimScheduleLinkPanel';
 import BimScheduleInterchangePanel from './BimScheduleInterchangePanel';
@@ -703,6 +704,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 { id: 'as-built', label: 'As-built', content: <BimAsBuiltAcceptancePanel projectId={project?.id} empresaId={access?.resolved_company_id} models={workspace.models} activeVersionId={activeVersionId} /> },
                 { id: 'commissioning', label: 'Commissioning', content: <BimCommissioningRegistryPanel projectId={project?.id} empresaId={access?.resolved_company_id} versionId={activeVersionId} element={selectedElement} /> },
                 { id: 'punch-closure', label: 'Cierre punch', content: <BimPunchClosurePanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
+                { id: 'handover-dossier', label: 'Dossier digital', content: <BimHandoverDossierPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
             ],
         };
         const bottomTools = [

@@ -15864,3 +15864,10 @@ Cambios realizados
 - El snapshot SHA-256 se invalida ante pendientes o cambios posteriores, sin
   duplicar ni mutar hallazgos.
 - G03 pasa a completa; paridad 77,50% y programa 62,30% completado.
+### 2026-07-16 - Dossier digital BIM gobernado (BIM-TASK-0165)
+
+- Entrega BIM V2 ensambla un manifiesto versionado de as-built, punch,
+  commissioning y documentos CDE con huella SHA-256.
+- `de2049a1b2c3` permanece aislada y reversible; no duplica ni modifica datos
+  clásicos o fuentes BIM gobernadas.
+- G04 pasa a parcial; paridad 78,33% y programa 63,93% completado.

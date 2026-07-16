@@ -937,3 +937,14 @@ intercambio end-to-end.
   1920x900/2560x1300, anti-BIM y baseline pasan.
 - Paridad: `77,50%`, 44 completas, 5 parciales y 11 ausentes. Programa: 38/61,
   62,30% realizado y 37,70% pendiente. Sin deploy.
+
+## Ensamblado gobernado del dossier digital BIM - 2026-07-16
+
+- `BIM-TASK-0165` inicia G04 mediante un manifiesto canónico con referencias y
+  checksums de as-built, punch, commissioning y revisiones CDE vigentes.
+- `bim_handover_dossiers` conserva revisión, inventarios de IDs, métricas,
+  huella SHA-256, lock y auditoría dentro del tenant/proyecto.
+- La herramienta `Dossier digital` vive solo en Entrega BIM V2 y no escribe ni
+  consulta documentos clásicos.
+- G04 queda parcial. Paridad: `78,33%`, 44 completas, 6 parciales y 10
+  ausentes. Programa: 39/61, 63,93% realizado y 36,07% pendiente. Sin deploy.

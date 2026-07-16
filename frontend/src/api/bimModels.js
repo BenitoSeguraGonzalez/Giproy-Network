@@ -156,6 +156,8 @@ export const bimModelsApi = {
     listPunchClosures: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/punch-closures`, withTenantConfig({}, empresaId))).data,
     createPunchClosure: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/punch-closures`, payload, withTenantConfig({}, empresaId))).data,
     decidePunchClosure: async (projectId, closureId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/punch-closures/${closureId}/decision`, payload, withTenantConfig({}, empresaId))).data,
+    listHandoverDossiers: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/handover-dossiers`, withTenantConfig({}, empresaId))).data,
+    createHandoverDossier: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/handover-dossiers`, payload, withTenantConfig({}, empresaId))).data,
     getCapabilities: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/capabilities`, withTenantConfig({}, empresaId));
         return response.data;

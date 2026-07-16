@@ -1,5 +1,17 @@
 # HANDOFF
 
+## 2026-07-16 - Ensamblado gobernado del dossier digital BIM
+
+- `BIM-TASK-0165` inicia G04 con un manifiesto SHA-256 que referencia as-built,
+  punch, commissioning y revisiones CDE aceptadas/vigentes.
+- `de2049a1b2c3` es aditiva, tenant-aware y conserva las fuentes con claves
+  restrictivas; el workspace incorpora `Dossier digital` bajo Entrega.
+- 4 tests, PostgreSQL, build, 31 smokes, Playwright, anti-BIM y baseline pasan.
+- Paridad: 78,33% (44 completas, 6 parciales, 10 ausentes). Programa: 39/61,
+  63,93% realizado y 36,07% pendiente. Sin deploy.
+- Siguiente slice: `BIM-TASK-0166`, completar G04 con aceptación y
+  revalidación formal del manifiesto.
+
 ## 2026-07-16 - Cierre gobernado de punch list BIM
 
 - `BIM-TASK-0164` completa G03 congelando y revalidando la punch list BIM
