@@ -65,7 +65,7 @@
     {"id": "F07", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0160", "Versioned and approved multi-currency EAC forecast"]},
     {"id": "G01", "group": "handover", "status": "complete", "evidence": ["BIM-TASK-0161", "Immutable version with governed quality/checksum-bound as-built acceptance"]},
     {"id": "G02", "group": "handover", "status": "complete", "evidence": ["BIM-TASK-0162", "BIM-TASK-0163", "Governed asset/system registry, test protocols, results and technical acceptance"]},
-    {"id": "G03", "group": "handover", "status": "partial", "evidence": ["BIM-TASK-0083", "BIM-TASK-0116", "Delivery closure pending"]},
+    {"id": "G03", "group": "handover", "status": "complete", "evidence": ["BIM-TASK-0083", "BIM-TASK-0116", "BIM-TASK-0150", "BIM-TASK-0164", "Checksum-bound punch closure against accepted as-built"]},
     {"id": "G04", "group": "handover", "status": "absent", "evidence": ["Digital handover dossier pending"]},
     {"id": "G05", "group": "handover", "status": "absent", "evidence": ["Operations digital twin transition pending"]},
     {"id": "H01", "group": "enterprise", "status": "complete", "evidence": ["Tenant-aware BIM tests", "BIM rollout gates"]},

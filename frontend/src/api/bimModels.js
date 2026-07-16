@@ -153,6 +153,9 @@ export const bimModelsApi = {
     decideCommissioningTest: async (projectId, testId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/commissioning/tests/${testId}/decision`, payload, withTenantConfig({}, empresaId))).data,
     decideCommissioningAsset: async (projectId, assetId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/commissioning/assets/${assetId}/decision`, payload, withTenantConfig({}, empresaId))).data,
     acceptCommissioningSystem: async (projectId, systemId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/commissioning/systems/${systemId}/accept`, payload, withTenantConfig({}, empresaId))).data,
+    listPunchClosures: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/punch-closures`, withTenantConfig({}, empresaId))).data,
+    createPunchClosure: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/punch-closures`, payload, withTenantConfig({}, empresaId))).data,
+    decidePunchClosure: async (projectId, closureId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/punch-closures/${closureId}/decision`, payload, withTenantConfig({}, empresaId))).data,
     getCapabilities: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/capabilities`, withTenantConfig({}, empresaId));
         return response.data;

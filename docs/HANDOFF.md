@@ -1,5 +1,17 @@
 # HANDOFF
 
+## 2026-07-16 - Cierre gobernado de punch list BIM
+
+- `BIM-TASK-0164` completa G03 congelando y revalidando la punch list BIM
+  cerrada contra la aceptación as-built vigente.
+- `de2048a1b2c3` persiste IDs, métricas, criterios y SHA-256 sin duplicar ni
+  mutar hallazgos de Campo.
+- Entrega incorpora `Cierre punch`; 3 tests, PostgreSQL, build, 30 smokes,
+  Playwright, anti-BIM y baseline pasan.
+- Paridad: 77,50% (44 completas, 5 parciales, 11 ausentes). Programa: 38/61,
+  62,30% realizado y 37,70% pendiente. Sin deploy.
+- Siguiente slice: `BIM-TASK-0165`, iniciar G04 con dossier digital gobernado.
+
 ## 2026-07-16 - Aceptacion tecnica de commissioning BIM
 
 - `BIM-TASK-0163` completa G02 con protocolos, resultados y decisiones

@@ -58,6 +58,7 @@ BIM_TABLES = {
     "bim_commissioning_systems",
     "bim_commissioning_assets",
     "bim_commissioning_tests",
+    "bim_punch_closures",
     "bim_schedule_import_revisions",
     "bim_qto_snapshots",
     "bim_4d_resource_leveling_scenarios",
@@ -116,10 +117,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2047a1b2c3"
+        head for head in script.get_heads() if head != "de2048a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2047a1b2c3")
+    command.upgrade(config, "de2048a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -160,6 +161,16 @@ def validate(database_name: str) -> None:
         )).scalar_one()
         if commissioning_test_types != {"checklist_json": "json", "results_json": "json", "submitted_at": "timestamp with time zone", "decided_at": "timestamp with time zone"} or commissioning_delete_rule != "RESTRICT":
             raise RuntimeError("Protocolos de commissioning no usan JSON/TIMESTAMPTZ/RESTRICT.")
+        punch_closure_types = dict(connection.execute(text(
+            "select column_name, data_type from information_schema.columns where table_name='bim_punch_closures' and column_name in ('punch_item_ids_json','closure_criteria_json','submitted_at','decided_at')"
+        )).all())
+        punch_closure_index = connection.execute(text(
+            "select indexdef from pg_indexes where tablename='bim_punch_closures' and indexname='uq_bim_punch_closure_current'"
+        )).scalar_one()
+        if punch_closure_types != {"punch_item_ids_json": "json", "closure_criteria_json": "json", "submitted_at": "timestamp with time zone", "decided_at": "timestamp with time zone"}:
+            raise RuntimeError("El cierre punch no usa JSON/TIMESTAMPTZ.")
+        if "UNIQUE INDEX" not in punch_closure_index or "accepted" not in punch_closure_index:
+            raise RuntimeError("Indice parcial de cierre punch vigente invalido.")
         reported_at_type = connection.execute(
             text(
                 "select data_type from information_schema.columns "
@@ -451,10 +462,10 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2047a1b2c3")
+    command.upgrade(config, "de2048a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2047a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2048a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
@@ -464,7 +475,8 @@ def validate(database_name: str) -> None:
         "cost_estimates=NUMERIC cost_contracts=NUMERIC/DATE cost_payments=NUMERIC/DATE/TIMESTAMPTZ "
         "cost_sov=NUMERIC/partial_index cost_changes=NUMERIC/TIMESTAMPTZ "
         "actual_cost=NUMERIC/TIMESTAMPTZ/currency forecast=NUMERIC "
-        "as_built=TIMESTAMPTZ/partial_index commissioning=JSON/TIMESTAMPTZ/RESTRICT"
+        "as_built=TIMESTAMPTZ/partial_index commissioning=JSON/TIMESTAMPTZ/RESTRICT "
+        "punch_closure=JSON/TIMESTAMPTZ/partial_index"
     )
 
 

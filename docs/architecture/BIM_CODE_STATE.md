@@ -924,3 +924,16 @@ intercambio end-to-end.
   1920x900/2560x1300, anti-BIM y baseline pasan.
 - Paridad: `76,67%`, 43 completas, 6 parciales y 11 ausentes. Programa: 37/61,
   60,66% realizado y 39,34% pendiente. Sin deploy.
+
+## Cierre gobernado de punch list BIM - 2026-07-16
+
+- `BIM-TASK-0164` completa G03 con una solicitud tenant-aware ligada al
+  as-built aceptado y al ledger real de punch items BIM.
+- El snapshot conserva IDs, prioridad, cierre, responsable y huella SHA-256;
+  cualquier pendiente o mutación posterior bloquea la decisión.
+- `de2048a1b2c3` y `Cierre punch` permanecen aislados de incidencias y datos
+  clásicos.
+- PostgreSQL reversible, 3 tests, build, 30 smokes, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- Paridad: `77,50%`, 44 completas, 5 parciales y 11 ausentes. Programa: 38/61,
+  62,30% realizado y 37,70% pendiente. Sin deploy.

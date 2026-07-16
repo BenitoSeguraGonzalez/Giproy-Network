@@ -15857,3 +15857,10 @@ Cambios realizados
 - Los gates impiden aprobar pruebas fallidas, activos con protocolos pendientes
   o sistemas con activos no aceptados.
 - G02 pasa a completa; paridad 76,67% y programa 60,66% completado.
+### 2026-07-16 - Cierre gobernado de punch list BIM (BIM-TASK-0164)
+
+- Entrega BIM V2 incorpora cierre auditable sobre el ledger real de punch
+  items y la aceptación as-built vigente.
+- El snapshot SHA-256 se invalida ante pendientes o cambios posteriores, sin
+  duplicar ni mutar hallazgos.
+- G03 pasa a completa; paridad 77,50% y programa 62,30% completado.

@@ -242,6 +242,7 @@ iniciada.
 | `BIM-TASK-0161` | Cerrada localmente: aceptacion gobernada de modelo as-built BIM |
 | `BIM-TASK-0162` | Cerrada localmente: registro de activos y sistemas de commissioning |
 | `BIM-TASK-0163` | Cerrada localmente: protocolos y aceptacion tecnica de commissioning |
+| `BIM-TASK-0164` | Cerrada localmente: cierre gobernado de punch list de entrega |
 
 ## Orden de ejecucion
 

@@ -100,6 +100,8 @@ from app.schemas.bim_as_built import BimAsBuiltAcceptanceCreate, BimAsBuiltAccep
 from app.services.bim.as_built_acceptance_service import create_as_built_acceptance, decide_as_built_acceptance, list_as_built_acceptances
 from app.schemas.bim_commissioning import BimCommissioningAssetCreate, BimCommissioningAssetResponse, BimCommissioningDecision, BimCommissioningRegistryResponse, BimCommissioningSystemAcceptance, BimCommissioningSystemCreate, BimCommissioningSystemResponse, BimCommissioningTestCreate, BimCommissioningTestResponse
 from app.services.bim.commissioning_registry_service import accept_commissioning_system, create_commissioning_asset, create_commissioning_system, create_commissioning_test, decide_commissioning_asset, decide_commissioning_test, get_commissioning_registry
+from app.schemas.bim_punch_closure import BimPunchClosureCreate, BimPunchClosureDecision, BimPunchClosureResponse
+from app.services.bim.punch_closure_service import create_punch_closure, decide_punch_closure, list_punch_closures
 from app.services.bim.qto_service import (
     create_qto_snapshot,
     decide_qto_snapshot,
@@ -1081,6 +1083,24 @@ def decide_project_bim_commissioning_asset(project_id: int, asset_id: int, paylo
 def accept_project_bim_commissioning_system(project_id: int, system_id: int, payload: BimCommissioningSystemAcceptance, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
     return accept_commissioning_system(db, system_id=system_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.get("/projects/{project_id}/punch-closures", response_model=list[BimPunchClosureResponse])
+def list_project_bim_punch_closures(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.view")
+    return list_punch_closures(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/punch-closures", response_model=BimPunchClosureResponse, status_code=status.HTTP_201_CREATED)
+def create_project_bim_punch_closure(project_id: int, payload: BimPunchClosureCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
+    return create_punch_closure(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/punch-closures/{closure_id}/decision", response_model=BimPunchClosureResponse)
+def decide_project_bim_punch_closure(project_id: int, closure_id: int, payload: BimPunchClosureDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
+    return decide_punch_closure(db, closure_id=closure_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
 
 
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)
