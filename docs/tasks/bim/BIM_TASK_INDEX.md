@@ -235,6 +235,7 @@ iniciada.
 | `BIM-TASK-0154` | Cerrada localmente: estimacion BIM gobernada desde QTO aprobado |
 | `BIM-TASK-0155` | Cerrada localmente: contratos BIM de coste gobernados por estimacion aprobada |
 | `BIM-TASK-0156` | Cerrada localmente: solicitudes y certificaciones de pago BIM |
+| `BIM-TASK-0157` | Cerrada localmente: Schedule of Values BIM gobernado |
 
 ## Orden de ejecucion
 

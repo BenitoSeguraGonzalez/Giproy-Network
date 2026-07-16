@@ -814,6 +814,21 @@ intercambio end-to-end.
 - F03 queda completa. Paridad: `69,17%`, con 37 completas, 9 parciales y 14
   ausentes. Programa: 30/61, 49,18% realizado y 50,82% pendiente. Sin deploy.
 
+## Schedule of Values BIM - 2026-07-16
+
+- `BIM-TASK-0157` completa F04 con asignaciones contractuales versionadas,
+  aprobables y totalmente conciliadas con el compromiso BIM.
+- `bim_cost_schedules_of_values` persiste revision, lineas de codigo/
+  descripcion/valor, total `NUMERIC`, lock y decision.
+- Los codigos son unicos y la suma debe coincidir exactamente con el contrato;
+  una aprobacion nueva sustituye de forma trazable a la anterior.
+- Backend, API y editor `Valores` viven en BIM y no leen ni escriben EDT,
+  APUs, Presupuestos o contratos clasicos.
+- PostgreSQL reversible, build, 24 smokes BIM, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- F04 queda completa. Paridad: `70,83%`, con 38 completas, 9 parciales y 13
+  ausentes. Programa: 31/61, 50,82% realizado y 49,18% pendiente. Sin deploy.
+
 ## Cuadrillas y partes de horas BIM - 2026-07-16
 
 - `BIM-TASK-0153` completa E08 con directorio de cuadrillas BIM y partes

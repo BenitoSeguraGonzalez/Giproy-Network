@@ -343,6 +343,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0154](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0154.md) - Estimacion BIM gobernada desde QTO
 - [BIM-TASK-0155](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0155.md) - Contratos BIM de coste gobernados
 - [BIM-TASK-0156](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0156.md) - Solicitudes y certificaciones de pago BIM
+- [BIM-TASK-0157](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0157.md) - Schedule of Values BIM gobernado
 
 ---
 

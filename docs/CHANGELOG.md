@@ -15810,3 +15810,11 @@ Cambios realizados
   herramienta `Pagos` en Produccion BIM V2.
 - Añadidos tests focales, migracion PostgreSQL reversible y smoke Playwright
   para 1920x900 y resoluciones superiores.
+### 2026-07-16 - Schedule of Values BIM gobernado (BIM-TASK-0157)
+
+- Añadido dominio versionado `bim_cost_schedules_of_values`, conciliado de
+  forma exacta con el compromiso contractual BIM.
+- Añadidos workflow de aprobacion/sustitucion, endpoints y editor `Valores` en
+  Produccion BIM V2.
+- Añadidos tests focales, migracion PostgreSQL reversible y smoke Playwright
+  para 1920x900 y resoluciones superiores.

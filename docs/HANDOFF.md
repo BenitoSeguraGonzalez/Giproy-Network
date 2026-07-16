@@ -1,5 +1,19 @@
 # HANDOFF
 
+## 2026-07-16 - Schedule of Values BIM gobernado
+
+- `BIM-TASK-0157` cierra F04 con asignacion lineal versionada cuya suma debe
+  coincidir exactamente con el compromiso del contrato BIM.
+- `de2041a1b2c3` es aditiva y reversible; no toca EDT, APUs, Presupuestos ni
+  contratos clasicos.
+- Produccion incorpora `Valores`; build, 24 smokes BIM, PostgreSQL, Playwright
+  1920x900/2560x1300 y baseline pasan.
+- Paridad: 70,83% (38 completas, 9 parciales, 13 ausentes). Programa: 31/61,
+  50,82% realizado y 49,18% pendiente.
+- Siguiente slice: `BIM-TASK-0158`, completar F05 con potenciales ordenes y
+  ordenes de cambio BIM gobernadas.
+- Esta ola no se ha desplegado.
+
 ## 2026-07-16 - Solicitudes y certificaciones de pago BIM
 
 - `BIM-TASK-0156` cierra F03 con solicitud, envio y certificacion contra

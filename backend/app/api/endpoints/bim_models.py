@@ -88,6 +88,8 @@ from app.schemas.bim_cost_payment import (
     BimCostPaymentApplicationSubmit,
 )
 from app.services.bim.cost_payment_service import create_payment_application, decide_payment_application, list_payment_applications, submit_payment_application
+from app.schemas.bim_cost_sov import BimCostSovCreate, BimCostSovDecision, BimCostSovResponse
+from app.services.bim.cost_sov_service import create_sov, decide_sov, list_sovs
 from app.services.bim.qto_service import (
     create_qto_snapshot,
     decide_qto_snapshot,
@@ -943,6 +945,24 @@ def submit_project_bim_payment_application(project_id: int, application_id: int,
 def decide_project_bim_payment_application(project_id: int, application_id: int, payload: BimCostPaymentApplicationDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
     return decide_payment_application(db, application_id=application_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.get("/projects/{project_id}/schedules-of-values", response_model=list[BimCostSovResponse])
+def list_project_bim_sovs(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.view")
+    return list_sovs(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/schedules-of-values", response_model=BimCostSovResponse, status_code=status.HTTP_201_CREATED)
+def create_project_bim_sov(project_id: int, payload: BimCostSovCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
+    return create_sov(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/schedules-of-values/{sov_id}/decision", response_model=BimCostSovResponse)
+def decide_project_bim_sov(project_id: int, sov_id: int, payload: BimCostSovDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
+    return decide_sov(db, sov_id=sov_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
 
 
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)

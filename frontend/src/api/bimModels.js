@@ -131,6 +131,9 @@ export const bimModelsApi = {
     createPaymentApplication: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/payment-applications`, payload, withTenantConfig({}, empresaId))).data,
     submitPaymentApplication: async (projectId, applicationId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/payment-applications/${applicationId}/submit`, payload, withTenantConfig({}, empresaId))).data,
     decidePaymentApplication: async (projectId, applicationId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/payment-applications/${applicationId}/decision`, payload, withTenantConfig({}, empresaId))).data,
+    listSchedulesOfValues: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/schedules-of-values`, withTenantConfig({}, empresaId))).data,
+    createScheduleOfValues: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/schedules-of-values`, payload, withTenantConfig({}, empresaId))).data,
+    decideScheduleOfValues: async (projectId, sovId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/schedules-of-values/${sovId}/decision`, payload, withTenantConfig({}, empresaId))).data,
     getCapabilities: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/capabilities`, withTenantConfig({}, empresaId));
         return response.data;

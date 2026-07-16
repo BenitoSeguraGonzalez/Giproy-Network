@@ -59,7 +59,7 @@
     {"id": "F01", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0085", "BIM-TASK-0154", "Governed estimate from approved QTO with decimal pricing"]},
     {"id": "F02", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0155", "Tenant-aware BIM cost contracts governed by approved estimates"]},
     {"id": "F03", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0156", "Governed payment applications and certification against active BIM contracts"]},
-    {"id": "F04", "group": "cost", "status": "absent", "evidence": ["Schedule of Values pending"]},
+    {"id": "F04", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0157", "Versioned Schedule of Values fully reconciled to active BIM contract"]},
     {"id": "F05", "group": "cost", "status": "absent", "evidence": ["Change order workflow pending"]},
     {"id": "F06", "group": "cost", "status": "partial", "evidence": ["BIM-TASK-0105", "Actual cost ledger pending"]},
     {"id": "F07", "group": "cost", "status": "partial", "evidence": ["4D/5D data exists", "Versioned approved forecast pending"]},
