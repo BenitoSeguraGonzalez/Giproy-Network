@@ -856,3 +856,15 @@ intercambio end-to-end.
 - E07 queda completa. Paridad: `63,33%`, con 33 completas, 10 parciales y 17
   ausentes. Programa: 26/61 slices, 42,62% realizado y 57,38% pendiente. Sin
   deploy.
+## Ordenes de cambio BIM gobernadas - 2026-07-16
+
+- `BIM-TASK-0158` completa F05 con PCO versionadas y workflow potencial,
+  enviado, aprobado, rechazado o cancelado dentro del tenant.
+- La aprobacion modifica el compromiso del contrato BIM bajo bloqueo
+  transaccional, sustituye el SOV aprobado y protege pagos ya reservados.
+- Backend, API y herramienta `Cambios` viven solo en BIM; no escriben contratos,
+  Presupuestos, Cronogramas, facturacion o contabilidad clasicos.
+- PostgreSQL reversible, build, 25 smokes BIM, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- F05 queda completa. Paridad: `72,50%`, con 39 completas, 9 parciales y 12
+  ausentes. Programa: 32/61, 52,46% realizado y 47,54% pendiente. Sin deploy.

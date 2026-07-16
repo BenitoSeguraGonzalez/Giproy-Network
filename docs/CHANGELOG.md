@@ -15818,3 +15818,10 @@ Cambios realizados
   Produccion BIM V2.
 - Añadidos tests focales, migracion PostgreSQL reversible y smoke Playwright
   para 1920x900 y resoluciones superiores.
+### 2026-07-16 - Ordenes de cambio BIM gobernadas (BIM-TASK-0158)
+
+- Produccion BIM V2 incorpora PCO y ordenes de cambio con decision auditable e
+  impacto transaccional sobre el compromiso contractual.
+- Una aprobacion sustituye el SOV vigente y respeta el coste ya reservado por
+  solicitudes de pago; el dominio permanece aislado de GiProy Clasico.
+- F05 pasa a completa; paridad 72,50% y programa 52,46% completado.

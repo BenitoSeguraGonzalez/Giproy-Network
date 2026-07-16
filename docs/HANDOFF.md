@@ -1,5 +1,22 @@
 # HANDOFF
 
+## 2026-07-16 - Ordenes de cambio BIM gobernadas
+
+- `BIM-TASK-0158` cierra F05 con PCO tenant-aware, envio, aprobacion, rechazo y
+  cancelacion auditables sobre contratos BIM activos.
+- Una aprobacion actualiza el compromiso contractual en la misma transaccion,
+  invalida el SOV aprobado y no permite reducir el contrato por debajo de pagos
+  reservados.
+- `de2042a1b2c3` es aditiva y reversible; no toca contratos, Presupuestos,
+  Cronogramas, facturacion ni contabilidad clasicos.
+- Produccion incorpora `Cambios`; build, 25 smokes BIM, PostgreSQL, Playwright
+  1920x900/2560x1300 y baseline pasan.
+- Paridad: 72,50% (39 completas, 9 parciales, 12 ausentes). Programa: 32/61,
+  52,46% realizado y 47,54% pendiente.
+- Siguiente slice: `BIM-TASK-0159`, completar F06 con ledger gobernado de coste
+  real desde Campo.
+- Esta ola no se ha desplegado.
+
 ## 2026-07-16 - Schedule of Values BIM gobernado
 
 - `BIM-TASK-0157` cierra F04 con asignacion lineal versionada cuya suma debe

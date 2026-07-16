@@ -134,6 +134,10 @@ export const bimModelsApi = {
     listSchedulesOfValues: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/schedules-of-values`, withTenantConfig({}, empresaId))).data,
     createScheduleOfValues: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/schedules-of-values`, payload, withTenantConfig({}, empresaId))).data,
     decideScheduleOfValues: async (projectId, sovId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/schedules-of-values/${sovId}/decision`, payload, withTenantConfig({}, empresaId))).data,
+    listChangeOrders: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/change-orders`, withTenantConfig({}, empresaId))).data,
+    createChangeOrder: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/change-orders`, payload, withTenantConfig({}, empresaId))).data,
+    transitionChangeOrder: async (projectId, changeId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/change-orders/${changeId}/transition`, payload, withTenantConfig({}, empresaId))).data,
+    decideChangeOrder: async (projectId, changeId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/change-orders/${changeId}/decision`, payload, withTenantConfig({}, empresaId))).data,
     getCapabilities: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/capabilities`, withTenantConfig({}, empresaId));
         return response.data;

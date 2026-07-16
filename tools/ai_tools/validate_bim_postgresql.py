@@ -51,6 +51,7 @@ BIM_TABLES = {
     "bim_cost_contracts",
     "bim_cost_payment_applications",
     "bim_cost_schedules_of_values",
+    "bim_cost_change_orders",
     "bim_schedule_import_revisions",
     "bim_qto_snapshots",
     "bim_4d_resource_leveling_scenarios",
@@ -109,10 +110,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2041a1b2c3"
+        head for head in script.get_heads() if head != "de2042a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2041a1b2c3")
+    command.upgrade(config, "de2042a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -365,6 +366,20 @@ def validate(database_name: str) -> None:
             raise RuntimeError("El SOV BIM no usa NUMERIC para el valor programado.")
         if "UNIQUE INDEX" not in sov_active_index or "status" not in sov_active_index or "approved" not in sov_active_index:
             raise RuntimeError("Indice parcial de SOV BIM aprobado invalido.")
+        change_cost_type = connection.execute(
+            text(
+                "select data_type from information_schema.columns "
+                "where table_name='bim_cost_change_orders' and column_name='requested_cost_delta'"
+            )
+        ).scalar_one()
+        change_decided_type = connection.execute(
+            text(
+                "select data_type from information_schema.columns "
+                "where table_name='bim_cost_change_orders' and column_name='decided_at'"
+            )
+        ).scalar_one()
+        if change_cost_type != "numeric" or change_decided_type != "timestamp with time zone":
+            raise RuntimeError("Las ordenes de cambio BIM no usan NUMERIC/TIMESTAMPTZ.")
 
     command.downgrade(config, "de2010a1b2c3")
     with engine.connect() as connection:
@@ -378,10 +393,10 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2041a1b2c3")
+    command.upgrade(config, "de2042a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2041a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2042a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
@@ -389,7 +404,7 @@ def validate(database_name: str) -> None:
         "issue_attachments=BYTEA/TIMESTAMPTZ field_inspections=JSON/TIMESTAMPTZ "
         "unplanned_events=TIMESTAMPTZ field_resources=TIMESTAMPTZ crews_timecards=DATE "
         "cost_estimates=NUMERIC cost_contracts=NUMERIC/DATE cost_payments=NUMERIC/DATE/TIMESTAMPTZ "
-        "cost_sov=NUMERIC/partial_index"
+        "cost_sov=NUMERIC/partial_index cost_changes=NUMERIC/TIMESTAMPTZ"
     )
 
 

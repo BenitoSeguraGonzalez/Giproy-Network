@@ -123,6 +123,7 @@ from .bim_qto import BimCostEstimate, BimQtoSnapshot
 from .bim_cost_contract import BimCostContract
 from .bim_cost_payment import BimCostPaymentApplication
 from .bim_cost_sov import BimCostScheduleOfValues
+from .bim_cost_change_order import BimCostChangeOrder
 from .bim_cde import BimCdeDocument, BimCdeDocumentRevision
 from .bim_cde_rfi import BimCdeRfi, BimCdeRfiEvent
 from .bim_cde_submittal import BimCdeSubmittal, BimCdeSubmittalEvent, BimCdeSubmittalRevision
