@@ -98,8 +98,8 @@ from app.schemas.bim_cost_forecast import BimCostForecastCreate, BimCostForecast
 from app.services.bim.cost_forecast_service import create_forecast, decide_forecast, list_forecasts
 from app.schemas.bim_as_built import BimAsBuiltAcceptanceCreate, BimAsBuiltAcceptanceDecision, BimAsBuiltAcceptanceResponse
 from app.services.bim.as_built_acceptance_service import create_as_built_acceptance, decide_as_built_acceptance, list_as_built_acceptances
-from app.schemas.bim_commissioning import BimCommissioningAssetCreate, BimCommissioningAssetResponse, BimCommissioningRegistryResponse, BimCommissioningSystemCreate, BimCommissioningSystemResponse
-from app.services.bim.commissioning_registry_service import create_commissioning_asset, create_commissioning_system, get_commissioning_registry
+from app.schemas.bim_commissioning import BimCommissioningAssetCreate, BimCommissioningAssetResponse, BimCommissioningDecision, BimCommissioningRegistryResponse, BimCommissioningSystemAcceptance, BimCommissioningSystemCreate, BimCommissioningSystemResponse, BimCommissioningTestCreate, BimCommissioningTestResponse
+from app.services.bim.commissioning_registry_service import accept_commissioning_system, create_commissioning_asset, create_commissioning_system, create_commissioning_test, decide_commissioning_asset, decide_commissioning_test, get_commissioning_registry
 from app.services.bim.qto_service import (
     create_qto_snapshot,
     decide_qto_snapshot,
@@ -1057,6 +1057,30 @@ def create_project_bim_commissioning_system(project_id: int, payload: BimCommiss
 def create_project_bim_commissioning_asset(project_id: int, payload: BimCommissioningAssetCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
     return create_commissioning_asset(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/commissioning/tests", response_model=BimCommissioningTestResponse, status_code=status.HTTP_201_CREATED)
+def create_project_bim_commissioning_test(project_id: int, payload: BimCommissioningTestCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
+    return create_commissioning_test(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/commissioning/tests/{test_id}/decision", response_model=BimCommissioningTestResponse)
+def decide_project_bim_commissioning_test(project_id: int, test_id: int, payload: BimCommissioningDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
+    return decide_commissioning_test(db, test_id=test_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/commissioning/assets/{asset_id}/decision", response_model=BimCommissioningAssetResponse)
+def decide_project_bim_commissioning_asset(project_id: int, asset_id: int, payload: BimCommissioningDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
+    return decide_commissioning_asset(db, asset_id=asset_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/commissioning/systems/{system_id}/accept", response_model=BimCommissioningSystemResponse)
+def accept_project_bim_commissioning_system(project_id: int, system_id: int, payload: BimCommissioningSystemAcceptance, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
+    return accept_commissioning_system(db, system_id=system_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
 
 
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)

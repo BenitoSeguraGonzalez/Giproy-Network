@@ -15850,3 +15850,10 @@ Cambios realizados
   elementos y GlobalIds, con tags y datos técnicos propios de commissioning.
 - El dominio permanece aislado de inventario, mantenimiento y equipos clasicos.
 - G02 pasa a parcial; paridad 75,83% y programa 59,02% completado.
+### 2026-07-16 - Aceptacion tecnica de commissioning BIM (BIM-TASK-0163)
+
+- Entrega BIM V2 incorpora protocolos, resultados JSON y decisiones auditables
+  por activo, con aceptacion posterior del sistema completo.
+- Los gates impiden aprobar pruebas fallidas, activos con protocolos pendientes
+  o sistemas con activos no aceptados.
+- G02 pasa a completa; paridad 76,67% y programa 60,66% completado.

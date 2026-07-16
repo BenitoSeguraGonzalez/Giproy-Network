@@ -1,5 +1,19 @@
 # HANDOFF
 
+## 2026-07-16 - Aceptacion tecnica de commissioning BIM
+
+- `BIM-TASK-0163` completa G02 con protocolos, resultados y decisiones
+  tenant-aware por activo, seguidos de aceptacion del sistema completo.
+- `de2047a1b2c3` agrega JSON, timestamps y locks de forma aditiva y reversible;
+  fallos o protocolos pendientes bloquean la aceptacion.
+- Commissioning conserva una sola superficie con modos Activo, Sistema y
+  Prueba; 6 tests, PostgreSQL, build, 29 smokes, Playwright, anti-BIM y baseline
+  pasan.
+- Paridad: 76,67% (43 completas, 6 parciales, 11 ausentes). Programa: 37/61,
+  60,66% realizado y 39,34% pendiente. Sin deploy.
+- Siguiente slice: `BIM-TASK-0164`, completar G03 con cierre de punch list de
+  entrega gobernado.
+
 ## 2026-07-16 - Registro de commissioning BIM
 
 - `BIM-TASK-0162` registra sistemas y activos tenant-aware con tag, GlobalId,

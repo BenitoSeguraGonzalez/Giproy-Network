@@ -127,7 +127,7 @@ from .bim_cost_change_order import BimCostChangeOrder
 from .bim_cost_actual import BimCostActualEntry
 from .bim_cost_forecast import BimCostForecast
 from .bim_as_built_acceptance import BimAsBuiltAcceptance
-from .bim_commissioning import BimCommissioningAsset, BimCommissioningSystem
+from .bim_commissioning import BimCommissioningAsset, BimCommissioningSystem, BimCommissioningTest
 from .bim_cde import BimCdeDocument, BimCdeDocumentRevision
 from .bim_cde_rfi import BimCdeRfi, BimCdeRfiEvent
 from .bim_cde_submittal import BimCdeSubmittal, BimCdeSubmittalEvent, BimCdeSubmittalRevision

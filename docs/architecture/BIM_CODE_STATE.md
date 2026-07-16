@@ -910,3 +910,17 @@ intercambio end-to-end.
   build, 29 smokes BIM, Playwright 1920x900/2560x1300, anti-BIM y baseline pasan.
 - G02 queda parcial. Paridad: `75,83%`, 42 completas, 7 parciales y 11
   ausentes. Programa: 36/61, 59,02% realizado y 40,98% pendiente. Sin deploy.
+
+## Aceptacion tecnica de commissioning BIM - 2026-07-16
+
+- `BIM-TASK-0163` completa G02 con protocolos y resultados JSON vinculados a
+  activos, decision auditable y aceptacion jerarquica activo/sistema.
+- `de2047a1b2c3` agrega locks y timestamps de decision sin alterar tablas ni
+  contratos clasicos; las referencias a activos son restrictivas.
+- Una prueba fallida, pendiente o rechazada bloquea el activo; un activo no
+  aceptado bloquea el sistema. Los reintentos conservan el historial y solo el
+  ultimo intento gobernado de cada protocolo determina la aceptacion.
+- PostgreSQL reversible, 6 tests, build, 29 smokes, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- Paridad: `76,67%`, 43 completas, 6 parciales y 11 ausentes. Programa: 37/61,
+  60,66% realizado y 39,34% pendiente. Sin deploy.

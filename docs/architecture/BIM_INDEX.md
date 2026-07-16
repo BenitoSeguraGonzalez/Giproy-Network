@@ -349,6 +349,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0160](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0160.md) - Forecast versionado de coste final BIM
 - [BIM-TASK-0161](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0161.md) - Aceptacion gobernada de modelo as-built BIM
 - [BIM-TASK-0162](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0162.md) - Registro de activos y sistemas de commissioning
+- [BIM-TASK-0163](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0163.md) - Protocolos y aceptacion tecnica de commissioning
 
 ---
 

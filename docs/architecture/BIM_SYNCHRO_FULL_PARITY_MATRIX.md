@@ -116,7 +116,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | ID | Capacidad | Estado | Evidencia o brecha principal |
 |---|---|---|---|
 | G01 | Modelo as-built versionado | Completa | `BIM-TASK-0161`: version inmutable, calidad/checksum congelados y aceptacion as-built gobernada |
-| G02 | Commissioning | Parcial | `BIM-TASK-0162`: activos y sistemas trazables; faltan protocolos de prueba y aceptacion tecnica |
+| G02 | Commissioning | Completa | `BIM-TASK-0162/0163`: registro trazable, protocolos/resultados y aceptacion tecnica gobernada |
 | G03 | Punch list de terminacion | Parcial | incidencias/inspecciones; falta cierre de entrega |
 | G04 | Dossier digital de entrega | Ausente | no implementado |
 | G05 | Transicion a operacion/gemelo digital | Ausente | no implementada |
