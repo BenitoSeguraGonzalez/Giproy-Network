@@ -96,6 +96,8 @@ from app.schemas.bim_cost_actual import BimCostActualLedgerResponse
 from app.services.bim.cost_actual_service import get_actual_cost_ledger, sync_actual_cost_ledger
 from app.schemas.bim_cost_forecast import BimCostForecastCreate, BimCostForecastDecision, BimCostForecastResponse
 from app.services.bim.cost_forecast_service import create_forecast, decide_forecast, list_forecasts
+from app.schemas.bim_as_built import BimAsBuiltAcceptanceCreate, BimAsBuiltAcceptanceDecision, BimAsBuiltAcceptanceResponse
+from app.services.bim.as_built_acceptance_service import create_as_built_acceptance, decide_as_built_acceptance, list_as_built_acceptances
 from app.services.bim.qto_service import (
     create_qto_snapshot,
     decide_qto_snapshot,
@@ -1017,6 +1019,24 @@ def create_project_bim_cost_forecast(project_id: int, payload: BimCostForecastCr
 @router.post("/projects/{project_id}/cost-forecasts/{forecast_id}/decision", response_model=BimCostForecastResponse)
 def decide_project_bim_cost_forecast(project_id: int, forecast_id: int, payload: BimCostForecastDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project=_resolve_project(db,project_id,current_user,empresa_id);_require_bim_access(db,project,current_user,"bim.coordinate");return decide_forecast(db,forecast_id=forecast_id,project_id=project.id,company_id=project.empresa_id,user_id=current_user.id,payload=payload)
+
+
+@router.get("/projects/{project_id}/as-built-acceptances", response_model=list[BimAsBuiltAcceptanceResponse])
+def list_project_bim_as_built_acceptances(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.view")
+    return list_as_built_acceptances(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/as-built-acceptances", response_model=BimAsBuiltAcceptanceResponse, status_code=status.HTTP_201_CREATED)
+def create_project_bim_as_built_acceptance(project_id: int, payload: BimAsBuiltAcceptanceCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
+    return create_as_built_acceptance(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/as-built-acceptances/{acceptance_id}/decision", response_model=BimAsBuiltAcceptanceResponse)
+def decide_project_bim_as_built_acceptance(project_id: int, acceptance_id: int, payload: BimAsBuiltAcceptanceDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
+    return decide_as_built_acceptance(db, acceptance_id=acceptance_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
 
 
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)

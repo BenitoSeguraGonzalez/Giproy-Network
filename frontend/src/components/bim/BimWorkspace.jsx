@@ -24,6 +24,7 @@ import BimCostSovPanel from './BimCostSovPanel';
 import BimCostChangeOrdersPanel from './BimCostChangeOrdersPanel';
 import BimActualCostLedgerPanel from './BimActualCostLedgerPanel';
 import BimCostForecastPanel from './BimCostForecastPanel';
+import BimAsBuiltAcceptancePanel from './BimAsBuiltAcceptancePanel';
 import BimScheduleLinkPanel from './BimScheduleLinkPanel';
 import BimScheduleInterchangePanel from './BimScheduleInterchangePanel';
 import BimCdeDocumentsPanel from './BimCdeDocumentsPanel';
@@ -695,6 +696,9 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 { id: 'progress', label: 'Registrar avance', content: <BimFieldReportPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'safety', label: 'Inspecciones', content: <BimSafetyRiskPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'properties', label: 'Elemento', content: propertiesTool },
+            ],
+            handover: [
+                { id: 'as-built', label: 'As-built', content: <BimAsBuiltAcceptancePanel projectId={project?.id} empresaId={access?.resolved_company_id} models={workspace.models} activeVersionId={activeVersionId} /> },
             ],
         };
         const bottomTools = [

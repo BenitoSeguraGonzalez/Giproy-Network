@@ -15837,3 +15837,10 @@ Cambios realizados
 - Produccion BIM V2 incorpora forecast versionado y aprobable con presupuesto,
   compromiso, coste real, ETC, EAC y variacion congelados por moneda.
 - F07 pasa a completa; paridad 74,17% y programa 55,74% completado.
+### 2026-07-16 - Aceptacion de modelo as-built BIM (BIM-TASK-0161)
+
+- Entrega BIM V2 incorpora un workflow auditable sobre versiones listas, con
+  checksum IFC, calidad, criterios y declaracion congelados.
+- La aceptacion usa lock optimista, revalida el checksum y sustituye la
+  aceptacion vigente anterior sin mutar versiones ni datos clasicos.
+- G01 pasa a completa; paridad 75,00% y programa 57,38% completado.

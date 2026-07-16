@@ -9,6 +9,7 @@ import {
     GitMerge,
     Layers3,
     MonitorX,
+    PackageCheck,
     PanelLeft,
     PanelRight,
     RefreshCw,
@@ -26,6 +27,7 @@ const WORKSPACES = [
     { id: 'planning', label: 'Planificación 4D', icon: CalendarRange },
     { id: 'production', label: 'Producción', icon: ChartNoAxesCombined },
     { id: 'field', label: 'Campo', icon: ClipboardCheck },
+    { id: 'handover', label: 'Entrega', icon: PackageCheck },
     { id: 'reports', label: 'Informes', icon: FileChartColumn },
 ];
 
@@ -191,7 +193,7 @@ const BimWorkspaceV2 = ({
                 setSearchOpen(true);
                 return;
             }
-            if (event.altKey && /^[1-6]$/.test(event.key)) {
+            if (event.altKey && /^[1-7]$/.test(event.key)) {
                 event.preventDefault();
                 setActiveWorkspace(WORKSPACES[Number(event.key) - 1].id);
                 return;

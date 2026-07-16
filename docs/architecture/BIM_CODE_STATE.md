@@ -888,3 +888,15 @@ intercambio end-to-end.
   1920x900/2560x1300, anti-BIM y baseline pasan.
 - Paridad: `74,17%`, 41 completas, 7 parciales y 12 ausentes. Programa: 34/61,
   55,74% realizado y 44,26% pendiente. Sin deploy.
+## Aceptacion de modelo as-built BIM - 2026-07-16
+
+- `BIM-TASK-0161` completa G01 mediante solicitudes tenant-aware vinculadas a
+  versiones `ready`, reporte IFC no fallido y checksum congelado.
+- La decision revalida el checksum, usa lock optimista y sustituye de forma
+  auditable la aceptacion vigente anterior sin mutar el modelo fuente.
+- El workspace V2 incorpora el area independiente `Entrega`; no se modifica
+  navegacion, datos ni contratos de GiProy Clasico.
+- PostgreSQL reversible, 3 tests focales, build, 28 smokes BIM, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- Paridad: `75,00%`, 42 completas, 6 parciales y 12 ausentes. Programa: 35/61,
+  57,38% realizado y 42,62% pendiente. Sin deploy.

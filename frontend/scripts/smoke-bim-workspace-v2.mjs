@@ -6,7 +6,7 @@ const shellSource = readFileSync(new URL('../src/components/bim/BimWorkspaceV2.j
 
 assert.match(workspaceSource, /return\s*\([\s\S]*<BimWorkspaceV2/, 'V2 debe ser el unico retorno del workspace BIM');
 assert.doesNotMatch(workspaceSource, /VITE_BIM_WORKSPACE_V2|BIM_WORKSPACE_V2_ENABLED|BimShellContextBar|Herramientas de carga BIM/, 'No debe sobrevivir una rama de workspace legado');
-for (const label of ['Visor', 'Coordinación', 'Planificación 4D', 'Producción', 'Campo', 'Informes']) {
+for (const label of ['Visor', 'Coordinación', 'Planificación 4D', 'Producción', 'Campo', 'Entrega', 'Informes']) {
     assert.ok(shellSource.includes(`label: '${label}'`), `Debe existir el workspace ${label}`);
 }
 assert.match(shellSource, /window\.screen\.width\s*>=\s*1920[\s\S]*window\.screen\.height\s*>=\s*1080/, 'Debe mantenerse la guarda de resolución');

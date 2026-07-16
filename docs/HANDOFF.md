@@ -1,5 +1,19 @@
 # HANDOFF
 
+## 2026-07-16 - Aceptacion de modelo as-built BIM
+
+- `BIM-TASK-0161` cierra G01 con presentación y decisión gobernadas sobre una
+  versión BIM inmutable, lista y con reporte IFC no fallido.
+- La solicitud congela versión, archivo, checksum, calidad y criterios; la
+  aceptación revalida el checksum y sustituye la aceptación anterior.
+- `de2045a1b2c3` es aditiva y reversible; BIM V2 incorpora el área `Entrega`.
+- 3 tests focales, PostgreSQL, build, 28 smokes BIM, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- Paridad: 75,00% (42 completas, 6 parciales, 12 ausentes). Programa: 35/61,
+  57,38% realizado y 42,62% pendiente. Sin deploy.
+- Siguiente slice: `BIM-TASK-0162`, iniciar G02 con registro de activos y
+  sistemas de commissioning, manteniendo el dominio aislado.
+
 ## 2026-07-16 - Forecast de coste final BIM
 
 - `BIM-TASK-0160` cierra F07 con revisiones que congelan presupuesto aprobado,

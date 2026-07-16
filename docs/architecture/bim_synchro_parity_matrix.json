@@ -63,7 +63,7 @@
     {"id": "F05", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0158", "Governed potential and approved change orders"]},
     {"id": "F06", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0105", "BIM-TASK-0159", "Immutable actual cost ledger from governed field reports"]},
     {"id": "F07", "group": "cost", "status": "complete", "evidence": ["BIM-TASK-0160", "Versioned and approved multi-currency EAC forecast"]},
-    {"id": "G01", "group": "handover", "status": "partial", "evidence": ["Immutable BIM versions", "As-built acceptance pending"]},
+    {"id": "G01", "group": "handover", "status": "complete", "evidence": ["BIM-TASK-0161", "Immutable version with governed quality/checksum-bound as-built acceptance"]},
     {"id": "G02", "group": "handover", "status": "absent", "evidence": ["Commissioning domain pending"]},
     {"id": "G03", "group": "handover", "status": "partial", "evidence": ["BIM-TASK-0083", "BIM-TASK-0116", "Delivery closure pending"]},
     {"id": "G04", "group": "handover", "status": "absent", "evidence": ["Digital handover dossier pending"]},

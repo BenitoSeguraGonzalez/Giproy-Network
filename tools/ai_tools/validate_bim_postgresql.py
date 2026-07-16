@@ -54,6 +54,7 @@ BIM_TABLES = {
     "bim_cost_change_orders",
     "bim_cost_actual_entries",
     "bim_cost_forecasts",
+    "bim_as_built_acceptances",
     "bim_schedule_import_revisions",
     "bim_qto_snapshots",
     "bim_4d_resource_leveling_scenarios",
@@ -112,10 +113,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2044a1b2c3"
+        head for head in script.get_heads() if head != "de2045a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2044a1b2c3")
+    command.upgrade(config, "de2045a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -126,6 +127,23 @@ def validate(database_name: str) -> None:
                 text("select to_regclass(:table_name)"), {"table_name": table_name}
             ).scalar_one() != table_name:
                 raise RuntimeError(f"No se creo {table_name}.")
+        as_built_decided_type = connection.execute(
+            text(
+                "select data_type from information_schema.columns "
+                "where table_name='bim_as_built_acceptances' and column_name='decided_at'"
+            )
+        ).scalar_one()
+        if as_built_decided_type != "timestamp with time zone":
+            raise RuntimeError("as-built.decided_at no usa TIMESTAMP WITH TIME ZONE.")
+        as_built_current_index = connection.execute(
+            text(
+                "select indexdef from pg_indexes where tablename="
+                "'bim_as_built_acceptances' and indexname="
+                "'uq_bim_as_built_acceptance_current'"
+            )
+        ).scalar_one()
+        if "UNIQUE INDEX" not in as_built_current_index or "status" not in as_built_current_index or "accepted" not in as_built_current_index:
+            raise RuntimeError("Indice parcial de entrega as-built vigente invalido.")
         reported_at_type = connection.execute(
             text(
                 "select data_type from information_schema.columns "
@@ -417,10 +435,10 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2044a1b2c3")
+    command.upgrade(config, "de2045a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2044a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2045a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
@@ -429,7 +447,8 @@ def validate(database_name: str) -> None:
         "unplanned_events=TIMESTAMPTZ field_resources=TIMESTAMPTZ crews_timecards=DATE "
         "cost_estimates=NUMERIC cost_contracts=NUMERIC/DATE cost_payments=NUMERIC/DATE/TIMESTAMPTZ "
         "cost_sov=NUMERIC/partial_index cost_changes=NUMERIC/TIMESTAMPTZ "
-        "actual_cost=NUMERIC/TIMESTAMPTZ/currency forecast=NUMERIC"
+        "actual_cost=NUMERIC/TIMESTAMPTZ/currency forecast=NUMERIC "
+        "as_built=TIMESTAMPTZ/partial_index"
     )
 
 

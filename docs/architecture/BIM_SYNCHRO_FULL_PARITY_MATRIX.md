@@ -115,7 +115,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 
 | ID | Capacidad | Estado | Evidencia o brecha principal |
 |---|---|---|---|
-| G01 | Modelo as-built versionado | Parcial | versiones inmutables; falta workflow de aceptacion as-built |
+| G01 | Modelo as-built versionado | Completa | `BIM-TASK-0161`: version inmutable, calidad/checksum congelados y aceptacion as-built gobernada |
 | G02 | Commissioning | Ausente | sin activos, sistemas, pruebas ni aceptacion |
 | G03 | Punch list de terminacion | Parcial | incidencias/inspecciones; falta cierre de entrega |
 | G04 | Dossier digital de entrega | Ausente | no implementado |
@@ -154,8 +154,8 @@ Bentley. No modifica el cierre al 100% del nucleo 4D propio ya autorizado.
 5. `BIM-TASK-0147` a `0153`: Field desktop; PWA, movil y offline permanecen
    brechas explicitas mientras rija el contrato minimo 1920x1080.
 6. `BIM-TASK-0154` a `0160`: Perform.
-7. `BIM-TASK-0161` a `0167`: Cost.
-8. `BIM-TASK-0168` a `0172`: commissioning y handover.
+7. `BIM-TASK-0161`: aceptacion as-built; `BIM-TASK-0162` a `0172`: resto de
+   commissioning y handover.
 9. `BIM-TASK-0173` a `0183`: integraciones, escala y resiliencia.
 10. `BIM-TASK-0184` a `0188`: conformidad, Gate E, certificacion y rollout.
 
