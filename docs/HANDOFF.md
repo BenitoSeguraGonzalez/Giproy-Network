@@ -1,5 +1,19 @@
 # HANDOFF
 
+## 2026-07-16 - Solicitudes y certificaciones de pago BIM
+
+- `BIM-TASK-0156` cierra F03 con solicitud, envio y certificacion contra
+  contratos BIM activos, dentro de sus limites monetarios.
+- `de2040a1b2c3` es aditiva y reversible; no ejecuta pagos ni toca facturacion,
+  tesoreria o contabilidad clasicas.
+- Produccion incorpora `Pagos`; build, 23 smokes BIM, PostgreSQL, Playwright
+  1920x900/2560x1300 y baseline pasan.
+- Paridad: 69,17% (37 completas, 9 parciales, 14 ausentes). Programa: 30/61,
+  49,18% realizado y 50,82% pendiente.
+- Siguiente slice: `BIM-TASK-0157`, completar F04 con Schedule of Values
+  versionado y gobernado por contrato BIM.
+- Esta ola no se ha desplegado.
+
 ## 2026-07-16 - Contratos BIM de coste gobernados
 
 - `BIM-TASK-0155` cierra F02 con compromisos tenant-aware derivados solo de

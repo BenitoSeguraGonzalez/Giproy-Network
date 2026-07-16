@@ -15802,3 +15802,11 @@ Cambios realizados
   V2, sin acoplamiento a dominios contractuales o financieros clasicos.
 - Añadidos tests focales, migracion PostgreSQL reversible y smoke Playwright
   para 1920x900 y resoluciones superiores.
+### 2026-07-16 - Solicitudes y certificaciones de pago BIM (BIM-TASK-0156)
+
+- Añadido dominio `bim_cost_payment_applications` para solicitud, envio y
+  certificacion monetaria contra contratos BIM activos.
+- Añadidos limites acumulados, retencion, lock optimista, endpoints y la
+  herramienta `Pagos` en Produccion BIM V2.
+- Añadidos tests focales, migracion PostgreSQL reversible y smoke Playwright
+  para 1920x900 y resoluciones superiores.

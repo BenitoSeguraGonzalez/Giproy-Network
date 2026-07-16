@@ -81,6 +81,13 @@ from app.schemas.bim_qto import (
 from app.services.bim.cost_estimate_service import create_cost_estimate, decide_cost_estimate, list_cost_estimates
 from app.schemas.bim_cost_contract import BimCostContractCreate, BimCostContractResponse, BimCostContractTransition
 from app.services.bim.cost_contract_service import create_cost_contract, list_cost_contracts, transition_cost_contract
+from app.schemas.bim_cost_payment import (
+    BimCostPaymentApplicationCreate,
+    BimCostPaymentApplicationDecision,
+    BimCostPaymentApplicationResponse,
+    BimCostPaymentApplicationSubmit,
+)
+from app.services.bim.cost_payment_service import create_payment_application, decide_payment_application, list_payment_applications, submit_payment_application
 from app.services.bim.qto_service import (
     create_qto_snapshot,
     decide_qto_snapshot,
@@ -912,6 +919,30 @@ def create_project_bim_cost_contract(project_id: int, payload: BimCostContractCr
 def transition_project_bim_cost_contract(project_id: int, contract_id: int, payload: BimCostContractTransition, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
     return transition_cost_contract(db, contract_id=contract_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.get("/projects/{project_id}/payment-applications", response_model=list[BimCostPaymentApplicationResponse])
+def list_project_bim_payment_applications(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.view")
+    return list_payment_applications(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/payment-applications", response_model=BimCostPaymentApplicationResponse, status_code=status.HTTP_201_CREATED)
+def create_project_bim_payment_application(project_id: int, payload: BimCostPaymentApplicationCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
+    return create_payment_application(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/payment-applications/{application_id}/submit", response_model=BimCostPaymentApplicationResponse)
+def submit_project_bim_payment_application(project_id: int, application_id: int, payload: BimCostPaymentApplicationSubmit, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
+    return submit_payment_application(db, application_id=application_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/payment-applications/{application_id}/decision", response_model=BimCostPaymentApplicationResponse)
+def decide_project_bim_payment_application(project_id: int, application_id: int, payload: BimCostPaymentApplicationDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
+    return decide_payment_application(db, application_id=application_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
 
 
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)

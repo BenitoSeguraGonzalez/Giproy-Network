@@ -121,6 +121,7 @@ from .bim_4d_event import Bim4dUnplannedEvent
 from .bim_schedule_interop import BimScheduleImportRevision
 from .bim_qto import BimCostEstimate, BimQtoSnapshot
 from .bim_cost_contract import BimCostContract
+from .bim_cost_payment import BimCostPaymentApplication
 from .bim_cde import BimCdeDocument, BimCdeDocumentRevision
 from .bim_cde_rfi import BimCdeRfi, BimCdeRfiEvent
 from .bim_cde_submittal import BimCdeSubmittal, BimCdeSubmittalEvent, BimCdeSubmittalRevision

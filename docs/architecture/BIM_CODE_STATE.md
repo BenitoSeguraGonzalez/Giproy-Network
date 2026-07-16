@@ -799,6 +799,21 @@ intercambio end-to-end.
 - F02 queda completa. Paridad: `67,50%`, con 36 completas, 9 parciales y 15
   ausentes. Programa: 29/61, 47,54% realizado y 52,46% pendiente. Sin deploy.
 
+## Solicitudes y certificaciones de pago BIM - 2026-07-16
+
+- `BIM-TASK-0156` completa F03 con solicitudes de pago contra contratos BIM
+  activos y certificacion gobernada posterior al envio.
+- `bim_cost_payment_applications` persiste periodo, bruto, retencion, neto,
+  importes certificados, estado, lock y autores/timestamps de workflow.
+- Los acumulados solicitados y certificados permanecen dentro del compromiso;
+  una certificacion tampoco puede exceder su solicitud.
+- Backend, API y UI viven en BIM; no ejecutan pagos ni dependen de facturacion,
+  tesoreria o contabilidad clasicas.
+- PostgreSQL reversible, build, 23 smokes BIM, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- F03 queda completa. Paridad: `69,17%`, con 37 completas, 9 parciales y 14
+  ausentes. Programa: 30/61, 49,18% realizado y 50,82% pendiente. Sin deploy.
+
 ## Cuadrillas y partes de horas BIM - 2026-07-16
 
 - `BIM-TASK-0153` completa E08 con directorio de cuadrillas BIM y partes
