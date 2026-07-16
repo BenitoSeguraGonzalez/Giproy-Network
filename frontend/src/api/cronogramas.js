@@ -7,6 +7,21 @@ export const cronogramasApi = {
         return response.data;
     },
 
+    getRecursos: async (presupuestoId, empresaId = null) => {
+        const response = await axiosInstance.get(`/cronogramas/valorados/${presupuestoId}/recursos`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    getRecursosState: async (presupuestoId, empresaId = null) => {
+        const response = await axiosInstance.get(`/cronogramas/valorados/${presupuestoId}/recursos/state`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    updateRecursosState: async (presupuestoId, data, empresaId = null) => {
+        const response = await axiosInstance.put(`/cronogramas/valorados/${presupuestoId}/recursos/state`, data, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
     updateValoradoConfig: async (presupuestoId, data, empresaId = null) => {
         const response = await axiosInstance.put(`/cronogramas/valorados/${presupuestoId}/config`, data, withTenantConfig({}, empresaId));
         return response.data;
@@ -22,8 +37,20 @@ export const cronogramasApi = {
         return response.data;
     },
 
-    getTrabajo: async (presupuestoId, empresaId = null) => {
-        const response = await axiosInstance.get(`/cronogramas-trabajo/${presupuestoId}`, withTenantConfig({}, empresaId));
+    getTrabajo: async (presupuestoId, empresaId = null, options = {}) => {
+        const params = {
+            ...(options.compact ? { compact: true } : {}),
+            ...(options.metadataMode ? { metadata_mode: options.metadataMode } : {}),
+        };
+        const response = await axiosInstance.get(`/cronogramas-trabajo/${presupuestoId}`, withTenantConfig({ params }, empresaId));
+        return response.data;
+    },
+
+    getTrabajoLineMetadata: async (presupuestoId, lineaId, empresaId = null) => {
+        const response = await axiosInstance.get(
+            `/cronogramas-trabajo/${presupuestoId}/lineas/${lineaId}/metadata`,
+            withTenantConfig({}, empresaId),
+        );
         return response.data;
     },
 
@@ -39,6 +66,56 @@ export const cronogramasApi = {
 
     updateTrabajoDelta: async (presupuestoId, data, empresaId = null) => {
         const response = await axiosInstance.put(`/cronogramas-trabajo/${presupuestoId}/commit-delta`, data, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    getTrabajoGanttDraft: async (presupuestoId, empresaId = null) => {
+        const response = await axiosInstance.get(`/cronogramas-trabajo/${presupuestoId}/gantt-draft`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    saveTrabajoGanttDraftIntention: async (presupuestoId, data, empresaId = null) => {
+        const response = await axiosInstance.post(`/cronogramas-trabajo/${presupuestoId}/gantt-draft/intentions`, data, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    preflightTrabajoGanttDraftApply: async (presupuestoId, data = {}, empresaId = null) => {
+        const response = await axiosInstance.post(`/cronogramas-trabajo/${presupuestoId}/gantt-draft/preflight`, data, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    applyTrabajoGanttDraft: async (presupuestoId, data = {}, empresaId = null) => {
+        const response = await axiosInstance.post(`/cronogramas-trabajo/${presupuestoId}/gantt-draft/apply`, data, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    discardInvalidatedTrabajoGanttDraft: async (presupuestoId, data = {}, empresaId = null) => {
+        const response = await axiosInstance.post(`/cronogramas-trabajo/${presupuestoId}/gantt-draft/discard-invalidated`, data, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    prepareInvalidatedTrabajoGanttDraftAdjustment: async (presupuestoId, data = {}, empresaId = null) => {
+        const response = await axiosInstance.post(`/cronogramas-trabajo/${presupuestoId}/gantt-draft/prepare-adjustment`, data, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    acquireTrabajoGanttLock: async (presupuestoId, data = {}, empresaId = null) => {
+        const response = await axiosInstance.post(`/cronogramas-trabajo/${presupuestoId}/gantt-lock/acquire`, data, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    heartbeatTrabajoGanttLock: async (presupuestoId, data = {}, empresaId = null) => {
+        const response = await axiosInstance.post(`/cronogramas-trabajo/${presupuestoId}/gantt-lock/heartbeat`, data, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    requestTrabajoGanttLockRelease: async (presupuestoId, data = {}, empresaId = null) => {
+        const response = await axiosInstance.post(`/cronogramas-trabajo/${presupuestoId}/gantt-lock/request-release`, data, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    releaseTrabajoGanttLock: async (presupuestoId, empresaId = null) => {
+        const response = await axiosInstance.post(`/cronogramas-trabajo/${presupuestoId}/gantt-lock/release`, {}, withTenantConfig({}, empresaId));
         return response.data;
     },
 

@@ -106,6 +106,8 @@ class APUResponse(APUBase):
     fecha_creacion: datetime
     ultima_modificacion: Optional[datetime] = None
     lineas: List[APULineaResponse] = []
+    official_source: Optional[Dict] = None
+    official_price_overridden: Optional[bool] = False
 
 class APUImportRequest(BaseModel):
     source_base_id: int

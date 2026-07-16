@@ -46,6 +46,13 @@ class BaseTrabajoResponse(BaseTrabajoBase):
     snapshot_apus_count: Optional[int] = None
     fecha_creacion: datetime
     ultima_modificacion: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
+    deleted_by_user_id: Optional[int] = None
+    recycle_expires_at: Optional[datetime] = None
+    deletion_reason: Optional[str] = None
+    trash_original_nombre: Optional[str] = None
+    trash_original_codigo_unico: Optional[str] = None
+    trash_original_activa: Optional[bool] = None
     
     # Campos dinámicos agregados en el repositorio (outerjoin con proyectos)
     proyecto_id: Optional[int] = None

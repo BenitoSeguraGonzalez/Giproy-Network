@@ -71,12 +71,37 @@ const DIALOG_SHADOW_RAISED = '-4px -4px 10px rgba(255,255,255,0.85), 5px 5px 12p
 const DIALOG_SHADOW_INSET = 'inset 2px 2px 4px rgba(186,190,204,0.9), inset -3px -3px 7px rgba(255,255,255,0.78)';
 const DIALOG_PANEL_SHADOW = '-10px -10px 24px rgba(255,255,255,0.76), 14px 14px 28px rgba(148,163,184,0.24)';
 
+const normalizeDialogMessage = (dialog) => {
+    const rawMessage = dialog.message ?? dialog.detail ?? dialog.description ?? dialog.error;
+    if (typeof rawMessage === 'string') {
+        return rawMessage.trim();
+    }
+    if (rawMessage instanceof Error) {
+        return rawMessage.message?.trim() || '';
+    }
+    if (Array.isArray(rawMessage)) {
+        return rawMessage
+            .map((item) => {
+                if (typeof item === 'string') return item.trim();
+                if (item?.msg) return String(item.msg).trim();
+                if (item?.message) return String(item.message).trim();
+                return '';
+            })
+            .filter(Boolean)
+            .join('\n');
+    }
+    if (rawMessage && typeof rawMessage === 'object') {
+        if (rawMessage.message) return String(rawMessage.message).trim();
+        if (rawMessage.detail) return String(rawMessage.detail).trim();
+        if (rawMessage.msg) return String(rawMessage.msg).trim();
+    }
+    return '';
+};
+
 const resolveDialogConfig = (dialog) => {
     const defaults = DEFAULTS[dialog.type] || DEFAULTS.alert;
     const toneKey = dialog.tone || defaults.tone;
-    const normalizedMessage = typeof dialog.message === 'string'
-        ? dialog.message.trim()
-        : dialog.message;
+    const normalizedMessage = normalizeDialogMessage(dialog);
     return {
         ...defaults,
         ...dialog,

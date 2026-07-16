@@ -106,7 +106,7 @@ const MarketplaceBuyerDashboard = () => {
             const response = await marketplaceApi.downloadOrderInvoice(targetOrderId);
             triggerBlobDownload(response.data, `factura_marketplace_${targetOrderId}.pdf`, 'application/pdf');
         } catch (error) {
-            console.error('Error descargando factura del pedido:', error);
+            globalThis.reportClientError?.('Error descargando factura del pedido:', error);
             appAlert('No se pudo descargar la factura del pedido.');
         } finally {
             setDownloadingInvoiceId(null);
@@ -128,7 +128,7 @@ const MarketplaceBuyerDashboard = () => {
                     setAssets(libraryRes.data || []);
                 }
             } catch (error) {
-                console.error('Error cargando biblioteca comprador:', error);
+                globalThis.reportClientError?.('Error cargando biblioteca comprador:', error);
                 if (!cancelled) {
                     setOrders([]);
                     setAssets([]);

@@ -31,10 +31,10 @@
 
 ### Ola 1
 
-- `TASK-0546`
-- `TASK-0547`
-- `TASK-0548`
-- `TASK-0555`
+- `BIM-TASK-0001`
+- `BIM-TASK-0002`
+- `BIM-TASK-0003`
+- `BIM-TASK-0010`
 
 Resultado:
 - dominio BIM definido
@@ -44,9 +44,9 @@ Resultado:
 
 ### Ola 2
 
-- `TASK-0549`
-- `TASK-0551`
-- `TASK-0556`
+- `BIM-TASK-0004`
+- `BIM-TASK-0006`
+- `BIM-TASK-0011`
 
 Resultado:
 - importación/versionado
@@ -56,15 +56,15 @@ Resultado:
 
 ### Ola 3
 
-- `TASK-0550`
+- `BIM-TASK-0005`
 
 Resultado:
 - integración real con `EDT`, `APUs` y `Presupuesto`
 
 ### Ola 4
 
-- `TASK-0552`
-- `TASK-0553`
+- `BIM-TASK-0007`
+- `BIM-TASK-0008`
 
 Resultado:
 - endurecimiento multiempresa/seguridad
@@ -72,7 +72,7 @@ Resultado:
 
 ### Ola 5
 
-- `TASK-0554`
+- `BIM-TASK-0009`
 
 Resultado:
 - rollout
@@ -83,6 +83,10 @@ Resultado:
 
 No se debe avanzar a la siguiente ola si falla cualquiera de estos gates:
 
+Todas las olas deben documentarse en `docs/tasks/bim` con IDs `BIM-TASK-*`.
+Las TASK historicas `TASK-0545` a `TASK-0559` solo son referencia legacy de
+planificacion y no deben usarse para cerrar ejecucion BIM nueva.
+
 ### Gate A
 
 - licencia aceptada
@@ -91,6 +95,8 @@ No se debe avanzar a la siguiente ola si falla cualquiera de estos gates:
 - índice BIM único actualizado y navegable
 
 ### Gate B
+
+Estado local: cerrado el 2026-07-10 mediante `BIM-TASK-0075` a `0079`.
 
 - backend y migraciones BIM consistentes
 - modelo/versionado persistibles
@@ -112,6 +118,11 @@ No se debe avanzar a la siguiente ola si falla cualquiera de estos gates:
 - smoke suite aprobada
 - pruebas funcionales aprobadas
 - rendimiento mínimo aprobado
+
+Actualizacion 2026-07-13: `BIM-TASK-0124` despliega el Workspace BIM V2 en
+beta con viewer >= 65%, canvas real, cero overflow a 1920x1080 y rollback por
+flag. Esta evidencia cierra el slice UX tecnico, pero no cierra el piloto humano
+de Gate E.
 
 ## 5. Riesgos principales a vigilar
 

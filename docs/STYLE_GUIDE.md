@@ -132,6 +132,7 @@ Deben usar el componente `LiquidButton` con los siguientes lineamientos:
 - **Endpoints globales**: Las llamadas globales o de plataforma (`login`, `usuarios/me`, `empresas`, `paises`, `maestros`, utilidades transversales) deben marcarse explícitamente como `sin tenant`.
 - **Clientes API obligatorios**: En módulos multiempresa (`Proyectos`, `Presupuestos`, `Bases`, `Subcategorías`, `Recursos`, `APUs`, `EDT`, `EDO`, `Stakeholders`) queda prohibido usar `api.get/post/put/delete(...)` directo si existe o debe existir un cliente API del dominio.
 - **Cambios de contexto**: Al cambiar la empresa activa, se deben invalidar todos los contextos derivados que puedan contaminar otro tenant (`base`, `proyecto`, `presupuesto`, caches o selecciones persistidas).
+- **Remonte visual por tenant**: Todo módulo clásico protegido debe refrescar su estado visible al cambiar la empresa activa, sin exigir recarga del navegador. El `AppLayout` debe conservar una clave derivada de `selectedEmpresa.id` para remontar el contenido operativo, y los módulos con estado sensible deben seguir usando `selectedEmpresa` o clientes API con `empresa_id` explícito.
 
 ### Política de Stakeholders por Proyecto
 - **Directorio Común del Proyecto**: `Stakeholders` pertenece al proyecto raíz (`codigo_root`) y se comparte entre todas sus revisiones.
@@ -421,14 +422,14 @@ El panel izquierdo del editor/creador APU sigue una regla operativa específica:
 - **Hover de Recuperación**: Si el usuario lo plegó manualmente, al pasar el ratón por el rail debe desplegarse temporalmente.
 - **Retorno Automático**: Si el despliegue fue por hover, al salir el ratón debe volver a plegarse.
 
-### 4.2.6 Override Manual para Diseño y Pruebas
+### 4.2.6 Sin Override Manual de Modo Portátil
 
-El `Portable Workspace Mode` es automático para usuarios normales, pero el sistema admite un override manual exclusivamente para `superadmin`:
+El `Portable Workspace Mode` no debe exponerse como función manual del header ni como preferencia persistente de usuario:
 
-- **Uso Exclusivo de Superadmin**: Solo `superadmin` puede ver y accionar el control manual para forzar el modo portátil.
-- **Propósito**: El override existe únicamente para diseño, QA y pruebas de layout.
-- **Persistencia Local**: El estado puede persistirse en el navegador del operador técnico para repetir pruebas sin cambiar resolución física.
-- **Prohibición Funcional para Otros Roles**: Administradores y usuarios operativos no deben disponer de este control; para ellos el modo portátil sigue siendo puramente automático.
+- **Sin Control Visible**: Ningún rol debe ver un botón o acción `Portátil` para forzar el layout.
+- **Sin Persistencia Local**: No se debe guardar un override de modo portátil en `localStorage` ni reactivarlo entre sesiones.
+- **Responsive Real**: Las pantallas que necesiten compactación deben responder al ancho/alto efectivo del módulo o contenedor, no a una función global forzada.
+- **Compatibilidad Legacy Inerte**: Si existen helpers técnicos heredados para este override, deben permanecer sin efecto hasta su retirada segura por limpieza focal.
 
 ### 4.2.7 Ergonomía del Gráfico EDT/EDO
 
@@ -642,6 +643,8 @@ Reglas obligatorias:
 - El panel debe mantener radios amplios, borde técnico fino, fondo claro del sistema y jerarquía visual coherente con GiProy.
 - La cabecera debe seguir un patrón común: icono opcional, título técnico, subtítulo breve si aporta contexto y cierre alineado a la derecha.
 - El footer debe mantener el patrón del sistema para acciones primarias/secundarias; no deben aparecer agrupaciones ni estilos de botones improvisados por modal.
+- En los modales de `Analisis de Precio` / `Precios Unitarios`, el footer debe usar botones de accion solo con iconos visibles. Cada boton debe incluir `title` y `aria-label` descriptivos; no se deben mostrar textos como `Cancelar`, `Actualizar`, `Confirmar` o similares dentro del boton.
+- Los modales funcionales que conviven con el header operativo deben montar con un z-index superior al header (`z-[1000]` o token equivalente) y centrarse en viewport salvo que el libro de estilo defina una excepcion concreta.
 - Si un modal necesita una variante de tamaño, esta debe salir de la propia shell compartida y no de clases copiadas localmente.
 - En modales técnicos del módulo Proyectos, las acciones de cierre/confirmación deben reutilizar `ProjectSectionIconButton` con `AppHint`; no se deben crear botones nativos paralelos para iconos de footer. El hover, foco y activo deben ser iguales entre acción secundaria y primaria, cambiando solo el tono/acento.
 - Si el modal permite alternar modo o tipo de operación, usar el selector real `ProjectSegmentedSwitch` en cabecera cuando haya espacio. Las etiquetas no deben partirse en dos líneas; si son largas, aumentar `minSegmentWidth`, abreviar el `label` visible y conservar el texto completo en `title`.

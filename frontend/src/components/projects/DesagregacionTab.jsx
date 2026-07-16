@@ -225,7 +225,7 @@ const DesagregacionTab = ({ project }) => {
             setReportPreview(response.data);
             setShowReportPreview(true);
         } catch (error) {
-            console.error("Error al generar reporte VAE:", error);
+            globalThis.reportClientError?.("Error al generar reporte VAE:", error);
             appAlert({ title: "Error", message: "No se pudo generar el reporte VAE.", tone: "danger" });
         } finally {
             setGeneratingReport(false);
@@ -248,7 +248,7 @@ const DesagregacionTab = ({ project }) => {
                 extension: 'xlsx',
             }));
         } catch (error) {
-            console.error("Error al exportar reporte VAE:", error);
+            globalThis.reportClientError?.("Error al exportar reporte VAE:", error);
             appAlert({ title: "Error", message: await extractBlobErrorMessage(error, "No se pudo exportar el reporte VAE."), tone: "danger" });
         } finally {
             setGeneratingReport(false);
@@ -271,7 +271,7 @@ const DesagregacionTab = ({ project }) => {
                 extension: 'pdf',
             }), 'application/pdf');
         } catch (error) {
-            console.error("Error al exportar reporte VAE PDF:", error);
+            globalThis.reportClientError?.("Error al exportar reporte VAE PDF:", error);
             appAlert({ title: "Error", message: await extractBlobErrorMessage(error, "No se pudo exportar el reporte VAE en PDF."), tone: "danger" });
         } finally {
             setGeneratingReport(false);
@@ -294,7 +294,7 @@ const DesagregacionTab = ({ project }) => {
                 extension: 'pdf',
             }), 'application/pdf');
         } catch (error) {
-            console.error("Error al exportar reporte VAE PDF desde Excel:", error);
+            globalThis.reportClientError?.("Error al exportar reporte VAE PDF desde Excel:", error);
             appAlert({ title: "Error", message: await extractBlobErrorMessage(error, "No se pudo exportar el reporte VAE como PDF desde Excel."), tone: "danger" });
         } finally {
             setGeneratingReport(false);
@@ -353,7 +353,7 @@ const DesagregacionTab = ({ project }) => {
                 setProjectApuCpcMap(nextMap);
             })
             .catch((error) => {
-                console.error("Error cargando CPC de APUs del proyecto:", error);
+                globalThis.reportClientError?.("Error cargando CPC de APUs del proyecto:", error);
                 setProjectApuCpcMap({});
             });
         return () => {
@@ -401,7 +401,7 @@ const DesagregacionTab = ({ project }) => {
             directResults.forEach((result, index) => {
                 const fallbackId = directFallbackIds[index];
                 if (result.status !== 'fulfilled' || !result.value?.data) {
-                    console.error("Error cargando detalle directo de APU:", fallbackId, result.reason);
+                    globalThis.reportClientError?.("Error cargando detalle directo de APU:", fallbackId, result.reason);
                     return;
                 }
                 batchDetails[fallbackId] = buildApuVaeDetail(result.value.data);
@@ -413,7 +413,7 @@ const DesagregacionTab = ({ project }) => {
                 return next;
             });
         } catch (error) {
-            console.error("Error cargando VAE de APUs:", error);
+            globalThis.reportClientError?.("Error cargando VAE de APUs:", error);
             const directResults = await Promise.allSettled(
                 pendingIds.map((id) => apusApi.getById(id, selectedEmpresa?.id))
             );
@@ -421,7 +421,7 @@ const DesagregacionTab = ({ project }) => {
             directResults.forEach((result, index) => {
                 const fallbackId = pendingIds[index];
                 if (result.status !== 'fulfilled' || !result.value?.data) {
-                    console.error("Error cargando detalle directo de APU:", fallbackId, result.reason);
+                    globalThis.reportClientError?.("Error cargando detalle directo de APU:", fallbackId, result.reason);
                     return;
                 }
                 fallbackDetails[fallbackId] = buildApuVaeDetail(result.value.data);
@@ -479,7 +479,7 @@ const DesagregacionTab = ({ project }) => {
                 });
             })
             .catch((error) => {
-                console.error("Error cargando detalle directo del APU seleccionado:", error);
+                globalThis.reportClientError?.("Error cargando detalle directo del APU seleccionado:", error);
                 if (!apuDetailsRef.current[apuId]) {
                     loadApusVAE([apuId]);
                 }
@@ -516,12 +516,12 @@ const DesagregacionTab = ({ project }) => {
 
                 const presData = presupuestoResult.status === 'fulfilled' ? presupuestoResult.value : [];
                 if (presupuestoResult.status === 'rejected') {
-                    console.error("Error cargando presupuestos de desagregación:", presupuestoResult.reason);
+                    globalThis.reportClientError?.("Error cargando presupuestos de desagregación:", presupuestoResult.reason);
                 }
                 if (edtResult.status === 'fulfilled') {
                     setEdtTree(Array.isArray(edtResult.value) ? edtResult.value : []);
                 } else {
-                    console.error("Error cargando EDT de desagregación:", edtResult.reason);
+                    globalThis.reportClientError?.("Error cargando EDT de desagregación:", edtResult.reason);
                     setEdtTree([]);
                 }
 
@@ -533,7 +533,7 @@ const DesagregacionTab = ({ project }) => {
                 }
                 setPresupuestos(presData);
             } catch (error) {
-                console.error("Error cargando datos de desagregación:", error);
+                globalThis.reportClientError?.("Error cargando datos de desagregación:", error);
             } finally {
                 setLoading(false);
             }
@@ -555,7 +555,7 @@ const DesagregacionTab = ({ project }) => {
                 loadApusVAE(apuIds);
 
             } catch (error) {
-                console.error("Error cargando detalle del presupuesto:", error);
+                globalThis.reportClientError?.("Error cargando detalle del presupuesto:", error);
             } finally {
                 setLoadingDetails(false);
             }
@@ -607,7 +607,7 @@ const DesagregacionTab = ({ project }) => {
                 const res = await recursosApi.searchCPC(cpcSearchQuery);
                 setCpcResults(res.data);
             } catch (error) {
-                console.error("Error buscando CPC:", error);
+                globalThis.reportClientError?.("Error buscando CPC:", error);
             } finally {
                 setIsSearchingCpc(false);
             }
@@ -670,7 +670,7 @@ const DesagregacionTab = ({ project }) => {
 
             // Si estábamos en modo navegación, es probable que este rubro ya esté completo ahora
         } catch (error) {
-            console.error("Error guardando CPC:", error);
+            globalThis.reportClientError?.("Error guardando CPC:", error);
             appAlert({
                 title: "Error",
                 message: error.response?.data?.detail || "No se pudo actualizar el código CPC.",

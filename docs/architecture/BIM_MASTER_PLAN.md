@@ -2,7 +2,9 @@
 
 ## 1. Propósito
 
-Definir una hoja de ruta completa para incorporar una capa BIM madura, profesional y operativa en GiProy Network sin escribir todavía código productivo. Este documento congela la arquitectura objetivo, las fases, los módulos, las entidades, las integraciones y la estrategia de validación.
+Definir una hoja de ruta completa para incorporar una capa BIM madura, profesional y operativa en GiProy Network. Este documento congela la arquitectura objetivo, las fases, los módulos, las entidades, las integraciones y la estrategia de validación.
+
+Estado actualizado 2026-07-01: el programa BIM ya no esta solo en planificacion. Existe una incubacion funcional parcial en codigo, documentada en `BIM_CODE_STATE.md`. Este plan sigue siendo la referencia de madurez objetivo, pero el punto de partida real debe leerse desde ese estado de codigo.
 
 ## 2. Decisión tecnológica congelada
 
@@ -59,13 +61,31 @@ Esta combinación ofrece el mejor equilibrio entre:
   - `Fórmula Polinómica`
 - Backend FastAPI + PostgreSQL adecuado para versionado, metadata y vínculos
 
-### Huecos actuales
+### Estado real actual
 
-- No existe módulo BIM productivo
-- No existen dependencias BIM/3D activas en frontend
-- No existen entidades de modelo BIM, versión, elemento, vista o vínculo semántico
-- No existe pipeline de importación/versionado/optimización de modelos
-- No existe sincronización BIM <-> negocio
+- Existe dominio BIM backend aislado con modelos, schemas, servicios y endpoints.
+- Existen clientes API, hooks y componentes frontend BIM en perimetros dedicados.
+- La experiencia BIM visible en `Proyectos` permanece apagada mediante `CLASSIC_BIM_ACCESS_DISABLED`.
+- Existen links BIM latentes hacia `EDT`, `APUs` y `Presupuesto`, pero no navegacion clasica visible habilitada.
+- Existe importacion JSON para incubacion, no importacion IFC madura.
+- Existe viewer tecnico/demostrativo 2D y una fundacion local 3D con Three.js
+  sobre el stack BIM/3D autorizado; no aun viewer IFC maduro con parsing
+  semantico, fragments ni artefactos optimizados.
+- La persistencia principal BIM ya cuenta con migracion Alembic inicial; queda pendiente validar su aplicacion local y reducir fallbacks runtime `checkfirst` desde servicios.
+
+### Huecos actuales para madurez
+
+- No existe viewer IFC maduro; ya hay parsing semantico inicial, fragments
+  cargados en harness aislado y faltan datasets reales/representativos.
+- Las dependencias BIM/3D ya estan activas en frontend como fundacion local,
+  pero falta integrarlas al pipeline IFC real.
+- Falta validar en DB local la migracion Alembic principal BIM y decidir la retirada o reduccion de creacion runtime `checkfirst`.
+- Existe pipeline IFC inicial con manifiesto, storage, checksum, parsing
+  semantico y artefacto viewer JSON; falta madurez con datasets reales,
+  fragments de produccion y simulaciones de volumen.
+- No existe navegacion cruzada visible con modulos clasicos bajo TASK de integracion controlada.
+- Existe smoke suite BIM parcial; falta suite completa con datasets reales,
+  rendimiento y viewer 3D maduro.
 
 ## 3.1 Estrategia de convivencia congelada
 
@@ -236,10 +256,15 @@ Una capa BIM se considerará madura cuando cumpla simultáneamente:
 ## 11. Entregables documentales de esta planificación
 
 - `docs/architecture/BIM_INDEX.md`
+- `docs/architecture/BIM_CODE_STATE.md`
 - `docs/architecture/BIM_MASTER_PLAN.md`
 - `docs/architecture/BIM_CONCEPT_MAP.md`
 - `docs/architecture/BIM_INSERTION_MAP.md`
 - `docs/architecture/BIM_VALIDATION_PLAN.md`
 - `docs/architecture/BIM_EXECUTION_ROADMAP.md`
 - `docs/architecture/BIM_PARALLEL_IMPLEMENTATION_STRATEGY.md`
-- `docs/tasks/TASK-0545.md` a `TASK-0554.md`
+- `docs/tasks/bim/BIM_TASK_INDEX.md`
+- `docs/tasks/bim/BIM-TASK-0000.md` a `BIM-TASK-0014.md`
+
+Las TASK historicas `TASK-0545` a `TASK-0559` quedan como planificacion legacy
+previa a la separacion documental del carril BIM.

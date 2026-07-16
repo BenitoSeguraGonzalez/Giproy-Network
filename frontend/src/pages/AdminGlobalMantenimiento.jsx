@@ -81,7 +81,7 @@ const AdminGlobalMantenimiento = () => {
                 ends_at: toDateTimeLocal(data.ends_at),
             });
         } catch (error) {
-            console.error('Error cargando mantenimiento:', error);
+            globalThis.reportClientError?.('Error cargando mantenimiento:', error);
             await appAlert({
                 title: 'No se pudo cargar la configuración',
                 message: error.response?.data?.detail || 'Revise la conectividad con el backend.',
@@ -115,7 +115,7 @@ const AdminGlobalMantenimiento = () => {
             setStatus(data);
             await loadConfig();
         } catch (error) {
-            console.error('Error guardando mantenimiento:', error);
+            globalThis.reportClientError?.('Error guardando mantenimiento:', error);
             await appAlert({
                 title: 'No se pudo guardar el modo mantenimiento',
                 message: error.response?.data?.detail || 'Revise las fechas y vuelva a intentarlo.',

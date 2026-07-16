@@ -27,6 +27,7 @@ const buildViewStateSummary = (state) => {
         payload.storey_name ? `Nivel ${payload.storey_name}` : null,
         payload.element_id ? `Elemento ${payload.element_id}` : null,
         payload.link_id ? `Vínculo ${payload.link_id}` : null,
+        payload.viewer_state?.contract_version === 'giproy_bim_view_state_v2' ? 'Viewer reproducible' : null,
     ].filter(Boolean);
 };
 
@@ -46,6 +47,7 @@ const BimViewStateToolbar = ({
     renamingViewStateId,
     duplicatingViewStateId,
     deletingViewStateId,
+    applyStatus,
 }) => {
     const [draftName, setDraftName] = useState('');
     const [isEditingName, setIsEditingName] = useState(false);
@@ -152,6 +154,23 @@ const BimViewStateToolbar = ({
                     </button>
                 </div>
             </div>
+            {applyStatus ? (
+                <p
+                    className={`mb-3 rounded-lg border px-2.5 py-2 text-[11px] font-semibold ${
+                        applyStatus.status === 'incompatible' || applyStatus.status === 'error'
+                            ? 'border-amber-200 bg-amber-50 text-amber-800'
+                            : 'border-zinc-200 bg-white text-zinc-600'
+                    }`}
+                    role="status"
+                    data-bim-view-state-apply={applyStatus.status}
+                >
+                    {applyStatus.status === 'applying' ? 'Aplicando vista BIM...' : null}
+                    {applyStatus.status === 'applied' ? 'Vista BIM reproducida.' : null}
+                    {applyStatus.status === 'incompatible' ? 'Vista incompatible con la versión activa.' : null}
+                    {applyStatus.status === 'legacy' ? 'Vista aplicada sin estado 3D reproducible.' : null}
+                    {applyStatus.status === 'error' ? applyStatus.message || 'No se pudo reproducir la vista BIM.' : null}
+                </p>
+            ) : null}
             {isEditingName ? (
                 <div className="mb-3 rounded-xl border border-orange-200 bg-white px-3 py-3">
                     <label className="block text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">

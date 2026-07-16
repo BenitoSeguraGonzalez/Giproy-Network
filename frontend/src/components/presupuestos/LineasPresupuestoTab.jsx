@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef, useMemo, useCallback, u
 import { usePresupuestoActions, usePresupuestoData, usePresupuestoSelection } from '../../context/PresupuestoContext';
 import { AuthContext } from '../../context/AuthContext';
 import { edtApi } from '../../api/edt';
-import { Folders, ChevronDown, ChevronRight, Calculator, Trash2, FileText, GripVertical, Boxes, Target, Edit2, Check, FlaskConical, ArrowDown, X } from 'lucide-react';
+import { Folders, ChevronDown, ChevronRight, Calculator, Trash2, FileText, GripVertical, Boxes, Target, Edit2, Check, FlaskConical, ArrowDown, X, Lock } from 'lucide-react';
 import CodeColorizer from '../../utils/codeColorizer';
 import { getIndirectosStatus } from '../../utils/indirectosStatus';
 import { appConfirm } from '../../utils/appDialog';
@@ -32,6 +32,15 @@ const isOperationalBudgetLine = (linea) => !isStructuralBudgetRow(linea);
 const isDesyncedBudgetLine = (linea) => isOperationalBudgetLine(linea) && !linea?.apu_id;
 const isCountableBudgetLine = (linea) => isOperationalBudgetLine(linea) && !isDesyncedBudgetLine(linea);
 const BUDGET_ROW_MIN_WIDTH = 1024;
+const BUDGET_COLUMN_WIDTH = {
+    item: 'w-[72px]',
+    edt: 'w-[110px]',
+    unit: 'w-[44px]',
+    quantity: 'w-[92px]',
+    unitPrice: 'w-[84px]',
+    subtotal: 'w-[98px]',
+    actions: 'w-[144px]',
+};
 const CHAPTER_ROW_HEIGHT = 48;
 const LINE_ROW_HEIGHT = 52;
 const VIRTUAL_INITIAL_ROWS = 180;
@@ -193,7 +202,9 @@ const PresupuestoNodeItem = ({
     onSelectLineRange,
     onSelectionModeRequest,
     onTanteoModeRequest,
-    setTanteoVisible
+    setTanteoVisible,
+    onEquipoLockLine,
+    onEquipoProposalLine,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [isDragOver, setIsDragOver] = useState(false);
@@ -448,13 +459,13 @@ const PresupuestoNodeItem = ({
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
-                        <div className="w-[44px] shrink-0" />
-                        <div className="w-[92px] shrink-0" />
-                        <div className="w-[84px] shrink-0" />
-                        <div className="w-[98px] text-right font-black tabular-nums text-xs text-[#136191]/70">
+                        <div className={`${BUDGET_COLUMN_WIDTH.unit} shrink-0`} />
+                        <div className={`${BUDGET_COLUMN_WIDTH.quantity} shrink-0`} />
+                        <div className={`${BUDGET_COLUMN_WIDTH.unitPrice} shrink-0`} />
+                        <div className={`${BUDGET_COLUMN_WIDTH.subtotal} text-right font-black tabular-nums text-xs text-[#136191]/70`}>
                             {chapterSubtotal > 0 ? formatMoneda(chapterSubtotal) : '-'}
                         </div>
-                        <div className="w-[96px] shrink-0" />
+                        <div className={`${BUDGET_COLUMN_WIDTH.actions} shrink-0`} />
                     </div>
                 </div>
             </div>
@@ -476,6 +487,14 @@ const PresupuestoNodeItem = ({
                             onDragLeave={() => handleLineDragLeave(linea.id)}
                             onDrop={(e) => handleLineDrop(e, linea)}
                             onClick={(e) => handleLineSelection(e, linea)}
+                            onDoubleClick={(e) => {
+                                if (!linea.apu_id || e.target instanceof HTMLInputElement || e.target.closest('button') || e.target.closest('[data-budget-drag-handle="true"]')) {
+                                    return;
+                                }
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onEditApu && onEditApu(linea);
+                            }}
                             onMouseDown={(e) => {
                                 if (e.target instanceof HTMLInputElement || e.target.closest('button') || e.target.closest('[data-budget-drag-handle="true"]')) {
                                     return;
@@ -568,10 +587,10 @@ const PresupuestoNodeItem = ({
                                         </div>
 
                                         <div className="flex items-center gap-2.5 shrink-0">
-                                            <div className="w-[44px] text-center text-[10px] font-bold text-zinc-500 uppercase">
+                                            <div className={`${BUDGET_COLUMN_WIDTH.unit} text-center text-[10px] font-bold text-zinc-500 uppercase`}>
                                                 {linea.unidad || 'UND'}
                                             </div>
-                                            <div className="w-[92px] text-right">
+                                            <div className={`${BUDGET_COLUMN_WIDTH.quantity} text-right`}>
                                                 <input 
                                                     type="text" 
                                                     value={getQuantityDisplayValue ? getQuantityDisplayValue(linea.id, linea.cantidad) : formatNumericDisplay(linea.cantidad)}
@@ -596,7 +615,7 @@ const PresupuestoNodeItem = ({
                                                     className={`w-full rounded-lg border px-2 py-1 text-right text-[13px] font-mono font-black shadow-sm transition-all ${isDesynced ? 'border-red-200 bg-red-50 text-red-700 cursor-not-allowed' : 'border-zinc-100 bg-zinc-50 text-zinc-900 caret-[#F39200] hover:border-zinc-200 focus:bg-white focus:border-[#F39200]/40 focus:ring-2 focus:ring-[#F39200]/10'}`}
                                                 />
                                             </div>
-                                            <div className="w-[84px] text-right">
+                                            <div className={`${BUDGET_COLUMN_WIDTH.unitPrice} text-right`}>
                                                 <span className={`inline-flex min-w-[76px] justify-end rounded-lg border px-2 py-1 text-right text-[13px] font-mono font-black tabular-nums shadow-sm ${
                                                     isDesynced
                                                         ? 'border-red-200 bg-red-50 text-red-700'
@@ -608,11 +627,35 @@ const PresupuestoNodeItem = ({
                                                     {formatMoneda(tanteoSession[linea.apu_id] !== undefined ? tanteoSession[linea.apu_id] : toDecimalNumber(parseNumericInput(linea.precio_unitario), '0'))}
                                                 </span>
                                             </div>
-                                            <div className={`w-[98px] text-right font-black tabular-nums text-xs shadow-sm px-2 py-1 rounded-lg border ${isDesynced ? 'bg-red-50 border-red-200 text-red-700' : tanteoSession[linea.apu_id] !== undefined ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-emerald-50 border-emerald-100 text-zinc-900'}`}>
+                                            <div className={`${BUDGET_COLUMN_WIDTH.subtotal} text-right font-black tabular-nums text-xs shadow-sm px-2 py-1 rounded-lg border ${isDesynced ? 'bg-red-50 border-red-200 text-red-700' : tanteoSession[linea.apu_id] !== undefined ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-emerald-50 border-emerald-100 text-zinc-900'}`}>
                                                 {formatMoneda(lineSubtotal)}
                                             </div>
 
-                                            <div className={`flex items-center gap-1 transition-opacity w-[96px] justify-end ${lineNoteMeta.total > 0 || selectedLineId === linea.id ? 'opacity-100' : 'opacity-0 group-hover/linea:opacity-100'}`}>
+                                            <div className={`flex items-center gap-1 transition-opacity ${BUDGET_COLUMN_WIDTH.actions} justify-end ${lineNoteMeta.total > 0 || selectedLineId === linea.id ? 'opacity-100' : 'opacity-0 group-hover/linea:opacity-100'}`}>
+                                                {!isDesynced && onEquipoLockLine && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onEquipoLockLine(linea);
+                                                        }}
+                                                        className="p-1.5 text-zinc-400 hover:text-[#136191] hover:bg-blue-50 rounded transition-all"
+                                                        title="Bloquear línea Equipo"
+                                                    >
+                                                        <Lock className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                                {!isDesynced && onEquipoProposalLine && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onEquipoProposalLine(linea);
+                                                        }}
+                                                        className="p-1.5 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all"
+                                                        title="Proponer ajuste Equipo"
+                                                    >
+                                                        <Check className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                                 {linea.apu_id && (
                                                     <button
                                                         onClick={(e) => {
@@ -704,6 +747,8 @@ const PresupuestoNodeItem = ({
                             onSelectionModeRequest={onSelectionModeRequest}
                             onTanteoModeRequest={onTanteoModeRequest}
                             setTanteoVisible={setTanteoVisible}
+                            onEquipoLockLine={onEquipoLockLine}
+                            onEquipoProposalLine={onEquipoProposalLine}
                         />
                     ))}
                 </div>
@@ -768,10 +813,10 @@ const BudgetChapterRow = ({
                 </button>
             </div>
             <div className="flex-1 min-w-0 flex items-center gap-3">
-                <div className="flex h-full w-[72px] shrink-0 items-center justify-center text-center text-[11px] font-black tabular-nums text-[#136191]">
+                <div className={`flex h-full ${BUDGET_COLUMN_WIDTH.item} shrink-0 items-center justify-center text-center text-[11px] font-black tabular-nums text-[#136191]`}>
                     {itemVisible}
                 </div>
-                <div className="flex h-full w-[110px] shrink-0 items-center text-[11px] font-mono font-black tracking-wider text-[#136191]">
+                <div className={`flex h-full ${BUDGET_COLUMN_WIDTH.edt} shrink-0 items-center text-[11px] font-mono font-black tracking-wider text-[#136191]`}>
                     {edtCodeVisible || ''}
                 </div>
                 <div className="flex items-center gap-2 flex-1 min-w-0" style={{ paddingLeft: `${(level * 1.5) + 1}rem` }}>
@@ -781,13 +826,13 @@ const BudgetChapterRow = ({
                     </span>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                    <div className="w-[44px] shrink-0" />
-                    <div className="w-[92px] shrink-0" />
-                    <div className="w-[84px] shrink-0" />
-                    <div className="w-[98px] text-right font-black tabular-nums text-xs text-[#136191]/70">
+                    <div className={`${BUDGET_COLUMN_WIDTH.unit} shrink-0`} />
+                    <div className={`${BUDGET_COLUMN_WIDTH.quantity} shrink-0`} />
+                    <div className={`${BUDGET_COLUMN_WIDTH.unitPrice} shrink-0`} />
+                    <div className={`${BUDGET_COLUMN_WIDTH.subtotal} text-right font-black tabular-nums text-xs text-[#136191]/70`}>
                         {chapterSubtotal > 0 ? formatMoneda(chapterSubtotal) : '-'}
                     </div>
-                    <div className="w-[96px] shrink-0" />
+                    <div className={`${BUDGET_COLUMN_WIDTH.actions} shrink-0`} />
                 </div>
             </div>
         </div>
@@ -821,6 +866,8 @@ const BudgetLineRow = ({
     onEditApu,
     onOpenLineNotes,
     onDeleteLinea,
+    onEquipoLockLine,
+    onEquipoProposalLine,
     handleDragStart,
     handleLineDragOver,
     handleLineDragLeave,
@@ -856,6 +903,14 @@ const BudgetLineRow = ({
             onDragLeave={() => handleLineDragLeave(linea.id)}
             onDrop={(e) => handleLineDrop(e, linea)}
             onClick={(e) => handleLineSelection(e, linea)}
+            onDoubleClick={(e) => {
+                if (!linea.apu_id || e.target instanceof HTMLInputElement || e.target.closest('button') || e.target.closest('[data-budget-drag-handle="true"]')) {
+                    return;
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                onEditApu && onEditApu(linea);
+            }}
             onMouseDown={(e) => {
                 if (e.target instanceof HTMLInputElement || e.target.closest('button') || e.target.closest('[data-budget-drag-handle="true"]')) {
                     return;
@@ -896,10 +951,10 @@ const BudgetLineRow = ({
                     <GripVertical className="w-3.5 h-3.5 pointer-events-none" />
                 </div>
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex h-full w-[72px] shrink-0 items-center justify-center text-center text-[11px] font-black tabular-nums text-[#136191]">
+                    <div className={`flex h-full ${BUDGET_COLUMN_WIDTH.item} shrink-0 items-center justify-center text-center text-[11px] font-black tabular-nums text-[#136191]`}>
                         {itemVisible}
                     </div>
-                    <div className="flex h-full w-[110px] shrink-0 items-center">
+                    <div className={`flex h-full ${BUDGET_COLUMN_WIDTH.edt} shrink-0 items-center`}>
                         <CodeColorizer code={edtCodeVisible || 'S/N'} className="text-[10px]" />
                     </div>
                     <div className="flex items-center gap-2 flex-1 min-w-0" style={{ paddingLeft: `${((level + 1) * 1.5) + 1}rem` }}>
@@ -935,10 +990,10 @@ const BudgetLineRow = ({
                         </div>
                     </div>
                     <div className="flex items-center gap-2.5 shrink-0">
-                        <div className="w-[44px] text-center text-[10px] font-bold text-zinc-500 lowercase">
+                        <div className={`${BUDGET_COLUMN_WIDTH.unit} text-center text-[10px] font-bold text-zinc-500 lowercase`}>
                             {String(linea.unidad || 'und').toLowerCase()}
                         </div>
-                        <div className="w-[92px] text-right">
+                        <div className={`${BUDGET_COLUMN_WIDTH.quantity} text-right`}>
                             <input
                                 type="text"
                                 value={getQuantityDisplayValue ? getQuantityDisplayValue(linea.id, linea.cantidad) : formatNumericDisplay(linea.cantidad, quantityDecimals)}
@@ -963,15 +1018,39 @@ const BudgetLineRow = ({
                                 className={`w-full rounded-lg border px-2 py-1 text-right text-[13px] font-mono font-black shadow-sm transition-all ${isDesynced ? 'border-red-200 bg-red-50 text-red-700 cursor-not-allowed' : 'border-zinc-100 bg-zinc-50 text-zinc-900 caret-[#F39200] hover:border-zinc-200 focus:bg-white focus:border-[#F39200]/40 focus:ring-2 focus:ring-[#F39200]/10'}`}
                             />
                         </div>
-                        <div className="w-[84px] text-right">
+                        <div className={`${BUDGET_COLUMN_WIDTH.unitPrice} text-right`}>
                             <span className={`inline-flex min-w-[76px] justify-end rounded-lg border px-2 py-1 text-right text-[13px] font-mono font-black tabular-nums shadow-sm ${isDesynced ? 'border-red-200 bg-red-50 text-red-700' : tanteoSession[linea.apu_id] !== undefined ? 'border-blue-200 bg-blue-50 text-blue-600' : 'border-zinc-100 bg-zinc-50 text-zinc-900'}`}>
                                 {formatMoneda(tanteoSession[linea.apu_id] !== undefined ? tanteoSession[linea.apu_id] : toDecimalNumber(parseNumericInput(linea.precio_unitario), '0'))}
                             </span>
                         </div>
-                        <div className={`w-[98px] text-right font-black tabular-nums text-xs shadow-sm px-2 py-1 rounded-lg border ${isDesynced ? 'bg-red-50 border-red-200 text-red-700' : tanteoSession[linea.apu_id] !== undefined ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-emerald-50 border-emerald-100 text-zinc-900'}`}>
+                        <div className={`${BUDGET_COLUMN_WIDTH.subtotal} text-right font-black tabular-nums text-xs shadow-sm px-2 py-1 rounded-lg border ${isDesynced ? 'bg-red-50 border-red-200 text-red-700' : tanteoSession[linea.apu_id] !== undefined ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-emerald-50 border-emerald-100 text-zinc-900'}`}>
                             {formatMoneda(lineSubtotal)}
                         </div>
-                        <div className={`flex items-center gap-1 transition-opacity w-[96px] justify-end ${lineNoteMeta.total > 0 || isSelected ? 'opacity-100' : 'opacity-0 group-hover/linea:opacity-100'}`}>
+                        <div className={`flex items-center gap-1 transition-opacity ${BUDGET_COLUMN_WIDTH.actions} justify-end ${lineNoteMeta.total > 0 || isSelected ? 'opacity-100' : 'opacity-0 group-hover/linea:opacity-100'}`}>
+                            {!isDesynced && onEquipoLockLine && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEquipoLockLine(linea);
+                                    }}
+                                    className="p-1.5 text-zinc-400 hover:text-[#136191] hover:bg-blue-50 rounded transition-all"
+                                    title="Bloquear línea Equipo"
+                                >
+                                    <Lock className="w-4 h-4" />
+                                </button>
+                            )}
+                            {!isDesynced && onEquipoProposalLine && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEquipoProposalLine(linea);
+                                    }}
+                                    className="p-1.5 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all"
+                                    title="Proponer ajuste Equipo"
+                                >
+                                    <Check className="w-4 h-4" />
+                                </button>
+                            )}
                             {linea.apu_id && (
                                 <button
                                     onClick={(e) => {
@@ -1052,6 +1131,8 @@ const LineasPresupuestoTab = ({
     notesSummary = {},
     onOpenLineNotes,
     onEditApu,
+    onEquipoLockLine,
+    onEquipoProposalLine,
     minimapTargetNodeId = null,
     onMinimapTargetHandled = null,
     onTreeReady = null
@@ -1173,7 +1254,7 @@ const LineasPresupuestoTab = ({
                     setSelectedNodeId((prevSelectedNodeId) => prevSelectedNodeId ?? findFirstCuenta(treeData));
                 }
             } catch (error) {
-                console.error("Error cargando el árbol EDT para Presupuestos:", error);
+                globalThis.reportClientError?.("Error cargando el árbol EDT para Presupuestos:", error);
             } finally {
                 setLoading(false);
             }
@@ -1847,7 +1928,7 @@ const LineasPresupuestoTab = ({
         try {
             await deleteApuFromBudget(lineaId);
         } catch (error) {
-            console.error(error);
+            globalThis.reportClientError?.(error);
         }
     };
 
@@ -1978,7 +2059,7 @@ const LineasPresupuestoTab = ({
                 }
             }
         } catch (error) {
-            console.error("Error moviendo rubro:", error);
+            globalThis.reportClientError?.("Error moviendo rubro:", error);
         }
     };
 
@@ -1986,7 +2067,7 @@ const LineasPresupuestoTab = ({
         try {
             await updateApuInBudget(lineaId, updateData);
         } catch (error) {
-            console.error("Error actualizando linea:", error);
+            globalThis.reportClientError?.("Error actualizando linea:", error);
         }
     };
 
@@ -2230,19 +2311,19 @@ const LineasPresupuestoTab = ({
                 <div ref={budgetHeaderScrollRef} className="h-full overflow-hidden">
                     <div className="flex h-full items-center gap-3 border-b border-[#272b33] pl-0 pr-3" style={{ minWidth: `${BUDGET_ROW_MIN_WIDTH}px` }}>
                         <div className={`${isSelectionMode ? 'w-12' : 'w-6'} ml-1 shrink-0`} />
-                        <div className="w-[72px] shrink-0 text-center text-[10px] font-black uppercase tracking-widest text-zinc-400">ITEM</div>
-                        <div className="w-[110px] shrink-0 text-[10px] font-black uppercase tracking-widest text-zinc-400">COD EDT</div>
+                        <div className={`${BUDGET_COLUMN_WIDTH.item} shrink-0 text-center text-[10px] font-black uppercase tracking-widest text-zinc-400`}>ITEM</div>
+                        <div className={`${BUDGET_COLUMN_WIDTH.edt} shrink-0 text-[10px] font-black uppercase tracking-widest text-zinc-400`}>CÓD. EDT</div>
                         <div className="flex-1 min-w-0 text-[10px] font-black uppercase tracking-widest text-zinc-400">
                             DESCRIPCIÓN DE LA ESTRUCTURA / PARTIDAS
                         </div>
                         <div className="flex items-center gap-2.5 shrink-0">
-                            <div className="w-[44px] text-center text-[10px] font-black uppercase tracking-widest text-zinc-400">UNID</div>
-                            <div className="w-[92px] text-right text-[10px] font-black uppercase tracking-widest text-zinc-400">CANTIDAD</div>
-                            <div className="w-[84px] text-right text-[10px] font-black uppercase tracking-widest text-zinc-400" title="Precio unitario funcional con indirectos aplicados">
-                                P. UNIT.
+                            <div className={`${BUDGET_COLUMN_WIDTH.unit} text-center text-[10px] font-black uppercase tracking-widest text-zinc-400`}>UNIDAD</div>
+                            <div className={`${BUDGET_COLUMN_WIDTH.quantity} text-right text-[10px] font-black uppercase tracking-widest text-zinc-400`}>CANTIDAD</div>
+                            <div className={`${BUDGET_COLUMN_WIDTH.unitPrice} text-right text-[10px] font-black uppercase tracking-widest text-zinc-400`} title="Precio unitario funcional con indirectos aplicados">
+                                P. UNITARIO
                             </div>
-                            <div className="w-[98px] text-right text-[10px] font-black uppercase tracking-widest text-zinc-400">SUBTOTAL</div>
-                            <div className="w-[96px] text-right text-[10px] font-black uppercase tracking-widest text-zinc-400">ACCIONES</div>
+                            <div className={`${BUDGET_COLUMN_WIDTH.subtotal} text-right text-[10px] font-black uppercase tracking-widest text-zinc-400`}>SUBTOTAL</div>
+                            <div className={`${BUDGET_COLUMN_WIDTH.actions} text-right text-[10px] font-black uppercase tracking-widest text-zinc-400`}>ACCIONES</div>
                         </div>
                     </div>
                 </div>
@@ -2317,6 +2398,8 @@ const LineasPresupuestoTab = ({
                                     onEditApu={onEditApu}
                                     onOpenLineNotes={onOpenLineNotes}
                                     onDeleteLinea={handleDeleteLinea}
+                                    onEquipoLockLine={onEquipoLockLine}
+                                    onEquipoProposalLine={onEquipoProposalLine}
                                     handleDragStart={handleDragStart}
                                     handleLineDragOver={handleLineDragOver}
                                     handleLineDragLeave={handleLineDragLeave}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileSpreadsheet, FileText, Layers } from 'lucide-react';
+import { Boxes, CalendarRange, CircleDollarSign, FileSpreadsheet, FileText, Layers, PackageCheck, Sigma } from 'lucide-react';
 import { AppModalShell, AppModalHeader, AppModalBody, AppModalFooter } from '../ui/app-modal';
 import { normalizeReportDescription, normalizeReportPersonName, normalizeReportUnit } from '../../utils/reportTextFormatting';
 import { resolveMediaUrl } from '../../utils/mediaUrl';
@@ -11,6 +11,14 @@ const formatMoney = (value) => {
     return new Intl.NumberFormat('es-EC', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
+    }).format(number);
+};
+
+const formatCalc = (value, decimals = 4) => {
+    const number = Number(value || 0);
+    return new Intl.NumberFormat('es-EC', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: decimals,
     }).format(number);
 };
 
@@ -32,6 +40,15 @@ const isDocumentPersonLine = (linea = {}, reportKind = '') => {
         return Boolean(linea.codigo_stkr || String(linea.codigo_edt || linea.codigo || '').includes('.R'));
     }
     return false;
+};
+
+const isResourceUsagePreview = (preview = {}, item = {}) => {
+    const variant = String(preview?.variant || '').toLowerCase();
+    return item?.preview_layout === 'resource_usage'
+        || (
+            preview?.report_type === 'cronograma_valorado'
+            && ['resources', 'resource_usage', 'uso_recursos', 'uso_de_recursos', 'resources_range', 'resource_usage_range', 'uso_recursos_rango'].includes(variant)
+        );
 };
 
 const resolveDocumentTitleValue = (linea, titleKey, reportKind) => {
@@ -218,9 +235,335 @@ const CommonReportPreviewModal = ({
         if (count === 2) return 'grid-cols-2';
         return 'grid-cols-3';
     };
+    const renderReportWarnings = (item, className = '') => {
+        const warnings = Array.isArray(item?.warnings) ? item.warnings.filter(Boolean) : [];
+        if (!warnings.length) return null;
+        return (
+            <div className={`space-y-2 ${className}`}>
+                {warnings.map((warning, warningIndex) => {
+                    const message = typeof warning === 'string' ? warning : warning?.message;
+                    if (!message) return null;
+                    return (
+                        <div
+                            key={`${item?.id || 'report'}-warning-${warningIndex}`}
+                            className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-bold leading-snug text-amber-800"
+                        >
+                            {message}
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+    const renderResourceUsagePreview = (item, index) => {
+        const rows = item.resource_usage_rows?.length ? item.resource_usage_rows : (item.lineas || []);
+        const periods = item.periods || [];
+        const categoryPalette = {
+            '1': {
+                icon: Boxes,
+                chip: 'border-blue-200 bg-blue-50 text-blue-700',
+                row: 'bg-blue-50/70 text-blue-900',
+                dot: 'bg-blue-500',
+            },
+            '2': {
+                icon: PackageCheck,
+                chip: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                row: 'bg-emerald-50/70 text-emerald-900',
+                dot: 'bg-emerald-500',
+            },
+            '3': {
+                icon: CalendarRange,
+                chip: 'border-amber-200 bg-amber-50 text-amber-700',
+                row: 'bg-amber-50/70 text-amber-900',
+                dot: 'bg-amber-500',
+            },
+            '4': {
+                icon: Sigma,
+                chip: 'border-violet-200 bg-violet-50 text-violet-700',
+                row: 'bg-violet-50/70 text-violet-900',
+                dot: 'bg-violet-500',
+            },
+        };
+        const groupedRows = rows.reduce((acc, row) => {
+            const categoryId = String(row.categoria_id || String(row.categoria || '').split('.')[0] || '0');
+            const key = row.categoria || 'Recursos';
+            const current = acc.get(key) || {
+                key,
+                categoryId,
+                rows: [],
+                quantity: 0,
+                cost: 0,
+            };
+            current.rows.push(row);
+            current.quantity += Number(row.cantidad_total || 0);
+            current.cost += Number(row.costo_total || 0);
+            acc.set(key, current);
+            return acc;
+        }, new Map());
+        const groups = [...groupedRows.values()].sort((a, b) => Number(a.categoryId) - Number(b.categoryId));
+        const totalCost = rows.reduce((sum, row) => sum + Number(row.costo_total || 0), 0);
+        const totalQuantity = rows.reduce((sum, row) => sum + Number(row.cantidad_total || 0), 0);
+        const maxCost = Math.max(...groups.map((group) => group.cost), 1);
+        const periodSummaries = periods.map((period, periodIndex) => {
+            const cost = rows.reduce((sum, row) => sum + Number(row.period_costs?.[periodIndex] || 0), 0);
+            const quantity = rows.reduce((sum, row) => sum + Number(row.period_quantities?.[periodIndex] || 0), 0);
+            return {
+                label: period.label || `P${periodIndex + 1}`,
+                cost,
+                quantity,
+                percent: totalCost > 0 ? (cost / totalCost) * 100 : 0,
+            };
+        });
+        const maxPeriodCost = Math.max(...periodSummaries.map((period) => period.cost), 1);
+        const topResources = [...rows]
+            .sort((a, b) => Number(b.costo_total || 0) - Number(a.costo_total || 0))
+            .slice(0, 10);
+        const periodPeak = periodSummaries.reduce((best, period) => (period.cost > (best?.cost || 0) ? period : best), null);
+
+        return (
+            <section key={`${item.id}-${index}-resource-usage`} className="overflow-hidden rounded-[1.35rem] border border-zinc-200 bg-white">
+                <header className="border-b border-zinc-200 bg-[#111318] px-5 py-4 text-white">
+                    <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                        <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="rounded-full border border-[#F39200]/40 bg-[#F39200]/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#ffbd73]">
+                                    Reporte estrella
+                                </span>
+                                <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-zinc-300">
+                                    Cronogramas
+                                </span>
+                            </div>
+                            <h3 className="mt-3 text-xl font-black uppercase tracking-[0.04em] text-white">
+                                Uso de Recursos
+                            </h3>
+                            <p className="mt-1 max-w-4xl text-sm font-semibold leading-snug text-zinc-300">
+                                {getDisplayDescription(item.descripcion, false)}
+                            </p>
+                            {item.metadata_hint ? (
+                                <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                    {item.metadata_hint}
+                                </p>
+                            ) : null}
+                            {renderReportWarnings(item, 'mt-3 max-w-4xl')}
+                        </div>
+                        <div className="grid min-w-0 grid-cols-3 gap-2 xl:w-[520px]">
+                            {[
+                                { label: 'Recursos', value: rows.length, icon: PackageCheck, tone: 'text-[#F39200]' },
+                                { label: 'Periodos', value: periods.length, icon: CalendarRange, tone: 'text-[#136191]' },
+                                { label: 'Costo directo', value: `$${formatMoney(totalCost)}`, icon: CircleDollarSign, tone: 'text-[#F39200]' },
+                            ].map((card) => (
+                                <div key={card.label} className="rounded-[0.85rem] border border-white/10 bg-white/[0.06] px-3 py-2">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">{card.label}</span>
+                                        <card.icon className={`h-3.5 w-3.5 ${card.tone}`} />
+                                    </div>
+                                    <div className="mt-1 truncate text-base font-black text-white" title={String(card.value)}>
+                                        {card.value}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </header>
+
+                <div className="space-y-4 bg-[#f4f6f9] p-4">
+                    <div className="grid gap-3 lg:grid-cols-4">
+                        {groups.map((group) => {
+                            const palette = categoryPalette[group.categoryId] || categoryPalette['1'];
+                            const Icon = palette.icon;
+                            const percent = Math.min(100, Math.max(0, (group.cost / maxCost) * 100));
+                            return (
+                                <article key={group.key} className="rounded-[1rem] border border-zinc-200 bg-white px-4 py-3">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <div className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] ${palette.chip}`}>
+                                                <Icon className="h-3.5 w-3.5" />
+                                                {group.key}
+                                            </div>
+                                            <div className="mt-3 text-xl font-black text-zinc-950">
+                                                ${formatMoney(group.cost)}
+                                            </div>
+                                            <div className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400">
+                                                {group.rows.length} recurso(s) · {formatCalc(group.quantity)} unid.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-zinc-100">
+                                        <div className={`h-full rounded-full ${palette.dot}`} style={{ width: `${percent}%` }} />
+                                    </div>
+                                </article>
+                            );
+                        })}
+                    </div>
+
+                    <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
+                        <div className="rounded-[1rem] border border-zinc-200 bg-white px-4 py-3">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">Lectura ejecutiva</p>
+                                    <p className="mt-1 text-sm font-bold text-zinc-800">
+                                        Recursos finales consolidados, concentracion de costo y periodos de mayor demanda.
+                                    </p>
+                                </div>
+                                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-500">
+                                    Total cantidad {formatCalc(totalQuantity)}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="rounded-[1rem] border border-blue-100 bg-blue-50 px-4 py-3 text-[11px] font-semibold leading-snug text-[#136191]">
+                            Periodo pico: <span className="font-black">{periodPeak?.label || '-'}</span> · ${formatMoney(periodPeak?.cost || 0)}. Excel mantiene la matriz completa para trabajo operativo.
+                        </div>
+                    </div>
+
+                    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+                        <div className="rounded-[1rem] border border-zinc-200 bg-white p-4">
+                            <div className="mb-3 flex items-center justify-between gap-3">
+                                <div>
+                                    <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">Recursos gobernantes</p>
+                                    <p className="mt-1 text-sm font-bold text-zinc-800">Top 10 por costo directo acumulado.</p>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                {topResources.map((row, rowIndex) => {
+                                    const share = totalCost > 0 ? (Number(row.costo_total || 0) / totalCost) * 100 : 0;
+                                    const categoryId = String(row.categoria_id || String(row.categoria || '').split('.')[0] || '0');
+                                    const palette = categoryPalette[categoryId] || categoryPalette['1'];
+                                    return (
+                                        <article key={`${item.id}-top-resource-${row.recurso_id || rowIndex}`} className="rounded-[0.85rem] border border-zinc-100 bg-zinc-50 px-3 py-2">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-black text-zinc-600">
+                                                            {rowIndex + 1}
+                                                        </span>
+                                                        <p className="truncate text-[12px] font-black text-zinc-900" title={getDisplayDescription(row.recurso, false)}>
+                                                            {getDisplayDescription(row.recurso, false)}
+                                                        </p>
+                                                    </div>
+                                                    <div className="mt-1 flex flex-wrap items-center gap-2 pl-8 text-[9px] font-bold uppercase tracking-[0.08em] text-zinc-400">
+                                                        <span>{row.codigo || '-'}</span>
+                                                        <span className={`rounded-full border px-2 py-0.5 ${palette.chip}`}>{row.categoria || '-'}</span>
+                                                        <span>{formatCalc(row.cantidad_total)} {row.unidad || ''}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="shrink-0 text-right">
+                                                    <div className="text-[12px] font-black tabular-nums text-zinc-950">${formatMoney(row.costo_total)}</div>
+                                                    <div className="text-[9px] font-bold tabular-nums text-zinc-400">{formatCalc(share, 2)}%</div>
+                                                </div>
+                                            </div>
+                                            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white">
+                                                <div className={`h-full rounded-full ${palette.dot}`} style={{ width: `${Math.min(100, Math.max(2, share))}%` }} />
+                                            </div>
+                                        </article>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="rounded-[1rem] border border-zinc-200 bg-white p-4">
+                            <div className="mb-3">
+                                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">Demanda por periodos</p>
+                                <p className="mt-1 text-sm font-bold text-zinc-800">Costo directo requerido por periodo.</p>
+                            </div>
+                            <div className="space-y-2">
+                                {periodSummaries.map((period, periodIndex) => (
+                                    <div key={`${item.id}-period-summary-${periodIndex}`} className="grid grid-cols-[72px_minmax(0,1fr)_96px] items-center gap-3">
+                                        <div className="truncate text-[10px] font-black uppercase tracking-[0.1em] text-zinc-500" title={period.label}>
+                                            {period.label}
+                                        </div>
+                                        <div className="h-2 overflow-hidden rounded-full bg-zinc-100">
+                                            <div
+                                                className="h-full rounded-full bg-[#136191]"
+                                                style={{ width: `${Math.min(100, Math.max(2, (period.cost / maxPeriodCost) * 100))}%` }}
+                                            />
+                                        </div>
+                                        <div className="text-right text-[11px] font-black tabular-nums text-zinc-900">
+                                            ${formatMoney(period.cost)}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="overflow-hidden rounded-[1rem] border border-zinc-200 bg-white">
+                        <div className="border-b border-zinc-200 px-4 py-3">
+                            <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">Listado ejecutivo consolidado</p>
+                            <p className="mt-1 text-sm font-bold text-zinc-800">Todos los recursos finales, sin detallar la matriz periodo por periodo.</p>
+                        </div>
+                        <div className="max-h-[38vh] overflow-auto">
+                            <table className="min-w-full border-separate border-spacing-0 text-left">
+                                <thead className="sticky top-0 z-10 bg-white">
+                                    <tr className="text-[9px] font-black uppercase tracking-[0.12em] text-zinc-400">
+                                        <th className="sticky left-0 z-20 border-b border-zinc-200 bg-white px-4 py-3">Recurso</th>
+                                        <th className="border-b border-zinc-200 px-3 py-3">Categoria</th>
+                                        <th className="border-b border-zinc-200 px-3 py-3 text-right">Cant. total</th>
+                                        <th className="border-b border-zinc-200 px-3 py-3 text-right">Costo total</th>
+                                        <th className="border-b border-zinc-200 px-3 py-3 text-right">Peso</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {groups.map((group) => {
+                                        const palette = categoryPalette[group.categoryId] || categoryPalette['1'];
+                                        return (
+                                            <React.Fragment key={`${item.id}-group-${group.key}`}>
+                                                <tr>
+                                                    <td colSpan={5} className={`border-b border-zinc-200 px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] ${palette.row}`}>
+                                                        {group.key}
+                                                    </td>
+                                                </tr>
+                                                {group.rows.map((row, rowIndex) => (
+                                                    <tr key={`${item.id}-resource-${group.key}-${row.recurso_id || rowIndex}`} className="group border-b border-zinc-100 hover:bg-zinc-50">
+                                                        <td className="sticky left-0 z-[1] min-w-[320px] border-b border-zinc-100 bg-white px-4 py-3 group-hover:bg-zinc-50">
+                                                            <div className="text-[12px] font-black leading-snug text-zinc-900">
+                                                                {getDisplayDescription(row.recurso, false)}
+                                                            </div>
+                                                            <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-bold text-zinc-400">
+                                                                <span>{row.codigo || '-'}</span>
+                                                                <span className="h-1 w-1 rounded-full bg-zinc-300" />
+                                                                <span>{row.unidad || '-'}</span>
+                                                                <span className="h-1 w-1 rounded-full bg-zinc-300" />
+                                                                <span>{row.subcategoria || '-'}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="min-w-[180px] border-b border-zinc-100 px-3 py-3">
+                                                            <span className={`inline-flex rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] ${palette.chip}`}>
+                                                                {row.categoria || group.key}
+                                                            </span>
+                                                        </td>
+                                                        <td className="border-b border-zinc-100 px-3 py-3 text-right text-[12px] font-black tabular-nums text-zinc-800">
+                                                            {formatCalc(row.cantidad_total)}
+                                                        </td>
+                                                        <td className="border-b border-zinc-100 px-3 py-3 text-right text-[12px] font-black tabular-nums text-zinc-950">
+                                                            ${formatMoney(row.costo_total)}
+                                                        </td>
+                                                        <td className="min-w-[120px] border-b border-zinc-100 px-3 py-3 text-right">
+                                                            <div className="text-[11px] font-black tabular-nums text-zinc-800">
+                                                                {formatCalc(totalCost > 0 ? (Number(row.costo_total || 0) / totalCost) * 100 : 0, 2)}%
+                                                            </div>
+                                                            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-zinc-100">
+                                                                <div
+                                                                    className={`h-full rounded-full ${palette.dot}`}
+                                                                    style={{ width: `${Math.min(100, Math.max(2, totalCost > 0 ? (Number(row.costo_total || 0) / totalCost) * 100 : 0))}%` }}
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </React.Fragment>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+    };
 
     return (
-        <AppModalShell isOpen={isOpen} onClose={onClose} size="2xl" zIndex="z-[420]">
+        <AppModalShell isOpen={isOpen} onClose={onClose} size={items.some((item) => isResourceUsagePreview(preview, item)) ? '3xl' : '2xl'} zIndex="z-[420]">
             <AppModalHeader
                 title={preview?.title || 'Visor de Reporte'}
                 subtitle={`${preview?.selection_count || 0} elemento(s) seleccionado(s)`}
@@ -234,6 +577,9 @@ const CommonReportPreviewModal = ({
                     const reportKind = isEdtReport || item.preview_layout === 'edt_document' ? 'edt' : 'edo';
                     const isDocumentReport = isEdoReport || isEdtReport || item.preview_layout === 'edo_document' || item.preview_layout === 'edt_document';
                     const useCompactSummary = shouldUseSingleLineSummary(item);
+                    if (isResourceUsagePreview(preview, item)) {
+                        return renderResourceUsagePreview(item, index);
+                    }
                     if (isDocumentReport) {
                         const fieldMap = resolveDocumentFieldMap(item, reportKind);
                         const fallbackColumns = reportKind === 'edt' ? edtDocumentColumns : edoDocumentColumns;
@@ -412,6 +758,7 @@ const CommonReportPreviewModal = ({
                                 {item.metadata_hint ? (
                                     <p className="mt-2 text-[11px] font-semibold text-zinc-500">{item.metadata_hint}</p>
                                 ) : null}
+                                {renderReportWarnings(item, 'mt-3')}
                             </div>
                             <div className={`min-w-0 grid w-full gap-3 text-right ${resolveSummaryGridClass(item, useCompactSummary)}`}>
                                 {(item.summary_cards || [

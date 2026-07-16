@@ -1,0 +1,566 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { Box, Cpu, Layers3, RotateCcw } from 'lucide-react';
+import { adaptViewerArtifactToElements } from './bimViewerArtifactAdapter';
+
+const TYPE_COLORS = {
+    ifcwall: 0xf39200,
+    ifcslab: 0x136191,
+    ifcbeam: 0x475569,
+    ifccolumn: 0x22c55e,
+    ifcgrid: 0x94a3b8,
+    ifcroof: 0xe94e1b,
+};
+
+const normalizePoints = (points = []) =>
+    points
+        .map((point) => ({ x: Number(point?.x), y: Number(point?.y) }))
+        .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y));
+
+const getElementBounds = (element, index) => {
+    const geometry = element?.metadata_json?.geometry_2d || {};
+    const points = normalizePoints(geometry.points || []);
+    if (points.length >= 2) {
+        const xs = points.map((point) => point.x);
+        const ys = points.map((point) => point.y);
+        return {
+            x: Math.min(...xs),
+            y: Math.min(...ys),
+            width: Math.max(12, Math.max(...xs) - Math.min(...xs)),
+            depth: Math.max(12, Math.max(...ys) - Math.min(...ys)),
+            source: 'imported',
+        };
+    }
+
+    if (
+        Number.isFinite(Number(geometry.x)) &&
+        Number.isFinite(Number(geometry.y)) &&
+        Number.isFinite(Number(geometry.width)) &&
+        Number.isFinite(Number(geometry.height))
+    ) {
+        return {
+            x: Number(geometry.x),
+            y: Number(geometry.y),
+            width: Math.max(12, Number(geometry.width)),
+            depth: Math.max(12, Number(geometry.height)),
+            source: 'imported',
+        };
+    }
+
+    return {
+        x: 32 + (index % 5) * 90,
+        y: 48 + Math.floor(index / 5) * 70,
+        width: 56,
+        depth: 40,
+        source: 'derived',
+    };
+};
+
+const buildThreeElements = (elements = []) => {
+    const prepared = elements.map((element, index) => {
+        const bounds = getElementBounds(element, index);
+        const ifcClass = (element.ifc_class || '').toLowerCase();
+        const heightSeed = ifcClass.includes('slab') ? 10 : ifcClass.includes('grid') ? 4 : 32 + (index % 4) * 8;
+        return {
+            ...element,
+            ...bounds,
+            height: heightSeed,
+            color: TYPE_COLORS[ifcClass] || 0xcbd5e1,
+        };
+    });
+
+    const minX = Math.min(...prepared.map((element) => element.x), 0);
+    const minY = Math.min(...prepared.map((element) => element.y), 0);
+    const maxX = Math.max(...prepared.map((element) => element.x + element.width), 1);
+    const maxY = Math.max(...prepared.map((element) => element.y + element.depth), 1);
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    return prepared.map((element) => ({
+        ...element,
+        sceneX: element.x - centerX + element.width / 2,
+        sceneZ: element.y - centerY + element.depth / 2,
+    }));
+};
+
+const BimThreeViewer = ({
+    elements = [],
+    ready,
+    selectedElement,
+    linkedElementIds = [],
+    highlightedElementIds = [],
+    activeVersionLabel,
+    activeStoreyName,
+    viewerArtifact = null,
+    onSelectElement,
+}) => {
+    const mountRef = useRef(null);
+    const rendererRef = useRef(null);
+    const animationRef = useRef(null);
+    const cameraRef = useRef(null);
+    const controlsRef = useRef(null);
+    const onSelectElementRef = useRef(onSelectElement);
+    const [raycastHit, setRaycastHit] = useState(null);
+    const [raycastHover, setRaycastHover] = useState(null);
+    const [focusedElement, setFocusedElement] = useState(null);
+    const artifactElements = useMemo(() => adaptViewerArtifactToElements(viewerArtifact), [viewerArtifact]);
+    const sourceElements = artifactElements.length > 0 ? artifactElements : elements;
+    const preparedElements = useMemo(() => buildThreeElements(sourceElements), [sourceElements]);
+    const [activeIfcClass, setActiveIfcClass] = useState('all');
+    const [hiddenIfcClasses, setHiddenIfcClasses] = useState(() => new Set());
+    const ifcClassFilters = useMemo(() => {
+        const classes = new Set(preparedElements.map((element) => element.ifc_class).filter(Boolean));
+        return ['all', ...Array.from(classes).sort((left, right) => left.localeCompare(right))];
+    }, [preparedElements]);
+    const visibleIfcClassCount = ifcClassFilters.filter((ifcClass) => ifcClass !== 'all' && !hiddenIfcClasses.has(ifcClass)).length;
+    const visibleThreeElements = useMemo(
+        () =>
+            preparedElements.filter((element) => {
+                if (hiddenIfcClasses.has(element.ifc_class)) return false;
+                return activeIfcClass === 'all' || element.ifc_class === activeIfcClass;
+            }),
+        [activeIfcClass, hiddenIfcClasses, preparedElements],
+    );
+    const linkedElementIdSet = useMemo(() => new Set(linkedElementIds), [linkedElementIds]);
+    const highlightedElementIdSet = useMemo(() => new Set(highlightedElementIds), [highlightedElementIds]);
+    const artifactSource = artifactElements.length > 0 ? 'viewer-artifact' : 'elements';
+    const selectedSceneElement = useMemo(
+        () => visibleThreeElements.find((element) => element.id === selectedElement?.id) || null,
+        [visibleThreeElements, selectedElement?.id],
+    );
+    const inspectedSceneElement = useMemo(() => {
+        const inspectedId = raycastHover?.elementId || raycastHit?.elementId || selectedElement?.id;
+        return visibleThreeElements.find((element) => element.id === inspectedId) || null;
+    }, [raycastHit?.elementId, raycastHover?.elementId, selectedElement?.id, visibleThreeElements]);
+    const inspectedProperties = inspectedSceneElement?.properties_json || inspectedSceneElement?.metadata_json?.properties || {};
+    const inspectedPropertyCount =
+        Number(inspectedSceneElement?.metadata_json?.viewer_artifact?.property_count) || Object.keys(inspectedProperties || {}).length;
+    const inspectedMaterial = inspectedSceneElement?.metadata_json?.material_names?.[0] || inspectedSceneElement?.material_name || '';
+    const inspectedSystem = inspectedSceneElement?.metadata_json?.system_name || inspectedSceneElement?.system_name || '';
+
+    useEffect(() => {
+        onSelectElementRef.current = onSelectElement;
+    }, [onSelectElement]);
+
+    const handleResetCamera = () => {
+        const camera = cameraRef.current;
+        const controls = controlsRef.current;
+        if (!camera || !controls) return;
+        camera.position.set(260, 260, 360);
+        controls.target.set(0, 0, 0);
+        controls.update();
+        setRaycastHit(null);
+        setFocusedElement(null);
+    };
+
+    const handleFocusSelectedElement = () => {
+        const camera = cameraRef.current;
+        const controls = controlsRef.current;
+        if (!camera || !controls || !selectedSceneElement) return;
+        const target = new THREE.Vector3(
+            selectedSceneElement.sceneX,
+            selectedSceneElement.height / 2,
+            selectedSceneElement.sceneZ,
+        );
+        controls.target.copy(target);
+        camera.position.set(target.x + 180, target.y + 150, target.z + 240);
+        camera.lookAt(target);
+        controls.update();
+        setFocusedElement({
+            elementId: selectedSceneElement.id,
+            globalId: selectedSceneElement.global_id || '',
+            ifcClass: selectedSceneElement.ifc_class || '',
+        });
+    };
+
+    const toggleIfcClassVisibility = (ifcClass) => {
+        setHiddenIfcClasses((current) => {
+            const next = new Set(current);
+            if (next.has(ifcClass)) {
+                next.delete(ifcClass);
+            } else {
+                next.add(ifcClass);
+            }
+            return next;
+        });
+    };
+
+    const resetIfcClassVisibility = () => setHiddenIfcClasses(new Set());
+
+    useEffect(() => {
+        const mount = mountRef.current;
+        if (!mount || !ready || visibleThreeElements.length === 0) {
+            return undefined;
+        }
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf8fafc);
+        const camera = new THREE.PerspectiveCamera(42, 1, 1, 5000);
+        camera.position.set(260, 260, 360);
+        camera.lookAt(0, 0, 0);
+        cameraRef.current = camera;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.domElement.setAttribute('data-bim-three-canvas', 'true');
+        rendererRef.current = renderer;
+        mount.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.screenSpacePanning = true;
+        controls.minDistance = 120;
+        controls.maxDistance = 1200;
+        controls.target.set(0, 0, 0);
+        controls.update();
+        controlsRef.current = controls;
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
+        const keyLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        keyLight.position.set(180, 260, 140);
+        scene.add(ambientLight, keyLight);
+
+        const grid = new THREE.GridHelper(620, 18, 0xcbd5e1, 0xe4e4e7);
+        grid.position.y = -2;
+        scene.add(grid);
+
+        const group = new THREE.Group();
+        visibleThreeElements.forEach((element) => {
+            const geometry = new THREE.BoxGeometry(element.width, element.height, element.depth);
+            const isSelected = element.id === selectedElement?.id;
+            const isHighlighted = highlightedElementIdSet.has(element.id);
+            const isLinked = linkedElementIdSet.has(element.id);
+            const material = new THREE.MeshStandardMaterial({
+                color: isSelected ? 0xf39200 : isHighlighted ? 0x2563eb : isLinked ? 0x60a5fa : element.color,
+                roughness: 0.52,
+                metalness: 0.08,
+                transparent: true,
+                opacity: element.source === 'derived' ? 0.78 : 0.95,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(element.sceneX, element.height / 2, element.sceneZ);
+            mesh.userData = {
+                element,
+                elementId: element.id,
+                globalId: element.global_id,
+                ifcClass: element.ifc_class,
+                geometrySource: element.source,
+            };
+            group.add(mesh);
+
+            const edges = new THREE.EdgesGeometry(geometry);
+            const edgeMaterial = new THREE.LineBasicMaterial({ color: isSelected ? 0xc26f00 : isHighlighted ? 0x1d4ed8 : 0x475569 });
+            const line = new THREE.LineSegments(edges, edgeMaterial);
+            line.position.copy(mesh.position);
+            group.add(line);
+        });
+        scene.add(group);
+
+        const resize = () => {
+            const width = Math.max(320, mount.clientWidth);
+            const height = Math.max(320, mount.clientHeight);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height, false);
+        };
+
+        resize();
+        const observer = new ResizeObserver(resize);
+        observer.observe(mount);
+
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        const selectableMeshes = [];
+        group.traverse((node) => {
+            if (node.isMesh && node.userData?.element) selectableMeshes.push(node);
+        });
+
+        const findRaycastElement = (event) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(pointer, camera);
+            const [hit] = raycaster.intersectObjects(selectableMeshes, false);
+            return hit?.object?.userData?.element || null;
+        };
+
+        const readElementHit = (element) =>
+            element
+                ? {
+                      elementId: element.id,
+                      globalId: element.global_id || '',
+                      ifcClass: element.ifc_class || '',
+                  }
+                : null;
+
+        const hoverElement = (event) => {
+            setRaycastHover(readElementHit(findRaycastElement(event)));
+        };
+        const leaveElement = () => setRaycastHover(null);
+
+        const pickElement = (event) => {
+            const element = findRaycastElement(event);
+            if (!element) {
+                setRaycastHit(null);
+                return;
+            }
+            setRaycastHit({
+                elementId: element.id,
+                globalId: element.global_id || '',
+                ifcClass: element.ifc_class || '',
+            });
+            if (typeof onSelectElementRef.current === 'function') {
+                onSelectElementRef.current(element);
+            }
+        };
+
+        renderer.domElement.addEventListener('pointermove', hoverElement);
+        renderer.domElement.addEventListener('pointerleave', leaveElement);
+        renderer.domElement.addEventListener('pointerdown', pickElement);
+
+        const animate = () => {
+            controls.update();
+            renderer.render(scene, camera);
+            animationRef.current = window.requestAnimationFrame(animate);
+        };
+        animate();
+
+        return () => {
+            observer.disconnect();
+            if (animationRef.current) {
+                window.cancelAnimationFrame(animationRef.current);
+            }
+            renderer.domElement.removeEventListener('pointermove', hoverElement);
+            renderer.domElement.removeEventListener('pointerleave', leaveElement);
+            renderer.domElement.removeEventListener('pointerdown', pickElement);
+            controls.dispose();
+            scene.traverse((node) => {
+                if (node.geometry) node.geometry.dispose();
+                if (node.material) {
+                    if (Array.isArray(node.material)) {
+                        node.material.forEach((material) => material.dispose());
+                    } else {
+                        node.material.dispose();
+                    }
+                }
+            });
+            renderer.dispose();
+            renderer.forceContextLoss();
+            if (renderer.domElement.parentNode === mount) {
+                mount.removeChild(renderer.domElement);
+            }
+            rendererRef.current = null;
+            cameraRef.current = null;
+            controlsRef.current = null;
+        };
+    }, [highlightedElementIdSet, linkedElementIdSet, ready, selectedElement?.id, visibleThreeElements]);
+
+    return (
+        <section
+            data-bim-three-viewer="isolated"
+            data-bim-artifact-source={artifactSource}
+            data-bim-artifact-elements={artifactElements.length}
+            data-bim-three-raycast="enabled"
+            data-bim-three-raycast-hit={raycastHit?.elementId || ''}
+            data-bim-three-raycast-global-id={raycastHit?.globalId || ''}
+            data-bim-three-raycast-ifc-class={raycastHit?.ifcClass || ''}
+            data-bim-three-hover-element={raycastHover?.elementId || ''}
+            data-bim-three-hover-global-id={raycastHover?.globalId || ''}
+            data-bim-three-hover-ifc-class={raycastHover?.ifcClass || ''}
+            data-bim-three-controls="orbit"
+            data-bim-three-focus-element={focusedElement?.elementId || ''}
+            data-bim-three-focus-global-id={focusedElement?.globalId || ''}
+            data-bim-three-inspector-element={inspectedSceneElement?.id || ''}
+            data-bim-three-inspector-global-id={inspectedSceneElement?.global_id || ''}
+            data-bim-three-inspector-properties={inspectedPropertyCount}
+            data-bim-three-ifc-filter={activeIfcClass}
+            data-bim-three-filtered-elements={visibleThreeElements.length}
+            data-bim-three-ifc-filter-count={ifcClassFilters.length}
+            data-bim-three-hidden-ifc-classes={hiddenIfcClasses.size}
+            data-bim-three-visible-ifc-classes={visibleIfcClassCount}
+            className="flex min-h-[360px] flex-col overflow-hidden rounded-[1.25rem] border border-zinc-200 bg-white"
+        >
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 px-4 py-3">
+                <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                        Viewer BIM 3D / IFC foundation
+                    </p>
+                    <h3 className="mt-1 text-sm font-black uppercase tracking-tight text-zinc-900">
+                        Escena tridimensional aislada
+                    </h3>
+                </div>
+                <div className="flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.16em]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-1 text-[#C26F00]">
+                        <Box className="h-3 w-3" /> {preparedElements.length} elementos
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-1 text-[#136191]">
+                        <Layers3 className="h-3 w-3" /> {visibleThreeElements.length} visibles
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 text-zinc-600">
+                        <Cpu className="h-3 w-3" /> Three.js
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 text-zinc-700">
+                        Raycast 3D
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 text-zinc-700">
+                        OrbitControls
+                    </span>
+                    {artifactElements.length > 0 ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">
+                            Artefacto viewer
+                        </span>
+                    ) : null}
+                </div>
+                <button
+                    type="button"
+                    data-bim-three-reset-view="true"
+                    onClick={handleResetCamera}
+                    disabled={!ready || preparedElements.length === 0}
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-zinc-200 bg-white px-3 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600 transition hover:border-[#F39200] hover:text-[#F39200] disabled:pointer-events-none disabled:opacity-40"
+                >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    Reset vista 3D
+                </button>
+                <button
+                    type="button"
+                    data-bim-three-focus-selected="true"
+                    onClick={handleFocusSelectedElement}
+                    disabled={!ready || !selectedSceneElement}
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-zinc-200 bg-white px-3 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600 transition hover:border-[#F39200] hover:text-[#F39200] disabled:pointer-events-none disabled:opacity-40"
+                >
+                    <Box className="h-3.5 w-3.5" />
+                    Enfocar elemento
+                </button>
+                <div className="flex basis-full flex-wrap items-center gap-2">
+                    <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
+                        IFC 3D
+                    </span>
+                    {ifcClassFilters.map((ifcClass) => (
+                        <button
+                            key={ifcClass}
+                            type="button"
+                            data-bim-three-ifc-filter-button={ifcClass}
+                            onClick={() => setActiveIfcClass(ifcClass)}
+                            className={`inline-flex h-7 items-center rounded-full border px-2 text-[9px] font-black uppercase tracking-[0.12em] transition ${
+                                activeIfcClass === ifcClass
+                                    ? 'border-[#F39200] bg-orange-50 text-[#C26F00]'
+                                    : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300'
+                            }`}
+                        >
+                            {ifcClass === 'all' ? 'Todas' : ifcClass}
+                        </button>
+                    ))}
+                </div>
+                <div className="flex basis-full flex-wrap items-center gap-2">
+                    <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
+                        Visibilidad 3D
+                    </span>
+                    {ifcClassFilters
+                        .filter((ifcClass) => ifcClass !== 'all')
+                        .map((ifcClass) => {
+                            const isVisible = !hiddenIfcClasses.has(ifcClass);
+                            return (
+                                <button
+                                    key={ifcClass}
+                                    type="button"
+                                    data-bim-three-ifc-visibility-button={ifcClass}
+                                    aria-pressed={isVisible}
+                                    onClick={() => toggleIfcClassVisibility(ifcClass)}
+                                    className={`inline-flex h-7 items-center rounded-full border px-2 text-[9px] font-black uppercase tracking-[0.12em] transition ${
+                                        isVisible
+                                            ? 'border-zinc-200 bg-white text-zinc-600 hover:border-[#F39200] hover:text-[#C26F00]'
+                                            : 'border-zinc-200 bg-zinc-100 text-zinc-400 line-through'
+                                    }`}
+                                >
+                                    {ifcClass}
+                                </button>
+                            );
+                        })}
+                    <button
+                        type="button"
+                        data-bim-three-reset-visibility="true"
+                        onClick={resetIfcClassVisibility}
+                        disabled={hiddenIfcClasses.size === 0}
+                        className="inline-flex h-7 items-center rounded-full border border-zinc-200 bg-white px-2 text-[9px] font-black uppercase tracking-[0.12em] text-zinc-500 transition hover:border-[#136191] hover:text-[#136191] disabled:pointer-events-none disabled:opacity-40"
+                    >
+                        Reset
+                    </button>
+                </div>
+            </div>
+            <div className="relative min-h-[320px] flex-1 bg-zinc-50" ref={mountRef}>
+                {!ready || visibleThreeElements.length === 0 ? (
+                    <div className="absolute inset-0 flex items-center justify-center p-8 text-center">
+                        <div>
+                            <p className="text-sm font-black uppercase tracking-tight text-zinc-800">
+                                Escena 3D BIM en espera
+                            </p>
+                            <p className="mt-2 max-w-md text-sm text-zinc-500">
+                                Carga o simula elementos BIM para materializar la escena 3D local.
+                            </p>
+                        </div>
+                    </div>
+                ) : null}
+                <div className="pointer-events-none absolute bottom-3 left-3 rounded-2xl border border-zinc-200 bg-white/90 px-3 py-2 text-[11px] text-zinc-500 shadow-sm">
+                    <p className="font-black uppercase tracking-[0.16em] text-zinc-700">
+                        {activeVersionLabel || 'Version BIM'} {activeStoreyName ? `· ${activeStoreyName}` : ''}
+                    </p>
+                    <p className="mt-1">
+                        IFC foundation: parsing semantico, artefacto viewer y escena 3D local aislada.
+                    </p>
+                    <p className="mt-1 font-bold text-[#F39200]">
+                        Hit 3D: {raycastHit ? `${raycastHit.ifcClass || 'IFC'} · ${raycastHit.globalId || raycastHit.elementId}` : 'selecciona un elemento'}
+                    </p>
+                    <p className="mt-1 font-bold text-zinc-700">
+                        Hover 3D: {raycastHover ? `${raycastHover.ifcClass || 'IFC'} · ${raycastHover.globalId || raycastHover.elementId}` : 'sin elemento'}
+                    </p>
+                    <p className="mt-1 font-bold text-[#136191]">
+                        Foco 3D: {focusedElement ? `${focusedElement.ifcClass || 'IFC'} · ${focusedElement.globalId || focusedElement.elementId}` : 'sin foco activo'}
+                    </p>
+                </div>
+                {inspectedSceneElement ? (
+                    <aside className="pointer-events-none absolute right-3 top-3 w-[min(280px,calc(100%-1.5rem))] rounded-2xl border border-zinc-200 bg-white/95 p-3 text-[11px] shadow-sm">
+                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                            Inspector 3D
+                        </p>
+                        <p className="mt-1 truncate text-sm font-black uppercase tracking-tight text-zinc-900">
+                            {inspectedSceneElement.name || inspectedSceneElement.element_type || 'Elemento BIM'}
+                        </p>
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                            <div className="rounded-xl bg-zinc-50 px-2 py-1.5">
+                                <p className="font-black uppercase tracking-[0.14em] text-zinc-400">Clase</p>
+                                <p className="mt-1 truncate font-bold text-zinc-800">
+                                    {inspectedSceneElement.ifc_class || 'IFC'}
+                                </p>
+                            </div>
+                            <div className="rounded-xl bg-zinc-50 px-2 py-1.5">
+                                <p className="font-black uppercase tracking-[0.14em] text-zinc-400">Props</p>
+                                <p className="mt-1 font-bold text-zinc-800">{inspectedPropertyCount}</p>
+                            </div>
+                            <div className="col-span-2 rounded-xl bg-orange-50 px-2 py-1.5">
+                                <p className="font-black uppercase tracking-[0.14em] text-[#C26F00]">GlobalId</p>
+                                <p className="mt-1 truncate font-bold text-[#7C4A00]">
+                                    {inspectedSceneElement.global_id || 'sin GlobalId'}
+                                </p>
+                            </div>
+                            {inspectedMaterial || inspectedSystem ? (
+                                <div className="col-span-2 rounded-xl bg-sky-50 px-2 py-1.5">
+                                    <p className="font-black uppercase tracking-[0.14em] text-[#136191]">
+                                        Material / sistema
+                                    </p>
+                                    <p className="mt-1 truncate font-bold text-[#0F4D73]">
+                                        {[inspectedMaterial, inspectedSystem].filter(Boolean).join(' · ')}
+                                    </p>
+                                </div>
+                            ) : null}
+                        </div>
+                    </aside>
+                ) : null}
+            </div>
+        </section>
+    );
+};
+
+export default BimThreeViewer;

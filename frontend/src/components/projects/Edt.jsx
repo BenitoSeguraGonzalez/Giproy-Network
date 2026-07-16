@@ -798,7 +798,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             setSelectedIds((prev) => new Set(Array.from(prev).filter((id) => Boolean(findNodeById(data, id)))));
             setActiveNodeId((prev) => (prev && findNodeById(data, prev) ? prev : null));
         } catch (error) {
-            console.error("Error cargando EDT:", error);
+            globalThis.reportClientError?.("Error cargando EDT:", error);
         } finally {
             setLoading(false);
         }
@@ -817,7 +817,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             const detail = await presupuestosApi.getById(budget.id, empId);
             setActiveBudget(detail);
         } catch (error) {
-            console.error('Error cargando presupuesto operativo en EDT:', error);
+            globalThis.reportClientError?.('Error cargando presupuesto operativo en EDT:', error);
             setActiveBudget(null);
         } finally {
             setBudgetLoading(false);
@@ -834,7 +834,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             const data = await cronogramasApi.getTrabajo(activeBudget.id, empId);
             setGanttTrabajo(data || null);
         } catch (error) {
-            console.error('Error sincronizando duraciones Gantt en EDT:', error);
+            globalThis.reportClientError?.('Error sincronizando duraciones Gantt en EDT:', error);
             setGanttTrabajo(null);
         } finally {
             setGanttSyncLoading(false);
@@ -957,7 +957,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             setReportPreview(response.data);
             setShowReportPreview(true);
         } catch (error) {
-            console.error('Error generando vista previa de EDT:', error);
+            globalThis.reportClientError?.('Error generando vista previa de EDT:', error);
             appAlert(await extractBlobErrorMessage(error, 'No fue posible generar la vista previa del reporte EDT.'));
         } finally {
             setLoadingReportPreview(false);
@@ -983,7 +983,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
                 format === 'xlsx' ? undefined : 'application/pdf'
             );
         } catch (error) {
-            console.error('Error exportando reporte EDT:', error);
+            globalThis.reportClientError?.('Error exportando reporte EDT:', error);
             const fallbackMessage =
                 format === 'xlsx'
                     ? 'No fue posible exportar el reporte EDT en Excel.'
@@ -1011,7 +1011,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             });
             setPrintOptionsOpen(false);
         } catch (error) {
-            console.error('Error preparando lámina gráfica EDT:', error);
+            globalThis.reportClientError?.('Error preparando lámina gráfica EDT:', error);
             appAlert({
                 title: 'No se pudo generar el PDF',
                 message: error?.message || 'No fue posible generar la lámina gráfica EDT.',
@@ -1124,7 +1124,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             setCuentaModal({ isOpen: false });
             await reloadEdtAndBudget();
         } catch (error) {
-            console.error(error);
+            globalThis.reportClientError?.(error);
             appAlert("Error al guardar cuenta paquete.");
         }
     };
@@ -1151,7 +1151,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             setStakeholderModal({ isOpen: false });
             await reloadEdtAndBudget();
         } catch (error) {
-            console.error(error);
+            globalThis.reportClientError?.(error);
             appAlert("Error al asignar stakeholder.");
         }
     };
@@ -1171,7 +1171,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             await edtApi.delete(id, empId);
             await reloadEdtAndBudget();
         } catch (error) {
-            console.error(error);
+            globalThis.reportClientError?.(error);
             appAlert("Error al eliminar.");
         }
     };
@@ -1193,7 +1193,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             setActiveNodeId(null);
             await reloadEdtAndBudget();
         } catch (error) {
-            console.error("Bulk delete error:", error);
+            globalThis.reportClientError?.("Bulk delete error:", error);
             appAlert("Error al eliminar elementos en bloque.");
         } finally {
             setLoading(false);
@@ -1209,7 +1209,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             setActiveNodeId(null);
             await reloadEdtAndBudget();
         } catch (error) {
-            console.error(error);
+            globalThis.reportClientError?.(error);
             appAlert("Error al mover elementos en bloque.");
             setLoading(false);
         }
@@ -1233,7 +1233,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             await reloadEdtAndBudget();
             setExpandedNodes(prev => new Set(prev).add(targetParentId));
         } catch (error) {
-            console.error("Error un drop:", error);
+            globalThis.reportClientError?.("Error un drop:", error);
             appAlert("No se pudo mover el elemento.");
         }
     };
@@ -1246,7 +1246,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             await edtApi.move(node.id, node.parent_id, newOrden, empId);
             await reloadEdtAndBudget();
         } catch (error) {
-            console.error("Error al reordenar:", error);
+            globalThis.reportClientError?.("Error al reordenar:", error);
             appAlert("No se pudo cambiar el orden.");
         }
     };
@@ -1269,7 +1269,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
                 await edtApi.move(draggedNode.id, targetNode.parent_id, targetNode.orden + 1, empId);
                 await reloadEdtAndBudget();
             } catch (error) {
-                console.error(error);
+                globalThis.reportClientError?.(error);
                 appAlert("No se pudo subir la cuenta de nivel en la vista gráfica.");
             }
             return;
@@ -1293,7 +1293,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
                 await reloadEdtAndBudget();
                 setExpandedNodes((prev) => new Set(prev).add(targetNode.id));
             } catch (error) {
-                console.error(error);
+                globalThis.reportClientError?.(error);
                 appAlert("No se pudo mover la cuenta en la vista gráfica.");
             }
             return;
@@ -1318,7 +1318,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             await edtApi.move(draggedNode.id, targetNode.parent_id, newOrder, empId);
             await reloadEdtAndBudget();
         } catch (error) {
-            console.error(error);
+            globalThis.reportClientError?.(error);
             appAlert("No se pudo reordenar la cuenta en la vista gráfica.");
         }
     };
@@ -1333,7 +1333,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
             await edtApi.move(dragged.nodeId, null, 99999, empId);
             await reloadEdtAndBudget();
         } catch (error) {
-            console.error(error);
+            globalThis.reportClientError?.(error);
         }
     };
 

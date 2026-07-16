@@ -24,6 +24,42 @@ export const parseOperationalNumber = (value) => {
     return toDecimalNumber(value, '0');
 };
 
+export const resolveOperationalRelativeWork = (resource = {}) => {
+    const sourceLines = Array.isArray(resource?.source_lines) ? resource.source_lines : [];
+    const sourceWork = sourceLines.reduce(
+        (total, line) => total + parseOperationalNumber(line?.trabajo_relativo),
+        0
+    );
+    if (sourceWork > 0) return sourceWork;
+
+    const persistedWork = parseOperationalNumber(resource?.trabajo_relativo);
+    if (persistedWork > 0) return persistedWork;
+
+    return multiplyDecimalNumber(
+        [
+            parseOperationalNumber(resource?.cantidad),
+            parseOperationalNumber(resource?.rendimiento_equivalente ?? resource?.rendimiento),
+        ],
+        { decimals: 12 }
+    );
+};
+
+export const resolveLockedOperationalResourceValues = (resource = {}, quantity = null) => {
+    const activeQuantity = quantity === null
+        ? parseOperationalNumber(resource?.cantidad)
+        : parseOperationalNumber(quantity);
+    const relativeWork = resolveOperationalRelativeWork(resource);
+    const rendimiento = activeQuantity > 0 && relativeWork > 0
+        ? relativeWork / activeQuantity
+        : 0;
+
+    return {
+        cantidad: activeQuantity,
+        trabajoRelativo: relativeWork,
+        rendimiento,
+    };
+};
+
 export const roundOperationalMoney = (value, moneyDecimals = 2) => roundDecimal(value ?? 0, moneyDecimals);
 
 export const resolveBudgetLineOperationalSubtotal = (
@@ -90,10 +126,12 @@ export const resolveApuLineOperationalSubtotal = (
 
 export const resolveApuLineSimulatedSubtotal = (
     linea,
-    { moneyDecimals = 2, rendimiento = null } = {}
+    { moneyDecimals = 2, cantidad = null, rendimiento = null } = {}
 ) => {
     const unitPrice = resolveApuLineOperationalUnitPrice(linea, { moneyDecimals });
-    const quantity = parseOperationalNumber(linea?.cantidad_num ?? linea?.cantidad);
+    const quantity = cantidad === null
+        ? parseOperationalNumber(linea?.cantidad_num ?? linea?.cantidad)
+        : parseOperationalNumber(cantidad);
     const effectiveRendimiento = rendimiento === null
         ? parseOperationalNumber((linea?.rendimiento_num ?? linea?.rendimiento) || 1)
         : parseOperationalNumber(rendimiento);

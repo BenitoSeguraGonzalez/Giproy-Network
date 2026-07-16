@@ -178,11 +178,80 @@ class CronogramaTrabajoConfig(BaseModel):
     dias_mes: float = 30.0
     recursos_asumidos_base: float = 1.0
     fecha_inicio_proyecto: Optional[datetime] = None
+    fecha_inicio_referencia_proyecto: Optional[datetime] = None
+    fecha_inicio_autoridad: Optional[Literal["datos_proyecto", "gantt"]] = None
     fecha_fin_objetivo_proyecto: Optional[datetime] = None
     manual_milestones: List[Dict[str, Any]] = Field(default_factory=list)
+    apu_resource_modifications_v1: Dict[str, Any] = Field(default_factory=dict)
     advanced_calendar: CronogramaTrabajoAdvancedCalendar = Field(
         default_factory=CronogramaTrabajoAdvancedCalendar
     )
+
+
+class CronogramaGanttDraftResponse(BaseModel):
+    id: Optional[int] = None
+    status: str = "none"
+    version: int = 0
+    work_origin: Literal["gantt", "valorados"] = "gantt"
+    empresa_id: Optional[int] = None
+    proyecto_id: Optional[int] = None
+    presupuesto_id: Optional[int] = None
+    cronograma_id: Optional[int] = None
+    base_snapshot: Dict[str, Any] = Field(default_factory=dict)
+    intentions: List[Dict[str, Any]] = Field(default_factory=list)
+    preview_snapshot: Dict[str, Any] = Field(default_factory=dict)
+    invalidations: List[Dict[str, Any]] = Field(default_factory=list)
+    audit_log: List[Dict[str, Any]] = Field(default_factory=list)
+    updated_by_id: Optional[int] = None
+    updated_at: Optional[datetime] = None
+
+
+class CronogramaGanttIntentionCreate(BaseModel):
+    expected_version: Optional[int] = None
+    intention: Dict[str, Any] = Field(default_factory=dict)
+    preview_snapshot: Dict[str, Any] = Field(default_factory=dict)
+
+
+class CronogramaGanttDraftApplyRequest(BaseModel):
+    expected_version: Optional[int] = None
+    application_result: Dict[str, Any] = Field(default_factory=dict)
+
+
+class CronogramaGanttDraftPreflightResponse(BaseModel):
+    ok: bool = True
+    status: str = "none"
+    version: int = 0
+    work_origin: Literal["gantt", "valorados"] = "gantt"
+    pending_count: int = 0
+    invalidated_count: int = 0
+    adjustment_required_count: int = 0
+    issues: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+class CronogramaGanttLockRequest(BaseModel):
+    ttl_minutes: int = Field(default=15, ge=1, le=120)
+
+
+class CronogramaGanttLockReleaseRequest(BaseModel):
+    message: Optional[str] = Field(default=None, max_length=500)
+
+
+class CronogramaGanttLockResponse(BaseModel):
+    id: Optional[int] = None
+    status: str = "none"
+    empresa_id: Optional[int] = None
+    proyecto_id: Optional[int] = None
+    presupuesto_id: Optional[int] = None
+    cronograma_id: Optional[int] = None
+    locked_by_user_id: Optional[int] = None
+    locked_by_name: Optional[str] = None
+    requested_release_by_user_id: Optional[int] = None
+    requested_release_by_name: Optional[str] = None
+    request_message: Optional[str] = None
+    last_heartbeat_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
+    released_at: Optional[datetime] = None
+    audit_log: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class CronogramaTrabajoDependency(BaseModel):
@@ -344,6 +413,7 @@ class CronogramaTrabajoResponse(BaseModel):
     proyecto_id: int
     empresa_id: int
     config: CronogramaTrabajoConfig
+    official_source: Dict[str, Any] = Field(default_factory=dict)
     schedule_data: Dict[str, CronogramaTrabajoLinea]
     rows: List[CronogramaTrabajoComputedRow]
     summary: CronogramaTrabajoSummary

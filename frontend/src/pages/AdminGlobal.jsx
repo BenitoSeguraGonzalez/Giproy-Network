@@ -16,7 +16,9 @@ import {
     Settings2,
     Eye,
     Blocks,
-    FileCog
+    FileCog,
+    Mail,
+    Plug
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { Card, CardContent } from '../components/ui/card';
@@ -61,12 +63,12 @@ const AdminGlobal = () => {
         {
             id: 'superadmins',
             title: 'Superadministradores',
-            description: 'Edición y gobierno de cuentas con privilegio máximo del sistema desde el ajuste SaaS.',
+            description: 'Edición y gobierno de cuentas con privilegio máximo del sistema desde Administración Global.',
             icon: <Settings2 className="w-7 h-7 text-violet-700" />,
             color: 'bg-violet-50',
             borderColor: 'border-violet-200',
             status: 'Submódulo activo',
-            href: '/settings?tab=superadmins'
+            href: '/admin-global/superadministradores'
         },
         {
             id: 'estado',
@@ -119,6 +121,26 @@ const AdminGlobal = () => {
             href: '/admin-global/licencias'
         },
         {
+            id: 'email-corporativo',
+            title: 'Email corporativo',
+            description: 'Credenciales SMTP, Gmail, remitente, URL pública de activación y prueba de envío.',
+            icon: <Mail className="w-7 h-7 text-[#F39200]" />,
+            color: 'bg-orange-50',
+            borderColor: 'border-orange-200',
+            status: 'Submódulo activo',
+            href: '/admin-global/email-corporativo'
+        },
+        {
+            id: 'integraciones',
+            title: 'Integraciones',
+            description: 'Catálogo fiscal SRI, actualizaciones y revisiones de identidad empresarial.',
+            icon: <Plug className="w-7 h-7 text-violet-700" />,
+            color: 'bg-violet-50',
+            borderColor: 'border-violet-200',
+            status: 'Submódulo activo',
+            href: '/admin-global/integraciones'
+        },
+        {
             id: 'empresas',
             title: 'Empresas',
             description: 'Gestión de personas jurídicas, activación, cuotas y datos corporativos de plataforma.',
@@ -126,7 +148,7 @@ const AdminGlobal = () => {
             color: 'bg-blue-50',
             borderColor: 'border-blue-200',
             status: 'Migración activa',
-            href: '/settings?tab=empresas'
+            href: '/admin-global/empresas'
         },
         {
             id: 'comunicados',

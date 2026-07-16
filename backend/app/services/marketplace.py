@@ -27,20 +27,7 @@ from app.services.marketplace_asset_origin import marketplace_asset_origin_servi
 from app.services.marketplace_bootstrap import FIXED_MARKETPLACE_CATEGORIES
 from app.services.marketplace_profile import evaluate_marketplace_profile, seed_admin_marketplace_profile_from_company
 from app.services.marketplace_permissions import has_marketplace_permission, is_marketplace_beta_company_admin
-
-
-ECUADOR_GEO_REFERENCE = {
-    ("azuay", "cuenca"): {"lat": -2.9006, "lng": -79.0045, "resolution": "canton"},
-    ("azuay", "paute"): {"lat": -2.7801, "lng": -78.7597, "resolution": "canton"},
-    ("guayas", "guayaquil"): {"lat": -2.1709, "lng": -79.9224, "resolution": "canton"},
-    ("guayas", "daule"): {"lat": -1.8622, "lng": -79.9778, "resolution": "canton"},
-    ("manabi", "manta"): {"lat": -0.9677, "lng": -80.7089, "resolution": "canton"},
-    ("pichincha", "quito"): {"lat": -0.1807, "lng": -78.4678, "resolution": "canton"},
-    ("azuay", None): {"lat": -2.9006, "lng": -79.0045, "resolution": "provincia"},
-    ("guayas", None): {"lat": -2.1709, "lng": -79.9224, "resolution": "provincia"},
-    ("manabi", None): {"lat": -0.9677, "lng": -80.7089, "resolution": "provincia"},
-    ("pichincha", None): {"lat": -0.1807, "lng": -78.4678, "resolution": "provincia"},
-}
+from app.services.geo import ECUADOR_GEO_REFERENCE
 
 
 class MarketplaceService:
@@ -52,6 +39,8 @@ class MarketplaceService:
         "base_maestra": "tienda-bases-maestras",
         "proyecto": "tienda-proyectos",
         "portal_compras_publicas": "tienda-portal-compras-publicas",
+        "addon": "tienda-packs-saas",
+        "adicional": "tienda-modulos-servicios",
     }
     REFERENCE_TYPE_TO_PRODUCT_TYPE = {
         "base_trabajo": "base_maestra",
@@ -414,7 +403,9 @@ class MarketplaceService:
             if end_date < start_date:
                 raise HTTPException(status_code=400, detail="La fecha fin de publicación no puede ser anterior a la fecha de inicio.")
 
-        return {
+        normalized_meta = {
+            **current_meta,
+            **raw,
             "codigo": codigo,
             "descripcion_corta": str(raw.get("descripcion_corta") or current_meta.get("descripcion_corta") or "").strip() or None,
             "descripcion_larga": str(raw.get("descripcion_larga") or current_meta.get("descripcion_larga") or "").strip() or None,
@@ -426,6 +417,7 @@ class MarketplaceService:
             "descuento_promocion": str(descuento_promocion_raw or "").strip() or None,
             "creador": "Sistema" if normalized_product_type == "portal_compras_publicas" else self._resolve_creator_label(db, current_user),
         }
+        return normalized_meta
 
     def _build_portal_template_version(self, product_code: str, revision: int) -> str:
         base_code = (product_code or "PCP").strip() or "PCP"
@@ -858,6 +850,13 @@ class MarketplaceService:
         return fixed_category.id if fixed_category else None
 
     def _backfill_missing_fixed_category_ids(self, db: Session) -> None:
+        has_missing = db.query(
+            db.query(MarketplaceProduct)
+            .filter(MarketplaceProduct.category_id.is_(None))
+            .exists()
+        ).scalar()
+        if not has_missing:
+            return
         missing_products = (
             db.query(MarketplaceProduct)
             .filter(MarketplaceProduct.category_id.is_(None))
@@ -1647,6 +1646,27 @@ class MarketplaceService:
             if method.is_active and method.readiness_status in {"sandbox_ready", "production_ready"}
         ]
 
+    def get_active_commercial_payment_method(self, db: Session, slug: str) -> MarketplacePaymentMethod:
+        normalized_slug = str(slug or "").strip().lower()
+        if not normalized_slug:
+            raise HTTPException(status_code=400, detail="Debe seleccionar una forma de pago.")
+
+        self._seed_payment_methods_if_missing(db)
+        method = (
+            db.query(MarketplacePaymentMethod)
+            .filter(MarketplacePaymentMethod.slug == normalized_slug)
+            .first()
+        )
+        if not method:
+            raise HTTPException(status_code=404, detail="Forma de pago no encontrada.")
+
+        self._sync_payment_method_readiness(method)
+        if not method.is_active:
+            raise HTTPException(status_code=400, detail="La forma de pago seleccionada no esta activa.")
+        if (method.readiness_status or "").strip().lower() not in {"sandbox_ready", "production_ready"}:
+            raise HTTPException(status_code=400, detail="La forma de pago seleccionada no esta lista para operar.")
+        return method
+
     def update_admin_payment_method(self, db: Session, slug: str, payload, current_user: Usuario) -> MarketplacePaymentMethod:
         self._validate_marketplace_admin_access(current_user)
         self._seed_payment_methods_if_missing(db)
@@ -1831,7 +1851,26 @@ class MarketplaceService:
         if not product:
             raise HTTPException(status_code=404, detail="Producto marketplace no encontrado.")
 
-        db.delete(product)
+        sales_count = (
+            db.query(func.count(MarketplaceOrderItem.id))
+            .filter(MarketplaceOrderItem.product_id == product.id)
+            .scalar()
+        )
+        if int(sales_count or 0) > 0:
+            product.activo = False
+            product.estado = "cancelled"
+            preview = dict(product.vista_previa or {})
+            sales_policy = dict(preview.get("sales_policy") or {})
+            sales_policy.update({
+                "admin_withdrawn": True,
+                "withdrawn_at": datetime.now(timezone.utc).isoformat(),
+                "withdrawn_by_user_id": current_user.id,
+                "withdrawal_mode": "cancelled_with_order_history",
+            })
+            product.vista_previa = {**preview, "sales_policy": sales_policy}
+            db.add(product)
+        else:
+            db.delete(product)
         db.commit()
 
     def create_category(self, db: Session, payload, current_user: Usuario) -> MarketplaceProductCategory:

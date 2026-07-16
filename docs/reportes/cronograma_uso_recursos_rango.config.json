@@ -1,0 +1,28 @@
+{
+  "id": "cronograma_uso_recursos_rango",
+  "report_type": "cronograma_valorado",
+  "variant": "resources_range",
+  "label": "Uso de Recursos por Rango",
+  "classic_layer": true,
+  "template_id": "001",
+  "template_file": "001 - Uso de Recursos Cronograma.xlsx",
+  "settings_key": "cronograma_uso_recursos_rango",
+  "date_filter": {
+    "start_key": "date_start",
+    "end_key": "date_end",
+    "default_start": "project_full_period_start",
+    "default_end": "project_full_period_end"
+  },
+  "exports": [
+    "preview",
+    "xlsx",
+    "pdf",
+    "pdf_excel"
+  ],
+  "calculation": {
+    "source": "cronograma_valorado.rows[].distribution + exploded_apu_resources",
+    "range_method": "period_overlap_proration",
+    "totals": "sum_selected_period_resource_quantities_and_costs"
+  },
+  "bim_visibility": "hidden"
+}

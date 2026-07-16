@@ -1,9 +1,10 @@
 import logging
+from copy import deepcopy
 
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional, Tuple
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from app.models.proyecto import Proyecto
 from app.models.proyecto_asignacion import ProyectoAsignacion
@@ -34,11 +35,114 @@ from app.schemas.base_trabajo import BaseTrabajoCreate
 from app.repositories.proyecto import proyecto_repo
 from app.repositories.base_trabajo import base_trabajo_repo
 from app.services.license import license_service
+from app.services.audit_event import record_audit_event
 from app.core.unit_normalization import canonicalize_unit_symbol
 
 logger = logging.getLogger(__name__)
 
 class ProyectoService:
+    RECYCLE_RETENTION_DAYS = 7
+    GANTT_LINE_ID_METADATA_KEYS = {
+        "budget_line_id",
+        "budgetLineId",
+        "presupuesto_linea_id",
+        "presupuestoLineaId",
+        "linea_presupuesto_id",
+        "lineaPresupuestoId",
+        "linea_id",
+        "lineaId",
+    }
+
+    @staticmethod
+    def _now_utc() -> datetime:
+        return datetime.now(timezone.utc)
+
+    @classmethod
+    def _recycle_expiry(cls, deleted_at: datetime) -> datetime:
+        return deleted_at + timedelta(days=cls.RECYCLE_RETENTION_DAYS)
+
+    @staticmethod
+    def _trash_text(value: Optional[str], item_id: int) -> str:
+        base = (value or "sin-nombre").strip() or "sin-nombre"
+        return f"{base} [papelera {item_id}]"
+
+    def _mark_base_for_recycle(
+        self,
+        db: Session,
+        base: BaseTrabajo,
+        *,
+        deleted_at: datetime,
+        expires_at: datetime,
+        user_id: Optional[int],
+        reason: Optional[str],
+    ) -> None:
+        if base.deleted_at:
+            return
+        base.trash_original_nombre = base.trash_original_nombre or base.nombre
+        base.trash_original_codigo_unico = base.trash_original_codigo_unico or base.codigo_unico
+        base.trash_original_activa = bool(base.activa)
+        base.deleted_at = deleted_at
+        base.deleted_by_user_id = user_id
+        base.recycle_expires_at = expires_at
+        base.deletion_reason = reason
+        base.activa = False
+        base.nombre = self._trash_text(base.nombre, base.id)
+        base.codigo_unico = self._trash_text(base.codigo_unico, base.id)
+        db.add(base)
+
+    def _restore_recycled_base(self, db: Session, base: BaseTrabajo, empresa_id: int) -> None:
+        original_name = base.trash_original_nombre or base.nombre
+        original_code = base.trash_original_codigo_unico or base.codigo_unico
+        name_conflict = db.query(BaseTrabajo).filter(
+            BaseTrabajo.empresa_id == empresa_id,
+            BaseTrabajo.id != base.id,
+            BaseTrabajo.deleted_at.is_(None),
+            BaseTrabajo.nombre == original_name,
+        ).first()
+        if name_conflict:
+            raise ValueError(f"No se puede restaurar la base porque ya existe una base activa con el nombre '{original_name}'.")
+        code_conflict = db.query(BaseTrabajo).filter(
+            BaseTrabajo.empresa_id == empresa_id,
+            BaseTrabajo.id != base.id,
+            BaseTrabajo.deleted_at.is_(None),
+            BaseTrabajo.codigo_unico == original_code,
+        ).first()
+        if code_conflict:
+            raise ValueError(f"No se puede restaurar la base porque ya existe una base activa con el codigo '{original_code}'.")
+
+        should_restore_active = bool(base.trash_original_activa)
+        if should_restore_active:
+            active_base = db.query(BaseTrabajo).filter(
+                BaseTrabajo.empresa_id == empresa_id,
+                BaseTrabajo.id != base.id,
+                BaseTrabajo.deleted_at.is_(None),
+                BaseTrabajo.activa == True,
+            ).first()
+            should_restore_active = active_base is None
+
+        base.nombre = original_name
+        base.codigo_unico = original_code
+        base.activa = should_restore_active
+        base.deleted_at = None
+        base.deleted_by_user_id = None
+        base.recycle_expires_at = None
+        base.deletion_reason = None
+        base.trash_original_nombre = None
+        base.trash_original_codigo_unico = None
+        base.trash_original_activa = None
+        db.add(base)
+
+    def _convert_project_base_to_work_base(self, db: Session, base: BaseTrabajo, project: Proyecto) -> None:
+        if base.deleted_at:
+            return
+        project_name = project.trash_original_nombre or project.nombre or "proyecto eliminado"
+        base.tipo = "Base Maestra"
+        base.descripcion = (
+            f"Base de trabajo conservada desde el proyecto eliminado {project_name}. "
+            "Se mantiene disponible para reutilizacion operativa."
+        )
+        db.add(base)
+
     @staticmethod
     def _sync_marketplace_products_before_project_delete(db: Session, project_ids: list[int], empresa_id: int) -> None:
         if not project_ids:
@@ -183,12 +287,108 @@ class ProyectoService:
 
         return node_id_map
 
+    @classmethod
+    def _remap_gantt_metadata_line_ids(cls, value, line_id_map: dict[int, int]):
+        if isinstance(value, list):
+            return [cls._remap_gantt_metadata_line_ids(item, line_id_map) for item in value]
+        if not isinstance(value, dict):
+            return value
+
+        remapped = {}
+        for key, item in value.items():
+            if key in cls.GANTT_LINE_ID_METADATA_KEYS:
+                try:
+                    item_as_int = int(item)
+                    remapped[key] = line_id_map.get(item_as_int, item)
+                    continue
+                except Exception:
+                    pass
+            remapped[key] = cls._remap_gantt_metadata_line_ids(item, line_id_map)
+        return remapped
+
+    @classmethod
+    def _clone_gantt_schedule_data(cls, source_schedule_data: dict | None, line_id_map: dict[int, int]) -> dict:
+        source_schedule_data = deepcopy(source_schedule_data or {})
+        raw_config = source_schedule_data.get("__config__") or source_schedule_data.get("config") or {}
+        raw_lineas = (
+            source_schedule_data.get("lineas")
+            if "lineas" in source_schedule_data
+            else {str(key): value for key, value in source_schedule_data.items() if str(key) != "__config__"}
+        ) or {}
+
+        config = deepcopy(raw_config)
+        resource_modifications = config.get("apu_resource_modifications_v1")
+        if isinstance(resource_modifications, dict):
+            remapped_modifications = {}
+            for key, value in resource_modifications.items():
+                try:
+                    source_line_id = int(key)
+                except Exception:
+                    continue
+                target_line_id = line_id_map.get(source_line_id)
+                if target_line_id:
+                    remapped_modifications[str(target_line_id)] = cls._remap_gantt_metadata_line_ids(value, line_id_map)
+            config["apu_resource_modifications_v1"] = remapped_modifications
+
+        cloned_lineas: dict[str, dict] = {}
+        for raw_key, raw_value in raw_lineas.items():
+            try:
+                source_line_id = int(raw_key)
+            except Exception:
+                continue
+            target_line_id = line_id_map.get(source_line_id)
+            if not target_line_id or not isinstance(raw_value, dict):
+                continue
+
+            cloned_value = deepcopy(raw_value)
+            predecessors = []
+            for predecessor in cloned_value.get("predecessors") or []:
+                try:
+                    mapped_predecessor = line_id_map.get(int(predecessor))
+                except Exception:
+                    mapped_predecessor = None
+                if mapped_predecessor and mapped_predecessor not in predecessors:
+                    predecessors.append(mapped_predecessor)
+            cloned_value["predecessors"] = predecessors
+
+            dependencies = []
+            for dependency in cloned_value.get("dependencies") or []:
+                if not isinstance(dependency, dict):
+                    continue
+                try:
+                    source_id = int(dependency.get("source_id"))
+                except Exception:
+                    source_id = 0
+                mapped_source_id = line_id_map.get(source_id)
+                if not mapped_source_id:
+                    continue
+                cloned_dependency = deepcopy(dependency)
+                cloned_dependency["source_id"] = mapped_source_id
+                cloned_dependency["target_id"] = target_line_id
+                cloned_dependency["metadata"] = cls._remap_gantt_metadata_line_ids(
+                    cloned_dependency.get("metadata") or {},
+                    line_id_map,
+                )
+                dependencies.append(cloned_dependency)
+            cloned_value["dependencies"] = dependencies
+
+            metadata = cloned_value.get("metadata")
+            if isinstance(metadata, dict):
+                cloned_value["metadata"] = cls._remap_gantt_metadata_line_ids(metadata, line_id_map)
+
+            cloned_lineas[str(target_line_id)] = cloned_value
+
+        return {"__config__": config, **cloned_lineas}
+
     def get_projects_roots(self, db: Session, current_user: Usuario, empresa_id: int, skip: int = 0, limit: int = 100) -> List[Proyecto]:
         # Implementation moved from repository and slightly adjusted for service layer
         query_subq = db.query(
             Proyecto.codigo_root,
             func.count(Proyecto.id).label("cnt")
-        ).filter(Proyecto.empresa_id == empresa_id).group_by(Proyecto.codigo_root)
+        ).filter(
+            Proyecto.empresa_id == empresa_id,
+            Proyecto.deleted_at.is_(None),
+        ).group_by(Proyecto.codigo_root)
 
         # Filtrar por asignación si el usuario es colaborador
         if current_user.rol.lower() == "usuario":
@@ -202,7 +402,8 @@ class ProyectoService:
             subq, Proyecto.codigo_root == subq.c.codigo_root
         ).filter(
             Proyecto.empresa_id == empresa_id,
-            Proyecto.revision == 0
+            Proyecto.revision == 0,
+            Proyecto.deleted_at.is_(None),
         )
 
         # Filtrar por asignación en el query principal si es colaborador
@@ -245,7 +446,8 @@ class ProyectoService:
             nuevo_codigo = f"{prefix}-{period}-{seq_str}"
             exists = db.query(Proyecto).filter(
                 Proyecto.codigo == nuevo_codigo, 
-                Proyecto.empresa_id == empresa_id
+                Proyecto.empresa_id == empresa_id,
+                Proyecto.deleted_at.is_(None),
             ).first()
             if not exists:
                 obj_in.codigo = nuevo_codigo
@@ -446,6 +648,24 @@ class ProyectoService:
                         indirectos_porcentaje=indirectos_porcentaje,
                     )
                 id_map[d.id] = nuevo_detalle.id
+
+            cronograma_original = db.query(CronogramaTrabajo).filter(
+                CronogramaTrabajo.presupuesto_id == p_orig.id,
+                CronogramaTrabajo.proyecto_id == original.id,
+                CronogramaTrabajo.empresa_id == empresa_id,
+            ).first()
+            if cronograma_original:
+                db.add(
+                    CronogramaTrabajo(
+                        presupuesto_id=nuevo_presupuesto.id,
+                        proyecto_id=nuevo_proyecto.id,
+                        empresa_id=empresa_id,
+                        schedule_data=self._clone_gantt_schedule_data(
+                            cronograma_original.schedule_data,
+                            id_map,
+                        ),
+                    )
+                )
         
         db.commit()
         db.refresh(nuevo_proyecto)
@@ -462,12 +682,21 @@ class ProyectoService:
         
         return nuevo_proyecto
 
-    def update_proyecto(self, db: Session, proyecto_id: int, obj_in: ProyectoUpdate, empresa_id: int) -> Proyecto:
+    def update_proyecto(
+        self,
+        db: Session,
+        proyecto_id: int,
+        obj_in: ProyectoUpdate,
+        empresa_id: int,
+        user_id: int | None = None,
+    ) -> Proyecto:
         db_obj = proyecto_repo.get_by_id(db, id=proyecto_id, empresa_id=empresa_id)
         if not db_obj:
             return None
 
         update_data = obj_in.model_dump(exclude_unset=True)
+        previous_estado = str(db_obj.estado or "").strip()
+        incoming_estado = str(update_data.get("estado") or "").strip() if "estado" in update_data else previous_estado
         sync_fields = {"presupuesto_estimado", "nombre"}
         root_code = db_obj.codigo_root or db_obj.codigo
 
@@ -501,10 +730,231 @@ class ProyectoService:
                         db.add(base)
 
         result = proyecto_repo.update(db, db_obj=db_obj, obj_in=obj_in)
+        if "estado" in update_data and incoming_estado and incoming_estado != previous_estado:
+            from app.services.gantt_workflow import gantt_workflow_service
+
+            gantt_workflow_service.cancel_active_drafts_for_project(
+                db,
+                proyecto_id=proyecto_id,
+                empresa_id=empresa_id,
+                reason=f"project_state_changed:{previous_estado}->{incoming_estado}",
+                user_id=user_id,
+            )
         return result
 
-    def delete_full_project(self, db: Session, proyecto_id: int, empresa_id: int) -> bool:
+    def list_recycled_projects(self, db: Session, empresa_id: int, skip: int = 0, limit: int = 100) -> List[Proyecto]:
+        return proyecto_repo.get_deleted_roots(db, empresa_id=empresa_id, skip=skip, limit=limit)
+
+    def soft_delete_full_project(
+        self,
+        db: Session,
+        proyecto_id: int,
+        empresa_id: int,
+        *,
+        current_user: Optional[Usuario] = None,
+        reason: Optional[str] = None,
+        delete_project_base: bool = True,
+    ) -> bool:
         target = proyecto_repo.get_by_id(db, id=proyecto_id, empresa_id=empresa_id)
+        if not target:
+            return False
+
+        root_code = target.codigo_root or target.codigo
+        revisions = db.query(Proyecto).filter(
+            Proyecto.codigo_root == root_code,
+            Proyecto.empresa_id == empresa_id,
+            Proyecto.deleted_at.is_(None),
+        ).all()
+        revision_ids = [r.id for r in revisions]
+        self._sync_marketplace_products_before_project_delete(db, revision_ids, empresa_id)
+
+        deleted_at = self._now_utc()
+        expires_at = self._recycle_expiry(deleted_at)
+        user_id = getattr(current_user, "id", None)
+        base_ids = list(set([r.base_trabajo_id for r in revisions if r.base_trabajo_id]))
+
+        try:
+            for revision in revisions:
+                revision.trash_original_nombre = revision.trash_original_nombre or revision.nombre
+                revision.trash_original_codigo = revision.trash_original_codigo or revision.codigo
+                revision.deleted_at = deleted_at
+                revision.deleted_by_user_id = user_id
+                revision.recycle_expires_at = expires_at
+                revision.deletion_reason = reason
+                db.add(revision)
+
+            recycled_base_ids = []
+            preserved_base_ids = []
+
+            for base_id in base_ids:
+                base = db.query(BaseTrabajo).filter(
+                    BaseTrabajo.id == base_id,
+                    BaseTrabajo.empresa_id == empresa_id,
+                    BaseTrabajo.tipo == "Base de Proyecto",
+                    BaseTrabajo.deleted_at.is_(None),
+                ).first()
+                if not base:
+                    continue
+                if delete_project_base:
+                    self._mark_base_for_recycle(
+                        db,
+                        base,
+                        deleted_at=deleted_at,
+                        expires_at=expires_at,
+                        user_id=user_id,
+                        reason=f"Base de proyecto movida a papelera junto al proyecto {root_code}",
+                    )
+                    recycled_base_ids.append(base_id)
+                else:
+                    source_revision = next((revision for revision in revisions if revision.base_trabajo_id == base_id), target)
+                    self._convert_project_base_to_work_base(db, base, source_revision)
+                    preserved_base_ids.append(base_id)
+
+            db.commit()
+            license_service.update_usage_metrics(db, empresa_id)
+            record_audit_event(
+                db,
+                module="proyectos",
+                event_type="project_moved_to_recycle_bin",
+                entity_type="proyecto",
+                entity_id=target.id,
+                actor=current_user,
+                empresa_id=empresa_id,
+                message=f"Proyecto movido a papelera: {target.trash_original_nombre or target.nombre}",
+                payload={
+                    "project_id": target.id,
+                    "root_code": root_code,
+                    "revision_ids": revision_ids,
+                    "base_ids": base_ids,
+                    "recycled_base_ids": recycled_base_ids,
+                    "preserved_base_ids": preserved_base_ids,
+                    "delete_project_base": bool(delete_project_base),
+                    "deleted_at": deleted_at,
+                    "recycle_expires_at": expires_at,
+                    "retention_days": self.RECYCLE_RETENTION_DAYS,
+                },
+            )
+            return True
+        except Exception:
+            db.rollback()
+            raise
+
+    def restore_full_project(
+        self,
+        db: Session,
+        proyecto_id: int,
+        empresa_id: int,
+        *,
+        current_user: Optional[Usuario] = None,
+    ) -> Proyecto:
+        target = proyecto_repo.get_by_id(db, id=proyecto_id, empresa_id=empresa_id, include_deleted=True)
+        if not target or not target.deleted_at:
+            return None
+
+        root_code = target.codigo_root or target.codigo
+        revisions = db.query(Proyecto).filter(
+            Proyecto.codigo_root == root_code,
+            Proyecto.empresa_id == empresa_id,
+            Proyecto.deleted_at.isnot(None),
+        ).all()
+        base_ids = list(set([r.base_trabajo_id for r in revisions if r.base_trabajo_id]))
+
+        try:
+            for base_id in base_ids:
+                base = db.query(BaseTrabajo).filter(
+                    BaseTrabajo.id == base_id,
+                    BaseTrabajo.empresa_id == empresa_id,
+                ).first()
+                if base and base.deleted_at:
+                    self._restore_recycled_base(db, base, empresa_id)
+                elif base and base.tipo != "Base de Proyecto":
+                    source_revision = next((revision for revision in revisions if revision.base_trabajo_id == base_id), target)
+                    base.tipo = "Base de Proyecto"
+                    base.descripcion = self._build_project_base_description(source_revision, source_revision.trash_original_nombre or source_revision.nombre)
+                    db.add(base)
+
+            for revision in revisions:
+                revision.nombre = revision.trash_original_nombre or revision.nombre
+                revision.codigo = revision.trash_original_codigo or revision.codigo
+                revision.deleted_at = None
+                revision.deleted_by_user_id = None
+                revision.recycle_expires_at = None
+                revision.deletion_reason = None
+                revision.trash_original_nombre = None
+                revision.trash_original_codigo = None
+                db.add(revision)
+
+            db.commit()
+            license_service.update_usage_metrics(db, empresa_id)
+            db.refresh(target)
+            record_audit_event(
+                db,
+                module="proyectos",
+                event_type="project_restored_from_recycle_bin",
+                entity_type="proyecto",
+                entity_id=target.id,
+                actor=current_user,
+                empresa_id=empresa_id,
+                message=f"Proyecto restaurado desde papelera: {target.nombre}",
+                payload={"project_id": target.id, "root_code": root_code, "revision_count": len(revisions), "base_ids": base_ids},
+            )
+            return target
+        except Exception:
+            db.rollback()
+            raise
+
+    def purge_recycled_project(
+        self,
+        db: Session,
+        proyecto_id: int,
+        empresa_id: int,
+        *,
+        current_user: Optional[Usuario] = None,
+        require_expired: bool = False,
+    ) -> bool:
+        target = proyecto_repo.get_by_id(db, id=proyecto_id, empresa_id=empresa_id, include_deleted=True)
+        if not target or not target.deleted_at:
+            return False
+        if require_expired and target.recycle_expires_at and target.recycle_expires_at > self._now_utc():
+            return False
+        root_code = target.codigo_root or target.codigo
+        success = self.delete_full_project(db, proyecto_id=target.id, empresa_id=empresa_id)
+        if success:
+            record_audit_event(
+                db,
+                module="proyectos",
+                event_type="project_purged_from_recycle_bin",
+                entity_type="proyecto",
+                entity_id=target.id,
+                actor=current_user,
+                empresa_id=empresa_id,
+                message=f"Proyecto purgado definitivamente desde papelera: {root_code}",
+                payload={"project_id": target.id, "root_code": root_code},
+            )
+        return success
+
+    def purge_expired_recycled_projects(self, db: Session, empresa_id: int, *, limit: int = 100) -> int:
+        now = self._now_utc()
+        expired = (
+            db.query(Proyecto)
+            .filter(
+                Proyecto.empresa_id == empresa_id,
+                Proyecto.revision == 0,
+                Proyecto.deleted_at.isnot(None),
+                Proyecto.recycle_expires_at <= now,
+            )
+            .order_by(Proyecto.recycle_expires_at.asc(), Proyecto.id.asc())
+            .limit(limit)
+            .all()
+        )
+        purged = 0
+        for project in expired:
+            if self.purge_recycled_project(db, project.id, empresa_id, require_expired=True):
+                purged += 1
+        return purged
+
+    def delete_full_project(self, db: Session, proyecto_id: int, empresa_id: int) -> bool:
+        target = proyecto_repo.get_by_id(db, id=proyecto_id, empresa_id=empresa_id, include_deleted=True)
         if not target:
             return False
 

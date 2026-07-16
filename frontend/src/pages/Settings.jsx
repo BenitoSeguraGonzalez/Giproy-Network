@@ -4,7 +4,9 @@ import { AuthContext } from '../context/AuthContext';
 import { PLANTILLAS_OPCIONES } from '../constants/plantillas';
 import { Trash2, Edit2, Plus, Save, X, Building2, Users, Settings as SettingsIcon, Shield, Camera, Globe, ChevronDown, Check, AlertCircle, Info, RefreshCw, Loader2, CheckCircle2, XCircle, AlertTriangle, Briefcase, FileText, Eye, ShieldCheck, Search, Power, ArrowLeft, Building, Loader2 as LoaderIcon, CheckCircle2 as CheckIcon, XCircle as XIcon, AlertTriangle as AlertIcon, ShieldCheck as ShieldIcon } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import api from '../api/axiosConfig';
+import { empresasApi } from '../api/empresas';
+import { usuariosApi } from '../api/usuarios';
+import { proyectosApi } from '../api/proyectos';
 import { Card, CardContent } from '../components/ui/card';
 import { Checkbox } from '../components/ui/checkbox';
 import { Input } from '../components/ui/input';
@@ -21,6 +23,79 @@ import { resolveMediaUrl } from '../utils/mediaUrl';
 import { includesNormalized } from '../utils/normalizeSearch';
 import { getLicenseStatusLabel, getLicenseStatusTone } from '../utils/licenseStatusUi';
 import { ProjectSectionIconButton } from '../components/projects/ProjectSectionReportButton';
+import { getCompanyDisplayName } from '../utils/companyDisplayName';
+import { companyBackupsApi } from '../api/companyBackups';
+
+const COMMERCIAL_CAPABILITY_LABELS = {
+    apus: 'APUs',
+    presupuestos: 'Presupuestos',
+    cronogramas: 'Cronogramas',
+    formula_polinomica: 'Formula polinomica',
+    desagregacion: 'Desagregacion',
+    licitaciones: 'Licitaciones',
+    conecta: 'Conecta',
+    excel_exports: 'Excel',
+    pdf_exports: 'PDF',
+    commercial_exports: 'Exportes comerciales',
+};
+
+const formatCommercialCode = (code) => String(code || '')
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const formatSaasDate = (value) => {
+    if (!value) return 'Sin vencimiento';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Sin vencimiento';
+    return date.toLocaleDateString();
+};
+
+const formatBackupDateTime = (value) => {
+    if (!value) return 'Sin fecha';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Sin fecha';
+    return date.toLocaleString();
+};
+
+const resolveCurrentLicenseCode = (licenseInfo) => {
+    const candidates = [
+        licenseInfo?.commercial_capabilities?.license?.codigo,
+        licenseInfo?.codigo,
+        licenseInfo?.license_code,
+        licenseInfo?.licencia_codigo,
+        licenseInfo?.licencia_actual,
+    ];
+    const normalized = candidates
+        .map((value) => String(value || '').trim().toUpperCase())
+        .find(Boolean);
+
+    if (!normalized) return 'STANDARD';
+    if (normalized.includes('PROF')) return 'PROFESSIONAL';
+    if (normalized.includes('EST') || normalized.includes('STAND')) return 'STANDARD';
+    if (normalized.includes('EXP')) return 'STANDARD';
+    return normalized;
+};
+
+const buildMarketplaceSaasUrl = ({ code = '', intent = '' } = {}) => {
+    const params = new URLSearchParams({ saas: '1' });
+    if (code) params.set('q', code);
+    if (intent) params.set('intent', intent);
+    return `/marketplace?${params.toString()}`;
+};
+
+const COMPANY_SETTINGS_ZONES = [
+    { id: 'datos', label: 'Datos empresa', icon: Building2 },
+    { id: 'licencia', label: 'Licencia y SaaS', icon: ShieldCheck },
+];
+
+const USER_SETTINGS_ZONES = [
+    { id: 'todos', label: 'Todos' },
+    { id: 'admins', label: 'Administradores' },
+    { id: 'colaboradores', label: 'Colaboradores' },
+    { id: 'bloqueados', label: 'Bloqueados' },
+];
+
 const Settings = () => {
     const { user, selectedEmpresa, setSelectedEmpresa, selectedBaseTrabajo, licenseInfo } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -28,7 +103,9 @@ const Settings = () => {
     const requestedTab = searchParams.get('tab');
     const requestedEditUser = searchParams.get('edit_user');
     const isSuperAdmin = (user?.rol || '').toLowerCase() === 'superadministrador';
-    const initialTab = requestedTab || (((user?.rol || '').toLowerCase() === 'administrador' || isSuperAdmin) ? 'mi-empresa' : 'config-proyecto');
+    const initialTab = requestedTab === 'empresas' || requestedTab === 'superadmins'
+        ? 'mi-empresa'
+        : requestedTab || (((user?.rol || '').toLowerCase() === 'administrador' || isSuperAdmin) ? 'mi-empresa' : 'config-proyecto');
     const marketplaceProfileEditHandledRef = useRef(false);
     const [activeTab, setActiveTab] = useState(initialTab);
     const [empresas, setEmpresas] = useState([]);
@@ -37,6 +114,8 @@ const Settings = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [paises, setPaises] = useState([]);
     const [activeProject, setActiveProject] = useState(null);
+    const [miEmpresaZone, setMiEmpresaZone] = useState('datos');
+    const [usuariosZone, setUsuariosZone] = useState('todos');
 
     // Estados para formularios de creación/edición
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -48,7 +127,7 @@ const Settings = () => {
     const [deletingEmpresa, setDeletingEmpresa] = useState(false);
 
     const [newEmpresa, setNewEmpresa] = useState({
-        nombre: '', ruc: '', codigo: '',
+        nombre: '', alias: '', ruc: '', codigo: '',
         direccion: '', localidad: '', canton: '', provincia: '', pais: '',
         telefono: '', email: '',
         contacto_nombre: '', contacto_email: '', contacto_telefono: '',
@@ -69,9 +148,50 @@ const Settings = () => {
         acepta_politica_privacidad: false, acepta_politicas_comunicacion: false, autoriza_publicidad: false
     });
     const [miEmpresa, setMiEmpresa] = useState(null);
+    const [companyBackupPreflight, setCompanyBackupPreflight] = useState(null);
+    const [companyBackupLoading, setCompanyBackupLoading] = useState(false);
+    const [companyBackupExporting, setCompanyBackupExporting] = useState(false);
+    const [companyBackupError, setCompanyBackupError] = useState('');
+    const [companyBackupLastExport, setCompanyBackupLastExport] = useState(null);
+    const [companyBackupZone, setCompanyBackupZone] = useState('backup');
+    const [companyBackupRestoreFile, setCompanyBackupRestoreFile] = useState(null);
+    const [companyBackupRestorePreflight, setCompanyBackupRestorePreflight] = useState(null);
+    const [companyBackupRestoreLoading, setCompanyBackupRestoreLoading] = useState(false);
+    const [companyBackupPreparingInternal, setCompanyBackupPreparingInternal] = useState(false);
+    const [companyBackupInternalArtifacts, setCompanyBackupInternalArtifacts] = useState(null);
+    const [companyBackupInternalLoading, setCompanyBackupInternalLoading] = useState(false);
+    const [companyBackupCrossCompanyAttempts, setCompanyBackupCrossCompanyAttempts] = useState(null);
+    const [companyBackupCrossCompanyLoading, setCompanyBackupCrossCompanyLoading] = useState(false);
+    const [companyBackupRestoring, setCompanyBackupRestoring] = useState(false);
+    const [companyBackupSelectedArtifactId, setCompanyBackupSelectedArtifactId] = useState('');
+    const [companyBackupInternalRestoreTarget, setCompanyBackupInternalRestoreTarget] = useState(null);
+    const [companyBackupRestoreConfirmation, setCompanyBackupRestoreConfirmation] = useState('');
+    const [companyBackupRestoreResult, setCompanyBackupRestoreResult] = useState(null);
     const [empresaProvincias, setEmpresaProvincias] = useState([]);
     const [empresaCantones, setEmpresaCantones] = useState([]);
-
+    const commercialCapabilities = licenseInfo?.commercial_capabilities || {};
+    const saasProducts = Array.isArray(licenseInfo?.saas_products)
+        ? licenseInfo.saas_products
+        : Array.isArray(commercialCapabilities.saas_products)
+            ? commercialCapabilities.saas_products
+            : [];
+    const effectiveRightCodes = Array.isArray(commercialCapabilities.effective_right_codes)
+        ? commercialCapabilities.effective_right_codes
+        : [];
+    const capabilityEntries = Object.entries(commercialCapabilities.capabilities || {})
+        .filter(([key]) => Object.prototype.hasOwnProperty.call(COMMERCIAL_CAPABILITY_LABELS, key));
+    const enabledCapabilities = capabilityEntries.filter(([, enabled]) => Boolean(enabled));
+    const disabledCapabilities = capabilityEntries.filter(([, enabled]) => !enabled);
+    const currentLicenseCode = resolveCurrentLicenseCode(licenseInfo);
+    const currentLicenseMonthlyCode = `LIC_${currentLicenseCode}_MONTHLY`;
+    const suggestedUpgradeCode = currentLicenseCode === 'PROFESSIONAL'
+        ? 'LIC_STANDARD_MONTHLY'
+        : 'LIC_PROFESSIONAL_MONTHLY';
+    const licenseRequiresAttention = Boolean(
+        licenseInfo?.access_mode === 'readonly'
+        || licenseInfo?.grace_days_remaining > 0
+        || ['expired', 'grace', 'readonly', 'suspended'].includes(String(licenseInfo?.license_status || '').toLowerCase())
+    );
     const buildEmptyUsuarioForm = useCallback((role = 'usuario') => ({
         email: '',
         password: '',
@@ -137,7 +257,7 @@ const Settings = () => {
             const data = await maestrosApi.getProvincias();
             setEmpresaProvincias(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Error loading empresa provinces:", error);
+            globalThis.reportClientError?.("Error loading empresa provinces:", error);
         }
     }, []);
 
@@ -147,7 +267,7 @@ const Settings = () => {
             const data = await maestrosApi.getCantones(provincia);
             setEmpresaCantones(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Error loading empresa cantons:", error);
+            globalThis.reportClientError?.("Error loading empresa cantons:", error);
             setEmpresaCantones([]);
         }
     }, []);
@@ -173,40 +293,41 @@ const Settings = () => {
             const empId = isSuperAdmin ? selectedEmpresa?.id : user?.empresa_id;
 
             if (activeTab === 'empresas' && isSuperAdmin) {
-                const res = await api.get('/empresas/');
-                setEmpresas(res.data);
-            } else if (activeTab === 'superadmins' && isSuperAdmin) {
-                const res = await api.get('/usuarios/');
-                setUsuarios(res.data);
+                const data = await empresasApi.getAll();
+                setEmpresas(data);
             } else if (activeTab === 'usuarios') {
+                if (isSuperAdmin && !selectedEmpresa?.id) {
+                    setUsuarios([]);
+                    return;
+                }
                 const params = empId ? { empresa_id: empId } : {};
-                const res = await api.get('/usuarios/', { params });
-                setUsuarios(res.data);
+                const data = await usuariosApi.getAll(params);
+                setUsuarios(data);
             }
 
             const targetEmpresaId = isSuperAdmin ? selectedEmpresa?.id : user?.empresa_id;
 
             if (targetEmpresaId) {
-                const empRes = await api.get(`/empresas/${targetEmpresaId}`);
-                setMiEmpresa(empRes.data);
-                if (selectedEmpresa?.id === empRes.data.id) {
-                    setSelectedEmpresa(empRes.data);
+                const empresaData = await empresasApi.getById(targetEmpresaId);
+                setMiEmpresa(empresaData);
+                if (selectedEmpresa?.id === empresaData.id) {
+                    setSelectedEmpresa(empresaData);
                 }
 
                 if (activeTab === 'plantillas' && selectedBaseTrabajo?.tipo === 'Base de Proyecto') {
                     try {
-                        const proyRes = await api.get('/proyectos/', { params: { empresa_id: targetEmpresaId } });
-                        const project = proyRes.data.find(p => p.base_trabajo_id === selectedBaseTrabajo.id);
+                        const proyectos = await proyectosApi.getAll({ empresa_id: targetEmpresaId });
+                        const project = proyectos.find(p => p.base_trabajo_id === selectedBaseTrabajo.id);
                         if (project) {
                             setActiveProject(project);
                         }
                     } catch (error) {
-                        console.error("Error buscando proyecto activo:", error);
+                        globalThis.reportClientError?.("Error buscando proyecto activo:", error);
                     }
                 }
             }
         } catch (error) {
-            console.error("Error cargando datos:", error);
+            globalThis.reportClientError?.("Error cargando datos:", error);
         } finally {
             setLoading(false);
         }
@@ -214,12 +335,295 @@ const Settings = () => {
 
     const fetchPaises = useCallback(async () => {
         try {
-            const response = await api.get('/paises/');
-            setPaises(response.data);
+            const data = await maestrosApi.getPaises();
+            setPaises(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Error fetching paises:", error);
+            globalThis.reportClientError?.("Error fetching paises:", error);
         }
     }, []);
+
+    const loadCompanyBackupPreflight = useCallback(async () => {
+        const role = (user?.rol || '').toLowerCase();
+        if (role !== 'administrador' && role !== 'superadministrador') {
+            setCompanyBackupError('Solo administradores y superadministradores pueden consultar copias de seguridad.');
+            setCompanyBackupPreflight(null);
+            return;
+        }
+        if (isSuperAdmin && !selectedEmpresa?.id) {
+            setCompanyBackupError('Seleccione una empresa para consultar el preflight de copia 1:1.');
+            setCompanyBackupPreflight(null);
+            return;
+        }
+
+        setCompanyBackupLoading(true);
+        setCompanyBackupError('');
+        try {
+            const data = await companyBackupsApi.preflightExport({
+                empresa_id: isSuperAdmin ? selectedEmpresa?.id : user?.empresa_id,
+                dry_run: true,
+            });
+            setCompanyBackupPreflight(data);
+        } catch (error) {
+            const detail = error?.response?.data?.detail;
+            setCompanyBackupPreflight(null);
+            setCompanyBackupError(detail?.message || 'No se pudo ejecutar el preflight de copia de seguridad.');
+        } finally {
+            setCompanyBackupLoading(false);
+        }
+    }, [isSuperAdmin, selectedEmpresa?.id, user?.empresa_id, user?.rol]);
+
+    const handleCompanyBackupExport = useCallback(async () => {
+        const role = (user?.rol || '').toLowerCase();
+        if (role !== 'administrador' && role !== 'superadministrador') {
+            setCompanyBackupError('Solo administradores y superadministradores pueden generar copias de seguridad.');
+            return;
+        }
+        if (isSuperAdmin && !selectedEmpresa?.id) {
+            setCompanyBackupError('Seleccione una empresa antes de generar la copia.');
+            return;
+        }
+        if (companyBackupPreflight && !companyBackupPreflight.exportable) {
+            setCompanyBackupError('La copia esta bloqueada por integridad. Revise las referencias antes de exportar.');
+            return;
+        }
+
+        setCompanyBackupExporting(true);
+        setCompanyBackupError('');
+        try {
+            const result = await companyBackupsApi.exportBackup({
+                empresa_id: isSuperAdmin ? selectedEmpresa?.id : user?.empresa_id,
+            });
+            const url = window.URL.createObjectURL(result.blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = result.filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            setCompanyBackupLastExport(result);
+            await loadCompanyBackupPreflight();
+        } catch (error) {
+            const detail = error?.response?.data?.detail;
+            setCompanyBackupError(detail?.message || 'No se pudo generar la copia de seguridad cifrada.');
+        } finally {
+            setCompanyBackupExporting(false);
+        }
+    }, [companyBackupPreflight, isSuperAdmin, loadCompanyBackupPreflight, selectedEmpresa?.id, user?.empresa_id, user?.rol]);
+
+    const handleCompanyBackupRestorePreflight = useCallback(async () => {
+        const role = (user?.rol || '').toLowerCase();
+        if (role !== 'administrador' && role !== 'superadministrador') {
+            setCompanyBackupError('Solo administradores y superadministradores pueden validar restauraciones.');
+            return;
+        }
+        if (isSuperAdmin && !selectedEmpresa?.id) {
+            setCompanyBackupError('Seleccione una empresa antes de validar la restauracion.');
+            return;
+        }
+        if (!companyBackupRestoreFile) {
+            setCompanyBackupError('Seleccione un archivo .giproybackup para validar.');
+            return;
+        }
+
+        setCompanyBackupRestoreLoading(true);
+        setCompanyBackupError('');
+        setCompanyBackupRestorePreflight(null);
+        try {
+            const data = await companyBackupsApi.preflightRestore({
+                empresa_id: isSuperAdmin ? selectedEmpresa?.id : user?.empresa_id,
+                file: companyBackupRestoreFile,
+            });
+            setCompanyBackupRestorePreflight(data);
+        } catch (error) {
+            const detail = error?.response?.data?.detail;
+            setCompanyBackupError(detail?.message || 'No se pudo validar el archivo de copia.');
+        } finally {
+            setCompanyBackupRestoreLoading(false);
+        }
+    }, [companyBackupRestoreFile, isSuperAdmin, selectedEmpresa?.id, user?.empresa_id, user?.rol]);
+
+    const loadCompanyBackupInternalArtifacts = useCallback(async () => {
+        if (!isSuperAdmin) {
+            setCompanyBackupError('Solo superadministradores pueden consultar copias automaticas internas.');
+            setCompanyBackupInternalArtifacts(null);
+            return;
+        }
+        if (!selectedEmpresa?.id) {
+            setCompanyBackupError('Seleccione una empresa para consultar copias automaticas internas.');
+            setCompanyBackupInternalArtifacts(null);
+            return;
+        }
+
+        setCompanyBackupInternalLoading(true);
+        setCompanyBackupError('');
+        try {
+            const data = await companyBackupsApi.listInternalArtifacts({
+                empresa_id: selectedEmpresa.id,
+            });
+            setCompanyBackupInternalArtifacts(data);
+        } catch (error) {
+            const detail = error?.response?.data?.detail;
+            setCompanyBackupInternalArtifacts(null);
+            setCompanyBackupError(detail?.message || 'No se pudieron consultar las copias automaticas internas.');
+        } finally {
+            setCompanyBackupInternalLoading(false);
+        }
+    }, [isSuperAdmin, selectedEmpresa?.id]);
+
+    const loadCompanyBackupCrossCompanyAttempts = useCallback(async () => {
+        if (!isSuperAdmin) {
+            return;
+        }
+
+        setCompanyBackupCrossCompanyLoading(true);
+        setCompanyBackupError('');
+        try {
+            const data = await companyBackupsApi.listCrossCompanyRestoreAttempts({ limit: 200 });
+            setCompanyBackupCrossCompanyAttempts(data);
+        } catch (error) {
+            const detail = error?.response?.data?.detail;
+            setCompanyBackupCrossCompanyAttempts(null);
+            setCompanyBackupError(detail?.message || 'No se pudo cargar la auditoria de intentos bloqueados.');
+        } finally {
+            setCompanyBackupCrossCompanyLoading(false);
+        }
+    }, [isSuperAdmin]);
+
+    const handleCompanyBackupPrepareInternalSafety = useCallback(async () => {
+        if (!isSuperAdmin) {
+            setCompanyBackupError('Solo superadministradores pueden preparar una restauracion.');
+            return;
+        }
+        if (!selectedEmpresa?.id) {
+            setCompanyBackupError('Seleccione una empresa antes de preparar la restauracion.');
+            return;
+        }
+        if (!companyBackupRestoreFile) {
+            setCompanyBackupError('Seleccione un archivo .giproybackup para preparar la restauracion.');
+            return;
+        }
+
+        setCompanyBackupPreparingInternal(true);
+        setCompanyBackupError('');
+        try {
+            const data = await companyBackupsApi.prepareInternalSafetyBackup({
+                empresa_id: selectedEmpresa.id,
+                file: companyBackupRestoreFile,
+            });
+            setCompanyBackupRestorePreflight(data.restore_preflight);
+            setCompanyBackupInternalArtifacts((prev) => {
+                const currentItems = Array.isArray(prev?.items) ? prev.items : [];
+                return {
+                    ...(prev || {}),
+                    empresa: data.restore_preflight?.empresa,
+                    retention_days: prev?.retention_days ?? 30,
+                    restored_cleanup_days: prev?.restored_cleanup_days ?? 7,
+                    items: [data.internal_safety_backup, ...currentItems],
+                };
+            });
+            await loadCompanyBackupInternalArtifacts();
+        } catch (error) {
+            const detail = error?.response?.data?.detail;
+            setCompanyBackupError(detail?.message || 'No se pudo crear la copia automatica previa.');
+        } finally {
+            setCompanyBackupPreparingInternal(false);
+        }
+    }, [companyBackupRestoreFile, isSuperAdmin, loadCompanyBackupInternalArtifacts, selectedEmpresa?.id]);
+
+    const handleCompanyBackupExecuteRestore = useCallback(async () => {
+        if (!isSuperAdmin) {
+            setCompanyBackupError('Solo superadministradores pueden ejecutar restauraciones.');
+            return;
+        }
+        if (!selectedEmpresa?.id) {
+            setCompanyBackupError('Seleccione una empresa antes de restaurar.');
+            return;
+        }
+        if (!companyBackupRestoreFile) {
+            setCompanyBackupError('Seleccione el archivo .giproybackup que ya fue validado.');
+            return;
+        }
+        if (!companyBackupRestorePreflight?.restorable) {
+            setCompanyBackupError('Valide primero una copia restaurable de la misma empresa.');
+            return;
+        }
+
+        setCompanyBackupRestoring(true);
+        setCompanyBackupError('');
+        setCompanyBackupRestoreResult(null);
+        try {
+            const data = await companyBackupsApi.executeRestore({
+                empresa_id: selectedEmpresa.id,
+                file: companyBackupRestoreFile,
+                confirm_phrase: companyBackupRestoreConfirmation,
+            });
+            setCompanyBackupRestoreResult(data);
+            setCompanyBackupRestorePreflight(null);
+            setCompanyBackupRestoreFile(null);
+            setCompanyBackupSelectedArtifactId('');
+            setCompanyBackupRestoreConfirmation('');
+            await loadCompanyBackupInternalArtifacts();
+            await loadCompanyBackupPreflight();
+        } catch (error) {
+            const detail = error?.response?.data?.detail;
+            setCompanyBackupError(detail?.message || 'No se pudo ejecutar la restauracion destructiva.');
+        } finally {
+            setCompanyBackupRestoring(false);
+        }
+    }, [
+        companyBackupRestoreConfirmation,
+        companyBackupRestoreFile,
+        companyBackupRestorePreflight?.restorable,
+        isSuperAdmin,
+        loadCompanyBackupInternalArtifacts,
+        loadCompanyBackupPreflight,
+        selectedEmpresa?.id,
+    ]);
+
+    const handleCompanyBackupExecuteInternalRestore = useCallback(async () => {
+        if (!isSuperAdmin) {
+            setCompanyBackupError('Solo superadministradores pueden restaurar copias internas.');
+            return;
+        }
+        if (!selectedEmpresa?.id) {
+            setCompanyBackupError('Seleccione una empresa antes de restaurar una copia interna.');
+            return;
+        }
+        if (!companyBackupInternalRestoreTarget?.id) {
+            setCompanyBackupError('Seleccione una copia interna disponible.');
+            return;
+        }
+
+        setCompanyBackupRestoring(true);
+        setCompanyBackupError('');
+        setCompanyBackupRestoreResult(null);
+        try {
+            const data = await companyBackupsApi.executeInternalArtifactRestore({
+                empresa_id: selectedEmpresa.id,
+                internal_artifact_id: companyBackupInternalRestoreTarget.id,
+                confirm_phrase: companyBackupRestoreConfirmation,
+            });
+            setCompanyBackupRestoreResult(data);
+            setCompanyBackupInternalRestoreTarget(null);
+            setCompanyBackupSelectedArtifactId('');
+            setCompanyBackupRestoreConfirmation('');
+            await loadCompanyBackupInternalArtifacts();
+            await loadCompanyBackupPreflight();
+        } catch (error) {
+            const detail = error?.response?.data?.detail;
+            setCompanyBackupError(detail?.message || 'No se pudo restaurar la copia automatica interna.');
+        } finally {
+            setCompanyBackupRestoring(false);
+        }
+    }, [
+        companyBackupInternalRestoreTarget?.id,
+        companyBackupRestoreConfirmation,
+        isSuperAdmin,
+        loadCompanyBackupInternalArtifacts,
+        loadCompanyBackupPreflight,
+        selectedEmpresa?.id,
+    ]);
 
     const getAvailableRoles = useCallback(() => {
         const roles = [];
@@ -242,11 +646,11 @@ const Settings = () => {
 
     useEffect(() => {
         if (requestedTab === 'empresas' && isSuperAdmin) {
-            setActiveTab('empresas');
+            navigate('/admin-global/empresas', { replace: true });
             return;
         }
         if (requestedTab === 'superadmins' && isSuperAdmin) {
-            setActiveTab('superadmins');
+            navigate('/admin-global/superadministradores', { replace: true });
             return;
         }
         if (requestedTab === 'usuarios' && user?.rol !== 'usuario') {
@@ -261,7 +665,7 @@ const Settings = () => {
 
     const handleToggleEmpresa = async (empresa) => {
         try {
-            await api.put(`/empresas/${empresa.id}`, { activa: !empresa.activa });
+            await empresasApi.update(empresa.id, { activa: !empresa.activa });
             fetchData();
         } catch {
             appAlert("Error al actualizar estado de empresa");
@@ -271,7 +675,7 @@ const Settings = () => {
     const handleUpdatePreferencias = async (e) => {
         e.preventDefault();
         try {
-            await api.put(`/empresas/${miEmpresa.id}`, {
+            await empresasApi.update(miEmpresa.id, {
                 decimales_moneda: miEmpresa.decimales_moneda,
                 decimales_calculos: miEmpresa.decimales_calculos,
                 use_omniclass: miEmpresa.use_omniclass,
@@ -302,7 +706,7 @@ const Settings = () => {
         if (!empresaToDelete) return;
         try {
             setDeletingEmpresa(true);
-            await api.delete(`/empresas/${empresaToDelete.id}`);
+            await empresasApi.delete(empresaToDelete.id);
             setShowDeleteEmpresaModal(false);
             setDeleteEmpresaStep(1);
             setEmpresaToDelete(null);
@@ -335,25 +739,25 @@ const Settings = () => {
             }
             let empresaId = selectedId;
             if (editMode) {
-                await api.put(`/empresas/${selectedId}`, payload);
+                delete payload.ruc;
+                delete payload.nombre;
+                await empresasApi.update(selectedId, payload);
             } else {
-                const res = await api.post('/empresas/', payload);
-                empresaId = res.data.id;
+                const empresa = await empresasApi.create(payload);
+                empresaId = empresa.id;
             }
 
             if (logoFile) {
                 const formData = new FormData();
                 formData.append('file', logoFile);
-                await api.post(`/empresas/upload-logo/${empresaId}/`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await empresasApi.uploadLogo(empresaId, formData);
             }
 
             setShowCreateModal(false);
             resetEmpresaForm();
             fetchData();
         } catch (error) {
-            console.error("Error al procesar empresa:", error);
+            globalThis.reportClientError?.("Error al procesar empresa:", error);
             appAlert("Error al procesar empresa");
         }
     };
@@ -362,7 +766,7 @@ const Settings = () => {
         setEditMode(false);
         setSelectedId(null);
         setNewEmpresa({
-            nombre: '', ruc: '', codigo: '',
+            nombre: '', alias: '', ruc: '', codigo: '',
             direccion: '', localidad: '', canton: '', provincia: '', pais: '',
             telefono: '', email: '',
             contacto_nombre: '', contacto_email: '', contacto_telefono: '',
@@ -417,9 +821,9 @@ const Settings = () => {
             const params = empIdForOp ? { empresa_id: empIdForOp } : {};
 
             if (editMode) {
-                await api.put(`/usuarios/${selectedId}`, payload, { params });
+                await usuariosApi.update(selectedId, payload, params);
             } else {
-                await api.post('/usuarios/', payload, { params });
+                await usuariosApi.create(payload, params);
             }
             setShowCreateModal(false);
             setNewUsuario(buildEmptyUsuarioForm());
@@ -459,10 +863,16 @@ const Settings = () => {
         if (marketplaceProfileEditHandledRef.current) return;
         if (!user || user?.rol === 'usuario') return;
 
-        setActiveTab(isSuperAdmin ? 'superadmins' : 'usuarios');
+        if (isSuperAdmin) {
+            navigate('/admin-global/superadministradores?edit_user=me', { replace: true });
+            marketplaceProfileEditHandledRef.current = true;
+            return;
+        }
+
+        setActiveTab('usuarios');
         handleEditUsuario({
             ...user,
-            rol: isSuperAdmin ? 'Superadministrador' : (user.rol || 'usuario'),
+            rol: user.rol || 'usuario',
             empresa_id: user.empresa_id || '',
         });
         marketplaceProfileEditHandledRef.current = true;
@@ -486,7 +896,7 @@ const Settings = () => {
         try {
             const empIdForOp = isSuperAdmin ? selectedEmpresa?.id : user?.empresa_id;
             const params = empIdForOp ? { empresa_id: empIdForOp } : {};
-            await api.delete(`/usuarios/${u.id}`, { params });
+            await usuariosApi.delete(u.id, params);
             fetchData();
         } catch (error) {
             appAlert("Error al eliminar colaborador: " + (error.response?.data?.detail || error.message));
@@ -505,18 +915,31 @@ const Settings = () => {
     };
 
     const filteredEmpresas = empresas.filter((empresa) =>
-        includesNormalized(`${empresa.nombre || ''} ${empresa.ruc || ''} ${empresa.codigo || ''}`, searchTerm)
+        includesNormalized(`${empresa.nombre || ''} ${empresa.alias || ''} ${empresa.ruc || ''} ${empresa.codigo || ''}`, searchTerm)
     );
 
     const filteredUsuarios = usuarios.filter((usuario) =>
-        includesNormalized(`${usuario.nombre_completo || ''} ${usuario.email || ''} ${usuario.empresa?.nombre || ''}`, searchTerm)
+        includesNormalized(`${usuario.nombre_completo || ''} ${usuario.email || ''} ${getCompanyDisplayName(usuario.empresa, '')}`, searchTerm)
     );
+    const filteredCompanyUsers = filteredUsuarios.filter((usuario) => {
+        const role = (usuario?.rol || '').toLowerCase();
+        if (usuariosZone === 'admins') return role === 'administrador';
+        if (usuariosZone === 'colaboradores') return role === 'usuario' || role === 'usuario_comunidad';
+        if (usuariosZone === 'bloqueados') return usuario?.activo === false;
+        return true;
+    });
+    const usuariosStats = {
+        total: filteredUsuarios.length,
+        admins: filteredUsuarios.filter((usuario) => (usuario?.rol || '').toLowerCase() === 'administrador').length,
+        colaboradores: filteredUsuarios.filter((usuario) => ['usuario', 'usuario_comunidad'].includes((usuario?.rol || '').toLowerCase())).length,
+        bloqueados: filteredUsuarios.filter((usuario) => usuario?.activo === false).length,
+    };
 
     const filteredSuperadmins = usuarios.filter((usuario) => {
         const role = (usuario?.rol || '').toLowerCase();
         if (role !== 'superadministrador') return false;
         return includesNormalized(
-            `${usuario.nombre_completo || ''} ${usuario.email || ''} ${usuario.empresa?.nombre || ''} ${usuario.alias || ''} ${usuario.profesion || ''}`,
+            `${usuario.nombre_completo || ''} ${usuario.email || ''} ${getCompanyDisplayName(usuario.empresa, '')} ${usuario.alias || ''} ${usuario.profesion || ''}`,
             searchTerm
         );
     });
@@ -563,7 +986,10 @@ const Settings = () => {
                                         )}
                                     </div>
                                     <div className="space-y-1">
-                                        <h3 className="font-black text-sm uppercase tracking-tight text-[#1A1A1A]">{emp.nombre}</h3>
+                                        <h3 className="font-black text-sm uppercase tracking-tight text-[#1A1A1A]">{getCompanyDisplayName(emp)}</h3>
+                                        {emp.alias ? (
+                                            <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">Legal: {emp.nombre}</p>
+                                        ) : null}
                                         <div className="flex items-center gap-2">
                                             <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{emp.ruc || 'SIN RUC'}</span>
                                             <div className="w-1 h-1 rounded-full bg-zinc-300" />
@@ -633,8 +1059,24 @@ const Settings = () => {
             );
         }
 
+        if (isSuperAdmin && !selectedEmpresa?.id) {
+            return (
+                <Card className="bg-white border-zinc-100 shadow-sm max-w-5xl mx-auto md:mx-0 overflow-hidden">
+                    <CardContent className="p-10">
+                        <div className="rounded-[2rem] border border-dashed border-zinc-200 bg-zinc-50 p-10 text-center" data-settings-users-tenant-lock="true">
+                            <Users className="mx-auto h-12 w-12 text-zinc-300" />
+                            <h2 className="mt-5 text-lg font-black uppercase tracking-tight text-[#1A1A1A]">Usuarios de empresa</h2>
+                            <p className="mx-auto mt-2 max-w-md text-xs font-bold uppercase tracking-[0.14em] text-zinc-400">
+                                Selecciona una empresa activa para gestionar sus usuarios.
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+            );
+        }
+
         return (
-            <Card className="bg-white border-zinc-100 shadow-sm max-w-5xl mx-auto md:mx-0 overflow-hidden">
+            <Card className="bg-white border-zinc-100 shadow-sm max-w-5xl mx-auto md:mx-0 overflow-hidden" data-settings-company-zone="usuarios-empresa">
                 <CardContent className="p-8">
                     {/* Header Estándar Industrial Light */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
@@ -644,7 +1086,7 @@ const Settings = () => {
                             </div>
                             <div>
                                 <div className="flex items-center gap-3">
-                                    <h2 className="text-xl font-black uppercase tracking-tight text-[#1A1A1A]">Personal / Staff</h2>
+                                    <h2 className="text-xl font-black uppercase tracking-tight text-[#1A1A1A]">Usuarios Empresa</h2>
                                     <div className="flex gap-2">
                                         <div className="px-3 py-1 bg-zinc-100 rounded-full border border-zinc-200 flex items-center gap-2">
                                             <span className="text-[8px] font-black text-zinc-400">ADM</span>
@@ -656,7 +1098,7 @@ const Settings = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Gestión de Usuarios y Roles</p>
+                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Empresa activa y roles permitidos</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -682,6 +1124,36 @@ const Settings = () => {
                         </div>
                     </div>
 
+                    <div className="mb-6 grid gap-3 md:grid-cols-4" data-settings-users-summary="empresa-activa">
+                        {[
+                            ['Total', usuariosStats.total],
+                            ['Administradores', usuariosStats.admins],
+                            ['Colaboradores', usuariosStats.colaboradores],
+                            ['Bloqueados', usuariosStats.bloqueados],
+                        ].map(([label, value]) => (
+                            <div key={label} className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                                <p className="text-[8px] font-black uppercase tracking-[0.18em] text-zinc-400">{label}</p>
+                                <p className="mt-1 text-xl font-black text-[#1A1A1A]">{value}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mb-6 flex flex-wrap gap-2 rounded-2xl border border-zinc-200 bg-zinc-50 p-2" data-settings-users-tabs="empresa">
+                        {USER_SETTINGS_ZONES.map((zone) => {
+                            const active = usuariosZone === zone.id;
+                            return (
+                                <button
+                                    key={zone.id}
+                                    type="button"
+                                    onClick={() => setUsuariosZone(zone.id)}
+                                    className={`inline-flex min-h-[38px] items-center rounded-xl px-4 text-[10px] font-black uppercase tracking-[0.16em] transition-all ${active ? 'bg-[#1A1A1A] text-white shadow-sm' : 'text-zinc-500 hover:bg-white hover:text-[#1A1A1A]'}`}
+                                >
+                                    {zone.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+
                     <div className="border border-zinc-200/60 rounded-[2rem] overflow-hidden bg-zinc-50/30">
                         <table className="w-full text-left">
                             <thead className="bg-zinc-50 border-b border-zinc-200/60">
@@ -694,7 +1166,7 @@ const Settings = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-200/60">
-                                {filteredUsuarios.map(u => (
+                                {filteredCompanyUsers.length > 0 ? filteredCompanyUsers.map(u => (
                                     <tr key={u.id} className="hover:bg-white transition-colors group">
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-4">
@@ -755,7 +1227,14 @@ const Settings = () => {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
+                                )) : (
+                                    <tr>
+                                        <td colSpan={5} className="px-8 py-12 text-center">
+                                            <Users className="mx-auto h-10 w-10 text-zinc-200" />
+                                            <p className="mt-4 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">Sin usuarios en esta vista</p>
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -770,7 +1249,7 @@ const Settings = () => {
                 <div className="p-20 text-center">
                     <ShieldIcon className="w-16 h-16 mx-auto text-zinc-200 mb-6" />
                     <h2 className="text-xl font-black uppercase text-zinc-900">Acceso Restringido</h2>
-                    <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest mt-2">Solo superadministración puede operar este ajuste SaaS.</p>
+                    <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest mt-2">Solo superadministración puede operar cuentas globales.</p>
                 </div>
             );
         }
@@ -785,7 +1264,7 @@ const Settings = () => {
                             </div>
                             <div>
                                 <div className="flex items-center gap-3">
-                                    <h2 className="text-xl font-black uppercase tracking-tight text-[#1A1A1A]">Ajuste SaaS</h2>
+                                    <h2 className="text-xl font-black uppercase tracking-tight text-[#1A1A1A]">Superadministradores migrados</h2>
                                     <div className="px-3 py-1 bg-violet-50 rounded-full border border-violet-100 flex items-center gap-2">
                                         <span className="text-[8px] font-black text-violet-500">SUPERADMIN</span>
                                         <span className="text-[10px] font-black text-violet-700">{filteredSuperadmins.length}</span>
@@ -806,7 +1285,7 @@ const Settings = () => {
                     </div>
 
                     <div className="mb-8 rounded-[2rem] border border-violet-100 bg-[linear-gradient(135deg,rgba(245,243,255,0.95),rgba(255,255,255,0.96))] p-6">
-                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-violet-600">Gobierno SaaS</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-violet-600">Gobierno global</p>
                         <h3 className="mt-2 text-2xl font-black uppercase tracking-tight text-[#1A1A1A]">Operación crítica centralizada</h3>
                         <p className="mt-3 max-w-3xl text-sm font-medium leading-relaxed text-zinc-600">
                             Esta superficie concentra las cuentas con privilegio máximo del sistema. Solo el rol <strong>Superadministrador</strong> puede ver, editar y mantener este listado.
@@ -894,15 +1373,15 @@ const Settings = () => {
     };
 
     const renderPreferencias = () => (
-        <Card className="bg-white border-zinc-100 shadow-sm max-w-2xl mx-auto md:mx-0">
+        <Card className="bg-white border-zinc-100 shadow-sm max-w-2xl mx-auto md:mx-0" data-settings-company-zone="preferencias-empresa">
             <CardContent className="p-8">
                 <div className="flex items-center gap-4 mb-8">
                     <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-[#F39200]">
                         <SettingsIcon className="w-6 h-6" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black uppercase tracking-tight">Preferencias de Aplicación</h2>
-                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Configuración de Precisión Decimal</p>
+                        <h2 className="text-xl font-black uppercase tracking-tight">Preferencias Empresa</h2>
+                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Precision, sesion y clasificacion</p>
                     </div>
                 </div>
 
@@ -966,7 +1445,7 @@ const Settings = () => {
                     </div>
 
                     <LiquidButton type="submit" className="w-full !h-14 bg-[#F39200] text-white text-xs font-black uppercase tracking-[0.2em]">
-                        Guardar Preferencias Locales
+                        Guardar Preferencias
                     </LiquidButton>
                 </form>
             </CardContent>
@@ -979,9 +1458,9 @@ const Settings = () => {
         const saveConfig = async (target, id, config) => {
             try {
                 if (target === 'empresa') {
-                    await api.put(`/empresas/${id}`, { plantillas_config: config });
+                    await empresasApi.update(id, { plantillas_config: config });
                 } else {
-                    await api.put(`/proyectos/${id}`, { plantillas_config: config });
+                    await proyectosApi.update(id, { plantillas_config: config });
                 }
                 appAlert("Configuración de plantillas guardada correctamente.");
                 fetchData();
@@ -1018,7 +1497,7 @@ const Settings = () => {
     const handleUpdateProyectoConfig = async (e) => {
         e.preventDefault();
         try {
-            await api.put(`/empresas/${miEmpresa.id}`, {
+            await empresasApi.update(miEmpresa.id, {
                 proy_prefijo: miEmpresa.proy_prefijo,
                 proy_periodo: miEmpresa.proy_periodo,
                 proy_secuencial: miEmpresa.proy_secuencial,
@@ -1039,9 +1518,8 @@ const Settings = () => {
 
             // Filtrar solo campos editables para el backend para evitar errores con campos calculados
             const updateData = {
-                nombre: miEmpresa.nombre,
+                alias: miEmpresa.alias,
                 codigo: miEmpresa.codigo,
-                ruc: miEmpresa.ruc,
                 direccion: miEmpresa.direccion,
                 localidad: miEmpresa.localidad,
                 canton: miEmpresa.canton,
@@ -1082,34 +1560,583 @@ const Settings = () => {
                 updateData.contacto_telefono = formatInternationalPhone(updateData.contacto_telefono, prefix);
             }
 
-            await api.put(`/empresas/${empId}`, updateData);
+            await empresasApi.update(empId, updateData);
 
             if (logoFile) {
                 const formData = new FormData();
                 formData.append('file', logoFile);
-                await api.post(`/empresas/upload-logo/${empId}`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await empresasApi.uploadLogo(empId, formData);
             }
 
             appAlert("Datos de la empresa actualizados correctamente.");
 
             // Si es superadmin, actualizar la lista general tambien
             if (user?.rol === 'Superadministrador') {
-                const res = await api.get('/empresas/');
-                setEmpresas(res.data);
+                const data = await empresasApi.getAll();
+                setEmpresas(data);
                 // Actualizar la empresa seleccionada en el estado si es la misma
                 if (selectedEmpresa?.id === empId) {
-                    const updated = res.data.find(e => e.id === empId);
+                    const updated = data.find(e => e.id === empId);
                     if (updated) setSelectedEmpresa(updated);
                 }
             }
 
             fetchData();
         } catch (error) {
-            console.error("Error al actualizar empresa:", error);
+            globalThis.reportClientError?.("Error al actualizar empresa:", error);
             appAlert("Error al actualizar datos de la empresa");
         }
+    };
+
+    const renderCompanyBackupPanel = () => {
+        const role = (user?.rol || '').toLowerCase();
+        if (role !== 'administrador' && role !== 'superadministrador') return null;
+
+        const counts = companyBackupPreflight?.counts || {};
+        const fileReferences = companyBackupPreflight?.file_references || [];
+        const availableInternalArtifacts = (companyBackupInternalArtifacts?.items || []).filter((item) => item.status === 'available');
+        const isRestoreConfirmationReady = (
+            companyBackupRestorePreflight?.restorable
+            && companyBackupRestoreFile
+            && companyBackupRestoreConfirmation === 'CONFIRMO IMPORTACION'
+        );
+        const isInternalRestoreConfirmationReady = (
+            companyBackupInternalRestoreTarget?.id
+            && companyBackupRestoreConfirmation === 'CONFIRMO IMPORTACION'
+        );
+        const visibleCounts = [
+            ['Proyectos', counts.proyectos_total],
+            ['Proyectos papelera', counts.proyectos_papelera],
+            ['Bases', counts.bases_total],
+            ['Bases papelera', counts.bases_papelera],
+            ['Presupuestos', counts.presupuestos],
+            ['APUs', counts.apus],
+            ['Recursos', counts.recursos],
+            ['Comunidad', counts.community_posts],
+            ['Adjuntos', counts.community_attachments],
+            ['Marketplace propios', counts.marketplace_seller_products],
+        ].filter(([, value]) => Number.isFinite(Number(value)));
+
+        return (
+            <div className="rounded-[2rem] border border-amber-100 bg-amber-50/45 p-6" data-settings-company-zone="backup-restore-empresa">
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div>
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-700">Empresa completa 1:1</p>
+                        <h4 className="mt-2 text-lg font-black tracking-tight text-[#1A1A1A]">Backup Empresa / Restore Empresa</h4>
+                        <p className="mt-1 max-w-2xl text-xs font-semibold leading-relaxed text-zinc-500">
+                            Copia y restauracion completas de empresa. Incluye papelera, Comunidad y archivos referenciados.
+                        </p>
+                    </div>
+                    <div className="inline-flex rounded-2xl border border-zinc-200 bg-white p-1" data-settings-backup-tabs="empresa">
+                        {[
+                            ['backup', 'Backup Empresa'],
+                            ['restore', 'Restore Empresa'],
+                        ].map(([zone, label]) => (
+                            <button
+                                key={zone}
+                                type="button"
+                                onClick={() => setCompanyBackupZone(zone)}
+                                className={`min-h-[38px] rounded-xl px-4 text-[10px] font-black uppercase tracking-[0.16em] transition-colors ${companyBackupZone === zone ? 'bg-[#1A1A1A] text-white' : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'}`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {companyBackupZone === 'backup' && (
+                    <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+                        <button
+                            type="button"
+                            onClick={loadCompanyBackupPreflight}
+                            disabled={companyBackupLoading || companyBackupExporting}
+                            className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl border border-amber-200 bg-white px-4 text-[10px] font-black uppercase tracking-[0.16em] text-amber-700 transition-colors hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            <RefreshCw className={`h-4 w-4 ${companyBackupLoading ? 'animate-spin' : ''}`} />
+                            Validar Backup
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleCompanyBackupExport}
+                            disabled={companyBackupLoading || companyBackupExporting || (companyBackupPreflight && !companyBackupPreflight.exportable)}
+                            className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-600 px-4 text-[10px] font-black uppercase tracking-[0.16em] text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {companyBackupExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+                            Backup Empresa
+                        </button>
+                    </div>
+                )}
+
+                {companyBackupError && (
+                    <div className="mt-5 rounded-2xl border border-red-100 bg-white px-4 py-4">
+                        <div className="flex items-start gap-3">
+                            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
+                            <p className="text-xs font-bold leading-relaxed text-red-600">{companyBackupError}</p>
+                        </div>
+                    </div>
+                )}
+
+                {(companyBackupZone === 'backup' || companyBackupZone === 'restore') && (
+                    <div className="mt-5 space-y-4">
+                        {companyBackupZone === 'backup' && companyBackupPreflight && (
+                        <>
+                        <div className={`rounded-2xl border px-4 py-4 ${companyBackupPreflight.exportable ? 'border-emerald-100 bg-white' : 'border-red-100 bg-white'}`}>
+                            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                                <div className="flex items-center gap-3">
+                                    {companyBackupPreflight.exportable ? (
+                                        <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                                    ) : (
+                                        <AlertTriangle className="h-5 w-5 text-red-500" />
+                                    )}
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">Estado preflight</p>
+                                        <p className={`text-sm font-black uppercase tracking-tight ${companyBackupPreflight.exportable ? 'text-emerald-700' : 'text-red-600'}`}>
+                                            {companyBackupPreflight.exportable ? 'Sin bloqueos de integridad' : 'Bloqueado por integridad'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="rounded-xl border border-zinc-100 bg-zinc-50 px-3 py-2 text-[9px] font-black uppercase tracking-[0.16em] text-zinc-500">
+                                    Operacion #{companyBackupPreflight.operation_id}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                            {visibleCounts.map(([label, value]) => (
+                                <div key={label} className="rounded-2xl border border-amber-100 bg-white px-3 py-3">
+                                    <p className="text-[8px] font-black uppercase tracking-[0.16em] text-zinc-400">{label}</p>
+                                    <p className="mt-1 text-lg font-black text-[#1A1A1A]">{value ?? 0}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="rounded-2xl border border-zinc-100 bg-white px-4 py-4">
+                            <div className="flex items-start gap-3">
+                                <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#136191]" />
+                                <div>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">Politica</p>
+                                    <p className="mt-1 text-xs font-semibold leading-relaxed text-zinc-500">
+                                        Las compras Marketplace se preservan; articulos propios fuera del backup se cancelaran/despublicaran con auditoria solo superadministrador en fases posteriores.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        </>
+                        )}
+
+                        {companyBackupZone === 'backup' && fileReferences.length > 0 && (
+                            <div className="rounded-2xl border border-zinc-100 bg-white px-4 py-4">
+                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">Archivos referenciados</p>
+                                <p className="mt-1 text-xs font-semibold text-zinc-500">
+                                    {fileReferences.length} referencia(s) revisada(s); {fileReferences.filter(item => !item.exists).length} bloqueada(s).
+                                </p>
+                            </div>
+                        )}
+
+                        {companyBackupZone === 'backup' && companyBackupLastExport && (
+                            <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
+                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Ultima copia generada</p>
+                                <p className="mt-1 break-all text-xs font-semibold text-emerald-800">
+                                    Operacion #{companyBackupLastExport.operationId || 'registrada'} · {companyBackupLastExport.filename}
+                                </p>
+                                {companyBackupLastExport.backupHash && (
+                                    <p className="mt-1 break-all text-[10px] font-bold text-emerald-700">
+                                        Hash: {companyBackupLastExport.backupHash}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        {companyBackupZone === 'restore' && (
+                        <div className="rounded-2xl border border-sky-100 bg-white px-4 py-4">
+                            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                                <div className="flex-1">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-700">Validacion Restore</p>
+                                    <p className="mt-1 text-xs font-semibold leading-relaxed text-zinc-500">
+                                        Valida formato, cifrado, hash, misma empresa, Comunidad, papelera y Marketplace. No restaura ni borra datos.
+                                    </p>
+                                    <input
+                                        type="file"
+                                        accept=".giproybackup"
+                                        onChange={(event) => {
+                                            const file = event.target.files?.[0] || null;
+                                            setCompanyBackupRestoreFile(file);
+                                            setCompanyBackupRestorePreflight(null);
+                                            setCompanyBackupRestoreResult(null);
+                                            setCompanyBackupSelectedArtifactId('');
+                                        }}
+                                        className="mt-3 block w-full text-xs font-semibold text-zinc-600 file:mr-4 file:rounded-xl file:border-0 file:bg-sky-50 file:px-4 file:py-2 file:text-[10px] file:font-black file:uppercase file:tracking-[0.14em] file:text-sky-700"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleCompanyBackupRestorePreflight}
+                                    disabled={companyBackupRestoreLoading || !companyBackupRestoreFile}
+                                    className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-700 px-4 text-[10px] font-black uppercase tracking-[0.16em] text-white transition-colors hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {companyBackupRestoreLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                                    Validar copia
+                                </button>
+                            </div>
+                        </div>
+                        )}
+
+                        {companyBackupZone === 'restore' && companyBackupRestorePreflight && (
+                            <div className={`rounded-2xl border px-4 py-4 ${companyBackupRestorePreflight.restorable ? 'border-emerald-100 bg-emerald-50' : 'border-red-100 bg-red-50'}`}>
+                                <div className="flex items-start gap-3">
+                                    {companyBackupRestorePreflight.restorable ? (
+                                        <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-700" />
+                                    ) : (
+                                        <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+                                    )}
+                                    <div className="min-w-0">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">
+                                            {companyBackupRestorePreflight.restorable ? 'Copia valida para esta empresa' : 'Copia bloqueada'}
+                                        </p>
+                                        <p className="mt-1 text-xs font-semibold leading-relaxed text-zinc-600">
+                                            Empresa copia: {companyBackupRestorePreflight.backup_empresa?.nombre || 'No identificada'} · Fecha: {companyBackupRestorePreflight.backup_created_at || 'Sin fecha'}
+                                        </p>
+                                        <p className="mt-1 break-all text-[10px] font-bold text-zinc-500">
+                                            Hash: {companyBackupRestorePreflight.backup_hash || 'No disponible'}
+                                        </p>
+                                        <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
+                                            <div className="rounded-xl bg-white/80 px-3 py-2">
+                                                <p className="text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">Proyectos copia</p>
+                                                <p className="text-base font-black text-zinc-900">{companyBackupRestorePreflight.backup_counts?.proyectos_total ?? 0}</p>
+                                            </div>
+                                            <div className="rounded-xl bg-white/80 px-3 py-2">
+                                                <p className="text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">Proyectos actuales</p>
+                                                <p className="text-base font-black text-zinc-900">{companyBackupRestorePreflight.current_counts?.proyectos_total ?? 0}</p>
+                                            </div>
+                                            <div className="rounded-xl bg-white/80 px-3 py-2">
+                                                <p className="text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">Comunidad copia</p>
+                                                <p className="text-base font-black text-zinc-900">{companyBackupRestorePreflight.backup_counts?.community_posts ?? 0}</p>
+                                            </div>
+                                            <div className="rounded-xl bg-white/80 px-3 py-2">
+                                                <p className="text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">Archivos</p>
+                                                <p className="text-base font-black text-zinc-900">{companyBackupRestorePreflight.file_count ?? 0}</p>
+                                            </div>
+                                        </div>
+                                        {companyBackupRestorePreflight.blockers?.length > 0 && (
+                                            <ul className="mt-3 space-y-1">
+                                                {companyBackupRestorePreflight.blockers.map((blocker) => (
+                                                    <li key={blocker} className="text-xs font-bold text-red-700">{blocker}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                        <p className="mt-3 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
+                                            Restore Empresa: bloquea copias de otra empresa y crea copia automatica interna al confirmar.
+                                        </p>
+                                        {isSuperAdmin && companyBackupRestorePreflight.restorable && (
+                                            <div className="mt-4 space-y-4">
+                                                <div className="rounded-2xl border border-amber-200 bg-white px-4 py-4">
+                                                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                                        <div>
+                                                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-700">Copia automatica interna</p>
+                                                            <p className="mt-1 text-xs font-semibold leading-relaxed text-zinc-500">
+                                                                Se crea automaticamente al confirmar Restore Empresa. No requiere accion previa del usuario.
+                                                            </p>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleCompanyBackupPrepareInternalSafety}
+                                                            disabled={companyBackupPreparingInternal}
+                                                            className="hidden"
+                                                        >
+                                                            {companyBackupPreparingInternal ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
+                                                            Automatico al confirmar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="rounded-2xl border border-red-200 bg-white px-4 py-4">
+                                                    <div>
+                                                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-red-700">Confirmacion final</p>
+                                                        <p className="mt-1 text-xs font-semibold leading-relaxed text-zinc-500">
+                                                            Esta accion borra los datos restaurables actuales y los reemplaza por la copia. Marketplace conserva compras; ventas propias no presentes en la copia se cancelan y quedan solo para auditoria/superadministrador.
+                                                        </p>
+                                                    </div>
+                                                    <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                                                        <label className="hidden">
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-500">Copia interna previa</span>
+                                                            <select
+                                                                value={companyBackupSelectedArtifactId}
+                                                                onChange={(event) => setCompanyBackupSelectedArtifactId(event.target.value)}
+                                                                className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-bold text-zinc-700 outline-none focus:border-red-400"
+                                                            >
+                                                                <option value="">Seleccione respaldo interno</option>
+                                                                {availableInternalArtifacts.map((item) => (
+                                                                    <option key={item.id} value={item.id}>
+                                                                        #{item.id} · {formatBackupDateTime(item.created_at)} · {item.created_by_email || 'sin usuario'} · expira {formatBackupDateTime(item.expires_at)}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </label>
+                                                        <label className="hidden">
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-500">Confirmacion retirada</span>
+                                                            <input
+                                                                value=""
+                                                                readOnly
+                                                                placeholder=""
+                                                                className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-xs font-bold text-zinc-700 outline-none focus:border-red-400"
+                                                            />
+                                                        </label>
+                                                        <label className="hidden">
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-500">Nombre exacto de empresa</span>
+                                                            <input
+                                                                value=""
+                                                                readOnly
+                                                                placeholder=""
+                                                                className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-xs font-bold text-zinc-700 outline-none focus:border-red-400"
+                                                            />
+                                                        </label>
+                                                        <label className="hidden">
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-500">Email autenticado</span>
+                                                            <input
+                                                                value=""
+                                                                readOnly
+                                                                placeholder=""
+                                                                className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-xs font-bold text-zinc-700 outline-none focus:border-red-400"
+                                                            />
+                                                        </label>
+                                                        <label className="block lg:col-span-2">
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-500">Escribe CONFIRMO IMPORTACION</span>
+                                                            <input
+                                                                value={companyBackupRestoreConfirmation}
+                                                                onChange={(event) => setCompanyBackupRestoreConfirmation(event.target.value)}
+                                                                placeholder="CONFIRMO IMPORTACION"
+                                                                className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-xs font-bold text-zinc-700 outline-none focus:border-red-400"
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className="mt-5 flex justify-end">
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleCompanyBackupExecuteRestore}
+                                                            disabled={companyBackupRestoring || !isRestoreConfirmationReady}
+                                                            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-red-700 bg-red-700 px-5 text-[10px] font-black uppercase tracking-[0.18em] text-white transition-colors hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-40"
+                                                        >
+                                                            {companyBackupRestoring ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
+                                                            Ejecutar Restore Empresa
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {companyBackupRestoreResult && (
+                            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
+                                <div className="flex items-start gap-3">
+                                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-700" />
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">
+                                            Restauracion completada
+                                        </p>
+                                        <p className="mt-1 text-xs font-semibold leading-relaxed text-zinc-600">
+                                            Operacion #{companyBackupRestoreResult.operation_id} · Hash {companyBackupRestoreResult.backup_hash}
+                                        </p>
+                                        <p className="mt-1 text-xs font-semibold leading-relaxed text-zinc-600">
+                                            Copia interna #{companyBackupRestoreResult.internal_safety_backup?.id} marcada como restaurada; limpieza programada para {formatBackupDateTime(companyBackupRestoreResult.internal_safety_backup?.cleanup_after)}.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {isSuperAdmin && (
+                            <div className="rounded-2xl border border-zinc-100 bg-white px-4 py-4">
+                                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Copias automaticas internas</p>
+                                        <p className="mt-1 text-xs font-semibold leading-relaxed text-zinc-500">
+                                            Solo superadministrador. Vida util 30 dias; si se restauran, quedan programadas para desaparecer a la semana.
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={loadCompanyBackupInternalArtifacts}
+                                        disabled={companyBackupInternalLoading}
+                                        className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-700 transition-colors hover:border-[#F39200] hover:text-[#F39200] disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <RefreshCw className={`h-4 w-4 ${companyBackupInternalLoading ? 'animate-spin' : ''}`} />
+                                        Ver internas
+                                    </button>
+                                </div>
+
+                                {companyBackupInternalArtifacts?.items?.length > 0 ? (
+                                    <div className="mt-4 space-y-2">
+                                        {companyBackupInternalArtifacts.items.map((item) => (
+                                            <div key={item.id} className="rounded-2xl border border-zinc-100 bg-zinc-50 px-4 py-3">
+                                                <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                                                    <div className="min-w-0">
+                                                        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-600">
+                                                            Copia interna #{item.id} · {item.status}
+                                                        </p>
+                                                        <p className="mt-1 text-xs font-semibold text-zinc-500">
+                                                            Fecha: {formatBackupDateTime(item.created_at)} · Usuario: {item.created_by_email || 'No registrado'}
+                                                        </p>
+                                                        <p className="mt-1 text-xs font-semibold text-zinc-500">
+                                                            Expira: {formatBackupDateTime(item.expires_at)} · Tamano: {item.size_bytes || 0} bytes
+                                                        </p>
+                                                        <p className="mt-1 break-all text-[10px] font-bold text-zinc-400">
+                                                            Hash: {item.backup_hash}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="grid grid-cols-3 gap-2 text-center">
+                                                            <div className="rounded-xl bg-white px-3 py-2">
+                                                                <p className="text-[8px] font-black uppercase tracking-[0.12em] text-zinc-400">Proyectos</p>
+                                                                <p className="text-sm font-black text-zinc-900">{item.counts?.proyectos_total ?? 0}</p>
+                                                            </div>
+                                                            <div className="rounded-xl bg-white px-3 py-2">
+                                                                <p className="text-[8px] font-black uppercase tracking-[0.12em] text-zinc-400">Comunidad</p>
+                                                                <p className="text-sm font-black text-zinc-900">{item.counts?.community_posts ?? 0}</p>
+                                                            </div>
+                                                            <div className="rounded-xl bg-white px-3 py-2">
+                                                                <p className="text-[8px] font-black uppercase tracking-[0.12em] text-zinc-400">Archivos</p>
+                                                                <p className="text-sm font-black text-zinc-900">{item.manifest_summary?.file_count ?? 0}</p>
+                                                            </div>
+                                                        </div>
+                                                        {item.status === 'available' && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setCompanyBackupInternalRestoreTarget(item);
+                                                                    setCompanyBackupRestoreResult(null);
+                                                                    setCompanyBackupRestoreConfirmations({
+                                                                        impact: '',
+                                                                        companyName: '',
+                                                                        userEmail: '',
+                                                                        phrase: '',
+                                                                    });
+                                                                }}
+                                                                className="inline-flex min-h-[36px] items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-3 text-[9px] font-black uppercase tracking-[0.16em] text-red-700 transition-colors hover:bg-red-50"
+                                                            >
+                                                                <AlertTriangle className="h-3.5 w-3.5" />
+                                                                Restaurar interna
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="mt-4 text-xs font-semibold text-zinc-400">
+                                        Sin copias automaticas internas cargadas para la empresa seleccionada.
+                                    </p>
+                                )}
+
+                                {companyBackupInternalRestoreTarget && (
+                                    <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-4">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-red-700">
+                                            Restaurar copia interna #{companyBackupInternalRestoreTarget.id}
+                                        </p>
+                                        <p className="mt-1 text-xs font-semibold leading-relaxed text-zinc-600">
+                                            Origen: {formatBackupDateTime(companyBackupInternalRestoreTarget.created_at)} · Usuario: {companyBackupInternalRestoreTarget.created_by_email || 'No registrado'} · Hash {companyBackupInternalRestoreTarget.backup_hash}
+                                        </p>
+                                        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                                            <input
+                                                value=""
+                                                readOnly
+                                                placeholder=""
+                                                className="hidden"
+                                            />
+                                            <input
+                                                value=""
+                                                readOnly
+                                                placeholder=""
+                                                className="hidden"
+                                            />
+                                            <input
+                                                value=""
+                                                readOnly
+                                                placeholder=""
+                                                className="hidden"
+                                            />
+                                            <input
+                                                value={companyBackupRestoreConfirmation}
+                                                onChange={(event) => setCompanyBackupRestoreConfirmation(event.target.value)}
+                                                placeholder="CONFIRMO IMPORTACION"
+                                                className="rounded-xl border border-red-100 bg-white px-3 py-2 text-xs font-bold text-zinc-700 outline-none focus:border-red-400"
+                                            />
+                                        </div>
+                                        <div className="mt-5 flex items-center justify-between gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => setCompanyBackupInternalRestoreTarget(null)}
+                                                className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-600"
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleCompanyBackupExecuteInternalRestore}
+                                                disabled={companyBackupRestoring || !isInternalRestoreConfirmationReady}
+                                                className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl border border-red-700 bg-red-700 px-5 text-[10px] font-black uppercase tracking-[0.18em] text-white transition-colors hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-40"
+                                            >
+                                                {companyBackupRestoring ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
+                                                Ejecutar restauracion interna
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="mt-4 rounded-2xl border border-zinc-100 bg-zinc-50 px-4 py-4">
+                                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Intentos bloqueados entre empresas</p>
+                                            <p className="mt-1 text-xs font-semibold leading-relaxed text-zinc-500">
+                                                Solo superadministrador. Agrupa intentos de Restore Empresa con copias de otra empresa.
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={loadCompanyBackupCrossCompanyAttempts}
+                                            disabled={companyBackupCrossCompanyLoading}
+                                            className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-700 transition-colors hover:border-red-300 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <RefreshCw className={`h-4 w-4 ${companyBackupCrossCompanyLoading ? 'animate-spin' : ''}`} />
+                                            Ver intentos
+                                        </button>
+                                    </div>
+
+                                    {companyBackupCrossCompanyAttempts?.items?.length > 0 ? (
+                                        <div className="mt-4 space-y-2">
+                                            {companyBackupCrossCompanyAttempts.items.map((item) => (
+                                                <div key={`${item.attempted_empresa?.empresa_id || 'x'}-${item.backup_empresa?.empresa_id || 'x'}-${item.last_backup_hash || 'hash'}`} className="rounded-2xl border border-red-100 bg-white px-4 py-3">
+                                                    <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs font-black text-zinc-900">
+                                                                {item.attempted_empresa?.nombre || 'Empresa solicitante no identificada'} intento restaurar {item.backup_empresa?.nombre || 'empresa de copia no identificada'}
+                                                            </p>
+                                                            <p className="mt-1 break-all text-[10px] font-bold text-zinc-500">
+                                                                Usuario: {item.last_requested_by_email || 'No registrado'} · Ultimo intento: {formatBackupDateTime(item.last_attempt_at)}
+                                                            </p>
+                                                        </div>
+                                                        <span className="rounded-full border border-red-100 bg-red-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-red-700">
+                                                            {item.attempts} intento(s)
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="mt-4 text-xs font-semibold text-zinc-400">
+                                            {companyBackupCrossCompanyAttempts ? 'Sin intentos bloqueados registrados.' : 'Carga la auditoria para revisar intentos.'}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
     };
 
     const renderMiEmpresa = () => (
@@ -1126,7 +2153,27 @@ const Settings = () => {
                 </div>
 
                 <form onSubmit={handleUpdateMiEmpresa} className="space-y-8">
-                    <div className="flex items-center gap-6 mb-8 bg-zinc-50/50 p-6 rounded-3xl border border-zinc-100">
+                    <div className="flex flex-wrap gap-2 rounded-2xl border border-zinc-200 bg-zinc-50 p-2" data-settings-company-tabs="mi-empresa">
+                        {COMPANY_SETTINGS_ZONES.map((zone) => {
+                            const Icon = zone.icon;
+                            const active = miEmpresaZone === zone.id;
+                            return (
+                                <button
+                                    key={zone.id}
+                                    type="button"
+                                    onClick={() => setMiEmpresaZone(zone.id)}
+                                    className={`inline-flex min-h-[42px] items-center gap-2 rounded-xl px-4 text-[10px] font-black uppercase tracking-[0.16em] transition-all ${active ? 'bg-[#1A1A1A] text-white shadow-sm' : 'text-zinc-500 hover:bg-white hover:text-[#1A1A1A]'}`}
+                                >
+                                    <Icon className="h-4 w-4" />
+                                    {zone.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {miEmpresaZone === 'datos' && (
+                    <>
+                    <div className="flex items-center gap-6 mb-8 bg-zinc-50/50 p-6 rounded-3xl border border-zinc-100" data-settings-company-zone="datos-empresa">
                         <div className="w-24 h-24 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center overflow-hidden relative group shadow-sm transition-all hover:border-[#F39200]/30">
                             {logoPreview || (miEmpresa?.logo_url ? resolveMediaUrl(miEmpresa.logo_url) : null) ? (
                                 <img src={logoPreview || resolveMediaUrl(miEmpresa.logo_url)} alt="Logo" className="w-full h-full object-contain p-2" />
@@ -1148,8 +2195,14 @@ const Settings = () => {
                         <div className="space-y-6">
                             <h3 className="text-[10px] font-black text-[#F39200] uppercase tracking-[0.2em] border-b border-orange-100 pb-2">Datos Identificativos</h3>
                             <div className="space-y-2">
-                                <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">Nombre Comercial</Label>
-                                <Input required value={miEmpresa?.nombre || ''} onChange={e => setMiEmpresa({ ...miEmpresa, nombre: e.target.value })} className="h-12 rounded-xl bg-zinc-50/30 border-zinc-200" />
+                                <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">Nombre Legal / Comercial</Label>
+                                <Input required value={miEmpresa?.nombre || ''} disabled className="h-12 rounded-xl border-zinc-200 bg-zinc-100 text-zinc-500 cursor-not-allowed" />
+                                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight ml-1">Sincronizado automáticamente desde la fuente fiscal oficial.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">Alias de Empresa</Label>
+                                <Input value={miEmpresa?.alias || ''} onChange={e => setMiEmpresa({ ...miEmpresa, alias: e.target.value })} className="h-12 rounded-xl bg-zinc-50/30 border-zinc-200" />
+                                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight ml-1">Si existe, se usará como nombre visible en menús y selectores.</p>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
@@ -1158,8 +2211,8 @@ const Settings = () => {
                                         required
                                         value={miEmpresa?.ruc || ''}
                                         onChange={e => setMiEmpresa({ ...miEmpresa, ruc: e.target.value })}
-                                        disabled={miEmpresa?.ruc && user?.rol !== 'Superadministrador'}
-                                        className={`h-12 rounded-xl border-zinc-200 ${miEmpresa?.ruc && user?.rol !== 'Superadministrador' ? 'bg-zinc-100 text-zinc-500 cursor-not-allowed' : 'bg-zinc-50/30'}`}
+                                        disabled={Boolean(miEmpresa?.ruc)}
+                                        className="h-12 rounded-xl border-zinc-200 bg-zinc-100 text-zinc-500 cursor-not-allowed"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -1309,87 +2362,220 @@ const Settings = () => {
                             </div>
                         </div>
                     </div>
+                    </>
+                    )}
 
                     {/* Sección de Licencia y Uso (Nueva) */}
-                    {licenseInfo && (
-                        <div className="mt-12 pt-8 border-t border-zinc-100">
-                            <h3 className="text-[10px] font-black text-[#F39200] uppercase tracking-[0.2em] mb-6">Licencia y Cuotas de Uso</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="p-6 bg-zinc-50 rounded-[2rem] border border-zinc-200">
-                                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Plan contratado</p>
-                                    <p className="text-xl font-black uppercase text-[#1A1A1A]">{licenseInfo.licencia_actual}</p>
-                                    <span className={`mt-3 inline-flex rounded-full border px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] ${getLicenseStatusTone(licenseInfo)}`}>
+                    {miEmpresaZone === 'licencia' && (
+                        <div className="mt-1 space-y-4" data-settings-company-zone="licencia-conecta" data-settings-license-conecta-compact="true">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#F39200]">Licencia y SaaS</p>
+                                    <h3 className="mt-1 text-sm font-black uppercase tracking-tight text-[#1A1A1A]">Estado comercial</h3>
+                                </div>
+                                {licenseInfo ? (
+                                    <span className={`inline-flex min-h-8 items-center rounded-full border px-3 text-[9px] font-black uppercase tracking-[0.14em] ${getLicenseStatusTone(licenseInfo)}`}>
                                         {getLicenseStatusLabel(licenseInfo)}
                                     </span>
+                                ) : null}
+                            </div>
+                            {!licenseInfo ? (
+                                <div className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50 px-4 py-3">
+                                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-500">Licencia no disponible</p>
+                                </div>
+                            ) : (
+                            <>
+                            <div className="grid grid-cols-2 gap-3 xl:grid-cols-5" data-settings-license-summary="compact">
+                                <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5">
+                                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Plan contratado</p>
+                                    <p className="truncate text-sm font-black uppercase text-[#1A1A1A]">{licenseInfo.licencia_actual}</p>
                                     {licenseInfo.next_license ? (
                                         <p className="mt-2 text-[9px] font-bold text-blue-600 uppercase tracking-widest">
                                             Sigue: {licenseInfo.next_license.nombre}
                                         </p>
                                     ) : null}
                                 </div>
-                                <div className="p-6 bg-zinc-50 rounded-[2rem] border border-zinc-200">
+                                <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5">
                                     <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">{licenseInfo.access_mode === 'readonly' ? 'Lectura permitida hasta' : 'Vencimiento'}</p>
-                                    <p className="text-lg font-black uppercase text-[#1A1A1A]">
+                                    <p className="text-sm font-black uppercase text-[#1A1A1A]">
                                         {licenseInfo.license_end_date ? new Date(licenseInfo.license_end_date).toLocaleDateString() : 'Indefinido'}
                                     </p>
                                     <p className="text-[9px] font-bold text-zinc-500 mt-1 uppercase tracking-widest">
                                         {licenseInfo.grace_days_remaining > 0 ? `${licenseInfo.grace_days_remaining} días de gracia restantes` : (licenseInfo.access_mode === 'readonly' ? 'Modo solo lectura' : 'Renovación / cambio de plan')}
                                     </p>
                                 </div>
-                                <div className="p-6 bg-zinc-50 rounded-[2rem] border border-zinc-200">
+                                <div className="col-span-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 xl:col-span-1">
                                     <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Uso de Almacenamiento</p>
-                                    <p className="text-lg font-black uppercase text-[#1A1A1A]">
-                                        {licenseInfo.usados.almacenamiento_gb.toFixed(2)} / {licenseInfo.limites.almacenamiento_gb === -1 ? '∞' : licenseInfo.limites.almacenamiento_gb} GB
+                                    <p className="text-[11px] font-black uppercase text-[#1A1A1A]">
+                                        {Number(licenseInfo.usados?.almacenamiento_gb || 0).toFixed(2)} / {licenseInfo.limites?.almacenamiento_gb === -1 ? '∞' : (licenseInfo.limites?.almacenamiento_gb ?? 0)} GB
                                     </p>
                                     <div className="w-full h-1.5 bg-zinc-200 rounded-full mt-2 overflow-hidden">
                                         <div
                                             className={`h-full ${
-                                                licenseInfo.limites.almacenamiento_gb === -1
+                                                licenseInfo.limites?.almacenamiento_gb === -1
                                                     ? 'bg-emerald-500'
                                                     : (() => {
-                                                        const ratio = licenseInfo.limites.almacenamiento_gb > 0
-                                                            ? licenseInfo.usados.almacenamiento_gb / licenseInfo.limites.almacenamiento_gb
+                                                        const storageLimit = Number(licenseInfo.limites?.almacenamiento_gb || 0);
+                                                        const storageUsed = Number(licenseInfo.usados?.almacenamiento_gb || 0);
+                                                        const ratio = storageLimit > 0
+                                                            ? storageUsed / storageLimit
                                                             : 0;
                                                         if (ratio >= 0.95) return 'bg-red-500';
                                                         if (ratio >= 0.75) return 'bg-orange-400';
                                                         return 'bg-emerald-500';
                                                     })()
                                             }`}
-                                            style={{ width: `${licenseInfo.limites.almacenamiento_gb > 0 ? (licenseInfo.usados.almacenamiento_gb / licenseInfo.limites.almacenamiento_gb * 100) : 0}%` }}
+                                            style={{ width: `${Number(licenseInfo.limites?.almacenamiento_gb || 0) > 0 ? (Number(licenseInfo.usados?.almacenamiento_gb || 0) / Number(licenseInfo.limites?.almacenamiento_gb || 0) * 100) : 0}%` }}
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             {licenseInfo.license_banner_message ? (
-                                <div className={`mt-6 rounded-[2rem] border px-6 py-5 ${getLicenseStatusTone(licenseInfo)}`}>
+                                <div className={`rounded-xl border px-4 py-3 ${getLicenseStatusTone(licenseInfo)}`}>
                                     <p className="text-[10px] font-black uppercase tracking-[0.18em]">Estado operativo</p>
-                                    <p className="mt-2 text-sm font-semibold leading-relaxed">
+                                    <p className="mt-1 text-xs font-semibold leading-relaxed">
                                         {licenseInfo.license_banner_message}
                                     </p>
                                 </div>
                             ) : null}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                                <div className="p-6 bg-zinc-50 rounded-[2rem] border border-zinc-200 flex items-center justify-between">
+                            <div className={`rounded-[1.25rem] border px-4 py-3 ${licenseRequiresAttention ? 'border-orange-200 bg-orange-50' : 'border-blue-100 bg-blue-50/70'}`} data-settings-license-actions="compact">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
                                     <div>
-                                        <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Proyectos activos</p>
-                                        <p className="text-xl font-black text-[#1A1A1A]">{licenseInfo.usados.proyectos} / {licenseInfo.limites.proyectos === -1 ? '∞' : licenseInfo.limites.proyectos}</p>
+                                        <p className={`text-[9px] font-black uppercase tracking-[0.14em] ${licenseRequiresAttention ? 'text-orange-700' : 'text-[#136191]'}`}>
+                                            {licenseRequiresAttention ? 'Renovacion recomendada' : 'Gestion del plan'}
+                                        </p>
+                                        <p className="mt-1 text-[11px] font-semibold text-zinc-600">
+                                            Marketplace SaaS oficial
+                                        </p>
                                     </div>
-                                    <div className="w-12 h-12 bg-white rounded-2xl border border-zinc-100 flex items-center justify-center">
-                                        <Briefcase className="w-6 h-6 text-zinc-400" />
-                                    </div>
-                                </div>
-                                <div className="p-6 bg-zinc-50 rounded-[2rem] border border-zinc-200 flex items-center justify-between">
-                                    <div>
-                                        <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Usuarios registrados</p>
-                                        <p className="text-xl font-black text-[#1A1A1A]">{licenseInfo.usados.usuarios} / {licenseInfo.limites.usuarios === -1 ? '∞' : licenseInfo.limites.usuarios}</p>
-                                    </div>
-                                    <div className="w-12 h-12 bg-white rounded-2xl border border-zinc-100 flex items-center justify-center">
-                                        <Users className="w-6 h-6 text-zinc-400" />
+                                    <div className="flex items-center gap-2">
+                                        <ProjectSectionIconButton
+                                            icon={RefreshCw}
+                                            label="Renovar plan actual"
+                                            onClick={() => navigate(buildMarketplaceSaasUrl({ code: currentLicenseMonthlyCode, intent: 'renewal' }))}
+                                            className="hover:border-[#F39200]/30 hover:bg-orange-50 hover:text-[#F39200]"
+                                        />
+                                        <ProjectSectionIconButton
+                                            icon={ShieldCheck}
+                                            label="Evaluar cambio de plan"
+                                            onClick={() => navigate(buildMarketplaceSaasUrl({ code: suggestedUpgradeCode, intent: 'plan_change' }))}
+                                            className="hover:border-[#136191]/25 hover:bg-blue-50 hover:text-[#136191]"
+                                        />
                                     </div>
                                 </div>
                             </div>
+
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5">
+                                    <div>
+                                        <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Proyectos activos</p>
+                                        <p className="text-sm font-black text-[#1A1A1A]">{licenseInfo.usados.proyectos} / {licenseInfo.limites.proyectos === -1 ? '∞' : licenseInfo.limites.proyectos}</p>
+                                    </div>
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-100 bg-white">
+                                        <Briefcase className="h-4 w-4 text-zinc-400" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5">
+                                    <div>
+                                        <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Usuarios registrados</p>
+                                        <p className="text-sm font-black text-[#1A1A1A]">{licenseInfo.usados.usuarios} / {licenseInfo.limites.usuarios === -1 ? '∞' : licenseInfo.limites.usuarios}</p>
+                                    </div>
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-100 bg-white">
+                                        <Users className="h-4 w-4 text-zinc-400" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="rounded-[1.25rem] border border-blue-100 bg-blue-50/40 p-4" data-settings-saas-rights="compact">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#136191]">SaaS</p>
+                                        <h4 className="mt-1 text-sm font-black uppercase tracking-tight text-[#1A1A1A]">Derechos efectivos</h4>
+                                    </div>
+                                    <ProjectSectionIconButton
+                                        icon={Eye}
+                                        label="Ver planes en Marketplace"
+                                        onClick={() => navigate('/marketplace?saas=1')}
+                                        className="hover:border-[#136191]/25 hover:bg-blue-50 hover:text-[#136191]"
+                                    />
+                                </div>
+
+                                <div className="mt-3 grid grid-cols-3 gap-2">
+                                    <div className="rounded-xl border border-white bg-white/90 px-3 py-2">
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Productos adicionales</p>
+                                        <p className="mt-1 text-sm font-black text-[#1A1A1A]">{saasProducts.length}</p>
+                                    </div>
+                                    <div className="rounded-xl border border-white bg-white/90 px-3 py-2">
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Derechos efectivos</p>
+                                        <p className="mt-1 text-sm font-black text-[#1A1A1A]">{effectiveRightCodes.length}</p>
+                                    </div>
+                                    <div className="rounded-xl border border-white bg-white/90 px-3 py-2">
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Capacidades habilitadas</p>
+                                        <p className="mt-1 text-sm font-black text-[#1A1A1A]">{enabledCapabilities.length}</p>
+                                    </div>
+                                </div>
+
+                                {saasProducts.length > 0 ? (
+                                    <div className="mt-3 divide-y divide-blue-100 overflow-hidden rounded-xl border border-blue-100 bg-white">
+                                        {saasProducts.slice(0, 4).map((product, index) => (
+                                            <div key={`${product.order_item_id || product.product_id || product.commercial_code || 'saas-product'}-${index}`} className="px-3 py-2.5">
+                                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-xs font-black text-[#1A1A1A]">{product.title || formatCommercialCode(product.commercial_code)}</p>
+                                                        <p className="mt-0.5 text-[8px] font-black uppercase tracking-[0.13em] text-zinc-400">
+                                                            {formatCommercialCode(product.right_code || product.commercial_code)}
+                                                        </p>
+                                                    </div>
+                                                    <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-emerald-700">
+                                                        {product.status || 'active'}
+                                                    </span>
+                                                </div>
+                                                <p className="mt-1 text-[8px] font-bold uppercase tracking-[0.12em] text-zinc-500">
+                                                    Vigencia: {formatSaasDate(product.starts_at)} - {formatSaasDate(product.ends_at)}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="mt-3 rounded-xl border border-dashed border-blue-200 bg-white/70 px-3 py-3">
+                                        <p className="text-xs font-bold text-zinc-600">
+                                            Sin productos SaaS adicionales activos.
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                                    <div className="rounded-xl border border-white bg-white/90 p-3">
+                                        <p className="text-[8px] font-black uppercase tracking-[0.14em] text-emerald-700">Habilitado</p>
+                                        <div className="mt-2 flex flex-wrap gap-1.5">
+                                            {enabledCapabilities.length > 0 ? enabledCapabilities.map(([key]) => (
+                                                <span key={key} className="rounded-full bg-emerald-50 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.1em] text-emerald-700">
+                                                    {COMMERCIAL_CAPABILITY_LABELS[key]}
+                                                </span>
+                                            )) : (
+                                                <span className="text-xs font-semibold text-zinc-500">Sin capacidades habilitadas.</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="rounded-xl border border-white bg-white/90 p-3">
+                                        <p className="text-[8px] font-black uppercase tracking-[0.14em] text-zinc-500">No incluido</p>
+                                        <div className="mt-2 flex flex-wrap gap-1.5">
+                                            {disabledCapabilities.length > 0 ? disabledCapabilities.map(([key]) => (
+                                                <span key={key} className="rounded-full bg-zinc-100 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.1em] text-zinc-500">
+                                                    {COMMERCIAL_CAPABILITY_LABELS[key]}
+                                                </span>
+                                            )) : (
+                                                <span className="text-xs font-semibold text-zinc-500">Sin restricciones reportadas.</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            </>
+                            )}
                         </div>
                     )}
 
@@ -1404,15 +2590,15 @@ const Settings = () => {
     );
 
     const renderProyectoConfig = () => (
-        <Card className="bg-white border-zinc-100 shadow-sm max-w-5xl mx-auto md:mx-0">
+        <Card className="bg-white border-zinc-100 shadow-sm max-w-5xl mx-auto md:mx-0" data-settings-company-zone="codigos-proyecto">
             <CardContent className="p-8">
                 <div className="flex items-center gap-4 mb-8">
                     <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
                         <Briefcase className="w-6 h-6" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black uppercase tracking-tight">Configuración de Proyecto</h2>
-                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Reglas de Generación de Códigos</p>
+                        <h2 className="text-xl font-black uppercase tracking-tight">Códigos Proyecto</h2>
+                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Prefijo, periodo y secuencia</p>
                     </div>
                 </div>
 
@@ -1519,15 +2705,15 @@ const Settings = () => {
     );
 
     const renderPlantillasConfig = () => (
-        <Card className="bg-white border-zinc-100 shadow-sm max-w-5xl mx-auto md:mx-0">
+        <Card className="bg-white border-zinc-100 shadow-sm max-w-5xl mx-auto md:mx-0" data-settings-company-zone="plantillas-informes">
             <CardContent className="p-8">
                 <div className="flex items-center gap-4 mb-8">
                     <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600">
                         <FileText className="w-6 h-6" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black uppercase tracking-tight">Plantillas de Informes</h2>
-                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Configuración Predeterminada de Reportes</p>
+                        <h2 className="text-xl font-black uppercase tracking-tight">Plantillas</h2>
+                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Reportes y salida documental</p>
                     </div>
                 </div>
 
@@ -1599,9 +2785,9 @@ const Settings = () => {
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <SettingsIcon className="w-5 h-5 text-[#F39200]" />
-                                <h1 className="text-xl font-black uppercase tracking-tight">Ajustes <span className="text-[#F39200]">Globales</span></h1>
+                                <h1 className="text-xl font-black uppercase tracking-tight">Settings <span className="text-[#F39200]">Empresa</span></h1>
                             </div>
-                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Configuración de Entorno y Permisos</p>
+                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Empresa activa, permisos y datos operativos</p>
                         </div>
                     </div>
                 </div>
@@ -1609,13 +2795,21 @@ const Settings = () => {
 
             <main className="flex-1 overflow-y-auto p-12 custom-scrollbar">
                 <div className="flex gap-12">
-                    <aside className="w-64 space-y-2">
+                    <aside className="sticky top-8 h-fit w-64 space-y-2">
                         {((user?.rol || '').toLowerCase() === 'administrador' || isSuperAdmin) && (
                             <button
                                 onClick={() => setActiveTab('mi-empresa')}
                                 className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all ${activeTab === 'mi-empresa' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-zinc-400 hover:bg-white hover:text-[#1A1A1A]'}`}
                             >
                                 <Building2 className="w-4 h-4" /> Mi Empresa
+                            </button>
+                        )}
+                        {((user?.rol || '').toLowerCase() === 'administrador' || isSuperAdmin) && (
+                            <button
+                                onClick={() => setActiveTab('backup-empresa')}
+                                className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all ${activeTab === 'backup-empresa' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-zinc-400 hover:bg-white hover:text-[#1A1A1A]'}`}
+                            >
+                                <ShieldCheck className="w-4 h-4" /> Backup Empresa
                             </button>
                         )}
                         {(user?.rol || '').toLowerCase() !== 'usuario' && (
@@ -1626,32 +2820,24 @@ const Settings = () => {
                                 <Users className="w-4 h-4" /> Gestión de Usuarios
                             </button>
                         )}
-                        {isSuperAdmin && (
-                            <button
-                                onClick={() => setActiveTab('superadmins')}
-                                className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all ${activeTab === 'superadmins' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-zinc-400 hover:bg-white hover:text-[#1A1A1A]'}`}
-                            >
-                                <ShieldIcon className="w-4 h-4" /> Ajuste SaaS
-                            </button>
-                        )}
                         <button
                             onClick={() => setActiveTab('plantillas')}
                             className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all ${activeTab === 'plantillas' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-zinc-400 hover:bg-white hover:text-[#1A1A1A]'}`}
                         >
-                            <FileText className="w-4 h-4" /> Plantillas de Informes
+                            <FileText className="w-4 h-4" /> Plantillas
                         </button>
                         <button
                             onClick={() => setActiveTab('config-proyecto')}
                             className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all ${activeTab === 'config-proyecto' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-zinc-400 hover:bg-white hover:text-[#1A1A1A]'}`}
                         >
-                            <Briefcase className="w-4 h-4" /> Configuración de Proyecto
+                            <Briefcase className="w-4 h-4" /> Códigos Proyecto
                         </button>
                         {((user?.rol || '').toLowerCase() === 'administrador' || isSuperAdmin) && (
                             <button
                                 onClick={() => setActiveTab('preferencias')}
                                 className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all ${activeTab === 'preferencias' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-zinc-400 hover:bg-white hover:text-[#1A1A1A]'}`}
                             >
-                                <SettingsIcon className="w-4 h-4" /> Preferencias de Aplicación
+                                <SettingsIcon className="w-4 h-4" /> Preferencias
                             </button>
                         )}
                         {isSuperAdmin && (
@@ -1682,10 +2868,9 @@ const Settings = () => {
                                         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Sincronizando Sistema...</p>
                                     </div>
                                 ) : (
-                                    activeTab === 'empresas' ? renderEmpresas() :
-                                        activeTab === 'preferencias' ? renderPreferencias() :
+                                    activeTab === 'preferencias' ? renderPreferencias() :
                                             activeTab === 'mi-empresa' ? renderMiEmpresa() :
-                                                activeTab === 'superadmins' ? renderSuperadmins() :
+                                                activeTab === 'backup-empresa' ? renderCompanyBackupPanel() :
                                                 activeTab === 'config-proyecto' ? renderProyectoConfig() :
                                                     activeTab === 'plantillas' ? renderPlantillasConfig() :
                                                         renderUsuarios()
@@ -1708,17 +2893,13 @@ const Settings = () => {
                         <AppModalHeader
                             title={activeTab === 'empresas'
                                 ? (editMode ? 'Editar Empresa' : 'Registrar Empresa')
-                                : activeTab === 'superadmins'
-                                    ? 'Editar Superadministrador'
-                                    : (editMode ? 'Editar Perfil' : 'Añadir Nuevo Perfil')}
+                                : (editMode ? 'Editar Perfil' : 'Añadir Nuevo Perfil')}
                             subtitle={activeTab === 'empresas'
                                 ? 'Ficha administrativa y fiscal de la empresa'
-                                : activeTab === 'superadmins'
-                                    ? 'Cuenta de plataforma con privilegios globales'
-                                    : 'Credenciales y perfil operativo de la empresa activa'}
-                            icon={activeTab === 'empresas' ? Building : activeTab === 'superadmins' ? ShieldIcon : Users}
-                            iconClassName={activeTab === 'empresas' ? 'text-[#F39200]' : activeTab === 'superadmins' ? 'text-violet-700' : 'text-[#136191]'}
-                            iconWrapClassName={activeTab === 'empresas' ? 'border-orange-200 bg-orange-50' : activeTab === 'superadmins' ? 'border-violet-200 bg-violet-50' : 'border-blue-200 bg-blue-50'}
+                                : 'Credenciales y perfil operativo de la empresa activa'}
+                            icon={activeTab === 'empresas' ? Building : Users}
+                            iconClassName={activeTab === 'empresas' ? 'text-[#F39200]' : 'text-[#136191]'}
+                            iconWrapClassName={activeTab === 'empresas' ? 'border-orange-200 bg-orange-50' : 'border-blue-200 bg-blue-50'}
                             onClose={() => setShowCreateModal(false)}
                             closeButton={(
                                 <ProjectSectionIconButton
@@ -1753,8 +2934,13 @@ const Settings = () => {
 
                                     <h3 className="text-[10px] font-black text-[#F39200] uppercase tracking-[0.2em] border-b border-orange-100 pb-2">Datos Identificativos</h3>
                                     <div className="space-y-2">
-                                        <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">Nombre Comercial</Label>
+                                        <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">Nombre Legal / Comercial</Label>
                                         <Input required value={newEmpresa.nombre} onChange={e => setNewEmpresa({ ...newEmpresa, nombre: e.target.value })} className="h-12 rounded-xl bg-zinc-50 border-zinc-200" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">Alias de Empresa</Label>
+                                        <Input value={newEmpresa.alias || ''} onChange={e => setNewEmpresa({ ...newEmpresa, alias: e.target.value })} className="h-12 rounded-xl bg-zinc-50 border-zinc-200" />
+                                        <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight ml-1">Opcional. Si existe, será el nombre visible en menús y selectores.</p>
                                     </div>
                                     <div className="grid grid-cols-1 gap-4">
                                         <div className="space-y-2">
@@ -1923,11 +3109,11 @@ const Settings = () => {
                                         formData={newUsuario}
                                         setFormData={setNewUsuario}
                                         isSuperAdmin={isSuperAdmin}
-                                        allowSuperAdminRole={activeTab === 'superadmins'}
+                                        allowSuperAdminRole={false}
                                         hidePolicies={editMode}
                                         isEditing={editMode}
                                         paises={paises}
-                                        availableRoles={activeTab === 'superadmins' ? ['Superadministrador'] : getAvailableRoles()}
+                                        availableRoles={getAvailableRoles()}
                                     />
                                 </div>
                             )}
@@ -1938,9 +3124,9 @@ const Settings = () => {
                                 <button type="button" onClick={() => setShowCreateModal(false)} className="h-11 rounded-xl border border-zinc-200 bg-white px-5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700">
                                     Cancelar
                                 </button>
-                                <LiquidButton type="submit" className={`!h-11 !px-8 text-white ${activeTab === 'superadmins' ? 'bg-violet-700' : activeTab === 'empresas' ? 'bg-[#1A1A1A]' : 'bg-[#F39200]'}`}>
+                                <LiquidButton type="submit" className={`!h-11 !px-8 text-white ${activeTab === 'empresas' ? 'bg-[#1A1A1A]' : 'bg-[#F39200]'}`}>
                                     <Save className="h-4 w-4" />
-                                    {activeTab === 'superadmins' ? 'Guardar Superadministrador' : editMode ? 'Guardar Cambios' : activeTab === 'empresas' ? 'Guardar Empresa' : 'Confirmar Registro'}
+                                    {editMode ? 'Guardar Cambios' : activeTab === 'empresas' ? 'Guardar Empresa' : 'Confirmar Registro'}
                                 </LiquidButton>
                             </div>
                         </AppModalFooter>
@@ -2023,6 +3209,7 @@ const Settings = () => {
                     </AppModalShell>
                 )}
             </AnimatePresence>
+
         </div >
     );
 };

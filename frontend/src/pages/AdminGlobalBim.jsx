@@ -42,7 +42,7 @@ const AdminGlobalBim = () => {
                 allowed_company_ids: data.allowed_company_ids || '',
             });
         } catch (error) {
-            console.error('Error cargando configuración BIM:', error);
+            globalThis.reportClientError?.('Error cargando configuración BIM:', error);
             await appAlert({
                 title: 'No se pudo cargar la activación BIM',
                 message: error.response?.data?.detail || 'Revise la migración y la conectividad del backend.',
@@ -76,7 +76,7 @@ const AdminGlobalBim = () => {
             setStatus(data);
             await loadConfig();
         } catch (error) {
-            console.error('Error guardando configuración BIM:', error);
+            globalThis.reportClientError?.('Error guardando configuración BIM:', error);
             await appAlert({
                 title: 'No se pudo guardar la activación BIM',
                 message: error.response?.data?.detail || 'Revise la configuración e inténtelo de nuevo.',

@@ -42,7 +42,7 @@ import { buildOmniClassOptions, getOmniClassTableForSubcategoria } from '../util
 import BulkDeleteConfirmModal from '../components/precios-unitarios/BulkDeleteConfirmModal';
 import ImportFormatHint from '../components/precios-unitarios/ImportFormatHint';
 import CatalogSidebarCard from '../components/ui/CatalogSidebarCard';
-import { APP_MODAL_CLOSE_BUTTON_CLASS } from '../components/ui/app-modal';
+import { AppModalShell, AppModalHeader, AppModalBody, AppModalFooter } from '../components/ui/app-modal';
 import CodeColorizer from '../utils/codeColorizer';
 import { normalizeTextInputValue } from '../utils/normalizeInputValue';
 import { appAlert, appConfirm } from '../utils/appDialog';
@@ -240,7 +240,7 @@ const Subcategorias = () => {
             });
             setItems(grouped);
         } catch (error) {
-            console.error("Error cargando items:", error);
+            globalThis.reportClientError?.("Error cargando items:", error);
         } finally {
             setLoading(false);
         }
@@ -273,7 +273,7 @@ const Subcategorias = () => {
             const res = await maestrosApi.getOmniClassSearch(q, currentOmniClassTable);
             setOmniclassOptions(buildOmniClassOptions(res || []));
         } catch (error) {
-            console.error("Error buscando OmniClass:", error);
+            globalThis.reportClientError?.("Error buscando OmniClass:", error);
         } finally {
             setIsOmniLoading(false);
         }
@@ -286,7 +286,7 @@ const Subcategorias = () => {
             const res = await maestrosApi.getOmniClassTabla(currentOmniClassTable);
             setOmniclassOptions(buildOmniClassOptions(res || []));
         } catch (error) {
-            console.error("Error precargando OmniClass:", error);
+            globalThis.reportClientError?.("Error precargando OmniClass:", error);
         } finally {
             setIsOmniLoading(false);
         }
@@ -329,7 +329,7 @@ const Subcategorias = () => {
             closeModal();
             fetchItems();
         } catch (error) {
-            console.error("Error al guardar:", error);
+            globalThis.reportClientError?.("Error al guardar:", error);
             let detail = error.response?.data?.detail;
 
             // Si el error es un objeto o array (validación FastAPI), extraer el mensaje
@@ -362,7 +362,7 @@ const Subcategorias = () => {
             await subcategoriasItemsApi.delete(item.id, empId);
             fetchItems();
         } catch (error) {
-            console.error("Error al borrar:", error);
+            globalThis.reportClientError?.("Error al borrar:", error);
             appAlert('Error al borrar el item: ' + (error.response?.data?.detail || error.message));
         }
     };
@@ -374,7 +374,7 @@ const Subcategorias = () => {
             await subcategoriasItemsApi.duplicate(item.id, empId);
             fetchItems();
         } catch (error) {
-            console.error("Error al duplicar:", error);
+            globalThis.reportClientError?.("Error al duplicar:", error);
             appAlert('Error al duplicar el item: ' + (error.response?.data?.detail || error.message));
         }
     };
@@ -433,7 +433,7 @@ const Subcategorias = () => {
                 setImportData('');
             }
         } catch (error) {
-            console.error("Error al importar:", error);
+            globalThis.reportClientError?.("Error al importar:", error);
             appAlert("Error al importar: " + (error.response?.data?.detail || error.message));
         }
     };
@@ -462,7 +462,7 @@ const Subcategorias = () => {
                 appAlert("No se detectaron errores ortográficos.");
             }
         } catch (error) {
-            console.error("Error al revisar ortografía:", error);
+            globalThis.reportClientError?.("Error al revisar ortografía:", error);
             appAlert("Error al revisar ortografía: " + (error.response?.data?.detail || error.message));
         } finally {
             setIsCheckingSpell(false);
@@ -600,7 +600,7 @@ const Subcategorias = () => {
             await subcategoriasItemsApi.reorder(itemId, targetItem.id, placeAfter, empId);
             fetchItems();
         } catch (error) {
-            console.error("Error al reordenar item:", error);
+            globalThis.reportClientError?.("Error al reordenar item:", error);
             appAlert(error.response?.data?.detail || 'Error al reordenar la subcategoría');
         }
     };
@@ -619,7 +619,7 @@ const Subcategorias = () => {
             await subcategoriasItemsApi.move(itemId, targetSubcat, empId);
             fetchItems();
         } catch (error) {
-            console.error("Error al mover item:", error);
+            globalThis.reportClientError?.("Error al mover item:", error);
             appAlert(error.response?.data?.detail || 'Error al mover la subcategoría');
         }
     };
@@ -820,7 +820,7 @@ const Subcategorias = () => {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-8 pt-6 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                         {/* Items List */}
                         {loading ? (
                             <div className="py-20 flex flex-col items-center justify-center gap-4">
@@ -837,7 +837,7 @@ const Subcategorias = () => {
                                 </LiquidButton>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 gap-4">
+                            <div className="grid grid-cols-1 gap-2">
                             {visibleItems.map((item) => (
                                     <motion.div
                                         key={item.id}
@@ -848,7 +848,7 @@ const Subcategorias = () => {
                                         onDragOver={(e) => handleItemDragOver(e, item)}
                                         onDragLeave={handleItemDragLeave}
                                         onDrop={(e) => handleItemDrop(e, item)}
-                                        className={`group flex items-center gap-4 p-4 bg-white border rounded-xl transition-all cursor-pointer ${selectedItems.includes(item.id)
+                                        className={`group flex items-center gap-3 px-4 py-3 bg-white border rounded-xl transition-all cursor-pointer ${selectedItems.includes(item.id)
                                             ? 'border-[#F39200] bg-orange-50'
                                             : dragOverItemId === item.id
                                                 ? `border-[#F39200] bg-orange-50/40 ${dragOverItemPosition === 'before' ? 'ring-2 ring-inset ring-[#F39200]' : 'ring-2 ring-inset ring-zinc-300'}`
@@ -860,7 +860,7 @@ const Subcategorias = () => {
                                         <div
                                             draggable
                                             onDragStart={(e) => handleDragStart(e, item)}
-                                            className="cursor-grab active:cursor-grabbing p-1 text-zinc-300 hover:text-zinc-600 transition-colors"
+                                            className="cursor-grab active:cursor-grabbing p-0.5 text-zinc-300 hover:text-zinc-600 transition-colors"
                                             title="Arrastrar para reordenar o mover de categoría"
                                         >
                                             <GripVertical className="w-5 h-5" />
@@ -899,21 +899,21 @@ const Subcategorias = () => {
                                         <div className="flex items-center gap-2 opacity-60 hover:opacity-100 transition-all">
                                             <button
                                                 onClick={(e) => handleDuplicate(e, item)}
-                                                className="p-2 hover:bg-purple-50 text-purple-500 rounded-lg"
+                                                className="p-1.5 hover:bg-purple-50 text-purple-500 rounded-lg"
                                                 title="Duplicar"
                                             >
                                                 <Copy className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={(e) => openEdit(e, item)}
-                                                className="p-2 hover:bg-blue-50 text-blue-500 rounded-lg"
+                                                className="p-1.5 hover:bg-blue-50 text-blue-500 rounded-lg"
                                                 title="Editar"
                                             >
                                                 <Edit2 className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={(e) => handleDelete(e, item)}
-                                                className="p-2 hover:bg-red-50 text-red-500 rounded-lg"
+                                                className="p-1.5 hover:bg-red-50 text-red-500 rounded-lg"
                                                 title="Borrar"
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -929,29 +929,18 @@ const Subcategorias = () => {
                 {/* Modal - Crear/Editar Item */}
                 <AnimatePresence>
                     {showModal && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-900/40 backdrop-blur-md p-4">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
-                            >
-                                <div className="p-10">
-                                    <div className="flex justify-between items-start mb-10">
-                                        <div>
-                                            <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900">
-                                                {editingItem ? 'Editar Subcategoría' : 'Nueva Subcategoría'}
-                                            </h2>
-                                            <p className="text-xs font-bold text-[#F39200] uppercase tracking-widest mt-1">
-                                                {SUBCATEGORIAS.find(s => s.codigo === selectedSubcategoria)?.nombre}
-                                            </p>
-                                        </div>
-                                        <button onClick={closeModal} className={`${APP_MODAL_CLOSE_BUTTON_CLASS} !h-9 !w-9 !rounded-[0.75rem]`}>
-                                            <X className="h-4 w-4" />
-                                        </button>
-                                    </div>
-
-                                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <AppModalShell isOpen={showModal} onClose={closeModal} size="lg" zIndex="z-[1000]" panelClassName="max-h-[90vh] flex flex-col">
+                            <AppModalHeader
+                                title={editingItem ? 'Editar subcategoría' : 'Nueva subcategoría'}
+                                subtitle={SUBCATEGORIAS.find(s => s.codigo === selectedSubcategoria)?.nombre}
+                                icon={Database}
+                                iconClassName="text-[#F39200]"
+                                iconWrapClassName="border border-orange-100 bg-orange-50"
+                                onClose={closeModal}
+                            />
+                            <form onSubmit={handleSubmit} className="min-h-0 flex flex-1 flex-col">
+                                <AppModalBody className="min-h-0 flex-1 overflow-y-auto bg-[#f7f7f5] p-5 md:p-6 custom-scrollbar">
+                                    <div className="space-y-5">
                                         <div className="space-y-2">
                                             <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">
                                                 Código
@@ -1048,50 +1037,40 @@ const Subcategorias = () => {
                                         </div>
                                         )}
 
-                                        <div className="flex gap-4 pt-4">
-                                            <button
-                                                type="button"
-                                                onClick={closeModal}
-                                                className="flex-1 h-12 bg-zinc-100 text-zinc-500 font-black uppercase tracking-widest text-[11px] rounded-2xl hover:bg-zinc-200 transition-all"
-                                            >
-                                                Cancelar
-                                            </button>
-                                            <LiquidButton type="submit" className="flex-[2] h-12 rounded-2xl">
-                                                <Save className="w-4 h-4" /> {editingItem ? 'Actualizar' : 'Crear'}
-                                            </LiquidButton>
-                                        </div>
-                                    </form>
-                                </div>
-                            </motion.div>
-                        </div>
+                                    </div>
+                                </AppModalBody>
+                                <AppModalFooter variant="flat" className="flex-wrap bg-[#f7f7f5]">
+                                    <button
+                                        type="button"
+                                        onClick={closeModal}
+                                        title="Cancelar"
+                                        aria-label="Cancelar"
+                                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                    <LiquidButton type="submit" title={editingItem ? 'Actualizar' : 'Crear'} aria-label={editingItem ? 'Actualizar' : 'Crear'} className="h-11 w-11 !min-w-0 rounded-xl !px-0">
+                                        <Save className="w-4 h-4" />
+                                    </LiquidButton>
+                                </AppModalFooter>
+                            </form>
+                        </AppModalShell>
                     )}
                 </AnimatePresence>
 
                 {/* Modal - Importar */}
                 <AnimatePresence>
                     {showImportModal && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-900/40 backdrop-blur-md p-4">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                className="bg-white w-full max-w-2xl max-h-[90vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col"
-                            >
-                                <div className="flex-1 min-h-0 overflow-y-auto p-10">
-                                    <div className="flex justify-between items-start mb-10">
-                                        <div>
-                                            <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900">
-                                                Importar Subcategorías
-                                            </h2>
-                                            <p className="text-xs font-bold text-[#F39200] uppercase tracking-widest mt-1">
-                                                Pegue datos desde Excel (Ctrl+V)
-                                            </p>
-                                        </div>
-                                        <button onClick={closeImportModal} className={`${APP_MODAL_CLOSE_BUTTON_CLASS} !h-9 !w-9 !rounded-[0.75rem]`}>
-                                            <X className="h-4 w-4" />
-                                        </button>
-                                    </div>
-
+                        <AppModalShell isOpen={showImportModal} onClose={closeImportModal} size="xl" zIndex="z-[1000]" panelClassName="max-h-[90vh] flex flex-col">
+                            <AppModalHeader
+                                title="Importar subcategorías"
+                                subtitle="Pegue datos desde Excel o portapapeles"
+                                icon={Upload}
+                                iconClassName="text-[#F39200]"
+                                iconWrapClassName="border border-orange-100 bg-orange-50"
+                                onClose={closeImportModal}
+                            />
+                            <AppModalBody className="flex-1 min-h-0 overflow-y-auto bg-[#f7f7f5] p-5 md:p-6 custom-scrollbar">
                                     <div className="space-y-4">
                                         <ImportFormatHint
                                             format="Una línea por ítem • TAB opcional para observaciones"
@@ -1203,27 +1182,30 @@ const Subcategorias = () => {
                                         )}
 
                                     </div>
-                                </div>
-                                <div className="border-t border-zinc-200 bg-white px-10 py-6">
+                            </AppModalBody>
+                            <AppModalFooter variant="flat" className="border-t border-zinc-200 bg-white px-5 py-4 md:px-6">
                                     <div className="flex gap-4">
                                         <button
                                             type="button"
                                             onClick={closeImportModal}
-                                            className="flex-1 h-12 bg-zinc-100 text-zinc-500 font-black uppercase tracking-widest text-[11px] rounded-2xl hover:bg-zinc-200 transition-all"
+                                            title="Cancelar"
+                                            aria-label="Cancelar"
+                                            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700"
                                         >
-                                            Cancelar
+                                            <X className="h-4 w-4" />
                                         </button>
                                         <LiquidButton
                                             onClick={handleImport}
                                             disabled={validImportRows.length === 0}
-                                            className="flex-[2] h-12 rounded-2xl"
+                                            title={`Confirmar importación de ${validImportRows.length} registros`}
+                                            aria-label={`Confirmar importación de ${validImportRows.length} registros`}
+                                            className="h-11 w-11 !min-w-0 rounded-xl !px-0"
                                         >
-                                            <Upload className="w-4 h-4 mr-2" /> Confirmar Importación ({validImportRows.length})
+                                            <Upload className="w-4 h-4" />
                                         </LiquidButton>
                                     </div>
-                                </div>
-                            </motion.div>
-                        </div>
+                            </AppModalFooter>
+                        </AppModalShell>
                     )}
                 </AnimatePresence>
             </div>

@@ -19,7 +19,7 @@ const INITIAL_RENDER_COUNT = 12;
 const RENDER_CHUNK_SIZE = 12;
 const PRECACHE_BUFFER_SIZE = 12;
 const FULL_RENDER_THRESHOLD = 24;
-const CART_ABANDON_MS = 7 * 24 * 60 * 60 * 1000;
+const CART_ABANDON_MS = 4 * 60 * 60 * 1000;
 const CART_NOTICE_TIMEOUT_MS = 4200;
 const PAYPHONE_BOX_SCRIPT_URL = 'https://cdn.payphonetodoesposible.com/box/v1.1/payphone-payment-box.js';
 const PAYPHONE_BOX_STYLES_URL = 'https://cdn.payphonetodoesposible.com/box/v1.1/payphone-payment-box.css';
@@ -547,11 +547,36 @@ const renderVatIncludedLabel = (className = '') => (
     </p>
 );
 
+const getMarketplaceProductMeta = (product) => product?.vista_previa?.product_meta || {};
+
+const isOfficialSaasProduct = (product) => {
+    const productMeta = getMarketplaceProductMeta(product);
+    const commercialCode = String(productMeta.commercial_code || '').trim().toUpperCase();
+    if (!commercialCode) return false;
+    return Boolean(
+        productMeta.requires_superadmin_edit
+        && (
+            commercialCode.startsWith('LIC_')
+            || commercialCode.startsWith('PACK_')
+            || commercialCode.startsWith('MOD_')
+        )
+    );
+};
+
+const resolveOfficialSaasKind = (product) => {
+    const commercialCode = String(getMarketplaceProductMeta(product).commercial_code || '').trim().toUpperCase();
+    if (commercialCode.startsWith('LIC_')) return 'Licencia';
+    if (commercialCode.startsWith('PACK_')) return 'Pack';
+    if (commercialCode.startsWith('MOD_')) return 'Módulo';
+    return 'SaaS';
+};
+
 const ProductVisualCard = ({ product, canBuy, inCartQuantity, onAddToCart, onOpenDetails }) => {
     const viewModel = resolveMarketplaceProductViewModel(product);
     const coverTheme = COVER_THEMES[product.product_type] || COVER_THEMES.adicional;
     const coverImage = viewModel.commonMeta.imageUrl;
     const salesConfig = viewModel.salesConfig;
+    const officialSaas = isOfficialSaasProduct(product);
 
     return (
         <div className="group overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white transition-colors hover:border-[#F39200]">
@@ -576,6 +601,11 @@ const ProductVisualCard = ({ product, canBuy, inCartQuantity, onAddToCart, onOpe
                     <div className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/65 text-white transition-transform group-hover:scale-105">
                         <Eye className="h-4 w-4" />
                     </div>
+                    {officialSaas ? (
+                        <div className="absolute left-3 top-3 rounded-full border border-white/25 bg-white/90 px-3 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-[#136191]">
+                            {resolveOfficialSaasKind(product)} SaaS
+                        </div>
+                    ) : null}
                     <div className="absolute inset-x-0 bottom-0 p-4 text-white xl:p-5">
                         <p className="text-[9px] font-black uppercase tracking-[0.14em] text-white/80 xl:text-[10px]">
                             {viewModel.commonMeta.categoryLabel}
@@ -934,6 +964,21 @@ const StorefrontControlTile = ({ icon: Icon, label, dark = false, onClick }) => 
     </button>
 );
 
+const StorefrontToggleTile = ({ icon: Icon, label, active = false, onClick }) => (
+    <button
+        type="button"
+        onClick={onClick}
+        className={`inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border px-5 py-3 text-[11px] font-black tracking-tight shadow-sm transition-all ${
+            active
+                ? 'border-[#136191] bg-blue-50 text-[#136191]'
+                : 'border-zinc-200 bg-white text-zinc-700 hover:border-[#136191]/35 hover:text-[#136191]'
+        }`}
+    >
+        <Icon className="h-4 w-4 shrink-0" />
+        <span className="whitespace-nowrap">{label}</span>
+    </button>
+);
+
 const Marketplace = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -948,7 +993,7 @@ const Marketplace = () => {
     const cartModalScrollRef = useRef(null);
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [query, setQuery] = useState('');
+    const [query, setQuery] = useState(() => new URLSearchParams(location.search).get('q') || '');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedSort, setSelectedSort] = useState('default');
     const [loading, setLoading] = useState(true);
@@ -958,6 +1003,7 @@ const Marketplace = () => {
     const [appliedPriceCap, setAppliedPriceCap] = useState(200);
     const [draftPriceFloor, setDraftPriceFloor] = useState(0);
     const [appliedPriceFloor, setAppliedPriceFloor] = useState(0);
+    const [saasCatalogOnly, setSaasCatalogOnly] = useState(() => new URLSearchParams(location.search).get('saas') === '1');
     const [visibleCount, setVisibleCount] = useState(INITIAL_RENDER_COUNT);
     const [preloadedCount, setPreloadedCount] = useState(INITIAL_RENDER_COUNT + PRECACHE_BUFFER_SIZE);
     const [sortMenuOpen, setSortMenuOpen] = useState(false);
@@ -1069,6 +1115,18 @@ const Marketplace = () => {
     }, [canBuy, cartHydrated, cartLines, user?.id]);
 
     useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const shouldShowSaasCatalog = searchParams.get('saas') === '1';
+        const nextQuery = searchParams.get('q') || '';
+        if (nextQuery) {
+            setQuery(nextQuery);
+        }
+        if (!shouldShowSaasCatalog) return;
+        setSaasCatalogOnly(true);
+        setSelectedCategory('');
+    }, [location.search]);
+
+    useEffect(() => {
         let cancelled = false;
 
         const load = async () => {
@@ -1093,7 +1151,7 @@ const Marketplace = () => {
                 setDraftPriceCap(nextPriceCap);
                 setAppliedPriceCap(nextPriceCap);
             } catch (loadError) {
-                console.error('Error cargando tienda:', loadError);
+                globalThis.reportClientError?.('Error cargando tienda:', loadError);
                 if (cancelled) return;
                 setProducts([]);
                 setCategories([]);
@@ -1401,12 +1459,16 @@ const Marketplace = () => {
         const normalizedQuery = normalizeSearchToken(query);
 
         const result = products.filter((product) => {
+            if (saasCatalogOnly && !isOfficialSaasProduct(product)) {
+                return false;
+            }
             const haystack = [
                 product.titulo,
                 product.resumen,
                 product.descripcion,
                 product.category?.nombre,
                 getMarketplaceSellerDisplayName(product.seller),
+                getMarketplaceProductMeta(product).commercial_code,
             ].filter(Boolean).join(' ');
 
             const queryMatch = !normalizedQuery || normalizeSearchToken(haystack).includes(normalizedQuery);
@@ -1443,9 +1505,13 @@ const Marketplace = () => {
                 return rightDate - leftDate || rightSales - leftSales || rightRating - leftRating;
             }
         });
-    }, [appliedPriceCap, appliedPriceFloor, products, query, selectedCategory, selectedSort]);
+    }, [appliedPriceCap, appliedPriceFloor, products, query, saasCatalogOnly, selectedCategory, selectedSort]);
 
     const totalResults = filteredProducts.length;
+    const officialSaasProducts = useMemo(
+        () => products.filter((product) => isOfficialSaasProduct(product)),
+        [products],
+    );
 
     useEffect(() => {
         const shouldRenderAll = totalResults <= FULL_RENDER_THRESHOLD;
@@ -1463,7 +1529,7 @@ const Marketplace = () => {
         if (optionsContainerRef.current) {
             optionsContainerRef.current.scrollTop = 0;
         }
-    }, [query, selectedCategory, selectedSort, appliedPriceCap, appliedPriceFloor]);
+    }, [query, selectedCategory, selectedSort, appliedPriceCap, appliedPriceFloor, saasCatalogOnly]);
 
     const visibleProducts = useMemo(() => {
         return filteredProducts.slice(0, visibleCount);
@@ -1795,6 +1861,7 @@ const Marketplace = () => {
         setQuery('');
         setSelectedCategory('');
         setSelectedSort('default');
+        setSaasCatalogOnly(false);
         setDraftPriceFloor(0);
         setAppliedPriceFloor(0);
         setDraftPriceCap(maxCap);
@@ -1884,6 +1951,17 @@ const Marketplace = () => {
                                                 </span>
                                             ) : null}
                                         </button>
+                                    ) : null}
+                                    {canBuy ? (
+                                        <StorefrontToggleTile
+                                            icon={CreditCard}
+                                            label="Planes SaaS"
+                                            active={saasCatalogOnly}
+                                            onClick={() => {
+                                                setSaasCatalogOnly((current) => !current);
+                                                setSelectedCategory('');
+                                            }}
+                                        />
                                     ) : null}
                                     {canBuy ? (
                                         <StorefrontControlTile
@@ -2012,6 +2090,25 @@ const Marketplace = () => {
                                     </div>
                                 ) : (
                                     <>
+                                        {saasCatalogOnly ? (
+                                            <div className="mb-5 rounded-[1.25rem] border border-blue-100 bg-blue-50/70 px-4 py-3">
+                                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                                    <div>
+                                                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#136191]">Catálogo SaaS oficial</p>
+                                                        <p className="mt-1 text-sm font-semibold text-zinc-700">
+                                                            Licencias, packs y módulos definidos por Superadministración para venta en Marketplace.
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setSaasCatalogOnly(false)}
+                                                        className="inline-flex min-h-[34px] items-center justify-center rounded-xl border border-blue-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.14em] text-[#136191] transition-colors hover:bg-blue-50"
+                                                    >
+                                                        Ver todo
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : null}
                                         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                                             {visibleProducts.map((product) => (
                                                 <ProductVisualCard
@@ -2040,6 +2137,34 @@ const Marketplace = () => {
                                 ref={optionsContainerRef}
                                 className="giproy-motion-scrollbar-hide h-[calc(100%-47px)] min-h-0 space-y-4 overflow-y-auto overscroll-contain px-4 py-4 pr-7 xl:px-5"
                             >
+                            <section className="rounded-[1.35rem] border border-zinc-200 bg-white px-4 py-4">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h2 className="text-[1.05rem] font-black tracking-tight text-zinc-950">Planes y packs SaaS</h2>
+                                        <p className="mt-1 text-[0.76rem] font-bold leading-relaxed text-zinc-500">
+                                            Catálogo oficial de licencias, packs y módulos vendibles.
+                                        </p>
+                                    </div>
+                                    <span className="inline-flex h-7 min-w-[34px] items-center justify-center rounded-lg bg-blue-50 px-2 text-[11px] font-black text-[#136191]">
+                                        {officialSaasProducts.length}
+                                    </span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSaasCatalogOnly((current) => !current);
+                                        setSelectedCategory('');
+                                    }}
+                                    className={`mt-4 inline-flex min-h-[42px] w-full items-center justify-center rounded-xl border px-4 text-[10px] font-black uppercase tracking-[0.16em] transition-colors ${
+                                        saasCatalogOnly
+                                            ? 'border-[#136191] bg-blue-50 text-[#136191]'
+                                            : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:border-[#136191]/40 hover:text-[#136191]'
+                                    }`}
+                                >
+                                    {saasCatalogOnly ? 'Mostrando catálogo SaaS' : 'Ver catálogo SaaS'}
+                                </button>
+                            </section>
+
                             <section className="rounded-[1.35rem] border border-zinc-200 bg-white px-4 py-4">
                                 <h2 className="text-[1.05rem] font-black tracking-tight text-zinc-950">Categorías</h2>
                                 <div className="mt-3">

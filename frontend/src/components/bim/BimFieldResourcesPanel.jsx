@@ -1,0 +1,79 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ArrowDownToLine, ArrowUpFromLine, PackageOpen, RefreshCw, RotateCcw } from 'lucide-react';
+
+import { bimModelsApi } from '../../api/bimModels';
+
+const EMPTY = { resource_id: '', activity_snapshot_id: '', work_area_id: '', movement_type: 'receipt', quantity: '', occurred_at: '', reference: '', note: '' };
+const LABELS = { receipt: 'Recepción', consume: 'Consumo', return: 'Retorno' };
+const ICONS = { receipt: ArrowDownToLine, consume: ArrowUpFromLine, return: RotateCcw };
+
+export default function BimFieldResourcesPanel({ projectId, empresaId, api = bimModelsApi }) {
+    const [resources, setResources] = useState([]);
+    const [activities, setActivities] = useState([]);
+    const [areas, setAreas] = useState([]);
+    const [movements, setMovements] = useState([]);
+    const [selectedId, setSelectedId] = useState('');
+    const [draft, setDraft] = useState(EMPTY);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState('');
+
+    const load = useCallback(async () => {
+        if (!projectId) return;
+        try {
+            setError('');
+            const [resourceValues, activityValues, areaValues, movementValues] = await Promise.all([
+                api.list4dResources(projectId, empresaId), api.list4dActivities(projectId, empresaId),
+                api.list4dWorkAreas(projectId, empresaId), api.list4dFieldResourceMovements(projectId, null, empresaId),
+            ]);
+            const fieldResources = resourceValues.filter((item) => ['material', 'equipment'].includes(item.resource_type));
+            setResources(fieldResources); setActivities(activityValues); setAreas(areaValues); setMovements(movementValues);
+            setSelectedId((current) => current || String(fieldResources[0]?.id || ''));
+            setDraft((current) => ({ ...current, resource_id: current.resource_id || String(fieldResources[0]?.id || '') }));
+        } catch (requestError) { setError(requestError?.response?.data?.detail || 'No se pudieron cargar los recursos de Campo.'); }
+    }, [api, empresaId, projectId]);
+
+    useEffect(() => { load(); }, [load]);
+    const selected = resources.find((item) => String(item.id) === selectedId) || null;
+    const selectedMovements = useMemo(() => movements.filter((item) => String(item.resource_id) === selectedId).slice().reverse(), [movements, selectedId]);
+    const balance = selectedMovements[0]?.balance_after || 0;
+    const totals = useMemo(() => movements.reduce((acc, item) => { acc[item.movement_type] += item.quantity; return acc; }, { receipt: 0, consume: 0, return: 0 }), [movements]);
+
+    const submit = async (event) => {
+        event.preventDefault();
+        try {
+            setBusy(true); setError('');
+            const created = await api.create4dFieldResourceMovement(projectId, {
+                resource_id: Number(draft.resource_id), activity_snapshot_id: draft.activity_snapshot_id ? Number(draft.activity_snapshot_id) : null,
+                work_area_id: draft.work_area_id ? Number(draft.work_area_id) : null, movement_type: draft.movement_type,
+                quantity: Number(draft.quantity), occurred_at: new Date(draft.occurred_at).toISOString(), reference: draft.reference || null, note: draft.note,
+            }, empresaId);
+            setMovements((current) => [...current, created]); setSelectedId(String(created.resource_id));
+            setDraft((current) => ({ ...EMPTY, resource_id: current.resource_id, movement_type: current.movement_type }));
+        } catch (requestError) { setError(requestError?.response?.data?.detail || 'No se pudo registrar el movimiento.'); }
+        finally { setBusy(false); }
+    };
+
+    return <section className="flex h-full min-h-0 flex-col overflow-hidden rounded border border-slate-200 bg-white" data-bim-field-resources>
+        <header className="flex h-11 shrink-0 items-center justify-between border-b border-slate-200 px-3">
+            <div className="flex items-center gap-2"><PackageOpen size={16} className="text-orange-600" /><div><h3 className="text-xs font-semibold text-slate-900">Materiales y equipos de Campo</h3><p className="text-[10px] text-slate-500">{resources.length} recursos · saldo operativo BIM</p></div></div>
+            <div className="flex items-center gap-5 text-[10px]"><span><strong className="block text-sm text-emerald-700">{totals.receipt + totals.return}</strong>entradas</span><span><strong className="block text-sm text-orange-700">{totals.consume}</strong>consumo</span><button type="button" onClick={load} title="Actualizar" aria-label="Actualizar recursos de Campo" className="grid h-8 w-8 place-items-center border border-slate-200 text-slate-600"><RefreshCw size={14} /></button></div>
+        </header>
+        <div className="grid min-h-0 flex-1 grid-cols-[340px_430px_minmax(0,1fr)]">
+            <aside className="overflow-y-auto border-r border-slate-200" data-bim-field-resource-list>{resources.map((resource) => { const latest = movements.filter((item) => item.resource_id === resource.id).at(-1); return <button type="button" key={resource.id} onClick={() => { setSelectedId(String(resource.id)); setDraft((current) => ({ ...current, resource_id: String(resource.id) })); }} className={`block w-full border-b border-slate-100 px-3 py-3 text-left ${String(resource.id) === selectedId ? 'bg-orange-50' : 'hover:bg-slate-50'}`}><div className="flex justify-between gap-2"><strong className="text-xs text-slate-900">{resource.code} · {resource.name}</strong><span className="text-[9px] uppercase text-slate-500">{resource.resource_type === 'material' ? 'Material' : 'Equipo'}</span></div><p className="mt-1 text-[10px] text-slate-500">Saldo <b className="text-slate-800">{latest?.balance_after || 0} {resource.unit}</b></p></button>; })}</aside>
+            <form className="space-y-2 overflow-y-auto border-r border-slate-200 p-3" onSubmit={submit}>
+                <h4 className="text-xs font-semibold text-slate-900">Registrar movimiento</h4>
+                <select required aria-label="Recurso de Campo" value={draft.resource_id} onChange={(e) => setDraft({ ...draft, resource_id: e.target.value })} className="h-9 w-full border border-slate-300 px-2 text-xs"><option value="">Seleccionar recurso</option>{resources.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}</select>
+                <div className="grid grid-cols-3 gap-1">{Object.entries(LABELS).map(([value, label]) => { const Icon = ICONS[value]; return <button type="button" key={value} onClick={() => setDraft({ ...draft, movement_type: value })} className={`inline-flex h-9 items-center justify-center gap-1 border text-[10px] font-semibold ${draft.movement_type === value ? 'border-orange-500 bg-orange-50 text-orange-800' : 'border-slate-200 text-slate-600'}`}><Icon size={13} />{label}</button>; })}</div>
+                <div className="grid grid-cols-2 gap-2"><input required type="number" min="0.01" step="0.01" aria-label="Cantidad del movimiento" placeholder="Cantidad" value={draft.quantity} onChange={(e) => setDraft({ ...draft, quantity: e.target.value })} className="h-9 min-w-0 border border-slate-300 px-2 text-xs" /><input required type="datetime-local" aria-label="Fecha del movimiento" value={draft.occurred_at} onChange={(e) => setDraft({ ...draft, occurred_at: e.target.value })} className="h-9 min-w-0 border border-slate-300 px-2 text-xs" /></div>
+                <select required={draft.movement_type === 'consume'} aria-label="Actividad del movimiento" value={draft.activity_snapshot_id} onChange={(e) => setDraft({ ...draft, activity_snapshot_id: e.target.value })} className="h-9 w-full border border-slate-300 px-2 text-xs"><option value="">Sin actividad</option>{activities.map((item) => <option key={item.id} value={item.id}>{item.activity_code} · {item.activity_name}</option>)}</select>
+                <select aria-label="Frente del movimiento" value={draft.work_area_id} onChange={(e) => setDraft({ ...draft, work_area_id: e.target.value })} className="h-9 w-full border border-slate-300 px-2 text-xs"><option value="">Sin frente</option>{areas.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}</select>
+                <input aria-label="Referencia del movimiento" placeholder="Remisión, parte o referencia" value={draft.reference} onChange={(e) => setDraft({ ...draft, reference: e.target.value })} className="h-9 w-full border border-slate-300 px-2 text-xs" />
+                <textarea required minLength={3} aria-label="Nota del movimiento" placeholder="Detalle operativo" value={draft.note} onChange={(e) => setDraft({ ...draft, note: e.target.value })} className="h-20 w-full resize-none border border-slate-300 p-2 text-xs" />
+                <button disabled={busy || !resources.length} className="h-9 w-full bg-slate-800 text-xs font-semibold text-white disabled:opacity-40">Registrar</button>{error ? <p role="alert" className="text-xs text-red-700">{error}</p> : null}
+            </form>
+            <main className="min-w-0 overflow-y-auto p-4" data-bim-field-resource-ledger><div className="flex items-end justify-between border-b border-slate-200 pb-3"><div><p className="text-[10px] uppercase text-orange-600">{selected?.resource_type === 'equipment' ? 'Equipo' : 'Material'}</p><h4 className="text-sm font-semibold text-slate-900">{selected ? `${selected.code} · ${selected.name}` : 'Sin recurso'}</h4></div><div className="text-right"><strong className="block text-2xl text-slate-900">{balance}</strong><span className="text-[10px] text-slate-500">{selected?.unit || ''} disponibles</span></div></div>
+                <div className="divide-y divide-slate-100">{selectedMovements.map((item) => { const Icon = ICONS[item.movement_type]; return <article key={item.id} className="grid grid-cols-[34px_130px_1fr_100px] items-center gap-3 py-3 text-xs"><span className="grid h-8 w-8 place-items-center bg-slate-100 text-slate-600"><Icon size={15} /></span><div><strong>{LABELS[item.movement_type]}</strong><p className="text-[10px] text-slate-500">{new Date(item.occurred_at).toLocaleString()}</p></div><div className="min-w-0"><p className="truncate text-slate-700">{item.note}</p><p className="text-[10px] text-slate-500">{item.reference || 'Sin referencia'}</p></div><div className="text-right"><strong className={item.movement_type === 'consume' ? 'text-orange-700' : 'text-emerald-700'}>{item.movement_type === 'consume' ? '-' : '+'}{item.quantity}</strong><p className="text-[10px] text-slate-500">saldo {item.balance_after}</p></div></article>; })}</div>
+            </main>
+        </div>
+    </section>;
+}

@@ -66,12 +66,10 @@ def get_user_me(
 @router.get("/validar-ruc", response_model=ValidarRucResponse)
 def validar_ruc(
     ruc: str = Query(..., description="Número de RUC a validar (13 dígitos)"),
-    token: str = Query(..., description="Token de autorización")
+    token: str = Query("", description="Parámetro legado; ya no se usa"),
+    db: Session = Depends(get_db),
 ) -> Any:
-    """
-    Valida un RUC consultando el servicio externo de SRI delegado a la capa de servicios.
-    """
-    return usuario_service.validar_ruc(ruc=ruc, token=token)
+    return usuario_service.validar_ruc(ruc=ruc, token=token, db=db)
 
 @router.get("/", response_model=List[UsuarioResponse])
 def get_users(

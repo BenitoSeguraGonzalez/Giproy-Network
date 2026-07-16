@@ -5,6 +5,7 @@ from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from contextvars import ContextVar
 import hashlib
 import os
 import re
@@ -15,6 +16,7 @@ import time
 import xml.etree.ElementTree as ET
 from functools import lru_cache
 
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.apu import APU, APULinea
@@ -38,6 +40,15 @@ from app.schemas.cronograma_trabajo import (
     CronogramaTrabajoUpdate,
 )
 from app.services.cronograma_cpm import ActividadCpm, CriticalPathEngine, DependenciaCpm
+from app.services.apu_explosion import (
+    build_operational_resource_key,
+    collect_apu_exploded_resources,
+    resolve_resource_category_id,
+    resolve_resource_price,
+    resolve_resource_unit_label,
+)
+from app.services.functional_source import resolve_active_apu_resource_modification
+from app.services.project_functional_modification import project_functional_modification_service
 from app.services.project_calendar import project_calendar_service
 from app.services.presupuesto import refresh_presupuesto_prices
 
@@ -51,6 +62,7 @@ DEFAULT_CONFIG = {
     "recursos_asumidos_base": 1.0,
     "fecha_inicio_proyecto": None,
     "fecha_fin_objetivo_proyecto": None,
+    "apu_resource_modifications_v1": {},
     "advanced_calendar": {
         "enabled": False,
         "mode": "simple",
@@ -61,7 +73,27 @@ DEFAULT_CONFIG = {
     },
 }
 
+CALENDAR_LOOKAHEAD_DAYS = 3650
+MAX_WORKDAY_AUTO_SEGMENTS = 750
 RESERVED_CONFIG_KEY = "__config__"
+_LINE_OVERRIDE_CACHE: ContextVar[Optional[dict[int, "CronogramaTrabajoLinea"]]] = ContextVar(
+    "cronograma_trabajo_line_override_cache",
+    default=None,
+)
+_WORKDAY_CALC_CACHE: ContextVar[Optional[dict[str, dict[Any, Any]]]] = ContextVar(
+    "cronograma_trabajo_workday_calc_cache",
+    default=None,
+)
+GANTT_AUTO_SUBBAR_SOURCES = {"gantt_workday_auto_segment"}
+GANTT_RENEWABLE_SUBBAR_SOURCES = {
+    "factory_reset_seed",
+    "initial_creation_seed",
+    "gantt_schedule_period_seed",
+    "gantt_initial_segments",
+    "valuado_initial_segment",
+}
+APU_OPERATIONAL_RESOURCES_METADATA_KEY = "apu_operational_resources_v1"
+APU_RESOURCE_MODIFICATIONS_CONFIG_KEY = "apu_resource_modifications_v1"
 MS_PROJECT_TEMPLATE_NAME = "Cronograma de trabajo.mpp"
 ASPOSE_TASKS_LICENSE_ENV = "ASPOSE_TASKS_LICENSE_PATH"
 ASPOSE_TASKS_JAVA_JAR_ENV = "ASPOSE_TASKS_JAVA_JAR_PATH"
@@ -157,6 +189,10 @@ class CronogramaTrabajoService:
                 value = datetime.fromisoformat(value.replace("Z", "+00:00"))
             except Exception:
                 return None
+        if isinstance(value, date) and not isinstance(value, datetime):
+            value = datetime.combine(value, datetime.min.time())
+        if not isinstance(value, datetime):
+            return None
         if getattr(value, "tzinfo", None) is not None:
             return value.replace(tzinfo=None, microsecond=0)
         return value.replace(microsecond=0)
@@ -290,6 +326,15 @@ class CronogramaTrabajoService:
         self, budget_line_id: str, metadata: Optional[dict]
     ) -> dict:
         normalized_metadata = dict(metadata or {})
+        if (
+            "session_state" not in normalized_metadata
+            and "subbars" not in normalized_metadata
+            and "manualTemporalWindow" not in normalized_metadata
+            and isinstance(normalized_metadata.get("gantt_session"), dict)
+            and isinstance(normalized_metadata.get("gantt_subbars"), list)
+        ):
+            return normalized_metadata
+
         raw_session = (
             normalized_metadata.get("gantt_session")
             or normalized_metadata.get("session_state")
@@ -1074,6 +1119,11 @@ class CronogramaTrabajoService:
         normalized["fecha_inicio_proyecto"] = self._normalize_datetime_value(
             normalized.get("fecha_inicio_proyecto")
         )
+        normalized["fecha_inicio_referencia_proyecto"] = self._normalize_datetime_value(
+            normalized.get("fecha_inicio_referencia_proyecto")
+        )
+        if normalized.get("fecha_inicio_autoridad") not in {"datos_proyecto", "gantt"}:
+            normalized["fecha_inicio_autoridad"] = None
         normalized["fecha_fin_objetivo_proyecto"] = self._normalize_datetime_value(
             normalized.get("fecha_fin_objetivo_proyecto")
         )
@@ -1145,6 +1195,94 @@ class CronogramaTrabajoService:
 
         return None
 
+    def _resolve_external_project_start(
+        self,
+        proyecto: Optional[Proyecto] = None,
+        detail: Optional[ProyectoDetalle] = None,
+    ) -> Optional[datetime]:
+        detail_start = self._normalize_datetime_value(
+            getattr(detail, "fecha_inicio", None)
+        )
+        if detail_start is not None:
+            return detail_start
+
+        proyecto_start = self._normalize_datetime_value(
+            getattr(proyecto, "fecha_inicio", None)
+        )
+        if proyecto_start is not None:
+            return proyecto_start
+
+        return None
+
+    def _sync_config_with_external_project_start(
+        self,
+        *,
+        config: CronogramaTrabajoConfig,
+        lineas: Dict[str, dict],
+        proyecto: Optional[Proyecto] = None,
+        detail: Optional[ProyectoDetalle] = None,
+    ) -> tuple[CronogramaTrabajoConfig, Dict[str, dict], bool]:
+        project_start = self._resolve_external_project_start(proyecto, detail)
+        if project_start is None:
+            return config, lineas, False
+
+        project_start = self._align_to_workday_start(project_start, config) or project_start
+        last_reference = self._normalize_datetime_value(
+            getattr(config, "fecha_inicio_referencia_proyecto", None)
+        )
+        config_start = self._normalize_datetime_value(
+            getattr(config, "fecha_inicio_proyecto", None)
+        )
+        if last_reference is None and config_start is None:
+            next_config = config.model_copy(
+                update={
+                    "fecha_inicio_proyecto": project_start,
+                    "fecha_inicio_referencia_proyecto": project_start,
+                    "fecha_inicio_autoridad": "datos_proyecto",
+                }
+            )
+            return next_config, lineas, True
+
+        current_anchor = self._resolve_schedule_start_anchor(config, last_reference)
+
+        if last_reference is None or abs((project_start - last_reference).total_seconds()) >= 1:
+            shifted_lineas = self._shift_line_overrides_for_project_start_delta(
+                lineas,
+                old_anchor=current_anchor,
+                new_anchor=project_start,
+            )
+            next_config = config.model_copy(
+                update={
+                    "fecha_inicio_proyecto": project_start,
+                    "fecha_inicio_referencia_proyecto": project_start,
+                    "fecha_inicio_autoridad": "datos_proyecto",
+                }
+            )
+            return next_config, shifted_lineas, True
+
+        if getattr(config, "fecha_inicio_referencia_proyecto", None) is None:
+            next_config = config.model_copy(
+                update={"fecha_inicio_referencia_proyecto": project_start}
+            )
+            return next_config, lineas, True
+
+        return config, lineas, False
+
+    def _mark_gantt_start_authority(
+        self,
+        *,
+        config: CronogramaTrabajoConfig,
+        proyecto: Optional[Proyecto] = None,
+        detail: Optional[ProyectoDetalle] = None,
+    ) -> CronogramaTrabajoConfig:
+        project_start = self._resolve_external_project_start(proyecto, detail)
+        update_payload = {"fecha_inicio_autoridad": "gantt"}
+        if project_start is not None:
+            update_payload["fecha_inicio_referencia_proyecto"] = (
+                self._align_to_workday_start(project_start, config) or project_start
+            )
+        return config.model_copy(update=update_payload)
+
     def _estimate_calendar_window(
         self,
         *,
@@ -1164,36 +1302,45 @@ class CronogramaTrabajoService:
         )
 
         end_candidates: list[datetime] = []
+        max_calendar_finish = start_anchor + timedelta(days=CALENDAR_LOOKAHEAD_DAYS)
+
+        def append_bounded_candidate(value: Optional[datetime]) -> None:
+            if value is None:
+                return
+            if value < start_anchor - timedelta(days=365):
+                return
+            if value > max_calendar_finish:
+                return
+            end_candidates.append(value)
+
         if detail:
             detail_finish = self._normalize_datetime_value(
                 getattr(detail, "fecha_finalizacion", None)
             )
-            if detail_finish is not None:
-                end_candidates.append(detail_finish)
+            append_bounded_candidate(detail_finish)
             try:
                 plazo = int(getattr(detail, "plazo_ejecucion", 0) or 0)
             except Exception:
                 plazo = 0
             if plazo > 0:
-                end_candidates.append(start_anchor + timedelta(days=plazo))
+                append_bounded_candidate(start_anchor + timedelta(days=plazo))
         project_finish = self._normalize_datetime_value(
             getattr(proyecto, "fecha_fin_estimada", None)
         )
-        if project_finish is not None:
-            end_candidates.append(project_finish)
+        append_bounded_candidate(project_finish)
 
         for raw_value in (line_overrides or {}).values():
             override = self._resolve_line_override(raw_value)
             start_value = self._normalize_datetime_value(override.start_date)
             end_value = self._normalize_datetime_value(override.end_date)
-            if start_value is not None:
-                end_candidates.append(start_value)
-            if end_value is not None:
-                end_candidates.append(end_value)
+            append_bounded_candidate(start_value)
+            append_bounded_candidate(end_value)
 
         finish_anchor = max(
             end_candidates, default=(start_anchor + timedelta(days=365))
         )
+        if finish_anchor > max_calendar_finish:
+            finish_anchor = max_calendar_finish
         start_date = (start_anchor - timedelta(days=15)).date()
         end_date = (finish_anchor + timedelta(days=45)).date()
         if end_date < start_date:
@@ -1261,8 +1408,21 @@ class CronogramaTrabajoService:
         value = self._normalize_datetime_value(value)
         if value is None:
             return None
+        cache = _WORKDAY_CALC_CACHE.get()
+        cache_key = None
+        if cache is not None:
+            cache_key = (
+                id(config),
+                value.isoformat(),
+            )
+            cached = cache.setdefault("align_to_workday_start", {}).get(cache_key)
+            if cached is not None:
+                return cached
         if self._uses_advanced_calendar(config):
-            return self._advanced_align_to_work_start(value, config)
+            result = self._advanced_align_to_work_start(value, config)
+            if cache is not None:
+                cache["align_to_workday_start"][cache_key] = result
+            return result
         hour, minute = _round_hour_parts(config.hora_inicio_jornada or 8.0)
         if (
             value.hour == 0
@@ -1270,8 +1430,12 @@ class CronogramaTrabajoService:
             and value.second == 0
             and value.microsecond == 0
         ):
-            return value.replace(hour=hour, minute=minute, second=0, microsecond=0)
-        return value.replace(microsecond=0)
+            result = value.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        else:
+            result = value.replace(microsecond=0)
+        if cache is not None:
+            cache["align_to_workday_start"][cache_key] = result
+        return result
 
     def _resolve_workday_day_start(
         self, value: Optional[datetime], config: CronogramaTrabajoConfig
@@ -1279,27 +1443,48 @@ class CronogramaTrabajoService:
         value = self._normalize_datetime_value(value)
         if value is None:
             return None
+        cache = _WORKDAY_CALC_CACHE.get()
+        cache_key = None
+        if cache is not None:
+            cache_key = (id(config), value.date().isoformat())
+            cached = cache.setdefault("workday_day_start", {}).get(cache_key)
+            if cached is not None:
+                return cached
         if self._uses_advanced_calendar(config):
             slots = self._advanced_slots_for_date(value.date(), config)
             if slots:
                 start_minutes, _ = slots[0]
-                return value.replace(
+                result = value.replace(
                     hour=start_minutes // 60,
                     minute=start_minutes % 60,
                     second=0,
                     microsecond=0,
                 )
-            return value.replace(hour=0, minute=0, second=0, microsecond=0)
-        hour, minute = _round_hour_parts(config.hora_inicio_jornada or 8.0)
-        return value.replace(hour=hour, minute=minute, second=0, microsecond=0)
+            else:
+                result = value.replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            hour, minute = _round_hour_parts(config.hora_inicio_jornada or 8.0)
+            result = value.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        if cache is not None:
+            cache["workday_day_start"][cache_key] = result
+        return result
 
     def _uses_advanced_calendar(self, config: CronogramaTrabajoConfig) -> bool:
+        cache = _WORKDAY_CALC_CACHE.get()
+        cache_key = id(config)
+        if cache is not None:
+            cached = cache.setdefault("uses_advanced_calendar", {}).get(cache_key)
+            if cached is not None:
+                return cached
         advanced_calendar = getattr(config, "advanced_calendar", None)
-        return bool(
+        result = bool(
             advanced_calendar
             and getattr(advanced_calendar, "enabled", False)
             and getattr(advanced_calendar, "mode", "simple") == "advanced"
         )
+        if cache is not None:
+            cache["uses_advanced_calendar"][cache_key] = result
+        return result
 
     def _advanced_time_minutes(self, value: str) -> int:
         try:
@@ -1446,15 +1631,31 @@ class CronogramaTrabajoService:
         config: CronogramaTrabajoConfig,
         holiday_dates: Optional[set[date]] = None,
     ) -> bool:
+        cache = _WORKDAY_CALC_CACHE.get()
+        cache_key = None
+        if cache is not None:
+            cache_key = (
+                id(config),
+                value.date().isoformat(),
+                id(holiday_dates),
+            )
+            cached = cache.setdefault("is_workday", {}).get(cache_key)
+            if cached is not None:
+                return cached
         if self._uses_advanced_calendar(config):
-            return bool(self._advanced_slots_for_date(value.date(), config, holiday_dates))
-        laborable_week_days = min(
-            max(int(round(float(config.dias_laborables_semana or 5.0))), 1), 7
-        )
-        weekday = value.isoweekday()
-        if holiday_dates and value.date() in holiday_dates:
-            return False
-        return laborable_week_days >= 7 or weekday <= laborable_week_days
+            result = bool(self._advanced_slots_for_date(value.date(), config, holiday_dates))
+        else:
+            laborable_week_days = min(
+                max(int(round(float(config.dias_laborables_semana or 5.0))), 1), 7
+            )
+            weekday = value.isoweekday()
+            if holiday_dates and value.date() in holiday_dates:
+                result = False
+            else:
+                result = laborable_week_days >= 7 or weekday <= laborable_week_days
+        if cache is not None:
+            cache["is_workday"][cache_key] = result
+        return result
 
     def _build_finish_from_start(
         self,
@@ -1657,13 +1858,14 @@ class CronogramaTrabajoService:
         if value is None:
             return None
         safe_duration = _to_float(duration_days, 0.0)
+        # TASK-1859: duracion cero = anclaje exacto, sin alinear a calendario laboral
+        if abs(safe_duration) <= 0.000001:
+            return value.replace(microsecond=0)
         safe_value = (
             self._align_to_available_work_start(value, config, holiday_dates)
-            if safe_duration >= 0
+            if safe_duration > 0
             else self._normalize_datetime_value(value)
         ) or value
-        if abs(safe_duration) <= 0.000001:
-            return safe_value.replace(microsecond=0)
         if safe_duration < 0:
             return self._subtract_work_duration(
                 safe_value, abs(safe_duration), config, holiday_dates
@@ -1754,6 +1956,9 @@ class CronogramaTrabajoService:
         remaining_hours = max(_to_float(duration_days, 0.0), 0.0) * jornada_horas
         if remaining_hours <= 0.000001:
             return []
+        requested_hours = remaining_hours
+        if _to_float(duration_days, 0.0) > CALENDAR_LOOKAHEAD_DAYS:
+            return []
 
         current = self._align_to_available_work_start(
             start_date, config, holiday_dates
@@ -1792,6 +1997,8 @@ class CronogramaTrabajoService:
                 ).replace(microsecond=0)
                 if segment_finish > segment_start:
                     raw_segments.append((segment_start, segment_finish, consume_hours))
+                    if len(raw_segments) > MAX_WORKDAY_AUTO_SEGMENTS:
+                        return []
                 current = segment_finish
                 remaining_hours -= consume_hours
                 consumed_in_day = True
@@ -1808,11 +2015,13 @@ class CronogramaTrabajoService:
                     current, config, holiday_dates
                 ) or current
 
+        if remaining_hours > 0.000001:
+            return []
         if len(raw_segments) <= 1:
             return []
 
         total_hours = sum(segment[2] for segment in raw_segments)
-        if total_hours <= 0:
+        if total_hours <= 0 or abs(total_hours - requested_hours) > 0.0001:
             return []
 
         line_token = str(budget_line_id or "unbound").strip() or "unbound"
@@ -1845,26 +2054,30 @@ class CronogramaTrabajoService:
             )
         return segments
 
+    def _has_only_renewable_gantt_subbars(self, metadata: dict) -> bool:
+        subbars = list((metadata or {}).get("gantt_subbars") or [])
+        if not subbars:
+            return False
+        renewable_sources = GANTT_AUTO_SUBBAR_SOURCES | GANTT_RENEWABLE_SUBBAR_SOURCES
+        return all(
+            isinstance(segment, dict)
+            and str(segment.get("source") or "").strip().lower() in renewable_sources
+            for segment in subbars
+        )
+
     def _decorate_rows_with_workday_auto_segments(
         self,
         rows: list[CronogramaTrabajoComputedRow],
         config: CronogramaTrabajoConfig,
         holiday_dates: Optional[set[date]] = None,
     ) -> list[CronogramaTrabajoComputedRow]:
-        auto_sources = {"gantt_workday_auto_segment"}
-        renewable_sources = {
-            "factory_reset_seed",
-            "initial_creation_seed",
-            "gantt_schedule_period_seed",
-            "gantt_initial_segments",
-            "valuado_initial_segment",
-        }
+        renewable_sources = GANTT_AUTO_SUBBAR_SOURCES | GANTT_RENEWABLE_SUBBAR_SOURCES
         for row in rows or []:
             metadata = dict(getattr(row, "metadata", {}) or {})
             existing_subbars = list(metadata.get("gantt_subbars") or [])
             has_protected_subbars = any(
                 str(segment.get("source") or "").strip().lower()
-                not in (auto_sources | renewable_sources)
+                not in renewable_sources
                 for segment in existing_subbars
                 if isinstance(segment, dict)
             )
@@ -1965,6 +2178,15 @@ class CronogramaTrabajoService:
         return value.replace(microsecond=0)
 
     def _resolve_line_override(self, raw_value) -> CronogramaTrabajoLinea:
+        cache = _LINE_OVERRIDE_CACHE.get()
+        cache_key = (
+            id(raw_value)
+            if isinstance(raw_value, (dict, CronogramaTrabajoLinea))
+            else None
+        )
+        if cache is not None and cache_key is not None and cache_key in cache:
+            return cache[cache_key]
+
         if isinstance(raw_value, CronogramaTrabajoLinea):
             line_override = raw_value.model_copy(deep=True)
             line_override.metadata = self._normalize_operational_metadata(
@@ -1984,6 +2206,8 @@ class CronogramaTrabajoService:
             budget_line_id,
             line_override.metadata,
         )
+        if cache is not None and cache_key is not None:
+            cache[cache_key] = line_override
         return line_override
 
     def _resolve_line_dependencies(
@@ -2027,15 +2251,7 @@ class CronogramaTrabajoService:
         return dependencies
 
     def _resolve_line_category(self, linea: APULinea) -> int:
-        if linea.apu_hijo_id:
-            return 5
-        codigo = str(
-            (linea.recurso.codigo if linea.recurso and linea.recurso.codigo else "")
-        ).strip()
-        try:
-            return int(codigo.split("-")[0])
-        except Exception:
-            return 1
+        return resolve_resource_category_id(linea, getattr(linea, "recurso", None))
 
     def _compute_apu_work_breakdown(
         self,
@@ -2101,6 +2317,303 @@ class CronogramaTrabajoService:
 
         cache[apu.id] = dict(breakdown)
         return dict(breakdown)
+
+    def _resolve_resource_unit_label(self, recurso: Optional[Recurso]) -> str:
+        return resolve_resource_unit_label(recurso)
+
+    def _resolve_resource_price(self, linea: APULinea, recurso: Optional[Recurso]) -> Decimal:
+        return resolve_resource_price(linea, recurso)
+
+    def _build_operational_resource_key(
+        self,
+        *,
+        recurso_id: int,
+        category_id: int,
+        unit_label: str,
+        price: Decimal,
+    ) -> str:
+        return build_operational_resource_key(
+            resource_id=recurso_id,
+            category_id=category_id,
+            unit_label=unit_label,
+            price=price,
+        )
+
+    def _collect_apu_operational_resources(
+        self,
+        apu: Optional[APU],
+        *,
+        inherited_factor: Decimal = Decimal("1"),
+        nested: bool = False,
+        accumulator: Optional[Dict[str, Dict[str, Any]]] = None,
+        active_path: Optional[set[int]] = None,
+    ) -> Dict[str, Dict[str, Any]]:
+        return collect_apu_exploded_resources(
+            apu,
+            inherited_factor=inherited_factor,
+            nested=nested,
+            accumulator=accumulator,
+            active_path=active_path,
+            category_labels=self.CATEGORY_LABELS,
+        )
+
+    def _build_apu_operational_resources_metadata(self, apu: Optional[APU]) -> Dict[str, Any]:
+        if not apu:
+            return {
+                "status": "base_sin_anidados",
+                "has_nested": False,
+                "resources": [],
+                "conflicts": [],
+            }
+
+        calculation_mode, nested_count = self._resolve_apu_calculation_mode(apu)
+        accumulator = self._collect_apu_operational_resources(apu)
+        keys_by_resource: Dict[int, set[str]] = {}
+        for key, entry in accumulator.items():
+            keys_by_resource.setdefault(int(entry["recurso_id"]), set()).add(key)
+
+        conflicts = [
+            {"recurso_id": recurso_id, "keys": sorted(keys)}
+            for recurso_id, keys in keys_by_resource.items()
+            if len(keys) > 1
+        ]
+        conflicted_resource_ids = {item["recurso_id"] for item in conflicts}
+        resources = []
+        for entry in accumulator.values():
+            cantidad = _as_decimal(entry.get("cantidad"), "0")
+            trabajo_relativo = _as_decimal(entry.get("trabajo_relativo"), "0")
+            rendimiento_equivalente = (
+                trabajo_relativo / cantidad
+                if cantidad > 0
+                else Decimal("0")
+            )
+            has_direct = int(entry.get("direct_sources") or 0) > 0
+            has_nested = int(entry.get("nested_sources") or 0) > 0
+            if int(entry["recurso_id"]) in conflicted_resource_ids:
+                origin = "no_fusionado"
+            elif has_direct and has_nested:
+                origin = "consolidado"
+            elif has_nested:
+                origin = "anidado"
+            else:
+                origin = "directo"
+            resources.append(
+                {
+                    "id": entry["key"],
+                    "recurso_id": entry["recurso_id"],
+                    "codigo": entry["codigo"],
+                    "descripcion": entry["descripcion"],
+                    "categoria_id": entry["categoria_id"],
+                    "categoria": entry["categoria"],
+                    "unidad": entry["unidad"],
+                    "precio_unitario": round(_to_float(entry["precio_unitario"]), 6),
+                    "cantidad": round(_to_float(cantidad), 6),
+                    "trabajo_relativo": round(_to_float(trabajo_relativo), 6),
+                    "rendimiento_equivalente": round(_to_float(rendimiento_equivalente), 6),
+                    "origin": origin,
+                    "direct_sources": int(entry.get("direct_sources") or 0),
+                    "nested_sources": int(entry.get("nested_sources") or 0),
+                    "source_lines": entry.get("source_lines") or [],
+                }
+            )
+
+        resources.sort(
+            key=lambda item: (
+                int(item.get("categoria_id") or 0),
+                str(item.get("descripcion") or ""),
+                str(item.get("codigo") or ""),
+            )
+        )
+        has_nested_apus = nested_count > 0
+        return {
+            "status": "conflicto_explosion" if conflicts else (
+                "anidados_explotados" if has_nested_apus else "base_sin_anidados"
+            ),
+            "has_nested": has_nested_apus,
+            "calculation_mode": calculation_mode,
+            "nested_apu_count": nested_count,
+            "resources": resources,
+            "conflicts": conflicts,
+        }
+
+    def _normalize_exploded_operational_snapshot(
+        self,
+        snapshot: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        resources = snapshot.get("resources") if isinstance(snapshot, dict) else None
+        if not isinstance(resources, list):
+            return dict(snapshot or {})
+
+        has_exploded_nested = bool(snapshot.get("has_nested")) or any(
+            isinstance(resource, dict)
+            and str(resource.get("origin") or "").strip().lower() in {"anidado", "consolidado"}
+            for resource in resources
+        )
+        if not has_exploded_nested:
+            return dict(snapshot)
+
+        normalized_resources = []
+        for resource in resources:
+            if not isinstance(resource, dict):
+                normalized_resources.append(resource)
+                continue
+
+            normalized = dict(resource)
+            quantity = _as_decimal(normalized.get("cantidad"), "0")
+            source_lines = normalized.get("source_lines")
+            source_work = Decimal("0")
+            if isinstance(source_lines, list):
+                source_work = sum(
+                    (
+                        _as_decimal(source_line.get("trabajo_relativo"), "0")
+                        for source_line in source_lines
+                        if isinstance(source_line, dict)
+                    ),
+                    Decimal("0"),
+                )
+            relative_work = source_work if source_work > 0 else _as_decimal(
+                normalized.get("trabajo_relativo"),
+                "0",
+            )
+            if relative_work <= 0:
+                rendimiento = _as_decimal(
+                    normalized.get("rendimiento_equivalente")
+                    if normalized.get("rendimiento_equivalente") is not None
+                    else normalized.get("rendimiento"),
+                    "0",
+                )
+                relative_work = quantity * rendimiento
+
+            equivalent_performance = (
+                relative_work / quantity
+                if quantity > 0
+                else Decimal("0")
+            )
+            normalized["trabajo_relativo"] = round(_to_float(relative_work), 6)
+            normalized["rendimiento_equivalente"] = round(
+                _to_float(equivalent_performance),
+                6,
+            )
+            normalized_resources.append(normalized)
+
+        resolved = dict(snapshot)
+        resolved["has_nested"] = True
+        resolved["resources"] = normalized_resources
+        return resolved
+
+    def _resolve_active_apu_operational_snapshot(
+        self,
+        *,
+        apu: Optional[APU],
+        config: CronogramaTrabajoConfig,
+        row_metadata: Optional[dict],
+    ) -> Dict[str, Any]:
+        active_modification_snapshot = resolve_active_apu_resource_modification(
+            config=config,
+            apu_id=getattr(apu, "id", None),
+        )
+        if active_modification_snapshot is not None:
+            return self._normalize_exploded_operational_snapshot(active_modification_snapshot)
+
+        metadata_snapshot = (
+            row_metadata.get(APU_OPERATIONAL_RESOURCES_METADATA_KEY)
+            if isinstance(row_metadata, dict)
+            else None
+        )
+        if (
+            apu is None
+            and isinstance(metadata_snapshot, dict)
+            and isinstance(metadata_snapshot.get("resources"), list)
+        ):
+            resolved = dict(metadata_snapshot)
+            resolved["source"] = resolved.get("source") or "line_metadata"
+            return self._normalize_exploded_operational_snapshot(resolved)
+
+        return self._normalize_exploded_operational_snapshot(
+            self._build_apu_operational_resources_metadata(apu)
+        )
+
+    def _build_operational_calculation_from_snapshot(
+        self,
+        snapshot: Optional[dict],
+        budget_quantity: Decimal,
+    ) -> Optional[Dict[str, Any]]:
+        resources = snapshot.get("resources") if isinstance(snapshot, dict) else None
+        if not isinstance(resources, list) or not resources:
+            return None
+
+        unit_breakdown = {
+            "equipos_herramientas": Decimal("0"),
+            "materiales": Decimal("0"),
+            "transporte": Decimal("0"),
+            "mano_obra": Decimal("0"),
+        }
+        crew_breakdown = {
+            "equipos_herramientas": Decimal("0"),
+            "mano_obra": Decimal("0"),
+        }
+        candidates: List[Dict[str, Any]] = []
+        for index, resource in enumerate(resources, start=1):
+            if not isinstance(resource, dict):
+                continue
+            try:
+                category_id = int(resource.get("categoria_id") or 0)
+            except (TypeError, ValueError):
+                category_id = 0
+            category_key = self.CATEGORY_LABELS.get(category_id)
+            if not category_key:
+                continue
+
+            quantity = _as_decimal(resource.get("cantidad"), "0")
+            rendimiento = _as_decimal(
+                resource.get("rendimiento_equivalente")
+                if resource.get("rendimiento_equivalente") is not None
+                else resource.get("rendimiento"),
+                "0",
+            )
+            unit_work = _as_decimal(resource.get("trabajo_relativo"), "0")
+            if unit_work <= 0:
+                unit_work = quantity * rendimiento
+            if quantity > 0 and unit_work > 0:
+                rendimiento = unit_work / quantity
+            if category_key in unit_breakdown:
+                unit_breakdown[category_key] += unit_work
+            if category_key in crew_breakdown:
+                crew_breakdown[category_key] += quantity
+            if category_id in {1, 4} and unit_work > 0:
+                total_work = unit_work * budget_quantity
+                candidates.append(
+                    {
+                        "recurso_id": resource.get("recurso_id"),
+                        "nombre": resource.get("descripcion") or resource.get("recurso"),
+                        "categoria": (
+                            "Equipos y Herramientas"
+                            if category_id == 1
+                            else "Mano de Obra"
+                        ),
+                        "categoria_detalle": resource.get("origin") or "operativo",
+                        "categoria_detalle_label": resource.get("origin") or "Operativo",
+                        "priority": 1 if category_id == 4 else 2,
+                        "rendimiento_horas_unidad": rendimiento,
+                        "cantidad_total": budget_quantity,
+                        "cantidad_cuadrilla": quantity,
+                        "trabajo_horas": total_work,
+                        "costo_total": Decimal("0"),
+                        "costo_hora": Decimal("0"),
+                        "order_index": index,
+                    }
+                )
+
+        breakdown = {
+            key: value * budget_quantity
+            for key, value in unit_breakdown.items()
+        }
+        return {
+            "unit_breakdown": unit_breakdown,
+            "breakdown": breakdown,
+            "crew_breakdown": crew_breakdown,
+            "governing_resource": self._select_governing_resource_candidate(candidates),
+        }
 
     def _resolve_apu_line_cost_total(
         self,
@@ -2476,6 +2989,7 @@ class CronogramaTrabajoService:
     ) -> dict:
         quantity = budget_quantity if budget_quantity > 0 else Decimal("1")
         unit_direct_cost = _as_decimal(getattr(apu, "costo_directo", None), "0")
+        base_line_direct_cost = unit_direct_cost * quantity
         line_direct_cost = (
             budget_line_total if budget_line_total > 0 else unit_direct_cost * quantity
         )
@@ -2521,6 +3035,15 @@ class CronogramaTrabajoService:
         )
         if total_cost <= 0:
             total_cost = time_dependent_cost + quantity_dependent_cost
+        operational_line_cost = time_dependent_cost + quantity_dependent_cost
+        official_budget_line_total = (
+            budget_line_total if budget_line_total > 0 else base_line_direct_cost
+        )
+        price_source = (
+            "presupuesto_linea"
+            if budget_line_total > 0
+            else "apu_base"
+        )
 
         dominant_time_category = None
         if time_dependent_cost > 0:
@@ -2587,7 +3110,13 @@ class CronogramaTrabajoService:
 
         return {
             "version": "gantt_cost_model_v1",
+            "price_source": price_source,
             "unit_direct_cost": round(_to_float(unit_direct_cost), dec_cost),
+            "base_line_direct_cost": round(_to_float(base_line_direct_cost), dec_cost),
+            "official_budget_line_total": round(
+                _to_float(official_budget_line_total), dec_cost
+            ),
+            "operational_line_cost": round(_to_float(operational_line_cost), dec_cost),
             "line_direct_cost": round(_to_float(total_cost), dec_cost),
             "time_dependent_cost": round(_to_float(time_dependent_cost), dec_cost),
             "quantity_dependent_cost": round(
@@ -2879,6 +3408,7 @@ class CronogramaTrabajoService:
             base_start = self._align_to_workday_start(
                 base_start + timedelta(days=1), config
             ) or (base_start + timedelta(days=1))
+        max_schedule_finish = base_start + timedelta(days=CALENDAR_LOOKAHEAD_DAYS)
         row_map = {int(row.presupuesto_linea_id): row for row in rows}
 
         resolved: Dict[int, Tuple[datetime, datetime]] = {}
@@ -2961,19 +3491,30 @@ class CronogramaTrabajoService:
                     else base_start
                 )
             elif override.start_date:
-                start_date = (
-                    self._align_to_workday_start(override.start_date, config)
-                    or base_start
-                )
+                start_candidate = self._normalize_datetime_value(override.start_date)
+                if (
+                    start_candidate is not None
+                    and start_candidate <= max_schedule_finish
+                ):
+                    start_date = (
+                        self._align_to_workday_start(start_candidate, config)
+                        or base_start
+                    )
+                else:
+                    start_date = base_start
             else:
                 start_date = base_start
 
-            while start_date and not self._is_workday(
-                start_date, config, holiday_dates
-            ):
-                start_date = self._align_to_workday_start(
-                    start_date + timedelta(days=1), config
-                ) or (start_date + timedelta(days=1))
+            # TASK-1859: el bucle post-anclaje solo aplica a filas sin dependencias.
+            # Cuando hay dependencias, cada _resolve_dependency_target_start ya aplico
+            # la politica de ajuste correspondiente al tipo de dependencia y lag.
+            if not dependencies:
+                while start_date and not self._is_workday(
+                    start_date, config, holiday_dates
+                ):
+                    start_date = self._align_to_workday_start(
+                        start_date + timedelta(days=1), config
+                    ) or (start_date + timedelta(days=1))
 
             if dependencies:
                 end_date = (
@@ -2986,8 +3527,14 @@ class CronogramaTrabajoService:
                     or start_date
                 )
             elif override.end_date:
-                explicit_end = self._align_to_workday_finish(
-                    override.end_date, config, holiday_dates
+                end_candidate = self._normalize_datetime_value(override.end_date)
+                explicit_end = (
+                    self._align_to_workday_finish(
+                        end_candidate, config, holiday_dates
+                    )
+                    if end_candidate is not None
+                    and end_candidate <= max_schedule_finish
+                    else None
                 )
                 if explicit_end and explicit_end >= start_date:
                     end_date = explicit_end
@@ -3115,7 +3662,19 @@ class CronogramaTrabajoService:
         self,
         row: CronogramaTrabajoComputedRow,
         config: CronogramaTrabajoConfig,
+        holiday_dates: Optional[set[date]] = None,
     ) -> float:
+        start_date = self._normalize_datetime_value(getattr(row, "start_date", None))
+        end_date = self._normalize_datetime_value(getattr(row, "end_date", None))
+        if start_date is not None and end_date is not None and end_date >= start_date:
+            visible_duration = self._measure_work_duration_days(
+                start_date,
+                end_date,
+                config,
+                holiday_dates or set(),
+            )
+            if visible_duration > 0:
+                return visible_duration
         duration_days = _to_float(getattr(row, "dias_utiles", 0.0), 0.0)
         if duration_days > 0:
             return duration_days
@@ -3145,12 +3704,13 @@ class CronogramaTrabajoService:
         self,
         rows: list[CronogramaTrabajoComputedRow],
         config: CronogramaTrabajoConfig,
+        holiday_dates: Optional[set[date]] = None,
     ) -> Dict[str, ActividadCpm]:
         activities: Dict[str, ActividadCpm] = {}
         valid_ids = {str(int(row.presupuesto_linea_id)) for row in rows}
         durations_by_id = {
             str(int(row.presupuesto_linea_id)): self._resolve_cpm_row_duration_days(
-                row, config
+                row, config, holiday_dates
             )
             for row in rows
         }
@@ -3214,7 +3774,9 @@ class CronogramaTrabajoService:
         )
 
         try:
-            result = self.CPM_ENGINE.calcular(self._build_cpm_activities(rows, config))
+            result = self.CPM_ENGINE.calcular(
+                self._build_cpm_activities(rows, config, holiday_dates)
+            )
         except Exception as exc:
             warning = f"CPM paralelo no disponible: {exc}"
             for row in rows:
@@ -3722,6 +4284,23 @@ class CronogramaTrabajoService:
             calculation_mode, nested_apu_count = self._resolve_apu_calculation_mode(
                 detail.apu
             )
+            base_metadata = dict(override.metadata or {})
+            apu_operational_resources_metadata = (
+                self._resolve_active_apu_operational_snapshot(
+                    apu=detail.apu,
+                    config=config,
+                    row_metadata=base_metadata,
+                )
+            )
+            operational_calculation = self._build_operational_calculation_from_snapshot(
+                apu_operational_resources_metadata,
+                quantity,
+            )
+            if operational_calculation:
+                unit_breakdown = operational_calculation["unit_breakdown"]
+                breakdown = operational_calculation["breakdown"]
+                crew_breakdown = operational_calculation["crew_breakdown"]
+                governing_resource = operational_calculation["governing_resource"]
             horas_equipos = breakdown["equipos_herramientas"]
             horas_mano_obra = breakdown["mano_obra"]
             horas_transporte = breakdown["transporte"]
@@ -3796,7 +4375,6 @@ class CronogramaTrabajoService:
                 "Transporte": round(_to_float(horas_transporte), 4),
                 "Mano de Obra": round(_to_float(horas_mano_obra), 4),
             }
-            base_metadata = dict(override.metadata or {})
             duration_model_metadata = self._build_duration_model_metadata(
                 row_metadata=base_metadata,
                 progress_pct=round(_to_float(override.progress_pct, 0.0), 2),
@@ -3930,6 +4508,9 @@ class CronogramaTrabajoService:
                 categorias=categorias,
                 metadata={
                     **base_metadata,
+                    APU_OPERATIONAL_RESOURCES_METADATA_KEY: (
+                        apu_operational_resources_metadata
+                    ),
                     "duration_model": duration_model_metadata,
                     "cost_model": cost_model_metadata,
                     "crashing_review": crashing_review_metadata,
@@ -4198,6 +4779,17 @@ class CronogramaTrabajoService:
     def _build_response(
         self, db: Session, schedule: CronogramaTrabajo
     ) -> CronogramaTrabajoResponse:
+        token = _LINE_OVERRIDE_CACHE.set({})
+        workday_token = _WORKDAY_CALC_CACHE.set({})
+        try:
+            return self._build_response_uncached(db, schedule)
+        finally:
+            _WORKDAY_CALC_CACHE.reset(workday_token)
+            _LINE_OVERRIDE_CACHE.reset(token)
+
+    def _build_response_uncached(
+        self, db: Session, schedule: CronogramaTrabajo
+    ) -> CronogramaTrabajoResponse:
         schedule = (
             db.query(CronogramaTrabajo)
             .filter(CronogramaTrabajo.id == schedule.id)
@@ -4238,6 +4830,25 @@ class CronogramaTrabajoService:
         raw_config, raw_lineas = self._split_schedule_payload(schedule.schedule_data)
         config = self._resolve_config(raw_config)
         detail = self._resolve_project_detail(db, proyecto)
+        config, raw_lineas, synced_project_start = (
+            self._sync_config_with_external_project_start(
+                config=config,
+                lineas=raw_lineas,
+                proyecto=proyecto,
+                detail=detail,
+            )
+        )
+        if synced_project_start:
+            schedule = cronograma_trabajo_repo.update(
+                db,
+                schedule,
+                {
+                    "schedule_data": self._join_schedule_payload(
+                        config.model_dump(mode="json"),
+                        raw_lineas,
+                    )
+                },
+            )
         resolved_project_start = self._resolve_project_start_reference(
             config=config,
             proyecto=proyecto,
@@ -4294,8 +4905,9 @@ class CronogramaTrabajoService:
             ),
             default=None,
         )
+        response_lineas = self._apply_computed_rows_to_line_overrides(raw_lineas, rows)
         line_map = {}
-        for key, value in (raw_lineas or {}).items():
+        for key, value in (response_lineas or {}).items():
             override = self._resolve_line_override(value)
             try:
                 line_id = int(key)
@@ -4307,12 +4919,41 @@ class CronogramaTrabajoService:
                 dependency.source_id for dependency in override.dependencies
             ]
             line_map[str(key)] = override
+        base_trabajo_id = None
+        budget_details = getattr(presupuesto, "detalle", []) or []
+        try:
+            budget_details_iter = iter(budget_details)
+        except TypeError:
+            budget_details_iter = iter(())
+        for detail_line in budget_details_iter:
+            apu = getattr(detail_line, "apu", None)
+            if apu and getattr(apu, "base_trabajo_id", None) is not None:
+                base_trabajo_id = getattr(apu, "base_trabajo_id", None)
+                break
+        try:
+            presupuesto_revision = int(getattr(presupuesto, "revision", 0) or 0)
+        except (TypeError, ValueError):
+            presupuesto_revision = 0
+        official_source = project_functional_modification_service.resolve_official_source(
+            db,
+            empresa_id=schedule.empresa_id,
+            proyecto_id=schedule.proyecto_id,
+            presupuesto_id=schedule.presupuesto_id,
+            base_trabajo_id=base_trabajo_id,
+            revision=presupuesto_revision,
+            base_snapshot={
+                "presupuesto_id": schedule.presupuesto_id,
+                "base_trabajo_id": base_trabajo_id,
+                "revision": presupuesto_revision,
+            },
+        )
         return CronogramaTrabajoResponse(
             id=schedule.id,
             presupuesto_id=schedule.presupuesto_id,
             proyecto_id=schedule.proyecto_id,
             empresa_id=schedule.empresa_id,
             config=config,
+            official_source=official_source,
             schedule_data=line_map,
             rows=rows,
             summary=summary,
@@ -4687,6 +5328,37 @@ class CronogramaTrabajoService:
         rows: list[CronogramaTrabajoComputedRow],
     ) -> Dict[str, dict]:
         next_line_overrides = {str(key): dict(value or {}) for key, value in (line_overrides or {}).items()}
+        persistence_anchor = min(
+            (
+                value
+                for value in (
+                    self._normalize_datetime_value(getattr(row, "start_date", None))
+                    for row in (rows or [])
+                )
+                if value is not None
+            ),
+            default=None,
+        )
+        max_persisted_finish = (
+            persistence_anchor + timedelta(days=CALENDAR_LOOKAHEAD_DAYS)
+            if persistence_anchor is not None
+            else None
+        )
+        min_persisted_start = (
+            persistence_anchor - timedelta(days=365)
+            if persistence_anchor is not None
+            else None
+        )
+
+        def is_persistable_date(value: Optional[datetime]) -> bool:
+            if value is None:
+                return False
+            if min_persisted_start is not None and value < min_persisted_start:
+                return False
+            if max_persisted_finish is not None and value > max_persisted_finish:
+                return False
+            return True
+
         for row in rows or []:
             key = str(getattr(row, "presupuesto_linea_id", "") or "").strip()
             if not key:
@@ -4694,15 +5366,27 @@ class CronogramaTrabajoService:
             payload = dict(next_line_overrides.get(key) or {})
             start_date = self._normalize_datetime_value(getattr(row, "start_date", None))
             end_date = self._normalize_datetime_value(getattr(row, "end_date", None))
-            if start_date is not None:
+            if is_persistable_date(start_date):
                 payload["start_date"] = start_date.isoformat()
-            if end_date is not None:
+            else:
+                payload.pop("start_date", None)
+            if is_persistable_date(end_date) and (
+                start_date is None or end_date >= start_date
+            ):
                 payload["end_date"] = end_date.isoformat()
+            else:
+                payload.pop("end_date", None)
 
             metadata = dict(payload.get("metadata") or {})
             row_metadata = dict(getattr(row, "metadata", {}) or {})
+            if APU_OPERATIONAL_RESOURCES_METADATA_KEY in row_metadata:
+                metadata[APU_OPERATIONAL_RESOURCES_METADATA_KEY] = dict(
+                    row_metadata.get(APU_OPERATIONAL_RESOURCES_METADATA_KEY) or {}
+                )
             if "gantt_subbars" in row_metadata:
                 metadata["gantt_subbars"] = list(row_metadata.get("gantt_subbars") or [])
+            elif self._has_only_renewable_gantt_subbars(metadata):
+                metadata.pop("gantt_subbars", None)
             if "gantt_operational" in row_metadata:
                 metadata["gantt_operational"] = dict(row_metadata.get("gantt_operational") or {})
             payload["metadata"] = self._normalize_operational_metadata(key, metadata)
@@ -4779,6 +5463,28 @@ class CronogramaTrabajoService:
 
         resolved_config = self._resolve_config(config)
         project_detail = self._resolve_project_detail(db, proyecto)
+        if (
+            obj_in.config is not None
+            and "fecha_inicio_proyecto"
+            in getattr(obj_in.config, "model_fields_set", set())
+        ):
+            resolved_config = self._mark_gantt_start_authority(
+                config=resolved_config,
+                proyecto=proyecto,
+                detail=project_detail,
+            )
+            config = resolved_config.model_dump(mode="json")
+        else:
+            resolved_config, lineas, synced_project_start = (
+                self._sync_config_with_external_project_start(
+                    config=resolved_config,
+                    lineas=lineas,
+                    proyecto=proyecto,
+                    detail=project_detail,
+                )
+            )
+            if synced_project_start:
+                config = resolved_config.model_dump(mode="json")
         resolved_project_start = self._resolve_project_start_reference(
             config=resolved_config,
             proyecto=proyecto,
@@ -5311,7 +6017,11 @@ class CronogramaTrabajoService:
         updated = cronograma_trabajo_repo.update(
             db,
             schedule,
-            {"schedule_data": self._join_schedule_payload(raw_config, lineas)},
+            {
+                "schedule_data": jsonable_encoder(
+                    self._join_schedule_payload(raw_config, lineas)
+                )
+            },
         )
         return self._build_response(db, updated)
 
@@ -5523,6 +6233,28 @@ class CronogramaTrabajoService:
 
         resolved_config = self._resolve_config(config)
         project_detail = self._resolve_project_detail(db, proyecto)
+        if (
+            obj_in.config is not None
+            and "fecha_inicio_proyecto"
+            in getattr(obj_in.config, "model_fields_set", set())
+        ):
+            resolved_config = self._mark_gantt_start_authority(
+                config=resolved_config,
+                proyecto=proyecto,
+                detail=project_detail,
+            )
+            config = resolved_config.model_dump(mode="json")
+        else:
+            resolved_config, lineas, synced_project_start = (
+                self._sync_config_with_external_project_start(
+                    config=resolved_config,
+                    lineas=lineas,
+                    proyecto=proyecto,
+                    detail=project_detail,
+                )
+            )
+            if synced_project_start:
+                config = resolved_config.model_dump(mode="json")
         resolved_project_start = self._resolve_project_start_reference(
             config=resolved_config,
             proyecto=proyecto,

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from typing import List, Optional
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 import base64
 import mimetypes
@@ -15,6 +15,12 @@ from app.services.license_policy import validate_company_limits_against_usage, v
 from app.core.phone_normalization import is_valid_phone, normalize_phone
 
 class EmpresaService:
+    def get_display_name(self, empresa: Optional[Empresa]) -> Optional[str]:
+        if not empresa:
+            return None
+        alias = (getattr(empresa, "alias", None) or "").strip()
+        return alias or getattr(empresa, "nombre", None)
+
     def _resolve_logo_url(self, logo_url: Optional[str]) -> Optional[str]:
         if not logo_url or not isinstance(logo_url, str):
             return None if logo_url is None else (logo_url if isinstance(logo_url, str) else None)
@@ -62,6 +68,14 @@ class EmpresaService:
         return empresa_repo.get_all(db)
 
     def create_empresa(self, db: Session, empresa_in: EmpresaCreate, current_user: Usuario) -> Empresa:
+        if not empresa_in.ruc or len(empresa_in.ruc.strip()) != 13 or not empresa_in.ruc.strip().isdigit():
+            raise HTTPException(status_code=400, detail="El RUC empresarial debe contener exactamente 13 dígitos.")
+        from app.services.sri_ruc import lookup_ruc
+
+        fiscal_data = lookup_ruc(db, empresa_in.ruc.strip())
+        if not fiscal_data:
+            raise HTTPException(status_code=409, detail="El RUC no consta en la fuente fiscal vigente.")
+        empresa_in.nombre = fiscal_data["business_name"]
         license_start_date = empresa_in.license_start_date or date.today()
         license_end_date = empresa_in.license_end_date or (license_start_date + timedelta(days=365))
         if empresa_in.telefono:
@@ -81,6 +95,15 @@ class EmpresaService:
             license_start_date=license_start_date, 
             license_end_date=license_end_date
         )
+        db_obj.fiscal_status = fiscal_data.get("status")
+        db_obj.fiscal_taxpayer_type = fiscal_data.get("taxpayer_type")
+        db_obj.fiscal_start_date = fiscal_data.get("start_date")
+        db_obj.fiscal_economic_activity = fiscal_data.get("economic_activity")
+        db_obj.fiscal_source = fiscal_data.get("source")
+        db_obj.fiscal_source_date = fiscal_data.get("source_date")
+        db_obj.fiscal_verified_at = datetime.now(timezone.utc)
+        db.commit()
+        db.refresh(db_obj)
 
         record_audit_event(
             db,
@@ -91,8 +114,8 @@ class EmpresaService:
             target_empresa_id=db_obj.id,
             entity_type="empresa",
             entity_id=db_obj.id,
-            message=f"Empresa creada: {db_obj.nombre}",
-            payload={"empresa_nombre": db_obj.nombre, "ruc": db_obj.ruc},
+            message=f"Empresa creada: {self.get_display_name(db_obj)}",
+            payload={"empresa_nombre": self.get_display_name(db_obj), "nombre_legal": db_obj.nombre},
         )
         return db_obj
 
@@ -108,6 +131,13 @@ class EmpresaService:
                 )
         
         update_data = empresa_in.model_dump(exclude_unset=True)
+        if "ruc" in update_data or "nombre" in update_data:
+            raise HTTPException(status_code=409, detail="El RUC y la razón social fiscal no son editables manualmente.")
+        if update_data.get("activa") is True and getattr(db_obj, "lifecycle_status", "active") == "baja_purgada":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="La empresa esta dada de baja y purgada. Cargue y restaure una copia validada antes de activarla.",
+            )
         effective_country = update_data.get("pais", db_obj.pais)
         if "telefono" in update_data and update_data["telefono"]:
             if not is_valid_phone(update_data["telefono"]):
@@ -128,6 +158,13 @@ class EmpresaService:
                 "activa",
                 "session_timeout_minutes",
                 "marketplace_can_sell",
+                "lifecycle_status",
+                "baja_purged_at",
+                "baja_backup_hash",
+                "baja_backup_manifest",
+                "baja_purged_counts",
+                "baja_requested_by_email",
+                "baja_recovery_required",
             ]
             for field in forbidden_fields:
                 if field in update_data:
@@ -149,30 +186,19 @@ class EmpresaService:
                 target_empresa_id=updated_obj.id,
                 entity_type="empresa",
                 entity_id=updated_obj.id,
-                message=f"Empresa actualizada: {updated_obj.nombre}",
+                message=f"Empresa actualizada: {self.get_display_name(updated_obj)}",
                 payload={"fields": sorted(update_data.keys())},
             )
         return updated_obj
 
     def delete_empresa(self, db: Session, empresa_id: int, current_user: Usuario) -> None:
-        db_obj = self.get_empresa(db, empresa_id)
-        
-        empresa_id_deleted = db_obj.id
-        empresa_nombre_deleted = db_obj.nombre
-        
-        empresa_repo.remove(db, id=empresa_id)
-
-        record_audit_event(
-            db,
-            module="empresas",
-            event_type="empresa_deleted",
-            severity="critical",
-            actor=current_user,
-            target_empresa_id=empresa_id_deleted,
-            entity_type="empresa",
-            entity_id=empresa_id_deleted,
-            message=f"Empresa eliminada: {empresa_nombre_deleted}",
-            payload={"empresa_nombre": empresa_nombre_deleted},
+        self.get_empresa(db, empresa_id)
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "La eliminacion fisica de empresas esta bloqueada. Use SaaS > Empresas > Baja purgada "
+                "con copia de seguridad validada para liberar almacenamiento y conservar la ficha minima."
+            ),
         )
 
     def update_logo(self, db: Session, empresa_id: int, logo_url: str, current_user: Usuario) -> Empresa:

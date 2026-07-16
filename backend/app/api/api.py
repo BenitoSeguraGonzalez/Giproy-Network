@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 from app.api.endpoints import (
-    auth, usuarios, proyectos, empresas, paises, recursos, apus, 
-    presupuestos, bases_trabajo, subcategorias, subcategorias_items, 
-    dispositivos, utils, maestros, proyecto_detalles, stakeholders, roles, 
+    auth, usuarios, proyectos, empresas, paises, recursos, apus,
+    presupuestos, bases_trabajo, subcategorias, subcategorias_items,
+    dispositivos, utils, maestros, proyecto_detalles, stakeholders, roles,
     edo, edt, system_announcements, project_calendar_entries, personal_todos, admin_audit, admin_system, admin_import_models,
-    admin_maintenance, admin_licenses, admin_bim, cronogramas, polinomica, bim, bim_models, bim_view_states, bim_links,
-    cronogramas_trabajo, reporting, community
+    admin_maintenance, admin_licenses, admin_bim, admin_config, cronogramas, polinomica, bim, bim_models, bim_view_states, bim_links,
+    cronogramas_trabajo, reporting, community, conecta, equipo, license_notifications, transferencias, company_backups, sri_ruc
 )
 from app.api.endpoints import marketplace
 
@@ -42,6 +42,7 @@ api_router.include_router(admin_import_models.router, prefix="/admin-import-mode
 api_router.include_router(admin_maintenance.router, prefix="/admin-maintenance", tags=["Modo Mantenimiento"])
 api_router.include_router(admin_bim.router, prefix="/admin-bim", tags=["Configuración BIM"])
 api_router.include_router(admin_licenses.router, prefix="/admin-licenses", tags=["Licencias y Cuotas"])
+api_router.include_router(license_notifications.router, prefix="/license-notifications", tags=["Avisos de Licencias y Compras"])
 api_router.include_router(cronogramas.router, prefix="/cronogramas", tags=["Cronogramas"])
 api_router.include_router(polinomica.router, prefix="/polinomica", tags=["Fórmula Polinómica"])
 api_router.include_router(bim.router, prefix="/bim", tags=["BIM"])
@@ -52,3 +53,9 @@ api_router.include_router(cronogramas_trabajo.router, prefix="/cronogramas-traba
 api_router.include_router(reporting.router, prefix="/reporting", tags=["Reportes Profesionales"])
 api_router.include_router(community.router, prefix="/community", tags=["Comunidad"])
 api_router.include_router(marketplace.router, prefix="/marketplace", tags=["Marketplace"])
+api_router.include_router(conecta.router, prefix="/conecta", tags=["Conecta"])
+api_router.include_router(equipo.router, prefix="/equipo", tags=["Equipo"])
+api_router.include_router(transferencias.router, prefix="/transferencias", tags=["Envios y Transferencias"])
+api_router.include_router(company_backups.router, prefix="/company-backups", tags=["Copias de Seguridad de Empresa"])
+api_router.include_router(admin_config.router, prefix="/admin-config", tags=["Configuracion de Administracion"])
+api_router.include_router(sri_ruc.router, prefix="/sri-ruc", tags=["Catálogo fiscal SRI"])

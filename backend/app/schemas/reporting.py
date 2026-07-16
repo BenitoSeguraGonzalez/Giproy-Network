@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 
 class ReportPreviewRequest(BaseModel):
@@ -7,6 +7,10 @@ class ReportPreviewRequest(BaseModel):
     entity_ids: List[int] = Field(min_length=1)
     template_id: Optional[str] = "001"
     variant: Optional[str] = None
+    filters: Optional[Dict[str, Any]] = None
+    project_id: Optional[int] = None
+    base_trabajo_id: Optional[int] = None
+    revision: Optional[int] = None
 
 
 class ReportExportRequest(BaseModel):
@@ -15,3 +19,7 @@ class ReportExportRequest(BaseModel):
     template_id: Optional[str] = "001"
     format: Literal["xlsx", "pdf", "pdf_excel"] = "xlsx"
     variant: Optional[str] = None
+    filters: Optional[Dict[str, Any]] = None
+    project_id: Optional[int] = None
+    base_trabajo_id: Optional[int] = None
+    revision: Optional[int] = None

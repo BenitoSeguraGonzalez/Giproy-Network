@@ -10,9 +10,18 @@ class Empresa(Base):
     __tablename__ = "empresas"
 
     id = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String(255), nullable=False, index=True)
+    nombre = Column(Text, nullable=False, index=True)
+    alias = Column(String(100), nullable=True, index=True)
     codigo = Column(String(50), unique=True, nullable=True, index=True)
-    ruc = Column(String(20), unique=True, nullable=True, index=True)
+    ruc = Column(String(20), unique=True, nullable=False, index=True)
+    is_system_company = Column(Boolean, default=False, nullable=False, server_default="0", index=True)
+    fiscal_status = Column(String(100), nullable=True)
+    fiscal_taxpayer_type = Column(String(150), nullable=True)
+    fiscal_start_date = Column(String(50), nullable=True)
+    fiscal_economic_activity = Column(Text, nullable=True)
+    fiscal_source = Column(String(50), nullable=True)
+    fiscal_source_date = Column(DateTime(timezone=True), nullable=True)
+    fiscal_verified_at = Column(DateTime(timezone=True), nullable=True)
     direccion = Column(String(500), nullable=True)
     localidad = Column(String(255), nullable=True)
     canton = Column(String(255), nullable=True)
@@ -36,6 +45,14 @@ class Empresa(Base):
     session_timeout_minutes = Column(Integer, default=30, nullable=False)
     use_omniclass = Column(Boolean, default=False, nullable=False, server_default="0")
     marketplace_can_sell = Column(Boolean, default=True, nullable=False, server_default="1")
+
+    lifecycle_status = Column(String(40), default="active", nullable=False, server_default="active", index=True)
+    baja_purged_at = Column(DateTime(timezone=True), nullable=True)
+    baja_backup_hash = Column(String(128), nullable=True, index=True)
+    baja_backup_manifest = Column(JSON, nullable=True)
+    baja_purged_counts = Column(JSON, nullable=True)
+    baja_requested_by_email = Column(String(255), nullable=True)
+    baja_recovery_required = Column(Boolean, default=False, nullable=False, server_default="0")
     
     # Configuración de Proyectos
     proy_prefijo = Column(String(50), nullable=True) # Prefijo (ej. GiProy)

@@ -26,8 +26,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { LiquidButton } from '../components/ui/liquid-button';
-import BulkDeleteConfirmModal from '../components/precios-unitarios/BulkDeleteConfirmModal';
-import ResourceEditorModal from '../components/precios-unitarios/ResourceEditorModal';
 import ImportFormatHint from '../components/precios-unitarios/ImportFormatHint';
 import utilsApi from '../api/utils';
 import SearchableSelect from '../components/ui/searchable-select';
@@ -50,13 +48,7 @@ import {
     resolveApuLineOperationalSubtotal,
     resolveApuLineOperationalUnitPrice,
 } from '../utils/operationalNumbers';
-import CommonReportPreviewModal from '../components/reporting/CommonReportPreviewModal';
-import ReportGenerationModal from '../components/reporting/ReportGenerationModal';
 import { extractBlobErrorMessage } from '../utils/apiBlobErrors';
-import {
-    readPortableWorkspaceOverride,
-    resolvePortableWorkspace
-} from '../utils/portableWorkspace';
 import { buildOmniClassOptions, getOmniClassTableForApu, getOmniClassTableForResourceCategory } from '../utils/omniclass';
 import { includesNormalized, normalizeSearchToken } from '../utils/normalizeSearch';
 import { buildReportFileName, sanitizeReportContext } from '../utils/reportFileName';
@@ -82,6 +74,11 @@ const USE_ENHANCED_APU_SUBCATEGORY_LIST = true;
 
 import ErrorBoundary from '../components/ErrorBoundary';
 
+const BulkDeleteConfirmModal = React.lazy(() => import('../components/precios-unitarios/BulkDeleteConfirmModal'));
+const ResourceEditorModal = React.lazy(() => import('../components/precios-unitarios/ResourceEditorModal'));
+const CommonReportPreviewModal = React.lazy(() => import('../components/reporting/CommonReportPreviewModal'));
+const ReportGenerationModal = React.lazy(() => import('../components/reporting/ReportGenerationModal'));
+
 const APU_EDITOR_GLOBAL_RENDIMIENTO_STORAGE_KEY = 'giproy_apu_editor_global_rendimiento_activado';
 const APU_STATUS_FILTER_OPTIONS = [
     { id: 'all', label: 'Todos' },
@@ -92,6 +89,9 @@ const APU_STATUS_FILTER_OPTIONS = [
 const PROJECT_APU_ENTRY = 'project';
 const PROJECT_APU_RETURN = 'project';
 const PROJECT_APU_RETURN_TAB = 'presupuesto';
+const APU_EDITOR_DESKTOP_MIN_WIDTH = 1920;
+const APU_EDITOR_DESKTOP_MIN_HEIGHT = 1080;
+const APU_EDITOR_HEADER_HEIGHT_PX = 76;
 
 const readApuEditorGlobalRendimientoPreference = () => {
     if (typeof window === 'undefined') return true;
@@ -377,8 +377,10 @@ const APUs = () => {
     const [dragOverCatEditor, setDragOverCatEditor] = useState(null); // Para el editor
     const [draggingEditorLineKey, setDraggingEditorLineKey] = useState(null);
     const [dragOverEditorLineKey, setDragOverEditorLineKey] = useState(null);
-    const [viewportWidth, setViewportWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1920));
-    const [forcedPortableWorkspace, setForcedPortableWorkspace] = useState(() => readPortableWorkspaceOverride());
+    const [viewportSize, setViewportSize] = useState(() => ({
+        width: typeof window !== 'undefined' ? window.innerWidth : APU_EDITOR_DESKTOP_MIN_WIDTH,
+        height: typeof window !== 'undefined' ? window.innerHeight : APU_EDITOR_DESKTOP_MIN_HEIGHT
+    }));
     const importPreview = useMemo(() => buildApuImportPreview(importText, apus, apuUnidades), [importText, apus, apuUnidades]);
     const routeQuery = useMemo(() => new URLSearchParams(location.search), [location.search]);
     const requestedApuId = Number(routeQuery.get('apu_id') || 0);
@@ -422,7 +424,7 @@ const APUs = () => {
                     setSelectedBaseTrabajo(baseRes.data);
                 }
             } catch (error) {
-                console.error('Error sincronizando base del APU adquirido:', error);
+                globalThis.reportClientError?.('Error sincronizando base del APU adquirido:', error);
             }
         };
 
@@ -617,26 +619,19 @@ const APUs = () => {
     );
 
     useEffect(() => {
-        const handleResize = () => setViewportWidth(window.innerWidth);
+        const handleResize = () => setViewportSize({
+            width: window.innerWidth,
+            height: window.innerHeight
+        });
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    useEffect(() => {
-        const syncOverride = () => setForcedPortableWorkspace(readPortableWorkspaceOverride());
-        window.addEventListener('storage', syncOverride);
-        window.addEventListener('giproy:portable-workspace-changed', syncOverride);
-        return () => {
-            window.removeEventListener('storage', syncOverride);
-            window.removeEventListener('giproy:portable-workspace-changed', syncOverride);
-        };
-    }, []);
-
-    const isEditorCompact = resolvePortableWorkspace({
-        width: viewportWidth,
-        height: typeof window !== 'undefined' ? window.innerHeight : 1080,
-        forced: user?.rol?.toLowerCase() === 'superadministrador' && forcedPortableWorkspace
-    });
+    const isEditorBelowDesktopBaseline = (
+        viewportSize.width < APU_EDITOR_DESKTOP_MIN_WIDTH
+        || viewportSize.height < APU_EDITOR_DESKTOP_MIN_HEIGHT
+    );
+    const isEditorCompact = isEditorBelowDesktopBaseline;
 
     useEffect(() => {
         if (!editingApu) {
@@ -669,7 +664,7 @@ const APUs = () => {
             const res = await maestrosApi.getOmniClassSearch(term, currentApuOmniClassTable);
             setOmniclassOptions(buildOmniClassOptions(res || []));
         } catch (error) {
-            console.error("Error searching OmniClass:", error);
+            globalThis.reportClientError?.("Error searching OmniClass:", error);
         } finally {
             setIsOmniLoading(false);
         }
@@ -682,7 +677,7 @@ const APUs = () => {
             const res = await maestrosApi.getOmniClassTabla(currentApuOmniClassTable);
             setOmniclassOptions(buildOmniClassOptions(res || []));
         } catch (error) {
-            console.error("Error preloading OmniClass:", error);
+            globalThis.reportClientError?.("Error preloading OmniClass:", error);
         } finally {
             setIsOmniLoading(false);
         }
@@ -719,7 +714,7 @@ const APUs = () => {
                 const resCats = await recursosApi.getCategorias(selectedBaseTrabajo.id, empId);
                 setCategorias(resCats.data || []);
             } catch (err) {
-                console.error("Error fetching category counts:", err);
+                globalThis.reportClientError?.("Error fetching category counts:", err);
             }
 
             // Filtrar Cat 5 por el campo categórico real para evitar falsos vacíos.
@@ -751,14 +746,16 @@ const APUs = () => {
                 ...(currentSubcatId ? { subcategoria_item_id: currentSubcatId } : {}),
                 empresa_id: empId,
                 revision: effectiveBaseRevision,
+                ...(activeProject?.id ? { proyecto_id: activeProject.id } : {}),
                 limit: 1000
-            });
+            }, { summary: true });
             setApus(resApus.data);
 
             const resNestedApus = await apusApi.getAll({
                 base_trabajo_id: selectedBaseTrabajo.id,
                 empresa_id: empId,
                 revision: effectiveBaseRevision,
+                ...(activeProject?.id ? { proyecto_id: activeProject.id } : {}),
                 limit: 1000
             });
             setNestedApusCatalog(resNestedApus.data || []);
@@ -771,7 +768,7 @@ const APUs = () => {
             const resUn = await recursosApi.getUnidades(5, selectedBaseTrabajo.id, empId);
             setApuUnidades(resUn.data);
         } catch (error) {
-            console.error("Error fetching data:", error);
+            globalThis.reportClientError?.("Error fetching data:", error);
             setApus([]);
             setNestedApusCatalog([]);
             setRecursos([]);
@@ -780,7 +777,7 @@ const APUs = () => {
         } finally {
             setLoading(false);
         }
-    }, [selectedBaseTrabajo, selectedEmpresa?.id, user?.empresa_id, selectedSubcatId, navigate, effectiveBaseRevision]);
+    }, [selectedBaseTrabajo, selectedEmpresa?.id, user?.empresa_id, selectedSubcatId, navigate, effectiveBaseRevision, activeProject?.id]);
 
     useEffect(() => {
         fetchData();
@@ -1022,7 +1019,10 @@ const APUs = () => {
             setLoading(true);
             const empId = selectedEmpresa?.id || user?.empresa_id;
             // Obtener el detalle completo del APU (incluyendo líneas)
-            const res = await apusApi.getById(apu.id, empId);
+            const res = await apusApi.getById(apu.id, empId, {
+                ...(activeProject?.id ? { proyecto_id: activeProject.id } : {}),
+                ...(effectiveBaseRevision !== undefined ? { revision: effectiveBaseRevision } : {}),
+            });
             const fullApu = res.data;
 
             // Mapear líneas del backend al formato esperado por el frontend
@@ -1086,7 +1086,7 @@ const APUs = () => {
             setFormApu(nextForm);
             setInitialApuEditorSnapshot(serializeApuEditorState(nextForm));
         } catch (error) {
-            console.error("Error al cargar detalle del APU:", error);
+            globalThis.reportClientError?.("Error al cargar detalle del APU:", error);
             showToast("Error al cargar el detalle completo del APU", "error");
         } finally {
             setLoading(false);
@@ -1325,7 +1325,7 @@ const APUs = () => {
             });
             setAvailableBases(otherBases);
         } catch (error) {
-            console.error("Error loading bases:", error);
+            globalThis.reportClientError?.("Error loading bases:", error);
             showToast("Error crítico al cargar bases de trabajo para importación", "error");
         } finally {
             setBaseImportLoading(false);
@@ -1348,7 +1348,12 @@ const APUs = () => {
             setSourceBaseSubcats(resSub.data);
 
             // Cargar APUs de la base fuente
-            const resApu = await apusApi.getAll({ base_trabajo_id: baseId, empresa_id: empId, revision: sourceRevision });
+            const resApu = await apusApi.getAll({
+                base_trabajo_id: baseId,
+                empresa_id: empId,
+                revision: sourceRevision,
+                limit: 1000
+            }, { summary: true });
             setSourceBaseApus(resApu.data);
 
             setImportingStep(2);
@@ -1523,6 +1528,15 @@ const APUs = () => {
         setShowBulkDeleteModal(true);
     };
 
+    const buildApuReportProjectContext = () => {
+        if (!activeProject?.id) return {};
+        return {
+            project_id: activeProject.id,
+            base_trabajo_id: selectedBaseTrabajo?.id || activeProject.base_trabajo_id || null,
+            revision: activeProject.revision ?? effectiveBaseRevision ?? null,
+        };
+    };
+
     const handleBulkDeleteConfirm = async () => {
         try {
             setBulkDeleting(true);
@@ -1550,12 +1564,13 @@ const APUs = () => {
             const response = await reportingApi.previewReport({
                 report_type: 'apu',
                 entity_ids: selectedApus,
-                template_id: templateId
+                template_id: templateId,
+                ...buildApuReportProjectContext(),
             });
             setReportPreview(response.data);
             setShowReportPreviewModal(true);
         } catch (error) {
-            console.error("Error al preparar vista previa:", error);
+            globalThis.reportClientError?.("Error al preparar vista previa:", error);
             showToast("Error al preparar la vista previa del reporte", "error");
         } finally {
             setLoading(false);
@@ -1570,7 +1585,8 @@ const APUs = () => {
                 report_type: 'apu',
                 entity_ids: reportPreview.items.map(item => item.id),
                 template_id: reportPreview.template_id || "001",
-                format: 'xlsx'
+                format: 'xlsx',
+                ...buildApuReportProjectContext(),
             });
             const reportName = reportPreview.items.length > 1
                 ? buildReportFileName({
@@ -1588,7 +1604,7 @@ const APUs = () => {
             downloadBlobResponse(response, reportName);
             showToast("Reporte Excel generado correctamente");
         } catch (error) {
-            console.error("Error al exportar Excel:", error);
+            globalThis.reportClientError?.("Error al exportar Excel:", error);
             showToast(await extractBlobErrorMessage(error, "Error al exportar el reporte a Excel"), "error");
         } finally {
             setReportExporting(false);
@@ -1603,7 +1619,8 @@ const APUs = () => {
                 report_type: 'apu',
                 entity_ids: reportPreview.items.map((item) => item.id),
                 template_id: reportPreview.template_id || "001",
-                format: 'pdf'
+                format: 'pdf',
+                ...buildApuReportProjectContext(),
             });
             const reportName = reportPreview.selection_count > 1
                 ? buildReportFileName({
@@ -1621,7 +1638,7 @@ const APUs = () => {
             downloadBlobResponse(response, reportName, 'application/pdf');
             showToast("Reporte PDF generado correctamente");
         } catch (error) {
-            console.error("Error al exportar PDF:", error);
+            globalThis.reportClientError?.("Error al exportar PDF:", error);
             showToast(await extractBlobErrorMessage(error, "Error al exportar el reporte a PDF"), "error");
         } finally {
             setReportExporting(false);
@@ -1636,7 +1653,8 @@ const APUs = () => {
                 report_type: 'apu',
                 entity_ids: reportPreview.items.map((item) => item.id),
                 template_id: reportPreview.template_id || "001",
-                format: 'pdf_excel'
+                format: 'pdf_excel',
+                ...buildApuReportProjectContext(),
             });
             const reportName = reportPreview.selection_count > 1
                 ? buildReportFileName({
@@ -1654,7 +1672,7 @@ const APUs = () => {
             downloadBlobResponse(response, reportName, 'application/pdf');
             showToast("PDF desde Excel generado correctamente");
         } catch (error) {
-            console.error("Error al exportar PDF desde Excel:", error);
+            globalThis.reportClientError?.("Error al exportar PDF desde Excel:", error);
             showToast(await extractBlobErrorMessage(error, "Error al exportar el reporte PDF desde Excel"), "error");
         } finally {
             setReportExporting(false);
@@ -2120,7 +2138,7 @@ const APUs = () => {
                     }
                 }}
                 onChange={(e) => updateLinea(rowKey, 'cantidad', e.target.value)}
-                className="w-full text-center bg-white border border-zinc-200 rounded-lg px-2 py-1.5 text-[10px] font-black text-zinc-900 focus:outline-none focus:border-[#F39200] focus:ring-1 focus:ring-[#F39200] transition-all"
+                className="w-full text-center bg-white border border-zinc-200 rounded-lg px-2 py-1 text-[9px] font-black text-zinc-900 focus:outline-none focus:border-[#F39200] focus:ring-1 focus:ring-[#F39200] transition-all"
             />
         );
         const priceInput = (
@@ -2131,7 +2149,7 @@ const APUs = () => {
                     value={linea.precio !== undefined && linea.precio !== null ? formatNumericDisplay(linea.precio, precisionMoneda) : ''}
                     readOnly
                     title="El precio base se edita desde el recurso (botón Lápiz)"
-                    className="w-full text-right bg-zinc-50 border border-zinc-200 rounded-lg px-2.5 py-1.5 text-[10px] font-black text-zinc-500 cursor-not-allowed transition-all"
+                    className="w-full text-right bg-zinc-50 border border-zinc-200 rounded-lg px-2 py-1 text-[9px] font-black text-zinc-500 cursor-not-allowed transition-all"
                 />
             </div>
         );
@@ -2152,7 +2170,7 @@ const APUs = () => {
                     }
                 }}
                 onChange={(e) => updateLinea(rowKey, 'rendimiento', e.target.value)}
-                className="w-full text-center bg-[#FFF9F0] border border-orange-100 rounded-lg px-2 py-1.5 text-[10px] font-black text-[#F39200] focus:outline-none focus:border-[#F39200] transition-all"
+                className="w-full text-center bg-[#FFF9F0] border border-orange-100 rounded-lg px-2 py-1 text-[9px] font-black text-[#F39200] focus:outline-none focus:border-[#F39200] transition-all"
             />
         ) : (
             <div className="py-1.5 text-center text-zinc-300 text-[10px] font-bold">—</div>
@@ -2167,32 +2185,32 @@ const APUs = () => {
                 title={`${renderApuDescription(linea.descripcion) || ''}${lineUnit ? ` | Und: ${lineUnit}` : ''}`}
                 onDragOver={(e) => handleEditorLineDragOver(e, rowKey)}
                 onDrop={(e) => handleEditorLineDrop(e, rowKey)}
-                className={`px-6 py-4 pb-12 transition-colors group relative ${
+                className={`px-4 py-2.5 transition-colors group relative ${
                     dragOverEditorLineKey === rowKey ? 'bg-orange-50 ring-1 ring-inset ring-[#F39200]' : 'hover:bg-zinc-50/30'
                 }`}
             >
                 <div className={`${editorGridClass} items-center`}>
                     <div className="flex items-center justify-center">{dragButton}</div>
                     <div className="min-w-0 flex items-center gap-2 overflow-hidden">
-                        <div className="inline-flex max-w-[9rem] shrink-0 rounded-xl border border-blue-100 bg-white px-2 py-1 shadow-xs">
+                        <div className="inline-flex max-w-[8rem] shrink-0 rounded-lg border border-blue-100 bg-white px-2 py-0.5 shadow-xs">
                             <CodeColorizer code={linea.codigo} className="block max-w-full truncate text-[8px]" />
                         </div>
                         <div className="min-w-0 flex-1">
-                            <span className="block truncate text-[11px] font-bold tracking-tight text-zinc-700">
+                            <span className="block truncate text-[10px] font-bold tracking-tight text-zinc-700">
                                 {renderApuDescription(linea.descripcion)}
                             </span>
                         </div>
                     </div>
-                    <div className="text-center"><span className="text-[9px] font-bold text-zinc-400 normal-case">{renderUnidad(lineUnit)}</span></div>
+                    <div className="text-center"><span className="text-[8px] font-bold text-zinc-400 normal-case">{renderUnidad(lineUnit)}</span></div>
                     <div>{quantityInput}</div>
                     <div>{priceInput}</div>
                     <div>{rendimientoInput}</div>
-                    <div className="text-right"><span className="text-[11px] font-black tracking-tighter text-zinc-900">${formatMoneda(partial)}</span></div>
+                    <div className="text-right"><span className="text-[10px] font-black tracking-tighter text-zinc-900">${formatMoneda(partial)}</span></div>
                     {showRelativeColumn && (
                         <div className="text-right"><span className="text-[10px] font-black uppercase tracking-widest text-[#F39200]">{formatRelativePercent(lineRelative)}</span></div>
                     )}
                 </div>
-                <div className="pointer-events-none absolute bottom-3 right-6 opacity-0 translate-y-1 transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 opacity-0 transition-all duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                     <div className="pointer-events-auto">
                         {renderEditorLineActions(linea, rowKey)}
                     </div>
@@ -2432,7 +2450,7 @@ const APUs = () => {
             const empId = selectedEmpresa?.id || user?.empresa_id;
             await apusApi.moveLinea(editingApu, sourceLinea.id, targetIndex, empId);
         } catch (error) {
-            console.error('Error persistiendo orden de líneas APU:', error);
+            globalThis.reportClientError?.('Error persistiendo orden de líneas APU:', error);
             setFormApu((prev) => ({
                 ...prev,
                 lineas: previousLineas,
@@ -2455,7 +2473,7 @@ const APUs = () => {
             const data = JSON.parse(rawData);
             addLinea(data.item, data.isApu, catId);
         } catch (error) {
-            console.error("Error drop editor:", error);
+            globalThis.reportClientError?.("Error drop editor:", error);
         }
     };
 
@@ -2488,7 +2506,7 @@ const APUs = () => {
                 const res = await recursosApi.getUnidades(resourceCat, selectedBaseTrabajo.id, empId);
                 setResourceUnidades(res.data || []);
             } catch (error) {
-                console.error("Error fetching units for resource category:", error);
+                globalThis.reportClientError?.("Error fetching units for resource category:", error);
                 setResourceUnidades([]);
             }
         } else {
@@ -2574,7 +2592,7 @@ const APUs = () => {
                 appAlert("Ortografía correcta.");
             }
         } catch (error) {
-            console.error(error);
+            globalThis.reportClientError?.(error);
         }
     };
 
@@ -2819,8 +2837,8 @@ const APUs = () => {
                         </div>
 
                         {/* Contenedor Principal de la Tabla */}
-                        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-white">
-                            <div className="max-w-7xl mx-auto space-y-8">
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-white">
+                            <div className="w-full max-w-none space-y-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <div>
                                         <h2 className="text-xl font-black uppercase text-zinc-800 tracking-tight">
@@ -2837,7 +2855,7 @@ const APUs = () => {
                                 {loading ? (
                                     <div className="py-20 text-center"><div className="w-8 h-8 mx-auto border-4 border-zinc-200 border-t-[#F39200] rounded-full animate-spin" /></div>
                                 ) : apus.length > 0 ? (
-                                    <div className="flex flex-col gap-4">
+                                    <div className="flex flex-col gap-2">
                                         {visibleApus.map(apu => {
                                             const directo = roundDecimalNumber(apu.costo_directo || 0, precisionMoneda || 2);
                                             // Usar el % de indirectos de la base activa (referencial en catálogo)
@@ -2856,12 +2874,12 @@ const APUs = () => {
                                                     animate={{ opacity: 1, y: 0 }}
                                                     onClick={() => toggleSelectApu(apu.id)}
                                                     onDoubleClick={() => handleEditApu(apu)}
-                                                    className={`group relative bg-white border-2 rounded-[2rem] p-6 transition-all cursor-pointer overflow-hidden ${selectedApus.includes(apu.id)
-                                                        ? 'border-[#F39200] bg-[#FFF9F0] shadow-md ring-4 ring-[#F39200]/10'
-                                                        : 'border-zinc-100 hover:border-zinc-200 hover:shadow-xl'
+                                                    className={`group relative bg-white border rounded-xl px-4 py-3 transition-all cursor-pointer overflow-hidden ${selectedApus.includes(apu.id)
+                                                        ? 'border-[#F39200] bg-[#FFF9F0] shadow-sm ring-2 ring-[#F39200]/10'
+                                                        : 'border-zinc-100 hover:border-zinc-200 hover:shadow-md'
                                                         }`}
                                                 >
-                                                    <div className="flex items-stretch gap-4">
+                                                    <div className="flex items-center gap-3">
                                                         <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                                                             <SoftSelectToggle
                                                                 checked={selectedApus.includes(apu.id)}
@@ -2874,7 +2892,7 @@ const APUs = () => {
                                                         </div>
 
                                                         <div className="min-w-0 flex-1">
-                                                            <div className="flex items-center gap-2 mb-1">
+                                                            <div className="flex items-center gap-2 mb-0.5">
                                                                 <CodeColorizer
                                                                     code={apu.codigo}
                                                                     className="text-[9px] bg-white px-2 py-0.5 rounded border border-zinc-100 shadow-sm"
@@ -2893,15 +2911,15 @@ const APUs = () => {
                                                             <h4 className="text-sm font-black text-zinc-800 tracking-tight leading-tight break-words">
                                                                 {renderApuDescription(apu.descripcion)}
                                                             </h4>
-                                                            <div className="flex items-center gap-3 mt-2">
+                                                            <div className="flex items-center gap-3 mt-1">
                                                                 <p className="text-[9px] font-medium text-zinc-400 font-bold uppercase tracking-widest">
                                                                     Actualizado: {apu.ultima_modificacion ? new Date(apu.ultima_modificacion).toLocaleString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '---'}
                                                                 </p>
                                                             </div>
                                                         </div>
 
-                                                        <div className="text-right px-4 flex flex-col justify-center border-l border-zinc-100 min-w-[168px] flex-shrink-0">
-                                                            <div className="mb-2">
+                                                        <div className="text-right px-3 flex flex-col justify-center border-l border-zinc-100 min-w-[132px] flex-shrink-0">
+                                                            <div className="mb-1.5">
                                                                 <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-0.5 leading-none">Costo Directo</p>
                                                                 <p className="text-base font-black text-zinc-900 tracking-tighter leading-none">
                                                                     ${formatMoneda(directo)}
@@ -2925,10 +2943,10 @@ const APUs = () => {
                                                             )}
                                                         </div>
 
-                                                        <div className="flex items-center gap-1 pl-4 border-l border-zinc-100 flex-shrink-0 self-center">
-                                                            <button onClick={(e) => handleDuplicateApu(apu.id, e)} className="p-2 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-[#F39200]" title="Duplicar"><Copy className="w-4 h-4" /></button>
-                                                            <button onClick={() => handleEditApu(apu)} className="p-2 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-[#F39200]" title="Editar"><Edit2 className="w-4 h-4" /></button>
-                                                            <button onClick={(e) => handleDeleteApu(apu.id, e)} className="p-2 hover:bg-red-50 rounded-lg text-zinc-400 hover:text-red-500" title="Borrar"><Trash2 className="w-4 h-4" /></button>
+                                                        <div className="flex items-center gap-1 pl-3 border-l border-zinc-100 flex-shrink-0 self-center">
+                                                            <button onClick={(e) => handleDuplicateApu(apu.id, e)} className="p-1.5 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-[#F39200]" title="Duplicar"><Copy className="w-4 h-4" /></button>
+                                                            <button onClick={() => handleEditApu(apu)} className="p-1.5 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-[#F39200]" title="Editar"><Edit2 className="w-4 h-4" /></button>
+                                                            <button onClick={(e) => handleDeleteApu(apu.id, e)} className="p-1.5 hover:bg-red-50 rounded-lg text-zinc-400 hover:text-red-500" title="Borrar"><Trash2 className="w-4 h-4" /></button>
                                                         </div>
                                                     </div>
                                                 </motion.div>
@@ -2960,16 +2978,19 @@ const APUs = () => {
                                 }
                             }}
                         >
-                            <div className={`${isEditorSidebarVisuallyCollapsed ? 'px-2 py-3 items-center' : (isEditorCompact ? 'p-5' : 'p-6')} bg-[#0f1115] border-b border-white/10 flex-shrink-0 flex ${isEditorSidebarVisuallyCollapsed ? 'flex-col gap-3' : 'flex-col'}`}>
-                                <div className={`flex items-center ${isEditorSidebarVisuallyCollapsed ? 'justify-center' : 'justify-between'} gap-3 ${isEditorSidebarVisuallyCollapsed ? 'mb-0' : 'mb-4'}`}>
+                            <div
+                                className={`${isEditorSidebarVisuallyCollapsed ? 'px-2 py-2 items-center' : 'px-4 py-1.5'} bg-[#0f1115] border-b border-white/10 flex-shrink-0 flex ${isEditorSidebarVisuallyCollapsed ? 'flex-col justify-center gap-3' : 'flex-col justify-center'}`}
+                                style={{ height: APU_EDITOR_HEADER_HEIGHT_PX }}
+                            >
+                                <div className={`flex items-center ${isEditorSidebarVisuallyCollapsed ? 'justify-center' : 'justify-between'} gap-3 ${isEditorSidebarVisuallyCollapsed ? 'mb-0' : 'mb-1.5'}`}>
                                     {!isEditorSidebarVisuallyCollapsed && (
                                         <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-white/[0.06] rounded-[0.85rem] border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                                                <Layers className="w-4 h-4 text-[#F39200]" />
+                                            <div className="p-1.5 bg-white/[0.06] rounded-[0.75rem] border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                                                <Layers className="w-3.5 h-3.5 text-[#F39200]" />
                                             </div>
                                             <div>
-                                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/45 leading-none mb-1">Catálogo de Base</h3>
-                                                <p className="text-sm font-black text-white tracking-tight">Recursos Disponibles</p>
+                                                <h3 className="text-[9px] font-black uppercase tracking-[0.18em] text-white/45 leading-none mb-1">Catálogo de Base</h3>
+                                                <p className="text-xs font-black text-white tracking-tight">Recursos Disponibles</p>
                                             </div>
                                         </div>
                                     )}
@@ -2984,7 +3005,7 @@ const APUs = () => {
                                                 return next;
                                             });
                                         }}
-                                        className="flex items-center justify-center w-9 h-9 rounded-[0.85rem] border border-white/10 bg-white/[0.05] text-white/65 hover:text-[#F39200] hover:border-[#F39200]/40 transition-all active:translate-y-[1px] active:scale-[0.96]"
+                                        className="flex items-center justify-center w-8 h-8 rounded-[0.75rem] border border-white/10 bg-white/[0.05] text-white/65 hover:text-[#F39200] hover:border-[#F39200]/40 transition-all active:translate-y-[1px] active:scale-[0.96]"
                                         title={isEditorSidebarVisuallyCollapsed ? 'Expandir catálogo' : 'Contraer catálogo'}
                                     >
                                         {isEditorSidebarVisuallyCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
@@ -2996,8 +3017,8 @@ const APUs = () => {
                                         onValueChange={setSearchLeft}
                                         placeholder="Buscar por código o nombre..."
                                         containerClassName="w-full"
-                                        searchIconClassName={isEditorCompact ? 'left-3 w-3.5 h-3.5' : 'left-4 w-4 h-4'}
-                                        inputClassName={`w-full ${isEditorCompact ? 'pl-10 pr-10 h-10 text-[13px]' : 'pl-12 pr-10 h-11 text-sm'} bg-white border border-zinc-200 rounded-[1.25rem] focus:outline-none focus:border-[#F39200] focus:ring-4 focus:ring-[#F39200]/5 text-zinc-700 placeholder:text-zinc-400 transition-all font-medium`}
+                                        searchIconClassName="left-3 w-3.5 h-3.5"
+                                        inputClassName="w-full pl-9 pr-9 h-7 bg-white border border-zinc-200 rounded-xl text-[10px] focus:outline-none focus:border-[#F39200] focus:ring-2 focus:ring-[#F39200]/5 text-zinc-700 placeholder:text-zinc-400 transition-all font-bold"
                                     />
                                 )}
                             </div>
@@ -3202,17 +3223,20 @@ const APUs = () => {
                                 </div>
                             )}
                             {/* Header del Panel de Edición - Imagen Original Refinada (Escala Corregida) */}
-                            <div className={`bg-[#0f1115] ${isEditorCompact ? 'px-5 py-3' : 'px-7 py-4'} flex-shrink-0 border-b border-white/10 z-40 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]`}>
-                                <div className={`flex ${isEditorCompact ? 'flex-col items-stretch gap-4' : 'items-center justify-between gap-4'}`}>
+                            <div
+                                className="bg-[#0f1115] px-5 py-0 flex flex-shrink-0 items-center border-b border-white/10 z-40 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+                                style={{ height: APU_EDITOR_HEADER_HEIGHT_PX }}
+                            >
+                                <div className={`flex h-full w-full ${isEditorCompact ? 'flex-col justify-center gap-2' : 'items-center justify-between gap-4'}`}>
                                     <div className="flex items-center gap-3">
-                                        <div className="flex items-center justify-center w-10 h-10 rounded-[0.95rem] bg-white/[0.06] border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                                            <Calculator className="w-5 h-5 text-[#F39200]" />
+                                        <div className="flex items-center justify-center w-9 h-9 rounded-[0.8rem] bg-white/[0.06] border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                                            <Calculator className="w-4 h-4 text-[#F39200]" />
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <h2 className="text-base font-black uppercase tracking-tight text-white">Editar APU:</h2>
+                                                <h2 className="text-sm font-black uppercase tracking-tight text-white">Editar APU:</h2>
                                                 <div className="flex items-center bg-white/[0.05] px-2 py-0.5 rounded-md border border-white/10">
-                                                    <CodeColorizer code={formApu.codigo} className="text-[11px]" />
+                                                    <CodeColorizer code={formApu.codigo} className="text-[10px]" />
                                                 </div>
                                             </div>
                                             <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mt-0.5">Ajustes de Composición</p>
@@ -3224,23 +3248,29 @@ const APUs = () => {
                                             {cameFromProjectModule && (
                                                 <button
                                                     onClick={handleReturnToProjectModule}
-                                                    className="h-10 px-4 rounded-[0.9rem] border border-[#F39200]/35 bg-white/[0.04] text-[#ffbd73] text-[10px] font-black uppercase tracking-widest hover:bg-white/[0.08] transition-all active:translate-y-[1px] active:scale-[0.98] inline-flex items-center gap-2"
+                                                    title="Volver al módulo Proyecto"
+                                                    aria-label="Volver al módulo Proyecto"
+                                                    className="h-9 w-9 rounded-[0.8rem] border border-[#F39200]/35 bg-white/[0.04] text-[#ffbd73] hover:bg-white/[0.08] transition-all active:translate-y-[1px] active:scale-[0.98] inline-flex items-center justify-center"
                                                 >
-                                                    <ArrowLeft className="w-3.5 h-3.5" /> Volver al módulo Proyecto
+                                                    <ArrowLeft className="w-3.5 h-3.5" />
                                                 </button>
                                             )}
                                             <button
                                                 onClick={handleCancelEdit}
-                                                className="h-10 px-4 rounded-[0.9rem] border border-white/10 bg-white/[0.04] text-white/72 text-[10px] font-black uppercase tracking-widest hover:bg-white/[0.08] hover:text-white transition-all active:translate-y-[1px] active:scale-[0.98] inline-flex items-center gap-2"
+                                                title="Cerrar"
+                                                aria-label="Cerrar"
+                                                className="h-9 w-9 rounded-[0.8rem] border border-white/10 bg-white/[0.04] text-white/72 hover:bg-white/[0.08] hover:text-white transition-all active:translate-y-[1px] active:scale-[0.98] inline-flex items-center justify-center"
                                             >
-                                                <ArrowLeft className="w-3.5 h-3.5" /> Cerrar
+                                                <ArrowLeft className="w-3.5 h-3.5" />
                                             </button>
                                             <button
                                                 onClick={handleSaveApu}
                                                 disabled={saving}
-                                                className="h-10 px-5 rounded-[0.9rem] border border-[#F39200]/45 bg-[#211b14] text-[#ffbd73] text-[10px] font-black uppercase tracking-widest hover:border-[#F39200]/70 hover:bg-[#2a2117] transition-all shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] active:translate-y-[1px] active:scale-[0.98] disabled:opacity-45 flex items-center gap-2"
+                                                title={saving ? 'Guardando' : 'Guardar cambios'}
+                                                aria-label={saving ? 'Guardando' : 'Guardar cambios'}
+                                                className="h-9 w-9 rounded-[0.8rem] border border-[#F39200]/45 bg-[#211b14] text-[#ffbd73] hover:border-[#F39200]/70 hover:bg-[#2a2117] transition-all shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] active:translate-y-[1px] active:scale-[0.98] disabled:opacity-45 flex items-center justify-center"
                                             >
-                                                <CheckCircle2 className="w-4 h-4" /> {saving ? 'Guardando...' : 'Guardar Cambios'}
+                                                {saving ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#ffbd73]/30 border-t-[#ffbd73]" /> : <CheckCircle2 className="w-4 h-4" />}
                                             </button>
                                         </div>
                                     ) : null}
@@ -3249,32 +3279,32 @@ const APUs = () => {
 
                             <div className="flex-1 overflow-hidden flex flex-col">
                                 {/* Tarjeta de Detalles - Fija en la parte superior */}
-                                <div className={`bg-white ${isEditorCompact ? 'px-5 pt-4 pb-3' : 'px-8 pt-5 pb-3'} border-b border-zinc-100 flex-shrink-0 z-10`}>
+                                <div className="bg-white px-5 pt-3 pb-2 border-b border-zinc-100 flex-shrink-0 z-10">
                                     <div className="max-w-7xl mx-auto">
                                         {/* Tarjeta de Detalles - Diseño Original (Zona Gris) */}
-                                        <div className={`bg-zinc-50/80 border border-zinc-100 rounded-[2rem] ${isEditorCompact ? 'p-5 space-y-4' : 'p-6 space-y-5'} shadow-sm`}>
+                                        <div className="bg-zinc-50/80 border border-zinc-100 rounded-[1.25rem] p-4 space-y-3 shadow-sm">
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl shadow-sm border border-zinc-100 ring-1 ring-zinc-200/50">
-                                                    <FolderOpen className="w-4 h-4 text-[#F39200]" />
-                                                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl shadow-sm border border-zinc-100 ring-1 ring-zinc-200/50">
+                                                    <FolderOpen className="w-3.5 h-3.5 text-[#F39200]" />
+                                                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">
                                                         {subcategorias.find(s => s.id === selectedSubcatId)?.codigo || 'S-001'}
                                                     </span>
-                                                    <span className="text-[11px] font-black tracking-tight text-zinc-900 border-l border-zinc-100 pl-3">
+                                                    <span className="text-[10px] font-black tracking-tight text-zinc-900 border-l border-zinc-100 pl-2">
                                                         {renderApuDescription(formApu.descripcion || 'REPLANTEOS Y NIVELACIONES')}
                                                     </span>
                                                 </div>
 
-                                                <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-2">
                                                     <button
                                                         onClick={handleToggleRendimientoGlobal}
-                                                        className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2 transition-all border ${formApu.rendimiento_global_activado ? 'bg-blue-50 text-blue-600 border-blue-100 shadow-sm' : 'bg-zinc-100 text-zinc-400 border-zinc-200'}`}
+                                                        className={`px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest flex items-center gap-2 transition-all border ${formApu.rendimiento_global_activado ? 'bg-blue-50 text-blue-600 border-blue-100 shadow-sm' : 'bg-zinc-100 text-zinc-400 border-zinc-200'}`}
                                                     >
                                                         <div className={`w-1.5 h-1.5 rounded-full ${formApu.rendimiento_global_activado ? 'bg-blue-500 animate-pulse' : 'bg-zinc-300'}`} />
                                                         Rendimiento Global
                                                     </button>
                                                     <button
                                                         onClick={() => setFormApu(prev => ({ ...prev, por_validar: !prev.por_validar }))}
-                                                        className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2 transition-all border ${!formApu.por_validar ? 'bg-emerald-50 text-emerald-600 border-emerald-100 shadow-sm' : 'bg-zinc-100 text-zinc-400 border-zinc-200'}`}
+                                                        className={`px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest flex items-center gap-2 transition-all border ${!formApu.por_validar ? 'bg-emerald-50 text-emerald-600 border-emerald-100 shadow-sm' : 'bg-zinc-100 text-zinc-400 border-zinc-200'}`}
                                                     >
                                                         <div className={`w-1.5 h-1.5 rounded-full ${!formApu.por_validar ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
                                                         {!formApu.por_validar ? 'Revisado' : 'Pendiente'}
@@ -3318,23 +3348,23 @@ const APUs = () => {
                                                 </div>
                                             )}
 
-                                            <div className="grid grid-cols-12 gap-4 items-end">
+                                            <div className="grid grid-cols-12 gap-3 items-end">
                                                 <div className={`${isEditorCompact ? 'col-span-7' : 'col-span-8'} space-y-2`}>
                                                     <div className="flex items-center gap-2 ml-1">
-                                                        <label className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">Descripción de Partida *</label>
+                                                        <label className="text-[8px] font-black uppercase tracking-[0.18em] text-zinc-400">Descripción de Partida *</label>
                                                     </div>
                                                     <input
                                                         value={formApu.descripcion}
                                                         onChange={(e) => setFormApu(prev => ({ ...prev, descripcion: e.target.value }))}
                                                         onBlur={(e) => setFormApu(prev => ({ ...prev, descripcion: renderApuDescription(e.target.value) }))}
-                                                        className="w-full h-12 bg-white border border-zinc-100 text-base font-black tracking-tight text-zinc-900 px-5 rounded-[1rem] focus:outline-none focus:border-[#F39200] focus:ring-4 focus:ring-[#F39200]/5 transition-all shadow-sm"
+                                                        className="w-full h-10 bg-white border border-zinc-100 text-sm font-black tracking-tight text-zinc-900 px-4 rounded-xl focus:outline-none focus:border-[#F39200] focus:ring-2 focus:ring-[#F39200]/5 transition-all shadow-sm"
                                                         placeholder="EJ. REPLANTEO Y NIVELACIÓN..."
                                                     />
                                                 </div>
 
                                                 <div className={`${isEditorCompact ? 'col-span-5' : 'col-span-4'} space-y-2`}>
                                                     <div className="flex items-center justify-between ml-1">
-                                                        <label className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">Unidad *</label>
+                                                        <label className="text-[8px] font-black uppercase tracking-[0.18em] text-zinc-400">Unidad *</label>
                                                         <button onClick={() => setShowUnidadModal(true)} className="text-[8px] font-black text-[#F39200] uppercase tracking-tighter hover:underline">(CREAR NUEVA) +</button>
                                                     </div>
                                                     <div className="flex items-center gap-2">
@@ -3350,14 +3380,13 @@ const APUs = () => {
                                                                     unidad: uObj ? uObj.descripcion : prev.unidad
                                                                 }));
                                                             }}
-                                                            className="w-full h-12 bg-white border border-zinc-100 rounded-[1rem] px-5 text-[13px] font-black text-zinc-700 appearance-none focus:outline-none focus:border-[#F39200] focus:ring-4 focus:ring-[#F39200]/5 transition-all cursor-pointer shadow-sm"
+                                                            className="w-full h-10 bg-white border border-zinc-100 rounded-xl px-4 text-[12px] font-black text-zinc-700 focus:outline-none focus:border-[#F39200] focus:ring-2 focus:ring-[#F39200]/5 transition-all cursor-pointer shadow-sm"
                                                         >
                                                             <option value="">(Seleccionar)</option>
                                                             {apuUnidades.map(u => (
                                                                 <option key={u.id} value={u.id}>{normalizeDisplayUnit(u.descripcion)} - {normalizeDisplayUnit(u.descripcion_completa)}</option>
                                                             ))}
                                                         </AnimatedSelect>
-                                                        <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none group-hover:text-zinc-600 transition-colors" />
                                                         </div>
                                                         {useOmniClass && (
                                                             <button
@@ -3368,7 +3397,7 @@ const APUs = () => {
                                                                         handleOmniClassOpen();
                                                                     }
                                                                 }}
-                                                                className={`h-12 w-12 shrink-0 rounded-[1rem] border shadow-sm transition-all flex items-center justify-center ${
+                                                                className={`h-10 w-10 shrink-0 rounded-xl border shadow-sm transition-all flex items-center justify-center ${
                                                                     showApuOmniPanel || formApu.omniclass_codigo
                                                                         ? 'border-blue-200 bg-blue-50 text-blue-600'
                                                                         : 'border-zinc-100 bg-white text-zinc-400 hover:text-zinc-700'
@@ -3458,9 +3487,9 @@ const APUs = () => {
                                 </div>
 
                                 {/* Tabla de Análisis - Scrollable */}
-                                <div className={`flex-1 overflow-y-auto ${isEditorCompact ? 'px-5' : 'px-8'} relative custom-scrollbar bg-white`}>
-                                    <div className={`max-w-7xl mx-auto ${isEditorCompact ? 'py-5' : 'py-8'}`}>
-                                        <div className={`${isEditorCompact ? 'space-y-8' : 'space-y-12'}`}>
+                                <div className="flex-1 overflow-y-auto px-5 relative custom-scrollbar bg-white">
+                                    <div className="max-w-7xl mx-auto py-4">
+                                        <div className="space-y-5">
                                             {CATEGORIAS_BASE.filter(cat => cat.id !== 5).map(cat => {
                                                 const hasLines = lineasEditor.some(l => l.categoria_id === cat.id);
                                                 const isDragOver = dragOverCatEditor === cat.id;
@@ -3470,13 +3499,13 @@ const APUs = () => {
                                                 }, 0);
                                                 const catRelative = Number(calculos.directo || 0) > 0 ? (catSubtotal / Number(calculos.directo || 0)) : 0;
                                                 const editorGridClass = isEditorCompact
-                                                    ? "grid grid-cols-[56px_minmax(0,2.8fr)_70px_108px_120px_104px_108px] gap-3"
-                                                    : "grid grid-cols-[56px_minmax(0,3.4fr)_76px_116px_136px_112px_120px_84px] gap-4";
+                                                    ? "grid grid-cols-[44px_minmax(0,2.8fr)_62px_92px_104px_88px_96px] gap-2"
+                                                    : "grid grid-cols-[44px_minmax(0,3.4fr)_64px_96px_112px_92px_100px_64px] gap-2";
 
                                                 if (!hasLines && !isDragOver) return null;
 
                                                 return (
-                                                    <div key={cat.id} className="space-y-4">
+                                                    <div key={cat.id} className="space-y-2">
                                                         {/* Cabecera de Categoría - Imagen 1 (Interactiva) */}
                                                         <button 
                                                             onClick={(e) => {
@@ -3487,16 +3516,16 @@ const APUs = () => {
                                                                         : [...prev, cat.id]
                                                                 );
                                                             }}
-                                                            className="w-full flex items-center justify-between px-4 py-2 bg-zinc-50/50 rounded-xl border border-zinc-100 cursor-pointer hover:bg-zinc-100/50 transition-all select-none group/cat"
+                                                            className="w-full flex items-center justify-between px-3 py-1.5 bg-zinc-50/50 rounded-xl border border-zinc-100 cursor-pointer hover:bg-zinc-100/50 transition-all select-none group/cat"
                                                         >
                                                             <div className="flex items-center gap-2">
                                                                 <div className="p-1 rounded-md bg-white border border-zinc-200 shadow-sm flex items-center justify-center transition-transform group-hover/cat:scale-110">
                                                                     <span className="text-[10px]">{cat.icon}</span>
                                                                 </div>
-                                                                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-700">{cat.nombre}</span>
+                                                                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-700">{cat.nombre}</span>
                                                                 <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform duration-300 ${collapsedCategoriesEditor.includes(cat.id) ? '-rotate-90' : ''}`} />
                                                             </div>
-                                                            <div className="flex items-center gap-6 text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                                                            <div className="flex items-center gap-5 text-[8px] font-black uppercase tracking-widest text-zinc-400">
                                                                 <span>
                                                                     Subtotal: <span className="text-zinc-900 ml-1">${formatMoneda(catSubtotal)}</span>
                                                                 </span>
@@ -3513,12 +3542,12 @@ const APUs = () => {
                                                                     animate={{ height: 'auto', opacity: 1 }}
                                                                     exit={{ height: 0, opacity: 0 }}
                                                                     transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                                                    className="overflow-hidden bg-white border border-zinc-100 rounded-2xl shadow-sm"
+                                                                    className="overflow-hidden bg-white border border-zinc-100 rounded-xl shadow-sm"
                                                                 >
                                                                     {/* Cabecera de Tabla - Imagen 1 (Ligera) */}
                                                                     {isEditorCompact ? (
-                                                                        <div className="px-6 py-3 bg-zinc-50/80 border-y border-zinc-100">
-                                                                            <div className="grid grid-cols-[56px_minmax(0,2.8fr)_70px_108px_120px_104px_108px] gap-3 items-center text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                                                                        <div className="px-4 py-2 bg-zinc-50/80 border-y border-zinc-100">
+                                                                            <div className="grid grid-cols-[44px_minmax(0,2.8fr)_62px_92px_104px_88px_96px] gap-2 items-center text-[8px] font-black uppercase tracking-[0.18em] text-zinc-500">
                                                                                 <div className="text-center">Orden</div>
                                                                                 <div>Recurso / Descripción</div>
                                                                                 <div className="text-center">Unidad</div>
@@ -3529,7 +3558,7 @@ const APUs = () => {
                                                                             </div>
                                                                         </div>
                                                                     ) : (
-                                                                        <div className={`${editorGridClass} px-6 py-3 bg-zinc-50/80 border-y border-zinc-100 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500`}>
+                                                                        <div className={`${editorGridClass} px-4 py-2 bg-zinc-50/80 border-y border-zinc-100 text-[8px] font-black uppercase tracking-[0.18em] text-zinc-500`}>
                                                                             <div className="text-center">Orden</div>
                                                                             <div>Recurso / Descripción</div>
                                                                             <div className="text-center">Unidad</div>
@@ -3613,46 +3642,58 @@ const APUs = () => {
                 )}
             </AnimatePresence>
 
-            <CommonReportPreviewModal
-                isOpen={showReportPreviewModal}
-                onClose={() => setShowReportPreviewModal(false)}
-                preview={reportPreview}
-                onExportExcel={handleExportReportExcel}
-                onExportPdf={handleExportReportPdf}
-                onExportPdfFromExcel={handleExportReportPdfFromExcel}
-                exporting={reportExporting}
-            />
-            <ReportGenerationModal
-                isOpen={reportExporting}
-                title="Generando reporte"
-                message="Estamos preparando el reporte de APUs. La descarga comenzará automáticamente cuando esté listo."
-            />
+            {showReportPreviewModal && (
+                <React.Suspense fallback={null}>
+                    <CommonReportPreviewModal
+                        isOpen={showReportPreviewModal}
+                        onClose={() => setShowReportPreviewModal(false)}
+                        preview={reportPreview}
+                        onExportExcel={handleExportReportExcel}
+                        onExportPdf={handleExportReportPdf}
+                        onExportPdfFromExcel={handleExportReportPdfFromExcel}
+                        exporting={reportExporting}
+                    />
+                </React.Suspense>
+            )}
+            {reportExporting && (
+                <React.Suspense fallback={null}>
+                    <ReportGenerationModal
+                        isOpen={reportExporting}
+                        title="Generando reporte"
+                        message="Estamos preparando el reporte de APUs. La descarga comenzará automáticamente cuando esté listo."
+                    />
+                </React.Suspense>
+            )}
 
-            <ResourceEditorModal
-                isOpen={showResourceModal}
-                onClose={() => {
-                    setShowResourceModal(false);
-                    setEditingRecurso(null);
-                    setResourceUnidades([]);
-                }}
-                onSubmit={handleSaveResource}
-                editingRecurso={editingRecurso}
-                form={resourceForm}
-                setForm={setResourceForm}
-                unidades={resourceUnidades}
-                onSpellCheck={handleResourceSpellCheck}
-                title="Editar Recurso"
-                subtitle="Ajuste directo desde APU"
-                submitLabel="Guardar Cambios"
-                currentOmniClassTable={currentResourceOmniClassTable}
-                formatMonedaInput={formatMonedaInput}
-                enableOmniClass={useOmniClass}
-                currentCategoryId={currentResourceCategory}
-            />
+            {showResourceModal && (
+                <React.Suspense fallback={null}>
+                    <ResourceEditorModal
+                        isOpen={showResourceModal}
+                        onClose={() => {
+                            setShowResourceModal(false);
+                            setEditingRecurso(null);
+                            setResourceUnidades([]);
+                        }}
+                        onSubmit={handleSaveResource}
+                        editingRecurso={editingRecurso}
+                        form={resourceForm}
+                        setForm={setResourceForm}
+                        unidades={resourceUnidades}
+                        onSpellCheck={handleResourceSpellCheck}
+                        title="Editar Recurso"
+                        subtitle="Ajuste directo desde APU"
+                        submitLabel="Guardar Cambios"
+                        currentOmniClassTable={currentResourceOmniClassTable}
+                        formatMonedaInput={formatMonedaInput}
+                        enableOmniClass={useOmniClass}
+                        currentCategoryId={currentResourceCategory}
+                    />
+                </React.Suspense>
+            )}
 
             <AnimatePresence>
                 {showUnidadModal && (
-                    <AppModalShell size="sm" zIndex="z-[100]">
+                    <AppModalShell size="sm" zIndex="z-[1000]">
                             <div className="p-8">
                                 <AppModalHeader
                                     title="Nueva Unidad para APUs"
@@ -3691,15 +3732,19 @@ const APUs = () => {
                                         <button
                                             type="button"
                                             onClick={() => setShowUnidadModal(false)}
-                                            className="flex-1 py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest text-zinc-400 hover:bg-zinc-100 transition-colors"
+                                            title="Cancelar"
+                                            aria-label="Cancelar"
+                                            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700"
                                         >
-                                            Cancelar
+                                            <X className="h-4 w-4" />
                                         </button>
                                         <button
                                             type="submit"
-                                            className="flex-1 py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white bg-zinc-900 hover:bg-zinc-800 transition-all shadow-lg"
+                                            title="Crear unidad"
+                                            aria-label="Crear unidad"
+                                            className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#F39200] text-white transition hover:bg-[#d97f00]"
                                         >
-                                            Crear Unidad
+                                            <Save className="h-4 w-4" />
                                         </button>
                                     </div>
                                 </form>
@@ -3715,7 +3760,7 @@ const APUs = () => {
                         isOpen={showImportModal}
                         onClose={closeImportModal}
                         size="lg"
-                        zIndex="z-[100]"
+                        zIndex="z-[1000]"
                         panelClassName="max-h-[90vh] flex flex-col"
                     >
                             <div className="flex flex-col min-h-0">
@@ -3827,16 +3872,20 @@ const APUs = () => {
                                     <div className="flex gap-3">
                                         <button
                                             onClick={closeImportModal}
-                                            className="flex-1 py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest text-zinc-400 hover:bg-zinc-100 transition-colors"
+                                            title="Cancelar"
+                                            aria-label="Cancelar"
+                                            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700"
                                         >
-                                            Cancelar
+                                            <X className="h-4 w-4" />
                                         </button>
                                         <button
                                             onClick={handleImportApu}
                                             disabled={importPreview.filter(p => p.valid).length === 0}
-                                            className="flex-1 py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:text-zinc-400 transition-all shadow-lg flex items-center justify-center gap-2"
+                                            title={`Confirmar ${importPreview.filter(p => p.valid).length} registros`}
+                                            aria-label={`Confirmar ${importPreview.filter(p => p.valid).length} registros`}
+                                            className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#F39200] text-white transition hover:bg-[#d97f00] disabled:bg-zinc-200 disabled:text-zinc-400"
                                         >
-                                            <Plus className="w-4 h-4" /> Confirmar {importPreview.filter(p => p.valid).length} Registros
+                                            <Plus className="w-4 h-4" />
                                         </button>
                                     </div>
                                 </div>
@@ -3852,7 +3901,7 @@ const APUs = () => {
                         isOpen={showBaseImportModal}
                         onClose={() => setShowBaseImportModal(false)}
                         size="xl"
-                        zIndex="z-[100]"
+                        zIndex="z-[1000]"
                         panelClassName="max-h-[90vh] flex flex-col"
                     >
                             {/* Header del Modal */}
@@ -4069,22 +4118,25 @@ const APUs = () => {
                                     <button
                                          type="button"
                                          onClick={() => setShowBaseImportModal(false)}
-                                        className="h-12 px-6 text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors"
+                                        title="Cancelar"
+                                        aria-label="Cancelar"
+                                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700"
                                     >
-                                        Cancelar
+                                        <X className="h-4 w-4" />
                                     </button>
                                     {importingStep === 2 && (
                                         <LiquidButton
                                             onClick={() => handleExecuteImport()}
                                             disabled={selectedImportApuIds.length === 0 || importingStatus}
-                                            className={`h-12 px-10 rounded-2xl bg-[#F39200] text-white shadow-xl shadow-[#F39200]/20 font-black uppercase tracking-widest text-[11px] flex items-center gap-2 ${importingStatus ? 'opacity-50' : ''}`}
+                                            title="Importar selección"
+                                            aria-label="Importar selección"
+                                            className={`h-11 w-11 !min-w-0 rounded-xl bg-[#F39200] !px-0 text-white ${importingStatus ? 'opacity-50' : ''}`}
                                         >
                                             {importingStatus ? (
                                                 <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                                             ) : (
                                                 <Download className="w-4 h-4" />
                                             )}
-                                            IMPORTAR SELECCIÓN
                                         </LiquidButton>
                                     )}
                                 </div>
@@ -4096,7 +4148,7 @@ const APUs = () => {
             {/* Modal: Resolución de Conflictos */}
             <AnimatePresence>
                 {showConflictModal && (
-                    <AppModalShell size="2xl" zIndex="z-[110]" overlayClassName="bg-black/55 backdrop-blur-md" panelClassName="max-h-[90vh] flex flex-col">
+                    <AppModalShell size="2xl" zIndex="z-[1000]" overlayClassName="bg-black/55 backdrop-blur-md" panelClassName="max-h-[90vh] flex flex-col">
                             <AppModalHeader
                                 title="Conflictos de Importación"
                                 subtitle={`Se han detectado ${importConflicts.length} APUs que ya existen en esta base`}
@@ -4170,18 +4222,26 @@ const APUs = () => {
                                     <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Total de decisiones tomadas: {Object.keys(importResolutions).length}</p>
                                 </div>
                                 <div className="flex gap-4">
-                                    <button onClick={() => setShowConflictModal(false)} className="h-12 px-6 text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors">Volver</button>
+                                    <button
+                                        onClick={() => setShowConflictModal(false)}
+                                        title="Volver"
+                                        aria-label="Volver"
+                                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700"
+                                    >
+                                        <ArrowLeft className="h-4 w-4" />
+                                    </button>
                                     <LiquidButton
                                         onClick={() => handleExecuteImport(importResolutions)}
                                         disabled={importingStatus}
-                                        className="h-12 px-10 rounded-2xl bg-zinc-900 text-white shadow-xl shadow-zinc-950/20 font-black uppercase tracking-widest text-[11px] flex items-center gap-2"
+                                        title="Confirmar y finalizar"
+                                        aria-label="Confirmar y finalizar"
+                                        className="h-11 w-11 !min-w-0 rounded-xl bg-[#F39200] !px-0 text-white"
                                     >
                                         {importingStatus ? (
                                             <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                                         ) : (
                                             <Check className="w-4 h-4" />
                                         )}
-                                        CONFIRMAR Y FINALIZAR
                                     </LiquidButton>
                                 </div>
                             </div>
@@ -4189,19 +4249,23 @@ const APUs = () => {
                 )}
             </AnimatePresence>
 
-            <BulkDeleteConfirmModal
-                isOpen={showBulkDeleteModal}
-                onClose={closeBulkDeleteModal}
-                onConfirm={handleBulkDeleteConfirm}
-                step={bulkDeleteStep}
-                setStep={setBulkDeleteStep}
-                loading={bulkDeleting}
-                title="¿Borrar APUs seleccionados?"
-                count={selectedApus.length}
-                summary="Se intentará eliminar toda la selección en una sola operación. Si uno de los APUs está siendo usado por otro APU superior, no se borrará ninguno."
-                previewItems={apus.filter(apu => selectedApus.includes(apu.id))}
-                finalWarning="¿Estás absolutamente seguro? Esta acción es irreversible. El borrado solo se ejecutará si todos los APUs cumplen las reglas de integridad definidas para el catálogo."
-            />
+            {showBulkDeleteModal && (
+                <React.Suspense fallback={null}>
+                    <BulkDeleteConfirmModal
+                        isOpen={showBulkDeleteModal}
+                        onClose={closeBulkDeleteModal}
+                        onConfirm={handleBulkDeleteConfirm}
+                        step={bulkDeleteStep}
+                        setStep={setBulkDeleteStep}
+                        loading={bulkDeleting}
+                        title="¿Borrar APUs seleccionados?"
+                        count={selectedApus.length}
+                        summary="Se intentará eliminar toda la selección en una sola operación. Si uno de los APUs está siendo usado por otro APU superior, no se borrará ninguno."
+                        previewItems={apus.filter(apu => selectedApus.includes(apu.id))}
+                        finalWarning="¿Estás absolutamente seguro? Esta acción es irreversible. El borrado solo se ejecutará si todos los APUs cumplen las reglas de integridad definidas para el catálogo."
+                    />
+                </React.Suspense>
+            )}
         </div>
     );
 };

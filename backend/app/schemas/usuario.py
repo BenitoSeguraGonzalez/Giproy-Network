@@ -16,6 +16,7 @@ class UsuarioBase(BaseModel):
     nombres: Optional[str] = None
     apellidos: Optional[str] = None
     alias: Optional[str] = None
+    empresa_alias: Optional[str] = None
     nacionalidad: Optional[str] = None
     profesion: Optional[str] = None
     ciudad: Optional[str] = None
@@ -40,6 +41,7 @@ class UsuarioRegister(BaseModel):
     nombres: Optional[str] = None
     apellidos: Optional[str] = None
     alias: Optional[str] = None
+    empresa_alias: Optional[str] = None
     nacionalidad: Optional[str] = None
     profesion: Optional[str] = None
     ciudad: Optional[str] = None
@@ -50,6 +52,21 @@ class UsuarioRegister(BaseModel):
     acepta_politica_privacidad: bool = False
     acepta_politicas_comunicacion: bool = False
     autoriza_publicidad: bool = False
+    ruc_verification_token: Optional[str] = None
+
+
+class RegisterPendingResponse(BaseModel):
+    status: str = "pending_email_verification"
+    message: str
+    email: str
+    empresa_id: int
+
+
+class RegisterVerificationResponse(BaseModel):
+    status: str = "verified"
+    message: str
+    email: str
+    empresa_id: int
 
 class UsuarioResponse(UsuarioBase):
     id: int
@@ -111,7 +128,13 @@ class ValidarRucResponse(BaseModel):
     mensaje: str
     ruc: Optional[str] = None
     razon_social: Optional[str] = None
+    nombres: Optional[str] = None
+    apellidos: Optional[str] = None
     estado_contribuyente: Optional[str] = None
     clase_contribuyente: Optional[str] = None
     fecha_inicio_actividades: Optional[str] = None
     actividad_economica: Optional[str] = None
+    verification_status: str = "source_unavailable"
+    source: Optional[str] = None
+    source_date: Optional[datetime] = None
+    requires_manual_review: bool = False

@@ -70,14 +70,14 @@ const servicePlaceholders = [
     {
         id: 'envios-transferencias',
         title: 'Envíos y Transferencias',
-        description: 'Base visual para logística, envíos internos, traspasos y movimientos entre contextos operativos.',
+        description: 'Bandeja operativa para enviar y recibir Bases de Trabajo o Proyectos entre empresas autorizadas.',
         icon: Truck,
         iconTone: 'text-emerald-700',
         iconBg: 'bg-emerald-50 border-emerald-200',
         accent: 'text-emerald-700',
-        status: 'En desarrollo',
+        status: 'Bandeja activa',
         progressionStage: 'active',
-        path: null
+        path: '/servicios/envios-transferencias'
     },
     {
         id: 'bolsa-trabajo',

@@ -115,7 +115,7 @@ const TanteoTab = ({ sidebar = false, onHide }) => {
                 const response = await apusApi.getById(selectedApuId, currentEmpresaId);
                 setApuDetails(response?.data || response);
             } catch (error) {
-                console.error("Error al cargar detalle de APU para tanteo:", error);
+                globalThis.reportClientError?.("Error al cargar detalle de APU para tanteo:", error);
             } finally {
                 setLoadingApu(false);
             }
@@ -344,7 +344,7 @@ const TanteoTab = ({ sidebar = false, onHide }) => {
             setTanteoDrafts({});
             clearTanteoSession(selectedApuId);
         } catch (error) {
-            console.error("Error revirtiendo tanteo:", error);
+            globalThis.reportClientError?.("Error revirtiendo tanteo:", error);
             appAlert("Error al restaurar el recurso.");
         }
     };
@@ -390,7 +390,7 @@ const TanteoTab = ({ sidebar = false, onHide }) => {
             clearTanteoSession(selectedApuId);
             // Importante: No cerramos el sidebar para que el usuario pueda seguir trabajando
         } catch (error) {
-            console.error("Error aplicando tanteo:", error);
+            globalThis.reportClientError?.("Error aplicando tanteo:", error);
             appAlert("Error al aplicar el tanteo.");
         }
     };

@@ -125,7 +125,7 @@ const Stakeholders = ({ project }) => {
             const stksData = await stakeholdersApi.getByProject(project.codigo_root, project.id, empId);
             setStakeholders(stksData);
         } catch (error) {
-            console.error("Error loading data:", error);
+            globalThis.reportClientError?.("Error loading data:", error);
         } finally {
             setLoading(false);
         }
@@ -135,14 +135,14 @@ const Stakeholders = ({ project }) => {
         try {
             const res = await maestrosApi.getProvincias();
             setProvincias(res.data || res);
-        } catch (error) { console.error("Error provincias:", error); }
+        } catch (error) { globalThis.reportClientError?.("Error provincias:", error); }
     }, []);
 
     const fetchCantones = useCallback(async (provincia) => {
         try {
             const res = await maestrosApi.getCantones(provincia);
             setCantones(res.data || res);
-        } catch (error) { console.error("Error cantones:", error); }
+        } catch (error) { globalThis.reportClientError?.("Error cantones:", error); }
     }, []);
 
     useEffect(() => {
@@ -189,7 +189,7 @@ const Stakeholders = ({ project }) => {
             setShowFormModal(false);
             fetchAll();
         } catch (err) {
-            console.error("Submit stakeholder error:", err);
+            globalThis.reportClientError?.("Submit stakeholder error:", err);
             if (err instanceof Error && err.message === 'Telefono invalido') {
                 appAlert("El móvil debe tener un formato válido.");
             } else {
@@ -214,7 +214,7 @@ const Stakeholders = ({ project }) => {
             await stakeholdersApi.delete(id, empId);
             fetchAll();
         } catch (err) {
-            console.error("Delete stakeholder error:", err);
+            globalThis.reportClientError?.("Delete stakeholder error:", err);
             appAlert(err?.response?.data?.detail || "Error al eliminar.");
         }
     };
@@ -264,7 +264,7 @@ const Stakeholders = ({ project }) => {
             setReportPreview(response.data);
             setShowReportPreview(true);
         } catch (error) {
-            console.error('Error generando vista previa de stakeholders:', error);
+            globalThis.reportClientError?.('Error generando vista previa de stakeholders:', error);
             appAlert(await extractBlobErrorMessage(error, 'No fue posible generar la vista previa del reporte de stakeholders.'));
         } finally {
             setLoadingReportPreview(false);
@@ -289,7 +289,7 @@ const Stakeholders = ({ project }) => {
                 format === 'xlsx' ? undefined : 'application/pdf'
             );
         } catch (error) {
-            console.error('Error exportando reporte de stakeholders:', error);
+            globalThis.reportClientError?.('Error exportando reporte de stakeholders:', error);
             const fallbackMessage =
                 format === 'xlsx'
                     ? 'No fue posible exportar el reporte de stakeholders en Excel.'

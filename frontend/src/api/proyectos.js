@@ -15,8 +15,8 @@ export const proyectosApi = {
     },
 
     // Crear proyecto
-    create: async (proyectoData) => {
-        const response = await axiosInstance.post('/proyectos/', proyectoData);
+    create: async (proyectoData, empresaId = null) => {
+        const response = await axiosInstance.post('/proyectos/', proyectoData, withTenantConfig({}, empresaId));
         return response.data;
     },
 
@@ -98,9 +98,36 @@ export const proyectosApi = {
         return response.data;
     },
 
-    // Eliminar proyecto (borrado profundo)
-    delete: async (id, empresaId = null) => {
-        const response = await axiosInstance.delete(`/proyectos/${id}`, withTenantConfig({}, empresaId));
+    // Eliminar proyecto: mueve a papelera y decide si la Base de Proyecto acompaña o se conserva como Base Maestra.
+    delete: async (id, empresaId = null, options = {}) => {
+        const response = await axiosInstance.delete(
+            `/proyectos/${id}`,
+            withTenantConfig({
+                params: {
+                    delete_project_base: options.deleteProjectBase !== false
+                }
+            }, empresaId)
+        );
+        return response.data;
+    },
+
+    getRecycleBin: async (params = {}) => {
+        const response = await axiosInstance.get('/proyectos/papelera', { params: withTenantParams(params) });
+        return response.data;
+    },
+
+    restoreFromRecycleBin: async (id, empresaId = null) => {
+        const response = await axiosInstance.post(`/proyectos/papelera/${id}/restore`, {}, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    purgeFromRecycleBin: async (id, empresaId = null) => {
+        const response = await axiosInstance.delete(`/proyectos/papelera/${id}/purge`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    purgeExpiredRecycleBin: async (empresaId = null) => {
+        const response = await axiosInstance.post('/proyectos/papelera/purge-expired', {}, withTenantConfig({}, empresaId));
         return response.data;
     },
 
@@ -123,6 +150,21 @@ export const proyectosApi = {
 
     getUserSummary: async (id, usuarioId, empresaId = null) => {
         const response = await axiosInstance.get(`/proyectos/${id}/user-summary/${usuarioId}`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    getAssignedUsers: async (id, params = {}) => {
+        const response = await axiosInstance.get(`/proyectos/${id}/assigned-users`, { params: withTenantParams(params) });
+        return response.data;
+    },
+
+    assignUser: async (id, params = {}) => {
+        const response = await axiosInstance.post(`/proyectos/${id}/assign`, null, { params: withTenantParams(params) });
+        return response.data;
+    },
+
+    unassignUser: async (id, usuarioId, params = {}) => {
+        const response = await axiosInstance.delete(`/proyectos/${id}/assign/${usuarioId}`, { params: withTenantParams(params) });
         return response.data;
     }
 };

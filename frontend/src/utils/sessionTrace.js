@@ -1,6 +1,5 @@
 import { decodeJWT } from './jwt';
-
-const TRACE_ENDPOINT = '/api/v1/login/session-trace';
+import { sendSessionTrace } from '../api/sessionTrace';
 
 const buildTracePayload = (eventType, payload = {}) => {
     const token = localStorage.getItem('giproy_token');
@@ -24,20 +23,8 @@ export const traceSessionEvent = (eventType, payload = {}) => {
 
     const body = JSON.stringify(buildTracePayload(eventType, payload));
     const token = localStorage.getItem('giproy_token');
-    const headers = {
-        'Content-Type': 'application/json',
-    };
 
-    if (token) {
-        headers.Authorization = `Bearer ${token}`;
-    }
-
-    fetch(TRACE_ENDPOINT, {
-        method: 'POST',
-        headers,
-        body,
-        keepalive: true,
-    }).catch(() => {
+    sendSessionTrace({ token, body }).catch(() => {
         // El trazado no debe interferir con el flujo principal.
     });
 };

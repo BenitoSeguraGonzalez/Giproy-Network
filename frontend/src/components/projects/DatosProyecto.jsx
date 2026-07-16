@@ -16,6 +16,7 @@ import { maestrosApi } from '../../api/maestros';
 import { proyectoDetalleApi } from '../../api/proyectoDetalle';
 import { proyectosApi } from '../../api/proyectos';
 import reportingApi from '../../api/reporting';
+import { geocodingApi } from '../../api/geocoding';
 import { AuthContext } from '../../context/AuthContext';
 import { appAlert, appConfirm, appPrompt } from '../../utils/appDialog';
 import { useFormatters } from '../../hooks/useFormatters';
@@ -461,11 +462,7 @@ area["boundary"="administrative"]["name"~"^${cityRegex}$",i](area.country)->.sea
 out geom tags;
 `;
 
-    const response = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-        body: new URLSearchParams({ data: query }).toString(),
-    });
+    const response = await geocodingApi.queryOverpass(query);
     if (!response.ok) return null;
 
     const payload = await response.json();
@@ -598,9 +595,7 @@ const geocodeAddressFromBrowserFallback = async (data) => {
             params.set('countrycodes', countryCode);
         }
 
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
-            headers: { Accept: 'application/json' },
-        });
+        const response = await geocodingApi.searchNominatim(params);
         if (!response.ok) {
             throw new Error(`Geocoding fallback failed with status ${response.status}`);
         }
@@ -794,19 +789,17 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
             const data = await maestrosApi.getCategorias(tipoId);
             setCategorias(data);
         } catch (error) {
-            console.error("Error al cargar categorías:", error);
+            globalThis.reportClientError?.("Error al cargar categorías:", error);
         }
     }, []);
 
     const loadCantones = useCallback(async (provincia) => {
         if (!provincia) return;
         try {
-            console.log("Solicitando cantones al API para:", provincia);
             const data = await maestrosApi.getCantones(provincia);
-            console.log("Cantones recibidos:", data);
             setCantones(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Error al cargar cantones:", error);
+            globalThis.reportClientError?.("Error al cargar cantones:", error);
             setCantones([]);
         }
     }, []);
@@ -898,17 +891,17 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
             try {
                 // We load each piece of data independently to avoid one failure blocking everything
                 const fetchTipos = maestrosApi.getTiposProyecto().catch(e => {
-                    console.error("Error loading project types:", e);
+                    globalThis.reportClientError?.("Error loading project types:", e);
                     return [];
                 });
                 const fetchProvincias = maestrosApi.getProvincias().catch(e => {
-                    console.error("Error loading provinces:", e);
+                    globalThis.reportClientError?.("Error loading provinces:", e);
                     return [];
                 });
                 const fetchDetalle = initialDetail
                     ? Promise.resolve(initialDetail)
                     : proyectoDetalleApi.getByRoot(project.codigo_root || project.codigo, empId).catch(e => {
-                        console.error("Error loading project details:", e);
+                        globalThis.reportClientError?.("Error loading project details:", e);
                         return { codigo_root: project.codigo_root || project.codigo };
                     });
 
@@ -918,7 +911,6 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                 setProvincias(Array.isArray(provs) ? provs : []);
 
                 if (detalle && (detalle.codigo_root || detalle.id)) {
-                    console.log("Detalle cargado:", detalle);
                     setFormData(prev => ({
                         ...prev,
                         ...detalle,
@@ -936,14 +928,12 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                         promises.push(loadCategorias(detalle.tipo_proyecto_id));
                     }
                     if (detalle.provincia) {
-                        console.log("Cargando cantones para:", detalle.provincia);
                         promises.push(loadCantones(detalle.provincia));
                     }
                     await Promise.all(promises);
-                    console.log("Datos dependientes cargados correctamente");
                 }
             } catch (error) {
-                console.error("Error al cargar datos iniciales:", error);
+                globalThis.reportClientError?.("Error al cargar datos iniciales:", error);
             } finally {
                 setLoading(false);
             }
@@ -1051,7 +1041,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
             const res = await proyectoDetalleApi.uploadImage(file, empId);
             setFormData(prev => ({ ...prev, imagen_referencial_url: res.url }));
         } catch (error) {
-            console.error("Error uploading image:", error);
+            globalThis.reportClientError?.("Error uploading image:", error);
             appAlert("Error al subir la imagen");
         }
     };
@@ -1063,7 +1053,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
             const documents = await proyectoDetalleApi.listDocuments(projectRootCode, empId);
             setProjectDocuments(Array.isArray(documents) ? documents : []);
         } catch (error) {
-            console.error("Error cargando documentos del proyecto:", error);
+            globalThis.reportClientError?.("Error cargando documentos del proyecto:", error);
             setProjectDocuments([]);
         } finally {
             setDocumentsLoading(false);
@@ -1095,7 +1085,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
             const uploaded = await proyectoDetalleApi.uploadDocument(projectRootCode, file, empId);
             setProjectDocuments((current) => [uploaded, ...current]);
         } catch (error) {
-            console.error("Error subiendo documento PDF:", error);
+            globalThis.reportClientError?.("Error subiendo documento PDF:", error);
             await appAlert(error?.response?.data?.detail || 'No se pudo subir el documento PDF.');
         } finally {
             setDocumentUploading(false);
@@ -1116,7 +1106,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                 return nextUrl;
             });
         } catch (error) {
-            console.error("Error abriendo visor PDF:", error);
+            globalThis.reportClientError?.("Error abriendo visor PDF:", error);
             setPdfPreviewDocument(null);
             await appAlert('No se pudo abrir el visor interno del PDF.');
         } finally {
@@ -1138,7 +1128,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
             const response = await proyectoDetalleApi.downloadDocument(document.id, empId);
             downloadBlobResponse(response, document.file_name || 'documento.pdf', 'application/pdf');
         } catch (error) {
-            console.error("Error descargando documento PDF:", error);
+            globalThis.reportClientError?.("Error descargando documento PDF:", error);
             await appAlert('No se pudo descargar el documento PDF.');
         }
     };
@@ -1161,7 +1151,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                 handleClosePdfPreview();
             }
         } catch (error) {
-            console.error("Error eliminando documento PDF:", error);
+            globalThis.reportClientError?.("Error eliminando documento PDF:", error);
             await appAlert(error?.response?.data?.detail || 'No se pudo eliminar el documento PDF.');
         }
     };
@@ -1457,7 +1447,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                 }, 1800);
             }
         } catch (error) {
-            console.error("Error guardando detalle del proyecto:", error);
+            globalThis.reportClientError?.("Error guardando detalle del proyecto:", error);
             if (isMounted.current) {
                 _setSaveStatus('error');
             }
@@ -1495,7 +1485,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                 }, 1800);
             }
         } catch (error) {
-            console.error('Error guardando nombre del proyecto:', error);
+            globalThis.reportClientError?.('Error guardando nombre del proyecto:', error);
             if (isMounted.current) {
                 _setSaveStatus('error');
             }
@@ -1575,7 +1565,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                     isDirty.current ? persistProjectDetail(formDataRef.current, currentEmpId, { silent: true }) : Promise.resolve(),
                     isDirty.current ? persistProjectCommercialSummary(formDataRef.current, currentEmpId) : Promise.resolve(),
                     isProjectDirty.current ? persistProjectName(projectNameRef.current, currentEmpId, { silent: true }) : Promise.resolve(),
-                ]).catch(e => console.error("Error al guardar en segundo plano (unmount)", e));
+                ]).catch(e => globalThis.reportClientError?.("Error al guardar en segundo plano (unmount)", e));
             }
         };
     }, [empId, persistProjectCommercialSummary, persistProjectDetail, persistProjectName, project.codigo_root]);
@@ -1680,7 +1670,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                 georef_map_error: ''
             }));
         } catch (error) {
-            console.error("Error georreferenciando dirección:", error);
+            globalThis.reportClientError?.("Error georreferenciando dirección:", error);
             const message = error?.response?.data?.detail
                 || "No fue posible localizar la dirección en este momento. Ajuste el punto manualmente o reintente en unos segundos.";
             setGeoHint('No se encontró una coincidencia útil. Revisa ciudad, cantón o provincia antes de volver a intentar.');
@@ -1720,7 +1710,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
             setReportPreview(response.data);
             setShowReportPreview(true);
         } catch (error) {
-            console.error('Error generando vista previa del acta:', error);
+            globalThis.reportClientError?.('Error generando vista previa del acta:', error);
             setShowReportPreview(false);
             setReportPreview(null);
             await appAlert({
@@ -1751,7 +1741,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                 format === 'xlsx' ? undefined : 'application/pdf'
             );
         } catch (error) {
-            console.error('Error exportando acta de constitución:', error);
+            globalThis.reportClientError?.('Error exportando acta de constitución:', error);
             const fallbackMessage =
                 format === 'xlsx'
                     ? 'No fue posible exportar el acta de constitución en Excel.'

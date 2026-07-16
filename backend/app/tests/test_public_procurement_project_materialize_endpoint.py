@@ -63,6 +63,7 @@ def test_project_public_procurement_materialize_creates_classic_project_stack(db
                     "precio_unitario": 10,
                     "precio_total": 20,
                     "capitulo": "Obras preliminares",
+                    "matched_apu_temp_id": "apu-001",
                 },
                 {
                     "codigo": "002",
@@ -72,32 +73,48 @@ def test_project_public_procurement_materialize_creates_classic_project_stack(db
                     "precio_unitario": 5,
                     "precio_total": 15,
                     "capitulo": "Movimiento de tierras",
+                    "matched_apu_temp_id": "apu-002",
                 },
             ],
             "analysis_bundle": {
                 "resources": [
                     {
                         "temp_id": "r1",
+                        "apu_temp_id": "apu-001",
                         "codigo": "MAT-001",
                         "descripcion": "Material importado",
                         "unidad": "u",
                         "precio_unitario": 4,
+                        "cantidad": 1,
+                        "resource_type": "material",
+                    },
+                    {
+                        "temp_id": "r2",
+                        "apu_temp_id": "apu-002",
+                        "codigo": "MAT-002",
+                        "descripcion": "Material relleno",
+                        "unidad": "u",
+                        "precio_unitario": 5,
+                        "cantidad": 1,
                         "resource_type": "material",
                     }
                 ],
                 "apus": [
                     {
+                        "temp_id": "apu-001",
                         "codigo": "001",
                         "descripcion": "Excavacion manual",
                         "unidad": "u",
                         "precio_unitario": 10,
-                        "resources": [
-                            {
-                                "temp_id": "r1",
-                                "cantidad": 1,
-                                "precio_unitario": 4,
-                            }
-                        ],
+                        "resource_count": 1,
+                    },
+                    {
+                        "temp_id": "apu-002",
+                        "codigo": "002",
+                        "descripcion": "Relleno compactado",
+                        "unidad": "u",
+                        "precio_unitario": 5,
+                        "resource_count": 1,
                     }
                 ],
             },
@@ -118,12 +135,12 @@ def test_project_public_procurement_materialize_creates_classic_project_stack(db
     assert data["summary"]["rubros_count"] == 2
     assert data["summary"]["chapters_count"] == 2
     assert data["summary"]["apus_count"] == 2
-    assert data["summary"]["resources_count"] == 1
+    assert data["summary"]["resources_count"] == 2
 
     assert db.query(BaseTrabajo).filter(BaseTrabajo.empresa_id == empresa.id).count() == 1
     assert db.query(EdtNode).filter(EdtNode.proyecto_id == data["proyecto_id"]).count() == 2
     assert db.query(APU).filter(APU.base_trabajo_id == data["base_trabajo_id"]).count() == 2
-    assert db.query(Recurso).filter(Recurso.base_trabajo_id == data["base_trabajo_id"]).count() == 1
+    assert db.query(Recurso).filter(Recurso.base_trabajo_id == data["base_trabajo_id"]).count() == 2
 
     presupuesto = db.query(Presupuesto).filter(Presupuesto.id == data["presupuesto_id"]).one()
     assert float(presupuesto.subtotal) == 35.0
@@ -131,6 +148,7 @@ def test_project_public_procurement_materialize_creates_classic_project_stack(db
         PresupuestoDetalle.presupuesto_id == presupuesto.id,
         PresupuestoDetalle.apu_id.isnot(None),
     ).count() == 2
+    assert data["summary"]["certification_status"] == "valid"
 
 
 def test_project_public_procurement_materialize_rolls_back_without_budget_rows(db):

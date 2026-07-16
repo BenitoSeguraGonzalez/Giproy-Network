@@ -18,7 +18,7 @@ export const useMarketplaceOriginsMap = () => {
             })
             .catch((error) => {
                 if (!cancelled) {
-                    console.error('Error cargando mapa de origenes marketplace:', error);
+                    globalThis.reportClientError?.('Error cargando mapa de origenes marketplace:', error);
                     setOrigins([]);
                 }
             })

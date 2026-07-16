@@ -98,6 +98,7 @@ const sanitizePdfFilename = (value) => String(value || 'lamina-grafica')
     .slice(0, 120) || 'lamina-grafica';
 
 const PRINT_MODE_PAGINATED = 'paginated';
+const HIERARCHY_CARD_MIN_GAP = 10;
 
 const normalizePrintMode = (value) => (value === PRINT_MODE_PAGINATED ? PRINT_MODE_PAGINATED : 'complete');
 
@@ -428,16 +429,27 @@ const countDirectHierarchyChildren = (node) => (node?.hijos || []).length;
 
 const countTotalHierarchyDescendants = (node) => countNodes(node?.hijos || []);
 
-const resolveNodePerson = (node) => {
-    const embedded = node?.embeddedStakeholders?.[0] || null;
-    const stakeholderNode = embedded || node;
-    const person = stakeholderNode?.stakeholder || null;
-    const name = person ? normalizePersonName(`${person.nombre || ''} ${person.apellidos || ''}`) : '';
-    return {
-        name: name || normalizePersonName(stakeholderNode?.responsable_nombre || stakeholderNode?.stakeholder_nombre || ''),
-        role: stakeholderNode?.rol?.nombre || node?.rol?.nombre || '',
-    };
+const countMaxHierarchySiblings = (nodes = []) => nodes.reduce((acc, node) => (
+    Math.max(acc, (node?.hijos || []).length, countMaxHierarchySiblings(node?.hijos || []))
+), nodes.length);
+
+const formatHierarchyCount = (value, singular, plural = `${singular}s`) => {
+    const numeric = Number(value || 0);
+    return `${numeric} ${numeric === 1 ? singular : plural}`;
 };
+
+const resolveEmbeddedPeople = (node) => (node?.embeddedStakeholders || [])
+    .map((stakeholderNode) => {
+        const person = stakeholderNode?.stakeholder || null;
+        const name = person
+            ? normalizePersonName(`${person.nombre || ''} ${person.apellidos || ''}`)
+            : normalizePersonName(stakeholderNode?.responsable_nombre || stakeholderNode?.stakeholder_nombre || '');
+        return {
+            name,
+            role: stakeholderNode?.rol?.nombre || stakeholderNode?.actividades_claves || '',
+        };
+    })
+    .filter((person) => person.name || person.role);
 
 const assignHierarchyPositions = ({ nodes, area, cardWidth, cardHeight }) => {
     const totalLeaves = Math.max(1, nodes.reduce((acc, node) => acc + countHierarchyLeaves(node), 0));
@@ -475,6 +487,27 @@ const assignHierarchyPositions = ({ nodes, area, cardWidth, cardHeight }) => {
     return { positioned, connectors };
 };
 
+const hasHierarchyCardCollisions = (positioned = [], minGap = HIERARCHY_CARD_MIN_GAP) => {
+    const byLevel = new Map();
+    positioned.forEach((item) => {
+        const bucket = byLevel.get(item.level) || [];
+        bucket.push(item);
+        byLevel.set(item.level, bucket);
+    });
+
+    for (const items of byLevel.values()) {
+        const sorted = [...items].sort((a, b) => a.x - b.x);
+        for (let index = 1; index < sorted.length; index += 1) {
+            const previous = sorted[index - 1];
+            const current = sorted[index];
+            if (previous.x + previous.width + minGap > current.x) {
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
 const drawHierarchyConnector = (canvas, parent, child) => {
     const parentBottom = { x: parent.x + parent.width / 2, y: parent.y + parent.height };
     const childTop = { x: child.x + child.width / 2, y: child.y };
@@ -484,157 +517,118 @@ const drawHierarchyConnector = (canvas, parent, child) => {
     canvas.line(childTop.x, midY, childTop.x, childTop.y, { stroke: '#CBD5E1', lineWidth: 0.8 });
 };
 
+const resolveHierarchyCardBodyRows = (node, { isEdt = false, currency = 'USD', totalValorado = 0 } = {}) => {
+    const embeddedPeople = resolveEmbeddedPeople(node);
+    if (!isEdt) {
+        return embeddedPeople.length
+            ? embeddedPeople.slice(0, 3).map((person) => ({
+                label: person.role || 'Rol sin definir',
+                value: person.name || 'Sin asignado',
+            }))
+            : [{ label: '', value: 'Sin responsables o participantes vinculados' }];
+    }
+
+    const rows = [];
+    const definition = node.definicion || node.descripcion || '';
+    if (definition) {
+        rows.push({ label: 'Definicion', value: definition });
+    }
+    if (embeddedPeople.length) {
+        const owner = embeddedPeople[0];
+        rows.push({ label: owner.role || 'Responsable', value: owner.name || 'Sin asignado' });
+    }
+    if (node.metrics) {
+        const metricValue = totalValorado > 0
+            ? `${formatCurrency(node.metrics.valorado || 0, currency, 0)} · ${formatNumber(((Number(node.metrics.valorado || 0) / totalValorado) * 100), 1)}%`
+            : formatCurrency(node.metrics.valorado || 0, currency, 0);
+        rows.push({ label: 'Valorado', value: metricValue });
+    }
+    return rows.length ? rows : [{ label: '', value: 'Sin definicion o responsable vinculado' }];
+};
+
 const drawHierarchyCard = (canvas, item, { moduleType = 'edo', accent = '#F39200', currency = 'USD', totalValorado = 0 }) => {
     const { node, x, y, width, height } = item;
     const isEdt = moduleType === 'edt';
-    const person = resolveNodePerson(node);
-    const descendants = countTotalHierarchyDescendants(node);
     const code = node.codigo || node.codigo_visible || node.item_visible || '-';
     const title = node.nombre || node.descripcion || 'Sin descripcion';
-    const cardFill = isEdt ? '#F7F7F5' : '#FFFFFF';
-    const chipFill = '#FFFFFF';
-    const chipStroke = '#E7E8EB';
-    const titleSize = clamp(width * 0.045, 7.2, 10.2);
-    const metaSize = clamp(width * 0.032, 5.4, 7.2);
+    const childCount = countDirectHierarchyChildren(node);
+    const descendantCount = countTotalHierarchyDescendants(node);
+    const lineX = x + 10;
+    const lineRight = x + width - 10;
+    const lineMaxWidth = width - 20;
+    const topY = y + 8;
+    const titleSize = clamp(width * 0.052, 8.2, 10.8);
+    const metaSize = clamp(width * 0.034, 5.8, 7);
+    const bodySize = clamp(width * 0.038, 6.4, 7.6);
+    const chipSize = clamp(width * 0.032, 5.6, 6.6);
+    const titleLines = wrapText(String(title).toUpperCase(), lineMaxWidth, titleSize, true, 2);
+    const moduleColor = isEdt ? '#059669' : '#136191';
+    const softFill = isEdt ? '#F0FDF4' : '#EFF6FF';
+    const borderColor = isEdt ? '#BBF7D0' : '#BFDBFE';
 
-    canvas.rect(x + 4, y + 5, width, height, { fill: '#E9E9E6' });
-    canvas.rect(x, y, width, height, { fill: cardFill, stroke: isEdt ? '#ECECEC' : '#E5E7EB', lineWidth: 0.6 });
-
-    if (!isEdt) {
-        const lineX = x + 14;
-        const lineRight = x + width - 14;
-        const lineMaxWidth = width - 28;
-        const roleLine = person.role || 'Sin función definida';
-        const personLine = person.name || '-';
-        const identifierSize = clamp(width * 0.035, 5.8, 7.2);
-        const edoTitleSize = clamp(width * 0.064, 9.2, 12);
-        let labelSize = clamp(width * 0.039, 6.8, 7.6);
-        let valueSize = clamp(width * 0.052, 8.6, 10.2);
-        const valueColor = '#136191';
-        const titleLines = wrapText(String(title).toUpperCase(), lineMaxWidth, edoTitleSize, true, 2);
-        const topY = y + 8;
-        const titleY = topY + identifierSize + 4;
-        const titleBlockHeight = titleLines.length * (edoTitleSize + 2);
-        const titleBottomY = titleY + titleBlockHeight;
-
-        const resolveInfoLayout = () => {
-            const roleLayoutLines = wrapText(roleLine, lineMaxWidth, valueSize, true, 2);
-            const assignedLayoutLines = wrapText(personLine, lineMaxWidth, valueSize, true, 2);
-            const valueLineGap = valueSize + 2.2;
-            const solidSeparatorY = titleBottomY + 3;
-            const roleLabelY = solidSeparatorY + 10;
-            const roleValueY = roleLabelY + labelSize + 2;
-            const dottedSeparatorY = roleValueY + (roleLayoutLines.length * valueLineGap) + 4;
-            const assignedLabelY = dottedSeparatorY + 5;
-            const assignedValueY = assignedLabelY + labelSize + 2;
-            const assignedBottomY = assignedValueY + ((assignedLayoutLines.length - 1) * valueLineGap) + valueSize;
-            return {
-                roleLines: roleLayoutLines,
-                assignedLines: assignedLayoutLines,
-                valueLineGap,
-                assignedValueY,
-                assignedLabelY,
-                dottedSeparatorY,
-                roleValueY,
-                roleLabelY,
-                solidSeparatorY,
-                bottomOverflow: assignedBottomY - (y + height - 6),
-            };
-        };
-
-        let infoLayout = resolveInfoLayout();
-        while (infoLayout.bottomOverflow > 0 && valueSize > 8) {
-            valueSize = Math.max(8, valueSize - 0.35);
-            labelSize = Math.max(6.4, labelSize - 0.2);
-            infoLayout = resolveInfoLayout();
-        }
-        const {
-            roleLines,
-            assignedLines,
-            valueLineGap,
-            assignedValueY,
-            assignedLabelY,
-            dottedSeparatorY,
-            roleValueY,
-            roleLabelY,
-            solidSeparatorY,
-        } = infoLayout;
-
-        canvas.text(lineX, topY, `EDO: ${code}`.toUpperCase(), {
-            size: identifierSize,
-            bold: true,
-            color: '#D97706',
-        });
-
-        titleLines.forEach((line, index) => {
-            canvas.text(lineX, titleY + index * (edoTitleSize + 2.5), line, {
-                size: edoTitleSize,
-                bold: true,
-                color: '#111827',
-            });
-        });
-
-        canvas.line(lineX, solidSeparatorY, lineRight, solidSeparatorY, { stroke: '#E5E7EB', lineWidth: 0.55 });
-
-        const drawLabelValueAt = (label, lines, labelY, valueY) => {
-            canvas.text(lineX, labelY, label, { size: labelSize, bold: true, color: '#6B7280' });
-            lines.forEach((line, index) => {
-                canvas.text(lineX, valueY + index * valueLineGap, line, {
-                    size: valueSize,
-                    bold: true,
-                    color: valueColor,
-                });
-            });
-        };
-
-        const drawDottedSeparator = (separatorY) => {
-            const segmentWidth = 2;
-            const gap = 3.2;
-            for (let dotX = lineX; dotX < lineRight; dotX += segmentWidth + gap) {
-                canvas.line(dotX, separatorY, Math.min(dotX + segmentWidth, lineRight), separatorY, {
-                    stroke: '#E5E7EB',
-                    lineWidth: 0.45,
-                });
-            }
-        };
-
-        drawLabelValueAt('ROL', roleLines, roleLabelY, roleValueY);
-        drawDottedSeparator(dottedSeparatorY);
-        drawLabelValueAt('ASIGNADO', assignedLines, assignedLabelY, assignedValueY);
-        return;
-    }
-
-    canvas.rect(x + 12, y + 11, 20, 20, { fill: '#FBFBFA', stroke: '#E7E8EB', lineWidth: 0.5 });
-    canvas.line(x + 22, y + 15, x + 22, y + 25, { stroke: '#6B7280', lineWidth: 0.6 });
-    canvas.line(x + 17, y + 25, x + 27, y + 25, { stroke: '#6B7280', lineWidth: 0.6 });
-    canvas.rect(x + width - 52, y + 12, 38, 14, { fill: chipFill, stroke: chipStroke, lineWidth: 0.45 });
-    canvas.text(x + width - 43, y + 22, 'CUENTA', { size: 5.7, bold: true, color: '#6B7280', maxWidth: 30 });
-
-    canvas.text(x + 13, y + 45, code, { size: titleSize * 0.85, bold: true, color: accent, maxWidth: 42 });
-    wrapText(title.toUpperCase(), width - 58, titleSize, true, 2).forEach((line, index) => {
-        canvas.text(x + 45, y + 45 + index * (titleSize + 2), line, { size: titleSize, bold: true, color: '#1A1A1A', maxWidth: width - 56 });
+    canvas.rect(x + 3, y + 4, width, height, { fill: '#E7E9EE' });
+    canvas.rect(x, y, width, height, { fill: '#FFFFFF', stroke: '#D9DDE5', lineWidth: 0.55 });
+    canvas.rect(x, y, 5, height, { fill: moduleColor });
+    canvas.rect(lineX, topY - 1, Math.min(width * 0.36, 74), 13, { fill: softFill, stroke: borderColor, lineWidth: 0.35 });
+    canvas.text(lineX + 4, topY + 8, `${isEdt ? 'EDT' : 'EDO'} ${code}`.toUpperCase(), {
+        size: metaSize,
+        bold: true,
+        color: moduleColor,
+        maxWidth: Math.min(width * 0.36, 68),
+    });
+    canvas.text(lineRight - 60, topY + 8, formatHierarchyCount(childCount, 'hijo'), {
+        size: metaSize,
+        bold: true,
+        color: '#6B7280',
+        maxWidth: 58,
     });
 
-    if (person.name || person.role) {
-        const pillY = y + height * 0.48;
-        const pillHeight = 28;
-        canvas.rect(x + 14, pillY, width - 28, pillHeight, { fill: '#FFFFFF', stroke: '#E6E7EA', lineWidth: 0.45 });
-        canvas.text(x + 22, pillY + 11, person.name || 'Sin responsable', { size: metaSize + 0.7, bold: true, color: '#173453', maxWidth: width - 44 });
-        canvas.text(x + 22, pillY + 22, (person.role || 'Responsable').toUpperCase(), { size: metaSize, bold: true, color: '#6B7280', maxWidth: width - 44 });
-    }
+    const titleY = topY + 22;
+    titleLines.forEach((line, index) => {
+        canvas.text(lineX, titleY + index * (titleSize + 2.2), line, {
+            size: titleSize,
+            bold: true,
+            color: '#111827',
+            maxWidth: lineMaxWidth,
+        });
+    });
 
-    const chipY = y + height - 21;
-    const chips = [
-        `DESC. ${descendants}`,
-        totalValorado > 0 && node.metrics ? formatCurrency(node.metrics.valorado, currency, 0) : '',
-    ].filter(Boolean);
-    let chipX = x + 14;
-    chips.forEach((chip) => {
-        const chipWidth = clamp(estimateTextWidth(chip, metaSize, true) + 18, 34, width - 28);
-        if (chipX + chipWidth > x + width - 14) return;
-        canvas.rect(chipX, chipY, chipWidth, 13, { fill: '#FFFFFF', stroke: chipStroke, lineWidth: 0.45 });
-        canvas.text(chipX + 8, chipY + 9, chip, { size: metaSize, bold: true, color: chip.startsWith('RESP') ? '#7C3AED' : '#6B7280', maxWidth: chipWidth - 12 });
-        chipX += chipWidth + 6;
+    const titleBottomY = titleY + titleLines.length * (titleSize + 2.2) + 2;
+    canvas.line(lineX, titleBottomY, lineRight, titleBottomY, { stroke: '#E5E7EB', lineWidth: 0.45 });
+
+    const peopleY = titleBottomY + 10;
+    const bodyRows = resolveHierarchyCardBodyRows(node, { isEdt, currency, totalValorado });
+    bodyRows.slice(0, 3).forEach((row, index) => {
+        const rowY = peopleY + index * 14;
+        if (row.label) {
+            canvas.text(lineX, rowY, row.label, {
+                size: chipSize,
+                bold: true,
+                color: '#6B7280',
+                maxWidth: lineMaxWidth * 0.34,
+            });
+        }
+        canvas.text(row.label ? lineX + lineMaxWidth * 0.38 : lineX, rowY, row.value, {
+            size: bodySize,
+            bold: true,
+            color: row.label ? moduleColor : '#6B7280',
+            maxWidth: row.label ? lineMaxWidth * 0.58 : lineMaxWidth,
+        });
+    });
+    if (bodyRows.length > 3) {
+        canvas.text(lineX, y + height - 9, `+ ${bodyRows.length - 3} dato(s) adicionales`, {
+            size: chipSize,
+            bold: true,
+            color: '#6B7280',
+            maxWidth: lineMaxWidth,
+        });
+        return;
+    }
+    canvas.text(lineX, y + height - 9, `${formatHierarchyCount(descendantCount, 'descendiente')} en rama`, {
+        size: chipSize,
+        bold: true,
+        color: '#6B7280',
+        maxWidth: lineMaxWidth,
     });
 };
 
@@ -659,6 +653,91 @@ const splitHierarchyPrintPages = (nodes = [], rowsPerPage = 30) => {
     return pages.length ? pages : [[]];
 };
 
+const splitHierarchyNodeIntoReadablePages = (node, leafBudget) => {
+    const children = node?.hijos || [];
+    if (!children.length || countHierarchyLeaves(node) <= leafBudget) {
+        return [[node]];
+    }
+    const childPages = splitHierarchyPrintPagesReadable(children, Math.max(1, leafBudget - 1));
+    return childPages.map((pageChildren, index) => ([{
+        ...node,
+        nombre: index === 0 ? node.nombre : `${node.nombre || 'Rama'} (continuacion ${index + 1})`,
+        hijos: pageChildren,
+    }]));
+};
+
+const splitNodeBySiblingCapacity = (node, siblingCapacity) => {
+    const children = node?.hijos || [];
+    if (!children.length) return [node];
+
+    const normalizedChildren = children.flatMap((child) => splitNodeBySiblingCapacity(child, siblingCapacity));
+    if (normalizedChildren.length <= siblingCapacity) {
+        return [{ ...node, hijos: normalizedChildren }];
+    }
+
+    const pages = [];
+    for (let index = 0; index < normalizedChildren.length; index += siblingCapacity) {
+        const pageIndex = Math.floor(index / siblingCapacity);
+        pages.push({
+            ...node,
+            nombre: pageIndex === 0 ? node.nombre : `${node.nombre || 'Rama'} (continuacion ${pageIndex + 1})`,
+            hijos: normalizedChildren.slice(index, index + siblingCapacity),
+        });
+    }
+    return pages;
+};
+
+const splitPagesBySiblingCapacity = (pages = [[]], siblingCapacity = 6) => (
+    pages.flatMap((pageNodes) => {
+        const normalizedNodes = pageNodes.flatMap((node) => splitNodeBySiblingCapacity(node, siblingCapacity));
+        const result = [];
+        for (let index = 0; index < normalizedNodes.length; index += siblingCapacity) {
+            result.push(normalizedNodes.slice(index, index + siblingCapacity));
+        }
+        return result.length ? result : [[]];
+    })
+);
+
+const splitHierarchyPrintPagesReadable = (nodes = [], rowsPerPage = 30) => {
+    const leafBudget = normalizeRowsPerPage(rowsPerPage, 30);
+    const pages = [];
+    let current = [];
+    let currentLeaves = 0;
+
+    nodes.forEach((node) => {
+        const nodeLeaves = Math.max(1, countHierarchyLeaves(node));
+        if (nodeLeaves > leafBudget) {
+            if (current.length) {
+                pages.push(current);
+                current = [];
+                currentLeaves = 0;
+            }
+            splitHierarchyNodeIntoReadablePages(node, leafBudget).forEach((page) => pages.push(page));
+            return;
+        }
+        if (current.length && currentLeaves + nodeLeaves > leafBudget) {
+            pages.push(current);
+            current = [];
+            currentLeaves = 0;
+        }
+        current.push(node);
+        currentLeaves += nodeLeaves;
+    });
+
+    if (current.length) pages.push(current);
+    return pages.length ? pages : [[]];
+};
+
+const estimateArea = (pageSize, orientation, margin = 22, headerHeight = 62) => {
+    const size = PAGE_SIZE_PT[pageSize] || PAGE_SIZE_PT.A3;
+    const w = orientation === 'landscape' ? size.height : size.width;
+    const h = orientation === 'landscape' ? size.width : size.height;
+    return {
+        width: w - margin * 2 - 32,
+        height: h - margin * 2 - headerHeight - 32,
+    };
+};
+
 const buildClassicHierarchyPdfBlob = ({
     tree = [],
     moduleType = 'edo',
@@ -675,9 +754,23 @@ const buildClassicHierarchyPdfBlob = ({
     const subtitleBase = isEdt ? 'Estructura de desglose completa, expandida y sin controles.' : 'Estructura organizacional completa, expandida y sin controles.';
     const graphTree = projectHierarchyPrintTree(tree, moduleType);
     const mode = normalizePrintMode(printMode);
-    const pages = mode === PRINT_MODE_PAGINATED
-        ? splitHierarchyPrintPages(graphTree, rowsPerPage)
+
+    const estArea = estimateArea(pageSize, orientation);
+    const targetCardWidth = isEdt ? 185 : 175;
+    const minReadableCardWidth = isEdt ? 165 : 150;
+    const siblingCapacity = Math.max(1, Math.floor((estArea.width + HIERARCHY_CARD_MIN_GAP) / (minReadableCardWidth + HIERARCHY_CARD_MIN_GAP)));
+    const adaptiveBudget = Math.max(1, Math.min(
+        Math.floor((estArea.width * 0.88) / targetCardWidth),
+        siblingCapacity
+    ));
+    const leafBudget = Math.max(4, Math.min(normalizeRowsPerPage(rowsPerPage, 30), adaptiveBudget));
+    const totalLeaves = graphTree.reduce((acc, node) => acc + countHierarchyLeaves(node), 0);
+    const shouldForceReadablePagination = totalLeaves > adaptiveBudget || countMaxHierarchySiblings(graphTree) > siblingCapacity;
+
+    const basePages = mode === PRINT_MODE_PAGINATED || shouldForceReadablePagination
+        ? splitHierarchyPrintPagesReadable(graphTree, leafBudget)
         : [graphTree];
+    const pages = splitPagesBySiblingCapacity(basePages, siblingCapacity);
     const totalValorado = isEdt
         ? graphTree.reduce((acc, node) => acc + Number(node.metrics?.valorado || 0), 0)
         : 0;
@@ -688,15 +781,25 @@ const buildClassicHierarchyPdfBlob = ({
             ? `${subtitleBase} Pagina ${pageIndex + 1} de ${pages.length}.`
             : subtitleBase;
         const area = drawSheetHeader(canvas, doc, { title, subtitle, project, accent: isEdt ? '#10B981' : '#F39200' });
-        const totalLeaves = Math.max(1, pageNodes.reduce((acc, node) => acc + countHierarchyLeaves(node), 0));
+        const totalPageLeaves = Math.max(1, pageNodes.reduce((acc, node) => acc + countHierarchyLeaves(node), 0));
         const maxDepth = resolveHierarchyDepth(pageNodes);
-        const cardWidth = isEdt
-            ? clamp((area.width / totalLeaves) * 0.74, 104, 160)
-            : clamp((area.width / totalLeaves) * 0.82, 124, 176);
-        const cardHeight = isEdt
-            ? clamp((area.height / (maxDepth + 1)) * 0.58, 72, 108)
-            : clamp((area.height / (maxDepth + 1)) * 0.62, 94, 118);
+        const horizontalUnit = area.width / totalPageLeaves;
+        const noOverlapCardHeight = (area.height / (maxDepth + 1)) * 0.82;
+        const availableCardWidth = horizontalUnit - HIERARCHY_CARD_MIN_GAP;
+        const cardWidth = clamp(
+            Math.min(horizontalUnit * 0.86, availableCardWidth),
+            Math.min(minReadableCardWidth, availableCardWidth),
+            isEdt ? 230 : 220
+        );
+        const cardHeight = clamp(
+            noOverlapCardHeight,
+            Math.min(isEdt ? 100 : 96, noOverlapCardHeight),
+            isEdt ? 140 : 132
+        );
         const { positioned, connectors } = assignHierarchyPositions({ nodes: pageNodes, area, cardWidth, cardHeight });
+        if (hasHierarchyCardCollisions(positioned)) {
+            throw new Error('La lamina grafica excede la capacidad visual sin solape. Reduzca elementos por pagina.');
+        }
         connectors.forEach((connector) => drawHierarchyConnector(canvas, connector.parent, connector.child));
         positioned.forEach((item) => drawHierarchyCard(canvas, item, {
             moduleType,

@@ -7,6 +7,10 @@ export const basesTrabajoApi = {
     create: (data, empresaId = null) => api.post('/bases-trabajo/', data, withTenantConfig({}, empresaId)),
     update: (id, data, empresaId = null) => api.put(`/bases-trabajo/${id}`, data, withTenantConfig({}, empresaId)),
     delete: (id, empresaId = null) => api.delete(`/bases-trabajo/${id}`, withTenantConfig({}, empresaId)),
+    getRecycleBin: (params = {}) => api.get('/bases-trabajo/papelera', { params: withTenantParams(params) }),
+    restoreFromRecycleBin: (id, empresaId = null) => api.post(`/bases-trabajo/papelera/${id}/restore`, {}, withTenantConfig({}, empresaId)),
+    purgeFromRecycleBin: (id, empresaId = null) => api.delete(`/bases-trabajo/papelera/${id}/purge`, withTenantConfig({}, empresaId)),
+    purgeExpiredRecycleBin: (empresaId = null) => api.post('/bases-trabajo/papelera/purge-expired', {}, withTenantConfig({}, empresaId)),
     getNextCode: (empresaId = null) => api.get('/bases-trabajo/generate-base-code', withTenantConfig({}, empresaId)),
     getActive: (params) => api.get('/bases-trabajo/active', { params: withTenantParams(params) }),
     // empresa_id opcional: permite al Superadministrador activar bases de otras empresas
@@ -71,7 +75,19 @@ export const basesTrabajoApi = {
     getSyncHistory: (id, empresaId = null, limit = 8) => api.get(
         `/bases-trabajo/${id}/sync-history`,
         withTenantConfig({ params: { limit } }, empresaId)
-    )
+    ),
+    getAssignedUsers: async (id, params = {}) => {
+        const response = await api.get(`/bases-trabajo/${id}/assigned-users`, { params: withTenantParams(params) });
+        return response.data;
+    },
+    assignUser: async (id, params = {}) => {
+        const response = await api.post(`/bases-trabajo/${id}/assign`, null, { params: withTenantParams(params) });
+        return response.data;
+    },
+    unassignUser: async (id, usuarioId, params = {}) => {
+        const response = await api.delete(`/bases-trabajo/${id}/assign/${usuarioId}`, { params: withTenantParams(params) });
+        return response.data;
+    }
 };
 
 export default basesTrabajoApi;

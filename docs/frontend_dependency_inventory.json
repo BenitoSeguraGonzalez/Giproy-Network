@@ -1,0 +1,2033 @@
+{
+  "generated_at": "2026-05-25T12:00:29.680487+00:00",
+  "mode": "GIPROY CLASICO",
+  "scope": "frontend dependency inventory; read-only source scan; no product code changes",
+  "root": "E:/Repositorios/GiProy Network",
+  "totals": {
+    "scanned_files": 217,
+    "scanned_lines": 120214,
+    "api_clients": 44
+  },
+  "file_counts_by_zone": {
+    "App.jsx": 1,
+    "__formula_responsive_harness.jsx": 1,
+    "api": 44,
+    "components": 81,
+    "constants": 2,
+    "context": 3,
+    "gantt-ff-harness.jsx": 1,
+    "hooks": 6,
+    "layouts": 1,
+    "lib": 1,
+    "main.jsx": 1,
+    "pages": 33,
+    "routes": 1,
+    "utils": 41
+  },
+  "largest_files": [
+    {
+      "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+      "size_kb": 1407.6
+    },
+    {
+      "path": "frontend/src/pages/Proyectos.jsx",
+      "size_kb": 363.1
+    },
+    {
+      "path": "frontend/src/components/projects/Cronogramas.jsx",
+      "size_kb": 357.4
+    },
+    {
+      "path": "frontend/src/pages/MarketplaceAdminDashboard.jsx",
+      "size_kb": 348.1
+    },
+    {
+      "path": "frontend/src/api/schema.d.ts",
+      "size_kb": 302.8
+    },
+    {
+      "path": "frontend/src/pages/Community.jsx",
+      "size_kb": 297.9
+    },
+    {
+      "path": "frontend/src/pages/APUs.jsx",
+      "size_kb": 256.3
+    },
+    {
+      "path": "frontend/src/components/projects/DatosProyecto.jsx",
+      "size_kb": 162.8
+    },
+    {
+      "path": "frontend/src/pages/SellerDashboard.jsx",
+      "size_kb": 158.7
+    },
+    {
+      "path": "frontend/src/pages/Marketplace.jsx",
+      "size_kb": 149.5
+    },
+    {
+      "path": "frontend/src/pages/Settings.jsx",
+      "size_kb": 132.6
+    },
+    {
+      "path": "frontend/src/components/presupuestos/LineasPresupuestoTab.jsx",
+      "size_kb": 117.9
+    },
+    {
+      "path": "frontend/src/pages/Recursos.jsx",
+      "size_kb": 95.6
+    },
+    {
+      "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+      "size_kb": 94.6
+    },
+    {
+      "path": "frontend/src/components/projects/HierarchyGraphView.jsx",
+      "size_kb": 93.6
+    },
+    {
+      "path": "frontend/src/components/projects/Edt.jsx",
+      "size_kb": 85.1
+    },
+    {
+      "path": "frontend/src/pages/BasesTrabajo.jsx",
+      "size_kb": 76.5
+    },
+    {
+      "path": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+      "size_kb": 75.5
+    },
+    {
+      "path": "frontend/src/pages/Subcategorias.jsx",
+      "size_kb": 69.4
+    },
+    {
+      "path": "frontend/src/components/projects/Edo.jsx",
+      "size_kb": 68.2
+    }
+  ],
+  "api_clients": [
+    "frontend/src/api/adminAudit.js",
+    "frontend/src/api/adminBim.js",
+    "frontend/src/api/adminGlobal.js",
+    "frontend/src/api/adminImportModels.js",
+    "frontend/src/api/adminLicenses.js",
+    "frontend/src/api/adminMaintenance.js",
+    "frontend/src/api/adminSessions.js",
+    "frontend/src/api/adminSupport.js",
+    "frontend/src/api/adminSystem.js",
+    "frontend/src/api/api-client.js",
+    "frontend/src/api/apus.js",
+    "frontend/src/api/auth.js",
+    "frontend/src/api/axiosConfig.js",
+    "frontend/src/api/basesTrabajo.js",
+    "frontend/src/api/bim.js",
+    "frontend/src/api/bimLinks.js",
+    "frontend/src/api/bimModels.js",
+    "frontend/src/api/bimViewStates.js",
+    "frontend/src/api/community.js",
+    "frontend/src/api/cronogramas.js",
+    "frontend/src/api/edo.js",
+    "frontend/src/api/edt.js",
+    "frontend/src/api/empresas.js",
+    "frontend/src/api/ganttFixtures.js",
+    "frontend/src/api/geocoding.js",
+    "frontend/src/api/maestros.js",
+    "frontend/src/api/marketplace.js",
+    "frontend/src/api/personalTodos.js",
+    "frontend/src/api/polinomica.js",
+    "frontend/src/api/presupuestos.js",
+    "frontend/src/api/projectCalendarEntries.js",
+    "frontend/src/api/proyectoDetalle.js",
+    "frontend/src/api/proyectos.js",
+    "frontend/src/api/publicAuth.js",
+    "frontend/src/api/recursos.js",
+    "frontend/src/api/reporting.js",
+    "frontend/src/api/schema.d.ts",
+    "frontend/src/api/sessionTrace.js",
+    "frontend/src/api/stakeholders.js",
+    "frontend/src/api/subcategoriasItems.js",
+    "frontend/src/api/systemAnnouncements.js",
+    "frontend/src/api/tenant.js",
+    "frontend/src/api/usuarios.js",
+    "frontend/src/api/utils.js"
+  ],
+  "categories": {
+    "direct_api_calls_outside_api": {
+      "description": "api/axios/fetch calls outside frontend/src/api that need migration review.",
+      "count": 0,
+      "samples": []
+    },
+    "tenant_references": {
+      "description": "Tenant-related references that must not be changed without focused validation.",
+      "count": 1199,
+      "samples": [
+        {
+          "path": "frontend/src/gantt-ff-harness.jsx",
+          "line": 57,
+          "text": "selectedEmpresa: { id: fixture.empresa_id, nombre: fixture.empresa_nombre },"
+        },
+        {
+          "path": "frontend/src/api/adminAudit.js",
+          "line": 2,
+          "text": "import { withoutTenant } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/adminAudit.js",
+          "line": 6,
+          "text": "const response = await api.get('/admin-audit/summary', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminAudit.js",
+          "line": 12,
+          "text": "...withoutTenant(),"
+        },
+        {
+          "path": "frontend/src/api/adminAudit.js",
+          "line": 20,
+          "text": "...withoutTenant(),"
+        },
+        {
+          "path": "frontend/src/api/adminBim.js",
+          "line": 2,
+          "text": "import { withoutTenant } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/adminBim.js",
+          "line": 6,
+          "text": "const response = await api.get('/admin-bim/', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminBim.js",
+          "line": 11,
+          "text": "const response = await api.put('/admin-bim/', payload, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminGlobal.js",
+          "line": 2,
+          "text": "import { withoutTenant } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/adminGlobal.js",
+          "line": 6,
+          "text": "const response = await api.get('/empresas/', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminGlobal.js",
+          "line": 10,
+          "text": "const response = await api.get('/usuarios/', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminImportModels.js",
+          "line": 2,
+          "text": "import { withoutTenant } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/adminImportModels.js",
+          "line": 6,
+          "text": "const response = await api.get('/admin-import-models/', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminImportModels.js",
+          "line": 11,
+          "text": "const response = await api.put(`/admin-import-models/${profileId}`, payload, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminImportModels.js",
+          "line": 16,
+          "text": "const response = await api.post(`/admin-import-models/${profileId}/activate`, {}, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminImportModels.js",
+          "line": 21,
+          "text": "const response = await api.post(`/admin-import-models/${profileId}/deactivate`, {}, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminImportModels.js",
+          "line": 26,
+          "text": "const response = await api.post(`/admin-import-models/${profileId}/clone`, payload, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminImportModels.js",
+          "line": 37,
+          "text": "...withoutTenant(),"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 2,
+          "text": "import { withoutTenant } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 6,
+          "text": "const response = await api.get('/admin-licenses/summary', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 10,
+          "text": "const response = await api.get('/admin-licenses/catalog', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 13,
+          "text": "updateCompany: async (empresaId, payload) => {"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 14,
+          "text": "const response = await api.put(`/empresas/${empresaId}`, payload, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 18,
+          "text": "const response = await api.post('/admin-licenses/assign', payload, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 21,
+          "text": "recalculateUsage: async (empresaId) => {"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 22,
+          "text": "const response = await api.post(`/admin-licenses/recalculate/${empresaId}`, {}, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 25,
+          "text": "runHousekeeping: async (empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 26,
+          "text": "const response = await api.post('/admin-licenses/housekeeping/run', { empresa_id: empresaId }, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 29,
+          "text": "getHistory: async (empresaId, limit = 20) => {"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 30,
+          "text": "const response = await api.get(`/admin-licenses/history/${empresaId}`, {"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 31,
+          "text": "...withoutTenant(),"
+        },
+        {
+          "path": "frontend/src/api/adminLicenses.js",
+          "line": 37,
+          "text": "const response = await api.get('/admin-licenses/me', withoutTenant({ params }));"
+        },
+        {
+          "path": "frontend/src/api/adminMaintenance.js",
+          "line": 2,
+          "text": "import { withoutTenant } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/adminMaintenance.js",
+          "line": 6,
+          "text": "const response = await api.get('/admin-maintenance/', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminMaintenance.js",
+          "line": 11,
+          "text": "const response = await api.get('/admin-maintenance/active', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminMaintenance.js",
+          "line": 16,
+          "text": "const response = await api.put('/admin-maintenance/', payload, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminSessions.js",
+          "line": 2,
+          "text": "import { withoutTenant } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/adminSessions.js",
+          "line": 6,
+          "text": "const response = await api.get('/admin-system/sessions', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminSessions.js",
+          "line": 11,
+          "text": "const response = await api.post(`/admin-system/sessions/${userId}/revoke`, {}, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminSupport.js",
+          "line": 2,
+          "text": "import { withoutTenant } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/adminSupport.js",
+          "line": 5,
+          "text": "getCompanyConsole: async (empresaId) => {"
+        },
+        {
+          "path": "frontend/src/api/adminSupport.js",
+          "line": 6,
+          "text": "const response = await api.get(`/admin-system/company-console/${empresaId}`, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminSystem.js",
+          "line": 2,
+          "text": "import { withoutTenant } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/adminSystem.js",
+          "line": 6,
+          "text": "const response = await api.get('/admin-system/status', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 2,
+          "text": "import { withTenantConfig, withTenantParams } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 10,
+          "text": "getAll: (params) => api.get('/apus/', { params: withTenantParams(params) }),"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 13,
+          "text": "getById: (id, empresaId = null) => api.get(`/apus/${id}`, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 15,
+          "text": "getBatchDetails: (apuIds, empresaId = null) => api.post('/apus/batch/details', {"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 17,
+          "text": "}, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 18,
+          "text": "getProjectCpc: (proyectoId, empresaId = null) => api.get('/apus/project-cpc', {"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 19,
+          "text": "params: withTenantParams({ proyecto_id: proyectoId }, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 21,
+          "text": "assignProjectCpc: (apuId, proyectoId, codCpcId, empresaId = null) => api.put(`/apus/${apuId}/project-cpc`, {"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 24,
+          "text": "}, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 25,
+          "text": "getImpactSummary: (id, empresaId = null) => api.get(`/apus/${id}/impact-summary`, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 31,
+          "text": "create: (data, empresaId = null, revision = null) => {"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 35,
+          "text": "params: withTenantParams(params, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 43,
+          "text": "update: (id, data, empresaId = null) => api.put(`/apus/${id}`, data, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 44,
+          "text": "moveLinea: (apuId, lineaId, targetIndex, empresaId = null) => api.put(`/apus/${apuId}/lineas/move`, {"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 47,
+          "text": "}, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 48,
+          "text": "delete: (id, empresaId = null) => api.delete(`/apus/${id}`, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 49,
+          "text": "bulkDelete: (apuIds, empresaId = null) => api.post('/apus/bulk-delete', {"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 51,
+          "text": "}, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 52,
+          "text": "duplicate: (id, empresaId = null, revision = null) => {"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 56,
+          "text": "params: withTenantParams(params, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 59,
+          "text": "importFromBase: (data, empresaId = null) => api.post('/apus/import-from-base', data, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 60,
+          "text": "importClipboard: (lines, baseId, subcatId, empresaId = null, revision = null) => {"
+        },
+        {
+          "path": "frontend/src/api/apus.js",
+          "line": 64,
+          "text": "params: withTenantParams(params, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/auth.js",
+          "line": 2,
+          "text": "import { withoutTenant } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/auth.js",
+          "line": 6,
+          "text": "const response = await api.post('/login/refresh', {}, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/auth.js",
+          "line": 11,
+          "text": "const response = await api.get('/usuarios/me', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/auth.js",
+          "line": 19,
+          "text": "skipTenant: true,"
+        },
+        {
+          "path": "frontend/src/api/auth.js",
+          "line": 25,
+          "text": "const response = await api.post('/login/logout', {}, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/axiosConfig.js",
+          "line": 2,
+          "text": "import { getStoredWorkingCompanyId, shouldSkipTenantInjection, withTenantParams } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/axiosConfig.js",
+          "line": 91,
+          "text": "const empresaId = getStoredWorkingCompanyId();"
+        },
+        {
+          "path": "frontend/src/api/axiosConfig.js",
+          "line": 92,
+          "text": "if (empresaId) {"
+        },
+        {
+          "path": "frontend/src/api/axiosConfig.js",
+          "line": 93,
+          "text": "config.params = withTenantParams(config.params, empresaId);"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 2,
+          "text": "import { withTenantConfig, withTenantParams } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 5,
+          "text": "getAll: (params) => api.get('/bases-trabajo/', { params: withTenantParams(params) }),"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 6,
+          "text": "getById: (id, empresaId = null) => api.get(`/bases-trabajo/${id}`, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 7,
+          "text": "create: (data, empresaId = null) => api.post('/bases-trabajo/', data, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 8,
+          "text": "update: (id, data, empresaId = null) => api.put(`/bases-trabajo/${id}`, data, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 9,
+          "text": "delete: (id, empresaId = null) => api.delete(`/bases-trabajo/${id}`, withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 10,
+          "text": "getNextCode: (empresaId = null) => api.get('/bases-trabajo/generate-base-code', withTenantConfig({}, empresaId)),"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 11,
+          "text": "getActive: (params) => api.get('/bases-trabajo/active', { params: withTenantParams(params) }),"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 12,
+          "text": "// empresa_id opcional: permite al Superadministrador activar bases de otras empresas"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 13,
+          "text": "activate: (id, empresaId = null) => api.post("
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 16,
+          "text": "withTenantConfig({}, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 18,
+          "text": "// empresa_id opcional: permite al Superadministrador desactivar bases de otras empresas"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 19,
+          "text": "deactivateAll: (empresaId = null) => api.post("
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 22,
+          "text": "withTenantConfig({}, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 24,
+          "text": "syncMissing: (id, empresaId = null) => api.post("
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 27,
+          "text": "withTenantConfig({}, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 29,
+          "text": "previewSyncMissing: (id, empresaId = null) => api.get("
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 31,
+          "text": "withTenantConfig({}, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 33,
+          "text": "repairInherited: (id, empresaId = null) => api.post("
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 36,
+          "text": "withTenantConfig({}, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 38,
+          "text": "previewSyncOperation: async (id, mode, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 43,
+          "text": "withTenantConfig({}, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 52,
+          "text": "executeSyncOperation: async (id, mode, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 57,
+          "text": "withTenantConfig({}, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 66,
+          "text": "revertSyncOperation: (id, syncEventId, empresaId = null) => api.post("
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 69,
+          "text": "withTenantConfig({}, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 71,
+          "text": "getSyncHistory: (id, empresaId = null, limit = 8) => api.get("
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 73,
+          "text": "withTenantConfig({ params: { limit } }, empresaId)"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 76,
+          "text": "const response = await api.get(`/bases-trabajo/${id}/assigned-users`, { params: withTenantParams(params) });"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 80,
+          "text": "const response = await api.post(`/bases-trabajo/${id}/assign`, null, { params: withTenantParams(params) });"
+        },
+        {
+          "path": "frontend/src/api/basesTrabajo.js",
+          "line": 84,
+          "text": "const response = await api.delete(`/bases-trabajo/${id}/assign/${usuarioId}`, { params: withTenantParams(params) });"
+        },
+        {
+          "path": "frontend/src/api/bim.js",
+          "line": 2,
+          "text": "import { withTenantConfig } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/bim.js",
+          "line": 5,
+          "text": "getFeatureFlags: async (empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bim.js",
+          "line": 6,
+          "text": "const response = await axiosInstance.get('/bim/feature-flags/me', withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 2,
+          "text": "import { withTenantConfig } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 5,
+          "text": "listByProject: async (projectId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 6,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/links`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 9,
+          "text": "listElementsByProject: async (projectId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 10,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/elements`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 13,
+          "text": "create: async (projectId, payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 14,
+          "text": "const response = await axiosInstance.post(`/bim/projects/${projectId}/links`, payload, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 17,
+          "text": "remove: async (projectId, targetType, linkId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 18,
+          "text": "await axiosInstance.delete(`/bim/projects/${projectId}/links/${targetType}/${linkId}`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 2,
+          "text": "import { withTenantConfig } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 5,
+          "text": "getWorkspace: async (projectId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 6,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/workspace`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 9,
+          "text": "listByProject: async (projectId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 10,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/models`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 13,
+          "text": "bootstrapDemo: async (projectId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 14,
+          "text": "const response = await axiosInstance.post(`/bim/projects/${projectId}/bootstrap-demo`, null, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 17,
+          "text": "importJsonPackage: async (projectId, payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 21,
+          "text": "withTenantConfig({}, empresaId),"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 25,
+          "text": "importJsonBatch: async (projectId, packages, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 29,
+          "text": "withTenantConfig({}, empresaId),"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 33,
+          "text": "validateJsonBatch: async (projectId, packages, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 37,
+          "text": "withTenantConfig({}, empresaId),"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 2,
+          "text": "import { withTenantConfig } from './tenant';"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 5,
+          "text": "listByProject: async (projectId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 6,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/view-states`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 9,
+          "text": "createByProject: async (projectId, payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 13,
+          "text": "withTenantConfig({}, empresaId),"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 17,
+          "text": "getByProject: async (projectId, viewStateId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 20,
+          "text": "withTenantConfig({}, empresaId),"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 24,
+          "text": "updateByProject: async (projectId, viewStateId, payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 28,
+          "text": "withTenantConfig({}, empresaId),"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 32,
+          "text": "duplicateByProject: async (projectId, viewStateId, payload = {}, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 36,
+          "text": "withTenantConfig({}, empresaId),"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 40,
+          "text": "deleteByProject: async (projectId, viewStateId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 43,
+          "text": "withTenantConfig({}, empresaId),"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 46,
+          "text": "getWorkspaceContext: async (projectId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 47,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/workspace-context`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 50,
+          "text": "updateWorkspaceContext: async (projectId, payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 54,
+          "text": "withTenantConfig({}, empresaId),"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 4,
+          "text": "getBootstrap: async (empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 5,
+          "text": "const response = await api.get('/community/bootstrap', { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 8,
+          "text": "getPosts: async (scope, empresaId = null, order = 'recent_activity') => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 9,
+          "text": "const response = await api.get('/community/posts', { params: { scope, order, ...(empresaId ? { empresa_id: empresaId } : {}) } });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 12,
+          "text": "getPostsByTopic: async (scope, topicId, empresaId = null, order = 'recent_activity') => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 13,
+          "text": "const response = await api.get('/community/posts', { params: { scope, topic_id: topicId, order, ...(empresaId ? { empresa_id: empresaId } : {}) } });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 16,
+          "text": "createPost: async (payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 17,
+          "text": "const response = await api.post('/community/posts', payload, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 20,
+          "text": "updatePost: async (postId, payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 21,
+          "text": "const response = await api.put(`/community/posts/${postId}`, payload, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 24,
+          "text": "deletePost: async (postId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 25,
+          "text": "const response = await api.delete(`/community/posts/${postId}`, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 28,
+          "text": "getPostReplies: async (postId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 29,
+          "text": "const response = await api.get(`/community/posts/${postId}/replies`, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 32,
+          "text": "createReply: async (postId, payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 33,
+          "text": "const response = await api.post(`/community/posts/${postId}/replies`, payload, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 36,
+          "text": "uploadPostAttachment: async (postId, file, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 40,
+          "text": "params: empresaId ? { empresa_id: empresaId } : {},"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 45,
+          "text": "deletePostAttachment: async (attachmentId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 47,
+          "text": "params: empresaId ? { empresa_id: empresaId } : {},"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 51,
+          "text": "updateReply: async (replyId, payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 52,
+          "text": "const response = await api.put(`/community/replies/${replyId}`, payload, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 55,
+          "text": "deleteReply: async (replyId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 56,
+          "text": "const response = await api.delete(`/community/replies/${replyId}`, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 59,
+          "text": "uploadReplyAttachment: async (replyId, file, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 63,
+          "text": "params: empresaId ? { empresa_id: empresaId } : {},"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 68,
+          "text": "deleteReplyAttachment: async (attachmentId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 70,
+          "text": "params: empresaId ? { empresa_id: empresaId } : {},"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 74,
+          "text": "moderateAttachment: async (attachmentId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 76,
+          "text": "params: empresaId ? { empresa_id: empresaId } : {},"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 80,
+          "text": "getTopics: async (scope, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 81,
+          "text": "const response = await api.get('/community/topics', { params: { scope, ...(empresaId ? { empresa_id: empresaId } : {}) } });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 84,
+          "text": "getCategories: async (scope, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 85,
+          "text": "const response = await api.get('/community/categories', { params: { scope, ...(empresaId ? { empresa_id: empresaId } : {}) } });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 88,
+          "text": "createCategory: async (payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 89,
+          "text": "const response = await api.post('/community/categories', payload, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 92,
+          "text": "updateCategory: async (categoryId, payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 93,
+          "text": "const response = await api.put(`/community/categories/${categoryId}`, payload, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 96,
+          "text": "createTopic: async (payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 97,
+          "text": "const response = await api.post('/community/topics', payload, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 100,
+          "text": "followTopic: async (topicId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 101,
+          "text": "const response = await api.post(`/community/topics/${topicId}/follow`, {}, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 104,
+          "text": "unfollowTopic: async (topicId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 105,
+          "text": "const response = await api.delete(`/community/topics/${topicId}/follow`, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 108,
+          "text": "updateTopic: async (topicId, payload, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 109,
+          "text": "const response = await api.put(`/community/topics/${topicId}`, payload, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 112,
+          "text": "getDmThreads: async (empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 113,
+          "text": "const response = await api.get('/community/dm/threads', { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 116,
+          "text": "getDmThreadMessages: async (threadId, empresaId = null) => {"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 117,
+          "text": "const response = await api.get(`/community/dm/threads/${threadId}/messages`, { params: empresaId ? { empresa_id: empresaId } : {} });"
+        },
+        {
+          "path": "frontend/src/api/community.js",
+          "line": 120,
+          "text": "getVisibleUsers: async (empresaId = null, q = '') => {"
+        }
+      ]
+    },
+    "bim_references": {
+      "description": "BIM references expected to stay isolated from the classic layer.",
+      "count": 132,
+      "samples": [
+        {
+          "path": "frontend/src/api/adminBim.js",
+          "line": 6,
+          "text": "const response = await api.get('/admin-bim/', withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/adminBim.js",
+          "line": 11,
+          "text": "const response = await api.put('/admin-bim/', payload, withoutTenant());"
+        },
+        {
+          "path": "frontend/src/api/bim.js",
+          "line": 6,
+          "text": "const response = await axiosInstance.get('/bim/feature-flags/me', withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 6,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/links`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 10,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/elements`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 14,
+          "text": "const response = await axiosInstance.post(`/bim/projects/${projectId}/links`, payload, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimLinks.js",
+          "line": 18,
+          "text": "await axiosInstance.delete(`/bim/projects/${projectId}/links/${targetType}/${linkId}`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 6,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/workspace`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 10,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/models`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 14,
+          "text": "const response = await axiosInstance.post(`/bim/projects/${projectId}/bootstrap-demo`, null, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 19,
+          "text": "`/bim/projects/${projectId}/imports/json-package`,"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 27,
+          "text": "`/bim/projects/${projectId}/imports/json-batch`,"
+        },
+        {
+          "path": "frontend/src/api/bimModels.js",
+          "line": 35,
+          "text": "`/bim/projects/${projectId}/imports/json-validate`,"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 6,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/view-states`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 11,
+          "text": "`/bim/projects/${projectId}/view-states`,"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 19,
+          "text": "`/bim/projects/${projectId}/view-states/${viewStateId}`,"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 26,
+          "text": "`/bim/projects/${projectId}/view-states/${viewStateId}`,"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 34,
+          "text": "`/bim/projects/${projectId}/view-states/${viewStateId}/duplicate`,"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 42,
+          "text": "`/bim/projects/${projectId}/view-states/${viewStateId}`,"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 47,
+          "text": "const response = await axiosInstance.get(`/bim/projects/${projectId}/workspace-context`, withTenantConfig({}, empresaId));"
+        },
+        {
+          "path": "frontend/src/api/bimViewStates.js",
+          "line": 52,
+          "text": "`/bim/projects/${projectId}/workspace-context`,"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 661,
+          "text": "<p className=\"text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400\">Canvas BIM</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 765,
+          "text": "<h3 className=\"text-base font-black uppercase tracking-tight text-zinc-900\">Viewer BIM en espera</h3>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 767,
+          "text": "Materializa una base BIM del proyecto para activar esta superficie visual del workspace."
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 779,
+          "text": "Cambia la versión o el nivel filtrado para ver elementos BIM dentro del canvas."
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 807,
+          "text": "Elemento BIM"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 844,
+          "text": "? 'Con errores BIM'"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 845,
+          "text": ": 'Con advertencias BIM'}"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 853,
+          "text": "? 'Importada desde paquete BIM'"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 874,
+          "text": "<p className=\"mt-1\">Geometría importada: admite rectángulos, líneas y polígonos 2D desde el paquete JSON BIM</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 875,
+          "text": "<p className=\"mt-1\">Rojo/ámbar: elementos con hallazgos de validación BIM</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 887,
+          "text": "{error ? <p className=\"mt-2 font-bold text-rose-500\">No se pudo actualizar el workspace BIM.</p> : null}"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 890,
+          "text": "<p className=\"font-black uppercase tracking-[0.16em] text-zinc-700\">Leyenda BIM</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 902,
+          "text": "<span>Vínculo BIM activo</span>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+          "line": 927,
+          "text": "<p className=\"text-[10px] font-black uppercase tracking-[0.16em] text-zinc-700\">Minimapa BIM</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 167,
+          "text": "setMessage(error?.response?.data?.detail || 'No se pudieron cargar los destinos del vínculo BIM.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 195,
+          "text": "setMessage('Selecciona un elemento BIM e indica el ID del destino.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 213,
+          "text": "setMessage('Vínculo BIM registrado.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 216,
+          "text": "setMessage(error?.response?.data?.detail || 'No se pudo registrar el vínculo BIM.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 231,
+          "text": "setMessage('Vínculo BIM eliminado.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 234,
+          "text": "setMessage(error?.response?.data?.detail || 'No se pudo eliminar el vínculo BIM.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 248,
+          "text": "<p className=\"text-sm text-zinc-500\">Todavía no se han registrado vínculos BIM con módulos de negocio.</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 265,
+          "text": "<p className=\"text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400\">Registro rápido BIM</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 274,
+          "text": "<option value=\"\">Selecciona un elemento BIM</option>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 315,
+          "text": "placeholder=\"Notas del vínculo BIM (opcional)\""
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 325,
+          "text": "{submitting ? 'Registrando...' : 'Crear vínculo BIM'}"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 329,
+          "text": "Este formulario técnico permite vincular un elemento BIM con `EDT`, `APUs` o `Presupuesto` usando selectores reales del proyecto activo."
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 349,
+          "text": "placeholder=\"Buscar vínculo BIM por destino o elemento\""
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 381,
+          "text": "{visibleRecentLinks.length} vínculos BIM visibles"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 435,
+          "text": "title=\"Eliminar vínculo BIM\""
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 443,
+          "text": "<p className=\"text-sm text-zinc-500\">El elemento activo todavía no tiene vínculos BIM registrados.</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+          "line": 447,
+          "text": "<p className=\"text-sm font-semibold text-zinc-600\">No hay vínculos BIM para el filtro actual.</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimPropertiesPanel.jsx",
+          "line": 125,
+          "text": "label: 'Metadata BIM',"
+        },
+        {
+          "path": "frontend/src/components/bim/BimPropertiesPanel.jsx",
+          "line": 158,
+          "text": "? 'El elemento BIM no tiene propiedades registradas todavía.'"
+        },
+        {
+          "path": "frontend/src/components/bim/BimPropertiesPanel.jsx",
+          "line": 159,
+          "text": ": 'No hay propiedades BIM activas todavía para este proyecto.'}"
+        },
+        {
+          "path": "frontend/src/components/bim/BimTreePanel.jsx",
+          "line": 87,
+          "text": "<p className=\"text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400\">Árbol BIM</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimTreePanel.jsx",
+          "line": 103,
+          "text": "? `${filteredElementCount} coincidencias BIM visibles`"
+        },
+        {
+          "path": "frontend/src/components/bim/BimTreePanel.jsx",
+          "line": 104,
+          "text": ": `${elements.length} elementos BIM visibles`}"
+        },
+        {
+          "path": "frontend/src/components/bim/BimTreePanel.jsx",
+          "line": 125,
+          "text": "Cuando haya una versión BIM activa, aquí aparecerán disciplinas, grupos o niveles del modelo."
+        },
+        {
+          "path": "frontend/src/components/bim/BimTreePanel.jsx",
+          "line": 210,
+          "text": "<p className=\"text-sm font-semibold text-zinc-600\">No hay coincidencias BIM para esa búsqueda.</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimVersionSelector.jsx",
+          "line": 107,
+          "text": "placeholder=\"Buscar versión BIM por modelo, disciplina u origen\""
+        },
+        {
+          "path": "frontend/src/components/bim/BimVersionSelector.jsx",
+          "line": 147,
+          "text": "{filteredVersions.length} versiones BIM visibles"
+        },
+        {
+          "path": "frontend/src/components/bim/BimVersionSelector.jsx",
+          "line": 168,
+          "text": "<p className=\"text-sm text-zinc-500\">Aún no hay versiones BIM registradas para este proyecto.</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimVersionSelector.jsx",
+          "line": 171,
+          "text": "<p className=\"text-sm font-semibold text-zinc-600\">No hay versiones BIM para el filtro actual.</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimViewStateToolbar.jsx",
+          "line": 140,
+          "text": "title=\"Guardar vista BIM actual\""
+        },
+        {
+          "path": "frontend/src/components/bim/BimViewStateToolbar.jsx",
+          "line": 149,
+          "text": "title=\"Refrescar vistas BIM\""
+        },
+        {
+          "path": "frontend/src/components/bim/BimViewStateToolbar.jsx",
+          "line": 158,
+          "text": "Nombre de la vista BIM"
+        },
+        {
+          "path": "frontend/src/components/bim/BimViewStateToolbar.jsx",
+          "line": 228,
+          "text": "<p className=\"text-sm text-zinc-500\">Consultando vistas BIM...</p>"
+        },
+        {
+          "path": "frontend/src/components/bim/BimViewStateToolbar.jsx",
+          "line": 273,
+          "text": "placeholder=\"Buscar vista BIM por nombre\""
+        },
+        {
+          "path": "frontend/src/components/bim/BimViewStateToolbar.jsx",
+          "line": 291,
+          "text": "? 'No hay vistas BIM que coincidan con la búsqueda actual.'"
+        },
+        {
+          "path": "frontend/src/components/bim/BimViewStateToolbar.jsx",
+          "line": 292,
+          "text": ": 'No hay vistas BIM para el filtro seleccionado.'}"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 12,
+          "text": "import { useBimProjectWorkspace } from '../../hooks/bim/useBimProjectWorkspace';"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 20,
+          "text": "\"description\": \"Paquete BIM inicial importado desde JSON\","
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 118,
+          "text": "// ignore storage issues to keep BIM shell non-blocking"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 437,
+          "text": "window.alert(viewStateError?.response?.data?.detail || 'No se pudo guardar la vista BIM actual.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 464,
+          "text": "window.alert(viewStateError?.response?.data?.detail || 'No se pudo renombrar la vista BIM.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 487,
+          "text": "window.alert(viewStateError?.response?.data?.detail || 'No se pudo duplicar la vista BIM.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 497,
+          "text": "const confirmed = window.confirm(`¿Eliminar la vista BIM \"${viewState.nombre}\"?`);"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 509,
+          "text": "window.alert(viewStateError?.response?.data?.detail || 'No se pudo eliminar la vista BIM.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 529,
+          "text": "bootstrapError?.response?.data?.detail || 'No se pudo materializar el bootstrap BIM demo.',"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 545,
+          "text": "setImportMessage('El paquete BIM JSON no es válido. Revisa la sintaxis antes de importar.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 554,
+          "text": "`Importación BIM lista: ${response.model_name} ${response.version_label} · elementos ${response.created_elements} · niveles ${response.created_storeys}`,"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 558,
+          "text": "setImportMessage(importError?.response?.data?.detail || 'No se pudo importar el paquete BIM JSON.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 579,
+          "text": "setImportMessage(`El archivo ${file.name || 'seleccionado'} no contiene un JSON BIM válido.`);"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 594,
+          "text": "? `Archivo BIM JSON cargado en borrador: ${validBatch[0].name}`"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 595,
+          "text": ": `${validBatch.length} archivos BIM JSON listos para importación por lote.`,"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 641,
+          "text": "setImportMessage(`Importación BIM por lote completada. ${results.join(' · ')}`);"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 644,
+          "text": "setImportMessage(importError?.response?.data?.detail || 'No se pudo completar la importación BIM por lote.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 663,
+          "text": "`Validación BIM completada. Errores: ${response.total_errors ?? 0} · Advertencias: ${response.total_warnings ?? 0}`,"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 667,
+          "text": "setImportMessage(validationError?.response?.data?.detail || 'No se pudo validar el paquete BIM JSON.');"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 684,
+          "text": "Workspace BIM"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 692,
+          "text": "La capa BIM ya quedó encapsulada detrás de feature flags y dentro del módulo de proyecto. Esta"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 693,
+          "text": "shell ya consume un workspace real por proyecto y sigue sin alterar el flujo clásico cuando BIM está apagado."
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 702,
+          "text": "BIM habilitado para esta sesión"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 716,
+          "text": "{bootstrapping ? 'Materializando...' : 'Bootstrap BIM demo'}"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 733,
+          "text": "Importación JSON BIM"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 747,
+          "text": "? 'Suelta aquí el archivo JSON BIM'"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 803,
+          "text": "{validatingPackage ? 'Validando...' : 'Validar JSON BIM'}"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 821,
+          "text": "Lote preparado: {importBatchFiles.length} archivos JSON BIM"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 832,
+          "text": "Resumen de validación BIM"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 862,
+          "text": "Origen: {importBatchFiles[index]?.name || importFileName || result.model_name || 'Paquete BIM'}"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 924,
+          "text": "<button type=\"button\" className={TOOL_BUTTON_BASE} title=\"Viewer BIM\">"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 928,
+          "text": "<button type=\"button\" className={TOOL_BUTTON_BASE} title=\"Árbol BIM\">"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 936,
+          "text": "<button type=\"button\" className={TOOL_BUTTON_BASE} title=\"Configuración BIM\">"
+        },
+        {
+          "path": "frontend/src/components/bim/BimWorkspace.jsx",
+          "line": 947,
+          "text": "Contexto activo BIM"
+        },
+        {
+          "path": "frontend/src/components/projects/BimTab.jsx",
+          "line": 3,
+          "text": "import BimWorkspace from '../bim/BimWorkspace';"
+        },
+        {
+          "path": "frontend/src/hooks/bim/useBimFeatureAccess.js",
+          "line": 3,
+          "text": "import { bimApi } from '../../api/bim';"
+        },
+        {
+          "path": "frontend/src/hooks/bim/useBimFeatureAccess.js",
+          "line": 7,
+          "text": "feature: 'bim',"
+        },
+        {
+          "path": "frontend/src/hooks/bim/useBimFeatureAccess.js",
+          "line": 43,
+          "text": "console.warn('No se pudo resolver la activacion BIM:', error);"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobal.jsx",
+          "line": 102,
+          "text": "id: 'bim',"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobal.jsx",
+          "line": 103,
+          "text": "title: 'BIM',"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobal.jsx",
+          "line": 104,
+          "text": "description: 'Activación controlada del módulo BIM desde interfaz, con alcance administrable por superadministración.',"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobal.jsx",
+          "line": 109,
+          "text": "href: '/admin-global/bim'"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 10,
+          "text": "titulo: 'Activación BIM',"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 11,
+          "text": "descripcion: 'Controla desde la interfaz si el módulo BIM debe quedar disponible para superadministración.',"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 45,
+          "text": "console.error('Error cargando configuración BIM:', error);"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 47,
+          "text": "title: 'No se pudo cargar la activación BIM',"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 79,
+          "text": "console.error('Error guardando configuración BIM:', error);"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 81,
+          "text": "title: 'No se pudo guardar la activación BIM',"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 113,
+          "text": "<h1 className=\"text-4xl font-black tracking-tight text-[#1A1A1A] sm:text-5xl uppercase\">Módulo BIM</h1>"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 115,
+          "text": "Esta consola permite a <span className=\"font-black uppercase\">Superadministrador</span> habilitar o apagar la entrada BIM desde la interfaz, sin depender del archivo `.env`."
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 122,
+          "text": "Cargando configuración BIM..."
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 129,
+          "text": "<h2 className=\"mt-2 text-2xl font-black uppercase tracking-tight text-zinc-900\">Puerta BIM</h2>"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 140,
+          "text": "<span className=\"text-sm font-black uppercase tracking-[0.14em] text-zinc-700\">BIM habilitado en interfaz</span>"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 193,
+          "text": "{saving ? 'Guardando...' : 'Guardar activación BIM'}"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 207,
+          "text": "<h3 className=\"text-2xl font-black uppercase tracking-tight\">{status?.is_enabled ? 'BIM visible para el acceso permitido' : 'BIM oculto en interfaz'}</h3>"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalBim.jsx",
+          "line": 245,
+          "text": "Cuando BIM esté habilitado, abre <span className=\"font-black uppercase\">Proyectos</span>, entra a un proyecto y usa la pestaña <span className=\"font-black uppercase\">BIM</span> en la barra lateral."
+        },
+        {
+          "path": "frontend/src/pages/MarketplaceProductDetail.jsx",
+          "line": 617,
+          "text": "'La lectura pública se mantiene en la capa clásica, sin activar ni mostrar experiencia BIM.',"
+        },
+        {
+          "path": "frontend/src/pages/Proyectos.jsx",
+          "line": 120,
+          "text": "feature: 'bim',"
+        },
+        {
+          "path": "frontend/src/pages/Proyectos.jsx",
+          "line": 864,
+          "text": "if (!bimAccess.enabled && activeTab === 'bim') {"
+        },
+        {
+          "path": "frontend/src/pages/Proyectos.jsx",
+          "line": 5105,
+          "text": "if (section.id === 'bim') return bimAccess.enabled;"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 114,
+          "text": "<Route path=\"/admin-global/bim\" element={withProtectedLayout(<AdminGlobalBim />)} />"
+        }
+      ]
+    },
+    "lazy_boundaries": {
+      "description": "Lazy-loading boundaries already present in the frontend.",
+      "count": 35,
+      "samples": [
+        {
+          "path": "frontend/src/components/projects/Cronogramas.jsx",
+          "line": 103,
+          "text": "const CronogramaGantt = lazyWithChunkRecovery(() => import('./CronogramaGantt'));"
+        },
+        {
+          "path": "frontend/src/pages/Proyectos.jsx",
+          "line": 87,
+          "text": "const Stakeholders = lazyWithChunkRecovery(() => import('../components/projects/Stakeholders'));"
+        },
+        {
+          "path": "frontend/src/pages/Proyectos.jsx",
+          "line": 88,
+          "text": "const Edo = lazyWithChunkRecovery(() => import('../components/projects/Edo'));"
+        },
+        {
+          "path": "frontend/src/pages/Proyectos.jsx",
+          "line": 89,
+          "text": "const Edt = lazyWithChunkRecovery(() => import('../components/projects/Edt'));"
+        },
+        {
+          "path": "frontend/src/pages/Proyectos.jsx",
+          "line": 90,
+          "text": "const Cronogramas = lazyWithChunkRecovery(() => import('../components/projects/Cronogramas'));"
+        },
+        {
+          "path": "frontend/src/pages/Proyectos.jsx",
+          "line": 91,
+          "text": "const DesagregacionTab = lazyWithChunkRecovery(() => import('../components/projects/DesagregacionTab'));"
+        },
+        {
+          "path": "frontend/src/pages/Proyectos.jsx",
+          "line": 92,
+          "text": "const FormulaPolinomicaTab = lazyWithChunkRecovery(() => import('../components/projects/FormulaPolinomicaTab'));"
+        },
+        {
+          "path": "frontend/src/pages/Proyectos.jsx",
+          "line": 93,
+          "text": "const PresupuestoDetail = lazyWithChunkRecovery(() => import('../components/presupuestos/PresupuestoDetail'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 17,
+          "text": "const ProjectManager = lazyWithChunkRecovery(() => import('../pages/ProjectManager'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 18,
+          "text": "const APUs = lazyWithChunkRecovery(() => import('../pages/APUs'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 19,
+          "text": "const Recursos = lazyWithChunkRecovery(() => import('../pages/Recursos'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 20,
+          "text": "const Presupuestos = lazyWithChunkRecovery(() => import('../pages/Presupuestos'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 21,
+          "text": "const PreciosUnitarios = lazyWithChunkRecovery(() => import('../pages/PreciosUnitarios'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 22,
+          "text": "const Settings = lazyWithChunkRecovery(() => import('../pages/Settings'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 23,
+          "text": "const Community = lazyWithChunkRecovery(() => import('../pages/Community'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 24,
+          "text": "const Marketplace = lazyWithChunkRecovery(() => import('../pages/Marketplace'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 25,
+          "text": "const MarketplaceProductDetail = lazyWithChunkRecovery(() => import('../pages/MarketplaceProductDetail'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 26,
+          "text": "const MarketplaceOrderDetail = lazyWithChunkRecovery(() => import('../pages/MarketplaceOrderDetail'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 27,
+          "text": "const MarketplaceBuyerDashboard = lazyWithChunkRecovery(() => import('../pages/MarketplaceBuyerDashboard'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 28,
+          "text": "const SellerDashboard = lazyWithChunkRecovery(() => import('../pages/SellerDashboard'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 29,
+          "text": "const MarketplaceAdminDashboard = lazyWithChunkRecovery(() => import('../pages/MarketplaceAdminDashboard'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 30,
+          "text": "const AdminGlobal = lazyWithChunkRecovery(() => import('../pages/AdminGlobal'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 31,
+          "text": "const AdminGlobalEstado = lazyWithChunkRecovery(() => import('../pages/AdminGlobalEstado'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 32,
+          "text": "const AdminGlobalSesiones = lazyWithChunkRecovery(() => import('../pages/AdminGlobalSesiones'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 33,
+          "text": "const AdminGlobalMantenimiento = lazyWithChunkRecovery(() => import('../pages/AdminGlobalMantenimiento'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 34,
+          "text": "const AdminGlobalBim = lazy(() => import('../pages/AdminGlobalBim'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 35,
+          "text": "const AdminGlobalLicencias = lazyWithChunkRecovery(() => import('../pages/AdminGlobalLicencias'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 36,
+          "text": "const AdminGlobalComunicados = lazyWithChunkRecovery(() => import('../pages/AdminGlobalComunicados'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 37,
+          "text": "const AdminGlobalGobernanza = lazyWithChunkRecovery(() => import('../pages/AdminGlobalGobernanza'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 38,
+          "text": "const AdminGlobalAuditoria = lazyWithChunkRecovery(() => import('../pages/AdminGlobalAuditoria'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 39,
+          "text": "const AdminGlobalHerramientas = lazyWithChunkRecovery(() => import('../pages/AdminGlobalHerramientas'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 40,
+          "text": "const AdminGlobalImportModels = lazyWithChunkRecovery(() => import('../pages/AdminGlobalImportModels'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 41,
+          "text": "const AdminGlobalEmpresaAuditada = lazyWithChunkRecovery(() => import('../pages/AdminGlobalEmpresaAuditada'));"
+        },
+        {
+          "path": "frontend/src/routes/AppRouter.jsx",
+          "line": 42,
+          "text": "const PresupuestoDetail = lazyWithChunkRecovery(() => import('../components/presupuestos/PresupuestoDetail'));"
+        },
+        {
+          "path": "frontend/src/utils/lazyImportRecovery.js",
+          "line": 41,
+          "text": "export const lazyWithChunkRecovery = (importer) => lazy(async () => {"
+        }
+      ]
+    }
+  },
+  "policy": {
+    "do_not_change_automatically": [
+      "authentication and refresh flow",
+      "tenant injection",
+      "Settings company/user administration",
+      "ProjectManager project operations",
+      "Gantt/Cronogramas",
+      "Presupuestos",
+      "Community",
+      "Marketplace",
+      "BIM code or UX in MODO 1"
+    ],
+    "review_notes": [
+      "Direct API call hits are candidates for domain clients, not automatic defects.",
+      "External fetch calls such as maps/geocoding may intentionally stay outside GiProy API clients.",
+      "BIM references are expected only inside isolated BIM routes, APIs, hooks and components."
+    ]
+  }
+}

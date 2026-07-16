@@ -13,10 +13,9 @@ import {
     SpellCheck,
     Trash2,
 } from 'lucide-react';
-import api from '../api/axiosConfig';
+import adminGlobalApi from '../api/adminGlobal';
 import systemAnnouncementsApi from '../api/systemAnnouncements';
 import utilsApi from '../api/utils';
-import { withoutTenant } from '../api/tenant';
 import { AuthContext } from '../context/AuthContext';
 import ClearSearchField from '../components/ui/ClearSearchField';
 import { appAlert, appConfirm } from '../utils/appDialog';
@@ -339,7 +338,7 @@ const AdminGlobalComunicados = () => {
             const data = await systemAnnouncementsApi.getAll(payload);
             setAnnouncements(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error('Error cargando comunicados:', error);
+            globalThis.reportClientError?.('Error cargando comunicados:', error);
             await appAlert({
                 title: 'No se pudieron cargar los comunicados',
                 message: error.response?.data?.detail || 'Revise la conectividad o el estado del backend.',
@@ -352,9 +351,9 @@ const AdminGlobalComunicados = () => {
     useEffect(() => {
         if (!isSuperadmin) return;
         loadAnnouncements(filters);
-        api.get('/empresas/', withoutTenant())
-            .then((response) => setEmpresas(response.data || []))
-            .catch((error) => console.error('Error cargando empresas para comunicados:', error));
+        adminGlobalApi.getEmpresas()
+            .then((data) => setEmpresas(data || []))
+            .catch((error) => globalThis.reportClientError?.('Error cargando empresas para comunicados:', error));
     }, [isSuperadmin, loadAnnouncements, filters]);
 
     const metrics = useMemo(() => ({
@@ -450,7 +449,7 @@ const AdminGlobalComunicados = () => {
             closeModal();
             await loadAnnouncements(filters);
         } catch (error) {
-            console.error('Error guardando comunicado:', error);
+            globalThis.reportClientError?.('Error guardando comunicado:', error);
             await appAlert({
                 title: 'No se pudo guardar el comunicado',
                 message: error.response?.data?.detail || 'Revise las fechas, la duración y los destinatarios antes de reintentar.',
@@ -472,7 +471,7 @@ const AdminGlobalComunicados = () => {
             await systemAnnouncementsApi.remove(announcement.id);
             await loadAnnouncements(filters);
         } catch (error) {
-            console.error('Error eliminando comunicado:', error);
+            globalThis.reportClientError?.('Error eliminando comunicado:', error);
             await appAlert({
                 title: 'No se pudo eliminar',
                 message: error.response?.data?.detail || 'El comunicado no pudo borrarse.',
@@ -520,7 +519,7 @@ const AdminGlobalComunicados = () => {
                 });
             }
         } catch (error) {
-            console.error('Error revisando ortografía del comunicado:', error);
+            globalThis.reportClientError?.('Error revisando ortografía del comunicado:', error);
             await appAlert({
                 title: 'No fue posible revisar la ortografía',
                 message: error.response?.data?.detail || error.message,

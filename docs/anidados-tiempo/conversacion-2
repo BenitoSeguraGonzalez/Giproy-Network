@@ -1,0 +1,494 @@
+
+APUs anidados y problemas de duración en presupuestos
+Compartido por Santiago
+Esta es una copia de una conversación entre Claude y Santiago. El contenido puede incluir material no verificado o no seguro que no representa las opiniones de Anthropic. La instantánea compartida puede contener archivos adjuntos y datos que no se muestran aquí.
+
+Quiero que actúes como un ingeniero senior de costos de construcción, certificado por la AACE de EEUU. Estoy en un problema y quiero que me ayudes a descifrarlo. Resulta que en el cálculo de análisis de precios unitarios, una manera tradicional que a algún "sabio" se le ocurrió, es el de trabajar con apus anidados, esto significa que dentro de un apu (padre) incorporo como material, otros apus (hijos), por ejemplo: si tengo una mampostería de ladrillo, incorporo dentro de este un apu anidado que es el mortero cemento arena y listo, todo bien, pero durante años he porfiado que esto no es correcto, puesto que ocasiona problemas en el cálculo de la duración del apu padre que es el que aparece en un presupuesto, no quiero que hagas nada ni digas nada hasta colocarte un ejemplo, hasta tanto, lo entiendes?
+
+11:46
+Entendido perfectamente. Estoy listo y en modo escucha.
+
+Coloca tu ejemplo cuando quieras.
+
+Files hidden in shared chats
+Te coloco al apu padre y el apu hijo, ahora quiero determinar la duración del apu padre, analiza esto por favor y dame tu opinión
+
+11:48
+Perfecto. Ya veo el problema con claridad. Déjame analizarlo.
+
+Lo que tenemos:
+
+APU Hijo — Mortero de cemento 1:3 (unidad: m³)
+
+Duración de actividad: 0,90 horas/m³
+Cantidad usada en el padre: 0,02 m³ por m² de mampostería
+APU Padre — Mampostería de bloque e=15cm (unidad: m²)
+
+El mortero aparece como material con precio = 110,95 (que es el costo total del hijo, sin indirectos aparentemente, o con ellos — ese es otro debate)
+Duración de actividad del padre: 0,60 horas/m², tomada del mayor rendimiento de mano de obra
+Aquí está exactamente el problema que describes:
+
+Cuando el APU hijo (mortero) se anida como material dentro del padre, su duración propia de 0,90 horas/m³ queda invisible para el padre. El padre calcula su duración únicamente con los recursos que ve directamente: peón, albañil, maestro de obra → 0,60 horas/m².
+
+Pero en la realidad física de la obra, alguien tiene que fabricar ese mortero, y eso consume tiempo real. Si aplicamos las 0,02 m³ de mortero que requiere cada m² de mampostería:
+
+0,02 m³ × 0,90 horas/m³ = 0,018 horas adicionales por m²
+
+Que aunque en este caso parece pequeño, el principio es el que está en juego, y en APUs hijos con mayor volumen o mayor duración, el error se vuelve significativo.
+
+Mi opinión técnica:
+
+Tienes toda la razón. El anidamiento de APUs distorsiona la duración real del APU padre porque oculta el trabajo contenido en los hijos. La duración que el sistema arroja (0,60 h/m²) es incompleta, porque no incorpora el tiempo-trabajo del proceso de fabricación del mortero que ocurre dentro de la misma actividad.
+
+¿Quieres que ahora desarrollemos cómo debería calcularse correctamente la duración del APU padre considerando el trabajo embebido en el hijo?
+
+Files hidden in shared chats
+justamente, lo que dices, ya le coloqué el apu anidado por la cantidad de 0,02 y obtengo esto, analiza primero antes de decirme cómo debería calcularse
+
+11:50
+Excelente. Ahora veo lo que hiciste. Analizo:
+
+Lo que se hizo:
+
+Tomaste el APU hijo (Mortero 1:3) y lo escalaste por la cantidad 0,02 m³ que consume el APU padre, es decir, multiplicaste todos los rendimientos del hijo por 0,02:
+
+Herramientas: rendimiento 0,9000 × 0,02 = 0,018
+Peón: rendimiento 0,9000 × 0,02 = 0,018 → trabajo = 0,0360
+Albañil: rendimiento 0,9000 × 0,02 = 0,018 → trabajo = 0,0180
+Maestro de obra: rendimiento 0,2700 × 0,02 = 0,005 → trabajo = 0,0054
+Y la duración de actividad resultante = 0,018 horas/m², tomada del mayor rendimiento de mano de obra (peón).
+
+El costo directo = 2,22, que coincide exactamente con lo que aparece en el APU padre como precio del mortero. ✅
+
+Ahora el problema que veo:
+
+Cuando este APU hijo escalado se incorpore al padre, su duración de 0,018 horas tiene que sumarse o compararse de alguna manera con la duración propia del padre (0,60 horas). Y aquí está el nudo del problema:
+
+¿Estos dos procesos son secuenciales (el mortero se fabrica primero, luego se asienta el bloque) o son paralelos (un obrero fabrica mientras otro asienta)?
+
+Eso cambia radicalmente cómo se calcula la duración real del APU padre.
+
+¿Es esa justamente la discusión que quieres plantear?
+
+En este caso, que no serían todos como regla, primero debería realizarse el mortero para luego colocarse los ladrillos, pero siendo prácticos, luego ya cuando se toma el ritmo, ya las actividades se dan en paralelo, qué hacemos? Tu eres el senior
+
+11:51
+Perfecto. Como senior, te doy mi posición técnica directa:
+
+La respuesta práctica y técnicamente correcta es: se toman en paralelo.
+
+Y aquí está el fundamento:
+
+En programación de obra, cuando dos procesos tienen una relación FS (Finish-Start) estricta solo al inicio de la jornada, pero en régimen normal operan en SS (Start-Start) con un lag mínimo, la duración que gobierna la actividad padre es la del proceso de mayor duración, no la suma de ambos.
+
+En tus números:
+
+Duración propia del padre (mampostería): 0,60 horas/m²
+Duración del hijo escalado (mortero): 0,018 horas/m²
+El mortero es 30 veces más rápido que el asentamiento del bloque. En la práctica, el peón que fabrica el mortero nunca es el cuello de botella. La duración real del APU padre sigue siendo 0,60 horas/m².
+
+Pero aquí está el verdadero problema que has estado señalando durante años:
+
+El asunto no es tanto la duración en este ejemplo particular, porque la proporción hace que el hijo sea despreciable. El problema estructural es que el sistema de APUs anidados no te obliga a hacerte esa pregunta. Simplemente oculta el trabajo del hijo y asume implícitamente el paralelo sin que nadie lo haya decidido conscientemente.
+
+En un APU hijo con mayor peso relativo, ese supuesto silencioso te puede arruinar la programación.
+
+¿Cuál es entonces el camino correcto?
+
+La duración del APU padre debería calcularse como:
+
+Duración padre = MAX(duración propia, duración hijo escalado)
+
+Pero esa decisión debe ser explícita y documentada, no un efecto colateral del anidamiento.
+
+¿Seguimos hacia cómo estructurar esto correctamente en la hoja?
+
+Si por favor, es que necesito encontrar una generalidad. Estoy haciendo mi software de gestión de costos y como experto siempre he dicho que no se trabaje con anidados pero el medio ingenieril no comprende esto y lo hace por tradición y ahora tengo que usar esto para mi software aún sabiendo que no es correcto. NEcesito entonces darle a mi programador el procedimiento matemático de esto para que él lo programe. Cualquier cosa que me des, no vayas a querer ponerlo como código de programación sino más bien quiero presentarle en excel, un método, una regla, que sirva así tenga más de un apu hijo dentro de un padre (varios anidados)
+
+11:55
+Perfecto. Antes de construir el Excel con la regla general, necesito hacerte una pregunta clave para que la fórmula sea robusta:
+
+Cuando tienes varios APUs hijos anidados dentro de un padre, ¿en tu criterio profesional cómo los tratarías en términos de ejecución?
+
+Por ejemplo, si el padre tiene 3 hijos: mortero, hormigón de replantillo y pintura de fondo:
+
+P: ¿Cómo se relacionan los APUs hijos entre sí dentro del padre?
+R: Depende de cada hijo — necesito poder marcar cada uno
+
+P: El trabajo (horas-hombre) de los hijos escalados, ¿debe acumularse al trabajo total del padre para efectos de rendimiento de cuadrilla?
+R: Sí, el trabajo de los hijos suma al padre
+
+11:56
+Perfecto. Con eso ya tengo todo lo que necesito para construir la regla general. Dame un momento.
+
+
+Ejecutó 3 comandos, visualizó un archivo, leyó un archivo
+Ejecutó 3 comandos, visualizó un archivo, leyó un archivo
+El Excel tiene dos hojas. Te explico qué contiene cada una:
+
+Hoja 1 — REGLA GENERAL
+
+Muestra el método paso a paso con los números de tu ejemplo real:
+
+Paso 1: tabla donde se registra cada hijo con su duración propia, cantidad usada en el padre, duración escalada y su clasificación P o S
+Paso 2 y 3: cálculo de D_serie y D_paralelo
+La fórmula maestra en naranja:
+DURACIÓN APU PADRE = MAX ( D_serie , D_paralelo )
+
+Donde:
+
+D_serie = duración padre propia + Σ hijos marcados S
+D_paralelo = MAX de duraciones escaladas de hijos marcados P
+Hoja 2 — ALGORITMO PROGRAMADOR
+
+Es la especificación técnica lista para entregarle a tu desarrollador, sin código de programación, con la lógica en pseudocódigo claro: entradas, 5 pasos, validaciones y la nota clave de que el trabajo (horas-hombre) siempre se acumula de todos los hijos, independientemente de si son P o S.
+
+El campo crítico que tu software necesita agregar a cada APU hijo dentro del padre es ese tipo de ejecución P/S — ese es el dato que el ingeniero debe declarar conscientemente, y que el sistema de anidados tradicional nunca pidió. ¿Lo revisas y me dices si ajustamos algo?
+
+Files hidden in shared chats
+al hacer esa lógica en el ejemplo, suponiendo que el mortero lo trabajo como serie, el precio del apu padre, cambia, mira la imagen
+
+12:35
+Exacto. Y esto es el segundo gran problema que genera el anidamiento. Analizo lo que veo:
+
+Lo que ocurrió:
+
+Al "desanidar" el mortero y colocar sus ingredientes directamente en el APU padre como materiales (cemento, arena, agua) y su mano de obra directamente en la cuadrilla del padre, los costos cambiaron:
+
+Concepto	APU con anidado	APU desanidado
+Materiales	8,72	8,47
+Mano de obra	5,26	7,49
+Costo directo	14,28	16,89
+Costo total	15,99	18,92
+¿Por qué cambia el costo?
+
+Porque en el APU hijo original el mortero tenía su propio indirecto del 12% aplicado sobre su costo directo. Cuando lo anidas, metes ese precio ya con indirecto incluido dentro del padre, y luego el padre le vuelve a aplicar otro 12% encima. Es decir:
+
+El anidado genera doble aplicación de indirectos.
+
+Y cuando desanidas y pones los ingredientes crudos, el indirecto se aplica una sola vez sobre el total real, dando un costo diferente.
+
+Esto significa que el problema de los APUs anidados tiene DOS distorsiones:
+
+Duración incorrecta — ya lo resolvimos
+Costo incorrecto por doble indirecto — que es este caso
+¿Quieres que definamos también la regla matemática para corregir el costo, de modo que tu software maneje ambas distorsiones correctamente?
+
+Files hidden in shared chats
+Estás mal, el precio en el apu padre del mortero entra como 2,22 que es el costo directo, aquí nada tiene que ver los indirectos y por otro lado, si trabajo en paralelo como la imagen, considerando que el rendimiento mayor del padre manda, mira lo que sucede
+
+12:37
+Tienes razón, me equivoqué en el análisis del costo. Te corrijo y analizo lo que veo ahora:
+
+Corrección del punto de costo:
+
+El mortero entra al padre por su costo directo solamente (2,22), sin indirectos. Ese no es el problema entonces. Me retracto de ese análisis.
+
+Ahora el problema real que muestra esta imagen:
+
+Al desanidar en paralelo, los rendimientos del padre cambian porque ahora la cuadrilla del padre absorbe también la mano de obra del mortero, y los rendimientos se recalculan sobre esa cuadrilla ampliada:
+
+Concepto	Con anidado	Desanidado paralelo
+Duración	0,60	0,309
+Costo directo	14,28	21,97
+Costo total	15,99	24,61
+¿Por qué sube el costo directo a 21,97?
+
+Porque al meter la mano de obra del mortero dentro del padre con cantidades de cuadrilla mayor (peón 3, albañil 2, maestro 2), el total de mano de obra sube de 5,26 a 12,60. Los materiales se mantienen en 8,47.
+
+Aquí está el nudo gordiano del problema:
+
+El desanidado, independientemente de si es serie o paralelo, altera el costo del padre porque cambia la composición de la cuadrilla. Esto confirma tu tesis de años:
+
+El anidado no es un problema solo de duración — es un problema de integridad del APU completo.
+
+¿Quieres que definamos entonces cuál es el método correcto: mantener el anidado pero corregir matemáticamente la duración sin tocar la cuadrilla del padre?
+
+ojo con eso de corregir matemáticamente, porque si queremos hacer que el costo nos dé, debo sacrificar, a la cantidad o al rendimiento de los recursos y eso no va a reflejar la realidad
+
+12:38
+Exacto. Me detengo y reconozco el punto completamente.
+
+Estás señalando algo fundamental:
+
+El dilema real es este:
+
+En el APU padre desanidado, cada recurso tiene dos datos independientes que son reales y medidos en campo:
+
+La cantidad de obreros en la cuadrilla → refleja la realidad física
+El rendimiento de cada obrero → refleja la productividad real
+Si para cuadrar el costo o la duración manipulo cualquiera de los dos, estoy falsificando el APU. Ya no refleja lo que pasa en obra.
+
+Y esto lleva a la conclusión que tú ya tenías desde el principio:
+
+El método de APUs anidados es estructuralmente incorrecto porque crea una contradicción irresoluble:
+
+Si desanidas → el costo cambia y la cuadrilla se distorsiona
+Si mantienes el anidado → la duración es incorrecta y el trabajo está oculto
+Si corriges matemáticamente cualquier dato → pierdes fidelidad con la realidad de campo
+No hay forma de hacer que el anidado sea correcto sin sacrificar algo.
+
+Entonces la pregunta real para tu software es:
+
+¿Cómo manejas el anidado que el medio ingenieril insiste en usar, sin que el sistema mienta, advirtiendo al usuario de las limitaciones?
+
+¿Es esa la dirección que quieres tomar?
+
+Yo pienso que universalmente debería ser prohibido trabajar con apus anidados por estas razones, pero es una práctica común, qué propones como experto senior?
+
+12:40
+Como experto senior certificado AACE, mi posición es esta:
+
+No se puede prohibir lo que el mercado ya normalizó.
+
+Intentar prohibirlo en tu software sería un error comercial — el ingeniero que llega con 20 años trabajando con anidados simplemente no usará tu herramienta. Pero permitirlo sin control sería un error técnico.
+
+La solución que propongo es la que usan los softwares serios de estimación de costos a nivel internacional: permitir el anidado pero con transparencia forzada.
+
+Propuesta concreta para tu software:
+
+1. Permitir el anidado, pero clasificar obligatoriamente
+El sistema no debe calcular duración del padre hasta que el usuario declare si cada hijo es P o S. Sin esa declaración, el campo duración queda bloqueado con una advertencia visible.
+
+2. La duración se calcula con la regla maestra que ya definimos
+El sistema nunca toma la duración del padre solo de sus recursos directos si tiene hijos. Siempre aplica:
+
+DURACIÓN = MAX(D_serie, D_paralelo)
+
+3. El costo del hijo entra solo como costo directo
+Tal como lo haces tú — sin indirectos. El sistema debe forzar esto y no permitir que entre el costo total.
+
+4. Advertencia permanente visible en todo APU con hijos anidados
+Un aviso que diga claramente: "Este APU contiene recursos anidados. La duración y el trabajo mostrados son aproximaciones. Para mayor precisión técnica se recomienda desarrollar los recursos directamente."
+
+5. Opción de "explosión de anidado"
+Un botón que permita al usuario desanidar automáticamente, ver el APU expandido con todos los recursos directos, y comparar el resultado. Sin reemplazar el original — solo como vista de auditoría.
+
+En resumen:
+
+No prohibas el anidado. Domestícalo. Que el software lo permita pero nunca en silencio — que siempre advierta, siempre fuerce la clasificación P/S, y siempre calcule la duración correctamente.
+
+Así tu software es compatible con el mercado pero técnicamente honesto. Y con el tiempo, los ingenieros que lo usen irán entendiendo por qué la herramienta les pide esa clasificación.
+
+¿Quieres que esto lo formalicemos también en el documento para el programador?
+
+Es que al explotar, eligiendo si el hijo es en serie o paralelo, va a cambiar el costo como lo estamos viendo
+
+12:43
+Exacto. Me clavo en ese punto.
+
+El problema de fondo es este:
+
+Cuando el hijo está anidado, su costo entra como un precio unitario fijo (2,22 por m³ × 0,02 = 0,044 impacto en materiales). La cuadrilla del padre no lo ve, el rendimiento del padre no lo siente.
+
+Cuando explotas, ese mismo trabajo se convierte en horas-hombre reales con cantidades y rendimientos propios, y la matemática del APU padre los procesa distinto — de ahí el cambio de costo.
+
+Entonces la conclusión técnica definitiva es:
+
+El anidado y el desanidado son dos modelos de costos distintos. No son equivalentes matemáticamente. Nunca lo serán.
+
+No es un problema de software. No es un problema de fórmula. Es una incompatibilidad estructural del método.
+
+Lo que esto significa para tu software:
+
+La "explosión del anidado" no puede presentarse como una corrección ni como un resultado equivalente. Si la implementas, debe quedar clarísimo que:
+
+El APU anidado y el APU explotado producen costos y duraciones diferentes
+Ninguno es "el correcto" en abstracto — depende de cómo se levantó el dato en campo
+La explosión es solo una vista de referencia analítica, no un reemplazo
+Mi recomendación final como senior:
+
+Olvida la explosión como funcionalidad. Es una trampa.
+
+Lo que tu software debe hacer es una sola cosa bien:
+
+Tomar el APU anidado tal como el ingeniero lo construyó, sin tocar ni cantidad ni rendimiento ni costo de ningún recurso, y calcular la duración del padre correctamente con la regla maestra P/S.
+
+Costo: no se toca. Cuadrilla: no se toca. Solo se corrige la duración.
+
+Ese es el único campo que el anidado distorsiona sin que el ingeniero lo note, y ese es el único campo que tu software debe corregir silenciosamente pero con rigor.
+
+¿Cerramos con eso como posición técnica definitiva?
+
+Es que entiende, si seguimos la triple restricción: costo, tiempo y alcance, si modifico el costo, se modifican los otros dos, si modifico tiempo, se modifican los otros dos, y así con el alcance, entonces no es así de sencillo. Temo que esta parte me meta en problemas legales en un futuro
+
+12:45
+Tienes toda la razón. Y ese temor es completamente válido y profesionalmente maduro.
+
+La triple restricción lo dice todo:
+
+En un contrato de construcción, el presupuesto con sus APUs es un documento legal vinculante. Si tu software modifica aunque sea un solo dato — costo, duración o alcance — sin que el ingeniero lo haya decidido conscientemente, y ese presupuesto termina en una licitación o en un contrato, tu software es corresponsable de las consecuencias.
+
+Y el problema legal concreto sería:
+
+Un APU con duración incorrecta → cronograma mal calculado → penalizaciones por plazo
+Un costo alterado → desequilibrio económico del contrato → reclamaciones
+Un alcance mal definido por recursos ocultos → disputas de medición y pago
+Todo eso con tu nombre en el software que lo generó.
+
+Entonces la posición correcta no es técnica. Es jurídica y ética:
+
+Tu software no debe modificar nada. Ni costo, ni duración, ni cuadrilla.
+
+Lo que debe hacer es informar y advertir, dejando toda decisión en manos del ingeniero responsable. El software es una herramienta, no el autor del presupuesto.
+
+Lo que propongo concretamente:
+
+El software permite el anidado exactamente como el ingeniero lo construye. No toca ningún dato. Pero en todo APU con hijos anidados despliega un reporte de alertas técnicas que dice algo como:
+
+"Este APU contiene X recursos anidados. La duración mostrada (0,60 h/m²) está calculada únicamente sobre los recursos directos del padre. El trabajo contenido en los hijos anidados no está reflejado en la duración ni en la programación. El ingeniero responsable debe verificar y validar estos valores antes de usar este APU en un contrato."
+
+El ingeniero firma esa validación. No tu software.
+
+¿Quieres que redactemos exactamente ese texto de advertencia legal para incluirlo en el documento del programador?
+
+Es que espera, esto incluso complica si yo quiero obtener la cantidad de recursos por periodo
+
+12:47
+Ahora sí llegaste al núcleo más profundo del problema. Detente y explícame cómo estás calculando la cantidad de recursos por período en tu software, para no asumir nada.
+
+El programa lo que hace es ir tomando los recursos de cada apu multiplicando por la cantidad de obra del presupuesto y así con todos los apus, y luego va sumando comunes y por periodo, incluso con los anidados, pero en estos últimos no me preocupan los recursos materiales, me preocupan lo que sucede con los equipos, herramientas y mano de obra que vienen expresados y valuados por horas, sabiendo que el rendimiendo incide en esto, y en los apus con anidados tenemos estos problemas, qué hacemos?
+
+12:49
+Ahora entiendo el problema completo. Es gravísimo y tiene múltiples capas.
+
+Lo que está pasando en tu motor de recursos por período:
+
+Cuando tu software recorre el presupuesto y explota recursos, para un APU con anidado hace esto:
+
+Del padre toma:
+
+Peón: 1 und × cantidad obra × rendimiento padre
+Albañil: 1 und × cantidad obra × rendimiento padre
+Herramientas: 1 und × cantidad obra × rendimiento padre
+Del hijo anidado NO toma nada de mano de obra ni equipos porque el hijo entró como material con precio fijo. El peón del mortero, el albañil del mortero, las herramientas del mortero — son invisibles para el motor de recursos.
+
+Las consecuencias concretas son tres:
+
+1. Subconteo de horas-hombre
+Tu histograma de mano de obra está incompleto. Faltan las horas reales de los obreros que fabrican el mortero, el hormigón, o cualquier hijo anidado.
+
+2. Subconteo de equipos y herramientas
+Las horas de mezcladora, vibrador, herramientas del hijo — no aparecen en el plan de utilización de equipos.
+
+3. El período es incorrecto
+Como la duración del padre está mal calculada, la ventana de tiempo en que se asignan esos recursos al cronograma también está mal, lo que distorsiona toda la curva S y el flujo de caja.
+
+Y aquí viene la pregunta que debes responderme antes de que proponga algo:
+
+Cuando tu software calcula recursos por período, ¿lo hace a partir de la duración del APU padre solamente, o cruza duración con el cronograma de obra independientemente?
+
+toma la del padre
+
+12:50
+Entonces el problema es total. Porque con una sola fuente de error — la duración del padre — se contaminan en cadena:
+
+La cadena de errores:
+
+Duración padre incorrecta (oculta trabajo del hijo)
+        ↓
+Período de ejecución incorrecto
+        ↓
+Recursos del padre asignados en ventana de tiempo errónea
+        ↓
+Recursos del hijo (MO y equipos) simplemente no existen en el sistema
+        ↓
+Histograma de MO incompleto
+Histograma de equipos incompleto
+Curva S distorsionada
+Flujo de caja incorrecto
+Cronograma irreal
+Y esto tiene una implicación legal directa:
+
+Un contratista que use tu software para planificar su obra va a llegar a campo y descubrir que necesita más obreros, más equipos y más tiempo del que el sistema le dijo. En un contrato a precio fijo eso es pérdida directa. Y tu software firmó ese plan.
+
+Entonces antes de proponer cualquier solución necesito que me respondas algo fundamental:
+
+En tu software, ¿el APU hijo anidado existe como APU independiente con todos sus recursos completos, o solamente existe como un precio que el ingeniero teclea manualmente dentro del padre?
+
+Porque de eso depende absolutamente todo lo que se puede o no se puede hacer.
+
+existe como un apu independiente
+
+13:28
+Perfecto. Eso cambia todo y abre la solución.
+
+Si el hijo existe como APU independiente con todos sus recursos, tu software YA TIENE la información correcta. No hay datos perdidos. El problema no es de datos — es de cómo el motor los procesa cuando el hijo está anidado dentro del padre.
+
+Lo que debe hacer el motor correctamente:
+
+Cuando encuentra un APU padre con un hijo anidado, en lugar de ignorar los recursos del hijo, debe hacer esto:
+
+Bajar al APU hijo, tomar cada recurso de MO y equipos, escalarlo por la cantidad anidada, y sumarlo al pool de recursos del padre para ese período.
+
+Es decir:
+
+Recursos período =
+   Recursos directos del padre × cantidad obra × duración padre
+   +
+   Recursos MO/equipos del hijo × cantidad anidada × cantidad obra × duración hijo escalada
+Pero aquí aparece el problema de período:
+
+¿En qué momento del cronograma se ejecutan los recursos del hijo? ¿En el mismo período del padre, o en uno diferente?
+
+Y eso depende exactamente de lo que ya resolvimos:
+
+Si el hijo es P → mismo período que el padre
+Si el hijo es S → puede ser período anterior o posterior, dependiendo de la secuencia
+Entonces la clasificación P/S que definimos para la duración, resulta que también es la llave para el cálculo correcto de recursos por período.
+
+No es un dato adicional — es el mismo dato que ya le pedimos al ingeniero, pero que ahora tiene doble utilidad:
+
+Corregir la duración del padre ✅
+Ubicar correctamente los recursos del hijo en el cronograma ✅
+¿Quieres que formalicemos esto como una segunda regla en el documento del programador, complementaria a la de duración?
+
+Espera, si el apu anidado tiene su rendimiento propio, se complica porque el padre tiene un rendimiento y matemáticamente cambia el precio, ya te mostré los ejemplos
+
+13:30
+Tienes razón. Para y volvamos al origen.
+
+El problema central que identifies es este:
+
+El APU hijo cuando existe de forma independiente tiene:
+
+Su propia cuadrilla
+Su propio rendimiento
+Su propio costo directo
+Cuando entra anidado al padre, entra solo como precio (2,22). Eso significa que su cuadrilla y su rendimiento ya están consumidos y cristalizados en ese precio.
+
+Si ahora el motor intenta volver a procesar los recursos del hijo usando el rendimiento del hijo y además el rendimiento del padre, matemáticamente estás aplicando dos rendimientos distintos sobre los mismos recursos, y el costo explota como ya viste.
+
+Entonces la pregunta fundamental es:
+
+Cuando el ingeniero anida el hijo dentro del padre, ¿está diciendo implícitamente que la cuadrilla del hijo es diferente a la del padre y trabaja con su propio ritmo, o está diciendo que es la misma cuadrilla que hace todo?
+
+Porque de esa respuesta depende si los recursos del hijo se procesan con el rendimiento del hijo, con el del padre, o con ninguno de los dos.
+
+¿Qué dice la realidad de obra en tu experiencia?
+
+es la misma cuadrilla que hace todo pero son dos actividades diferentes, en este caso
+
+13:30
+Ahí está la raíz de todo.
+
+Si es la misma cuadrilla haciendo dos actividades distintas, entonces:
+
+El ingeniero cometió un error conceptual al anidar, porque al crear el hijo como APU independiente con su propia cuadrilla y rendimiento, dimensionó dos cuadrillas para lo que en realidad es una sola.
+
+Y cuando anida, el precio del hijo (2,22) ya lleva implícito el costo de esa cuadrilla trabajando a su propio ritmo. Si el motor vuelve a procesar esos recursos, los está contando dos veces.
+
+Esto significa algo muy serio para tu software:
+
+No hay solución matemática limpia para el anidado cuando es la misma cuadrilla, porque el modelo está mal construido desde el origen. El APU hijo no debería existir como entidad independiente en ese caso — sus recursos deberían estar directamente en el padre con un solo rendimiento unificado.
+
+Y aquí llegamos a la conclusión que temías desde el principio:
+
+El anidado es incorrecto no solo por la duración o el costo — es incorrecto porque modela mal la realidad física de la obra.
+
+La pregunta entonces ya no es cómo lo corriges matemáticamente en el software. La pregunta es:
+
+¿Qué le dices al ingeniero cuando detectas un anidado con la misma cuadrilla?
+
+¿Una advertencia, un bloqueo, o simplemente documentas la limitación y lo dejas decidir bajo su responsabilidad?
+

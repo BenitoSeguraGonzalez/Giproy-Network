@@ -5,10 +5,11 @@ from app.models.system_bim_setting import SystemBimSetting
 
 
 def ensure_system_bim_settings_table(db: Session) -> None:
-    bind = db.get_bind()
-    if bind is None:
-        return
-    SystemBimSetting.__table__.create(bind=bind, checkfirst=True)
+    if not system_bim_settings_table_ready(db):
+        raise RuntimeError(
+            "La tabla system_bim_settings no esta disponible. "
+            "Ejecuta la migracion Alembic de configuracion BIM antes de escribir ajustes."
+        )
 
 
 def system_bim_settings_table_ready(db: Session) -> bool:

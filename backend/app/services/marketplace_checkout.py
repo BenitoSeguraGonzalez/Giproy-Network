@@ -21,6 +21,7 @@ from app.models.cronograma import CronogramaValorado
 from app.models.cronograma_trabajo import CronogramaTrabajo
 from app.models.edo import EdoNode
 from app.models.edt import EdtNode, TipoNodoEdt
+from app.models.empresa_licencia import EmpresaLicencia
 from app.models.marketplace import (
     MarketplaceAssetOrigin,
     MarketplaceCheckoutDraft,
@@ -32,6 +33,8 @@ from app.models.marketplace import (
     MarketplaceProduct,
     MarketplaceRefund,
 )
+from app.models.transferencia import TransferExtraRecipientPack
+from app.services.classic_asset_portability import classic_asset_portability_service
 from app.services.marketplace_asset_origin import marketplace_asset_origin_service
 from app.services.marketplace_profile import evaluate_marketplace_profile
 from app.models.presupuesto import Presupuesto, PresupuestoDetalle, PresupuestoIndirecto, PresupuestoNota
@@ -49,26 +52,14 @@ from app.schemas.marketplace import (
 )
 from app.services.marketplace_permissions import has_marketplace_permission
 from app.services.marketplace import marketplace_service
+from app.services.geo import ECUADOR_GEO_REFERENCE
 from app.services.recurso import recurso_service
 from app.services.apu import calculate_apu_price
 from app.services.presupuesto import calculate_presupuesto_totals
 from app.services.public_procurement_portal_import import public_procurement_portal_import_service
 from app.services.license import license_service
+from app.services.license_notifications import license_notification_service
 from app.core.unit_normalization import canonicalize_unit_symbol
-
-
-ECUADOR_GEO_REFERENCE = {
-    ("azuay", "cuenca"): {"lat": -2.9006, "lng": -79.0045, "resolution": "canton"},
-    ("azuay", "paute"): {"lat": -2.7801, "lng": -78.7597, "resolution": "canton"},
-    ("guayas", "guayaquil"): {"lat": -2.1709, "lng": -79.9224, "resolution": "canton"},
-    ("guayas", "daule"): {"lat": -1.8622, "lng": -79.9778, "resolution": "canton"},
-    ("manabi", "manta"): {"lat": -0.9677, "lng": -80.7089, "resolution": "canton"},
-    ("pichincha", "quito"): {"lat": -0.1807, "lng": -78.4678, "resolution": "canton"},
-    ("azuay", None): {"lat": -2.9006, "lng": -79.0045, "resolution": "provincia"},
-    ("guayas", None): {"lat": -2.1709, "lng": -79.9224, "resolution": "provincia"},
-    ("manabi", None): {"lat": -0.9677, "lng": -80.7089, "resolution": "provincia"},
-    ("pichincha", None): {"lat": -0.1807, "lng": -78.4678, "resolution": "provincia"},
-}
 
 
 class MarketplaceCheckoutService:
@@ -161,8 +152,80 @@ class MarketplaceCheckoutService:
 
         return licencia, offer
 
-    def _fulfill_license_product(self, db: Session, product: MarketplaceProduct, buyer: Usuario):
+    def _find_license_fulfillment_by_order_item(
+        self,
+        db: Session,
+        *,
+        empresa_id: int,
+        marketplace_order_item_id: int | None,
+    ):
+        if not marketplace_order_item_id:
+            return None
+
+        assignments = (
+            db.query(EmpresaLicencia)
+            .filter(
+                EmpresaLicencia.empresa_id == empresa_id,
+                EmpresaLicencia.source.in_(["marketplace_order", "marketplace_purchase"]),
+            )
+            .order_by(EmpresaLicencia.id.desc())
+            .all()
+        )
+        for assignment in assignments:
+            details = dict(assignment.detalles or {}) if isinstance(assignment.detalles, dict) else {}
+            delivery = dict(details.get("marketplace_delivery") or {})
+            if delivery.get("marketplace_order_item_id") == marketplace_order_item_id:
+                return assignment
+        return None
+
+    def _resolve_license_transition_kind(self, db: Session, *, empresa_id: int, target_license: Licencia) -> str:
+        plan_rank = {
+            "express": 0,
+            "estandar": 1,
+            "standard": 1,
+            "profesional": 2,
+            "professional": 2,
+        }
+        snapshot = license_service.get_company_license_snapshot(db, empresa_id)
+        current_assignment = snapshot.get("current_assignment")
+        current_license = current_assignment.licencia if current_assignment else None
+        if not current_license:
+            return "new_subscription"
+
+        current_key = str(current_license.plan_kind or current_license.codigo or "").strip().lower()
+        target_key = str(target_license.plan_kind or target_license.codigo or "").strip().lower()
+        if current_license.id == target_license.id or current_key == target_key:
+            return "renewal_queued"
+
+        current_rank = plan_rank.get(current_key)
+        target_rank = plan_rank.get(target_key)
+        if current_rank is None or target_rank is None:
+            return "plan_change_queued"
+        if target_rank > current_rank:
+            return "upgrade_immediate" if bool(getattr(current_license, "is_default_express", False)) else "upgrade_queued"
+        if target_rank < current_rank:
+            return "downgrade_queued"
+        return "plan_change_queued"
+
+    def _fulfill_license_product(
+        self,
+        db: Session,
+        product: MarketplaceProduct,
+        buyer: Usuario,
+        *,
+        marketplace_order_id: int | None = None,
+        marketplace_order_item_id: int | None = None,
+    ):
+        existing_assignment = self._find_license_fulfillment_by_order_item(
+            db,
+            empresa_id=buyer.empresa_id,
+            marketplace_order_item_id=marketplace_order_item_id,
+        )
+        if existing_assignment:
+            return "empresa_licencia", existing_assignment.id
+
         licencia, offer = self._resolve_marketplace_license_catalog(db, product)
+        transition_kind = self._resolve_license_transition_kind(db, empresa_id=buyer.empresa_id, target_license=licencia)
         assignment = license_service.assign_license_to_company(
             db,
             empresa_id=buyer.empresa_id,
@@ -172,9 +235,142 @@ class MarketplaceCheckoutService:
             payment_confirmed_at=datetime.now(timezone.utc),
             notes=f"Marketplace: {product.titulo}",
             force_immediate=False,
-            source="marketplace_purchase",
+            source="marketplace_order",
         )
+        preview = self._extract_product_preview(product)
+        product_meta = dict(preview.get("product_meta") or {})
+        details = dict(assignment.detalles or {}) if isinstance(assignment.detalles, dict) else {}
+        details["marketplace_delivery"] = {
+            "source": "marketplace_order",
+            "marketplace_order_id": marketplace_order_id,
+            "marketplace_order_item_id": marketplace_order_item_id,
+            "marketplace_product_id": product.id,
+            "marketplace_product_slug": product.slug,
+            "commercial_code": product_meta.get("commercial_code"),
+            "billing_cycle": offer["billing_cycle"],
+            "duration_months": offer["duration_months"],
+            "transition_kind": transition_kind,
+            "delivered_at": datetime.now(timezone.utc).isoformat(),
+        }
+        assignment.detalles = details
+        db.add(assignment)
+        license_service._log_event(
+            db,
+            empresa_id=buyer.empresa_id,
+            empresa_licencia_id=assignment.id,
+            licencia_id=licencia.id,
+            actor_usuario_id=buyer.id,
+            event_type="license_marketplace_purchase_activated",
+            notes=f"Marketplace: {product.titulo}",
+            payload={
+                "marketplace_order_id": marketplace_order_id,
+                "marketplace_order_item_id": marketplace_order_item_id,
+                "marketplace_product_id": product.id,
+                "marketplace_product_slug": product.slug,
+                "commercial_code": product_meta.get("commercial_code"),
+                "billing_cycle": offer["billing_cycle"],
+                "duration_months": offer["duration_months"],
+                "transition_kind": transition_kind,
+                "assignment_status": assignment.status,
+            },
+        )
+        db.flush()
         return "empresa_licencia", assignment.id
+
+    def _fulfill_saas_right_product(
+        self,
+        db: Session,
+        product: MarketplaceProduct,
+        buyer: Usuario,
+        *,
+        marketplace_order_id: int | None = None,
+        marketplace_order_item_id: int | None = None,
+    ):
+        preview = self._extract_product_preview(product)
+        product_meta = dict(preview.get("product_meta") or {})
+        delivery_kind = str(product_meta.get("delivery_kind") or "").strip().lower()
+        if "saas_right" not in delivery_kind:
+            return None, None
+
+        now = datetime.now(timezone.utc)
+        commercial_code = str(product_meta.get("commercial_code") or "").strip().upper()
+        if commercial_code == "CONECTA_TRANSFERENCIAS":
+            existing_pack = None
+            if marketplace_order_item_id:
+                existing_pack = (
+                    db.query(TransferExtraRecipientPack)
+                    .filter(TransferExtraRecipientPack.marketplace_order_item_id == marketplace_order_item_id)
+                    .first()
+                )
+            if existing_pack:
+                return "transfer_extra_recipient_pack", existing_pack.id
+
+            duration_days = int(product_meta.get("duration_days") or 30)
+            slots_total = int(product_meta.get("recipient_slots") or 3)
+            pack = TransferExtraRecipientPack(
+                empresa_id=buyer.empresa_id,
+                marketplace_order_item_id=marketplace_order_item_id,
+                product_code="CONECTA_TRANSFERENCIAS",
+                status="active",
+                slots_total=slots_total,
+                slots_used=0,
+                purchased_at=now,
+                expires_at=now + timedelta(days=duration_days),
+                metadata_json={
+                    "marketplace_order_id": marketplace_order_id,
+                    "marketplace_order_item_id": marketplace_order_item_id,
+                    "marketplace_product_id": product.id,
+                    "marketplace_product_slug": product.slug,
+                    "commercial_code": commercial_code,
+                    "context": product_meta.get("context") or "Envios y Transferencias",
+                    "duration_days": duration_days,
+                    "recipient_slots": slots_total,
+                    "requires_new_recipient_association": bool(product_meta.get("requires_new_recipient_association", True)),
+                },
+            )
+            db.add(pack)
+            db.flush()
+            license_service._log_event(
+                db,
+                empresa_id=buyer.empresa_id,
+                actor_usuario_id=buyer.id,
+                event_type="transfer_conecta_pack_marketplace_activated",
+                notes=f"Marketplace: {product.titulo}",
+                payload={
+                    "marketplace_order_id": marketplace_order_id,
+                    "marketplace_order_item_id": marketplace_order_item_id,
+                    "marketplace_product_id": product.id,
+                    "marketplace_product_slug": product.slug,
+                    "commercial_code": commercial_code,
+                    "pack_id": pack.id,
+                    "slots_total": slots_total,
+                    "expires_at": pack.expires_at.isoformat(),
+                },
+            )
+            db.flush()
+            return "transfer_extra_recipient_pack", pack.id
+
+        license_service._log_event(
+            db,
+            empresa_id=buyer.empresa_id,
+            actor_usuario_id=buyer.id,
+            event_type="saas_right_marketplace_purchase_activated",
+            notes=f"Marketplace: {product.titulo}",
+            payload={
+                "marketplace_order_id": marketplace_order_id,
+                "marketplace_order_item_id": marketplace_order_item_id,
+                "marketplace_product_id": product.id,
+                "marketplace_product_slug": product.slug,
+                "commercial_code": product_meta.get("commercial_code"),
+                "product_type": product.product_type,
+                "billing_period": product_meta.get("billing_period"),
+                "duration_months": product_meta.get("duration_months"),
+                "activation_policy": product_meta.get("activation_policy"),
+                "delivered_at": now.isoformat(),
+            },
+        )
+        db.flush()
+        return "saas_right", marketplace_order_item_id
 
     def _ensure_buyer_access(self, current_user: Usuario) -> None:
         role = (current_user.rol or "").strip().lower()
@@ -222,6 +418,55 @@ class MarketplaceCheckoutService:
             "max_quantity": max_quantity,
             "allows_multiple": True,
         }
+
+    def _validate_product_base_plan(
+        self,
+        db: Session,
+        product: MarketplaceProduct,
+        empresa_id: int,
+    ) -> None:
+        preview = self._extract_product_preview(product)
+        product_meta = dict(preview.get("product_meta") or {})
+        required_plans = {
+            str(value or "").strip().upper()
+            for value in (product_meta.get("requires_base_plan") or [])
+            if str(value or "").strip()
+        }
+        if not required_plans:
+            return
+
+        snapshot = license_service.get_company_license_snapshot(db, empresa_id)
+        assignment = snapshot.get("current_assignment")
+        licencia = assignment.licencia if assignment else None
+        company_plan_keys = {
+            str(value or "").strip().upper()
+            for value in (
+                getattr(licencia, "codigo", None),
+                getattr(licencia, "plan_kind", None),
+            )
+            if str(value or "").strip()
+        }
+        plan_aliases = {
+            "ESTANDAR": "STANDARD",
+            "PROFESIONAL": "PROFESSIONAL",
+            "EMPRESARIAL": "ENTERPRISE",
+        }
+        company_plan_keys |= {
+            plan_aliases[key]
+            for key in list(company_plan_keys)
+            if key in plan_aliases
+        }
+        if company_plan_keys & required_plans:
+            return
+
+        allowed_label = ", ".join(sorted(required_plans))
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                f"El producto '{product.titulo}' requiere una licencia base vigente: "
+                f"{allowed_label}."
+            ),
+        )
 
     def _normalize_checkout_items(self, payload: MarketplaceCheckoutRequest) -> list[dict]:
         merged_quantities: dict[int, int] = {}
@@ -479,6 +724,7 @@ class MarketplaceCheckoutService:
             product = products_by_id.get(line["product_id"])
             if not product:
                 raise HTTPException(status_code=400, detail="Uno o más productos no están disponibles para compra.")
+            self._validate_product_base_plan(db, product, current_user.empresa_id)
             sales_config = self._extract_sales_config(product)
             quantity = int(line["quantity"])
             if not sales_config["allows_multiple"] and quantity > 1:
@@ -491,12 +737,20 @@ class MarketplaceCheckoutService:
                 "quantity": quantity,
             })
 
+        requested_payment_method = (payload.payment_method or "").strip().lower() or None
+        payment_provider = None
+        payment_environment_mode = "pending_configuration"
+        if requested_payment_method:
+            method = marketplace_service.get_active_commercial_payment_method(db, requested_payment_method)
+            payment_provider = method.provider or method.slug
+            payment_environment_mode = method.environment_mode
+
         snapshot = self._build_checkout_snapshot(normalized_lines)
         draft = MarketplaceCheckoutDraft(
             company_id=current_user.empresa_id,
             user_id=current_user.id,
             status="open",
-            payment_method=(payload.payment_method or "").strip() or None,
+            payment_method=requested_payment_method,
             currency=snapshot["currency"],
             total=Decimal(snapshot["total"]),
             snapshot_json=snapshot,
@@ -511,11 +765,11 @@ class MarketplaceCheckoutService:
             payment_attempt = MarketplacePaymentAttempt(
                 checkout_draft_id=draft.id,
                 payment_method=draft.payment_method,
-                payment_provider=draft.payment_method,
+                payment_provider=payment_provider or draft.payment_method,
                 status="draft",
                 amount=draft.total,
                 currency=draft.currency,
-                environment_mode="pending_configuration",
+                environment_mode=payment_environment_mode,
                 payload_json={"draft_snapshot": snapshot},
             )
             db.add(payment_attempt)
@@ -804,7 +1058,6 @@ class MarketplaceCheckoutService:
             product = line["product"]
             quantity = int(line["quantity"])
             for _ in range(quantity):
-                delivered_type, delivered_id = self._fulfill_product(db, product, buyer, None)
                 item = MarketplaceOrderItem(
                     order_id=order.id,
                     product_id=product.id,
@@ -813,12 +1066,23 @@ class MarketplaceCheckoutService:
                     product_type_snapshot=product.product_type,
                     source_type_snapshot=product.source_type,
                     source_id_snapshot=product.source_id,
-                    delivered_entity_type=delivered_type,
-                    delivered_entity_id=delivered_id,
+                    delivered_entity_type=None,
+                    delivered_entity_id=None,
                     price=product.precio,
                 )
                 db.add(item)
                 db.flush()
+                delivered_type, delivered_id = self._fulfill_product(
+                    db,
+                    product,
+                    buyer,
+                    None,
+                    marketplace_order_id=order.id,
+                    marketplace_order_item_id=item.id,
+                )
+                item.delivered_entity_type = delivered_type
+                item.delivered_entity_id = delivered_id
+                db.add(item)
 
                 if delivered_type and delivered_id and delivered_type != "empresa_licencia":
                     origin_metadata = {
@@ -867,6 +1131,12 @@ class MarketplaceCheckoutService:
         draft.last_activity_at = datetime.now(timezone.utc)
         db.add(draft)
         db.flush()
+        license_notification_service.queue_purchase_formalized(
+            db,
+            order,
+            buyer=buyer,
+            payment_method=payment_attempt.payment_method,
+        )
         return order
 
     def _resolve_paypal_base_url(self, environment_mode: str | None) -> str:
@@ -1548,6 +1818,7 @@ class MarketplaceCheckoutService:
         if (draft.status or "").strip().lower() != "open":
             raise HTTPException(status_code=400, detail="Este checkout draft ya fue procesado.")
 
+        marketplace_service.get_active_commercial_payment_method(db, "bank_transfer")
         transfer_reference = str(payload.transfer_reference or "").strip()
         if not transfer_reference:
             raise HTTPException(status_code=400, detail="Debes indicar la referencia de la transferencia.")
@@ -1796,7 +2067,14 @@ class MarketplaceCheckoutService:
             )
             if not product:
                 continue
-            delivered_type, delivered_id = self._fulfill_product(db, product, buyer, None)
+            delivered_type, delivered_id = self._fulfill_product(
+                db,
+                product,
+                buyer,
+                None,
+                marketplace_order_id=order.id,
+                marketplace_order_item_id=item.id,
+            )
             item.delivered_entity_type = delivered_type
             item.delivered_entity_id = delivered_id
             db.add(item)
@@ -1867,6 +2145,13 @@ class MarketplaceCheckoutService:
             },
             processed_at=datetime.now(timezone.utc),
         ))
+        license_notification_service.queue_purchase_formalized(
+            db,
+            order,
+            buyer=buyer,
+            actor_usuario_id=current_user.id,
+            payment_method=payment_attempt.payment_method,
+        )
         db.commit()
         return (
             db.query(MarketplaceOrder)
@@ -2444,231 +2729,116 @@ class MarketplaceCheckoutService:
                 return candidate
             current_secuencial += 1
 
-    def _build_cloned_apu_map(self, db: Session, source_base_id: int | None, target_base_id: int | None, target_empresa_id: int) -> dict[int, int]:
-        if not source_base_id or not target_base_id:
-            return {}
-
-        source_apus = (
-            db.query(APU)
-            .filter(APU.base_trabajo_id == source_base_id)
-            .all()
-        )
-        cloned_apus = (
-            db.query(APU)
-            .filter(APU.base_trabajo_id == target_base_id, APU.empresa_id == target_empresa_id)
-            .all()
-        )
-        cloned_by_signature = {
-            (apu.descripcion_normalizada, canonicalize_unit_symbol(apu.unidad)): apu.id
-            for apu in cloned_apus
-        }
-
-        apu_map: dict[int, int] = {}
-        for source_apu in source_apus:
-            target_apu_id = cloned_by_signature.get((source_apu.descripcion_normalizada, canonicalize_unit_symbol(source_apu.unidad)))
-            if target_apu_id:
-                apu_map[source_apu.id] = target_apu_id
-        return apu_map
-
-    def _clone_project_detail_to_company(self, db: Session, source_project: Proyecto, cloned_project: Proyecto, buyer: Usuario) -> None:
-        source_root_code = source_project.codigo_root or source_project.codigo
-        if not source_root_code:
-            return
-
+    def _clone_project_detail_to_company(
+        self,
+        db: Session,
+        source_project: Proyecto,
+        cloned_project: Proyecto,
+        buyer: Usuario,
+    ) -> None:
         source_detail = (
             db.query(ProyectoDetalle)
             .filter(
-                ProyectoDetalle.codigo_root == source_root_code,
+                ProyectoDetalle.codigo_root == source_project.codigo_root,
                 ProyectoDetalle.empresa_id == source_project.empresa_id,
             )
             .first()
         )
         if not source_detail:
             return
-
-        cloned_detail = ProyectoDetalle(
-            codigo_root=cloned_project.codigo_root or cloned_project.codigo,
-            empresa_id=buyer.empresa_id,
-            cod_referencial=source_detail.cod_referencial,
-            tipo_proyecto_id=source_detail.tipo_proyecto_id,
-            categoria_id=source_detail.categoria_id,
-            tipo_construccion=source_detail.tipo_construccion,
-            ambito_contratacion=source_detail.ambito_contratacion,
-            tipo_contrato=source_detail.tipo_contrato,
-            normativa_aplicable=source_detail.normativa_aplicable,
-            nivel_complejidad=source_detail.nivel_complejidad,
-            cliente_contratante_preliminar=source_detail.cliente_contratante_preliminar,
-            presupuesto_referencial=source_detail.presupuesto_referencial,
-            moneda=source_detail.moneda,
-            fuente_financiamiento=source_detail.fuente_financiamiento,
-            numero_contrato=source_detail.numero_contrato,
-            fecha_firma_contrato=source_detail.fecha_firma_contrato,
-            descripcion_breve=source_detail.descripcion_breve,
-            alcance_detallado=source_detail.alcance_detallado,
-            tipo_medicion=source_detail.tipo_medicion,
-            area_terreno=source_detail.area_terreno,
-            area_construccion=source_detail.area_construccion,
-            num_niveles=source_detail.num_niveles,
-            longitud_total=source_detail.longitud_total,
-            unidad_longitud=source_detail.unidad_longitud,
-            ancho_promedio=source_detail.ancho_promedio,
-            volumen_total=source_detail.volumen_total,
-            cantidad_unidades=source_detail.cantidad_unidades,
-            descripcion_unidad=source_detail.descripcion_unidad,
-            fecha_inicio=source_detail.fecha_inicio,
-            plazo_ejecucion=source_detail.plazo_ejecucion,
-            fecha_finalizacion=source_detail.fecha_finalizacion,
-            pais=source_detail.pais,
-            provincia=source_detail.provincia,
-            canton=source_detail.canton,
-            ciudad=source_detail.ciudad,
-            direccion=source_detail.direccion,
-            imagen_referencial_url=source_detail.imagen_referencial_url,
-            latitud=source_detail.latitud,
-            longitud=source_detail.longitud,
-            map_zoom=source_detail.map_zoom,
+        db.add(
+            ProyectoDetalle(
+                codigo_root=cloned_project.codigo_root,
+                empresa_id=buyer.empresa_id,
+                cod_referencial=source_detail.cod_referencial,
+                tipo_proyecto_id=source_detail.tipo_proyecto_id,
+                categoria_id=source_detail.categoria_id,
+                tipo_construccion=source_detail.tipo_construccion,
+                ambito_contratacion=source_detail.ambito_contratacion,
+                tipo_contrato=source_detail.tipo_contrato,
+                normativa_aplicable=source_detail.normativa_aplicable,
+                nivel_complejidad=source_detail.nivel_complejidad,
+                cliente_contratante_preliminar=source_detail.cliente_contratante_preliminar,
+                presupuesto_referencial=source_detail.presupuesto_referencial,
+                moneda=source_detail.moneda,
+                fuente_financiamiento=source_detail.fuente_financiamiento,
+                numero_contrato=source_detail.numero_contrato,
+                fecha_firma_contrato=source_detail.fecha_firma_contrato,
+                descripcion_breve=source_detail.descripcion_breve,
+                alcance_detallado=source_detail.alcance_detallado,
+                tipo_medicion=source_detail.tipo_medicion,
+                area_terreno=source_detail.area_terreno,
+                area_construccion=source_detail.area_construccion,
+                num_niveles=source_detail.num_niveles,
+                longitud_total=source_detail.longitud_total,
+                unidad_longitud=source_detail.unidad_longitud,
+                ancho_promedio=source_detail.ancho_promedio,
+                volumen_total=source_detail.volumen_total,
+                cantidad_unidades=source_detail.cantidad_unidades,
+                descripcion_unidad=source_detail.descripcion_unidad,
+                fecha_inicio=source_detail.fecha_inicio,
+                plazo_ejecucion=source_detail.plazo_ejecucion,
+                fecha_finalizacion=source_detail.fecha_finalizacion,
+                pais=source_detail.pais,
+                provincia=source_detail.provincia,
+                canton=source_detail.canton,
+                ciudad=source_detail.ciudad,
+                direccion=source_detail.direccion,
+                objetivos_clave=source_detail.objetivos_clave,
+                restricciones_conocidas=source_detail.restricciones_conocidas,
+                supuestos_iniciales=source_detail.supuestos_iniciales,
+                imagen_referencial_url=source_detail.imagen_referencial_url,
+                latitud=source_detail.latitud,
+                longitud=source_detail.longitud,
+                map_zoom=source_detail.map_zoom,
+                georef_map_url=source_detail.georef_map_url,
+                georef_map_status=source_detail.georef_map_status,
+                georef_map_signature=source_detail.georef_map_signature,
+                georef_map_generated_at=source_detail.georef_map_generated_at,
+                georef_map_error=source_detail.georef_map_error,
+            )
         )
-        db.add(cloned_detail)
         db.flush()
 
-    def _clone_tree_nodes_to_company(self, db: Session, node_model, source_project_id: int, target_project_id: int, target_empresa_id: int) -> dict[int, int]:
-        source_nodes = (
-            db.query(node_model)
-            .filter(node_model.proyecto_id == source_project_id)
-            .order_by(node_model.parent_id.nullsfirst(), node_model.orden.asc(), node_model.id.asc())
-            .all()
-        )
-
-        id_map: dict[int, int] = {}
-        for source_node in source_nodes:
-            cloned_node = node_model(
-                proyecto_id=target_project_id,
-                parent_id=id_map.get(source_node.parent_id) if source_node.parent_id else None,
-                tipo_nodo=source_node.tipo_nodo,
-                orden=source_node.orden,
-                codigo=source_node.codigo,
-                empresa_id=target_empresa_id,
-            )
-            for field in ("nombre", "definicion", "stakeholder_id", "rol_id", "actividades_claves"):
-                if hasattr(source_node, field):
-                    setattr(cloned_node, field, getattr(source_node, field))
-            db.add(cloned_node)
-            db.flush()
-            id_map[source_node.id] = cloned_node.id
-
-        return id_map
-
-    def _clone_project_budgets_to_company(
+    def _clone_edo_nodes_to_company(
         self,
         db: Session,
         source_project: Proyecto,
         cloned_project: Proyecto,
         buyer: Usuario,
-        cloned_edt_map: dict[int, int],
-        cloned_apu_map: dict[int, int],
-    ) -> dict[int, dict[int, int]]:
-        source_budgets = (
-            db.query(Presupuesto)
-            .filter(
-                Presupuesto.proyecto_id == source_project.id,
-                Presupuesto.empresa_id == source_project.empresa_id,
-            )
+    ) -> None:
+        source_nodes = (
+            db.query(EdoNode)
+            .filter(EdoNode.proyecto_id == source_project.id, EdoNode.empresa_id == source_project.empresa_id)
+            .order_by(EdoNode.parent_id.asc().nullsfirst(), EdoNode.orden.asc(), EdoNode.id.asc())
             .all()
         )
-
-        budget_detail_maps: dict[int, dict[int, int]] = {}
-        for budget in source_budgets:
-            cloned_budget = Presupuesto(
-                codigo=budget.codigo,
-                revision=0,
-                descripcion=budget.descripcion,
-                subtotal=budget.subtotal,
-                indirectos_total=budget.indirectos_total,
-                impuestos=budget.impuestos,
-                total=budget.total,
-                estado="En Elaboración",
-                moneda=budget.moneda,
-                proyecto_id=cloned_project.id,
-                empresa_id=buyer.empresa_id,
-                iva_aplicado=budget.iva_aplicado,
-                dec_moneda=budget.dec_moneda,
-                dec_calculos=budget.dec_calculos,
-            )
-            db.add(cloned_budget)
-            db.flush()
-
-            detail_id_map: dict[int, int] = {}
-            source_details = (
-                db.query(PresupuestoDetalle)
-                .filter(PresupuestoDetalle.presupuesto_id == budget.id)
-                .order_by(PresupuestoDetalle.parent_id.nullsfirst(), PresupuestoDetalle.orden.asc(), PresupuestoDetalle.id.asc())
-                .all()
-            )
-            for source_detail in source_details:
-                cloned_detail = PresupuestoDetalle(
-                    presupuesto_id=cloned_budget.id,
-                    apu_id=cloned_apu_map.get(source_detail.apu_id) if source_detail.apu_id else None,
-                    parent_id=detail_id_map.get(source_detail.parent_id) if source_detail.parent_id else None,
-                    tipo=source_detail.tipo,
-                    edt_id=cloned_edt_map.get(source_detail.edt_id, source_detail.edt_id),
-                    codigo_item=source_detail.codigo_item,
-                    descripcion=source_detail.descripcion,
-                    unidad=canonicalize_unit_symbol(source_detail.unidad),
-                    cantidad=source_detail.cantidad,
-                    precio_unitario=source_detail.precio_unitario,
-                    precio_total=source_detail.precio_total,
-                    orden=source_detail.orden,
-                    omniclass_codigo=source_detail.omniclass_codigo,
-                    omniclass_titulo=source_detail.omniclass_titulo,
-                    notas=source_detail.notas,
-                    tanteo_activo=source_detail.tanteo_activo,
-                )
-                db.add(cloned_detail)
-                db.flush()
-                detail_id_map[source_detail.id] = cloned_detail.id
-
-            budget_detail_maps[budget.id] = detail_id_map
-
-            source_indirectos = (
-                db.query(PresupuestoIndirecto)
-                .filter(PresupuestoIndirecto.presupuesto_id == budget.id)
-                .all()
-            )
-            for source_indirecto in source_indirectos:
-                db.add(PresupuestoIndirecto(
-                    presupuesto_id=cloned_budget.id,
+        id_map: dict[int, int] = {}
+        pending = list(source_nodes)
+        while pending:
+            progressed = False
+            for source_node in list(pending):
+                if source_node.parent_id and source_node.parent_id not in id_map:
+                    continue
+                cloned_node = EdoNode(
+                    proyecto_id=cloned_project.id,
+                    parent_id=id_map.get(source_node.parent_id) if source_node.parent_id else None,
+                    tipo_nodo=source_node.tipo_nodo,
+                    orden=source_node.orden,
+                    codigo=source_node.codigo,
+                    nombre=source_node.nombre,
+                    stakeholder_id=None,
+                    rol_id=None,
+                    actividades_claves=source_node.actividades_claves,
                     empresa_id=buyer.empresa_id,
-                    concepto_codigo=source_indirecto.concepto_codigo,
-                    concepto_id=source_indirecto.concepto_id,
-                    categoria_codigo=source_indirecto.categoria_codigo,
-                    nombre=source_indirecto.nombre,
-                    porcentaje=source_indirecto.porcentaje,
-                    observaciones=source_indirecto.observaciones,
-                    fijo=source_indirecto.fijo,
-                    usuario=source_indirecto.usuario,
-                    custom=source_indirecto.custom,
-                ))
-
-            source_notes = (
-                db.query(PresupuestoNota)
-                .filter(PresupuestoNota.presupuesto_id == budget.id)
-                .order_by(PresupuestoNota.id.asc())
-                .all()
-            )
-            for source_note in source_notes:
-                db.add(PresupuestoNota(
-                    presupuesto_id=cloned_budget.id,
-                    linea_presupuesto_id=detail_id_map.get(source_note.linea_presupuesto_id) if source_note.linea_presupuesto_id else None,
-                    autor_usuario_id=None,
-                    autor_nombre_snapshot=source_note.autor_nombre_snapshot,
-                    tipo=source_note.tipo,
-                    texto=source_note.texto,
-                ))
-
-            calculate_presupuesto_totals(db, cloned_budget)
-            db.flush()
-
-        return budget_detail_maps
+                )
+                db.add(cloned_node)
+                db.flush()
+                id_map[int(source_node.id)] = int(cloned_node.id)
+                pending.remove(source_node)
+                progressed = True
+            if not progressed:
+                raise HTTPException(status_code=409, detail="La estructura EDO del proyecto origen no se puede clonar.")
 
     def _clone_project_schedules_to_company(
         self,
@@ -2763,77 +2933,46 @@ class MarketplaceCheckoutService:
         if not source_project:
             raise HTTPException(status_code=404, detail="Proyecto origen no encontrado.")
 
-        from app.repositories.base_trabajo import base_trabajo_repo
-
-        cloned_base = None
-        if source_project.base_trabajo_id:
-            cloned_base = base_trabajo_repo.create(
-                db,
-                BaseTrabajoCreate(
-                    nombre=f"Base adquirida - {source_project.nombre}",
-                    tipo="Base de Proyecto",
-                    descripcion=f"Base clonada desde marketplace para {source_project.nombre}",
-                    source_base_id=source_project.base_trabajo_id,
-                    empresa_id=buyer.empresa_id,
-                ),
-                buyer.empresa_id,
-            )
-
         project_code = self._generate_project_code(db, buyer.empresa_id)
-        cloned_project = Proyecto(
-            nombre=source_project.nombre,
-            codigo=project_code,
-            codigo_root=project_code,
-            revision=0,
-            descripcion=source_project.descripcion,
-            estado="Planificación",
-            fecha_inicio=source_project.fecha_inicio,
-            fecha_fin_estimada=source_project.fecha_fin_estimada,
-            presupuesto_estimado=source_project.presupuesto_estimado,
-            moneda=source_project.moneda,
-            empresa_id=buyer.empresa_id,
-            cliente_id=source_project.cliente_id,
-            base_trabajo_id=cloned_base.id if cloned_base else None,
-            plantillas_config=source_project.plantillas_config,
-        )
+        try:
+            copy_result = classic_asset_portability_service.clone_project_to_company(
+                db,
+                source_project_id=int(source_project.id),
+                source_empresa_id=int(source_project.empresa_id) if source_project.empresa_id else None,
+                target_empresa_id=int(buyer.empresa_id),
+                context="marketplace",
+                name_suffix="- adquirido",
+                target_code=project_code,
+                include_schedules=False,
+                metadata={
+                    "source": "marketplace_purchase",
+                    "buyer_user_id": buyer.id,
+                    "source_project_id": source_project.id,
+                },
+            )
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=409,
+                detail="El proyecto origen no cumple la integridad Proyecto/Base/APU/Presupuesto requerida.",
+            ) from exc
+
+        cloned_project = copy_result.project
+        cloned_project.nombre = source_project.nombre
+        cloned_project.codigo = project_code
+        cloned_project.codigo_root = project_code
+        cloned_project.estado = "Planificación"
+        cloned_project.cliente_id = source_project.cliente_id
         db.add(cloned_project)
         db.flush()
 
         self._clone_project_detail_to_company(db, source_project, cloned_project, buyer)
-        cloned_edt_map = self._clone_tree_nodes_to_company(
-            db,
-            EdtNode,
-            source_project.id,
-            cloned_project.id,
-            buyer.empresa_id,
-        )
-        self._clone_tree_nodes_to_company(
-            db,
-            EdoNode,
-            source_project.id,
-            cloned_project.id,
-            buyer.empresa_id,
-        )
-        cloned_apu_map = self._build_cloned_apu_map(
-            db,
-            source_project.base_trabajo_id,
-            cloned_base.id if cloned_base else None,
-            buyer.empresa_id,
-        )
-        budget_detail_maps = self._clone_project_budgets_to_company(
-            db,
-            source_project,
-            cloned_project,
-            buyer,
-            cloned_edt_map,
-            cloned_apu_map,
-        )
+        self._clone_edo_nodes_to_company(db, source_project, cloned_project, buyer)
         self._clone_project_schedules_to_company(
             db,
             source_project,
             cloned_project,
             buyer,
-            budget_detail_maps,
+            copy_result.presupuesto_detalle_id_map,
         )
 
         db.flush()
@@ -2860,178 +2999,6 @@ class MarketplaceCheckoutService:
                 f"{portal_meta.get('fecha_inicio_licitacion') or '-'} -> {portal_meta.get('fecha_fin_licitacion') or '-'}"
             )
         return "\n\n".join([line for line in lines if line]).strip() or f"Proyecto adquirido desde marketplace: {product.titulo}"
-
-    def _seed_portal_project_detail(
-        self,
-        db: Session,
-        *,
-        project: Proyecto,
-        buyer: Usuario,
-        product: MarketplaceProduct,
-        product_meta: dict,
-        portal_meta: dict,
-    ) -> None:
-        analysis = dict(portal_meta.get("import_analysis") or {})
-        chapters = list(analysis.get("chapters") or [])
-        chapters_preview = ", ".join(chapters[:4])
-        if len(chapters) > 4:
-            chapters_preview += ", ..."
-        reference_code = self._resolve_portal_reference_code(product_meta, portal_meta)
-        geolocation = self._resolve_portal_project_geolocation(portal_meta)
-        location_label = " / ".join([part for part in [portal_meta.get("pais"), portal_meta.get("provincia"), portal_meta.get("canton")] if part])
-
-        object_lines = [
-            f"Artículo adquirido: {product.titulo}",
-            product_meta.get("descripcion_completa") or product.descripcion or product.resumen or "",
-            f"Código / referencia técnica: {reference_code or 'Sin referencia'}",
-            f"Fuente técnica: {analysis.get('source_filename') or (portal_meta.get('import_source') or {}).get('reference') or 'Sin referencia'}",
-            f"Rubros detectados: {analysis.get('items_count') or 0}",
-            f"Capítulos detectados: {analysis.get('chapters_count') or 0}",
-            f"Importe técnico base: {analysis.get('total_amount') or portal_meta.get('precio_licitacion') or product.precio or 0} {product.moneda or 'USD'}",
-        ]
-        if chapters_preview:
-            object_lines.append(f"Capítulos principales: {chapters_preview}")
-        if location_label:
-            object_lines.append(f"Localización del proyecto: {location_label}")
-        if geolocation.get("lat") is not None and geolocation.get("lng") is not None:
-            object_lines.append(
-                f"Geolocalización propuesta: {geolocation.get('lat')}, {geolocation.get('lng')} ({geolocation.get('resolution')})"
-            )
-
-        detail = ProyectoDetalle(
-            codigo_root=project.codigo_root or project.codigo,
-            empresa_id=buyer.empresa_id,
-            cod_referencial=reference_code,
-            tipo_construccion="Adquirido",
-            ambito_contratacion="Público",
-            tipo_contrato="Portal de compras públicas",
-            cliente_contratante_preliminar=portal_meta.get("contratante") or portal_meta.get("entidad_contratante"),
-            presupuesto_referencial=portal_meta.get("precio_licitacion") or analysis.get("total_amount") or product.precio,
-            moneda=product.moneda or "USD",
-            fuente_financiamiento="Presupuesto Estatal",
-            numero_contrato=portal_meta.get("codigo_proceso") or portal_meta.get("numero_contrato"),
-            fecha_inicio=project.fecha_inicio,
-            fecha_finalizacion=project.fecha_fin_estimada,
-            pais=portal_meta.get("pais") or "Ecuador",
-            provincia=portal_meta.get("provincia"),
-            canton=portal_meta.get("canton"),
-            direccion=portal_meta.get("direccion"),
-            latitud=geolocation.get("lat"),
-            longitud=geolocation.get("lng"),
-            descripcion_breve=portal_meta.get("descripcion_breve") or reference_code,
-            alcance_detallado="\n".join([line for line in object_lines if line]).strip(),
-            tipo_medicion="area",
-        )
-        db.add(detail)
-        db.flush()
-
-    def _seed_portal_project_budget(
-        self,
-        db: Session,
-        *,
-        project: Proyecto,
-        buyer: Usuario,
-        product: MarketplaceProduct,
-        product_meta: dict,
-        portal_meta: dict,
-    ) -> Presupuesto | None:
-        analysis = dict(portal_meta.get("import_analysis") or {})
-        rubros = list(analysis.get("rubros") or [])
-        if not rubros:
-            return None
-
-        root_node = EdtNode(
-            proyecto_id=project.id,
-            parent_id=None,
-            tipo_nodo=TipoNodoEdt.CUENTA_PAQUETE,
-            orden=1,
-            codigo="1",
-            nombre=analysis.get("budget_title") or product.titulo,
-            definicion="Estructura operativa base generada automáticamente desde la compra de Portal de compras públicas.",
-            empresa_id=buyer.empresa_id,
-        )
-        db.add(root_node)
-        db.flush()
-
-        chapter_map: dict[str, EdtNode] = {}
-        chapter_order = 1
-        for row in rubros:
-            chapter_name = (row.get("capitulo") or "").strip() or "General"
-            if chapter_name in chapter_map:
-                continue
-            node = EdtNode(
-                proyecto_id=project.id,
-                parent_id=root_node.id,
-                tipo_nodo=TipoNodoEdt.CUENTA_PAQUETE,
-                orden=chapter_order,
-                codigo=f"1.{chapter_order}",
-                nombre=chapter_name,
-                definicion=f"Capítulo importado automáticamente desde el artículo adquirido: {product.titulo}.",
-                empresa_id=buyer.empresa_id,
-            )
-            db.add(node)
-            db.flush()
-            chapter_map[chapter_name] = node
-            chapter_order += 1
-
-        budget = Presupuesto(
-            codigo=f"{project.codigo}-P01" if project.codigo else None,
-            revision=int(project.revision or 0),
-            descripcion=product_meta.get("descripcion_corta") or product.titulo,
-            estado="En Elaboración",
-            moneda=product.moneda or "USD",
-            iva_aplicado=Decimal("15.00"),
-            proyecto_id=project.id,
-            empresa_id=buyer.empresa_id,
-        )
-        db.add(budget)
-        db.flush()
-
-        for index, row in enumerate(rubros, start=1):
-            chapter_name = (row.get("capitulo") or "").strip() or "General"
-            edt_node = chapter_map.get(chapter_name) or root_node
-            quantity = Decimal(str(row.get("cantidad") or 1))
-            unit_price = Decimal(str(row.get("precio_u") or row.get("precio_total") or 0))
-            total_price = Decimal(str(row.get("precio_total") or 0))
-            if quantity <= 0:
-                quantity = Decimal("1")
-            if unit_price <= 0 and total_price > 0:
-                unit_price = total_price
-
-            detail_notes = []
-            if row.get("codigo"):
-                detail_notes.append(f"Código fuente: {row.get('codigo')}")
-            if analysis.get("source_files"):
-                source_preview = ", ".join(
-                    [item.get("filename") for item in list(analysis.get("source_files") or [])[:2] if item.get("filename")]
-                )
-                if source_preview:
-                    detail_notes.append(f"Fuentes: {source_preview}")
-            elif analysis.get("source_filename"):
-                detail_notes.append(f"Fuente: {analysis.get('source_filename')}")
-
-            detail = PresupuestoDetalle(
-                presupuesto_id=budget.id,
-                apu_id=None,
-                parent_id=None,
-                tipo="portal_importado",
-                edt_id=edt_node.id,
-                codigo_item=row.get("nro") or f"R-{index:03d}",
-                descripcion=row.get("descripcion") or f"Rubro importado {index}",
-                unidad=canonicalize_unit_symbol(row.get("unidad") or "u"),
-                cantidad=quantity,
-                precio_unitario=unit_price,
-                precio_total=total_price,
-                orden=index,
-                notas="\n".join(detail_notes) if detail_notes else None,
-                tanteo_activo=False,
-            )
-            db.add(detail)
-
-        db.flush()
-        calculate_presupuesto_totals(db, budget)
-        db.flush()
-        return budget
 
     def _fulfill_public_procurement_portal(self, db: Session, product: MarketplaceProduct, buyer: Usuario):
         preview = self._extract_product_preview(product)
@@ -3066,79 +3033,43 @@ class MarketplaceCheckoutService:
             db.flush()
             return "proyecto", cloned_project.id
 
-        project_code = self._generate_project_code(db, buyer.empresa_id)
-        project_name = (
-            delivery_preview.get("project_delivery", {}).get("project_name")
-            or f"Adquirido · {product.titulo}"
+        raise HTTPException(
+            status_code=409,
+            detail="La entrega de un proyecto Marketplace requiere un proyecto fuente materializado con Base de Proyecto y APUs.",
         )
 
-        project = Proyecto(
-            nombre=project_name,
-            codigo=project_code,
-            codigo_root=project_code,
-            revision=0,
-            descripcion=self._build_portal_project_description(product, product_meta, portal_meta),
-            estado="Planificación",
-            fecha_inicio=self._parse_iso_date(portal_meta.get("fecha_inicio_licitacion")),
-            fecha_fin_estimada=self._parse_iso_date(portal_meta.get("fecha_fin_licitacion")),
-            presupuesto_estimado=Decimal(str(portal_meta.get("precio_licitacion") or product.precio or 0)),
-            moneda=product.moneda,
-            empresa_id=buyer.empresa_id,
-            cliente_id=None,
-            base_trabajo_id=None if policy.get("project_without_base", True) else None,
-            plantillas_config={
-                "marketplace_delivery": {
-                    "product_id": product.id,
-                    "product_type": product.product_type,
-                    "template_version": portal_meta.get("template_version"),
-                    "processing_status": portal_meta.get("processing_status"),
-                    "delivery_mode": portal_meta.get("delivery_mode"),
-                    "import_analysis": dict(portal_meta.get("import_analysis") or {}),
-                    "origin_label": f"Marketplace: {product.titulo}",
-                },
-                "portal_compras_publicas": {
-                    "import_source": dict(portal_meta.get("import_source") or {}),
-                    "project_delivery_policy": policy,
-                    "delivery_preview": delivery_preview,
-                },
-                "marketplace_flags": {
-                    "acquired": True,
-                    "send_locked": bool(policy.get("project_send_locked", True)),
-                    "without_base": bool(policy.get("project_without_base", True)),
-                },
-            },
-        )
-        db.add(project)
-        db.flush()
-        self._seed_portal_project_detail(
-            db,
-            project=project,
-            buyer=buyer,
-            product=product,
-            product_meta=product_meta,
-            portal_meta=portal_meta,
-        )
-        budget = self._seed_portal_project_budget(
-            db,
-            project=project,
-            buyer=buyer,
-            product=product,
-            product_meta=product_meta,
-            portal_meta=portal_meta,
-        )
-        if isinstance(project.plantillas_config, dict):
-            delivery = project.plantillas_config.get("marketplace_delivery") or {}
-            delivery["budget_seeded"] = budget is not None
-            delivery["budget_id"] = budget.id if budget else None
-            delivery["budget_lines"] = len(list((portal_meta.get("import_analysis") or {}).get("rubros") or []))
-            project.plantillas_config["marketplace_delivery"] = delivery
-            db.add(project)
-            db.flush()
-        return "proyecto", project.id
-
-    def _fulfill_product(self, db: Session, product: MarketplaceProduct, buyer: Usuario, apu_target_base_id: int | None):
+    def _fulfill_product(
+        self,
+        db: Session,
+        product: MarketplaceProduct,
+        buyer: Usuario,
+        apu_target_base_id: int | None,
+        *,
+        marketplace_order_id: int | None = None,
+        marketplace_order_item_id: int | None = None,
+    ):
         if product.product_kind == "manual" and product.product_type == "licencia":
-            return self._fulfill_license_product(db, product, buyer)
+            return self._fulfill_license_product(
+                db,
+                product,
+                buyer,
+                marketplace_order_id=marketplace_order_id,
+                marketplace_order_item_id=marketplace_order_item_id,
+            )
+
+        if product.product_kind == "manual":
+            preview = self._extract_product_preview(product)
+            product_meta = dict(preview.get("product_meta") or {})
+            delivery_kind = str(product_meta.get("delivery_kind") or "").strip().lower()
+            if "saas_right" in delivery_kind:
+                self._validate_product_base_plan(db, product, buyer.empresa_id)
+                return self._fulfill_saas_right_product(
+                    db,
+                    product,
+                    buyer,
+                    marketplace_order_id=marketplace_order_id,
+                    marketplace_order_item_id=marketplace_order_item_id,
+                )
 
         if product.product_kind == "manual" and product.product_type == "portal_compras_publicas":
             return self._fulfill_public_procurement_portal(db, product, buyer)
@@ -3202,6 +3133,8 @@ class MarketplaceCheckoutService:
             product = products_by_id.get(line["product_id"])
             if not product:
                 raise HTTPException(status_code=400, detail="Uno o más productos no están disponibles para compra.")
+
+            self._validate_product_base_plan(db, product, current_user.empresa_id)
 
             sales_config = self._extract_sales_config(product)
             quantity = int(line["quantity"])
@@ -3274,7 +3207,6 @@ class MarketplaceCheckoutService:
             product = line["product"]
             quantity = line["quantity"]
             for _ in range(quantity):
-                delivered_type, delivered_id = self._fulfill_product(db, product, current_user, payload.apu_target_base_id)
                 item = MarketplaceOrderItem(
                     order_id=order.id,
                     product_id=product.id,
@@ -3283,12 +3215,23 @@ class MarketplaceCheckoutService:
                     product_type_snapshot=product.product_type,
                     source_type_snapshot=product.source_type,
                     source_id_snapshot=product.source_id,
-                    delivered_entity_type=delivered_type,
-                    delivered_entity_id=delivered_id,
+                    delivered_entity_type=None,
+                    delivered_entity_id=None,
                     price=product.precio,
                 )
                 db.add(item)
                 db.flush()
+                delivered_type, delivered_id = self._fulfill_product(
+                    db,
+                    product,
+                    current_user,
+                    payload.apu_target_base_id,
+                    marketplace_order_id=order.id,
+                    marketplace_order_item_id=item.id,
+                )
+                item.delivered_entity_type = delivered_type
+                item.delivered_entity_id = delivered_id
+                db.add(item)
 
                 if delivered_type and delivered_id and delivered_type != "empresa_licencia":
                     origin_metadata = {
@@ -3341,6 +3284,12 @@ class MarketplaceCheckoutService:
             },
             processed_at=datetime.now(timezone.utc),
         ))
+        license_notification_service.queue_purchase_formalized(
+            db,
+            order,
+            buyer=current_user,
+            payment_method=payment_attempt.payment_method,
+        )
 
         db.commit()
         db.refresh(order)

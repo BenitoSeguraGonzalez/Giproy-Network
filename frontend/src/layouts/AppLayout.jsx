@@ -7,15 +7,12 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import api from '../api/axiosConfig';
-import { routeRequiresCompanyContext, withoutTenant } from '../api/tenant';
+import adminGlobalApi from '../api/adminGlobal';
+import { routeRequiresCompanyContext } from '../api/tenant';
 import systemAnnouncementsApi from '../api/systemAnnouncements';
+import licenseNotificationsApi from '../api/licenseNotifications';
 import adminMaintenanceApi from '../api/adminMaintenance';
-import {
-    readPortableWorkspaceOverride,
-    resolvePortableWorkspace,
-    writePortableWorkspaceOverride
-} from '../utils/portableWorkspace';
+import transferenciasApi from '../api/transferencias';
 import {
     LayoutDashboard,
     Settings as SettingsIcon,
@@ -26,13 +23,15 @@ import {
     AlertCircle,
     Building2,
     HardDrive,
+    RadioTower,
     X as CloseIcon
 } from 'lucide-react';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
 import { getMarketplaceOwnershipTone } from '../components/marketplace/MarketplaceOriginBadgeSet';
 import { applyTrimmedPaste } from '../utils/pasteSanitizer';
-import { getLicenseBannerMessage, getLicenseBannerTone } from '../utils/licenseStatusUi';
+import { getLicenseBannerMessage, getLicenseBannerTone, getLicenseStatusLabel, getLicenseStatusTone } from '../utils/licenseStatusUi';
+import { getCompanyDisplayName } from '../utils/companyDisplayName';
 import GiproyIconGradient from '../assets/GiproyIconGradient.svg';
 import GiproyWordmarkWhite from '../assets/GiproyWordmarkWhite.png';
 
@@ -58,21 +57,32 @@ const AppLayout = ({ children }) => {
     const [showResWarning, setShowResWarning] = useState(false);
     const [browserWindowSize, setBrowserWindowSize] = useState(() => readBrowserWindowSize());
     const [announcementQueue, setAnnouncementQueue] = useState([]);
+    const [licenseNotificationQueue, setLicenseNotificationQueue] = useState([]);
+    const [transferSignal, setTransferSignal] = useState({ total: 0, nuevos: 0 });
     const [activeMaintenance, setActiveMaintenance] = useState(null);
     const [viewport, setViewport] = useState({
         width: typeof window !== 'undefined' ? window.innerWidth : 1920,
         height: typeof window !== 'undefined' ? window.innerHeight : 1080
     });
     const isSuperadmin = user?.rol?.toLowerCase() === 'superadministrador';
+    const roleKey = user?.rol?.toLowerCase();
+    const canSeeTransferSignal = ['superadministrador', 'administrador'].includes(roleKey);
+    const hasNewTransferSignal = transferSignal.nuevos > 0;
     const companySelectorRef = useRef(null);
-    const [forcedPortableWorkspace, setForcedPortableWorkspace] = useState(() => readPortableWorkspaceOverride());
-    const isPortableWorkspace = resolvePortableWorkspace({
-        width: viewport.width,
-        height: viewport.height,
-        forced: isSuperadmin && forcedPortableWorkspace
-    });
+    const isPortableWorkspace = false;
     const activeBaseOrigin = useMarketplaceOrigin('base_trabajo', selectedBaseTrabajo?.id);
     const activeBaseTone = getMarketplaceOwnershipTone(activeBaseOrigin);
+    const activeLicenseName = String(
+        licenseInfo?.licencia_actual
+        || licenseInfo?.commercial_capabilities?.license?.nombre
+        || licenseInfo?.license_name
+        || ''
+    ).trim();
+    const activeLicenseLabel = activeLicenseName || (selectedEmpresa ? 'Licencia no resuelta' : 'Sin empresa activa');
+    const activeLicenseStatusLabel = licenseInfo ? getLicenseStatusLabel(licenseInfo) : 'Sin licencia';
+    const activeLicenseStatusTone = licenseInfo ? getLicenseStatusTone(licenseInfo) : 'border-zinc-200 bg-zinc-50 text-zinc-500';
+    const selectedEmpresaLabel = getCompanyDisplayName(selectedEmpresa, 'Global');
+    const tenantContentKey = `empresa-operativa:${selectedEmpresa?.id ?? 'sin-empresa'}`;
     
     // Bloqueo 1: Superadmin sin empresa contexto
     const shouldBlockByContext = isSuperadmin && !selectedEmpresa && routeRequiresCompanyContext(location.pathname);
@@ -143,23 +153,14 @@ const AppLayout = ({ children }) => {
         setShowResWarning((prev) => (prev ? prev : true));
     }, [browserWindowSize.width, browserWindowSize.height]);
 
-    useEffect(() => {
-        const syncOverride = () => setForcedPortableWorkspace(readPortableWorkspaceOverride());
-        window.addEventListener('storage', syncOverride);
-        window.addEventListener('giproy:portable-workspace-changed', syncOverride);
-        return () => {
-            window.removeEventListener('storage', syncOverride);
-            window.removeEventListener('giproy:portable-workspace-changed', syncOverride);
-        };
-    }, []);
-
     const currentAnnouncement = announcementQueue[0] || null;
+    const currentLicenseNotification = licenseNotificationQueue[0] || null;
 
     useEffect(() => {
         if (isSuperadmin) {
-            api.get('/empresas/', withoutTenant())
-                .then(res => setEmpresas(res.data))
-                .catch(err => console.error("Error cargando empresas:", err));
+            adminGlobalApi.getEmpresas()
+                .then(data => setEmpresas(data || []))
+                .catch(err => globalThis.reportClientError?.("Error cargando empresas:", err));
         }
     }, [isSuperadmin, setEmpresas]);
 
@@ -196,13 +197,77 @@ const AppLayout = ({ children }) => {
                 setAnnouncementQueue(nextQueue);
                 sessionStorage.setItem(shownKey, '1');
             } catch (error) {
-                console.error('Error cargando comunicados activos:', error);
+                globalThis.reportClientError?.('Error cargando comunicados activos:', error);
                 setAnnouncementQueue([]);
             }
         };
 
         loadAnnouncements();
     }, [user, selectedEmpresa?.id, loginSessionId]);
+
+    useEffect(() => {
+        if (!user) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setLicenseNotificationQueue(prev => prev.length > 0 ? [] : prev);
+            return;
+        }
+
+        let isMounted = true;
+
+        const loadLicenseNotifications = async () => {
+            try {
+                const data = await licenseNotificationsApi.getMine();
+                const nextQueue = Array.isArray(data?.items) ? data.items : [];
+                if (isMounted) {
+                    setLicenseNotificationQueue(nextQueue);
+                }
+            } catch (error) {
+                if (isMounted) {
+                    setLicenseNotificationQueue([]);
+                }
+            }
+        };
+
+        loadLicenseNotifications();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [user, loginSessionId]);
+
+    useEffect(() => {
+        if (!canSeeTransferSignal) {
+            setTransferSignal((current) => (
+                current.total === 0 && current.nuevos === 0 ? current : { total: 0, nuevos: 0 }
+            ));
+            return undefined;
+        }
+
+        let isMounted = true;
+        const loadTransferSignal = async () => {
+            try {
+                const data = await transferenciasApi.getTraySummary(selectedEmpresa?.id ?? null);
+                if (!isMounted) return;
+                const metrics = data?.metrics || {};
+                setTransferSignal({
+                    total: Number(data?.total ?? metrics.recibidos ?? 0) || 0,
+                    nuevos: Number(metrics.nuevos ?? 0) || 0,
+                });
+            } catch (error) {
+                if (isMounted) {
+                    setTransferSignal({ total: 0, nuevos: 0 });
+                }
+            }
+        };
+
+        loadTransferSignal();
+        const intervalId = window.setInterval(loadTransferSignal, 30000);
+
+        return () => {
+            isMounted = false;
+            window.clearInterval(intervalId);
+        };
+    }, [canSeeTransferSignal, selectedEmpresa?.id, user?.id]);
 
     useEffect(() => {
         if (!currentAnnouncement || currentAnnouncement.display_duration_seconds == null) return undefined;
@@ -230,7 +295,7 @@ const AppLayout = ({ children }) => {
                     setActiveMaintenance(data?.is_active_now ? data : null);
                 }
             } catch (error) {
-                console.error('Error cargando mantenimiento activo:', error);
+                globalThis.reportClientError?.('Error cargando mantenimiento activo:', error);
                 if (isMounted) {
                     setActiveMaintenance(null);
                 }
@@ -267,6 +332,47 @@ const AppLayout = ({ children }) => {
                 return 'Advertencia';
             default:
                 return 'Informativo';
+        }
+    };
+
+    const licenseNotificationTone = (severity) => {
+        switch (severity) {
+            case 'warning':
+                return 'border-orange-200 bg-orange-50 text-[#A55A00]';
+            case 'error':
+            case 'critical':
+                return 'border-red-200 bg-red-50 text-red-700';
+            case 'success':
+                return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+            default:
+                return 'border-blue-200 bg-blue-50 text-[#136191]';
+        }
+    };
+
+    const licenseNotificationLabel = (type) => {
+        switch (type) {
+            case 'license_welcome':
+                return 'Licencia';
+            case 'purchase_formalized':
+                return 'Compra';
+            case 'purchase_lifecycle_ended':
+                return 'Fin de compra';
+            default:
+                return 'Aviso';
+        }
+    };
+
+    const closeLicenseNotification = async () => {
+        const notification = currentLicenseNotification;
+        if (!notification) return;
+        setLicenseNotificationQueue((current) => current.slice(1));
+        if (notification.payload?.display_once === false) {
+            return;
+        }
+        try {
+            await licenseNotificationsApi.acknowledge(notification.id);
+        } catch (error) {
+            setLicenseNotificationQueue((current) => [notification, ...current]);
         }
     };
 
@@ -345,6 +451,46 @@ const AppLayout = ({ children }) => {
                 </div>
             )}
 
+            {currentLicenseNotification && (
+                <div className={`border-b border-zinc-200 bg-white ${isPortableWorkspace ? 'px-4 py-2' : 'px-6 py-3'}`}>
+                    <div className={`mx-auto max-w-[1800px] rounded-2xl border ${isPortableWorkspace ? 'px-3 py-2' : 'px-4 py-3'} ${licenseNotificationTone(currentLicenseNotification.severity)}`}>
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="min-w-0 flex-1">
+                                <div className={`flex flex-wrap items-center gap-2 ${isPortableWorkspace ? 'mb-0.5' : 'mb-1'}`}>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                                        {licenseNotificationLabel(currentLicenseNotification.notification_type)}
+                                    </span>
+                                    <span className="inline-flex items-center rounded-full border border-current/20 bg-white/50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em]">
+                                        Comunicacion interna
+                                    </span>
+                                    {currentLicenseNotification.action_label ? (
+                                        <span className="inline-flex items-center rounded-full border border-current/20 bg-white/50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em]">
+                                            {currentLicenseNotification.action_label}
+                                        </span>
+                                    ) : null}
+                                </div>
+                                <div className={`${isPortableWorkspace ? 'text-[12px]' : 'text-sm'} font-black uppercase tracking-tight`}>
+                                    {currentLicenseNotification.title || currentLicenseNotification.subject}
+                                </div>
+                                {isPortableWorkspace ? null : (
+                                    <div className="mt-1 text-sm font-medium leading-relaxed opacity-90">
+                                        {currentLicenseNotification.body}
+                                    </div>
+                                )}
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeLicenseNotification}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-current/20 bg-white/50 text-current hover:bg-white/70 transition-colors"
+                                title="Cerrar aviso"
+                            >
+                                <CloseIcon className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {activeMaintenance && (
                 <div className={`border-b border-zinc-200 bg-white ${isPortableWorkspace ? 'px-4 py-2' : 'px-6 py-3'}`}>
                     <div className={`mx-auto max-w-[1800px] rounded-2xl border ${isPortableWorkspace ? 'px-3 py-2' : 'px-4 py-3'} ${activeMaintenance.mode === 'restricted' ? 'border-red-200 bg-red-50 text-red-700' : 'border-orange-200 bg-orange-50 text-[#A55A00]'}`}>
@@ -366,7 +512,7 @@ const AppLayout = ({ children }) => {
             )}
 
             {/* Encabezado / Navbar Industrial — Persistente en todas las páginas */}
-            <nav className={`${isPortableWorkspace ? 'h-14 px-4' : 'h-20 px-8'} bg-white border-b border-zinc-200 flex items-center justify-between sticky top-0 z-50`}>
+            <nav className={`${isPortableWorkspace ? 'h-14 px-4' : 'h-20 px-8'} bg-white border-b border-zinc-200 flex items-center justify-between sticky top-0 z-[500]`}>
                 <div className={`flex items-center ${isPortableWorkspace ? 'gap-3' : 'gap-6'} min-w-0`}>
                     {/* Branding Principal (Fijo) */}
                     <div
@@ -403,8 +549,8 @@ const AppLayout = ({ children }) => {
                                     Contexto Operativo
                                 </span>
                                 <div className="flex items-center gap-2 w-full mt-0.5">
-                                    <h2 className={`${isPortableWorkspace ? 'text-[10px]' : 'text-[11px]'} font-black uppercase tracking-tight text-zinc-800 truncate leading-none`} title={selectedEmpresa?.nombre || 'Global'}>
-                                        {selectedEmpresa?.nombre || 'Global'}
+                                    <h2 className={`${isPortableWorkspace ? 'text-[10px]' : 'text-[11px]'} font-black uppercase tracking-tight text-zinc-800 truncate leading-none`} title={selectedEmpresaLabel}>
+                                        {selectedEmpresaLabel}
                                     </h2>
                                     {isSuperadmin && (
                                         <div ref={companySelectorRef} className="relative flex-shrink-0">
@@ -416,7 +562,7 @@ const AppLayout = ({ children }) => {
                                             >
                                                 Empresa <ChevronRight className={`transition-transform ${showCompanySelector ? 'rotate-90' : ''} ${isPortableWorkspace ? 'w-2.5 h-2.5' : 'w-2 h-2'}`} />
                                             </button>
-                                            <div className={`absolute top-full left-0 mt-2 w-64 bg-white border border-zinc-100 shadow-2xl rounded-2xl p-4 transition-all z-[100] ${showCompanySelector ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
+                                            <div className={`absolute top-full left-0 mt-2 w-64 bg-white border border-zinc-100 shadow-2xl rounded-2xl p-4 transition-all z-[520] ${showCompanySelector ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
                                                 <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-3 border-b border-zinc-50 pb-2">Cambiar Empresa (Auditoría)</p>
                                                 <div className="space-y-1 max-h-60 overflow-y-auto">
                                                     {empresas.map(emp => (
@@ -429,13 +575,27 @@ const AppLayout = ({ children }) => {
                                                             }}
                                                             className={`w-full text-left px-3 py-2.5 rounded-xl text-[10px] font-bold uppercase transition-all flex items-center justify-between ${selectedEmpresa?.id === emp.id ? 'bg-[#1A1A1A] text-white shadow-lg' : 'hover:bg-zinc-50 text-zinc-600'}`}
                                                         >
-                                                            {emp.nombre}
+                                                            {getCompanyDisplayName(emp)}
                                                             {selectedEmpresa?.id === emp.id && <ShieldCheck className="w-3 h-3 text-[#F39200]" />}
                                                         </button>
                                                     ))}
                                                 </div>
                                             </div>
                                         </div>
+                                    )}
+                                </div>
+                                <div className={`flex items-center gap-1.5 w-full ${isPortableWorkspace ? 'mt-0.5' : 'mt-1'}`}>
+                                    <ShieldCheck className={`${isPortableWorkspace ? 'h-2.5 w-2.5' : 'h-3 w-3'} flex-shrink-0 text-[#F39200]`} />
+                                    <span
+                                        className={`${isPortableWorkspace ? 'text-[7px]' : 'text-[8px]'} font-black uppercase tracking-[0.14em] text-[#F39200] truncate leading-none`}
+                                        title={`Licencia activa: ${activeLicenseLabel} · ${activeLicenseStatusLabel}`}
+                                    >
+                                        Licencia activa: {activeLicenseLabel}
+                                    </span>
+                                    {licenseInfo && !isPortableWorkspace && (
+                                        <span className={`inline-flex flex-shrink-0 rounded-full border px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] ${activeLicenseStatusTone}`}>
+                                            {activeLicenseStatusLabel}
+                                        </span>
                                     )}
                                 </div>
                             </div>
@@ -540,21 +700,32 @@ const AppLayout = ({ children }) => {
                         </div>
                     </div>
 
-                    {['superadministrador', 'administrador'].includes(user?.rol?.toLowerCase()) && (
+                    {canSeeTransferSignal && (
                         <div className={`flex items-center ${isPortableWorkspace ? 'gap-1' : 'gap-2'}`}>
-                            {isSuperadmin && (
-                                <button
-                                    onClick={() => writePortableWorkspaceOverride(!(isSuperadmin && forcedPortableWorkspace))}
-                                    className={`${isPortableWorkspace ? 'px-2 py-2 text-[8px]' : 'px-3 py-2.5 text-[9px]'} rounded-xl border transition-colors font-black uppercase tracking-[0.14em] ${
-                                        isSuperadmin && forcedPortableWorkspace
-                                            ? 'border-[#F39200] bg-orange-50 text-[#F39200]'
-                                            : 'border-zinc-200 bg-white text-zinc-500 hover:border-[#F39200]/40 hover:text-[#F39200]'
-                                    }`}
-                                    title="Forzar modo portátil para diseño y pruebas"
-                                >
-                                    Portátil
-                                </button>
-                            )}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    navigate('/servicios/envios-transferencias?bandeja=entrada');
+                                    window.dispatchEvent(new CustomEvent('giproy:transfer-signal-opened'));
+                                }}
+                                className={`${isPortableWorkspace ? 'h-9 w-9' : 'h-10 w-10'} group relative inline-flex items-center justify-center rounded-xl border bg-white shadow-sm transition-all hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 ${
+                                    hasNewTransferSignal
+                                        ? 'border-emerald-300 text-emerald-700 shadow-[0_0_0_4px_rgba(16,185,129,0.12),0_12px_28px_rgba(16,185,129,0.24)] ring-2 ring-emerald-300/70 animate-pulse'
+                                        : 'border-zinc-200 text-zinc-600'
+                                }`}
+                                title={`Nuevos envios pendientes: ${transferSignal.nuevos}`}
+                                aria-label={`Nuevos envios pendientes: ${transferSignal.nuevos}`}
+                                data-testid="transfer-header-signal"
+                            >
+                                <span className="relative inline-flex">
+                                    <RadioTower className={`${isPortableWorkspace ? 'h-4 w-4' : 'h-5 w-5'}`} />
+                                </span>
+                                {hasNewTransferSignal && (
+                                    <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 px-1 text-[10px] font-black leading-none text-white shadow-[0_4px_10px_rgba(16,185,129,0.35)]">
+                                        {transferSignal.nuevos}
+                                    </span>
+                                )}
+                            </button>
                             {isSuperadmin && (
                                 <button
                                     onClick={() => navigate('/admin-global')}
@@ -642,7 +813,11 @@ const AppLayout = ({ children }) => {
                             </div>
                         </div>
                     </div>
-                ) : children}
+                ) : (
+                    <div key={tenantContentKey} data-tenant-content-key={tenantContentKey} className="contents">
+                        {children}
+                    </div>
+                )}
                 {isRestrictedMaintenance && (
                     <div className="absolute inset-0 z-40 bg-black/45 backdrop-blur-[2px] flex items-center justify-center p-8">
                         <div className="w-full max-w-2xl bg-white border border-red-200 rounded-[2rem] p-8">

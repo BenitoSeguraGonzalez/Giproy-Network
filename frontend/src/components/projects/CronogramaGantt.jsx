@@ -1,10 +1,10 @@
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { AlertCircle, ArrowDown, ArrowUp, BarChart3, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeftRight, ChevronsRight, Diamond, Download, History, Link2, Loader2, Lock, LockOpen, Maximize2, Pencil, Route, RotateCcw, RotateCw, Settings, SlidersHorizontal, TimerReset, Trash2, Upload, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { AlertCircle, ArrowDown, ArrowUp, BarChart3, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeftRight, ChevronsRight, CircleCheck, CircleX, Diamond, Download, Gauge, History, Link2, Loader2, Lock, LockOpen, Maximize2, Pencil, Pin, PinOff, Route, RotateCcw, RotateCw, Settings, SlidersHorizontal, TimerReset, Trash2, TriangleAlert, Upload, X, ZoomIn, ZoomOut } from 'lucide-react';
 import ClearSearchField from '../ui/ClearSearchField';
 import AppHint from '../ui/AppHint';
-import GanttParetoModal from './GanttParetoModal';
+import ProjectSegmentedSwitch from './ProjectSegmentedSwitch';
 import { ControlRail, ControlRailDivider, ControlRailIconButton, ControlRailSection, ControlRailTooltip } from '../ui/ControlRail';
 import GridColumnManager, { useGridColumnSettings } from './GridColumnManager';
 import { includesNormalized } from '../../utils/normalizeSearch';
@@ -18,7 +18,7 @@ import { GIPROY_BUDGET_PRODUCTIVITY_UPDATED_EVENT } from '../../utils/cronograma
 import { normalizeDescriptionCapitalization, normalizeDisplayUnit, normalizeSubcategoryDisplay } from '../../utils/descriptionCapitalization';
 import { multiplyDecimalNumber, roundDecimalNumber } from '../../utils/decimalNumbers';
 import { formatoCantidad } from '../../utils/math';
-import { resolveApuLineOperationalUnitPrice, resolveApuLineSimulatedSubtotal } from '../../utils/operationalNumbers';
+import { resolveApuLineOperationalUnitPrice, resolveApuLineSimulatedSubtotal, resolveLockedOperationalResourceValues } from '../../utils/operationalNumbers';
 import { resolveApuLineUnitDescription } from '../../utils/unitOptions';
 import {
     buildGanttSplitPeriodSlots,
@@ -49,6 +49,7 @@ import {
 import { resolveBackendCriticalPathMembership, resolveCriticalEdgeKeys } from './cronogramasGanttCriticalPath';
 import { buildDeferredZoomViewport, clampGanttZoom } from './cronogramasGanttZoom';
 import { buildVirtualRowMetrics, resolveTimelineVirtualWindow, resolveVerticalVirtualWindow } from './cronogramasGanttVirtualization';
+import { buildGanttApuPlanningSignals } from './cronogramasGanttApuPlanning';
 import { clampMoveDayDeltaToBounds, isTaskBarDraggable, resolveSubbarClickSelection, resolveSubbarPointerSelection } from './cronogramasGanttInteraction';
 import { applyManualMilestoneDependencyLagUpdates, buildTaskMoveGuideModel, resolveGhostSubbarVisuals, resolveTaskMoveGuideAnchors } from './cronogramasGanttDragPreview';
 import { normalizeManualMilestonesConfig } from './cronogramasGanttManualMilestones';
@@ -56,6 +57,8 @@ import AnimatedSelect from '../ui/AnimatedSelect';
 import AnimatedDateInput from '../ui/AnimatedDateInput';
 import MotionScrollbar from '../ui/MotionScrollbar';
 import SoftSelectToggle from '../ui/SoftSelectToggle';
+
+const GanttParetoModal = React.lazy(() => import('./GanttParetoModal'));
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_GRID_COLUMN_WIDTHS = [76, 108, 336, 156, 92, 126, 156, 102, 186, 118, 118];
@@ -109,6 +112,7 @@ const GANTT_TASK_ROW_HEIGHT_PX = 74;
 const GANTT_GRID_HEADER_HEIGHT_PX = 54;
 const GANTT_HORIZONTAL_SCROLLBAR_RESERVED_PX = 24;
 const GANTT_VERTICAL_SCROLLBAR_BODY_TOP_PX = GANTT_GRID_HEADER_HEIGHT_PX + 24;
+const GANTT_WORKSPACE_MIN_HEIGHT_PX = 260;
 const GANTT_PROJECT_BOUNDARY_MIN_AIR_PX = 96;
 const GANTT_CONFIRMED_SNAPSHOT_KEY = 'gantt_confirmed_snapshot_v1';
 const GANTT_CONFIRMED_HISTORY_KEY = 'gantt_confirmed_history_v1';
@@ -116,6 +120,12 @@ const GANTT_PENDING_APPROVAL_KEY = 'gantt_pending_approval_v1';
 const GANTT_UNCONSTRAINED_SCHEDULE_KEY = 'gantt_unconstrained_schedule_v1';
 const GANTT_RESOURCE_PENDING_APPROVAL_KEY = 'gantt_resource_pending_approval_v1';
 const GANTT_RESOURCE_DRAFTS_KEY = 'gantt_resource_drafts_v1';
+const GANTT_RESOURCE_WORK_POLICY_KEY = 'gantt_resource_work_policy_v1';
+const GANTT_RESOURCE_SOURCE_LINES_DRAFTS_KEY = 'gantt_resource_source_lines_drafts_v1';
+const GANTT_RESOURCE_QUANTITY_DRAFTS_KEY = 'gantt_resource_quantity_drafts_v1';
+const GANTT_RESOURCE_EDITOR_MODAL_Z_INDEX = 640;
+const APU_OPERATIONAL_RESOURCES_METADATA_KEY = 'apu_operational_resources_v1';
+const APU_RESOURCE_MODIFICATIONS_CONFIG_KEY = 'apu_resource_modifications_v1';
 const GANTT_GOVERNANCE_OVERRIDE_KEY = 'gantt_governance_override_v1';
 const GANTT_CPM_TRACE_KEY = 'gantt_cpm_trace_v1';
 const GANTT_PERFORMANCE_DECIMALS = 4;
@@ -213,6 +223,7 @@ const GANTT_CPM_NAVIGATOR_MODE_STYLES = {
     },
 };
 const GANTT_DURATION_POLICY_MESSAGE = 'La duración ya no se edita directamente en el Gantt. Si necesitas cambiarla, debes hacerlo desde el editor de recursos/rendimientos del APU operativo de la línea en Presupuesto. Los cambios de fecha, secuencia o dependencias siguen siendo de programación y no modifican presupuesto.';
+const GANTT_PERIOD_ACTION_LABELS = ['Periodo seleccionado', 'Generar periodos', 'Generar periodos iniciales', 'Dividir periodo activo'];
 const GANTT_SCHEDULE_DRAFT_KEYS = new Set(['start_date', 'predecessors', 'dependencies', 'end_date']);
 const GANTT_RESOURCE_DRAFT_KEYS = new Set(['duration', 'assumed_resource_units']);
 // La edición canónica de dependencias sigue viviendo en "Predecesoras",
@@ -230,11 +241,11 @@ const RESOURCE_CATEGORIES = [
 const VISIBLE_RESOURCE_CATEGORY_IDS = new Set(RESOURCE_CATEGORIES.map((category) => category.id));
 const GOVERNING_RESOURCE_CATEGORY_IDS = new Set([1, 4]);
 const GOVERNING_RESOURCE_PRIORITIES = {
-    equipo_maquinaria: 1,
-    mano_obra_especializada: 2,
-    mano_obra_semiespecializada: 3,
-    mano_obra_no_especializada: 4,
-    herramientas: 5,
+    mano_obra_especializada: 1,
+    mano_obra_semiespecializada: 2,
+    mano_obra_no_especializada: 3,
+    equipo_maquinaria: 10,
+    herramientas: 11,
     materiales: 99,
     transporte: 99,
 };
@@ -251,18 +262,64 @@ const GOVERNING_RESOURCE_CATEGORY_LABELS = {
     1: 'Equipos y Herramientas',
     4: 'Mano de Obra',
 };
-const GANTT_RESOURCE_DISPLAY_MODES = [
+const GANTT_RESOURCE_TRACE_STYLES = {
+    anidado: {
+        descriptionClassName: 'text-[#8A6A2A]',
+        unitClassName: 'text-[#8A6A2A]',
+        badgeClassName: 'text-[#8A6A2A]',
+        badgeLabel: 'Anidado',
+    },
+    consolidado: {
+        descriptionClassName: 'text-sky-700',
+        unitClassName: 'text-sky-700',
+        badgeClassName: 'text-sky-700',
+        badgeLabel: 'Consolidado',
+    },
+    directo: {
+        descriptionClassName: 'text-zinc-700',
+        unitClassName: 'text-zinc-500',
+        badgeClassName: 'text-zinc-400',
+        badgeLabel: 'Directo',
+    },
+};
+const GANTT_RESOURCE_WORK_POLICIES = [
     {
-        id: 'apu',
-        label: 'APU',
-        helperText: 'Vista base del APU operativo. No modifica duración ni persistencia.',
+        value: 'fixed',
+        label: 'Fijo',
+        helperText: 'Mantiene el trabajo relativo y recalcula el rendimiento al ajustar cantidades.',
     },
     {
-        id: 'budget_line',
-        label: 'Presupuesto',
-        helperText: 'Vista analítica usando la cantidad de presupuesto. Solo afecta la lectura visual del modal.',
+        value: 'variable',
+        label: 'Variable',
+        helperText: 'Permite variar rendimiento y trabajo relativo; el costo operativo puede cambiar.',
     },
 ];
+
+const GanttApuWorkPolicyHint = () => (
+    <div className="space-y-2 text-left">
+        <div>
+            <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">Modo Trabajo</p>
+            <p className="mt-1 text-[11px] font-bold leading-snug text-zinc-700">
+                Define que se conserva cuando cambias cantidades del APU operativo desde el Gantt.
+            </p>
+        </div>
+        <div className="rounded-[0.8rem] border border-emerald-100 bg-emerald-50 px-2 py-1.5">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-emerald-800">Fijo</p>
+            <p className="mt-0.5 text-[10px] font-semibold leading-snug text-emerald-900">
+                Conserva el trabajo total de la partida. Si ajustas cantidades, el sistema recalcula el rendimiento para que el costo operativo no cambie.
+            </p>
+        </div>
+        <div className="rounded-[0.8rem] border border-sky-100 bg-sky-50 px-2 py-1.5">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-sky-800">Variable</p>
+            <p className="mt-0.5 text-[10px] font-semibold leading-snug text-sky-900">
+                Permite que el trabajo cambie con la cantidad/rendimiento. El tiempo y el costo operativo pueden variar según los recursos visibles.
+            </p>
+        </div>
+        <p className="text-[9px] font-semibold leading-snug text-zinc-500">
+            Por defecto: APUs con anidados usan Fijo; APUs sin anidados usan Variable.
+        </p>
+    </div>
+);
 const GANTT_DURATION_DISPLAY_UNITS = [
     { id: 'hour', label: 'Horas', shortLabel: 'Horas', unitSuffix: 'h', helperText: 'Vista homogénea en horas operativas.' },
     { id: 'day', label: 'Días', shortLabel: 'Días', unitSuffix: 'd', helperText: 'Vista homogénea en días de trabajo del Gantt.' },
@@ -474,7 +531,7 @@ const parseResourceCategoryFromCode = (value) => {
 };
 
 const resolveResourceCategoryId = (line, resource) => {
-    if (line?.apu_hijo_id || resource?.apu_hijo_id || resource?.isApu) return 5;
+    if (line?.apu_hijo_id || resource?.apu_hijo_id || resource?.isApu) return 2;
     const directCategory = Number(line?.categoria_id || resource?.categoria_id || 0);
     if (Number.isFinite(directCategory) && directCategory >= 1 && directCategory <= 5) {
         return directCategory;
@@ -1125,6 +1182,191 @@ const formatCurrency = (value, currency = 'USD', decimals = 2) => new Intl.Numbe
     maximumFractionDigits: decimals,
 }).format(Number(value || 0));
 
+const APU_PLANNING_SIGNAL_PRESENTATION = {
+    ok: {
+        label: 'OK',
+        Icon: CircleCheck,
+        chipClassName: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+        iconClassName: 'text-emerald-600',
+    },
+    review: {
+        label: 'Revisar',
+        Icon: TriangleAlert,
+        chipClassName: 'border-amber-200 bg-amber-50 text-amber-800',
+        iconClassName: 'text-amber-600',
+    },
+    error: {
+        label: 'Inconsistente',
+        Icon: CircleX,
+        chipClassName: 'border-rose-200 bg-rose-50 text-rose-700',
+        iconClassName: 'text-rose-600',
+    },
+    unavailable: {
+        label: 'Sin datos',
+        Icon: AlertCircle,
+        chipClassName: 'border-zinc-200 bg-zinc-100 text-zinc-600',
+        iconClassName: 'text-zinc-500',
+    },
+};
+
+const GanttApuPlanningSignalsPanel = ({
+    model,
+    pinned = false,
+    currency = 'USD',
+    moneyDecimals = 2,
+    onTogglePinned,
+    onPointerEnter,
+    onPointerLeave,
+}) => {
+    const overallPresentation = APU_PLANNING_SIGNAL_PRESENTATION[model?.overallStatus]
+        || APU_PLANNING_SIGNAL_PRESENTATION.unavailable;
+    const OverallIcon = overallPresentation.Icon;
+    const metrics = model?.metrics || {};
+    const unit = model?.activity?.unit || 'u';
+    const metricRows = model?.available ? [
+        {
+            label: 'Capacidad',
+            values: [
+                ['Ciclo gobernante', formatNumber(metrics.governingCycle, 4), `h/${unit}`],
+                ['Factor plan', formatNumber(metrics.planningFactor * 100, 2), '%'],
+                ['Producción teórica', formatNumber(metrics.theoreticalProduction, 4), `${unit}/h`],
+                ['Producción plan', formatNumber(metrics.plannedProduction, 4), `${unit}/h`],
+                ['Duración neta', formatNumber(metrics.netDurationHours, 4), 'h'],
+                ['Duración plan', formatNumber(metrics.plannedDurationDays, 4), 'd'],
+            ],
+        },
+        {
+            label: 'Recursos',
+            values: [
+                ['Trabajo MO neto', formatNumber(metrics.laborNetHours, 4), 'HH'],
+                ['Trabajo MO plan', formatNumber(metrics.laborPlannedHours, 4), 'HH'],
+                ['Cuadrilla nominal', formatNumber(metrics.nominalCrew, 2), 'pers.'],
+                ['Cuadrilla equivalente', formatNumber(metrics.equivalentCrew, 2), 'pers.'],
+                ['Carga de cuadrilla', formatNumber(metrics.crewLoad * 100, 2), '%'],
+                ['Equipos plan', formatNumber(metrics.equipmentPlannedHours, 4), 'EH'],
+            ],
+        },
+        {
+            label: 'Costo unitario',
+            values: [
+                ['Directo exacto', formatCurrency(metrics.exactDirectUnitCost, currency, moneyDecimals), ''],
+                ['Directo plan', formatCurrency(metrics.plannedDirectUnitCost, currency, moneyDecimals), ''],
+                ['Precio plan', formatCurrency(metrics.plannedUnitPrice, currency, moneyDecimals), ''],
+                ['Indirectos', formatNumber(metrics.indirectPercentage, 2), '%'],
+            ],
+        },
+    ] : [];
+
+    return (
+        <section
+            id="gantt-apu-planning-signals-panel"
+            data-testid="gantt-apu-planning-signals-panel"
+            className="flex max-h-full flex-col overflow-hidden rounded-[1rem] border border-zinc-200 bg-white shadow-[0_6px_12px_rgba(15,23,42,0.12)]"
+            onPointerEnter={onPointerEnter}
+            onPointerLeave={onPointerLeave}
+            aria-label="Semáforos de planificación del APU seleccionado"
+        >
+            <div className="flex items-start justify-between gap-3 border-b border-zinc-200 px-4 py-3">
+                <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Gauge className="h-4 w-4 shrink-0 text-[#136191]" />
+                        <h3 className="text-[12px] font-black text-zinc-900">Semáforos APU</h3>
+                        <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[9px] font-black ${overallPresentation.chipClassName}`}>
+                            <OverallIcon className="h-3 w-3" />
+                            {overallPresentation.label}
+                        </span>
+                    </div>
+                    <p className="mt-1 truncate text-[11px] font-semibold text-zinc-600">
+                        {model?.activity?.code ? `${model.activity.code} · ` : ''}
+                        {model?.activity?.description || 'Selecciona una actividad calculable vinculada a un APU.'}
+                    </p>
+                    {model?.available ? (
+                        <p className="mt-1 text-[10px] font-medium text-zinc-500">
+                            Gobierna: <span className="font-bold text-zinc-700">{model.activity.governingResourceName}</span>
+                            {model.activity.governingCandidateCount > 1 ? ` · ${model.activity.governingCandidateCount} candidatos` : ''}
+                        </p>
+                    ) : null}
+                </div>
+                <button
+                    type="button"
+                    onClick={onTogglePinned}
+                    className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[0.75rem] border px-2.5 text-[9px] font-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/35 ${
+                        pinned
+                            ? 'border-[#F39200]/45 bg-[#fff7ed] text-[#F39200]'
+                            : 'border-zinc-200 bg-white text-zinc-600 hover:border-[#136191]/35 hover:text-[#136191]'
+                    }`}
+                    aria-pressed={pinned}
+                >
+                    {pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                    {pinned ? 'Desacoplar' : 'Fijar'}
+                </button>
+            </div>
+
+            <div className="gantt-dark-scrollbar min-h-0 overflow-y-auto px-4 py-3">
+                {!model?.available ? (
+                    <div className="flex items-start gap-2 rounded-[0.85rem] bg-zinc-100 px-3 py-3 text-zinc-700">
+                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-zinc-500" />
+                        <p className="text-[11px] font-semibold leading-relaxed">
+                            {model?.reason || 'No hay información suficiente para calcular los indicadores.'}
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="space-y-3">
+                            {metricRows.map((group) => (
+                                <div key={group.label}>
+                                    <div className="mb-1.5 flex items-center gap-2">
+                                        <span className="text-[10px] font-black text-zinc-800">{group.label}</span>
+                                        <span className="h-px flex-1 bg-zinc-200" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                        {group.values.map(([label, value, valueUnit]) => (
+                                            <div key={label} className="flex min-w-0 items-baseline justify-between gap-2 py-1">
+                                                <span className="truncate text-[9px] font-semibold text-zinc-500">{label}</span>
+                                                <span className="shrink-0 text-[10px] font-black tabular-nums text-zinc-900">
+                                                    {value}{valueUnit ? <span className="ml-1 text-[8px] text-zinc-500">{valueUnit}</span> : null}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-3 border-t border-zinc-200 pt-3">
+                            <div className="mb-2 flex items-center justify-between gap-2">
+                                <span className="text-[10px] font-black text-zinc-800">Validaciones</span>
+                                <span className="text-[9px] font-semibold text-zinc-500">{model.validations.length} controles</span>
+                            </div>
+                            <div className="space-y-1.5">
+                                {model.validations.map((validation) => {
+                                    const presentation = APU_PLANNING_SIGNAL_PRESENTATION[validation.status]
+                                        || APU_PLANNING_SIGNAL_PRESENTATION.unavailable;
+                                    const ValidationIcon = presentation.Icon;
+                                    return (
+                                        <div key={validation.id} className="flex items-start gap-2 rounded-[0.75rem] bg-zinc-50 px-2.5 py-2">
+                                            <ValidationIcon className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${presentation.iconClassName}`} />
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="text-[9px] font-black text-zinc-800">{validation.label}</span>
+                                                    <span className={`shrink-0 text-[8px] font-black ${presentation.iconClassName}`}>
+                                                        {presentation.label}
+                                                    </span>
+                                                </div>
+                                                <p className="mt-0.5 text-[8px] font-medium leading-relaxed text-zinc-500">{validation.detail}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
+        </section>
+    );
+};
+
 const formatOperationalDuration = (durationDays, config = {}) => {
     const safeDays = Math.max(0, Number(durationDays || 0));
     const dailyHours = Math.max(1, Number(config?.jornada_laboral_horas || 8));
@@ -1614,8 +1856,14 @@ const GanttResourceEditorModal = ({
     const [collapsedCategories, setCollapsedCategories] = useState({});
     const [resourceDrafts, setResourceDrafts] = useState({});
     const [resourceInputValues, setResourceInputValues] = useState({});
+    const [resourceQuantityDrafts, setResourceQuantityDrafts] = useState({});
+    const [resourceSourceLineDrafts, setResourceSourceLineDrafts] = useState({});
+    const [resourceWorkPolicies, setResourceWorkPolicies] = useState({});
+    const [resourceContributionModal, setResourceContributionModal] = useState(null);
+    const activeResourceInputRef = useRef(null);
+    const cancelledResourceInputRef = useRef(null);
+    const shouldSkipCancelledResourceInput = (inputKey) => cancelledResourceInputRef.current === inputKey;
     const [governancePickerOpen, setGovernancePickerOpen] = useState(false);
-    const [resourceDisplayMode, setResourceDisplayMode] = useState('apu');
     const [subcontractDurationInput, setSubcontractDurationInput] = useState('');
     const [subcontractTypeMenuOpen, setSubcontractTypeMenuOpen] = useState(false);
     const subcontractDraft = useMemo(() => ({
@@ -1719,11 +1967,6 @@ const GanttResourceEditorModal = ({
 
     useEffect(() => {
         if (!open) return;
-        setResourceDisplayMode('apu');
-    }, [open, row?.budget_line_id, row?.linea_id]);
-
-    useEffect(() => {
-        if (!open) return;
         setSubcontractTypeMenuOpen(false);
         setSubcontractDurationInput(
             resolveSubcontractDurationInputValue(effectiveRow || row, subcontractDraft, config, subcontractDisplayUnit)
@@ -1736,7 +1979,6 @@ const GanttResourceEditorModal = ({
     const budgetQuantity = Number(row?.cantidad || 0);
     const valoradoImpact = buildGanttResourceEditorImpactPreview(row, effectiveRow, valorado, config);
     const apuCostModel = resolveGanttCostModel(row, {});
-    const apuCostPreview = resolveGanttCostPreview(row, {}, effectiveRow);
     const currentUnits = String(effectiveRow?.recursos_asumidos ?? row?.recursos_asumidos ?? row?.recursos_calculados ?? 1);
     const quantityUnitLabel = resolveApuLineUnitDescription({ unidad: row?.unidad }, 'u') || 'u';
     const moneyDecimals = valorado?.dec_moneda ?? 2;
@@ -1759,33 +2001,21 @@ const GanttResourceEditorModal = ({
         fallbackIndirectPercent,
     ].find((value) => value !== null && value !== undefined && Number.isFinite(value) && value >= 0) ?? 0;
     const indirectFactor = Math.max(0, resolvedIndirectPercent) / 100;
-    const baseLinePrice = Number(apuCostPreview?.baseLineCost ?? apuCostModel?.line_direct_cost ?? row?.precio_total ?? 0);
-    const visibleLinePrice = Number(apuCostPreview?.visibleLineCost ?? baseLinePrice);
-    const visibleUnitPrice = Number(row?.cantidad || 0) > 0 ? (visibleLinePrice / Number(row?.cantidad || 0)) : baseUnitPrice;
-    const visibleTemporalPrice = Number(apuCostPreview?.visibleTemporalCost ?? apuCostModel?.time_dependent_cost ?? 0);
-    const roundedVisibleDirectUnitPrice = roundDecimalNumber(visibleUnitPrice || 0, moneyDecimals);
-    const totalApuUnitPrice = roundDecimalNumber(
-        multiplyDecimalNumber(
-            [visibleUnitPrice || 0, 1 + indirectFactor],
-            { decimals: 6 }
-        ),
-        moneyDecimals
-    );
-    const indirectUnitPrice = Math.max(
-        0,
-        roundDecimalNumber(totalApuUnitPrice - roundedVisibleDirectUnitPrice, moneyDecimals)
-    );
-    const visibleBudgetPrice = Math.max(
-        0,
-        roundDecimalNumber(
-            multiplyDecimalNumber([budgetQuantity || 0, totalApuUnitPrice || 0], { decimals: 6 }),
-            moneyDecimals
-        )
-    );
-    const priceDelta = Number(apuCostPreview?.totalDelta ?? 0);
     const apuLines = apuState.data?.lineas || [];
     const persistedResourceDrafts = useMemo(
         () => getPersistedResourceDrafts(row, effectiveRow),
+        [effectiveRow, row]
+    );
+    const persistedResourceQuantityDrafts = useMemo(
+        () => getPersistedResourceQuantityDrafts(row, effectiveRow),
+        [effectiveRow, row]
+    );
+    const persistedResourceSourceLineDrafts = useMemo(
+        () => getPersistedResourceSourceLineDrafts(row, effectiveRow),
+        [effectiveRow, row]
+    );
+    const persistedResourceWorkPolicies = useMemo(
+        () => getPersistedResourceWorkPolicies(row, effectiveRow),
         [effectiveRow, row]
     );
     const normalizeResourceLabel = (value) => {
@@ -1799,7 +2029,61 @@ const GanttResourceEditorModal = ({
         return 'Sin descripción';
     };
 
-    const resourceLines = apuLines.map((line) => {
+    const operationalResourcesSnapshot = useMemo(() => {
+        const metadata = {
+            ...(row?.metadata || {}),
+            ...(effectiveRow?.metadata || {}),
+        };
+        const snapshot = metadata?.[APU_OPERATIONAL_RESOURCES_METADATA_KEY];
+        return snapshot && typeof snapshot === 'object' && Array.isArray(snapshot.resources)
+            ? snapshot
+            : null;
+    }, [effectiveRow, row]);
+    const operationalSnapshotResources = operationalResourcesSnapshot?.resources || [];
+    const shouldUseOperationalSnapshotResources = operationalSnapshotResources.length > 0
+        && Boolean(operationalResourcesSnapshot?.has_nested);
+
+    const resourceLines = shouldUseOperationalSnapshotResources ? operationalSnapshotResources.map((resource, index) => {
+        const label = normalizeResourceLabel(resource?.descripcion ?? resource?.codigo);
+        const cantidad = parsePositiveNumber(resource?.cantidad) ?? 0;
+        const rendimiento = parsePositiveNumber(resource?.rendimiento_equivalente ?? resource?.rendimiento) ?? null;
+        const timeHours = parsePositiveNumber(resource?.trabajo_relativo) ?? (rendimiento ? cantidad * rendimiento : 0);
+        const budgetProjectedQuantity = cantidad * budgetQuantity;
+        const sourceLine = {
+            id: resource?.id || `operational-resource-${index}`,
+            recurso_id: resource?.recurso_id ?? null,
+            recurso: {
+                id: resource?.recurso_id ?? null,
+                codigo: resource?.codigo || '',
+                descripcion: label,
+                precio: resource?.precio_unitario ?? 0,
+                unidad: resource?.unidad || '',
+                categoria_id: resource?.categoria_id ?? null,
+            },
+            cantidad,
+            rendimiento,
+            precio: resource?.precio_unitario ?? 0,
+            source_lines: Array.isArray(resource?.source_lines) ? resource.source_lines : [],
+        };
+        return {
+            id: resource?.id || `operational-resource-${index}`,
+            label,
+            typeLabel: 'Recurso',
+            cantidad,
+            rendimiento,
+            unidad: normalizeDisplayUnit(resource?.unidad || row?.unidad || ''),
+            categoryId: Number(resource?.categoria_id || 0) || resolveResourceCategoryId(sourceLine, sourceLine.recurso),
+            subcategory: null,
+            governingResourceKind: resource?.governing_resource_kind || '',
+            timeHours,
+            budgetProjectedQuantity,
+            governingWorkHours: rendimiento ? budgetProjectedQuantity * rendimiento : 0,
+            sourceLine,
+            source_lines: Array.isArray(resource?.source_lines) ? resource.source_lines : [],
+            trabajoRelativo: timeHours,
+            resourceTraceType: resource?.origin || '',
+        };
+    }) : apuLines.map((line) => {
         const resource = line?.recurso || line?.apu_hijo || null;
         const label = normalizeResourceLabel(resource?.descripcion ?? resource ?? line?.descripcion);
         const typeLabel = line?.recurso ? 'Recurso' : (line?.apu_hijo ? 'APU hijo' : 'Insumo');
@@ -1831,32 +2115,96 @@ const GanttResourceEditorModal = ({
         () => resourceLines.filter((item) => collectionHas(VISIBLE_RESOURCE_CATEGORY_IDS, item.categoryId)),
         [resourceLines]
     );
+    const hasExplodedNestedApu = useMemo(
+        () => visibleResourceLines.some((item) => {
+            const lines = buildGanttResourceSourceLines(item);
+            return lines.length > 1 || lines.some((sourceLine) => Boolean(sourceLine.nested));
+        }),
+        [visibleResourceLines]
+    );
+    const defaultApuWorkPolicy = hasExplodedNestedApu ? 'fixed' : 'variable';
+    const persistedApuWorkPolicy = resolveGanttApuWorkPolicy(persistedResourceWorkPolicies, defaultApuWorkPolicy);
 
     useEffect(() => {
         if (!open) return;
         const nextDrafts = {};
         const nextInputValues = {};
+        const nextQuantityDrafts = {};
+        const nextSourceLineDrafts = {};
+        const nextWorkPolicies = {};
+        const activeInputKey = activeResourceInputRef.current;
         visibleResourceLines.forEach((item) => {
-            const activeValue = parsePositiveNumber(persistedResourceDrafts[item.id]) ?? item.rendimiento ?? null;
+            const sourceLines = orderGanttSourceLinesParentFirst(
+                (persistedResourceSourceLineDrafts[item.id] || buildGanttResourceSourceLines(item))
+                    .map((sourceLine) => normalizeGanttSourceLine(sourceLine))
+            );
+            const summary = summarizeGanttSourceLines(sourceLines);
+            const activeQuantity = parsePositiveNumber(persistedResourceQuantityDrafts[item.id]) ?? summary.quantity ?? item.cantidad ?? 0;
+            const activeValue = parsePositiveNumber(persistedResourceDrafts[item.id])
+                ?? (activeQuantity > 0 && summary.work > 0 ? summary.work / activeQuantity : null)
+                ?? item.rendimiento
+                ?? null;
+            nextQuantityDrafts[item.id] = activeQuantity;
+            nextSourceLineDrafts[item.id] = sourceLines;
+            nextWorkPolicies[item.id] = persistedApuWorkPolicy;
             nextDrafts[item.id] = activeValue;
-            nextInputValues[item.id] = activeValue ? formatoCantidad(activeValue, GANTT_PERFORMANCE_DECIMALS) : '';
+            nextInputValues[item.id] = activeInputKey?.startsWith('rendimiento:')
+                && activeInputKey === `rendimiento:${item.id}`
+                ? resourceInputValues[item.id] ?? ''
+                : activeValue ? formatoCantidad(activeValue, GANTT_PERFORMANCE_DECIMALS) : '';
+            if (activeInputKey?.startsWith('cantidad:') && activeInputKey === `cantidad:${item.id}`) {
+                nextQuantityDrafts[item.id] = resourceQuantityDrafts[item.id] ?? activeQuantity;
+            }
         });
         setResourceDrafts(nextDrafts);
         setResourceInputValues(nextInputValues);
-    }, [open, persistedResourceDrafts, visibleResourceLines]);
+        setResourceQuantityDrafts(nextQuantityDrafts);
+        setResourceSourceLineDrafts(nextSourceLineDrafts);
+        setResourceWorkPolicies(nextWorkPolicies);
+    }, [open, persistedApuWorkPolicy, persistedResourceDrafts, persistedResourceQuantityDrafts, persistedResourceSourceLineDrafts, visibleResourceLines]);
 
     const activeResourceLines = useMemo(() => (
         visibleResourceLines.map((item) => {
+            const sourceLines = orderGanttSourceLinesParentFirst(
+                (resourceSourceLineDrafts[item.id] || buildGanttResourceSourceLines(item))
+                    .map((sourceLine) => normalizeGanttSourceLine(sourceLine))
+            );
+            const sourceSummary = summarizeGanttSourceLines(sourceLines);
+            const hasNestedSource = sourceLines.some((sourceLine) => Boolean(sourceLine.nested));
+            const resourceTraceType = sourceLines.length > 1
+                ? 'consolidado'
+                : hasNestedSource
+                    ? 'anidado'
+                    : 'directo';
+            const activeQuantity = parsePositiveNumber(resourceQuantityDrafts[item.id]) ?? sourceSummary.quantity ?? item.cantidad ?? 0;
+            const activeWorkPolicy = normalizeGanttResourceWorkPolicy(resourceWorkPolicies[item.id], persistedApuWorkPolicy);
+            const lockedValues = item.lockRendimiento || activeWorkPolicy === 'fixed'
+                ? resolveLockedOperationalResourceValues(
+                    { ...item, source_lines: sourceLines, trabajoRelativo: sourceSummary.work },
+                    activeQuantity
+                )
+                : null;
             const draftRendimiento = parsePositiveNumber(resourceDrafts[item.id]);
-            const activeRendimiento = draftRendimiento ?? item.rendimiento ?? null;
-            const activeTimeHours = activeRendimiento ? item.cantidad * activeRendimiento : 0;
+            const activeRendimiento = lockedValues?.rendimiento
+                ?? draftRendimiento
+                ?? (activeQuantity > 0 && sourceSummary.work > 0 ? sourceSummary.work / activeQuantity : null)
+                ?? item.rendimiento
+                ?? null;
+            const activeTimeHours = lockedValues?.trabajoRelativo ?? (activeRendimiento ? activeQuantity * activeRendimiento : 0);
             const unitPrice = resolveApuLineOperationalUnitPrice(item.sourceLine, { moneyDecimals });
             const totalPrice = resolveApuLineSimulatedSubtotal(item.sourceLine, {
                 moneyDecimals,
+                cantidad: activeQuantity,
                 rendimiento: activeRendimiento ?? 1,
             });
             return {
                 ...item,
+                cantidad: activeQuantity,
+                source_lines: sourceLines,
+                resourceTraceType,
+                lockRendimiento: item.lockRendimiento || activeWorkPolicy === 'fixed',
+                workPolicy: activeWorkPolicy,
+                trabajoRelativo: sourceSummary.work,
                 draftRendimiento: activeRendimiento,
                 activeTimeHours,
                 activeGoverningWorkHours: activeRendimiento ? item.budgetProjectedQuantity * activeRendimiento : 0,
@@ -1864,7 +2212,37 @@ const GanttResourceEditorModal = ({
                 totalPrice,
             };
         })
-    ), [budgetQuantity, moneyDecimals, resourceDrafts, visibleResourceLines]);
+    ), [moneyDecimals, persistedApuWorkPolicy, resourceDrafts, resourceQuantityDrafts, resourceSourceLineDrafts, resourceWorkPolicies, visibleResourceLines]);
+
+    const resourceDirectUnitPrice = activeResourceLines.reduce(
+        (acc, item) => acc + Number(item.totalPrice || 0),
+        0
+    );
+    const visibleUnitPrice = resourceDirectUnitPrice > 0 ? resourceDirectUnitPrice : baseUnitPrice;
+    const roundedVisibleDirectUnitPrice = roundDecimalNumber(visibleUnitPrice || 0, moneyDecimals);
+    const totalApuUnitPrice = roundDecimalNumber(
+        multiplyDecimalNumber(
+            [visibleUnitPrice || 0, 1 + indirectFactor],
+            { decimals: 6 }
+        ),
+        moneyDecimals
+    );
+    const indirectUnitPrice = Math.max(
+        0,
+        roundDecimalNumber(totalApuUnitPrice - roundedVisibleDirectUnitPrice, moneyDecimals)
+    );
+    const officialBudgetLineTotal = Math.max(
+        0,
+        Number(
+            selectedBudgetDetail?.precio_total
+            ?? row?.precio_total
+            ?? apuCostModel?.official_budget_line_total
+            ?? multiplyDecimalNumber([
+                budgetQuantity || 0,
+                selectedBudgetDetail?.precio_unitario ?? row?.precio_unitario ?? totalApuUnitPrice ?? 0,
+            ], { decimals: 6 })
+        ) || 0
+    );
 
     const groupedResourceLines = RESOURCE_CATEGORIES.map((category) => {
         const items = activeResourceLines.filter((item) => item.categoryId === category.id);
@@ -1894,18 +2272,14 @@ const GanttResourceEditorModal = ({
             totalPrice,
         };
     });
-    const resourceDisplayModeMeta = GANTT_RESOURCE_DISPLAY_MODES.find((item) => item.id === resourceDisplayMode) || GANTT_RESOURCE_DISPLAY_MODES[0];
-    const isBudgetDisplayMode = resourceDisplayMode === 'budget_line';
-    const resourceQuantityValueLabel = isBudgetDisplayMode ? 'Cantidad presupuesto' : 'Cantidad APU';
-    const getResourceDisplayQuantity = useCallback((item) => (
-        resourceDisplayMode === 'budget_line' ? Number(item.budgetProjectedQuantity || 0) : item.cantidad
-    ), [resourceDisplayMode]);
+    const activeApuWorkPolicy = resolveGanttApuWorkPolicy(resourceWorkPolicies, persistedApuWorkPolicy);
+    const activeApuWorkPolicyMeta = GANTT_RESOURCE_WORK_POLICIES.find((item) => item.value === activeApuWorkPolicy) || GANTT_RESOURCE_WORK_POLICIES[0];
+    const resourceQuantityValueLabel = 'Cantidad APU';
+    const getResourceDisplayQuantity = useCallback((item) => item.cantidad, []);
     const getResourceDisplayTimeHours = useCallback((item) => {
         if (!collectionHas(GOVERNING_RESOURCE_CATEGORY_IDS, item.categoryId)) return null;
-        return resourceDisplayMode === 'budget_line'
-            ? Number(item.activeGoverningWorkHours || 0)
-            : Number(item.activeTimeHours || 0);
-    }, [resourceDisplayMode]);
+        return Number(item.activeTimeHours || 0);
+    }, []);
     const getCategoryDisplayMaxHours = useCallback((category) => category.subcategories.reduce((maxValue, group) => {
         const groupMax = group.items.reduce((groupAccumulator, item) => {
             const displayHours = getResourceDisplayTimeHours(item);
@@ -1989,23 +2363,10 @@ const GanttResourceEditorModal = ({
         dominantCategoryId,
     ]);
 
-    const governanceManualCategoryOption = useMemo(() => {
-        if (!dominantCategoryId || governanceManualResourceCandidates.length < 2) return null;
-        return {
-            id: `category-${dominantCategoryId}`,
-            categoryId: dominantCategoryId,
-            label: GOVERNING_RESOURCE_CATEGORY_LABELS[dominantCategoryId] || 'Categoría gobernante',
-            governanceKindLabel: 'Selección manual por categoría',
-        };
-    }, [dominantCategoryId, governanceManualResourceCandidates]);
-
     const governanceManualCandidates = useMemo(() => {
         if (governanceManualResourceCandidates.length < 2) return [];
-        return [
-            ...governanceManualResourceCandidates,
-            ...(governanceManualCategoryOption ? [governanceManualCategoryOption] : []),
-        ];
-    }, [governanceManualCategoryOption, governanceManualResourceCandidates]);
+        return governanceManualResourceCandidates;
+    }, [governanceManualResourceCandidates]);
 
     const manualGovernanceCandidate = useMemo(() => {
         if (!persistedGovernanceOverride || governanceManualCandidates.length < 2) return null;
@@ -2129,21 +2490,187 @@ const GanttResourceEditorModal = ({
         onChangeDuration(duration);
     }, [duration, effectiveRow?.dias_calendario, effectiveRow?.dias_utiles, isSubcontracted, onChangeDuration, open, row?.dias_calendario, row?.dias_utiles]);
 
+    const persistResourceContributionDraft = (itemId, sourceLines, policy = activeApuWorkPolicy) => {
+        const normalizedLines = orderGanttSourceLinesParentFirst(
+            (sourceLines || []).map((sourceLine) => normalizeGanttSourceLine(sourceLine))
+        );
+        const summary = summarizeGanttSourceLines(normalizedLines);
+        const normalizedPolicy = normalizeGanttResourceWorkPolicy(policy, activeApuWorkPolicy);
+        const nextRendimiento = summary.performance || null;
+        setResourceSourceLineDrafts((prev) => ({ ...prev, [itemId]: normalizedLines }));
+        setResourceQuantityDrafts((prev) => ({ ...prev, [itemId]: summary.quantity }));
+        setResourceDrafts((prev) => ({ ...prev, [itemId]: nextRendimiento }));
+        setResourceInputValues((prev) => ({
+            ...prev,
+            [itemId]: nextRendimiento ? formatoCantidad(nextRendimiento, GANTT_PERFORMANCE_DECIMALS) : '',
+        }));
+        setResourceWorkPolicies((prev) => {
+            const next = { ...prev };
+            activeResourceLines.forEach((item) => {
+                next[item.id] = normalizedPolicy;
+            });
+            return next;
+        });
+        if (typeof onChangeDraftMetadata === 'function') {
+            const nextSourceLineDrafts = { ...resourceSourceLineDrafts, [itemId]: normalizedLines };
+            const nextQuantityDrafts = { ...resourceQuantityDrafts, [itemId]: summary.quantity };
+            const nextResourceDrafts = { ...persistedResourceDrafts, ...resourceDrafts, [itemId]: nextRendimiento };
+            const nextWorkPolicies = { ...persistedResourceWorkPolicies, ...resourceWorkPolicies };
+            activeResourceLines.forEach((item) => {
+                nextWorkPolicies[item.id] = normalizedPolicy;
+            });
+            onChangeDraftMetadata({
+                [GANTT_RESOURCE_DRAFTS_KEY]: nextResourceDrafts,
+                [GANTT_RESOURCE_QUANTITY_DRAFTS_KEY]: nextQuantityDrafts,
+                [GANTT_RESOURCE_SOURCE_LINES_DRAFTS_KEY]: nextSourceLineDrafts,
+                [GANTT_RESOURCE_WORK_POLICY_KEY]: nextWorkPolicies,
+            });
+        }
+    };
+
+    const handleApuWorkPolicyChange = (policy) => {
+        const normalizedPolicy = normalizeGanttResourceWorkPolicy(policy, activeApuWorkPolicy);
+        setResourceWorkPolicies((prev) => {
+            const next = { ...prev };
+            activeResourceLines.forEach((item) => {
+                next[item.id] = normalizedPolicy;
+            });
+            return next;
+        });
+        if (typeof onChangeDraftMetadata === 'function') {
+            const nextWorkPolicies = { ...persistedResourceWorkPolicies, ...resourceWorkPolicies };
+            activeResourceLines.forEach((item) => {
+                nextWorkPolicies[item.id] = normalizedPolicy;
+            });
+            onChangeDraftMetadata({ [GANTT_RESOURCE_WORK_POLICY_KEY]: nextWorkPolicies });
+        }
+    };
+
+    const openResourceContributionEditor = (item) => {
+        const sourceLines = orderGanttSourceLinesParentFirst(
+            (resourceSourceLineDrafts[item.id] || item.source_lines || buildGanttResourceSourceLines(item))
+                .map((sourceLine) => normalizeGanttSourceLine(sourceLine))
+        );
+        setResourceContributionModal({
+            itemId: item.id,
+            label: item.label,
+            unidad: item.unidad,
+            policy: activeApuWorkPolicy,
+            sourceLines,
+        });
+    };
+
+    const updateContributionSourceLine = (index, field, rawValue) => {
+        setResourceContributionModal((current) => {
+            if (!current) return current;
+            const nextLines = current.sourceLines.map((sourceLine, lineIndex) => {
+                if (lineIndex !== index) return sourceLine;
+                const normalized = parsePositiveNumber(rawValue) ?? 0;
+                if (field === 'cantidad') {
+                    const rendimiento = Number(sourceLine.rendimiento || 0) || 0;
+                    const work = current.policy === 'fixed'
+                        ? Number(sourceLine.trabajo_relativo || 0) || 0
+                        : normalized * rendimiento;
+                    return {
+                        ...sourceLine,
+                        cantidad: normalized,
+                        trabajo_relativo: work,
+                        rendimiento: normalized > 0 && work > 0 ? work / normalized : rendimiento,
+                    };
+                }
+                if (field === 'rendimiento') {
+                    const cantidad = Number(sourceLine.cantidad || 0) || 0;
+                    return {
+                        ...sourceLine,
+                        rendimiento: normalized,
+                        trabajo_relativo: cantidad * normalized,
+                    };
+                }
+                return sourceLine;
+            });
+            return { ...current, sourceLines: nextLines };
+        });
+    };
+
+    const acceptContributionModal = () => {
+        if (!resourceContributionModal) return;
+        persistResourceContributionDraft(resourceContributionModal.itemId, resourceContributionModal.sourceLines, resourceContributionModal.policy);
+        setResourceContributionModal(null);
+    };
+
     const handleRendimientoChange = (itemId, rawValue) => {
         setResourceInputValues((prev) => ({ ...prev, [itemId]: rawValue }));
         const normalized = parsePositiveNumber(rawValue);
         setResourceDrafts((prev) => ({ ...prev, [itemId]: normalized }));
-        if (typeof onChangeDraftMetadata === 'function') {
-            const nextPersistedDrafts = {
-                ...persistedResourceDrafts,
-                [itemId]: normalized,
-            };
-            if (!normalized) {
-                delete nextPersistedDrafts[itemId];
-            }
-            onChangeDraftMetadata({
-                [GANTT_RESOURCE_DRAFTS_KEY]: nextPersistedDrafts,
-            });
+    };
+
+    const handleResourceQuantityEditorOpen = (item) => {
+        openResourceContributionEditor(item);
+    };
+
+    const handleResourceQuantityChange = (itemId, rawValue) => {
+        const normalized = parsePositiveNumber(rawValue);
+        setResourceQuantityDrafts((prev) => ({ ...prev, [itemId]: normalized }));
+    };
+
+    const persistRendimientoDraft = (itemId, normalized) => {
+        if (typeof onChangeDraftMetadata !== 'function') return;
+        const nextPersistedDrafts = {
+            ...persistedResourceDrafts,
+            [itemId]: normalized,
+        };
+        if (!normalized) {
+            delete nextPersistedDrafts[itemId];
+        }
+        onChangeDraftMetadata({
+            [GANTT_RESOURCE_DRAFTS_KEY]: nextPersistedDrafts,
+        });
+    };
+
+    const persistResourceQuantityDraft = (itemId, normalized) => {
+        if (typeof onChangeDraftMetadata !== 'function') return;
+        const nextQuantityDrafts = {
+            ...persistedResourceQuantityDrafts,
+            ...resourceQuantityDrafts,
+            [itemId]: normalized,
+        };
+        if (!normalized) {
+            delete nextQuantityDrafts[itemId];
+        }
+        onChangeDraftMetadata({
+            [GANTT_RESOURCE_QUANTITY_DRAFTS_KEY]: nextQuantityDrafts,
+        });
+    };
+
+    const persistLockedResourceQuantityDraft = (itemId, cantidad, newRendimiento) => {
+        if (typeof onChangeDraftMetadata !== 'function') return;
+        const nextQuantityDrafts = {
+            ...persistedResourceQuantityDrafts,
+            ...resourceQuantityDrafts,
+            [itemId]: cantidad,
+        };
+        const nextResourceDrafts = {
+            ...persistedResourceDrafts,
+            ...resourceDrafts,
+            [itemId]: newRendimiento,
+        };
+        onChangeDraftMetadata({
+            [GANTT_RESOURCE_QUANTITY_DRAFTS_KEY]: nextQuantityDrafts,
+            [GANTT_RESOURCE_DRAFTS_KEY]: nextResourceDrafts,
+        });
+    };
+
+    const handleResourceQuantityBlur = (itemId) => {
+        const normalized = parsePositiveNumber(resourceQuantityDrafts[itemId]);
+        const item = activeResourceLines.find((resource) => resource.id === itemId);
+        const lockedValues = item?.lockRendimiento
+            ? resolveLockedOperationalResourceValues(item, normalized)
+            : null;
+        if (lockedValues) {
+            const newRendimiento = lockedValues.rendimiento;
+            persistLockedResourceQuantityDraft(itemId, lockedValues.cantidad, newRendimiento);
+        } else {
+            persistResourceQuantityDraft(itemId, normalized);
         }
     };
 
@@ -2153,6 +2680,7 @@ const GanttResourceEditorModal = ({
             ...prev,
             [itemId]: normalized ? formatoCantidad(normalized, GANTT_PERFORMANCE_DECIMALS) : '',
         }));
+        persistRendimientoDraft(itemId, normalized);
     };
 
     useEffect(() => {
@@ -2189,14 +2717,14 @@ const GanttResourceEditorModal = ({
     if (!isReady) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[340] flex items-center justify-center bg-slate-950/45 px-3 py-4 backdrop-blur-[2px]">
-            <div className="flex max-h-[92vh] w-[min(96vw,1380px)] flex-col overflow-hidden rounded-[1rem] border border-zinc-200 bg-white shadow-[0_28px_70px_rgba(15,23,42,0.26)]">
-                <div className="flex items-start justify-between gap-3 border-b border-zinc-100 px-4 py-3">
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-950/45 px-2 py-2 backdrop-blur-[2px]" style={{ zIndex: GANTT_RESOURCE_EDITOR_MODAL_Z_INDEX }}>
+            <div className="flex max-h-[96vh] w-[min(97vw,1380px)] flex-col overflow-hidden rounded-[0.85rem] border border-zinc-200 bg-white shadow-[0_28px_70px_rgba(15,23,42,0.26)]">
+                <div className="grid items-center gap-2 border-b border-zinc-100 px-3 py-1.5 lg:grid-cols-[minmax(260px,1fr)_minmax(360px,1.25fr)_auto]">
                     <div className="min-w-0">
-                        <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#F39200]">{isSubcontracted ? 'Duración contractual subcontratada' : 'Rendimientos operativos'}</p>
-                        <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <p className="text-[8px] font-black uppercase tracking-[0.14em] text-[#F39200]">{isSubcontracted ? 'Duración contractual subcontratada' : 'Rendimientos operativos'}</p>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-2">
                             <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#136191]">{row.codigo_item || row.item || 'APU'}</span>
-                            <span className="truncate text-sm font-black text-zinc-900">{formatCronogramaDescripcion(row) || 'Partida'}</span>
+                            <span className="truncate text-[13px] font-black text-zinc-900">{formatCronogramaDescripcion(row) || 'Partida'}</span>
                             {isSubcontracted ? (
                                 <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[8px] font-black tracking-[0.1em] ${persistedDurationDays <= 0.0001 ? 'border-sky-200 bg-sky-50 text-sky-700' : 'border-sky-200 bg-white text-[#136191]'}`}>
                                     Subcontratado
@@ -2204,14 +2732,33 @@ const GanttResourceEditorModal = ({
                             ) : null}
                         </div>
                     </div>
-                    <div className="flex shrink-0 items-center gap-2">
+                    <div className="grid min-w-0 grid-cols-3 gap-1.5">
+                        <div className="min-w-0 rounded-[0.55rem] border border-zinc-200 bg-zinc-50 px-2 py-1">
+                            <p className="truncate text-[6.5px] font-black uppercase tracking-[0.1em] text-zinc-400">Cantidad presupuesto</p>
+                            <p className="mt-0.5 truncate text-[10px] font-black text-zinc-900">
+                                {formatNumber(budgetQuantity || 0, 4)} <span className="text-[7px] text-zinc-500">{quantityUnitLabel}</span>
+                            </p>
+                        </div>
+                        <div className="min-w-0 rounded-[0.55rem] border border-zinc-200 bg-zinc-50 px-2 py-1">
+                            <p className="truncate text-[6.5px] font-black uppercase tracking-[0.1em] text-zinc-400">{isSubcontracted ? 'Duración contractual' : 'Trabajo gobernante'}</p>
+                            <p className="mt-0.5 truncate text-[10px] font-black text-zinc-900">
+                                {formatNumber(duration, 4)} <span className="text-[7px] text-zinc-500">d</span>
+                                {!isSubcontracted ? <span className="ml-1 text-[7px] font-bold text-zinc-500">{formatNumber(workHours, 4)} h</span> : null}
+                            </p>
+                        </div>
+                        <div className="min-w-0 rounded-[0.55rem] border border-zinc-200 bg-zinc-50 px-2 py-1">
+                            <p className="truncate text-[6.5px] font-black uppercase tracking-[0.1em] text-zinc-400">Jornada</p>
+                            <p className="mt-0.5 truncate text-[10px] font-black text-zinc-900">{formatNumber(dailyHours, 2)} <span className="text-[7px] text-zinc-500">h/día</span></p>
+                        </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1.5">
                         <button
                             type="button"
                             onClick={onReset}
                             disabled={saving}
                             title="Restaurar ajustes del modal"
                             aria-label="Restaurar ajustes del modal"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-[0.85rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#136191] hover:bg-[#eff6ff] hover:text-[#136191] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/25 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-[0.75rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#136191] hover:bg-[#eff6ff] hover:text-[#136191] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/25 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <RotateCcw className="h-4.5 w-4.5" />
                         </button>
@@ -2219,9 +2766,9 @@ const GanttResourceEditorModal = ({
                             type="button"
                             onClick={onAccept}
                             disabled={saving}
-                            title="Aceptar cambios"
-                            aria-label="Aceptar cambios"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-[0.85rem] border border-[#F39200] bg-[#F39200] text-white shadow-[0_10px_22px_rgba(243,146,0,0.18)] transition hover:-translate-y-[1px] hover:bg-[#e58300] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/35 disabled:cursor-not-allowed disabled:opacity-60"
+                            title="Guardar borrador operativo del APU"
+                            aria-label="Guardar borrador operativo del APU"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-[0.75rem] border border-[#F39200] bg-[#F39200] text-white shadow-[0_8px_16px_rgba(243,146,0,0.16)] transition hover:-translate-y-[1px] hover:bg-[#e58300] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/35 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {saving ? <Loader2 className="h-4.5 w-4.5 animate-spin" /> : <Check className="h-4.5 w-4.5" />}
                         </button>
@@ -2231,83 +2778,59 @@ const GanttResourceEditorModal = ({
                             disabled={saving}
                             title="Cancelar"
                             aria-label="Cancelar"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-[0.85rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-[0.75rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <X className="h-4.5 w-4.5" />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-4 py-3">
-                    <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)]">
-                        <div className="space-y-3">
-                            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                                <div className="rounded-[0.8rem] border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                    <p className="text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">Cantidad</p>
-                                    <p className="mt-1 text-[12px] font-black text-zinc-900">{formatNumber(row?.cantidad || 0, 4)} <span className="text-[9px] text-zinc-500">{quantityUnitLabel}</span></p>
-                                </div>
-                                <div className={`rounded-[0.8rem] border px-3 py-2 transition ${
-                                    isBudgetDisplayMode
-                                        ? 'border-sky-200 bg-sky-50'
-                                        : 'border-zinc-200 bg-zinc-50'
-                                }`}>
-                                    <p className={`text-[8px] font-black uppercase tracking-[0.14em] ${
-                                        isBudgetDisplayMode ? 'text-sky-700' : 'text-zinc-400'
-                                    }`}>Cantidad presupuesto</p>
-                                    <p className="mt-1 text-[12px] font-black text-zinc-900">
-                                        {formatNumber(budgetQuantity || 0, 4)} <span className="text-[9px] text-zinc-500">{quantityUnitLabel}</span>
-                                    </p>
-                                    <p className={`mt-1 text-[9px] font-bold ${
-                                        isBudgetDisplayMode ? 'text-sky-700' : 'text-zinc-500'
-                                    }`}>
-                                        Referencia visible para el modo presupuesto del modal
-                                    </p>
-                                </div>
-                                <div className="rounded-[0.8rem] border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                    <p className="text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">{isSubcontracted ? 'Duración contractual' : 'Trabajo gobernante'}</p>
-                                    <p className="mt-1 text-[12px] font-black text-zinc-900">{formatNumber(duration, 4)} <span className="text-[9px] text-zinc-500">d</span></p>
-                                    <p className="mt-1 text-[9px] font-bold text-zinc-500">{isSubcontracted ? `Magnitud activa: ${resolveGanttDurationTypePresentation(effectiveRow || row, subcontractDraft, config, subcontractDisplayUnit).label}` : `${formatNumber(workHours, 4)} h efectivas`}</p>
-                                </div>
-                                <div className="rounded-[0.8rem] border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                    <p className="text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">Jornada</p>
-                                    <p className="mt-1 text-[12px] font-black text-zinc-900">{formatNumber(dailyHours, 2)} <span className="text-[9px] text-zinc-500">h/día</span></p>
-                                </div>
-                            </div>
-
-                            <div className="rounded-[0.95rem] border border-zinc-200 bg-white px-3 py-3">
-                                <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex-1 overflow-y-auto px-3 py-1.5">
+                    <div className="grid gap-2 xl:grid-cols-[minmax(0,1fr)]">
+                        <div className="space-y-1.5">
+                            <div className="rounded-[0.75rem] border border-zinc-200 bg-white px-2 py-1.5">
+                                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-100 pb-1.5">
                                     <div className="min-w-0">
-                                        <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-500">{isSubcontracted ? 'Recursos del APU' : 'Recursos operativos'}</p>
-                                        <p className="mt-1 text-[9px] font-semibold leading-relaxed text-zinc-400">
+                                        <p className="text-[8px] font-black uppercase tracking-[0.14em] text-zinc-500">{isSubcontracted ? 'Recursos del APU' : 'Recursos operativos'}</p>
+                                        <p className="mt-0.5 text-[8px] font-semibold leading-tight text-zinc-400">
                                             {isSubcontracted
                                                 ? 'La subcontrata conserva sus insumos de referencia, pero la duración se define manualmente por contrato y no por rendimientos.'
-                                                : resourceDisplayModeMeta.helperText}
+                                                : activeApuWorkPolicyMeta.helperText}
                                         </p>
                                     </div>
-                                    <div className="flex flex-wrap items-center justify-end gap-2">
-                                        <span className="text-[8px] font-bold uppercase tracking-[0.12em] text-zinc-400">
-                                            {visibleResourceLines.length} recurso(s) visibles
-                                        </span>
-                                        <div className="inline-flex rounded-[0.9rem] border border-zinc-200 bg-zinc-50 p-1">
-                                            {GANTT_RESOURCE_DISPLAY_MODES.map((mode) => (
-                                                <button
-                                                    key={`resource-display-mode-${mode.id}`}
-                                                    type="button"
-                                                    onClick={() => setResourceDisplayMode(mode.id)}
-                                                    className={`inline-flex h-8 items-center justify-center rounded-[0.7rem] px-3 text-[9px] font-black uppercase tracking-[0.12em] transition ${
-                                                        resourceDisplayMode === mode.id
-                                                            ? 'bg-white text-[#F39200] shadow-[0_1px_2px_rgba(15,23,42,0.08)]'
-                                                            : 'text-zinc-500 hover:text-zinc-800'
-                                                    }`}
+                                    <div className="flex flex-col items-end gap-1">
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-[7px] font-black uppercase tracking-[0.12em] text-zinc-400">Modo Trabajo</span>
+                                            <AppHint
+                                                content={<GanttApuWorkPolicyHint />}
+                                                tone="light"
+                                                maxWidth={320}
+                                                minWidth={260}
+                                                zIndex={GANTT_RESOURCE_EDITOR_MODAL_Z_INDEX + 20}
+                                                triggerClassName="inline-flex"
+                                                as="span"
+                                            >
+                                                <span
+                                                    role="img"
+                                                    aria-label="Ayuda sobre modo de trabajo"
+                                                    className="inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-400 transition hover:border-[#F39200]/50 hover:text-[#F39200]"
                                                 >
-                                                    {mode.label}
-                                                </button>
-                                            ))}
+                                                    <AlertCircle className="h-3 w-3" />
+                                                </span>
+                                            </AppHint>
                                         </div>
+                                        <ProjectSegmentedSwitch
+                                            value={activeApuWorkPolicy}
+                                            options={GANTT_RESOURCE_WORK_POLICIES}
+                                            onChange={handleApuWorkPolicyChange}
+                                            size="sm"
+                                            minSegmentWidth={58}
+                                            ariaLabel="Modo de trabajo del APU"
+                                        />
                                     </div>
                                 </div>
-                                <div className="relative z-10 mt-3">
-                                    <div className="grid gap-2 xl:grid-cols-[minmax(260px,1.4fr)_118px_132px_132px_118px]">
+                                <div className="relative z-10 mt-1.5">
+                                    <div className="grid gap-1.5 xl:grid-cols-[minmax(260px,1.4fr)_100px_116px_116px_100px]">
                                                 <button
                                             type="button"
                                             onClick={() => {
@@ -2315,7 +2838,7 @@ const GanttResourceEditorModal = ({
                                                 if (governanceManualCandidates.length < 2) return;
                                                 setGovernancePickerOpen((current) => !current);
                                             }}
-                                            className={`flex min-h-[78px] flex-col justify-between rounded-[0.8rem] border px-3 py-2 text-left transition ${
+                                            className={`flex min-h-[50px] flex-col justify-center rounded-[0.65rem] border px-2.5 py-1.5 text-left transition ${
                                                 isSubcontracted
                                                     ? 'border-violet-200 bg-violet-50'
                                                     : governanceManualCandidates.length > 1
@@ -2327,58 +2850,53 @@ const GanttResourceEditorModal = ({
                                             <div className="flex items-start justify-between gap-2">
                                                 <p className={`text-[8px] font-black uppercase tracking-[0.12em] ${isSubcontracted ? 'text-violet-700' : 'text-sky-700'}`}>{isSubcontracted ? 'Contrato' : 'Gobierna'}</p>
                                                 {!isSubcontracted && governanceManualCandidates.length > 1 ? (
-                                                    <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-white px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.1em] text-sky-700">
+                                                    <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-white px-1.5 py-0.5 text-[6.5px] font-black uppercase tracking-[0.08em] text-sky-700">
                                                         {governanceManualCandidates.length} candidatos
                                                         <ChevronDown className={`h-3 w-3 transition ${governancePickerOpen ? 'rotate-180' : ''}`} />
                                                     </span>
                                                 ) : null}
                                             </div>
-                                            <div className="space-y-1">
+                                            <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
                                                 <p className={`truncate text-[10px] font-black leading-tight ${isSubcontracted ? 'text-violet-900' : 'text-sky-900'}`}>
                                                     {isSubcontracted ? 'Subcontratado' : (dominantResource?.label || dominantGovernanceCategory || 'Sin recurso gobernante')}
                                                 </p>
                                                 {isSubcontracted ? (
-                                                    <p className="text-[7px] font-bold leading-tight text-violet-700">
+                                                    <p className="truncate text-[7px] font-bold leading-tight text-violet-700">
                                                         La duración es contractual manual y no se obtiene de rendimientos.
                                                     </p>
                                                 ) : dominantResource?.governanceKindLabel ? (
-                                                    <p className="truncate text-[7px] font-bold uppercase tracking-[0.1em] leading-tight text-sky-700">
+                                                    <p className="truncate text-[7px] font-bold uppercase tracking-[0.08em] leading-tight text-sky-700">
                                                         {dominantResource.governanceKindLabel}
                                                     </p>
                                                 ) : (
-                                                    <p className="text-[7px] font-bold leading-tight text-sky-700">
+                                                    <p className="truncate text-[7px] font-bold leading-tight text-sky-700">
                                                         Duración operativa visible
                                                     </p>
                                                 )}
                                                 {!isSubcontracted && governanceManualCandidates.length > 1 ? (
-                                                    <p className="text-[7px] font-bold leading-tight text-[#F39200]">
-                                                        Categoría gobernante resuelta: puedes elegir manualmente dentro de {GOVERNING_RESOURCE_CATEGORY_LABELS[dominantCategoryId] || 'la categoría activa'}.
+                                                    <p className="truncate text-[7px] font-bold leading-tight text-[#F39200]">
+                                                        Selección manual dentro de {GOVERNING_RESOURCE_CATEGORY_LABELS[dominantCategoryId] || 'la categoría activa'}.
                                                     </p>
                                                 ) : null}
                                             </div>
                                         </button>
-                                    <label className="flex min-h-[78px] flex-col justify-between rounded-[0.8rem] border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                        <span className="text-[8px] font-black uppercase tracking-[0.12em] text-zinc-400">Cuadrilla</span>
+                                    <div className="flex min-h-[50px] flex-col justify-center rounded-[0.65rem] border border-zinc-200 bg-zinc-50 px-2.5 py-1.5">
+                                        <span className="text-[7px] font-black uppercase tracking-[0.1em] text-zinc-400">Cuadrilla</span>
                                         {isSubcontracted ? (
-                                            <p className="text-[0.95rem] font-black leading-none text-zinc-400">—</p>
+                                            <p className="mt-1 text-[12px] font-black leading-none text-zinc-400">—</p>
                                         ) : (
-                                            <input
-                                                type="number"
-                                                min="0.0001"
-                                                step="0.0001"
-                                                value={currentUnits}
-                                                onChange={(event) => {
-                                                    const normalized = parsePositiveNumber(event.target.value);
-                                                    if (normalized) {
-                                                        onChangeResourceUnits(normalized);
-                                                    }
-                                                }}
-                                                className="w-full bg-transparent text-[0.95rem] font-black leading-none text-zinc-900 outline-none"
-                                            />
+                                            <div>
+                                                <p className="mt-1 text-[13px] font-black leading-none text-zinc-900">
+                                                    {formatNumber(currentUnits || 0, 4)}
+                                                </p>
+                                                <p className="mt-0.5 text-[6.5px] font-bold uppercase tracking-[0.08em] text-zinc-400">
+                                                    Calculada
+                                                </p>
+                                            </div>
                                         )}
-                                    </label>
-                                    <label className={`flex min-h-[78px] flex-col justify-between rounded-[0.8rem] border px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ${isSubcontracted ? 'border-violet-200 bg-violet-50' : 'border-emerald-200 bg-emerald-50'}`}>
-                                        <p className={`text-[8px] font-black uppercase tracking-[0.12em] ${isSubcontracted ? 'text-violet-700' : 'text-emerald-700'}`}>{isSubcontracted ? 'Duración contractual' : 'Duración'}</p>
+                                    </div>
+                                    <label className={`flex min-h-[50px] flex-col justify-center rounded-[0.65rem] border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ${isSubcontracted ? 'border-violet-200 bg-violet-50' : 'border-emerald-200 bg-emerald-50'}`}>
+                                        <p className={`text-[7px] font-black uppercase tracking-[0.1em] ${isSubcontracted ? 'text-violet-700' : 'text-emerald-700'}`}>{isSubcontracted ? 'Duración contractual' : 'Duración'}</p>
                                         {isSubcontracted ? (
                                             <input
                                                 type="text"
@@ -2405,14 +2923,14 @@ const GanttResourceEditorModal = ({
                                                     }
                                                 }}
                                                 placeholder={`0 ${resolveGanttDurationTypePresentation(effectiveRow || row, subcontractDraft, config, subcontractDisplayUnit).label}`}
-                                                className="w-full bg-transparent text-[0.95rem] font-black leading-none text-zinc-900 outline-none"
+                                                className="mt-1 w-full bg-transparent text-[13px] font-black leading-none text-zinc-900 outline-none"
                                             />
                                         ) : (
-                                            <p className="text-[0.95rem] font-black leading-none text-zinc-900">{formatNumber(duration, 4)} <span className="text-[9px] text-zinc-500">d</span></p>
+                                            <p className="mt-1 text-[13px] font-black leading-none text-zinc-900">{formatNumber(duration, 4)} <span className="text-[8px] text-zinc-500">d</span></p>
                                         )}
                                     </label>
-                                    <div className="flex min-h-[78px] flex-col justify-between rounded-[0.8rem] border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                        <p className="text-[8px] font-black uppercase tracking-[0.12em] text-zinc-400">{isSubcontracted ? 'Tipo' : 'Rendimiento'}</p>
+                                    <div className="flex min-h-[50px] flex-col justify-center rounded-[0.65rem] border border-zinc-200 bg-zinc-50 px-2.5 py-1.5">
+                                        <p className="text-[7px] font-black uppercase tracking-[0.1em] text-zinc-400">{isSubcontracted ? 'Tipo' : 'Rendimiento'}</p>
                                         {isSubcontracted ? (
                                             <div className="relative">
                                                 <button
@@ -2454,15 +2972,15 @@ const GanttResourceEditorModal = ({
                                                 ) : null}
                                             </div>
                                         ) : (
-                                            <p className="text-[0.95rem] font-black leading-none text-zinc-900">
-                                                {formatNumber(governingPerformance, 4)} <span className="text-[9px] text-zinc-500">h/{quantityUnitLabel}</span>
+                                            <p className="mt-1 text-[13px] font-black leading-none text-zinc-900">
+                                                {formatNumber(governingPerformance, 4)} <span className="text-[8px] text-zinc-500">h/{quantityUnitLabel}</span>
                                             </p>
                                         )}
                                     </div>
-                                    <div className="flex min-h-[78px] flex-col justify-between rounded-[0.8rem] border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                        <p className="text-[8px] font-black uppercase tracking-[0.12em] text-zinc-400">Jornada</p>
-                                        <p className="text-[0.95rem] font-black leading-none text-zinc-900">
-                                            {formatNumber(dailyHours, 2)} <span className="text-[9px] text-zinc-500">h/día</span>
+                                    <div className="flex min-h-[50px] flex-col justify-center rounded-[0.65rem] border border-zinc-200 bg-zinc-50 px-2.5 py-1.5">
+                                        <p className="text-[7px] font-black uppercase tracking-[0.1em] text-zinc-400">Jornada</p>
+                                        <p className="mt-1 text-[13px] font-black leading-none text-zinc-900">
+                                            {formatNumber(dailyHours, 2)} <span className="text-[8px] text-zinc-500">h/día</span>
                                         </p>
                                     </div>
                                     </div>
@@ -2503,7 +3021,6 @@ const GanttResourceEditorModal = ({
                                                 </button>
                                                 {governanceManualCandidates.map((candidate) => {
                                                     const isSelected = String(candidate.id) === String(dominantResourceId) && Boolean(manualGovernanceCandidate);
-                                                    const isCategoryCandidate = String(candidate.id).startsWith('category-');
                                                     return (
                                                         <button
                                                             key={`governance-candidate-${candidate.id}`}
@@ -2524,15 +3041,9 @@ const GanttResourceEditorModal = ({
                                                             <p className="mt-1 truncate text-[8px] font-bold uppercase tracking-[0.08em]">
                                                                 {candidate.governanceKindLabel || 'Sin categoría'}
                                                             </p>
-                                                            {isCategoryCandidate ? (
-                                                                <p className="mt-1 text-[8px] font-semibold text-zinc-500">
-                                                                    Mantiene la prevalencia de categoría sin mezclar equipos.
-                                                                </p>
-                                                            ) : (
-                                                                <p className="mt-1 text-[8px] font-semibold text-zinc-500">
-                                                                    Rendimiento: {formatNumber(candidate.draftRendimiento ?? candidate.rendimiento ?? 0, 4)} h/{quantityUnitLabel} · Trabajo visible: {formatNumber(candidate.activeGoverningWorkHours || 0, 4)} h
-                                                                </p>
-                                                            )}
+                                                            <p className="mt-1 text-[8px] font-semibold text-zinc-500">
+                                                                Rendimiento: {formatNumber(candidate.draftRendimiento ?? candidate.rendimiento ?? 0, 4)} h/{quantityUnitLabel} · Trabajo visible: {formatNumber(candidate.activeGoverningWorkHours || 0, 4)} h
+                                                            </p>
                                                         </button>
                                                     );
                                                 })}
@@ -2612,6 +3123,7 @@ const GanttResourceEditorModal = ({
                                                                         </div>
                                                                         {group.items.map((item) => {
                                                                             const isDominant = item.id === dominantResourceId;
+                                                                            const traceStyle = GANTT_RESOURCE_TRACE_STYLES[item.resourceTraceType] || GANTT_RESOURCE_TRACE_STYLES.directo;
                                                                             const displayQuantity = getResourceDisplayQuantity(item);
                                                                             const displayTimeHours = getResourceDisplayTimeHours(item);
                                                                             const displayUnit = normalizeDisplayUnit(item.unidad || quantityUnitLabel || '') || '—';
@@ -2620,7 +3132,7 @@ const GanttResourceEditorModal = ({
                                                                                     <div className="min-w-0 space-y-0.5">
                                                                                         <p
                                                                                             title={normalizeDescriptionCapitalization(item.label)}
-                                                                                            className={`truncate text-[9px] font-black leading-tight ${isDominant ? 'text-sky-900' : 'text-zinc-700'}`}
+                                                                                            className={`truncate text-[9px] font-black leading-tight ${isDominant ? 'text-sky-900' : traceStyle.descriptionClassName}`}
                                                                                         >
                                                                                             {normalizeDescriptionCapitalization(item.label)}
                                                                                         </p>
@@ -2628,6 +3140,11 @@ const GanttResourceEditorModal = ({
                                                                                             <span className={`truncate text-[7px] font-black uppercase tracking-[0.08em] ${isDominant ? 'text-sky-700' : 'text-zinc-400'}`}>
                                                                                                 {item.typeLabel}
                                                                                             </span>
+                                                                                            {item.resourceTraceType && item.resourceTraceType !== 'directo' ? (
+                                                                                                <span className={`inline-flex rounded-full border border-current/20 bg-white px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] ${traceStyle.badgeClassName}`}>
+                                                                                                    {traceStyle.badgeLabel}
+                                                                                                </span>
+                                                                                            ) : null}
                                                                                             {isDominant ? (
                                                                                                 <span className="inline-flex rounded-full border border-sky-200 bg-white px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] text-sky-700">
                                                                                                     Gobernante
@@ -2635,33 +3152,74 @@ const GanttResourceEditorModal = ({
                                                                                             ) : null}
                                                                                         </div>
                                                                                     </div>
-                                                                                    <span className={`text-center text-[9px] font-black ${isDominant ? 'text-sky-700' : 'text-zinc-500'}`}>
+                                                                                    <span className={`text-center text-[9px] font-black ${isDominant ? 'text-sky-700' : traceStyle.unitClassName}`}>
                                                                                         {displayUnit}
                                                                                     </span>
-                                                                                    <span
-                                                                                        title={isBudgetDisplayMode
-                                                                                            ? `${resourceQuantityValueLabel}: ${formatNumber(displayQuantity || 0, 4)} ${displayUnit === '—' ? '' : displayUnit} | Recurso APU: ${formatNumber(item.cantidad || 0, 4)} ${displayUnit === '—' ? '' : displayUnit}`.trim()
-                                                                                            : `${resourceQuantityValueLabel}: ${formatNumber(displayQuantity || 0, 4)} ${displayUnit === '—' ? '' : displayUnit}`.trim()}
-                                                                                        className={`text-right text-[9px] font-black ${isDominant ? 'text-sky-800' : 'text-zinc-600'}`}
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => handleResourceQuantityEditorOpen(item)}
+                                                                                        onFocus={(event) => {
+                                                                                            activeResourceInputRef.current = `cantidad:${item.id}`;
+                                                                                            if (typeof event.currentTarget.select === 'function') {
+                                                                                                event.currentTarget.select();
+                                                                                            }
+                                                                                        }}
+                                                                                        onKeyDown={(event) => {
+                                                                                            if (event.key === 'Escape') {
+                                                                                                cancelledResourceInputRef.current = `cantidad:${item.id}`;
+                                                                                                activeResourceInputRef.current = null;
+                                                                                                event.currentTarget.blur();
+                                                                                            }
+                                                                                        }}
+                                                                                        title={`${resourceQuantityValueLabel}: ${formatNumber(displayQuantity || 0, 4)} ${displayUnit === '—' ? '' : displayUnit}`.trim()}
+                                                                                        className={`h-8 rounded-[0.75rem] border px-2 text-right text-[9px] font-black transition ${
+                                                                                            isDominant
+                                                                                                ? 'border-sky-200 bg-sky-50 text-sky-800 hover:border-sky-300'
+                                                                                                : 'border-zinc-200 bg-white text-zinc-600 hover:border-[#F39200] hover:text-[#F39200]'
+                                                                                        }`}
                                                                                     >
                                                                                         {formatNumber(displayQuantity || 0, 4)}
-                                                                                    </span>
+                                                                                    </button>
                                                                                     <span className={`text-right text-[9px] font-black ${isDominant ? 'text-sky-800' : 'text-zinc-600'}`}>
                                                                                         {formatCurrency(item.unitPrice || 0, moneyCurrency, moneyDecimals)}
                                                                                     </span>
                                                                                     {!collectionHas(GOVERNING_RESOURCE_CATEGORY_IDS, item.categoryId) ? (
                                                                                         <span className="text-right text-[9px] font-black text-zinc-400">{formatoCantidad(1, GANTT_PERFORMANCE_DECIMALS)}</span>
-                                                                                    ) : collectionHas(editableRendimientoIds, item.id) ? (
+                                                                                    ) : collectionHas(editableRendimientoIds, item.id) && activeApuWorkPolicy === 'variable' ? (
                                                                                         <input
                                                                                             type="text"
                                                                                             inputMode="decimal"
                                                                                             value={resourceInputValues[item.id] ?? ''}
+                                                                                            onFocus={(event) => {
+                                                                                                activeResourceInputRef.current = `rendimiento:${item.id}`;
+                                                                                                event.currentTarget.select();
+                                                                                            }}
                                                                                             onChange={(event) => handleRendimientoChange(item.id, event.target.value)}
-                                                                                            onBlur={() => handleRendimientoBlur(item.id)}
+                                                                                            onBlur={() => {
+                                                                                                activeResourceInputRef.current = null;
+                                                                                                handleRendimientoBlur(item.id);
+                                                                                            }}
+                                                                                            onKeyDown={(event) => {
+                                                                                                if (event.key === 'Escape') {
+                                                                                                    cancelledResourceInputRef.current = `rendimiento:${item.id}`;
+                                                                                                    activeResourceInputRef.current = null;
+                                                                                                    setResourceInputValues((prev) => ({
+                                                                                                        ...prev,
+                                                                                                        [item.id]: item.draftRendimiento ? formatoCantidad(item.draftRendimiento, GANTT_PERFORMANCE_DECIMALS) : '',
+                                                                                                    }));
+                                                                                                    event.currentTarget.blur();
+                                                                                                }
+                                                                                            }}
                                                                                             className={`h-8 min-w-0 w-full rounded-[0.75rem] border bg-white px-2.5 text-right text-[9px] font-black shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none focus:ring-2 ${isDominant ? 'border-sky-300 text-sky-800 focus:border-sky-500 focus:ring-sky-200' : 'border-zinc-200 text-zinc-700 focus:border-[#F39200] focus:ring-[#F39200]/20'}`}
                                                                                         />
                                                                                     ) : (
-                                                                                        <span className="text-right text-[9px] font-black text-zinc-400">—</span>
+                                                                                        <span className={`inline-flex h-8 min-w-0 items-center justify-end rounded-[0.75rem] border px-2 text-right text-[9px] font-black ${
+                                                                                            activeApuWorkPolicy === 'fixed'
+                                                                                                ? 'border-sky-100 bg-sky-50 text-sky-700'
+                                                                                                : 'border-zinc-100 bg-zinc-50 text-zinc-400'
+                                                                                        }`}>
+                                                                                            {formatNumber(item.draftRendimiento ?? item.rendimiento ?? 0, GANTT_PERFORMANCE_DECIMALS)}
+                                                                                        </span>
                                                                                     )}
                                                                                     <span className={`text-right text-[9px] font-black ${isDominant ? 'text-sky-800' : 'text-zinc-600'}`}>
                                                                                         {formatCurrency(item.totalPrice || 0, moneyCurrency, moneyDecimals)}
@@ -2692,38 +3250,38 @@ const GanttResourceEditorModal = ({
                                             Los recursos sin rendimiento se muestran en solo lectura.
                                         </p>
                                     ) : null}
-                                    <div className="mt-3 border-t border-zinc-200 bg-white pt-3">
-                                        <div className="mb-2 flex items-center justify-between gap-3">
-                                            <p className="text-[8px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                                    <div className="mt-2 border-t border-zinc-200 bg-white pt-2">
+                                        <div className="mb-1.5 flex items-center justify-between gap-2">
+                                            <p className="text-[7px] font-black uppercase tracking-[0.14em] text-zinc-400">
                                                 Totales visibles del APU
                                             </p>
-                                            <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#F39200]">
+                                            <p className="text-[8px] font-black uppercase tracking-[0.12em] text-[#F39200]">
                                                 Ajustado con rendimientos operativos del Gantt
                                             </p>
                                         </div>
-                                        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                                            <div className="rounded-[0.8rem] border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                                <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Costo Directo</span>
-                                                <span className="mt-1 block text-[1rem] font-black tracking-tight text-zinc-900">
+                                        <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
+                                            <div className="rounded-[0.7rem] border border-zinc-200 bg-zinc-50 px-2.5 py-1.5">
+                                                <span className="text-[7px] font-black uppercase tracking-[0.12em] text-zinc-400">Costo Directo</span>
+                                                <span className="mt-0.5 block text-[0.9rem] font-black tracking-tight text-zinc-900">
                                                     {formatCurrency(roundedVisibleDirectUnitPrice || 0, moneyCurrency, moneyDecimals)}
                                                 </span>
                                             </div>
-                                            <div className="rounded-[0.8rem] border border-orange-200 bg-orange-50/60 px-3 py-2">
-                                                <span className="text-[8px] font-black uppercase tracking-widest text-[#F39200]">Costo Indirecto</span>
-                                                <span className="mt-1 block text-[1rem] font-black tracking-tight text-[#F39200]">
+                                            <div className="rounded-[0.7rem] border border-orange-200 bg-orange-50/60 px-2.5 py-1.5">
+                                                <span className="text-[7px] font-black uppercase tracking-[0.12em] text-[#F39200]">Costo Indirecto</span>
+                                                <span className="mt-0.5 block text-[0.9rem] font-black tracking-tight text-[#F39200]">
                                                     {formatCurrency(indirectUnitPrice || 0, moneyCurrency, moneyDecimals)}
                                                 </span>
                                             </div>
-                                            <div className="rounded-[0.8rem] border border-[#F39200]/20 bg-[#F39200]/[0.08] px-3 py-2">
-                                                <span className="text-[8px] font-black uppercase tracking-widest text-[#F39200]">Precio Total APU</span>
-                                                <span className="mt-1 block text-[1.2rem] font-black leading-none tracking-tight text-[#F39200]">
+                                            <div className="rounded-[0.7rem] border border-[#F39200]/20 bg-[#F39200]/[0.08] px-2.5 py-1.5">
+                                                <span className="text-[7px] font-black uppercase tracking-[0.12em] text-[#F39200]">Precio operativo preview</span>
+                                                <span className="mt-0.5 block text-[1rem] font-black leading-none tracking-tight text-[#F39200]">
                                                     {formatCurrency(totalApuUnitPrice || 0, moneyCurrency, moneyDecimals)}
                                                 </span>
                                             </div>
-                                            <div className="rounded-[0.8rem] border border-zinc-200 bg-white px-3 py-2">
-                                                <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Precio en Presupuesto</span>
-                                                <span className="mt-1 block text-[1.05rem] font-black tracking-tight text-zinc-900">
-                                                    {formatCurrency(visibleBudgetPrice || 0, moneyCurrency, moneyDecimals)}
+                                            <div className="rounded-[0.7rem] border border-zinc-200 bg-white px-2.5 py-1.5">
+                                                <span className="text-[7px] font-black uppercase tracking-[0.12em] text-zinc-400">Precio en presupuesto</span>
+                                                <span className="mt-0.5 block text-[0.95rem] font-black tracking-tight text-zinc-900">
+                                                    {formatCurrency(officialBudgetLineTotal || 0, moneyCurrency, moneyDecimals)}
                                                 </span>
                                             </div>
                                         </div>
@@ -2735,6 +3293,109 @@ const GanttResourceEditorModal = ({
 
                     </div>
                 </div>
+                {resourceContributionModal ? (() => {
+                    const totals = summarizeGanttSourceLines(resourceContributionModal.sourceLines || []);
+                    return (
+                        <div className="absolute inset-0 flex items-center justify-center bg-slate-950/25 px-3 py-3 backdrop-blur-[1px]" style={{ zIndex: 40 }}>
+                            <div className="flex max-h-[min(78vh,32rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[0.9rem] border border-zinc-200 bg-[#f7f7f5] shadow-[0_24px_60px_rgba(15,23,42,0.24)]">
+                                <div className="flex items-center justify-between gap-3 border-b border-zinc-100 bg-white px-4 py-2.5">
+                                    <div className="min-w-0">
+                                        <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#F39200]">Ajuste trazable de recurso explotado</p>
+                                        <h3 className="mt-0.5 truncate text-[13px] font-black text-zinc-900">
+                                            {normalizeDescriptionCapitalization(resourceContributionModal.label)}
+                                        </h3>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setResourceContributionModal(null)}
+                                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.75rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:text-[#F39200]"
+                                        aria-label="Cerrar ajuste trazable"
+                                    >
+                                        <X className="h-4.5 w-4.5" />
+                                    </button>
+                                </div>
+                                <div className="overflow-x-auto bg-white px-4 py-3">
+                                    <div className="min-w-[620px] overflow-hidden rounded-xl border border-zinc-100">
+                                        <div className="grid grid-cols-[minmax(150px,1.35fr)_68px_112px_112px_112px] items-center gap-2 bg-zinc-50 px-3 py-2 text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">
+                                            <span>Origen</span>
+                                            <span className="text-center">Tipo</span>
+                                            <span className="text-right">Cantidad</span>
+                                            <span className="text-right">Rend.</span>
+                                            <span className="text-right">Trabajo</span>
+                                        </div>
+                                        {(resourceContributionModal.sourceLines || []).map((sourceLine, index) => {
+                                            const quantity = Number(sourceLine.cantidad || 0) || 0;
+                                            const rendimiento = Number(sourceLine.rendimiento || 0) || 0;
+                                            const work = Number(sourceLine.trabajo_relativo || 0) || 0;
+                                            const isNested = Boolean(sourceLine.nested);
+                                            const apuDescription = normalizeDescriptionCapitalization(sourceLine.apu_descripcion || '');
+                                            const apuCode = String(sourceLine.apu_codigo || '').trim();
+                                            const apuUnit = normalizeDisplayUnit(sourceLine.apu_unidad || '');
+                                            const originLabel = apuDescription || (isNested ? 'APU anidado' : 'APU base');
+                                            const originMeta = [
+                                                apuCode,
+                                                apuUnit ? `Unidad ${apuUnit}` : '',
+                                            ].filter(Boolean).join(' · ') || `APU ${sourceLine.apu_id || 'sin id'} · Linea ${sourceLine.linea_id || 'sin id'}`;
+                                            return (
+                                                <div key={sourceLine._draft_key || sourceLine.linea_id || index} className="grid grid-cols-[minmax(150px,1.35fr)_68px_112px_112px_112px] items-center gap-2 border-t border-zinc-100 px-3 py-2">
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-[10px] font-black text-zinc-800">{originLabel}</p>
+                                                        <p className="mt-0.5 truncate text-[8px] font-bold uppercase tracking-[0.08em] text-zinc-400">
+                                                            {originMeta}
+                                                        </p>
+                                                    </div>
+                                                    <span className={`justify-self-center rounded-full border px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.1em] ${isNested ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-sky-200 bg-sky-50 text-sky-700'}`}>
+                                                        {isNested ? 'Hijo' : 'Padre'}
+                                                    </span>
+                                                    <input
+                                                        type="text"
+                                                        inputMode="decimal"
+                                                        value={quantity ? String(quantity).replace('.', ',') : ''}
+                                                        onFocus={(event) => event.currentTarget.select()}
+                                                        onChange={(event) => updateContributionSourceLine(index, 'cantidad', event.target.value)}
+                                                        className="h-8 min-w-0 rounded-[0.75rem] border border-zinc-200 bg-white px-2 text-right text-[9px] font-black text-zinc-800 outline-none focus:border-[#F39200] focus:ring-2 focus:ring-[#F39200]/20"
+                                                    />
+                                                    {resourceContributionModal.policy === 'variable' ? (
+                                                        <input
+                                                            type="text"
+                                                            inputMode="decimal"
+                                                            value={rendimiento ? String(rendimiento).replace('.', ',') : ''}
+                                                            onFocus={(event) => event.currentTarget.select()}
+                                                            onChange={(event) => updateContributionSourceLine(index, 'rendimiento', event.target.value)}
+                                                            className="h-8 min-w-0 rounded-[0.75rem] border border-zinc-200 bg-white px-2 text-right text-[9px] font-black text-zinc-800 outline-none focus:border-[#F39200] focus:ring-2 focus:ring-[#F39200]/20"
+                                                        />
+                                                    ) : (
+                                                        <span className="inline-flex h-8 min-w-0 items-center justify-end rounded-[0.75rem] border border-sky-100 bg-sky-50 px-2 text-right text-[9px] font-black text-sky-700">
+                                                            {formatNumber(rendimiento || 0, GANTT_PERFORMANCE_DECIMALS)}
+                                                        </span>
+                                                    )}
+                                                    <span className="text-right text-[9px] font-black text-zinc-600">
+                                                        {formatNumber(work || 0, 4)} h
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                        <div className="grid grid-cols-[minmax(150px,1.35fr)_68px_112px_112px_112px] items-center gap-2 border-t border-zinc-200 bg-white px-3 py-2 text-[8px] font-black uppercase tracking-[0.12em] text-zinc-500">
+                                            <span>Total</span>
+                                            <span className="text-center text-zinc-400">{normalizeDisplayUnit(resourceContributionModal.unidad || '') || '-'}</span>
+                                            <span className="text-right text-zinc-700">{formatNumber(totals.quantity || 0, 4)}</span>
+                                            <span className="text-right text-zinc-700">{formatNumber(totals.performance || 0, GANTT_PERFORMANCE_DECIMALS)}</span>
+                                            <span className="text-right text-zinc-700">{formatNumber(totals.work || 0, 4)} h</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-end gap-2 border-t border-zinc-100 bg-[#f7f7f5] px-5 py-3">
+                                    <button type="button" onClick={() => setResourceContributionModal(null)} className="h-10 rounded-xl border border-zinc-200 bg-white px-5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700">
+                                        Cancelar
+                                    </button>
+                                    <button type="button" onClick={acceptContributionModal} className="h-10 rounded-xl bg-[#F39200] px-5 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_10px_22px_rgba(243,146,0,0.18)] transition hover:bg-[#e58300]">
+                                        Aplicar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })() : null}
             </div>
         </div>,
         document.body,
@@ -5677,6 +6338,36 @@ const resolveGanttConfigDraft = (config = {}, fallbackProjectStart = null) => {
     };
 };
 
+const buildGanttScheduleConfigWithHolidayCalendar = (config = {}, holidayCalendar = null) => {
+    const officialHolidays = (Array.isArray(holidayCalendar?.items) ? holidayCalendar.items : [])
+        .map((item) => ({
+            date: String(item?.date || item?.fecha || item?.dia || '').slice(0, 10),
+            is_working_day: false,
+            description: String(item?.description || item?.descripcion || item?.name || item?.nombre || 'Festivo oficial').trim(),
+        }))
+        .filter((item) => item.date);
+    if (!officialHolidays.length) return config || {};
+
+    const advanced = normalizeAdvancedCalendarDraft(config);
+    const existingByDate = new Map((advanced.holidays || []).map((item) => [item.date, item]));
+    officialHolidays.forEach((item) => {
+        if (!existingByDate.has(item.date)) {
+            existingByDate.set(item.date, item);
+        }
+    });
+
+    return {
+        ...(config || {}),
+        holiday_calendar: holidayCalendar,
+        advanced_calendar: {
+            ...advanced,
+            enabled: true,
+            mode: 'advanced',
+            holidays: Array.from(existingByDate.values()).sort((a, b) => a.date.localeCompare(b.date)),
+        },
+    };
+};
+
 const buildManualMilestonesSignature = (milestones = []) => JSON.stringify(
     (Array.isArray(milestones) ? milestones : []).map((entry) => ({
         id: String(entry?.id || '').trim(),
@@ -6012,6 +6703,97 @@ const getPersistedResourceDrafts = (row = null, draft = {}) => {
     };
     const persisted = metadata?.[GANTT_RESOURCE_DRAFTS_KEY];
     return persisted && typeof persisted === 'object' && !Array.isArray(persisted) ? persisted : {};
+};
+
+const getPersistedResourceQuantityDrafts = (row = null, draft = {}) => {
+    const metadata = { ...(row?.metadata || {}), ...(draft?.metadata || {}) };
+    const persisted = metadata?.[GANTT_RESOURCE_QUANTITY_DRAFTS_KEY];
+    return persisted && typeof persisted === 'object' && !Array.isArray(persisted) ? persisted : {};
+};
+
+const getPersistedResourceSourceLineDrafts = (row = null, draft = {}) => {
+    const metadata = { ...(row?.metadata || {}), ...(draft?.metadata || {}) };
+    const persisted = metadata?.[GANTT_RESOURCE_SOURCE_LINES_DRAFTS_KEY];
+    return persisted && typeof persisted === 'object' && !Array.isArray(persisted) ? persisted : {};
+};
+
+const getPersistedResourceWorkPolicies = (row = null, draft = {}) => {
+    const metadata = { ...(row?.metadata || {}), ...(draft?.metadata || {}) };
+    const persisted = metadata?.[GANTT_RESOURCE_WORK_POLICY_KEY];
+    return persisted && typeof persisted === 'object' && !Array.isArray(persisted) ? persisted : {};
+};
+
+const normalizeGanttResourceWorkPolicy = (value, fallback = 'variable') => (
+    String(value || fallback).trim().toLowerCase() === 'fixed' ? 'fixed' : 'variable'
+);
+
+const resolveGanttApuWorkPolicy = (policies = {}, fallback = 'variable') => {
+    const values = Object.values(policies || {}).map((value) => normalizeGanttResourceWorkPolicy(value, fallback));
+    if (values.includes('variable')) return 'variable';
+    if (values.includes('fixed')) return 'fixed';
+    return normalizeGanttResourceWorkPolicy(fallback);
+};
+
+const normalizeGanttSourceLine = (sourceLine = {}, fallback = {}) => {
+    const cantidad = parsePositiveNumber(sourceLine.cantidad ?? sourceLine.quantity) ?? 0;
+    const rendimiento = parsePositiveNumber(sourceLine.rendimiento ?? sourceLine.performance) ?? 0;
+    const trabajo = parsePositiveNumber(sourceLine.trabajo_relativo ?? sourceLine.work) ?? (cantidad * rendimiento);
+    return {
+        ...sourceLine,
+        linea_id: sourceLine.linea_id ?? sourceLine.line_id ?? fallback.linea_id ?? null,
+        apu_id: sourceLine.apu_id ?? fallback.apu_id ?? null,
+        apu_codigo: sourceLine.apu_codigo ?? sourceLine.apu_code ?? fallback.apu_codigo ?? '',
+        apu_descripcion: sourceLine.apu_descripcion ?? sourceLine.apu_description ?? fallback.apu_descripcion ?? '',
+        apu_unidad: sourceLine.apu_unidad ?? sourceLine.apu_unit ?? fallback.apu_unidad ?? '',
+        nested: Boolean(sourceLine.nested ?? fallback.nested),
+        inherited_factor: sourceLine.inherited_factor ?? fallback.inherited_factor ?? null,
+        cantidad,
+        rendimiento,
+        trabajo_relativo: trabajo,
+    };
+};
+
+const orderGanttSourceLinesParentFirst = (sourceLines = []) => (
+    (sourceLines || [])
+        .map((sourceLine, index) => ({ sourceLine, index }))
+        .sort((a, b) => (
+            Number(Boolean(a.sourceLine?.nested)) - Number(Boolean(b.sourceLine?.nested))
+            || a.index - b.index
+        ))
+        .map(({ sourceLine }) => sourceLine)
+);
+
+const buildGanttResourceSourceLines = (item = {}) => {
+    const explicit = Array.isArray(item?.sourceLine?.source_lines)
+        ? item.sourceLine.source_lines
+        : Array.isArray(item?.source_lines)
+            ? item.source_lines
+            : [];
+    if (explicit.length) {
+        return orderGanttSourceLinesParentFirst(
+            explicit.map((sourceLine, index) => normalizeGanttSourceLine(sourceLine, { linea_id: `${item.id}-${index}` }))
+        );
+    }
+    return orderGanttSourceLinesParentFirst([
+        normalizeGanttSourceLine({
+            linea_id: item.sourceLine?.id ?? item.id,
+            apu_id: item.sourceLine?.apu_id ?? null,
+            nested: Boolean(item.sourceLine?.apu_hijo_id),
+            cantidad: item.cantidad,
+            rendimiento: item.draftRendimiento ?? item.rendimiento ?? 0,
+            trabajo_relativo: Number(item.cantidad || 0) * Number(item.draftRendimiento ?? item.rendimiento ?? 0),
+        }),
+    ]);
+};
+
+const summarizeGanttSourceLines = (sourceLines = []) => {
+    const quantity = sourceLines.reduce((total, sourceLine) => total + (Number(sourceLine.cantidad || 0) || 0), 0);
+    const work = sourceLines.reduce((total, sourceLine) => total + (Number(sourceLine.trabajo_relativo || 0) || 0), 0);
+    return {
+        quantity,
+        work,
+        performance: quantity > 0 && work > 0 ? work / quantity : 0,
+    };
 };
 
 const getGanttPendingApprovalState = (row = null, draft = {}) => {
@@ -7311,7 +8093,7 @@ const mergeManualMilestonesIntoRows = (rows = [], manualMilestones = [], fallbac
             orderedRows.push(syntheticRow);
         }
         if (anchorId) {
-            console.warn(`No se pudo resolver el ancla visual del hito manual "${milestone?.id || ''}": ${anchorId}`);
+            globalThis.reportClientError?.(`No se pudo resolver el ancla visual del hito manual "${milestone?.id || ''}": ${anchorId}`);
         }
     });
 
@@ -7912,6 +8694,7 @@ const CronogramaGantt = ({
     onRemoveTrabajoHolidayDay,
     onSaveTrabajoLine,
     onSaveTrabajoDraftBatch,
+    onLoadTrabajoLineMetadata,
     onReloadFromBudget,
     onPreviewReloadFromBudget,
     onSyncValoradoFromGantt,
@@ -8044,6 +8827,8 @@ const CronogramaGantt = ({
     const [lastBudgetSyncEvent, setLastBudgetSyncEvent] = useState(null);
     const [projectBaseState, setProjectBaseState] = useState({ loading: false, error: '', data: null });
     const [historyPanelOpen, setHistoryPanelOpen] = useState(false);
+    const [apuPlanningSignalsHovered, setApuPlanningSignalsHovered] = useState(false);
+    const [apuPlanningSignalsPinned, setApuPlanningSignalsPinned] = useState(false);
     const [ganttUndoStack, setGanttUndoStack] = useState([]);
     const [ganttRedoStack, setGanttRedoStack] = useState([]);
     const [ganttHistorySaving, setGanttHistorySaving] = useState(false);
@@ -8051,8 +8836,12 @@ const CronogramaGantt = ({
     const [importingMsProject, setImportingMsProject] = useState(false);
     const importMsProjectInputRef = useRef(null);
     const toolsButtonRef = useRef(null);
+    const toolsMenuRef = useRef(null);
+    const apuPlanningSignalsButtonRef = useRef(null);
+    const apuPlanningSignalsCloseTimeoutRef = useRef(null);
     const [toolsMenuStyle, setToolsMenuStyle] = useState(null);
     const [historyPanelStyle, setHistoryPanelStyle] = useState(null);
+    const [apuPlanningSignalsPanelStyle, setApuPlanningSignalsPanelStyle] = useState(null);
     const [configPanelStyle, setConfigPanelStyle] = useState(null);
     const [timeScaleMenuOpen, setTimeScaleMenuOpen] = useState(false);
     const [timeScaleMenuStyle, setTimeScaleMenuStyle] = useState(null);
@@ -8087,6 +8876,7 @@ const CronogramaGantt = ({
     const [hoveredDependencyKey, setHoveredDependencyKey] = useState(null);
     const [selectedDependencyEditorStyle, setSelectedDependencyEditorStyle] = useState(null);
     const [resourceEditorRowId, setResourceEditorRowId] = useState(null);
+    const resourceEditorSessionRef = useRef({ active: false, lineId: null });
     const resourceEditorDraftSnapshotRef = useRef({ lineId: null, draft: null });
     const [editingStartRowId, setEditingStartRowId] = useState(null);
     const [selectedTaskId, setSelectedTaskId] = useState(null);
@@ -8139,6 +8929,21 @@ const CronogramaGantt = ({
         setQuickSuccessorSubmitting(false);
         setActiveBarPointerHold(null);
     }, []);
+
+    const ensureTrabajoLineFullMetadata = useCallback(async (lineId) => {
+        const normalizedLineId = String(lineId || '').trim();
+        if (!normalizedLineId || typeof onLoadTrabajoLineMetadata !== 'function') return null;
+        return onLoadTrabajoLineMetadata(normalizedLineId);
+    }, [onLoadTrabajoLineMetadata]);
+
+    useEffect(() => {
+        if (!selectedTaskId) return;
+        const selectedRow = baseRows.find((row) => String(row?.presupuesto_linea_id ?? row?.linea_id ?? '') === String(selectedTaskId));
+        if (!selectedRow?.metadata?.metadata_lazy) return;
+        void ensureTrabajoLineFullMetadata(selectedTaskId).catch((error) => {
+            globalThis.reportClientError?.('Error cargando metadata completa de Gantt:', error);
+        });
+    }, [baseRows, ensureTrabajoLineFullMetadata, selectedTaskId]);
 
     useEffect(() => {
         configDraftRef.current = configDraft;
@@ -8345,9 +9150,14 @@ const CronogramaGantt = ({
         ),
         [ganttLayout.dataGridViewportWidth, gridViewportWidthOverride]
     );
+    const holidayCalendar = trabajo?.holiday_calendar || null;
+    const scheduleConfig = useMemo(
+        () => buildGanttScheduleConfigWithHolidayCalendar(configDraft, holidayCalendar),
+        [configDraft, holidayCalendar]
+    );
     const scheduledRows = useMemo(
-        () => resolveGanttRowsWithDependencySchedule(rows, drafts, configDraft),
-        [configDraft, drafts, rows]
+        () => resolveGanttRowsWithDependencySchedule(rows, drafts, scheduleConfig),
+        [drafts, rows, scheduleConfig]
     );
     const timelineRows = useMemo(
         () => scheduledRows.filter((row) => row.is_calculable),
@@ -8358,18 +9168,18 @@ const CronogramaGantt = ({
         [drafts, scheduledRows]
     );
     const edtSummaryBoundsMap = useMemo(
-        () => buildEdtSummaryBoundsMap(scheduledRows, drafts, configDraft),
-        [configDraft, drafts, scheduledRows]
+        () => buildEdtSummaryBoundsMap(scheduledRows, drafts, scheduleConfig),
+        [drafts, scheduleConfig, scheduledRows]
     );
     const projectTimelineBounds = useMemo(() => {
         const projectStart = shiftToGanttLaborableDate(
             trabajo?.fecha_inicio || detail?.fecha_inicio || project?.fecha_inicio,
-            configDraft,
+            scheduleConfig,
             1,
         );
         const projectEnd = applyGanttWorkdayFinishTime(
             detail?.fecha_finalizacion || trabajo?.fecha_fin || project?.fecha_fin_estimada,
-            configDraft,
+            scheduleConfig,
         );
 
         if (!projectStart || !projectEnd) return null;
@@ -8378,7 +9188,7 @@ const CronogramaGantt = ({
             end: projectEnd,
         };
     }, [
-        configDraft,
+        scheduleConfig,
         detail?.fecha_finalizacion,
         trabajo?.fecha_fin,
         trabajo?.fecha_inicio,
@@ -8399,8 +9209,8 @@ const CronogramaGantt = ({
         [detail?.fecha_finalizacion, project?.fecha_fin_estimada, trabajo?.fecha_fin]
     );
     const projectFinishDelaySummary = useMemo(() => {
-        const targetFinish = applyGanttWorkdayFinishTime(projectFinishTargetDisplay, configDraft);
-        const calculatedFinish = applyGanttWorkdayFinishTime(projectFinishReference, configDraft);
+        const targetFinish = applyGanttWorkdayFinishTime(projectFinishTargetDisplay, scheduleConfig);
+        const calculatedFinish = applyGanttWorkdayFinishTime(projectFinishReference, scheduleConfig);
         if (!targetFinish || !calculatedFinish) return null;
 
         const targetAnchor = new Date(targetFinish);
@@ -8411,9 +9221,9 @@ const CronogramaGantt = ({
         const calendarDays = Math.round((calculatedAnchor.getTime() - targetAnchor.getTime()) / (24 * 60 * 60 * 1000));
         const direction = calendarDays === 0 ? 0 : calendarDays > 0 ? 1 : -1;
         const workHours = direction >= 0
-            ? measureGanttWorkWindowHours(targetFinish, calculatedFinish, configDraft)
-            : measureGanttWorkWindowHours(calculatedFinish, targetFinish, configDraft);
-        const workdays = roundConfigNumber(workHours / Math.max(1, Number(configDraft?.jornada_laboral_horas || 8)), 2);
+            ? measureGanttWorkWindowHours(targetFinish, calculatedFinish, scheduleConfig)
+            : measureGanttWorkWindowHours(calculatedFinish, targetFinish, scheduleConfig);
+        const workdays = roundConfigNumber(workHours / Math.max(1, Number(scheduleConfig?.jornada_laboral_horas || 8)), 2);
 
         return {
             targetFinish,
@@ -8422,8 +9232,7 @@ const CronogramaGantt = ({
             workdays,
             direction,
         };
-    }, [configDraft, projectFinishReference, projectFinishTargetDisplay]);
-    const holidayCalendar = trabajo?.holiday_calendar || null;
+    }, [projectFinishReference, projectFinishTargetDisplay, scheduleConfig]);
     const holidayCalendarDisplayRange = useMemo(() => {
         const start = normalizeDate(projectStartConfigDisplay || holidayCalendar?.start_date);
         const finishCandidates = [
@@ -8716,13 +9525,9 @@ const CronogramaGantt = ({
         if (Number.isFinite(pinnedHeight) && pinnedHeight > 0) {
             return pinnedHeight;
         }
-        const visibleRowCount = Math.max(rows.length, 1);
-        const headerHeight = 60;
-        const estimatedRowHeight = 62;
-        const viewportPadding = 18;
-        const desiredHeight = headerHeight + (visibleRowCount * estimatedRowHeight) + viewportPadding;
-        return Math.max(260, Math.min(ganttAvailableHeight, desiredHeight));
-    }, [dragWorkspaceHeightOverride, ganttAvailableHeight, rows.length]);
+        const safeAvailableHeight = Math.max(GANTT_WORKSPACE_MIN_HEIGHT_PX, Number(ganttAvailableHeight || 0));
+        return safeAvailableHeight;
+    }, [dragWorkspaceHeightOverride, ganttAvailableHeight]);
     const rowVirtualMetrics = useMemo(
         () => buildVirtualRowMetrics(scheduledRows, resolveGanttRowHeightPx),
         [scheduledRows]
@@ -8735,6 +9540,18 @@ const CronogramaGantt = ({
             overscanRows: 8,
         }),
         [ganttWorkspaceHeight, rowVirtualMetrics, verticalViewportSnapshot]
+    );
+    const visualBodyHeightPx = Math.max(
+        1,
+        ganttWorkspaceHeight - GANTT_GRID_HEADER_HEIGHT_PX - GANTT_HORIZONTAL_SCROLLBAR_RESERVED_PX
+    );
+    const visualBottomFillPx = Math.max(
+        0,
+        visualBodyHeightPx - Number(rowVirtualMetrics.totalHeight || 0)
+    );
+    const rowVirtualBottomSpacerPx = Math.max(
+        0,
+        Number(rowVirtualWindow.bottomSpacerPx || 0) + visualBottomFillPx
     );
     const visibleRows = useMemo(
         () => scheduledRows.slice(rowVirtualWindow.startIndex, rowVirtualWindow.endIndex + 1),
@@ -8904,6 +9721,34 @@ const CronogramaGantt = ({
         markTimelineInteractionActive();
     }, [markTimelineInteractionActive, restoreViewportInteractionLock, scheduleTimelineViewportSnapshot, scheduleVerticalViewportSnapshot, syncScrollTop]);
 
+    const apuPlanningSignalsOpen = apuPlanningSignalsHovered || apuPlanningSignalsPinned;
+
+    const clearApuPlanningSignalsClose = useCallback(() => {
+        if (!apuPlanningSignalsCloseTimeoutRef.current) return;
+        clearTimeout(apuPlanningSignalsCloseTimeoutRef.current);
+        apuPlanningSignalsCloseTimeoutRef.current = null;
+    }, []);
+
+    const openApuPlanningSignals = useCallback(() => {
+        clearApuPlanningSignalsClose();
+        setApuPlanningSignalsHovered(true);
+    }, [clearApuPlanningSignalsClose]);
+
+    const scheduleCloseApuPlanningSignals = useCallback(() => {
+        clearApuPlanningSignalsClose();
+        if (apuPlanningSignalsPinned) return;
+        apuPlanningSignalsCloseTimeoutRef.current = setTimeout(() => {
+            setApuPlanningSignalsHovered(false);
+            apuPlanningSignalsCloseTimeoutRef.current = null;
+        }, 160);
+    }, [apuPlanningSignalsPinned, clearApuPlanningSignalsClose]);
+
+    const toggleApuPlanningSignalsPinned = useCallback(() => {
+        clearApuPlanningSignalsClose();
+        setApuPlanningSignalsHovered(true);
+        setApuPlanningSignalsPinned((current) => !current);
+    }, [clearApuPlanningSignalsClose]);
+
     const openToolsMenu = useCallback(() => {
         if (toolsHoverTimeoutRef.current) {
             clearTimeout(toolsHoverTimeoutRef.current);
@@ -8957,7 +9802,7 @@ const CronogramaGantt = ({
     }, []);
 
     useLayoutEffect(() => {
-        if (!toolsMenuOpen && !historyPanelOpen && !configPanelOpen && !timeScaleMenuOpen) return;
+        if (!toolsMenuOpen && !historyPanelOpen && !configPanelOpen && !timeScaleMenuOpen && !apuPlanningSignalsOpen) return;
         const update = () => {
             const trigger = toolsButtonRef.current;
             if (toolsMenuOpen) {
@@ -8984,6 +9829,15 @@ const CronogramaGantt = ({
                     preferAboveWhenTight: true,
                 }));
             }
+            if (apuPlanningSignalsOpen) {
+                const trigger = apuPlanningSignalsButtonRef.current;
+                const maxWidth = Math.min(440, window.innerWidth - 24);
+                setApuPlanningSignalsPanelStyle(buildPopoverPosition(trigger, maxWidth, 8, {
+                    estimatedHeight: 680,
+                    minVisibleHeight: 360,
+                    preferAboveWhenTight: true,
+                }));
+            }
         };
         update();
         window.addEventListener('scroll', update, true);
@@ -8992,7 +9846,48 @@ const CronogramaGantt = ({
             window.removeEventListener('scroll', update, true);
             window.removeEventListener('resize', update);
         };
-    }, [buildPopoverPosition, configPanelOpen, historyPanelOpen, timeScaleMenuOpen, toolsMenuOpen]);
+    }, [apuPlanningSignalsOpen, buildPopoverPosition, configPanelOpen, historyPanelOpen, timeScaleMenuOpen, toolsMenuOpen]);
+
+    useEffect(() => () => {
+        if (apuPlanningSignalsCloseTimeoutRef.current) {
+            clearTimeout(apuPlanningSignalsCloseTimeoutRef.current);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!apuPlanningSignalsOpen) return undefined;
+        const handlePlanningSignalsEscape = (event) => {
+            if (event.key !== 'Escape') return;
+            clearApuPlanningSignalsClose();
+            setApuPlanningSignalsPinned(false);
+            setApuPlanningSignalsHovered(false);
+        };
+        window.addEventListener('keydown', handlePlanningSignalsEscape);
+        return () => window.removeEventListener('keydown', handlePlanningSignalsEscape);
+    }, [apuPlanningSignalsOpen, clearApuPlanningSignalsClose]);
+
+    useEffect(() => {
+        if (!toolsMenuOpen) return undefined;
+        const handleToolsMenuPointerDown = (event) => {
+            const target = event.target instanceof Node ? event.target : null;
+            if (!target) return;
+            if (toolsMenuRef.current?.contains(target)) return;
+            if (toolsButtonRef.current?.contains(target)) return;
+            setToolsMenuOpen(false);
+        };
+        const handleToolsMenuKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                setToolsMenuOpen(false);
+                toolsButtonRef.current?.focus?.();
+            }
+        };
+        document.addEventListener('pointerdown', handleToolsMenuPointerDown, true);
+        document.addEventListener('keydown', handleToolsMenuKeyDown, true);
+        return () => {
+            document.removeEventListener('pointerdown', handleToolsMenuPointerDown, true);
+            document.removeEventListener('keydown', handleToolsMenuKeyDown, true);
+        };
+    }, [toolsMenuOpen]);
 
     const handleGridScroll = useCallback(() => {
         if (viewportInteractionLockRef.current) {
@@ -9061,18 +9956,37 @@ const CronogramaGantt = ({
         };
     }, [scheduleTimelineViewportSnapshot, scheduleVerticalViewportSnapshot]);
 
+    const onAcquireGanttEditLock = useCallback(async () => ({ ok: true }), []);
+    const onRequestGanttLockRelease = useCallback(async () => null, []);
+
     const openResourceGovernanceEditor = useCallback(async (row) => {
         if (!row?.is_calculable) {
             await openDurationGovernanceAlert();
             return;
         }
         const lineId = String(row.budget_line_id ?? row.linea_id);
+        try {
+            const lock = await onAcquireGanttEditLock({ lineId, scope: 'resource_editor' });
+            if (lock?.ok === false) {
+                await onRequestGanttLockRelease({ lineId, owner: lock.owner || null, skipConfirm: true });
+                return;
+            }
+        } catch (error) {
+            await onRequestGanttLockRelease({ lineId, error, skipConfirm: true });
+            return;
+        }
+        try {
+            await ensureTrabajoLineFullMetadata(lineId);
+        } catch (error) {
+            globalThis.reportClientError?.('Error cargando metadata completa del editor Gantt:', error);
+        }
         resourceEditorDraftSnapshotRef.current = {
             lineId,
             draft: drafts[lineId] ? JSON.parse(JSON.stringify(drafts[lineId])) : null,
         };
+        resourceEditorSessionRef.current = { active: true, lineId };
         setResourceEditorRowId(lineId);
-    }, [drafts]);
+    }, [drafts, ensureTrabajoLineFullMetadata, onAcquireGanttEditLock, onRequestGanttLockRelease]);
 
     useEffect(() => {
         const handleBudgetProductivityUpdated = async (event) => {
@@ -9083,6 +9997,29 @@ const CronogramaGantt = ({
                 updatedAt: event?.detail?.updatedAt || new Date().toISOString(),
                 apuId: event?.detail?.apuId ?? null,
             });
+            const backendManagedLineIds = Array.isArray(event?.detail?.lineIds)
+                ? event.detail.lineIds.map((lineId) => String(lineId))
+                : [];
+            const ganttAdjustmentRequiredLineIds = new Set(backendManagedLineIds);
+            if (backendManagedLineIds.length) {
+                setDrafts((current) => {
+                    const nextDrafts = { ...current };
+                    backendManagedLineIds.forEach((lineId) => {
+                        delete nextDrafts[String(lineId)];
+                    });
+                    ganttAdjustmentRequiredLineIds.forEach((lineId) => {
+                        nextDrafts[String(lineId)] = {
+                            ...(nextDrafts[String(lineId)] || {}),
+                            metadata: {
+                                ...((nextDrafts[String(lineId)] || {}).metadata || {}),
+                                gantt_adjustment_required: true,
+                                statusLabel: 'Reajustar',
+                            },
+                        };
+                    });
+                    return nextDrafts;
+                });
+            }
 
             const pendingPersistedApprovalCount = rows.filter((row) => (
                 row?.is_calculable
@@ -9111,7 +10048,7 @@ const CronogramaGantt = ({
                     actionLabel: '',
                 });
             } catch (error) {
-                console.error('Error sincronizando Gantt desde presupuesto:', error);
+                globalThis.reportClientError?.('Error sincronizando Gantt desde presupuesto:', error);
                 setBudgetSyncNotice({
                     tone: 'danger',
                     message: 'Presupuesto cambió, pero no se pudo recargar automáticamente el Gantt. Revisa la sincronización.',
@@ -9307,7 +10244,7 @@ const CronogramaGantt = ({
                     centerY,
                 }
                 : null;
-            const subbars = buildGanttSubbarVisuals(row, draft, timelineSegments, segmentColumnWidth, configDraft, valorado, effectiveTimeScale)
+            const subbars = buildGanttSubbarVisuals(row, draft, timelineSegments, segmentColumnWidth, scheduleConfig, valorado, effectiveTimeScale)
                 .map((segment) => ({
                     id: segment.id,
                     leftPx: segment.leftPx,
@@ -9582,7 +10519,7 @@ const CronogramaGantt = ({
             setConfigSaved(true);
             return true;
         } catch (error) {
-            console.error('Error guardando hitos manuales del Gantt:', error);
+            globalThis.reportClientError?.('Error guardando hitos manuales del Gantt:', error);
             pendingManualMilestonesSignatureRef.current = null;
             setConfigDraft((current) => ({ ...current, manual_milestones: previousMilestones }));
             setGanttError(error?.response?.data?.detail || error?.message || 'No se pudo guardar el hito manual.');
@@ -11793,7 +12730,7 @@ const CronogramaGantt = ({
                     try {
                         await onReloadFromBudget();
                     } catch (reloadError) {
-                        console.error('Error recargando Gantt tras detectar una línea inválida en drag:', reloadError);
+                        globalThis.reportClientError?.('Error recargando Gantt tras detectar una línea inválida en drag:', reloadError);
                     }
                 }
             } finally {
@@ -12298,6 +13235,23 @@ const CronogramaGantt = ({
         }) : null),
         [resolvedBudgetIndirectPercent, selectedTaskDraft, selectedTaskEffectiveRow, selectedTaskRow, valorado?.dec_moneda]
     );
+    const selectedTaskApuPlanningSignals = useMemo(
+        () => buildGanttApuPlanningSignals({
+            row: selectedTaskRow,
+            effectiveRow: selectedTaskEffectiveRow,
+            durationModel: selectedTaskDurationModel,
+            costModel: selectedTaskCostModel,
+            dailyHours: resolveGanttDailyHours(configDraft),
+            indirectPercentage: resolvedBudgetIndirectPercent,
+        }),
+        [configDraft, resolvedBudgetIndirectPercent, selectedTaskCostModel, selectedTaskDurationModel, selectedTaskEffectiveRow, selectedTaskRow]
+    );
+    useEffect(() => {
+        if (selectedTaskRow?.is_calculable && selectedTaskRow?.apu_id) return;
+        clearApuPlanningSignalsClose();
+        setApuPlanningSignalsPinned(false);
+        setApuPlanningSignalsHovered(false);
+    }, [clearApuPlanningSignalsClose, selectedTaskRow]);
     const selectedTaskDurationReconciliation = useMemo(
         () => (selectedTaskRow ? getGanttDurationModelReconciliation(selectedTaskRow, selectedTaskDraft) : null),
         [selectedTaskDraft, selectedTaskRow]
@@ -12893,6 +13847,9 @@ const CronogramaGantt = ({
             if (nextDraft.metadata && typeof nextDraft.metadata === 'object') {
                 const nextMetadata = { ...nextDraft.metadata };
                 delete nextMetadata[GANTT_RESOURCE_DRAFTS_KEY];
+                delete nextMetadata[GANTT_RESOURCE_QUANTITY_DRAFTS_KEY];
+                delete nextMetadata[GANTT_RESOURCE_SOURCE_LINES_DRAFTS_KEY];
+                delete nextMetadata[GANTT_RESOURCE_WORK_POLICY_KEY];
                 delete nextMetadata[GANTT_GOVERNANCE_OVERRIDE_KEY];
                 if (Object.keys(nextMetadata).length) {
                     nextDraft.metadata = nextMetadata;
@@ -12910,13 +13867,19 @@ const CronogramaGantt = ({
         });
     };
 
-    const handleCancelResourceEditor = () => {
+    const onSaveGanttDraftIntention = useCallback((payload = {}) => payload, []);
+
+    const handleCancelResourceEditor = async () => {
         if (!resourceEditorRowId) {
+            resourceEditorSessionRef.current = { active: false, lineId: null };
+            resourceEditorDraftSnapshotRef.current = { lineId: null, draft: null };
             setResourceEditorRowId(null);
             return;
         }
         const lineId = String(resourceEditorRowId);
         const snapshot = resourceEditorDraftSnapshotRef.current;
+        resourceEditorSessionRef.current = { active: false, lineId: null };
+        resourceEditorDraftSnapshotRef.current = { lineId: null, draft: null };
         setDrafts((current) => {
             const updatedDrafts = { ...current };
             if (snapshot?.lineId === lineId && snapshot.draft && Object.keys(snapshot.draft).length) {
@@ -12932,12 +13895,27 @@ const CronogramaGantt = ({
     const handleSaveResourceEditorDraft = async () => {
         if (!resourceEditorRow) return;
         const lineId = String(resourceEditorRow.budget_line_id ?? resourceEditorRow.linea_id);
+        const previousPreviewLinePayloadMap = resourceEditorDraft?.metadata?.gantt_draft_intention?.preview_snapshot?.line_payload_map || {};
+        const linePayloadMap = {
+            ...previousPreviewLinePayloadMap,
+            [lineId]: drafts[lineId] || {},
+        };
+        const draftIntention = onSaveGanttDraftIntention({
+            preview_snapshot: {
+                line_payload_map: linePayloadMap,
+                previousPreviewLinePayloadMap,
+                linePayloadMap,
+            },
+        });
         const nextDraft = {
             ...(drafts[lineId] || {}),
-            metadata: buildPendingApprovalMetadata(resourceEditorRow, drafts[lineId] || {}, {
+            metadata: {
+                ...buildPendingApprovalMetadata(resourceEditorRow, drafts[lineId] || {}, {
                 source: 'gantt_resource_editor',
                 reason: 'resource',
-            }),
+                }),
+                gantt_draft_intention: draftIntention,
+            },
         };
         try {
             await handleSave(resourceEditorRow, nextDraft);
@@ -13541,7 +14519,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                             ...(draftSnapshot[sourceId] || {}),
                             ...(patches[sourceId] || {}),
                         };
-                        return resolveDependencyTargetStart(sourceRow, sourceDraft, targetRow, targetDraft, dependency, configDraft);
+                        return resolveDependencyTargetStart(sourceRow, sourceDraft, targetRow, targetDraft, dependency, scheduleConfig);
                     })
                     .filter(Boolean);
                 if (constrainedStarts.length) {
@@ -13655,7 +14633,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             const lineId = String(row.budget_line_id ?? row.linea_id ?? '');
             const draft = candidateDrafts[lineId] || {};
             const actualStart = shiftToGanttWorkingDateTime(draft.start_date || row.start_date, configDraft, 1);
-            const actualFinish = resolveGanttRowFinishDate(row, draft, configDraft);
+            const actualFinish = resolveGanttRowFinishDate(row, draft, scheduleConfig);
             if (projectStartBoundary && actualStart && actualStart < projectStartBoundary) {
                 return {
                     ok: false,
@@ -15158,6 +16136,20 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         });
     };
 
+    const onPreflightGanttDraftApply = useCallback(async (targetRows = []) => {
+        const invalidRows = targetRows.filter((row) => {
+            const lineId = String(row.budget_line_id);
+            const draft = drafts[lineId] || {};
+            return Boolean(draft?.metadata?.invalidated || draft?.metadata?.gantt_invalidated);
+        });
+        if (!invalidRows.length) {
+            return { ok: true, invalidRows: [] };
+        }
+        return { ok: false, invalidRows };
+    }, [drafts]);
+
+    const onMarkGanttDraftApplied = useCallback((payload = {}) => payload, []);
+
     const executeApproveCurrentGantt = async () => {
         const targetRows = visibleCalculableRows.filter((row) => {
             const lineId = String(row.budget_line_id);
@@ -15165,6 +16157,15 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             return hasPersistedPendingApproval(row, draft) || Object.keys(draft).length > 0;
         });
         if (!targetRows.length) return;
+        const preflight = await onPreflightGanttDraftApply(targetRows);
+        if (preflight.ok === false) {
+            await appAlert({
+                title: 'Borrador Gantt no aplicable',
+                message: `Hay ${preflight.invalidRows?.length || 0} línea(s) invalidadas por cambios deterministas. Descártalas o ajústalas antes de aplicar globalmente el Gantt.`,
+                tone: 'warning',
+            });
+            return;
+        }
         setApprovalSaving(true);
         try {
             const confirmationStamp = new Date().toISOString();
@@ -15177,13 +16178,19 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             setPredecessorPickerRowId(null);
             setResourceEditorRowId(null);
             await onSyncValoradoFromGantt?.({ silent: true, source: 'gantt_approval' });
+            onMarkGanttDraftApplied({
+                application_result: {
+                    source: 'gantt_approval',
+                    persisted_line_ids: persisted.lineIds,
+                },
+            });
             await appAlert({
                 title: 'Cronograma confirmado',
                 message: 'El estado actual del Gantt quedó aprobado como nueva referencia confirmada. Si el Valorado estaba derivado desde Gantt, también se resincronizó junto con Caja.',
                 tone: 'success',
             });
         } catch (error) {
-            console.error('Error confirmando cronograma Gantt:', error);
+            globalThis.reportClientError?.('Error confirmando cronograma Gantt:', error);
             await appAlert({
                 title: 'No se pudo confirmar',
                 message: error?.response?.data?.detail || error?.message || 'No fue posible confirmar el cronograma actual.',
@@ -15232,7 +16239,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 tone: 'success',
             });
         } catch (error) {
-            console.error('Error restaurando cronograma confirmado:', error);
+            globalThis.reportClientError?.('Error restaurando cronograma confirmado:', error);
             await appAlert({
                 title: 'No se pudo restaurar',
                 message: error?.response?.data?.detail || error?.message || 'No fue posible restaurar el cronograma confirmado.',
@@ -15252,7 +16259,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 actionLabel: '',
             });
         } catch (error) {
-            console.error('Error recargando Gantt desde presupuesto:', error);
+            globalThis.reportClientError?.('Error recargando Gantt desde presupuesto:', error);
             setBudgetSyncNotice({
                 tone: 'danger',
                 message: 'No se pudo recargar la sincronización desde Presupuesto.',
@@ -15279,7 +16286,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 context: lastBudgetSyncEvent,
             });
         } catch (error) {
-            console.error('Error preparando comparación con Presupuesto:', error);
+            globalThis.reportClientError?.('Error preparando comparación con Presupuesto:', error);
             await appAlert({
                 title: 'No se pudo preparar la comparación',
                 message: error?.response?.data?.detail || error?.message || 'No fue posible comparar el tanteo actual con la versión recalculada desde Presupuesto.',
@@ -16232,7 +17239,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 }
                 setTaskActionMenu(null);
             } catch (error) {
-                console.error('Error fusionando selección intertramo:', error);
+                globalThis.reportClientError?.('Error fusionando selección intertramo:', error);
                 await appAlert({
                     title: 'No se pudo fusionar la selección',
                     message: error?.response?.data?.detail || error?.message || 'No fue posible reajustar el Cronograma Valorado para fusionar las subbarras seleccionadas.',
@@ -16360,7 +17367,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 tone: 'success',
             });
         } catch (error) {
-            console.error('Error fusionando tramos entre padres distintos:', error);
+            globalThis.reportClientError?.('Error fusionando tramos entre padres distintos:', error);
             await appAlert({
                 title: 'No se pudo fusionar',
                 message: error?.response?.data?.detail || error?.message || 'No fue posible reajustar el Cronograma Valorado para fusionar los tramos seleccionados.',
@@ -16545,7 +17552,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             setQuickSuccessorLagValue('0');
             setQuickSuccessorLagUnit('day');
         } catch (error) {
-            console.error('Error creando dependencia rápida de Gantt:', error);
+            globalThis.reportClientError?.('Error creando dependencia rápida de Gantt:', error);
             setQuickSuccessorSubmitError(error?.response?.data?.detail || error?.message || 'No se pudo guardar la dependencia solicitada.');
         } finally {
             setQuickSuccessorSubmitting(false);
@@ -16765,7 +17772,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             setConfigSaved(true);
             setConfigPanelOpen(false);
         } catch (error) {
-            console.error('Error guardando configuración Gantt:', error);
+            globalThis.reportClientError?.('Error guardando configuración Gantt:', error);
             setConfigError(error?.response?.data?.detail || error?.message || 'No se pudo guardar la configuración Gantt.');
         } finally {
             setConfigSaving(false);
@@ -16780,7 +17787,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             await onReloadTrabajoHolidayCalendar();
             setConfigSaved(true);
         } catch (error) {
-            console.error('Error recargando festivos oficiales del proyecto:', error);
+            globalThis.reportClientError?.('Error recargando festivos oficiales del proyecto:', error);
             setConfigError(error?.response?.data?.detail || error?.message || 'No se pudo recargar el calendario oficial del proyecto.');
         } finally {
             setConfigSaving(false);
@@ -16804,7 +17811,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             setHolidayDraft({ date: '', name: '' });
             setConfigSaved(true);
         } catch (error) {
-            console.error('Error reseteando calendario festivo del proyecto:', error);
+            globalThis.reportClientError?.('Error reseteando calendario festivo del proyecto:', error);
             setConfigError(error?.response?.data?.detail || error?.message || 'No se pudo resetear el calendario festivo del proyecto.');
         } finally {
             setConfigSaving(false);
@@ -16862,7 +17869,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             setHolidayDraft({ date: '', name: '' });
             setConfigSaved(true);
         } catch (error) {
-            console.error('Error añadiendo festivo manual del proyecto:', error);
+            globalThis.reportClientError?.('Error añadiendo festivo manual del proyecto:', error);
             setConfigError(error?.response?.data?.detail || error?.message || 'No se pudo añadir el festivo manual del proyecto.');
         } finally {
             setConfigSaving(false);
@@ -16880,7 +17887,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             });
             setConfigSaved(true);
         } catch (error) {
-            console.error('Error quitando festivo del proyecto:', error);
+            globalThis.reportClientError?.('Error quitando festivo del proyecto:', error);
             setConfigError(error?.response?.data?.detail || error?.message || 'No se pudo quitar el festivo del calendario del proyecto.');
         } finally {
             setConfigSaving(false);
@@ -16933,7 +17940,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 tone: 'success',
             });
         } catch (error) {
-            console.error('Error importando XML de Microsoft Project al Gantt:', error);
+            globalThis.reportClientError?.('Error importando XML de Microsoft Project al Gantt:', error);
             await appAlert({
                 title: 'No se pudo importar',
                 message: error.response?.data?.detail || 'No fue posible importar el XML de Microsoft Project.',
@@ -17559,7 +18566,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                     actionLabel: '',
                 });
             } catch (error) {
-                console.error('Error reordenando hito manual del Gantt:', error);
+                globalThis.reportClientError?.('Error reordenando hito manual del Gantt:', error);
                 await appAlert({
                     title: 'No se pudo mover el hito',
                     message: error?.response?.data?.detail || error?.message || 'No fue posible reordenar verticalmente el hito.',
@@ -17596,7 +18603,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 actionLabel: '',
             });
         } catch (error) {
-            console.error('Error reordenando línea del Gantt:', error);
+            globalThis.reportClientError?.('Error reordenando línea del Gantt:', error);
             await appAlert({
                 title: 'No se pudo mover la línea',
                 message: error?.response?.data?.detail || error?.message || 'No fue posible reordenar la línea del Gantt.',
@@ -17778,15 +18785,19 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 className="hidden"
                 onChange={handleMsProjectImportFileChange}
             />
-            <GanttParetoModal
-                isOpen={paretoOpen}
-                onClose={() => setParetoOpen(false)}
-                presupuestoId={selectedBudget?.id}
-                onNavigateToItem={handleNavigateParetoItem}
-                onOpenReport={onOpenParetoReport}
-                rows={rows}
-                valorado={valorado}
-            />
+            {paretoOpen ? (
+                <React.Suspense fallback={null}>
+                    <GanttParetoModal
+                        isOpen={paretoOpen}
+                        onClose={() => setParetoOpen(false)}
+                        presupuestoId={selectedBudget?.id}
+                        onNavigateToItem={handleNavigateParetoItem}
+                        onOpenReport={onOpenParetoReport}
+                        rows={rows}
+                        valorado={valorado}
+                    />
+                </React.Suspense>
+            ) : null}
             <div className="flex min-w-0 flex-wrap items-center gap-2.5 overflow-visible">
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2.5">
                     <ControlRail className="h-[60px] min-w-[260px] flex-[0.84_1_16rem] px-2 py-1.5">
@@ -17905,14 +18916,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         {true ? (
                             <>
                                 <ControlRail className="h-[60px] min-w-0 flex-1 gap-1.5 px-2 py-1.5">
-                                    <div
-                                        className="relative flex h-full shrink-0 items-center gap-1.5"
-                                        onBlurCapture={(event) => {
-                                            if (!event.currentTarget.contains(event.relatedTarget)) {
-                                                setToolsMenuOpen(false);
-                                            }
-                                        }}
-                                    >
+                                    <div className="relative flex h-full shrink-0 items-center gap-1.5">
                                         <ControlRailIconButton
                                             ref={toolsButtonRef}
                                             onClick={() => setToolsMenuOpen((current) => !current)}
@@ -17933,9 +18937,49 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                         >
                                             <BarChart3 className="h-4 w-4" />
                                         </ControlRailIconButton>
+                                        <ControlRailIconButton
+                                            ref={apuPlanningSignalsButtonRef}
+                                            data-testid="gantt-apu-planning-signals-button"
+                                            onClick={toggleApuPlanningSignalsPinned}
+                                            onPointerEnter={openApuPlanningSignals}
+                                            onPointerLeave={scheduleCloseApuPlanningSignals}
+                                            onFocus={openApuPlanningSignals}
+                                            onBlur={scheduleCloseApuPlanningSignals}
+                                            active={apuPlanningSignalsPinned}
+                                            tooltip={suppressTopRailTooltips ? '' : (
+                                                selectedTaskRow?.is_calculable && selectedTaskRow?.apu_id
+                                                    ? apuPlanningSignalsPinned
+                                                        ? 'Semáforos APU fijados; pulsa para desacoplar'
+                                                        : 'Semáforos de planificación del APU seleccionado'
+                                                    : 'Selecciona una actividad calculable vinculada a un APU'
+                                            )}
+                                            aria-label={apuPlanningSignalsPinned ? 'Desacoplar semáforos APU' : 'Abrir y fijar semáforos APU'}
+                                            aria-expanded={apuPlanningSignalsOpen}
+                                            aria-controls="gantt-apu-planning-signals-panel"
+                                            disabled={!selectedTaskRow?.is_calculable || !selectedTaskRow?.apu_id}
+                                        >
+                                            <Gauge className="h-4 w-4" />
+                                        </ControlRailIconButton>
+                                        {apuPlanningSignalsOpen && apuPlanningSignalsPanelStyle
+                                            ? createPortal(
+                                                <div style={apuPlanningSignalsPanelStyle}>
+                                                    <GanttApuPlanningSignalsPanel
+                                                        model={selectedTaskApuPlanningSignals}
+                                                        pinned={apuPlanningSignalsPinned}
+                                                        currency={valorado?.moneda || 'USD'}
+                                                        moneyDecimals={valorado?.dec_moneda ?? 2}
+                                                        onTogglePinned={toggleApuPlanningSignalsPinned}
+                                                        onPointerEnter={openApuPlanningSignals}
+                                                        onPointerLeave={scheduleCloseApuPlanningSignals}
+                                                    />
+                                                </div>,
+                                                document.body
+                                            )
+                                            : null}
                                         {toolsMenuOpen && toolsMenuStyle
                                             ? createPortal(
                                                 <motion.div
+                                                    ref={toolsMenuRef}
                                                     initial={{ opacity: 0, y: -6, scale: 0.96 }}
                                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                                     transition={{ type: 'spring', stiffness: 300, damping: 25, mass: 0.82 }}
@@ -17951,6 +18995,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     <div className="gantt-dark-scrollbar max-h-[20rem] space-y-1.5 overflow-y-auto pr-1">
                                                         <button
                                                             type="button"
+                                                            onMouseDown={(event) => {
+                                                                event.preventDefault();
+                                                            }}
                                                             onClick={() => {
                                                                 setToolsMenuOpen(false);
                                                                 if (hasConfirmedUndoState && !restoreConfirmedSaving) {
@@ -17965,6 +19012,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         </button>
                                                         <button
                                                             type="button"
+                                                            onMouseDown={(event) => {
+                                                                event.preventDefault();
+                                                            }}
                                                             onClick={() => {
                                                                 setToolsMenuOpen(false);
                                                                 restoreOriginalGanttState();
@@ -17991,6 +19041,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         </button>
                                                         <button
                                                             type="button"
+                                                            onMouseDown={(event) => {
+                                                                event.preventDefault();
+                                                            }}
                                                             onClick={() => {
                                                                 setToolsMenuOpen(false);
                                                                 setHistoryPanelOpen(true);
@@ -18002,6 +19055,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         </button>
                                                         <button
                                                             type="button"
+                                                            onMouseDown={(event) => {
+                                                                event.preventDefault();
+                                                            }}
                                                             onClick={() => {
                                                                 setToolsMenuOpen(false);
                                                                 void handleFactoryResetCronogramas();
@@ -18732,7 +19788,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         const lineId = String(resolveRowLineId(row) || row.budget_line_id || row.linea_id || '');
                         const draft = drafts[lineId] || {};
                         const effectiveRow = applyGanttRowDraft(row, draft, configDraft);
-                        const effectiveFinishDate = row.is_calculable ? resolveGanttRowFinishDate(row, draft, configDraft) : null;
+                        const effectiveFinishDate = row.is_calculable ? resolveGanttRowFinishDate(row, draft, scheduleConfig) : null;
                         const rowHeightPx = resolveGanttRowHeightPx(row);
                         const planningNode = displayPlanningMap.get(lineId) || planningAnalysis.get(lineId);
                         const cpmDiagnostics = resolveBackendCpmDiagnostics(row, draft);
@@ -18741,7 +19797,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         const durationModelSignal = resolveDurationModelRowSignal(row, draft);
                         const durationTypePresentation = resolveGanttDurationTypePresentation(row, draft, configDraft, durationDisplayUnit);
                         const operationalSummary = resolveGanttOperationalSummary(row, draft);
-                        const subbarVisuals = buildGanttSubbarVisuals(row, draft, timelineSegments, segmentColumnWidth, configDraft, valorado, effectiveTimeScale);
+                        const subbarVisuals = buildGanttSubbarVisuals(row, draft, timelineSegments, segmentColumnWidth, scheduleConfig, valorado, effectiveTimeScale);
                         const operationalTooltip = subbarVisuals.length
                             ? `${subbarVisuals.length} tramo(s) operativo(s) visible(s).${operationalSummary.hasSubbars ? `\n${operationalSummary.acceptedSubbarCount} aceptada(s) · ${operationalSummary.confirmedSubbarCount} confirmada(s).` : '\nDerivados del Cronograma Valorado como tramos iniciales.'}${operationalSummary.hasManualTemporalWindow ? '\nIncluye ventana temporal manual operativa.' : ''}`
                             : operationalSummary.hasManualTemporalWindow
@@ -19170,7 +20226,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                 </div>
                                 <div className="px-3 py-1.5" style={ganttColumnSettings.getCellGridStyle('start')}>
                                     {row.is_calculable ? (
-                                        <GanttHeaderTooltip content={`${buildGanttSubbarVisuals(row, draft, timelineSegments, segmentColumnWidth, configDraft, valorado, effectiveTimeScale).length ? 'Inicio global de la línea: ' : 'Inicio real: '}${formatDateTime(draft.start_date || resolveVisibleRowStartDate(row, projectStartConfigDisplay))}`}>
+                                        <GanttHeaderTooltip content={`${buildGanttSubbarVisuals(row, draft, timelineSegments, segmentColumnWidth, scheduleConfig, valorado, effectiveTimeScale).length ? 'Inicio global de la línea: ' : 'Inicio real: '}${formatDateTime(draft.start_date || resolveVisibleRowStartDate(row, projectStartConfigDisplay))}`}>
                                             {editingStartRowId === lineId ? (
                                                 <AnimatedDateInput
                                                     type="datetime-local"
@@ -19561,12 +20617,12 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                             </div>
                         );
                     })}
-                    {rowVirtualWindow.bottomSpacerPx > 0 ? (
+                    {rowVirtualBottomSpacerPx > 0 ? (
                         <div
                             aria-hidden="true"
                             style={{
                                 width: `${ganttLayout.dataGridContentWidth}px`,
-                                height: `${rowVirtualWindow.bottomSpacerPx}px`,
+                                height: `${rowVirtualBottomSpacerPx}px`,
                             }}
                         />
                     ) : null}
@@ -21396,7 +22452,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         const geometryRow = effectiveRow;
                         const baseGeometryRow = applyGanttRowDraft(row, draft, configDraft);
                         const ghostGeometryRow = previewDraft ? baseGeometryRow : null;
-                        const bar = buildBarGeometry(geometryRow, timelineSegments, segmentColumnWidth, configDraft);
+                        const bar = buildBarGeometry(geometryRow, timelineSegments, segmentColumnWidth, scheduleConfig);
                         const baseBarGeometry = buildBarGeometry(baseGeometryRow, timelineSegments, segmentColumnWidth, configDraft);
                         const isDirty = Object.keys(draft).length > 0;
                         const isSaving = savingId === lineId;
@@ -22762,10 +23818,10 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                             </div>
                         );
                     })}
-                    {rowVirtualWindow.bottomSpacerPx > 0 ? (
+                    {rowVirtualBottomSpacerPx > 0 ? (
                         <div
                             aria-hidden="true"
-                            style={{ width: `${timelineCanvasWidthPx}px`, height: `${rowVirtualWindow.bottomSpacerPx}px` }}
+                            style={{ width: `${timelineCanvasWidthPx}px`, height: `${rowVirtualBottomSpacerPx}px` }}
                         />
                     ) : null}
                     </div>
@@ -23322,7 +24378,10 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 }}
                 onChangeDraftMetadata={(metadataPatch) => {
                     if (!resourceEditorRowId) return;
-                    updateDraft(String(resourceEditorRowId), { metadata: metadataPatch });
+                    const lineId = String(resourceEditorRowId);
+                    const session = resourceEditorSessionRef.current;
+                    if (!session.active || session.lineId !== lineId) return;
+                    updateDraft(lineId, { metadata: metadataPatch });
                 }}
             />
             {compareDialog?.mode === 'approval' ? (

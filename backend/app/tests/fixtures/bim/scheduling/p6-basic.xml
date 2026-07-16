@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<APIBusinessObjects xmlns="http://xmlns.oracle.com/Primavera/P6/V23.12/API/BusinessObjects">
+  <Project>
+    <ObjectId>1</ObjectId><Id>P6-QA</Id><Name>P6 Interoperable</Name>
+    <DataDate>2026-07-13T08:00:00-05:00</DataDate>
+  </Project>
+  <Calendar>
+    <ObjectId>10</ObjectId><Name>Calendario P6 QA</Name><Type>Project</Type><HoursPerDay>8</HoursPerDay>
+    <StandardWorkWeek>
+      <StandardWorkHours><DayOfWeek>Monday</DayOfWeek></StandardWorkHours>
+      <StandardWorkHours><DayOfWeek>Tuesday</DayOfWeek></StandardWorkHours>
+      <StandardWorkHours><DayOfWeek>Wednesday</DayOfWeek></StandardWorkHours>
+      <StandardWorkHours><DayOfWeek>Thursday</DayOfWeek></StandardWorkHours>
+      <StandardWorkHours><DayOfWeek>Friday</DayOfWeek></StandardWorkHours>
+    </StandardWorkWeek>
+    <HolidayOrExceptions><HolidayOrException><Date>2026-07-24</Date></HolidayOrException></HolidayOrExceptions>
+  </Calendar>
+  <WBS><ObjectId>100</ObjectId><ProjectObjectId>1</ProjectObjectId><Code>1</Code><Name>Construccion</Name></WBS>
+  <WBS><ObjectId>101</ObjectId><ProjectObjectId>1</ProjectObjectId><ParentObjectId>100</ParentObjectId><Code>1.1</Code><Name>Estructura</Name></WBS>
+  <Activity>
+    <ObjectId>1000</ObjectId><ProjectObjectId>1</ProjectObjectId><WBSObjectId>101</WBSObjectId><CalendarObjectId>10</CalendarObjectId>
+    <Id>A1000</Id><Name>Inicio estructura</Name><Type>Start Milestone</Type>
+    <PlannedStartDate>2026-07-13T08:00:00-05:00</PlannedStartDate><PlannedFinishDate>2026-07-13T08:00:00-05:00</PlannedFinishDate>
+    <PlannedDuration>0</PlannedDuration><PercentComplete>100</PercentComplete><ActualStartDate>2026-07-13T08:00:00-05:00</ActualStartDate><ActualFinishDate>2026-07-13T08:00:00-05:00</ActualFinishDate>
+  </Activity>
+  <Activity>
+    <ObjectId>1001</ObjectId><ProjectObjectId>1</ProjectObjectId><WBSObjectId>101</WBSObjectId><CalendarObjectId>10</CalendarObjectId>
+    <Id>A1010</Id><Name>Ejecutar estructura</Name><Type>Task Dependent</Type>
+    <PlannedStartDate>2026-07-14T08:00:00-05:00</PlannedStartDate><PlannedFinishDate>2026-07-18T17:00:00-05:00</PlannedFinishDate>
+    <PlannedDuration>40</PlannedDuration><PercentComplete>25</PercentComplete>
+    <PrimaryConstraintType>Start On or After</PrimaryConstraintType><PrimaryConstraintDate>2026-07-14T08:00:00-05:00</PrimaryConstraintDate>
+  </Activity>
+  <Relationship>
+    <ObjectId>2000</ObjectId><ProjectObjectId>1</ProjectObjectId><PredecessorActivityObjectId>1000</PredecessorActivityObjectId>
+    <SuccessorActivityObjectId>1001</SuccessorActivityObjectId><Type>Finish to Start</Type><Lag>8</Lag>
+  </Relationship>
+  <Resource>
+    <ObjectId>3000</ObjectId><Id>MO-01</Id><Name>Cuadrilla estructura</Name><ResourceType>Labor</ResourceType>
+    <MaxUnitsPerTime>2</MaxUnitsPerTime><PricePerUnit>25</PricePerUnit>
+  </Resource>
+  <ResourceAssignment>
+    <ObjectId>4000</ObjectId><ProjectObjectId>1</ProjectObjectId><ActivityObjectId>1001</ActivityObjectId><ResourceObjectId>3000</ResourceObjectId>
+    <PlannedUnits>2</PlannedUnits><PlannedDuration>40</PlannedDuration><PlannedCost>1000</PlannedCost><ActualUnits>8</ActualUnits><ActualCost>200</ActualCost>
+  </ResourceAssignment>
+  <BaselineProject><ObjectId>5000</ObjectId><Name>Baseline QA</Name></BaselineProject>
+</APIBusinessObjects>

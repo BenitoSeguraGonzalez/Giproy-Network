@@ -877,7 +877,90 @@ def _calcular_precio_linea_presupuesto(
     )
 
 
-def refresh_presupuesto_prices(db: Session, presupuesto_id: int, *, commit: bool = True, sanitize_scope: bool = True):
+def _apply_active_functional_price_previews(
+    db: Session,
+    pres: Presupuesto,
+    detalles: list[PresupuestoDetalle],
+) -> list[int]:
+    """
+    Reaplica la modificacion oficial activa sobre el presupuesto recalculado.
+
+    El refresco base puede reconstruir precios desde el APU original; si existe una
+    modificacion determinada para proyecto/revision, esa modificacion manda.
+    """
+    try:
+        from app.services.project_functional_modification import project_functional_modification_service
+    except Exception:
+        return []
+
+    base_trabajo_id = getattr(getattr(pres, "proyecto", None), "base_trabajo_id", None)
+    if base_trabajo_id is None:
+        base_trabajo_id = next(
+            (
+                getattr(getattr(linea, "apu", None), "base_trabajo_id", None)
+                for linea in detalles
+                if getattr(linea, "apu_id", None)
+            ),
+            None,
+        )
+
+    resolved = project_functional_modification_service.resolve_official_source(
+        db,
+        empresa_id=pres.empresa_id,
+        proyecto_id=pres.proyecto_id,
+        presupuesto_id=pres.id,
+        base_trabajo_id=base_trabajo_id,
+        revision=pres.revision,
+    )
+    summary = resolved.get("summary") if isinstance(resolved, dict) else {}
+    price_previews = summary.get("price_previews") if isinstance(summary, dict) else []
+    if not isinstance(price_previews, list) or not price_previews:
+        return []
+
+    previews_by_line_id: dict[int, dict] = {}
+    for preview in price_previews:
+        if not isinstance(preview, dict):
+            continue
+        try:
+            line_id = int(preview.get("linea_presupuesto_id") or 0)
+        except (TypeError, ValueError):
+            continue
+        if line_id <= 0:
+            continue
+        previews_by_line_id[line_id] = preview
+
+    updated_line_ids: list[int] = []
+    for linea in detalles:
+        preview = previews_by_line_id.get(int(linea.id or 0))
+        if not preview:
+            continue
+        try:
+            unit_price = Decimal(str(preview.get("total_unit_price")))
+        except Exception:
+            continue
+        if unit_price < 0:
+            continue
+        linea.precio_unitario = unit_price
+        linea.precio_total = calculate_budget_line_total(
+            quantity=linea.cantidad or "0",
+            unit_price=unit_price,
+            money_decimals=pres.dec_moneda,
+            calc_decimals=pres.dec_calculos,
+        )
+        linea.tanteo_activo = True
+        updated_line_ids.append(int(linea.id))
+
+    return sorted(set(updated_line_ids))
+
+
+def refresh_presupuesto_prices(
+    db: Session,
+    presupuesto_id: int,
+    *,
+    commit: bool = True,
+    sanitize_scope: bool = True,
+    apply_active_functional_overlay: bool = True,
+):
     """
     Recalcula los precios unitarios y subtotales de todas las líneas
     del presupuesto consultando los APUs actuales.
@@ -943,6 +1026,8 @@ def refresh_presupuesto_prices(db: Session, presupuesto_id: int, *, commit: bool
         else:
             linea.tanteo_activo = False
 
+    if apply_active_functional_overlay:
+        _apply_active_functional_price_previews(db, pres, detalles)
     calculate_presupuesto_totals(db, pres)
     if commit:
         db.commit()
@@ -952,7 +1037,12 @@ def refresh_presupuesto_prices(db: Session, presupuesto_id: int, *, commit: bool
 
 
 
-def propagate_apu_change_to_presupuestos(db: Session, apu_id: int):
+def propagate_apu_change_to_presupuestos(
+    db: Session,
+    apu_id: int,
+    *,
+    apply_active_functional_overlay: bool = True,
+):
     """
     Encuentra todos los Presupuestos en estado "Borrador" o "En Elaboración" 
     que contengan el APU modificado, y gatilla su recálculo.
@@ -965,7 +1055,11 @@ def propagate_apu_change_to_presupuestos(db: Session, apu_id: int):
         ).distinct().all()
 
     for (p_id,) in presupuestos_afectados:
-        refresh_presupuesto_prices(db, p_id)
+        refresh_presupuesto_prices(
+            db,
+            p_id,
+            apply_active_functional_overlay=apply_active_functional_overlay,
+        )
         
     return len(presupuestos_afectados)
 

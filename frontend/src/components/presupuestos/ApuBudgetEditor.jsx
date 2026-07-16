@@ -164,8 +164,11 @@ const ApuBudgetEditor = ({
         return map;
     }, [subcategorias]);
 
-    const resolveItemCategoryId = useCallback((item, isApu = false) => {
-        if (isApu || item?.isApu || item?.apu_hijo_id) return 5;
+    const resolveItemCategoryId = useCallback((item, isApu = false, options = {}) => {
+        const { asEditorLine = false } = options;
+        if (isApu || item?.isApu || item?.apu_hijo_id) {
+            return asEditorLine ? 2 : 5;
+        }
 
         const directCategory = Number(item?.categoria_id || item?.recurso?.categoria_id || 0);
         if (Number.isFinite(directCategory) && directCategory >= 1 && directCategory <= 5) {
@@ -231,7 +234,7 @@ const ApuBudgetEditor = ({
     useEffect(() => {
         fetchInitialData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [apuId, projectBaseId]);
+    }, [apuId, projectBaseId, projectRevision, activePresupuesto?.proyecto_id]);
 
     const showToast = (message, type = 'success') => {
         setToast({ message, type });
@@ -240,7 +243,7 @@ const ApuBudgetEditor = ({
 
     const fetchInitialData = async () => {
         if (!apuId || !projectBaseId) {
-            console.error("Missing IDs for APU Budget Editor:", { apuId, projectBaseId });
+            globalThis.reportClientError?.("Missing IDs for APU Budget Editor:", { apuId, projectBaseId });
             appAlert(`Error de contexto: IDs faltantes (APU: ${apuId}, Base: ${projectBaseId})`);
             onClose();
             return;
@@ -251,13 +254,16 @@ const ApuBudgetEditor = ({
             const empId = selectedEmpresa?.id || user?.empresa_id;
             
             // 1. Fetch APU Detail
-            const apuRes = await apusApi.getById(apuId, empId);
+            const apuContextParams = {
+                ...(activePresupuesto?.proyecto_id ? { proyecto_id: activePresupuesto.proyecto_id } : {}),
+                ...(projectRevision !== undefined ? { revision: projectRevision } : {}),
+            };
+            const apuRes = await apusApi.getById(apuId, empId, apuContextParams);
             const fullApu = apuRes.data;
             // 2. Fetch Resources for the project base
             let recRes = await recursosApi.getAll(projectBaseId, null, empId, projectRevision);
             if ((!recRes.data || recRes.data.length === 0) && projectRevision !== null) {
                 // FALLBACK: Si no hay nada en la revisión actual, intentar obtener del maestro (null)
-                console.log("No resources in revision", projectRevision, "falling back to master...");
                 recRes = await recursosApi.getAll(projectBaseId, null, empId, null);
             }
             const allRecsRaw = recRes.data || [];
@@ -266,18 +272,22 @@ const ApuBudgetEditor = ({
             let sideApusRes = await apusApi.getAll({
                 base_trabajo_id: projectBaseId,
                 empresa_id: empId,
-                revision: projectRevision
-            });
+                revision: projectRevision,
+                ...(activePresupuesto?.proyecto_id ? { proyecto_id: activePresupuesto.proyecto_id } : {})
+            }, { summary: true });
             if ((!sideApusRes.data || sideApusRes.data.length === 0) && projectRevision !== null) {
-                console.log("No APUs in revision", projectRevision, "falling back to master...");
-                sideApusRes = await apusApi.getAll({ base_trabajo_id: projectBaseId, empresa_id: empId, revision: null });
+                sideApusRes = await apusApi.getAll({
+                    base_trabajo_id: projectBaseId,
+                    empresa_id: empId,
+                    revision: null,
+                    ...(activePresupuesto?.proyecto_id ? { proyecto_id: activePresupuesto.proyecto_id } : {})
+                }, { summary: true });
             }
             const sideApus = (sideApusRes.data || []).map(a => ({ ...a, isApu: true, categoria_id: 5 }));
 
             // 2b. Fetch Subcategories for Sidebar
             let subRes = await subcategoriasItemsApi.getAll(projectBaseId, null, empId, projectRevision);
             if ((!subRes.data || subRes.data.length === 0) && projectRevision !== null) {
-                 console.log("No subcategories in revision", projectRevision, "falling back to master...");
                  subRes = await subcategoriasItemsApi.getAll(projectBaseId, null, empId, null);
             }
             setSubcategorias(subRes.data || []);
@@ -294,7 +304,7 @@ const ApuBudgetEditor = ({
             const mappedLineas = (fullApu.lineas || []).map((l, idx) => {
                 const isApu = !!l.apu_hijo_id;
                 const item = l.apu_hijo || l.recurso;
-                const resolvedCategoryId = resolveItemCategoryId(item, isApu);
+                const resolvedCategoryId = resolveItemCategoryId(item, isApu, { asEditorLine: true });
                 const subcategoryMeta = resolveItemSubcategoryMeta(item);
                 
                 return {
@@ -333,7 +343,7 @@ const ApuBudgetEditor = ({
             setRecursos(allRecs);
 
         } catch (error) {
-            console.error("Error loading APU for budget:", error);
+            globalThis.reportClientError?.("Error loading APU for budget:", error);
             const detail = error.response?.data?.detail || error.message;
             const detailStr = typeof detail === 'object' ? JSON.stringify(detail, null, 2) : detail;
             appAlert(`Error al cargar el APU: ${detailStr}`);
@@ -427,7 +437,7 @@ const ApuBudgetEditor = ({
 
     // -- Handlers --
     const addLinea = (item, isApu, catIdFallback) => {
-        const itemCatId = resolveItemCategoryId(item, isApu) || catIdFallback;
+        const itemCatId = resolveItemCategoryId(item, isApu, { asEditorLine: true }) || catIdFallback;
         const subcategoryMeta = resolveItemSubcategoryMeta(item);
         const newLine = {
             unique_key: `new-${Date.now()}-${Math.random()}`,
@@ -531,7 +541,7 @@ const ApuBudgetEditor = ({
             }
             return true;
         } catch (error) {
-            console.error("Error saving APU from budget:", error);
+            globalThis.reportClientError?.("Error saving APU from budget:", error);
             const detail = error.response?.data?.detail || error.message;
             const detailStr = typeof detail === 'object' ? JSON.stringify(detail, null, 2) : detail;
             appAlert(`Error al guardar el APU: ${detailStr}`);
@@ -1121,17 +1131,6 @@ const ApuBudgetEditor = ({
                                         </div>
                                     );
                                 })}
-
-                                {/* APU Hijas Category 5 */}
-                                {formApu?.lineas.some(l => l.categoria_id === 5) && (
-                                    <div>
-                                        <div className="px-6 py-2 bg-zinc-50 flex items-center gap-2">
-                                            <span className="text-[10px]">📑</span>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">APUs Relacionados (Hijos)</span>
-                                        </div>
-                                        {formApu.lineas.filter(l => l.categoria_id === 5).map((l, idx) => renderEditorLineRow(l, idx, 5))}
-                                    </div>
-                                )}
 
                                 {formApu?.lineas.length === 0 && (
                                     <div className="py-20 text-center flex flex-col items-center gap-3">

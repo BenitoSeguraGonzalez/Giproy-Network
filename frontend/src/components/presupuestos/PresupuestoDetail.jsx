@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { presupuestosApi } from '../../api/presupuestos';
 import { proyectosApi } from '../../api/proyectos';
+import { equipoApi } from '../../api/equipo';
 import { usePresupuestoActions, usePresupuestoData, usePresupuestoSelection } from '../../context/PresupuestoContext';
 import { AuthContext } from '../../context/AuthContext';
 import reportingApi from '../../api/reporting';
@@ -28,17 +29,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { normalizeSearchToken } from '../../utils/normalizeSearch';
 import CatalogoApuTab from './CatalogoApuTab';
 import LineasPresupuestoTab from './LineasPresupuestoTab';
-import TanteoTab from './TanteoTab';
-import ApuEditorModal from './ApuEditorModal';
 import ClearSearchField from '../ui/ClearSearchField';
 import { LiquidButton } from '../ui/liquid-button';
 import { getIndirectosStatus } from '../../utils/indirectosStatus';
-import IndirectosModal from './IndirectosModal';
-import ParetoModal from './ParetoModal';
-import NotasGeneralesModal from './NotasGeneralesModal';
-import { appAlert, appConfirm } from '../../utils/appDialog';
-import CommonReportPreviewModal from '../reporting/CommonReportPreviewModal';
-import ReportGenerationModal from '../reporting/ReportGenerationModal';
+import { appAlert, appConfirm, appPrompt } from '../../utils/appDialog';
 import {
     readPortableWorkspaceOverride,
     resolvePortableWorkspace
@@ -52,6 +46,13 @@ import ProjectSectionReportButton, {
 } from '../projects/ProjectSectionReportButton';
 
 const MotionDiv = motion.div;
+const TanteoTab = React.lazy(() => import('./TanteoTab'));
+const ApuEditorModal = React.lazy(() => import('./ApuEditorModal'));
+const IndirectosModal = React.lazy(() => import('./IndirectosModal'));
+const ParetoModal = React.lazy(() => import('./ParetoModal'));
+const NotasGeneralesModal = React.lazy(() => import('./NotasGeneralesModal'));
+const CommonReportPreviewModal = React.lazy(() => import('../reporting/CommonReportPreviewModal'));
+const ReportGenerationModal = React.lazy(() => import('../reporting/ReportGenerationModal'));
 
 const cleanClipboardNumberCell = (value) => String(value || '').replace(/\u00A0/g, ' ').trim();
 
@@ -129,6 +130,15 @@ const formatBudgetLinePreviewReference = (line) => {
     const itemVisible = String(line?.codigo_item || '').trim();
     if (itemVisible) return `Item ${itemVisible}`;
     return 'Item S/N';
+};
+
+const resolveEquipoErrorMessage = (error) => {
+    const detail = error?.response?.data?.detail;
+    if (typeof detail === 'string') return detail;
+    if (detail?.message) return detail.message;
+    if (detail?.code === 'equipo_edt_scope_denied') return 'No tienes alcance Equipo para esta EDT.';
+    if (detail?.code === 'equipo_lock_conflict') return 'La línea o EDT ya tiene un lock Equipo activo.';
+    return error?.message || 'No se pudo procesar la operación Equipo.';
 };
 
 const normalizeBudgetMiniMapSearch = (value) => normalizeSearchToken(value);
@@ -648,6 +658,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
     const currentEmpresaId = selectedEmpresa?.id || user?.empresa_id || null;
     const [editingApuId, setEditingApuId] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [equipoLineAction, setEquipoLineAction] = useState('');
     const [reportPreview, setReportPreview] = useState(null);
     const [showReportPreview, setShowReportPreview] = useState(false);
     const [showBudgetReportMenu, setShowBudgetReportMenu] = useState(false);
@@ -834,7 +845,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
                 await refreshNotesSummary(presupuestoId);
                 await markBudgetOpened(presupuestoId);
             } catch (error) {
-                console.error("Error cargando detalle del presupuesto:", error);
+                globalThis.reportClientError?.("Error cargando detalle del presupuesto:", error);
                 // No limpiar estados si hubo error para no causar parpadeo visual agresivo,
                 // el ErrorBoundary se encargará si es fatal.
             } finally {
@@ -893,7 +904,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
             await presupuestosApi.markGeneralNotesOpened(activePresupuesto?.id, currentEmpresaId);
             await refreshNotesSummary(activePresupuesto?.id);
         } catch (error) {
-            console.error("Error marcando notas generales como vistas:", error);
+            globalThis.reportClientError?.("Error marcando notas generales como vistas:", error);
         }
     };
 
@@ -905,7 +916,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
             await presupuestosApi.markLineNotesOpened(linea.id, currentEmpresaId);
             await refreshNotesSummary(activePresupuesto?.id);
         } catch (error) {
-            console.error("Error marcando notas de línea como vistas:", error);
+            globalThis.reportClientError?.("Error marcando notas de línea como vistas:", error);
         }
     };
 
@@ -1027,7 +1038,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
                 tone: 'success',
             });
         } catch (error) {
-            console.error('Error aplicando cantidades desde portapapeles:', error);
+            globalThis.reportClientError?.('Error aplicando cantidades desde portapapeles:', error);
             await appAlert({
                 title: 'No se pudo aplicar el portapapeles',
                 message: 'No fue posible leer o aplicar las cantidades del portapapeles. Revisa el formato y vuelve a intentarlo.',
@@ -1070,6 +1081,85 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
             extension,
         });
     };
+
+    const handleEquipoLockLine = async (linea) => {
+        if (!linea?.id || !linea?.edt_id || !activePresupuesto?.proyecto_id) return;
+        const confirmed = await appConfirm({
+            title: 'Bloquear línea Equipo',
+            message: `Se registrará un lock colaborativo sobre ${formatBudgetLinePreviewReference(linea)}.`,
+            confirmLabel: 'Bloquear',
+            cancelLabel: 'Cancelar',
+            tone: 'info',
+        });
+        if (!confirmed) return;
+
+        setEquipoLineAction(`lock-${linea.id}`);
+        try {
+            await equipoApi.createLock({
+                empresa_id: currentEmpresaId,
+                proyecto_id: activePresupuesto.proyecto_id,
+                edt_id: linea.edt_id,
+                presupuesto_linea_id: linea.id,
+                reason: 'Lock solicitado desde Presupuesto clásico',
+            });
+            await appAlert({
+                title: 'Lock Equipo registrado',
+                message: 'La línea quedó marcada para trabajo colaborativo controlado.',
+                tone: 'success',
+            });
+        } catch (error) {
+            await appAlert({
+                title: 'No se pudo registrar el lock',
+                message: resolveEquipoErrorMessage(error),
+                tone: 'danger',
+            });
+        } finally {
+            setEquipoLineAction('');
+        }
+    };
+
+    const handleEquipoProposalLine = async (linea) => {
+        if (!linea?.id || !linea?.edt_id || !activePresupuesto?.proyecto_id) return;
+        const quantityValue = await appPrompt({
+            title: 'Proponer cantidad Equipo',
+            message: `Cantidad sugerida para ${formatBudgetLinePreviewReference(linea)}.`,
+            label: 'Cantidad propuesta',
+            placeholder: String(linea.cantidad ?? ''),
+            confirmLabel: 'Enviar propuesta',
+            cancelLabel: 'Cancelar',
+            tone: 'info',
+            size: 'compact',
+        });
+        if (quantityValue == null || String(quantityValue).trim() === '') return;
+
+        setEquipoLineAction(`proposal-${linea.id}`);
+        try {
+            await equipoApi.createProposal({
+                empresa_id: currentEmpresaId,
+                proyecto_id: activePresupuesto.proyecto_id,
+                edt_id: linea.edt_id,
+                presupuesto_linea_id: linea.id,
+                title: `Ajuste de cantidad ${formatBudgetLinePreviewReference(linea)}`,
+                description: 'Propuesta enviada desde Presupuesto clásico por colaborador Equipo.',
+                proposed_changes: {
+                    cantidad: String(quantityValue).trim(),
+                },
+            });
+            await appAlert({
+                title: 'Propuesta Equipo enviada',
+                message: 'Un administrador deberá aprobar o rechazar el cambio antes de aplicar el presupuesto.',
+                tone: 'success',
+            });
+        } catch (error) {
+            await appAlert({
+                title: 'No se pudo enviar la propuesta',
+                message: resolveEquipoErrorMessage(error),
+                tone: 'danger',
+            });
+        } finally {
+            setEquipoLineAction('');
+        }
+    };
     const resolvePresupuestoReportTemplateId = (variant = reportPreview?.variant || reportVariant) => {
         const templateKey = variant === 'indirectos' ? 'indirectos' : 'presupuestos';
         return activeProject?.plantillas_config?.[templateKey] || selectedEmpresa?.plantillas_config?.[templateKey] || "001";
@@ -1094,7 +1184,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
             setShowReportPreview(true);
             setShowBudgetReportMenu(false);
         } catch (error) {
-            console.error("Error al generar reporte:", error);
+            globalThis.reportClientError?.("Error al generar reporte:", error);
             appAlert(await extractBlobErrorMessage(error, "Error al generar el reporte profesional."));
         } finally {
             setGeneratingReport(false);
@@ -1116,7 +1206,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
             }, reportEmpresaId);
             downloadBlobResponse(response, buildPresupuestoReportFilename('xlsx'));
         } catch (error) {
-            console.error("Error al exportar reporte:", error);
+            globalThis.reportClientError?.("Error al exportar reporte:", error);
             appAlert(await extractBlobErrorMessage(error, "Error al exportar el reporte profesional."));
         } finally {
             setGeneratingReport(false);
@@ -1138,7 +1228,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
             }, reportEmpresaId);
             downloadBlobResponse(response, buildPresupuestoReportFilename('pdf'), 'application/pdf');
         } catch (error) {
-            console.error("Error al exportar reporte PDF:", error);
+            globalThis.reportClientError?.("Error al exportar reporte PDF:", error);
             appAlert(await extractBlobErrorMessage(error, "Error al exportar el reporte PDF."));
         } finally {
             setGeneratingReport(false);
@@ -1160,7 +1250,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
             }, reportEmpresaId);
             downloadBlobResponse(response, buildPresupuestoReportFilename('pdf'), 'application/pdf');
         } catch (error) {
-            console.error("Error al exportar reporte PDF desde Excel:", error);
+            globalThis.reportClientError?.("Error al exportar reporte PDF desde Excel:", error);
             appAlert(await extractBlobErrorMessage(error, "Error al exportar el reporte PDF desde Excel."));
         } finally {
             setGeneratingReport(false);
@@ -1302,6 +1392,8 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
                             notesSummary={notesSummary}
                             onEditApu={handleEditApuLinea}
                             onOpenLineNotes={handleOpenLineNotes}
+                            onEquipoLockLine={equipoLineAction ? null : handleEquipoLockLine}
+                            onEquipoProposalLine={equipoLineAction ? null : handleEquipoProposalLine}
                             minimapTargetNodeId={minimapTargetNodeId}
                             onMinimapTargetHandled={() => setMinimapTargetNodeId(null)}
                             onTreeReady={setBudgetMiniMapTree}
@@ -1309,11 +1401,13 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
                     </div>
 
                     {/* Collapsible Tanteo Panel */}
-                    {tanteoVisible && (
+                    {tanteoVisible ? (
                         <div className={`${isCompactViewport ? 'w-[320px]' : 'w-[380px]'} shrink-0 animate-in slide-in-from-right duration-300`}>
-                            <TanteoTab sidebar={true} onHide={() => setTanteoVisible(false)} />
+                            <React.Suspense fallback={null}>
+                                <TanteoTab sidebar={true} onHide={() => setTanteoVisible(false)} />
+                            </React.Suspense>
                         </div>
-                    )}
+                    ) : null}
                 </main>
             </div>
 
@@ -1334,55 +1428,77 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
             </div>
 
             {/* Modal Editor APU Inline */}
-            {editingApuId && (
-                <ApuEditorModal
-                    apuId={editingApuId}
-                    projectBaseId={activeProyecto?.base_trabajo_id || activeProject?.base_trabajo_id || activePresupuesto?.proyecto?.base_trabajo_id}
-                    projectRevision={activeProyecto?.revision ?? activeProject?.revision ?? 0}
-                    onClose={() => {
-                        setEditingApuId(null);
-                        refreshActivePresupuesto();
-                    }}
-                />
-            )}
+            {editingApuId ? (
+                <React.Suspense fallback={null}>
+                    <ApuEditorModal
+                        apuId={editingApuId}
+                        projectBaseId={activeProyecto?.base_trabajo_id || activeProject?.base_trabajo_id || activePresupuesto?.proyecto?.base_trabajo_id}
+                        projectRevision={activeProyecto?.revision ?? activeProject?.revision ?? 0}
+                        onClose={() => {
+                            setEditingApuId(null);
+                            refreshActivePresupuesto();
+                        }}
+                    />
+                </React.Suspense>
+            ) : null}
 
             {/* Modals */}
-            <IndirectosModal
-                isOpen={isIndirectosOpen}
-                onClose={() => setIsIndirectosOpen(false)}
-                onSaved={() => refreshActivePresupuesto()}
-                presupuestoId={activePresupuesto?.id}
-            />
-            <ParetoModal
-                isOpen={isParetoOpen}
-                onClose={() => setIsParetoOpen(false)}
-                presupuestoId={activePresupuesto?.id}
-                onNavigateToItem={handleParetoNavigate}
-            />
-            <NotasGeneralesModal
-                isOpen={isNotasOpen}
-                onClose={() => setIsNotasOpen(false)}
-                presupuestoId={activePresupuesto?.id}
-                scope={notesModalScope}
-                linea={notesTargetLine}
-                onNoteCreated={handleNoteCreated}
-                readOnly={notesModalScope === 'linea' && notesTargetLine?.apu_id == null && notesTargetLine?.tipo !== 'CUENTA_PAQUETE'}
-            />
+            {isIndirectosOpen ? (
+                <React.Suspense fallback={null}>
+                    <IndirectosModal
+                        isOpen={isIndirectosOpen}
+                        onClose={() => setIsIndirectosOpen(false)}
+                        onSaved={() => refreshActivePresupuesto()}
+                        presupuestoId={activePresupuesto?.id}
+                    />
+                </React.Suspense>
+            ) : null}
+            {isParetoOpen ? (
+                <React.Suspense fallback={null}>
+                    <ParetoModal
+                        isOpen={isParetoOpen}
+                        onClose={() => setIsParetoOpen(false)}
+                        presupuestoId={activePresupuesto?.id}
+                        onNavigateToItem={handleParetoNavigate}
+                    />
+                </React.Suspense>
+            ) : null}
+            {isNotasOpen ? (
+                <React.Suspense fallback={null}>
+                    <NotasGeneralesModal
+                        isOpen={isNotasOpen}
+                        onClose={() => setIsNotasOpen(false)}
+                        presupuestoId={activePresupuesto?.id}
+                        scope={notesModalScope}
+                        linea={notesTargetLine}
+                        onNoteCreated={handleNoteCreated}
+                        readOnly={notesModalScope === 'linea' && notesTargetLine?.apu_id == null && notesTargetLine?.tipo !== 'CUENTA_PAQUETE'}
+                    />
+                </React.Suspense>
+            ) : null}
 
-            <CommonReportPreviewModal
-                isOpen={showReportPreview}
-                onClose={() => setShowReportPreview(false)}
-                preview={reportPreview}
-                onExportExcel={handleExportReportExcel}
-                onExportPdf={handleExportReportPdf}
-                onExportPdfFromExcel={handleExportReportPdfFromExcel}
-                exporting={generatingReport}
-            />
-            <ReportGenerationModal
-                isOpen={generatingReport}
-                title="Generando reporte"
-                message="Estamos preparando el reporte de presupuesto. La descarga comenzará automáticamente cuando esté listo."
-            />
+            {showReportPreview ? (
+                <React.Suspense fallback={null}>
+                    <CommonReportPreviewModal
+                        isOpen={showReportPreview}
+                        onClose={() => setShowReportPreview(false)}
+                        preview={reportPreview}
+                        onExportExcel={handleExportReportExcel}
+                        onExportPdf={handleExportReportPdf}
+                        onExportPdfFromExcel={handleExportReportPdfFromExcel}
+                        exporting={generatingReport}
+                    />
+                </React.Suspense>
+            ) : null}
+            {generatingReport ? (
+                <React.Suspense fallback={null}>
+                    <ReportGenerationModal
+                        isOpen={generatingReport}
+                        title="Generando reporte"
+                        message="Estamos preparando el reporte de presupuesto. La descarga comenzará automáticamente cuando esté listo."
+                    />
+                </React.Suspense>
+            ) : null}
 
             {/* Modal de Borrado de Tanteos con Doble Confirmación */}
             <AnimatePresence>
@@ -1442,7 +1558,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
                                                             setShowClearTanteoModal(false);
                                                             setClearTanteoStep(1);
                                                         } catch (error) {
-                                                            console.error("Error al limpiar tanteos:", error);
+                                                            globalThis.reportClientError?.("Error al limpiar tanteos:", error);
                                                             appAlert("Error al limpiar los tanteos.");
                                                         } finally {
                                                             setClearing(false);

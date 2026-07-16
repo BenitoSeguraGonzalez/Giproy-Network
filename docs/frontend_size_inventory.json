@@ -1,0 +1,393 @@
+{
+  "generated_by": "tools/ai_tools/frontend_size_inventory.py",
+  "scope": "frontend/src",
+  "totals": {
+    "files": 219,
+    "bytes": 6713248,
+    "lines": 120733
+  },
+  "areas": {
+    "App.css": {
+      "files": 1,
+      "bytes": 606,
+      "lines": 42
+    },
+    "App.jsx": {
+      "files": 1,
+      "bytes": 340,
+      "lines": 15
+    },
+    "__formula_responsive_harness.jsx": {
+      "files": 1,
+      "bytes": 559,
+      "lines": 13
+    },
+    "api": {
+      "files": 44,
+      "bytes": 403557,
+      "lines": 12712
+    },
+    "components": {
+      "files": 81,
+      "bytes": 3502494,
+      "lines": 62345
+    },
+    "constants": {
+      "files": 2,
+      "bytes": 13298,
+      "lines": 223
+    },
+    "context": {
+      "files": 3,
+      "bytes": 33257,
+      "lines": 797
+    },
+    "gantt-ff-harness.jsx": {
+      "files": 1,
+      "bytes": 6038,
+      "lines": 126
+    },
+    "hooks": {
+      "files": 6,
+      "bytes": 13133,
+      "lines": 401
+    },
+    "index.css": {
+      "files": 1,
+      "bytes": 13255,
+      "lines": 476
+    },
+    "layouts": {
+      "files": 1,
+      "bytes": 42355,
+      "lines": 676
+    },
+    "lib": {
+      "files": 1,
+      "bytes": 143,
+      "lines": 6
+    },
+    "main.jsx": {
+      "files": 1,
+      "bytes": 235,
+      "lines": 10
+    },
+    "pages": {
+      "files": 33,
+      "bytes": 2547400,
+      "lines": 39567
+    },
+    "routes": {
+      "files": 1,
+      "bytes": 8489,
+      "lines": 128
+    },
+    "utils": {
+      "files": 41,
+      "bytes": 128089,
+      "lines": 3196
+    }
+  },
+  "largest_files": [
+    {
+      "path": "frontend/src/components/projects/CronogramaGantt.jsx",
+      "area": "components",
+      "bytes": 1441405,
+      "lines": 23648
+    },
+    {
+      "path": "frontend/src/pages/Proyectos.jsx",
+      "area": "pages",
+      "bytes": 371797,
+      "lines": 5901
+    },
+    {
+      "path": "frontend/src/components/projects/Cronogramas.jsx",
+      "area": "components",
+      "bytes": 365990,
+      "lines": 6317
+    },
+    {
+      "path": "frontend/src/pages/MarketplaceAdminDashboard.jsx",
+      "area": "pages",
+      "bytes": 356445,
+      "lines": 5408
+    },
+    {
+      "path": "frontend/src/api/schema.d.ts",
+      "area": "api",
+      "bytes": 310113,
+      "lines": 10412
+    },
+    {
+      "path": "frontend/src/pages/Community.jsx",
+      "area": "pages",
+      "bytes": 305009,
+      "lines": 3939
+    },
+    {
+      "path": "frontend/src/pages/APUs.jsx",
+      "area": "pages",
+      "bytes": 262490,
+      "lines": 4228
+    },
+    {
+      "path": "frontend/src/components/projects/DatosProyecto.jsx",
+      "area": "components",
+      "bytes": 166752,
+      "lines": 2895
+    },
+    {
+      "path": "frontend/src/pages/SellerDashboard.jsx",
+      "area": "pages",
+      "bytes": 162515,
+      "lines": 2435
+    },
+    {
+      "path": "frontend/src/pages/Marketplace.jsx",
+      "area": "pages",
+      "bytes": 153047,
+      "lines": 2570
+    },
+    {
+      "path": "frontend/src/pages/Settings.jsx",
+      "area": "pages",
+      "bytes": 135739,
+      "lines": 2028
+    },
+    {
+      "path": "frontend/src/components/presupuestos/LineasPresupuestoTab.jsx",
+      "area": "components",
+      "bytes": 120694,
+      "lines": 2391
+    },
+    {
+      "path": "frontend/src/pages/Recursos.jsx",
+      "area": "pages",
+      "bytes": 97860,
+      "lines": 1692
+    },
+    {
+      "path": "frontend/src/components/projects/DesagregacionTab.jsx",
+      "area": "components",
+      "bytes": 96892,
+      "lines": 1703
+    },
+    {
+      "path": "frontend/src/components/projects/HierarchyGraphView.jsx",
+      "area": "components",
+      "bytes": 95842,
+      "lines": 1774
+    },
+    {
+      "path": "frontend/src/components/projects/Edt.jsx",
+      "area": "components",
+      "bytes": 87134,
+      "lines": 1679
+    },
+    {
+      "path": "frontend/src/pages/BasesTrabajo.jsx",
+      "area": "pages",
+      "bytes": 78411,
+      "lines": 1255
+    },
+    {
+      "path": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+      "area": "components",
+      "bytes": 77343,
+      "lines": 1479
+    },
+    {
+      "path": "frontend/src/pages/Subcategorias.jsx",
+      "area": "pages",
+      "bytes": 71040,
+      "lines": 1252
+    },
+    {
+      "path": "frontend/src/components/projects/Edo.jsx",
+      "area": "components",
+      "bytes": 69843,
+      "lines": 1269
+    },
+    {
+      "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
+      "area": "components",
+      "bytes": 66498,
+      "lines": 1211
+    },
+    {
+      "path": "frontend/src/utils/classicPrintEngine.js",
+      "area": "utils",
+      "bytes": 58520,
+      "lines": 1255
+    },
+    {
+      "path": "frontend/src/pages/ProjectManager.jsx",
+      "area": "pages",
+      "bytes": 58331,
+      "lines": 903
+    },
+    {
+      "path": "frontend/src/pages/MarketplaceBuyerDashboard.jsx",
+      "area": "pages",
+      "bytes": 55989,
+      "lines": 899
+    },
+    {
+      "path": "frontend/src/components/bim/BimWorkspace.jsx",
+      "area": "components",
+      "bytes": 55854,
+      "lines": 1091
+    },
+    {
+      "path": "frontend/src/pages/AdminGlobalLicencias.jsx",
+      "area": "pages",
+      "bytes": 51749,
+      "lines": 811
+    },
+    {
+      "path": "frontend/src/components/bim/BimCanvasViewer.jsx",
+      "area": "components",
+      "bytes": 50779,
+      "lines": 1025
+    },
+    {
+      "path": "frontend/src/pages/AdminGlobalComunicados.jsx",
+      "area": "pages",
+      "bytes": 49874,
+      "lines": 701
+    },
+    {
+      "path": "frontend/src/components/presupuestos/IndirectosModal.jsx",
+      "area": "components",
+      "bytes": 43280,
+      "lines": 703
+    },
+    {
+      "path": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
+      "area": "components",
+      "bytes": 42689,
+      "lines": 867
+    },
+    {
+      "path": "frontend/src/layouts/AppLayout.jsx",
+      "area": "layouts",
+      "bytes": 42355,
+      "lines": 676
+    },
+    {
+      "path": "frontend/src/pages/MarketplaceProductDetail.jsx",
+      "area": "pages",
+      "bytes": 41677,
+      "lines": 650
+    },
+    {
+      "path": "frontend/src/components/presupuestos/TanteoTab.jsx",
+      "area": "components",
+      "bytes": 39949,
+      "lines": 682
+    },
+    {
+      "path": "frontend/src/components/reporting/CommonReportPreviewModal.jsx",
+      "area": "components",
+      "bytes": 38247,
+      "lines": 595
+    },
+    {
+      "path": "frontend/src/components/projects/Stakeholders.jsx",
+      "area": "components",
+      "bytes": 36749,
+      "lines": 591
+    },
+    {
+      "path": "frontend/src/components/projects/GanttParetoModal.jsx",
+      "area": "components",
+      "bytes": 33525,
+      "lines": 537
+    },
+    {
+      "path": "frontend/src/components/presupuestos/ParetoModal.jsx",
+      "area": "components",
+      "bytes": 32940,
+      "lines": 497
+    },
+    {
+      "path": "frontend/src/components/presupuestos/EdtValoradaModal.jsx",
+      "area": "components",
+      "bytes": 32711,
+      "lines": 622
+    },
+    {
+      "path": "frontend/src/pages/AdminGlobalImportModels.jsx",
+      "area": "pages",
+      "bytes": 31107,
+      "lines": 493
+    },
+    {
+      "path": "frontend/src/pages/MarketplaceOrderDetail.jsx",
+      "area": "pages",
+      "bytes": 30894,
+      "lines": 525
+    },
+    {
+      "path": "frontend/src/components/precios-unitarios/ResourceEditorModal.jsx",
+      "area": "components",
+      "bytes": 29183,
+      "lines": 460
+    },
+    {
+      "path": "frontend/src/components/marketplace/MarketplaceVisualSystem.jsx",
+      "area": "components",
+      "bytes": 27624,
+      "lines": 515
+    },
+    {
+      "path": "frontend/src/pages/AdminGlobalEmpresaAuditada.jsx",
+      "area": "pages",
+      "bytes": 27425,
+      "lines": 377
+    },
+    {
+      "path": "frontend/src/pages/AdminGlobalAuditoria.jsx",
+      "area": "pages",
+      "bytes": 26956,
+      "lines": 350
+    },
+    {
+      "path": "frontend/src/components/presupuestos/CatalogoApuTab.jsx",
+      "area": "components",
+      "bytes": 26316,
+      "lines": 459
+    },
+    {
+      "path": "frontend/src/components/bim/BimViewStateToolbar.jsx",
+      "area": "components",
+      "bytes": 24911,
+      "lines": 435
+    },
+    {
+      "path": "frontend/src/components/TeamDashboardModal.jsx",
+      "area": "components",
+      "bytes": 24160,
+      "lines": 413
+    },
+    {
+      "path": "frontend/src/components/projects/cronogramasGanttSubbars.js",
+      "area": "components",
+      "bytes": 24148,
+      "lines": 525
+    },
+    {
+      "path": "frontend/src/components/ui/AnimatedDateInput.jsx",
+      "area": "components",
+      "bytes": 23243,
+      "lines": 594
+    },
+    {
+      "path": "frontend/src/components/bim/BimLinksPanel.jsx",
+      "area": "components",
+      "bytes": 21433,
+      "lines": 458
+    }
+  ]
+}

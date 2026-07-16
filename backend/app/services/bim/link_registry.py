@@ -1,6 +1,7 @@
 from typing import Optional
 
 from fastapi import HTTPException
+from sqlalchemy import String, cast, or_
 from sqlalchemy.orm import Session
 
 from app.models.apu import APU
@@ -12,7 +13,7 @@ from app.models.bim_model import BimModel
 from app.models.bim_model_version import BimModelVersion
 from app.models.edt import EdtNode
 from app.models.presupuesto import Presupuesto, PresupuestoDetalle
-from app.schemas.bim_link import BimElementOptionResponse, BimLinkCreateRequest, BimLinkResponse
+from app.schemas.bim_link import BimElementOptionResponse, BimElementPageResponse, BimLinkCreateRequest, BimLinkResponse
 from app.services.bim.model_registry import ensure_bim_domain_tables
 
 
@@ -42,6 +43,57 @@ def list_elements_for_project(
 
     elements = query.limit(limit).all()
     return [BimElementOptionResponse.model_validate(element, from_attributes=True) for element in elements]
+
+
+def search_elements_for_project(
+    db: Session,
+    *,
+    project_id: int,
+    company_id: int,
+    version_id: Optional[int] = None,
+    query_text: Optional[str] = None,
+    page: int = 1,
+    page_size: int = 100,
+) -> BimElementPageResponse:
+    ensure_bim_domain_tables(db)
+    query = _element_query(db, project_id=project_id, company_id=company_id)
+    if version_id is not None:
+        query = query.filter(BimElement.bim_model_version_id == version_id)
+
+    normalized_query = (query_text or "").strip()
+    if normalized_query:
+        pattern = f"%{normalized_query}%"
+        query = query.filter(
+            or_(
+                BimElement.global_id.ilike(pattern),
+                BimElement.nombre.ilike(pattern),
+                BimElement.ifc_class.ilike(pattern),
+                BimElement.storey_name.ilike(pattern),
+                BimElement.system_name.ilike(pattern),
+                BimElement.classification.ilike(pattern),
+                BimElement.descripcion.ilike(pattern),
+                cast(BimElement.properties, String).ilike(pattern),
+            )
+        )
+
+    total = query.count()
+    safe_page_size = max(1, min(page_size, 200))
+    safe_page = max(1, page)
+    pages = max(1, (total + safe_page_size - 1) // safe_page_size)
+    safe_page = min(safe_page, pages)
+    elements = (
+        query.order_by(BimElement.storey_name.asc(), BimElement.ifc_class.asc(), BimElement.nombre.asc(), BimElement.id.asc())
+        .offset((safe_page - 1) * safe_page_size)
+        .limit(safe_page_size)
+        .all()
+    )
+    return BimElementPageResponse(
+        items=[BimElementOptionResponse.model_validate(element, from_attributes=True) for element in elements],
+        total=total,
+        page=safe_page,
+        page_size=safe_page_size,
+        pages=pages,
+    )
 
 
 def _resolve_element_for_project(db: Session, *, project_id: int, company_id: int, element_id: int) -> BimElement:

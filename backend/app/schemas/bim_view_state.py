@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class BimViewStateResponse(BaseModel):
@@ -43,11 +43,26 @@ class BimWorkspaceContextUpsertRequest(BaseModel):
     link_id: Optional[int] = None
 
 
+class BimViewerStatePayload(BaseModel):
+    contract_version: Literal["giproy_bim_view_state_v2"]
+    source_version_id: int
+    camera: dict
+    selection: dict = Field(default_factory=dict)
+    visibility: dict = Field(default_factory=dict)
+    colors: list[dict] = Field(default_factory=list)
+    filters: dict = Field(default_factory=dict)
+    ghost: dict = Field(default_factory=dict)
+    clipping: dict = Field(default_factory=dict)
+    measurements: list[dict] = Field(default_factory=list)
+    units: Literal["m", "mm"] = "m"
+
+
 class BimViewStatePayload(BaseModel):
     active_version_id: Optional[int] = None
     storey_name: Optional[str] = None
     element_id: Optional[int] = None
     link_id: Optional[int] = None
+    viewer_state: Optional[BimViewerStatePayload] = None
 
 
 class BimViewStateCreateRequest(BaseModel):
@@ -57,6 +72,7 @@ class BimViewStateCreateRequest(BaseModel):
     storey_name: Optional[str] = None
     element_id: Optional[int] = None
     link_id: Optional[int] = None
+    viewer_state: Optional[BimViewerStatePayload] = None
 
 
 class BimViewStateUpdateRequest(BaseModel):

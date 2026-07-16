@@ -15,6 +15,9 @@ const DEFAULT_ACCESS = {
     resolved_company_id: null,
     resolved_user_id: null,
     resolved_role: null,
+    commercial_entitlement_required: false,
+    commercial_entitled: true,
+    commercial_entitlement_source: null,
 };
 
 export function useBimFeatureAccess() {

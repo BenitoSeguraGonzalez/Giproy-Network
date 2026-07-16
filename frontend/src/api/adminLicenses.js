@@ -6,6 +6,10 @@ export const adminLicensesApi = {
         const response = await api.get('/admin-licenses/summary', withoutTenant());
         return response.data;
     },
+    getCatalog: async () => {
+        const response = await api.get('/admin-licenses/catalog', withoutTenant());
+        return response.data;
+    },
     updateCompany: async (empresaId, payload) => {
         const response = await api.put(`/empresas/${empresaId}`, payload, withoutTenant());
         return response.data;
@@ -29,8 +33,8 @@ export const adminLicensesApi = {
         });
         return response.data;
     },
-    getMyLicense: async () => {
-        const response = await api.get('/admin-licenses/me', withoutTenant());
+    getMyLicense: async (params = {}) => {
+        const response = await api.get('/admin-licenses/me', withoutTenant({ params }));
         return response.data;
     }
 };

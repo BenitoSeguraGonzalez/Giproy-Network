@@ -1,19 +1,20 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from '../pages/Login';
-import Dashboard from '../pages/Dashboard';
 import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
-import BasesTrabajo from '../pages/BasesTrabajo';
-import Subcategorias from '../pages/Subcategorias';
-import Proyectos from '../pages/Proyectos';
-import { OtrosServicios } from '../pages/Placeholders';
+import VerifyRegistration from '../pages/VerifyRegistration';
+import RucReviewStatus from '../pages/RucReviewStatus';
 import ProtectedRoute from '../components/ProtectedRoute';
 import AppLayout from '../layouts/AppLayout';
 import { PresupuestoProvider } from '../context/PresupuestoContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { lazyWithChunkRecovery } from '../utils/lazyImportRecovery';
 
+const Dashboard = lazyWithChunkRecovery(() => import('../pages/Dashboard'));
+const BasesTrabajo = lazyWithChunkRecovery(() => import('../pages/BasesTrabajo'));
+const Subcategorias = lazyWithChunkRecovery(() => import('../pages/Subcategorias'));
+const Proyectos = lazyWithChunkRecovery(() => import('../pages/Proyectos'));
 const ProjectManager = lazyWithChunkRecovery(() => import('../pages/ProjectManager'));
 const APUs = lazyWithChunkRecovery(() => import('../pages/APUs'));
 const Recursos = lazyWithChunkRecovery(() => import('../pages/Recursos'));
@@ -21,6 +22,7 @@ const Presupuestos = lazyWithChunkRecovery(() => import('../pages/Presupuestos')
 const PreciosUnitarios = lazyWithChunkRecovery(() => import('../pages/PreciosUnitarios'));
 const Settings = lazyWithChunkRecovery(() => import('../pages/Settings'));
 const Community = lazyWithChunkRecovery(() => import('../pages/Community'));
+const EnviosTransferencias = lazyWithChunkRecovery(() => import('../pages/EnviosTransferencias'));
 const Marketplace = lazyWithChunkRecovery(() => import('../pages/Marketplace'));
 const MarketplaceProductDetail = lazyWithChunkRecovery(() => import('../pages/MarketplaceProductDetail'));
 const MarketplaceOrderDetail = lazyWithChunkRecovery(() => import('../pages/MarketplaceOrderDetail'));
@@ -33,6 +35,10 @@ const AdminGlobalSesiones = lazyWithChunkRecovery(() => import('../pages/AdminGl
 const AdminGlobalMantenimiento = lazyWithChunkRecovery(() => import('../pages/AdminGlobalMantenimiento'));
 const AdminGlobalBim = lazy(() => import('../pages/AdminGlobalBim'));
 const AdminGlobalLicencias = lazyWithChunkRecovery(() => import('../pages/AdminGlobalLicencias'));
+const AdminGlobalEmail = lazyWithChunkRecovery(() => import('../pages/AdminGlobalEmail'));
+const AdminGlobalIntegraciones = lazyWithChunkRecovery(() => import('../pages/AdminGlobalIntegraciones'));
+const AdminGlobalSuperadministradores = lazyWithChunkRecovery(() => import('../pages/AdminGlobalSuperadministradores'));
+const AdminGlobalEmpresas = lazyWithChunkRecovery(() => import('../pages/AdminGlobalEmpresas'));
 const AdminGlobalComunicados = lazyWithChunkRecovery(() => import('../pages/AdminGlobalComunicados'));
 const AdminGlobalGobernanza = lazyWithChunkRecovery(() => import('../pages/AdminGlobalGobernanza'));
 const AdminGlobalAuditoria = lazyWithChunkRecovery(() => import('../pages/AdminGlobalAuditoria'));
@@ -40,6 +46,9 @@ const AdminGlobalHerramientas = lazyWithChunkRecovery(() => import('../pages/Adm
 const AdminGlobalImportModels = lazyWithChunkRecovery(() => import('../pages/AdminGlobalImportModels'));
 const AdminGlobalEmpresaAuditada = lazyWithChunkRecovery(() => import('../pages/AdminGlobalEmpresaAuditada'));
 const PresupuestoDetail = lazyWithChunkRecovery(() => import('../components/presupuestos/PresupuestoDetail'));
+const OtrosServicios = lazyWithChunkRecovery(() => import('../pages/Placeholders').then((module) => ({
+    default: module.OtrosServicios,
+})));
 
 const RouteFallback = () => (
     <div className="min-h-[40vh] flex items-center justify-center bg-[#F8FAFC]">
@@ -84,6 +93,8 @@ const AppRouter = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify-registration" element={<VerifyRegistration />} />
+                <Route path="/ruc-review" element={<RucReviewStatus />} />
 
                 {/* Rutas protegidas — con encabezado persistente (AppLayout) */}
                 <Route path="/" element={withProtectedLayout(<Dashboard />)} />
@@ -99,6 +110,7 @@ const AppRouter = () => {
                 <Route path="/proyectos/:proyectoId/presupuestos/:presupuestoId" element={withProtectedLayout(<PresupuestoDetail />, true)} />
                 <Route path="/servicios" element={withProtectedLayout(<OtrosServicios />)} />
                 <Route path="/servicios/comunidad" element={withProtectedLayout(<Community />)} />
+                <Route path="/servicios/envios-transferencias" element={withProtectedLayout(<EnviosTransferencias />)} />
                 <Route path="/marketplace" element={withProtectedLayout(<Marketplace />)} />
                 <Route path="/product/:productId" element={withProtectedLayout(<MarketplaceProductDetail />)} />
                 <Route path="/pedido/:orderId" element={withProtectedLayout(<MarketplaceOrderDetail />)} />
@@ -113,6 +125,10 @@ const AppRouter = () => {
                 <Route path="/admin-global/mantenimiento" element={withProtectedLayout(<AdminGlobalMantenimiento />)} />
                 <Route path="/admin-global/bim" element={withProtectedLayout(<AdminGlobalBim />)} />
                 <Route path="/admin-global/licencias" element={withProtectedLayout(<AdminGlobalLicencias />)} />
+                <Route path="/admin-global/email-corporativo" element={withProtectedLayout(<AdminGlobalEmail />)} />
+                <Route path="/admin-global/integraciones" element={withProtectedLayout(<AdminGlobalIntegraciones />)} />
+                <Route path="/admin-global/superadministradores" element={withProtectedLayout(<AdminGlobalSuperadministradores />)} />
+                <Route path="/admin-global/empresas" element={withProtectedLayout(<AdminGlobalEmpresas />)} />
                 <Route path="/admin-global/comunicados" element={withProtectedLayout(<AdminGlobalComunicados />)} />
                 <Route path="/admin-global/gobernanza" element={withProtectedLayout(<AdminGlobalGobernanza />)} />
                 <Route path="/admin-global/auditoria" element={withProtectedLayout(<AdminGlobalAuditoria />)} />

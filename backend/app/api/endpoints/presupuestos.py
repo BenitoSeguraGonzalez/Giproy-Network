@@ -40,6 +40,7 @@ from app.services.presupuesto import (
     is_public_procurement_imported_presupuesto,
 )
 from app.repositories.presupuesto import presupuesto_repo
+from app.services.project_functional_modification import project_functional_modification_service
 from pydantic import BaseModel
 from decimal import Decimal
 from app.core.calculation_policy import calculate_budget_line_total
@@ -109,6 +110,109 @@ def _serialize_indirectos(presupuesto: Presupuesto) -> PresupuestoIndirectosResp
         total=Decimal(str(presupuesto.total or 0)),
         items=[PresupuestoIndirectoItemResponse.model_validate(item, from_attributes=True) for item in items]
     )
+
+
+def _invalidate_active_gantt_draft_for_presupuesto_change(
+    db: Session,
+    *,
+    presupuesto: Presupuesto,
+    affected_scope: dict,
+    reason: str,
+    user_id: int,
+) -> None:
+    from app.models.cronograma_trabajo import CronogramaTrabajo
+    from app.services.gantt_workflow import gantt_workflow_service
+
+    schedule = (
+        db.query(CronogramaTrabajo)
+        .filter(
+            CronogramaTrabajo.presupuesto_id == presupuesto.id,
+            CronogramaTrabajo.proyecto_id == presupuesto.proyecto_id,
+            CronogramaTrabajo.empresa_id == presupuesto.empresa_id,
+        )
+        .first()
+    )
+    if not schedule:
+        return
+    draft = gantt_workflow_service.get_active_draft(db, cronograma_id=schedule.id)
+    if not draft:
+        return
+    gantt_workflow_service.invalidate_related_intentions(
+        db,
+        draft=draft,
+        affected_scope=affected_scope,
+        reason=reason,
+        user_id=user_id,
+    )
+
+
+def _register_presupuesto_functional_modification(
+    db: Session,
+    *,
+    presupuesto: Presupuesto,
+    lineas: list[PresupuestoDetalle],
+    source_ref: dict,
+    user_id: int,
+) -> None:
+    lineas_validas = [linea for linea in lineas if linea is not None and getattr(linea, "id", None)]
+    affected_line_ids = sorted({int(linea.id) for linea in lineas_validas})
+    affected_apu_ids = sorted({int(linea.apu_id) for linea in lineas_validas if getattr(linea, "apu_id", None)})
+    base_trabajo_id = getattr(getattr(presupuesto, "proyecto", None), "base_trabajo_id", None)
+    if base_trabajo_id is None:
+        base_trabajo_id = next(
+            (
+                getattr(getattr(linea, "apu", None), "base_trabajo_id", None)
+                for linea in lineas_validas
+                if getattr(linea, "apu_id", None)
+            ),
+            None,
+        )
+    price_previews = [
+        {
+            "linea_presupuesto_id": int(linea.id),
+            "apu_id": int(linea.apu_id) if getattr(linea, "apu_id", None) else None,
+            "currency": presupuesto.moneda,
+            "money_decimals": presupuesto.dec_moneda,
+            "total_unit_price": str(linea.precio_unitario or 0),
+            "budget_quantity": str(linea.cantidad or 0),
+            "budget_line_total_after": str(linea.precio_total or 0),
+        }
+        for linea in lineas_validas
+    ]
+    project_functional_modification_service.create_active(
+        db,
+        empresa_id=presupuesto.empresa_id,
+        proyecto_id=presupuesto.proyecto_id,
+        presupuesto_id=presupuesto.id,
+        base_trabajo_id=base_trabajo_id,
+        revision=presupuesto.revision,
+        source="presupuesto",
+        source_ref=source_ref,
+        patch={
+            "affected_line_ids": affected_line_ids,
+            "affected_apu_ids": affected_apu_ids,
+            "intentions": [
+                {
+                    "type": "presupuesto_line_update",
+                    "linea_presupuesto_id": int(linea.id),
+                    "apu_id": int(linea.apu_id) if getattr(linea, "apu_id", None) else None,
+                    "price_preview": preview,
+                }
+                for linea, preview in zip(lineas_validas, price_previews)
+            ],
+        },
+        snapshot={
+            "budget_totals": {
+                "subtotal": str(presupuesto.subtotal or 0),
+                "indirectos_total": str(presupuesto.indirectos_total or 0),
+                "impuestos": str(presupuesto.impuestos or 0),
+                "total": str(presupuesto.total or 0),
+            },
+            "price_previews": price_previews,
+        },
+        user_id=user_id,
+    )
+
 
 @router.get("/", response_model=List[PresupuestoResponse])
 def read_presupuestos(
@@ -498,9 +602,32 @@ def apply_tanteo(
 
     db.flush()
 
+    expanded_affected_apu_ids = set()
     for apu_id in affected_apu_ids:
-        update_apu_operational_price(db, apu_id)
-        propagate_apu_change_to_presupuestos(db, apu_id)
+        expanded_affected_apu_ids.update(update_apu_operational_price(db, apu_id) or {apu_id})
+    for apu_id in sorted(expanded_affected_apu_ids):
+        propagate_apu_change_to_presupuestos(db, apu_id, apply_active_functional_overlay=False)
+        _invalidate_active_gantt_draft_for_presupuesto_change(
+            db,
+            presupuesto=pres,
+            affected_scope={"apu_id": apu_id},
+            reason="presupuesto_tanteo_aplicado",
+            user_id=current_user.id,
+        )
+    if expanded_affected_apu_ids:
+        from app.api.endpoints.apus import _register_apu_functional_modifications
+
+        apu_ref = db.query(APU).filter(APU.id == sorted(expanded_affected_apu_ids)[0]).first()
+        if apu_ref:
+            _register_apu_functional_modifications(
+                db,
+                empresa_id=target_empresa_id,
+                apu=apu_ref,
+                affected_apu_ids={int(item) for item in expanded_affected_apu_ids if item},
+                source_ref={"action": "presupuesto_tanteo_aplicado", "presupuesto_id": pres.id},
+                user_id=current_user.id,
+                invalidation_reason="presupuesto_tanteo_aplicado",
+            )
 
     return {"message": "Tanteo aplicado al APU y propagado al presupuesto en cascada."}
 
@@ -545,9 +672,32 @@ def clear_all_tanteos(
 
     db.flush()
 
+    expanded_affected_apu_ids = set()
     for apu_id in affected_apu_ids:
-        update_apu_operational_price(db, apu_id)
-        propagate_apu_change_to_presupuestos(db, apu_id)
+        expanded_affected_apu_ids.update(update_apu_operational_price(db, apu_id) or {apu_id})
+    for apu_id in sorted(expanded_affected_apu_ids):
+        propagate_apu_change_to_presupuestos(db, apu_id, apply_active_functional_overlay=False)
+        _invalidate_active_gantt_draft_for_presupuesto_change(
+            db,
+            presupuesto=pres,
+            affected_scope={"apu_id": apu_id},
+            reason="presupuesto_tanteo_revertido",
+            user_id=current_user.id,
+        )
+    if expanded_affected_apu_ids:
+        from app.api.endpoints.apus import _register_apu_functional_modifications
+
+        apu_ref = db.query(APU).filter(APU.id == sorted(expanded_affected_apu_ids)[0]).first()
+        if apu_ref:
+            _register_apu_functional_modifications(
+                db,
+                empresa_id=target_empresa_id,
+                apu=apu_ref,
+                affected_apu_ids={int(item) for item in expanded_affected_apu_ids if item},
+                source_ref={"action": "presupuesto_tanteo_revertido", "presupuesto_id": pres.id},
+                user_id=current_user.id,
+                invalidation_reason="presupuesto_tanteo_revertido",
+            )
             
     return {"message": f"Se han revertido y restaurado {count} tanteos de rendimiento en el proyecto."}
 
@@ -582,8 +732,29 @@ def delete_tanteo(
     linea.rendimiento_tanteo = None
     linea.rendimiento_original = None
     db.flush()
-    update_apu_operational_price(db, linea.apu_id)
-    propagate_apu_change_to_presupuestos(db, linea.apu_id)
+    expanded_affected_apu_ids = update_apu_operational_price(db, linea.apu_id) or {linea.apu_id}
+    for apu_id in sorted(expanded_affected_apu_ids):
+        propagate_apu_change_to_presupuestos(db, apu_id, apply_active_functional_overlay=False)
+        _invalidate_active_gantt_draft_for_presupuesto_change(
+            db,
+            presupuesto=pres,
+            affected_scope={"apu_id": apu_id},
+            reason="presupuesto_tanteo_revertido",
+            user_id=current_user.id,
+        )
+    from app.api.endpoints.apus import _register_apu_functional_modifications
+
+    apu_ref = db.query(APU).filter(APU.id == sorted(expanded_affected_apu_ids)[0]).first()
+    if apu_ref:
+        _register_apu_functional_modifications(
+            db,
+            empresa_id=target_empresa_id,
+            apu=apu_ref,
+            affected_apu_ids={int(item) for item in expanded_affected_apu_ids if item},
+            source_ref={"action": "presupuesto_tanteo_revertido", "presupuesto_id": pres.id, "apu_linea_id": apu_linea_id},
+            user_id=current_user.id,
+            invalidation_reason="presupuesto_tanteo_revertido",
+        )
     
     return {"message": "Tanteo revertido exitosamente. Rendimientos restaurados en cascada."}
 
@@ -643,6 +814,20 @@ def add_presupuesto_linea(
             calc_decimals=pres.dec_calculos,
         )
         calculate_presupuesto_totals(db, pres)
+        _register_presupuesto_functional_modification(
+            db,
+            presupuesto=pres,
+            lineas=[existing_line],
+            source_ref={"action": "linea_cantidad_actualizada", "linea_id": existing_line.id},
+            user_id=current_user.id,
+        )
+        _invalidate_active_gantt_draft_for_presupuesto_change(
+            db,
+            presupuesto=pres,
+            affected_scope={"linea_presupuesto_id": existing_line.id},
+            reason="presupuesto_linea_cantidad_actualizada",
+            user_id=current_user.id,
+        )
         db.commit()
         db.refresh(existing_line)
         return existing_line
@@ -710,6 +895,13 @@ def add_presupuesto_linea(
     ).first() is not None
 
     calculate_presupuesto_totals(db, pres)
+    _register_presupuesto_functional_modification(
+        db,
+        presupuesto=pres,
+        lineas=[db_linea],
+        source_ref={"action": "linea_creada", "linea_id": db_linea.id},
+        user_id=current_user.id,
+    )
     db.commit()
 
     db.refresh(db_linea)
@@ -762,6 +954,7 @@ def update_presupuesto_linea(
             ),
         ).order_by(PresupuestoDetalle.orden.asc(), PresupuestoDetalle.id.asc()).first()
         if existing_line:
+            removed_line_id = linea.id
             existing_line.cantidad = Decimal(str(existing_line.cantidad or 0)) + Decimal(str(linea.cantidad or 0))
             existing_line.notas = "\n".join(
                 part.strip()
@@ -780,6 +973,31 @@ def update_presupuesto_linea(
                 recalculate_line_codes(db, presupuesto.id, original_edt_id, commit=False)
             recalculate_line_codes(db, presupuesto.id, target_edt_id, commit=False)
             calculate_presupuesto_totals(db, presupuesto)
+            _register_presupuesto_functional_modification(
+                db,
+                presupuesto=presupuesto,
+                lineas=[existing_line],
+                source_ref={
+                    "action": "linea_fusionada",
+                    "linea_id": existing_line.id,
+                    "removed_line_id": removed_line_id,
+                },
+                user_id=current_user.id,
+            )
+            _invalidate_active_gantt_draft_for_presupuesto_change(
+                db,
+                presupuesto=presupuesto,
+                affected_scope={"linea_presupuesto_id": existing_line.id},
+                reason="presupuesto_linea_fusionada",
+                user_id=current_user.id,
+            )
+            _invalidate_active_gantt_draft_for_presupuesto_change(
+                db,
+                presupuesto=presupuesto,
+                affected_scope={"linea_presupuesto_id": removed_line_id},
+                reason="presupuesto_linea_fusionada",
+                user_id=current_user.id,
+            )
             db.commit()
             db.refresh(existing_line)
             return existing_line
@@ -797,6 +1015,20 @@ def update_presupuesto_linea(
     if linea.edt_id is not None and linea.apu_id is not None:
         enforce_presupuesto_apu_uniqueness(db, presupuesto.id, edt_id=linea.edt_id, commit=False)
     calculate_presupuesto_totals(db, presupuesto)
+    _register_presupuesto_functional_modification(
+        db,
+        presupuesto=presupuesto,
+        lineas=[linea],
+        source_ref={"action": "linea_actualizada", "linea_id": linea.id},
+        user_id=current_user.id,
+    )
+    _invalidate_active_gantt_draft_for_presupuesto_change(
+        db,
+        presupuesto=presupuesto,
+        affected_scope={"linea_presupuesto_id": linea.id},
+        reason="presupuesto_linea_actualizada",
+        user_id=current_user.id,
+    )
     db.commit()
     db.refresh(linea)
     return linea
@@ -844,6 +1076,21 @@ def bulk_update_presupuesto_lineas_cantidad(
 
     db.flush()
     calculate_presupuesto_totals(db, pres)
+    _register_presupuesto_functional_modification(
+        db,
+        presupuesto=pres,
+        lineas=lineas,
+        source_ref={"action": "lineas_cantidad_actualizadas", "linea_ids": requested_ids},
+        user_id=current_user.id,
+    )
+    for linea_id in requested_ids:
+        _invalidate_active_gantt_draft_for_presupuesto_change(
+            db,
+            presupuesto=pres,
+            affected_scope={"linea_presupuesto_id": linea_id},
+            reason="presupuesto_linea_cantidad_actualizada",
+            user_id=current_user.id,
+        )
     db.commit()
     db.refresh(pres)
     return pres

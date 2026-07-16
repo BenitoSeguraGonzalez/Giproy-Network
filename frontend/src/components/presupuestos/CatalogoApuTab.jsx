@@ -77,7 +77,7 @@ const CatalogoApuTab = ({
                 setLoading(true);
                 const empresaId = selectedEmpresa?.id || user?.empresa_id || null;
                 const [resApus, resSubs] = await Promise.all([
-                    apusApi.getAll({ base_trabajo_id: activeProyecto.base_trabajo_id, empresa_id: empresaId, limit: 1000 }),
+                    apusApi.getAll({ base_trabajo_id: activeProyecto.base_trabajo_id, empresa_id: empresaId, limit: 1000 }, { summary: true }),
                     subcategoriasItemsApi.getAll(activeProyecto.base_trabajo_id, null, empresaId)
                 ]);
 
@@ -92,7 +92,7 @@ const CatalogoApuTab = ({
                 setExpandedSubcats(initialExpanded);
 
             } catch (error) {
-                console.error("Error cargando datos del catálogo:", error);
+                globalThis.reportClientError?.("Error cargando datos del catálogo:", error);
             } finally {
                 setLoading(false);
             }

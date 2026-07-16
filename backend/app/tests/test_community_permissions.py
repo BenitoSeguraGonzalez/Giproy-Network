@@ -8,12 +8,16 @@ from app.api.endpoints import community
 from app.models.community import (
     CommunityAttachment,
     CommunityAdminAlert,
+    CommunityCategory,
+    CommunityDmMessage,
     CommunityDmThread,
+    CommunityInfraction,
     CommunityPost,
     CommunityPostReply,
     CommunitySanction,
     CommunitySanctionAppeal,
     CommunityTopic,
+    CommunityTopicFollow,
     CommunityTopicMember,
 )
 from app.models.empresa import Empresa
@@ -305,6 +309,21 @@ def test_detect_first_link_does_not_flag_plain_text_without_links():
     assert community._detect_first_link("Texto normal sin direcciones ni dominios externos.") is None
 
 
+def test_role_and_active_company_helpers_keep_superadmin_and_company_user_boundaries():
+    superadmin = SimpleNamespace(rol="superadministrador", empresa_id=1)
+    admin = SimpleNamespace(rol="administrador", empresa_id=2)
+    user = SimpleNamespace(rol=" usuario ", empresa_id=3)
+
+    assert community._is_superadmin(superadmin) is True
+    assert community._is_company_admin(admin) is True
+    assert community._is_company_moderator(superadmin) is True
+    assert community._is_company_moderator(admin) is True
+    assert community._normalize_role(user.rol) == "usuario"
+    assert community._resolve_active_company_id(superadmin, 9) == 9
+    assert community._resolve_active_company_id(superadmin, None) == 1
+    assert community._resolve_active_company_id(admin, 9) == 2
+
+
 def test_extract_mention_handles_normalizes_deduplicates_and_preserves_order():
     handles = community._extract_mention_handles(
         "Hola @Usuario.Uno y @usuario.uno",
@@ -312,6 +331,24 @@ def test_extract_mention_handles_normalizes_deduplicates_and_preserves_order():
     )
 
     assert handles == ["usuario.uno", "equipo-dos", "equipo_dos"]
+
+
+def test_serialize_mention_uses_stable_handle_and_display_name():
+    user = Usuario(
+        id=77,
+        email="persona@test.local",
+        nombre_completo="Persona Visible",
+        alias="Alias Con Espacios",
+        rol="usuario",
+        activo=True,
+        empresa_id=1,
+    )
+
+    serialized = community._serialize_mention(user)
+
+    assert serialized.user_id == 77
+    assert serialized.handle == "aliasconespacios"
+    assert serialized.display_name == "Persona Visible"
 
 
 def test_normalize_filename_sanitizes_unsafe_names():
@@ -342,6 +379,78 @@ def test_author_edit_window_accepts_naive_and_timezone_aware_dates():
     assert community._is_within_author_edit_window(fresh_naive) is True
     assert community._is_within_author_edit_window(old_aware) is False
     assert community._is_within_author_edit_window(None) is False
+
+
+def test_normalize_community_datetime_preserves_aware_and_normalizes_naive_fallback():
+    aware = datetime(2026, 5, 21, 10, 30, tzinfo=timezone.utc)
+    naive = datetime(2026, 5, 21, 10, 30)
+    fallback = datetime(2026, 5, 22, 8, 15)
+
+    assert community._normalize_community_datetime(aware) is aware
+    assert community._normalize_community_datetime(naive) == naive.replace(tzinfo=timezone.utc)
+    assert community._normalize_community_datetime(None, fallback) == fallback.replace(tzinfo=timezone.utc)
+    assert community._normalize_community_datetime(None) is None
+
+
+def test_post_last_activity_ignores_deleted_replies_and_normalizes_dates():
+    created_at = datetime(2026, 5, 21, 8, 0)
+    updated_at = datetime(2026, 5, 21, 9, 0, tzinfo=timezone.utc)
+    visible_reply = SimpleNamespace(
+        created_at=datetime(2026, 5, 21, 10, 0),
+        updated_at=None,
+        deleted_at=None,
+    )
+    deleted_reply = SimpleNamespace(
+        created_at=datetime(2026, 5, 21, 12, 0, tzinfo=timezone.utc),
+        updated_at=None,
+        deleted_at=datetime(2026, 5, 21, 12, 30, tzinfo=timezone.utc),
+    )
+    post = SimpleNamespace(created_at=created_at, updated_at=updated_at, replies=[visible_reply, deleted_reply])
+
+    assert community._post_last_activity_at(post) == visible_reply.created_at.replace(tzinfo=timezone.utc)
+
+
+def test_sort_posts_defaults_to_recent_activity_and_keeps_pinned_first():
+    pinned_old = SimpleNamespace(
+        title="pinned_old",
+        is_pinned=True,
+        created_at=datetime(2026, 5, 19, 9, 0),
+        updated_at=None,
+        replies=[],
+    )
+    recent_by_reply = SimpleNamespace(
+        title="recent_by_reply",
+        is_pinned=False,
+        created_at=datetime(2026, 5, 20, 9, 0),
+        updated_at=None,
+        replies=[
+            SimpleNamespace(
+                created_at=datetime(2026, 5, 21, 12, 0),
+                updated_at=None,
+                deleted_at=None,
+            )
+        ],
+    )
+    newest_created = SimpleNamespace(
+        title="newest_created",
+        is_pinned=False,
+        created_at=datetime(2026, 5, 21, 10, 0),
+        updated_at=None,
+        replies=[],
+    )
+
+    posts = [newest_created, recent_by_reply, pinned_old]
+
+    assert [post.title for post in community._sort_posts(posts, "")] == [
+        "pinned_old",
+        "recent_by_reply",
+        "newest_created",
+    ]
+    assert [post.title for post in community._sort_posts(posts, "created_at")] == [
+        "pinned_old",
+        "newest_created",
+        "recent_by_reply",
+    ]
 
 
 def test_author_post_policy_blocks_other_users_deleted_posts_and_visible_replies():
@@ -498,6 +607,104 @@ def test_ensure_category_scope_reports_scope_and_company_mismatch():
     assert community._ensure_category_scope(internal_category, "interno_empresa", 1) is None
 
 
+def test_ensure_post_visibility_respects_deleted_public_company_and_superadmin():
+    regular_user = SimpleNamespace(rol="usuario")
+    superadmin = SimpleNamespace(rol="superadministrador")
+    deleted_post = SimpleNamespace(deleted_at=datetime.now(timezone.utc), scope="publico", target_empresa_id=None)
+    public_post = SimpleNamespace(deleted_at=None, scope="publico", target_empresa_id=None)
+    internal_post = SimpleNamespace(deleted_at=None, scope="interno_empresa", target_empresa_id=1)
+
+    with pytest.raises(HTTPException, match="Publicación no encontrada"):
+        community._ensure_post_visibility(deleted_post, regular_user, 1)
+
+    assert community._ensure_post_visibility(public_post, regular_user, 99) is None
+    assert community._ensure_post_visibility(internal_post, regular_user, 1) is None
+
+    with pytest.raises(HTTPException, match="publicación interna"):
+        community._ensure_post_visibility(internal_post, regular_user, 2)
+
+    assert community._ensure_post_visibility(internal_post, superadmin, 2) is None
+
+
+def test_ensure_dm_thread_access_requires_participant_and_active_company():
+    current_user = SimpleNamespace(id=10)
+    valid_thread = SimpleNamespace(user_a_id=10, user_b_id=11, empresa_context_id=1)
+    global_thread = SimpleNamespace(user_a_id=10, user_b_id=11, empresa_context_id=None)
+    foreign_user_thread = SimpleNamespace(user_a_id=12, user_b_id=13, empresa_context_id=1)
+    foreign_company_thread = SimpleNamespace(user_a_id=10, user_b_id=11, empresa_context_id=2)
+
+    assert community._ensure_dm_thread_access(valid_thread, current_user, 1) is None
+    assert community._ensure_dm_thread_access(global_thread, current_user, 99) is None
+
+    with pytest.raises(HTTPException, match="No tiene acceso"):
+        community._ensure_dm_thread_access(foreign_user_thread, current_user, 1)
+    with pytest.raises(HTTPException, match="contexto activo"):
+        community._ensure_dm_thread_access(foreign_company_thread, current_user, 1)
+
+
+def test_ensure_can_review_sanction_appeal_respects_role_scope_and_company():
+    superadmin = SimpleNamespace(rol="superadministrador", empresa_id=99)
+    company_admin = SimpleNamespace(rol="administrador", empresa_id=1)
+    regular_user = SimpleNamespace(rol="usuario", empresa_id=1)
+    internal_sanction = SimpleNamespace(scope="interno_empresa", target_empresa_id=1)
+    public_sanction = SimpleNamespace(scope="publico", target_empresa_id=None)
+
+    assert community._ensure_can_review_sanction_appeal(
+        SimpleNamespace(sanction=public_sanction), superadmin, 2
+    ) is None
+    assert community._ensure_can_review_sanction_appeal(
+        SimpleNamespace(sanction=internal_sanction), company_admin, 1
+    ) is None
+
+    with pytest.raises(HTTPException, match="No tiene permisos"):
+        community._ensure_can_review_sanction_appeal(
+            SimpleNamespace(sanction=internal_sanction), regular_user, 1
+        )
+    with pytest.raises(HTTPException, match="solo puede resolver apelaciones internas"):
+        community._ensure_can_review_sanction_appeal(
+            SimpleNamespace(sanction=public_sanction), company_admin, 1
+        )
+    with pytest.raises(HTTPException, match="empresa activa"):
+        community._ensure_can_review_sanction_appeal(
+            SimpleNamespace(sanction=internal_sanction), company_admin, 2
+        )
+
+
+def test_ensure_can_issue_sanction_respects_type_scope_role_and_company():
+    superadmin = SimpleNamespace(rol="superadministrador", empresa_id=99)
+    company_admin = SimpleNamespace(rol="administrador", empresa_id=1)
+    target_user = SimpleNamespace(empresa_id=1)
+    invalid_pair = SimpleNamespace(
+        sanction_type="bloqueo_publico",
+        scope="interno_empresa",
+        target_empresa_id=1,
+    )
+    public_payload = SimpleNamespace(
+        sanction_type="bloqueo_publico",
+        scope="publico",
+        target_empresa_id=None,
+    )
+    valid_internal_payload = SimpleNamespace(
+        sanction_type="bloqueo_interno",
+        scope="interno_empresa",
+        target_empresa_id=1,
+    )
+    foreign_target_company_payload = SimpleNamespace(
+        sanction_type="bloqueo_interno",
+        scope="interno_empresa",
+        target_empresa_id=2,
+    )
+
+    with pytest.raises(HTTPException, match="combinación"):
+        community._ensure_can_issue_sanction(company_admin, target_user, invalid_pair, 1)
+
+    assert community._ensure_can_issue_sanction(superadmin, target_user, public_payload, 2) is None
+    assert community._ensure_can_issue_sanction(company_admin, target_user, valid_internal_payload, 1) is None
+
+    with pytest.raises(HTTPException, match="propia empresa"):
+        community._ensure_can_issue_sanction(company_admin, target_user, foreign_target_company_payload, 1)
+
+
 def test_dm_thread_serialization_exposes_blocking_actor(db, sample_empresa, community_users):
     thread = CommunityDmThread(
         user_a_id=community_users["user_company_one"].id,
@@ -517,6 +724,79 @@ def test_dm_thread_serialization_exposes_blocking_actor(db, sample_empresa, comm
     assert serialized_for_blocker.blocked_by_name == community_users["user_company_one"].nombre_completo
     assert serialized_for_blocker.blocked_by_me is True
     assert serialized_for_counterpart.blocked_by_me is False
+
+
+def test_dm_thread_serialization_counts_visible_messages_and_truncates_preview(sample_empresa, community_users):
+    current_user = community_users["user_company_one"]
+    counterpart = community_users["community_user_company_one"]
+    thread = CommunityDmThread(
+        id=51,
+        user_a_id=current_user.id,
+        user_b_id=counterpart.id,
+        empresa_context_id=sample_empresa.id,
+    )
+    thread.user_a = current_user
+    thread.user_b = counterpart
+    long_body = "Mensaje final " + ("x" * 160)
+    thread.messages = [
+        CommunityDmMessage(
+            id=52,
+            thread_id=thread.id,
+            author_user_id=current_user.id,
+            body="Mensaje visible inicial",
+            created_at=datetime(2026, 5, 22, 10, 0, tzinfo=timezone.utc),
+        ),
+        CommunityDmMessage(
+            id=53,
+            thread_id=thread.id,
+            author_user_id=counterpart.id,
+            body="Mensaje eliminado",
+            created_at=datetime(2026, 5, 22, 10, 5, tzinfo=timezone.utc),
+            deleted_at=datetime(2026, 5, 22, 10, 6, tzinfo=timezone.utc),
+        ),
+        CommunityDmMessage(
+            id=54,
+            thread_id=thread.id,
+            author_user_id=counterpart.id,
+            body=long_body,
+            created_at=datetime(2026, 5, 22, 10, 10),
+        ),
+    ]
+
+    serialized = community._serialize_dm_thread(thread, current_user)
+
+    assert serialized.counterpart_user_id == counterpart.id
+    assert serialized.counterpart_name == counterpart.nombre_completo
+    assert serialized.counterpart_company_name == sample_empresa.nombre
+    assert serialized.messages_count == 2
+    assert serialized.last_message_preview == long_body[:120]
+    assert serialized.last_message_at == datetime(2026, 5, 22, 10, 10, tzinfo=timezone.utc)
+
+
+def test_dm_message_serialization_without_company_context_skips_mentions_and_normalizes_dates(community_users):
+    author = community_users["user_company_one"]
+    thread = CommunityDmThread(
+        id=61,
+        user_a_id=author.id,
+        user_b_id=community_users["community_user_company_one"].id,
+        empresa_context_id=None,
+    )
+    message = CommunityDmMessage(
+        id=62,
+        thread_id=thread.id,
+        author_user_id=author.id,
+        body="@usuario mensaje directo sin contexto de empresa",
+        created_at=datetime(2026, 5, 22, 11, 0),
+        read_at=datetime(2026, 5, 22, 11, 5),
+    )
+    message.author = author
+
+    serialized = community._serialize_dm_message(message, thread)
+
+    assert serialized.author_name == author.nombre_completo
+    assert serialized.mentions == []
+    assert serialized.created_at == datetime(2026, 5, 22, 11, 0, tzinfo=timezone.utc)
+    assert serialized.read_at == datetime(2026, 5, 22, 11, 5, tzinfo=timezone.utc)
 
 
 def test_only_blocking_user_can_reactivate_dm_thread(db, sample_empresa, community_users):
@@ -754,17 +1034,342 @@ def test_feed_sort_prioritizes_pinned_and_recent_activity(db, sample_empresa, co
     assert [post.title for post in ordered_created] == ["Fijado antiguo", "Normal nuevo", "Normal activo"]
 
 
-def test_public_attachments_only_accept_images():
-    with pytest.raises(HTTPException, match="solo se permiten imágenes"):
+def test_attachment_policy_rejects_public_requires_internal_type_and_known_scope():
+    with pytest.raises(HTTPException, match="Público no se permiten adjuntos"):
         community._validate_attachment_policy("publico", "application/pdf")
+    with pytest.raises(HTTPException, match="Público no se permiten adjuntos"):
+        community._validate_attachment_policy("publico", "image/png")
 
-    community._validate_attachment_policy("publico", "image/png")
+    with pytest.raises(HTTPException, match="tipo del archivo"):
+        community._validate_attachment_policy("interno_empresa", None)
+    assert community._validate_attachment_policy("interno_empresa", "application/pdf") is None
+
+    with pytest.raises(HTTPException, match="Ámbito de adjunto no soportado"):
+        community._validate_attachment_policy("mensajes_directos", "image/png")
 
 
 def test_internal_attachments_receive_30_day_retention():
     expires_at = community._attachment_expiration_for_scope("interno_empresa")
     assert expires_at is not None
     assert expires_at > datetime.now(timezone.utc) + timedelta(days=29)
+    assert community._attachment_expiration_for_scope("publico") is None
+    assert community._attachment_expiration_for_scope("mensajes_directos") is None
+
+
+def test_attachment_list_serializes_active_items_and_skips_deleted():
+    active_attachment = SimpleNamespace(
+        id=1,
+        file_name="reporte.pdf",
+        public_url="/uploads/community/reporte.pdf",
+        content_type="application/pdf",
+        size_bytes=1234,
+        expires_at=datetime(2026, 5, 22, 8, 0),
+        created_at=datetime(2026, 5, 21, 8, 0),
+        deleted_at=None,
+    )
+    deleted_attachment = SimpleNamespace(
+        id=2,
+        file_name="eliminado.pdf",
+        public_url="/uploads/community/eliminado.pdf",
+        content_type="application/pdf",
+        size_bytes=999,
+        expires_at=None,
+        created_at=datetime(2026, 5, 21, 9, 0),
+        deleted_at=datetime(2026, 5, 21, 10, 0, tzinfo=timezone.utc),
+    )
+
+    serialized = community._attachment_list([active_attachment, deleted_attachment])
+
+    assert len(serialized) == 1
+    assert serialized[0].id == active_attachment.id
+    assert serialized[0].file_name == "reporte.pdf"
+    assert serialized[0].created_at == active_attachment.created_at.replace(tzinfo=timezone.utc)
+    assert serialized[0].expires_at == active_attachment.expires_at.replace(tzinfo=timezone.utc)
+
+
+def test_serialize_category_counts_only_active_topics_and_normalizes_created_at():
+    category = SimpleNamespace(
+        id=7,
+        scope="interno_empresa",
+        nombre="Técnico",
+        descripcion="Categoría técnica",
+        orden=3,
+        is_active=True,
+        target_empresa_id=2,
+        target_empresa=SimpleNamespace(nombre="Empresa Dos"),
+        topics=[
+            SimpleNamespace(is_active=True),
+            SimpleNamespace(is_active=False),
+            SimpleNamespace(is_active=True),
+        ],
+        created_at=datetime(2026, 5, 22, 9, 0),
+    )
+
+    serialized = community._serialize_category(category)
+
+    assert serialized.id == category.id
+    assert serialized.target_empresa_name == "Empresa Dos"
+    assert serialized.topic_count == 2
+    assert serialized.created_at == category.created_at.replace(tzinfo=timezone.utc)
+
+
+def test_serialize_topic_exposes_membership_follow_state_and_access(sample_empresa, community_users):
+    topic = CommunityTopic(
+        id=44,
+        scope="interno_empresa",
+        category_id=7,
+        nombre="Coordinacion tecnica",
+        descripcion="Tema interno",
+        is_restricted=True,
+        is_active=True,
+        target_empresa_id=sample_empresa.id,
+        created_at=datetime.now(timezone.utc),
+    )
+    topic.category = CommunityCategory(nombre="Soporte interno", scope="interno_empresa")
+    topic.target_empresa = sample_empresa
+    topic.members = [
+        CommunityTopicMember(user_id=community_users["user_company_one"].id),
+        CommunityTopicMember(user_id=community_users["community_user_company_one"].id),
+    ]
+    topic.followers = [
+        CommunityTopicFollow(
+            user_id=community_users["user_company_one"].id,
+            created_at=datetime.now(),
+        )
+    ]
+
+    serialized = community._serialize_topic(topic, community_users["user_company_one"])
+
+    assert serialized.category_name == "Soporte interno"
+    assert serialized.target_empresa_name == sample_empresa.nombre
+    assert serialized.member_count == 2
+    assert serialized.member_user_ids == [
+        community_users["user_company_one"].id,
+        community_users["community_user_company_one"].id,
+    ]
+    assert serialized.can_access is True
+    assert serialized.is_following is True
+    assert serialized.followed_at.tzinfo is not None
+    assert serialized.created_at.tzinfo is not None
+
+
+def test_serialize_infraction_and_admin_alert_normalize_context_and_dates(sample_empresa, community_users):
+    target_user = community_users["user_company_one"]
+    infraction = CommunityInfraction(
+        id=91,
+        target_user_id=target_user.id,
+        scope="interno_empresa",
+        infraction_type="link_publico",
+        content_type="post",
+        content_excerpt="Mira hxxps://portal.example.com",
+        detected_link="hxxps://portal.example.com",
+        target_empresa_id=sample_empresa.id,
+        triggered_sanction_id=13,
+        created_at=datetime.now(),
+    )
+    infraction.target_user = target_user
+    infraction.target_empresa = sample_empresa
+    alert = CommunityAdminAlert(
+        id=92,
+        alert_type="infraction_public_link",
+        title="Link detectado",
+        message="Se detecto un enlace",
+        target_empresa_id=sample_empresa.id,
+        target_user_id=target_user.id,
+        infraction_id=infraction.id,
+        is_read=True,
+        created_at=datetime.now(),
+        read_at=datetime.now(),
+    )
+    alert.target_empresa = sample_empresa
+    alert.target_user = target_user
+
+    serialized_infraction = community._serialize_infraction(infraction)
+    serialized_alert = community._serialize_admin_alert(alert)
+
+    assert serialized_infraction.target_user_name == target_user.nombre_completo
+    assert serialized_infraction.target_empresa_name == sample_empresa.nombre
+    assert serialized_infraction.detected_link == "hxxps://portal.example.com"
+    assert serialized_infraction.triggered_sanction_id == 13
+    assert serialized_infraction.created_at.tzinfo is not None
+    assert serialized_alert.target_user_name == target_user.nombre_completo
+    assert serialized_alert.target_empresa_name == sample_empresa.nombre
+    assert serialized_alert.infraction_id == infraction.id
+    assert serialized_alert.is_read is True
+    assert serialized_alert.created_at.tzinfo is not None
+    assert serialized_alert.read_at.tzinfo is not None
+
+
+def test_serialize_post_exposes_topic_counts_permissions_and_active_attachments(sample_empresa, community_users):
+    author = community_users["user_company_one"]
+    topic = CommunityTopic(
+        id=21,
+        scope="publico",
+        category_id=22,
+        nombre="Soporte general",
+        is_restricted=False,
+        is_active=True,
+        created_at=datetime.now(timezone.utc),
+    )
+    topic.category = CommunityCategory(
+        id=22,
+        scope="publico",
+        nombre="Operaciones",
+        created_at=datetime.now(timezone.utc),
+    )
+    post = CommunityPost(
+        id=23,
+        scope="publico",
+        topic_id=topic.id,
+        status="publicado",
+        title="Post serializable",
+        body="Texto sin menciones",
+        allow_replies=True,
+        is_pinned=True,
+        author_user_id=author.id,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+        deleted_at=None,
+    )
+    post.topic = topic
+    post.author = author
+    visible_reply = CommunityPostReply(
+        id=24,
+        post_id=post.id,
+        author_user_id=community_users["community_user_company_one"].id,
+        body="Respuesta visible",
+        status="publicado",
+        created_at=datetime.now(timezone.utc),
+        deleted_at=None,
+    )
+    deleted_reply = CommunityPostReply(
+        id=25,
+        post_id=post.id,
+        author_user_id=community_users["community_user_company_one"].id,
+        body="Respuesta eliminada",
+        status="publicado",
+        created_at=datetime.now(timezone.utc),
+        deleted_at=datetime.now(timezone.utc),
+    )
+    active_attachment = CommunityAttachment(
+        id=26,
+        post_id=post.id,
+        created_by_user_id=author.id,
+        target_empresa_id=sample_empresa.id,
+        scope="interno_empresa",
+        file_name="post.pdf",
+        storage_path="uploads/community/post.pdf",
+        public_url="/uploads/community/post.pdf",
+        content_type="application/pdf",
+        size_bytes=256,
+        created_at=datetime.now(timezone.utc),
+    )
+    deleted_attachment = CommunityAttachment(
+        id=27,
+        post_id=post.id,
+        created_by_user_id=author.id,
+        target_empresa_id=sample_empresa.id,
+        scope="interno_empresa",
+        file_name="post-deleted.pdf",
+        storage_path="uploads/community/post-deleted.pdf",
+        public_url="/uploads/community/post-deleted.pdf",
+        content_type="application/pdf",
+        size_bytes=128,
+        created_at=datetime.now(timezone.utc),
+        deleted_at=datetime.now(timezone.utc),
+    )
+    post.replies = [visible_reply, deleted_reply]
+    post.attachments = [active_attachment, deleted_attachment]
+
+    serialized = community._serialize_post(post, current_user=author)
+
+    assert serialized.topic_name == "Soporte general"
+    assert serialized.category_name == "Operaciones"
+    assert serialized.replies_count == 1
+    assert serialized.can_edit is True
+    assert serialized.can_delete is False
+    assert [attachment.file_name for attachment in serialized.attachments] == ["post.pdf"]
+    assert serialized.attachments[0].created_at.tzinfo is not None
+    assert serialized.created_at.tzinfo is not None
+    assert serialized.last_activity_at.tzinfo is not None
+    assert serialized.updated_at.tzinfo is not None
+
+
+def test_serialize_reply_exposes_author_permissions_active_attachments_and_dates(sample_empresa, community_users):
+    author = community_users["user_company_one"]
+    post = CommunityPost(
+        id=31,
+        scope="publico",
+        status="publicado",
+        title="Tema",
+        body="Texto",
+        author_user_id=author.id,
+        created_at=datetime.now(),
+    )
+    reply = CommunityPostReply(
+        id=32,
+        post_id=post.id,
+        author_user_id=author.id,
+        body="Respuesta con adjunto",
+        status="publicado",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+        deleted_at=None,
+    )
+    reply.post = post
+    reply.author = author
+    deleted_child = CommunityPostReply(
+        id=33,
+        post_id=post.id,
+        parent_reply_id=reply.id,
+        author_user_id=community_users["community_user_company_one"].id,
+        body="Hijo eliminado",
+        status="publicado",
+        created_at=datetime.now(timezone.utc),
+        deleted_at=datetime.now(timezone.utc),
+    )
+    active_attachment = CommunityAttachment(
+        id=34,
+        reply_id=reply.id,
+        created_by_user_id=author.id,
+        target_empresa_id=sample_empresa.id,
+        scope="interno_empresa",
+        file_name="evidencia.pdf",
+        storage_path="uploads/community/evidencia.pdf",
+        public_url="/uploads/community/evidencia.pdf",
+        content_type="application/pdf",
+        size_bytes=128,
+        created_at=datetime.now(timezone.utc),
+    )
+    deleted_attachment = CommunityAttachment(
+        id=35,
+        reply_id=reply.id,
+        created_by_user_id=author.id,
+        target_empresa_id=sample_empresa.id,
+        scope="interno_empresa",
+        file_name="oculto.pdf",
+        storage_path="uploads/community/oculto.pdf",
+        public_url="/uploads/community/oculto.pdf",
+        content_type="application/pdf",
+        size_bytes=64,
+        created_at=datetime.now(),
+        deleted_at=datetime.now(timezone.utc),
+    )
+    reply.attachments = [active_attachment, deleted_attachment]
+
+    serialized = community._serialize_reply(
+        reply,
+        current_user=author,
+        sibling_replies=[reply, deleted_child],
+    )
+
+    assert serialized.author_name == author.nombre_completo
+    assert serialized.can_edit is True
+    assert serialized.can_delete is True
+    assert [attachment.file_name for attachment in serialized.attachments] == ["evidencia.pdf"]
+    assert serialized.attachments[0].created_at.tzinfo is not None
+    assert serialized.created_at.tzinfo is not None
+    assert serialized.updated_at.tzinfo is not None
 
 
 def test_purge_expired_community_attachments_marks_deleted(db, sample_empresa, community_users, tmp_path):

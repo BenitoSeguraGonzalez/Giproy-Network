@@ -25,7 +25,7 @@ def manage_superuser():
         # 2. Definir nuevo Superusuario
         new_email = "benito.segura@gmail.com"
         new_pass = "Kathiana96!a!"
-        new_role = "Superadministrador"
+        new_role = "superadministrador"
         
         # Eliminar el usuario antiguo 'dreams2k' si existe
         old_user = db.query(Usuario).filter(Usuario.email == "dreams2k").first()

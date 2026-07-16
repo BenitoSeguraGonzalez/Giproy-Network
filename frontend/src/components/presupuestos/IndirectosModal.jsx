@@ -116,7 +116,7 @@ const IndirectosModal = ({ isOpen, onClose, onSaved, presupuestoId }) => {
                     || FIRST_FIXED_CATEGORY;
                 setSelectedCategoriaCodigo(firstCategoryWithItems);
             } catch (loadError) {
-                console.error('No se pudo cargar indirectos:', loadError);
+                globalThis.reportClientError?.('No se pudo cargar indirectos:', loadError);
                 setError(loadError.response?.data?.detail || 'No se pudo cargar la configuración de indirectos.');
                 setItems([]);
             } finally {
@@ -325,7 +325,7 @@ const IndirectosModal = ({ isOpen, onClose, onSaved, presupuestoId }) => {
             resetCustomComposer();
             onClose();
         } catch (saveError) {
-            console.error('No se pudo guardar indirectos:', saveError);
+            globalThis.reportClientError?.('No se pudo guardar indirectos:', saveError);
             setError(saveError.response?.data?.detail || 'No se pudo guardar la configuración de indirectos.');
         } finally {
             setSaving(false);

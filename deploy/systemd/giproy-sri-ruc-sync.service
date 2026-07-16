@@ -1,0 +1,10 @@
+[Unit]
+Description=GiProy - sincronización del catálogo RUC oficial del SRI
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/docker exec giproy-beta-backend python scripts/sri_ruc_sync.py --scheduled
+PrivateTmp=true
+NoNewPrivileges=true

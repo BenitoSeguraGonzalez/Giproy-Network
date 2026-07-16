@@ -19,14 +19,14 @@ import {
     SortAsc,
     SortDesc,
     ArrowUpDown,
-    RefreshCw
+    RefreshCw,
+    RotateCcw
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { includesNormalized, normalizeSearchToken } from '../utils/normalizeSearch';
-import api from '../api/axiosConfig';
 import basesTrabajoApi from '../api/basesTrabajo';
+import { maestrosApi } from '../api/maestros';
 import { proyectosApi } from '../api/proyectos';
-import { withoutTenant } from '../api/tenant';
 import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -88,7 +88,13 @@ const BasesTrabajo = () => {
     const parseNumericInput = formatters?.parseNumericInput || ((v) => String(v || '').replace(',', '.'));
     const navigate = useNavigate();
     const location = useLocation();
-    const baseOrigin = useMarketplaceOrigin('base_trabajo', selectedBaseTrabajo?.id);
+    const currentEmpresaId = selectedEmpresa?.id != null ? Number(selectedEmpresa.id) : null;
+    const selectedBaseTrabajoInCurrentEmpresa = selectedBaseTrabajo
+        && currentEmpresaId !== null
+        && Number(selectedBaseTrabajo.empresa_id) === currentEmpresaId
+        ? selectedBaseTrabajo
+        : null;
+    const baseOrigin = useMarketplaceOrigin('base_trabajo', selectedBaseTrabajoInCurrentEmpresa?.id);
     const { originsMap } = useMarketplaceOriginsMap();
     
     // Core States
@@ -109,6 +115,10 @@ const BasesTrabajo = () => {
     const [baseToDelete, setBaseToDelete] = useState(null);
     const [linkedProject, setLinkedProject] = useState(null);
     const [deleting, setDeleting] = useState(false);
+    const [showRecycleModal, setShowRecycleModal] = useState(false);
+    const [recycledBases, setRecycledBases] = useState([]);
+    const [recycleLoading, setRecycleLoading] = useState(false);
+    const [recycleActionId, setRecycleActionId] = useState(null);
     const [syncingBaseId, setSyncingBaseId] = useState(null);
     const [syncHistoryBase, setSyncHistoryBase] = useState(null);
     const [syncHistoryItems, setSyncHistoryItems] = useState([]);
@@ -205,22 +215,29 @@ const BasesTrabajo = () => {
     const fetchBases = useCallback(async () => {
         setLoading(true);
         try {
-            console.log("DEBUG BASES: Fetching for empresa", selectedEmpresa?.id);
+            if (user?.rol?.toLowerCase() === 'superadministrador' && !selectedEmpresa?.id) {
+                setBases([]);
+                return;
+            }
             const res = await basesTrabajoApi.getAll({ empresa_id: selectedEmpresa?.id });
-            setBases(res.data);
+            const nextBases = Array.isArray(res.data) ? res.data : [];
+            const scopedBases = selectedEmpresa?.id
+                ? nextBases.filter((base) => Number(base.empresa_id) === Number(selectedEmpresa.id))
+                : nextBases;
+            setBases(scopedBases);
         } catch (error) {
-            console.error("DEBUG BASES: Error fetchBases", error);
+            globalThis.reportClientError?.("Error cargando bases de trabajo", error);
         } finally {
             setLoading(false);
         }
-    }, [selectedEmpresa]);
+    }, [selectedEmpresa, user?.rol]);
 
     const fetchPaises = useCallback(async () => {
         try {
-            const res = await api.get('/paises/', withoutTenant());
-            setPaises(res.data);
+            const data = await maestrosApi.getPaises();
+            setPaises(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("DEBUG BASES: Error fetchPaises", error);
+            globalThis.reportClientError?.("Error cargando paises", error);
         }
     }, []);
 
@@ -229,7 +246,7 @@ const BasesTrabajo = () => {
             const res = await basesTrabajoApi.getNextCode(selectedEmpresa?.id);
             setNextCode(res.data.next_code);
         } catch (error) {
-            console.error("DEBUG BASES: Error fetchNextCode", error);
+            globalThis.reportClientError?.("Error generando codigo de base de trabajo", error);
             setNextCode('BT-ERR');
         }
     }, [selectedEmpresa]);
@@ -239,6 +256,21 @@ const BasesTrabajo = () => {
         fetchBases();
         fetchPaises();
     }, [selectedEmpresa, user, fetchBases, fetchPaises, setSelectedEmpresa]);
+
+    useEffect(() => {
+        if (!selectedBaseTrabajo || currentEmpresaId === null) {
+            return;
+        }
+        if (Number(selectedBaseTrabajo.empresa_id) !== currentEmpresaId) {
+            setSelectedBaseTrabajo(null);
+            if (setActiveProject) setActiveProject(null);
+        }
+    }, [
+        currentEmpresaId,
+        selectedBaseTrabajo,
+        setActiveProject,
+        setSelectedBaseTrabajo,
+    ]);
 
     useEffect(() => {
         const requestedBaseId = Number(new URLSearchParams(location.search).get('base_id') || 0);
@@ -262,7 +294,7 @@ const BasesTrabajo = () => {
                     if (setActiveProject) setActiveProject(null);
                 }
             } catch (error) {
-                console.error('Error sincronizando base solicitada desde marketplace:', error);
+                globalThis.reportClientError?.('Error sincronizando base solicitada desde marketplace:', error);
             }
         };
 
@@ -426,12 +458,10 @@ const BasesTrabajo = () => {
     const handleCreate = async (e) => {
         e.preventDefault();
         try {
-            console.log("DEBUG CREATE: Payload starting", newBase);
             const eid = selectedEmpresa?.id || user?.empresa_id;
             const rawIndir = newBase.porcentaje_indirectos;
             const parsedIndir = parseNumericInput(rawIndir);
             const sanitizedIndir = String(parseFloat(parsedIndir) || 0.0);
-            console.log("DEBUG CREATE: Sanitized Indir", sanitizedIndir);
 
             if (editingBase && !isCloning) {
                 // Update
@@ -497,6 +527,66 @@ const BasesTrabajo = () => {
         }
     };
 
+    const fetchRecycledBases = async () => {
+        const eid = selectedEmpresa?.id || user?.empresa_id;
+        setRecycleLoading(true);
+        try {
+            const response = await basesTrabajoApi.getRecycleBin(eid ? { empresa_id: eid } : {});
+            const data = Array.isArray(response?.data) ? response.data : [];
+            setRecycledBases(data);
+        } catch (error) {
+            globalThis.reportClientError?.('Error cargando papelera de bases:', error);
+            appAlert(error?.response?.data?.detail || 'No se pudo cargar la papelera de bases de trabajo.');
+        } finally {
+            setRecycleLoading(false);
+        }
+    };
+
+    const openRecycleModal = async () => {
+        setShowRecycleModal(true);
+        await fetchRecycledBases();
+    };
+
+    const handleRestoreRecycledBase = async (base) => {
+        if (!base?.id) return;
+        const eid = base.empresa_id || selectedEmpresa?.id || user?.empresa_id;
+        setRecycleActionId(base.id);
+        try {
+            await basesTrabajoApi.restoreFromRecycleBin(base.id, eid);
+            await fetchRecycledBases();
+            await fetchBases();
+        } catch (error) {
+            globalThis.reportClientError?.('Error restaurando base:', error);
+            appAlert(error?.response?.data?.detail || 'No se pudo restaurar la base de trabajo.');
+        } finally {
+            setRecycleActionId(null);
+        }
+    };
+
+    const handlePurgeRecycledBase = async (base) => {
+        if (!base?.id) return;
+        const confirmed = await appConfirm({
+            title: 'Borrado definitivo',
+            message: `Se eliminará definitivamente ${base.trash_original_nombre || base.nombre}. Esta acción no se puede deshacer. ¿Desea continuar?`,
+            confirmLabel: 'Borrar definitivamente',
+            cancelLabel: 'Cancelar',
+            tone: 'danger'
+        });
+        if (!confirmed) return;
+
+        const eid = base.empresa_id || selectedEmpresa?.id || user?.empresa_id;
+        setRecycleActionId(base.id);
+        try {
+            await basesTrabajoApi.purgeFromRecycleBin(base.id, eid);
+            await fetchRecycledBases();
+        } catch (error) {
+            globalThis.reportClientError?.('Error purgando base:', error);
+            appAlert(error?.response?.data?.detail || 'No se pudo borrar definitivamente la base de trabajo.');
+        } finally {
+            setRecycleActionId(null);
+        }
+    };
+
     const clearHighlightedBase = useCallback((sourceBaseId = null) => {
         if (highlightTimeoutRef.current) {
             window.clearTimeout(highlightTimeoutRef.current);
@@ -551,13 +641,16 @@ const BasesTrabajo = () => {
 
     const filteredBases = useMemo(() => {
         return bases.filter(b => {
+            if (currentEmpresaId !== null && Number(b.empresa_id) !== currentEmpresaId) {
+                return false;
+            }
             const s = normalizeSearchToken(searchTerm);
             const matchesSearch = includesNormalized(b.nombre, s) || includesNormalized(b.codigo_unico, s);
             const isMaster = b.tipo === 'Base Maestra' || b.tipo === 'Base Padre';
             const matchesFilter = filterType === 'todas' || (filterType === 'maestras' && isMaster) || (filterType === 'proyectos' && !isMaster);
             return matchesSearch && matchesFilter;
         });
-    }, [bases, searchTerm, filterType]);
+    }, [bases, currentEmpresaId, searchTerm, filterType]);
 
     const groupedBases = useMemo(() => {
         const groups = {};
@@ -623,6 +716,17 @@ const BasesTrabajo = () => {
         return new Date(dateString).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     };
 
+    const formatDateTime = (dateString) => {
+        if (!dateString) return 'N/A';
+        return new Date(dateString).toLocaleString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
     return (
         <div className="h-[calc(100vh-5rem)] flex flex-col bg-[#F8FAFC]">
             {/* Header */}
@@ -650,16 +754,26 @@ const BasesTrabajo = () => {
                         inputClassName="w-full pl-10 pr-10 h-10 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-[#F39200]"
                     />
                     {['administrador', 'superadministrador', 'admin', 'superadmin'].includes(user?.rol?.toLowerCase()) && (
-                        <LiquidButton onClick={() => { setEditingBase(null); setIsCloning(false); setShowCreateModal(true); }} className="bg-[#1A1A1A] text-white">
-                            <Plus className="w-4 h-4 mr-2" /> Nueva Base
-                        </LiquidButton>
+                        <>
+                            <button
+                                type="button"
+                                onClick={openRecycleModal}
+                                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-rose-200 hover:text-rose-700"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                Papelera
+                            </button>
+                            <LiquidButton onClick={() => { setEditingBase(null); setIsCloning(false); setShowCreateModal(true); }} className="bg-[#1A1A1A] text-white">
+                                <Plus className="w-4 h-4 mr-2" /> Nueva Base
+                            </LiquidButton>
+                        </>
                     )}
                 </div>
             </header>
 
             {/* Content */}
             <main className="flex-1 overflow-y-auto p-10 custom-scrollbar">
-                {selectedBaseTrabajo && (
+                {selectedBaseTrabajoInCurrentEmpresa && (
                     <div className="mb-6 flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
                         <span className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">
                             Base activa
@@ -698,7 +812,7 @@ const BasesTrabajo = () => {
                                             cardRefs.current.delete(activeBase.id);
                                         }
                                     }}
-                                    className={`bg-white border rounded-[2rem] p-6 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all cursor-pointer relative group flex flex-col min-h-[280px] ${highlightedBaseId === activeBase.id ? 'border-sky-400 shadow-[0_0_0_3px_rgba(14,165,233,0.18),0_18px_36px_rgba(14,165,233,0.15)]' : 'border-zinc-200 hover:border-[#F39200]/30'}`}
+                                    className={`bg-white border rounded-[1.5rem] p-5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all cursor-pointer relative group flex flex-col min-h-[280px] ${highlightedBaseId === activeBase.id ? 'border-sky-400 shadow-[0_0_0_3px_rgba(14,165,233,0.18),0_18px_36px_rgba(14,165,233,0.15)]' : 'border-zinc-200 hover:border-[#F39200]/30'}`}
                                     onMouseEnter={() => {
                                         if (isProjectVariant) {
                                             handleHighlightSourceBase(activeBase.source_base_id, { persistMs: 0 });
@@ -712,23 +826,23 @@ const BasesTrabajo = () => {
                                     onClick={() => handleOpenBase(activeBase)}
                                 >
                                     {/* Header: Icon + Name + Actions */}
-                                    <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-start justify-between mb-3">
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
                                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isMaster ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-500'}`}>
                                                 <Database className="w-5 h-5" />
                                             </div>
                                             <div className="min-w-0">
-                                                <div className="flex items-center gap-2 mb-0.5">
+                                                <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
                                                     <span className="text-[9px] font-black bg-zinc-900 text-white px-1.5 py-0.5 rounded italic leading-none">{activeBase.codigo_unico}</span>
                                                     <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full text-zinc-500 ${isMaster ? 'bg-orange-50' : 'bg-blue-50'}`}>{isMaster ? 'Base Maestra' : 'Base Proyecto'}</span>
                                                 </div>
                                                 <MarketplaceOriginBadgeSet
                                                     origin={activeBaseOriginData}
-                                                    className="mb-1"
+                                                    className="mb-0.5"
                                                     mode="tooltip"
                                                     label={`Origen de ${activeBase.nombre}`}
                                                 />
-                                                <h3 className="text-sm font-black uppercase tracking-tight truncate leading-tight text-zinc-900">{activeBase.nombre}</h3>
+                                                <h3 className="text-[13px] font-black uppercase tracking-tight leading-snug text-zinc-900 break-words [overflow-wrap:anywhere]">{activeBase.nombre}</h3>
                                             </div>
                                         </div>
                                         <div className="flex gap-0.5 shrink-0 ml-2">
@@ -758,18 +872,18 @@ const BasesTrabajo = () => {
                                     </div>
 
                                     {/* Body: Description */}
-                                    <div className="flex-1 mb-6">
+                                    <div className="flex-1 min-h-0 mb-4">
                                         <AppHint
                                             content={activeBase.descripcion || 'Sin descripción adicional.'}
                                             tone="light"
                                             as="div"
-                                            triggerClassName="relative"
+                                            triggerClassName="relative h-full"
                                             maxWidth={280}
                                             minWidth={180}
                                             widthOffset={32}
                                             zIndex={140}
                                         >
-                                            <p className="text-[10px] text-zinc-400 font-medium italic line-clamp-2 leading-relaxed">
+                                            <p className="max-h-16 overflow-y-auto pr-1 text-[10px] text-zinc-500 font-medium italic leading-relaxed custom-scrollbar break-words [overflow-wrap:anywhere]">
                                                 {activeBase.descripcion || 'Sin descripción adicional.'}
                                             </p>
                                         </AppHint>
@@ -791,7 +905,7 @@ const BasesTrabajo = () => {
                                                 onFocus={() => handleHighlightSourceBase(activeBase.source_base_id, { persistMs: 0 })}
                                                 onBlur={() => clearHighlightedBase(activeBase.source_base_id)}
                                                 title={sourceBase?.nombre || `Base maestra #${activeBase.source_base_id}`}
-                                                className="mt-2 text-left text-[10px] font-semibold text-sky-700 leading-relaxed hover:text-sky-800 transition-colors"
+                                                className="mt-1.5 line-clamp-2 text-left text-[10px] font-semibold text-sky-700 leading-relaxed hover:text-sky-800 transition-colors"
                                             >
                                                 Proviene de: {sourceBase?.nombre || `Base maestra #${activeBase.source_base_id}`}
                                             </button>
@@ -799,7 +913,7 @@ const BasesTrabajo = () => {
                                     </div>
 
                                     {/* Actions / Stats Row */}
-                                    <div className="space-y-4">
+                                    <div className="space-y-3">
                                         {isGroup && base.revisions.length > 1 ? (
                                             <div onClick={e => e.stopPropagation()} className="relative">
                                                 <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
@@ -814,12 +928,12 @@ const BasesTrabajo = () => {
                                                 />
                                             </div>
                                         ) : (
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex-1 flex items-center justify-between px-3 py-2 bg-zinc-50/80 rounded-xl border border-zinc-100">
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1 flex items-center justify-between px-2.5 py-1.5 bg-zinc-50/80 rounded-xl border border-zinc-100">
                                                     <span className="text-[8px] font-black uppercase text-zinc-400">Indirectos</span>
                                                     <span className="text-[10px] font-black text-zinc-900 italic">{activeBase.porcentaje_indirectos}%</span>
                                                 </div>
-                                                <div className="flex-1 flex items-center justify-between px-3 py-2 bg-zinc-50/80 rounded-xl border border-zinc-100">
+                                                <div className="flex-1 flex items-center justify-between px-2.5 py-1.5 bg-zinc-50/80 rounded-xl border border-zinc-100">
                                                     <span className="text-[8px] font-black uppercase text-zinc-400">Unidad</span>
                                                     <span className="text-[10px] font-bold text-zinc-600 truncate">{activeBase.unidad_tiempo}</span>
                                                 </div>
@@ -827,7 +941,7 @@ const BasesTrabajo = () => {
                                         )}
 
                                         {/* Footer Status */}
-                                        <div className="flex items-center justify-between pt-4 border-t border-zinc-50">
+                                        <div className="flex items-center justify-between pt-3 border-t border-zinc-50">
                                             <div className="flex items-center gap-1.5 min-w-0">
                                                 <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isVisuallySelected ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.3)]' : 'bg-zinc-200'}`} />
                                                 <span className={`text-[8px] font-black uppercase truncate ${isVisuallySelected ? 'text-green-600' : 'text-zinc-400'}`}>{isVisuallySelected ? 'Activa ahora' : 'No seleccionada'}</span>
@@ -908,13 +1022,105 @@ const BasesTrabajo = () => {
                             <div className="w-20 h-20 bg-red-100 text-red-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6"><Trash2 className="w-10 h-10" /></div>
                             <h2 className="text-2xl font-black uppercase mb-4 text-zinc-900 leading-tight">¿Eliminar Registro?</h2>
                             <p className="text-zinc-500 text-xs font-medium mb-10 leading-relaxed px-4">
-                                {linkedProject ? `La base está vinculada a ${linkedProject.nombre}. Se eliminará el proyecto completo y todas sus revisiones.` : `¿Desea borrar permanentemente ${baseToDelete?.nombre}?`}
+                                {linkedProject ? `La base está vinculada a ${linkedProject.nombre}. Se moverá el proyecto completo y sus revisiones a papelera durante 7 días.` : `¿Desea mover ${baseToDelete?.nombre} a papelera durante 7 días?`}
                             </p>
                             <LiquidButton onClick={handleDeleteBaseConfirm} className="w-full !h-14 bg-red-600 text-white rounded-2xl mb-3 uppercase tracking-widest font-black text-[10px]">
-                                {deleting ? 'Procesando...' : 'Confirmar Eliminación'}
+                                {deleting ? 'Procesando...' : 'Mover a Papelera'}
                             </LiquidButton>
                             <button onClick={() => setShowDeleteModal(false)} className="w-full h-12 text-zinc-400 font-black uppercase tracking-widest text-[9px]">Cancelar</button>
                         </div>
+                    </AppModalShell>
+                )}
+
+                {showRecycleModal && (
+                    <AppModalShell
+                        isOpen={showRecycleModal}
+                        size="lg"
+                        zIndex="z-[200]"
+                        panelClassName="rounded-[2.5rem] max-h-[calc(100vh-4rem)] flex flex-col"
+                        onClose={() => setShowRecycleModal(false)}
+                    >
+                        <AppModalHeader
+                            title="Papelera de bases"
+                            subtitle="Retención operativa de 7 días antes del borrado definitivo."
+                            icon={Trash2}
+                            onClose={() => setShowRecycleModal(false)}
+                        />
+                        <div className="min-h-0 overflow-y-auto px-6 py-5">
+                            {recycleLoading ? (
+                                <div className="flex items-center justify-center py-16">
+                                    <div className="flex flex-col items-center gap-4 text-zinc-400">
+                                        <div className="h-10 w-10 animate-spin rounded-full border-4 border-zinc-100 border-t-[#F39200]" />
+                                        <p className="text-[10px] font-black uppercase tracking-widest">Cargando papelera...</p>
+                                    </div>
+                                </div>
+                            ) : recycledBases.length === 0 ? (
+                                <div className="rounded-[2rem] border border-dashed border-zinc-200 bg-zinc-50/70 px-6 py-12 text-center">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Sin bases en papelera</p>
+                                    <p className="mt-3 text-sm font-medium text-zinc-500">Las bases eliminadas se mostrarán aquí durante 7 días.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {recycledBases.map((base) => {
+                                        const baseName = base.trash_original_nombre || base.nombre;
+                                        const baseCode = base.trash_original_codigo_unico || base.codigo_unico;
+                                        const isBusy = recycleActionId === base.id;
+                                        return (
+                                            <div key={base.id} className="rounded-[1.5rem] border border-zinc-200 bg-white px-4 py-3.5 shadow-[0_8px_20px_rgba(0,0,0,0.03)]">
+                                                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-[12px] font-black uppercase tracking-tight text-zinc-900">{baseName}</p>
+                                                        <div className="mt-1 flex flex-wrap gap-2 text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
+                                                            <span>{baseCode || 'Sin código'}</span>
+                                                            <span>{base.tipo || 'Base'}</span>
+                                                            <span>Eliminada: {formatDateTime(base.deleted_at)}</span>
+                                                            <span>Expira: {formatDateTime(base.recycle_expires_at)}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex shrink-0 items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRestoreRecycledBase(base)}
+                                                            disabled={isBusy}
+                                                            className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-emerald-100 bg-emerald-50 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 disabled:opacity-50"
+                                                        >
+                                                            <RotateCcw className="h-3.5 w-3.5" />
+                                                            Restaurar
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handlePurgeRecycledBase(base)}
+                                                            disabled={isBusy}
+                                                            className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-rose-100 bg-rose-50 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-rose-700 transition hover:border-rose-300 disabled:opacity-50"
+                                                        >
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                            Borrar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                        <AppModalFooter>
+                            <button
+                                type="button"
+                                onClick={() => setShowRecycleModal(false)}
+                                className="h-11 rounded-[1rem] bg-zinc-50 px-5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-zinc-100"
+                            >
+                                Cerrar
+                            </button>
+                            <LiquidButton
+                                onClick={fetchRecycledBases}
+                                disabled={recycleLoading}
+                                className="!h-11 bg-[#1A1A1A] text-white"
+                            >
+                                <RotateCcw className="mr-2 h-4 w-4" />
+                                Actualizar
+                            </LiquidButton>
+                        </AppModalFooter>
                     </AppModalShell>
                 )}
 

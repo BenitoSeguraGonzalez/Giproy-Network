@@ -71,7 +71,7 @@ const AdminGlobalAuditoria = () => {
                 setEvents(eventsData || []);
                 setLegacyEvents(legacyData || []);
             } catch (error) {
-                console.error('Error cargando auditoría:', error);
+                globalThis.reportClientError?.('Error cargando auditoría:', error);
             } finally {
                 setLoading(false);
             }

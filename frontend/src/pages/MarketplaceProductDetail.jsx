@@ -84,7 +84,7 @@ const MarketplaceProductDetail = () => {
                     pushMarketplaceRecentlyViewed(user?.id, productData.id);
                 }
             } catch (error) {
-                console.error('Error cargando producto:', error);
+                globalThis.reportClientError?.('Error cargando producto:', error);
                 if (!cancelled) {
                     setProduct(null);
                     setReviews([]);
@@ -160,7 +160,7 @@ const MarketplaceProductDetail = () => {
             const { data } = await marketplaceApi.checkout(payload);
             navigate(`/pedido/${data.id}`);
         } catch (error) {
-            console.error('Error en checkout:', error);
+            globalThis.reportClientError?.('Error en checkout:', error);
             appAlert(error?.response?.data?.detail || 'No se pudo completar la compra.');
         } finally {
             setSubmitting(false);
@@ -180,7 +180,7 @@ const MarketplaceProductDetail = () => {
             setReviews(reviewsData || []);
             setReviewForm({ rating: 5, comment: '' });
         } catch (error) {
-            console.error('Error creando reseña marketplace:', error);
+            globalThis.reportClientError?.('Error creando reseña marketplace:', error);
             appAlert(error?.response?.data?.detail || 'No se pudo registrar la reseña.');
         } finally {
             setReviewSubmitting(false);

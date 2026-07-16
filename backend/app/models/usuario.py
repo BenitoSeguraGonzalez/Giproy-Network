@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text, UniqueConstraint, JSON
-from sqlalchemy.orm import relationship, deferred
+from sqlalchemy.orm import relationship, deferred, validates
 from sqlalchemy.sql import func
 from app.core.database import Base
 
@@ -36,6 +36,7 @@ class Usuario(Base):
     fecha_aceptacion_politicas_comunicacion = Column(DateTime(timezone=True), nullable=True)
     fecha_autorizacion_publicidad = Column(DateTime(timezone=True), nullable=True)
     ruc_verificado = Column(Boolean, default=False)  # Si el RUC fue verificado
+    ruc_provenance = Column(String(50), nullable=True)
     
     # Información del RUC consultada
     razon_social_ruc = Column(String(500), nullable=True)
@@ -58,6 +59,10 @@ class Usuario(Base):
     fecha_actualizacion = Column(DateTime(timezone=True), onupdate=func.now())
 
     __table_args__ = (UniqueConstraint('email', 'empresa_id', name='uq_usuario_email_empresa'),)
+
+    @validates("rol")
+    def _normalize_rol(self, key, value):
+        return value.strip().lower() if value else "usuario"
 
     empresa = relationship("Empresa", back_populates="usuarios")
     dispositivos = relationship("Dispositivo", back_populates="usuario")

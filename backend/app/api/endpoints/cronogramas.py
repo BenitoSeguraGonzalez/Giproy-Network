@@ -21,12 +21,16 @@ from app.schemas.cronograma import (
     CronogramaLineaUpdate,
     CronogramaLineaValorada,
     CronogramaPeriodo,
+    CronogramaRecursosResponse,
+    CronogramaRecursosStateResponse,
+    CronogramaRecursosStateUpdate,
     CronogramaValoradoResponse,
 )
 from app.services.audit_event import record_audit_event
 from app.core.rounding import round_decimal
 from app.core.calculation_policy import as_decimal, round_operational_calc
 from app.services.cronograma_trabajo import cronograma_trabajo_service
+from app.services.cronograma_recursos import cronograma_recursos_service
 
 router = APIRouter()
 
@@ -859,6 +863,69 @@ def read_cronograma_valorado(
     _verify_module_access(db, presupuesto.proyecto_id, current_user.id)
     cronograma = _get_or_create_cronograma(db, presupuesto)
     return _serialize_cronograma(db, presupuesto, cronograma)
+
+
+@router.get("/valorados/{presupuesto_id}/recursos", response_model=CronogramaRecursosResponse)
+def read_cronograma_recursos(
+    presupuesto_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+    empresa_id: Optional[int] = Query(None),
+):
+    presupuesto = _resolve_budget(db, presupuesto_id, current_user, empresa_id)
+    _verify_module_access(db, presupuesto.proyecto_id, current_user.id)
+    cronograma = _get_or_create_cronograma(db, presupuesto)
+    serialized = _serialize_cronograma(db, presupuesto, cronograma)
+    return cronograma_recursos_service.build_resource_demand(db, presupuesto, serialized, presupuesto.empresa_id)
+
+
+@router.get("/valorados/{presupuesto_id}/recursos/state", response_model=CronogramaRecursosStateResponse)
+def read_cronograma_recursos_state(
+    presupuesto_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+    empresa_id: Optional[int] = Query(None),
+):
+    presupuesto = _resolve_budget(db, presupuesto_id, current_user, empresa_id)
+    _verify_module_access(db, presupuesto.proyecto_id, current_user.id)
+    return cronograma_recursos_service.get_resource_state(db, presupuesto)
+
+
+@router.put("/valorados/{presupuesto_id}/recursos/state", response_model=CronogramaRecursosStateResponse)
+def update_cronograma_recursos_state(
+    presupuesto_id: int,
+    payload: CronogramaRecursosStateUpdate,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+    empresa_id: Optional[int] = Query(None),
+):
+    _check_write_permissions(current_user)
+    presupuesto = _resolve_budget(db, presupuesto_id, current_user, empresa_id)
+    _verify_module_access(db, presupuesto.proyecto_id, current_user.id)
+    state_payload = cronograma_recursos_service.update_resource_state(
+        db,
+        presupuesto,
+        adjustments=payload.adjustments,
+        expected_version=payload.version,
+        updated_by_id=current_user.id,
+    )
+    record_audit_event(
+        db,
+        module="cronogramas",
+        event_type="cronograma_recursos_state_updated",
+        severity="info",
+        actor=current_user,
+        target_empresa_id=presupuesto.empresa_id,
+        entity_type="presupuesto",
+        entity_id=presupuesto.id,
+        message=f"Estado de recursos actualizado para presupuesto {presupuesto.id}",
+        payload={
+            "presupuesto_id": presupuesto.id,
+            "version": state_payload.get("version"),
+            "adjustment_keys": sorted(list((state_payload.get("adjustments") or {}).keys())),
+        },
+    )
+    return state_payload
 
 
 @router.put("/valorados/{presupuesto_id}/config", response_model=CronogramaValoradoResponse)

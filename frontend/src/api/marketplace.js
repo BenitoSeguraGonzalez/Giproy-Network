@@ -81,6 +81,8 @@ export const marketplaceApi = {
                 throw error;
             }
 
+            console.warn('[marketplaceApi] /excel-preview returned 404, falling back to form-based /preview. This is expected during staggered deploys.');
+
             const formData = new FormData();
             formData.append('output_kind', 'excel');
             formData.append('analysis_json', JSON.stringify(payload?.import_analysis || {}));

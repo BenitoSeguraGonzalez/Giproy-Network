@@ -117,10 +117,25 @@ def test_delete_project_endpoint_removes_root_revision_and_operational_stack(db,
     try:
         with TestClient(app) as client:
             response = client.delete(f"/api/v1/proyectos/{root_id}?empresa_id={sample_empresa.id}")
+            normal_list = client.get(f"/api/v1/proyectos/?empresa_id={sample_empresa.id}")
+            recycle_list = client.get(f"/api/v1/proyectos/papelera?empresa_id={sample_empresa.id}")
+            restore_response = client.post(f"/api/v1/proyectos/papelera/{root_id}/restore?empresa_id={sample_empresa.id}")
+            delete_again_response = client.delete(f"/api/v1/proyectos/{root_id}?empresa_id={sample_empresa.id}")
+            purge_response = client.delete(f"/api/v1/proyectos/papelera/{root_id}/purge?empresa_id={sample_empresa.id}")
     finally:
         app.dependency_overrides.clear()
 
     assert response.status_code == 204, response.text
+    assert normal_list.status_code == 200, normal_list.text
+    assert all(item["id"] != root_id for item in normal_list.json())
+    assert recycle_list.status_code == 200, recycle_list.text
+    recycled_root = next(item for item in recycle_list.json() if item["id"] == root_id)
+    assert recycled_root["deleted_at"] is not None
+    assert recycled_root["recycle_expires_at"] is not None
+    assert restore_response.status_code == 200, restore_response.text
+    assert restore_response.json()["id"] == root_id
+    assert delete_again_response.status_code == 204, delete_again_response.text
+    assert purge_response.status_code == 204, purge_response.text
     assert db.query(Proyecto).filter(Proyecto.id.in_([root_id, revision_id])).count() == 0
     assert db.query(Presupuesto).filter(Presupuesto.proyecto_id.in_([root_id, revision_id])).count() == 0
     assert db.query(CronogramaValorado).filter(CronogramaValorado.proyecto_id.in_([root_id, revision_id])).count() == 0
@@ -128,6 +143,70 @@ def test_delete_project_endpoint_removes_root_revision_and_operational_stack(db,
     assert db.query(ProjectCalendarEntry).filter(ProjectCalendarEntry.proyecto_codigo_root == root_code).count() == 0
     for base_id in base_ids:
         assert db.query(BaseTrabajo).filter(BaseTrabajo.id == base_id).first() is None
+
+
+def test_delete_project_can_preserve_project_base_as_work_base(db, sample_empresa):
+    current_user = _admin_user(db, sample_empresa.id)
+    source_base = BaseTrabajo(
+        codigo_unico="BT-PRESERVE-SOURCE",
+        nombre="Base fuente para preservar",
+        tipo="Base Maestra",
+        empresa_id=sample_empresa.id,
+    )
+    db.add(source_base)
+    db.commit()
+    db.refresh(source_base)
+
+    root = proyecto_service.create_proyecto(
+        db,
+        ProyectoCreate(nombre="Proyecto borrado conservando base", source_base_id=source_base.id),
+        sample_empresa.id,
+    )
+    root_id = root.id
+    base_id = root.base_trabajo_id
+    assert db.query(BaseTrabajo).filter(BaseTrabajo.id == base_id).first().tipo == "Base de Proyecto"
+
+    app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_current_active_user] = lambda: current_user
+    try:
+        with TestClient(app) as client:
+            response = client.delete(
+                f"/api/v1/proyectos/{root_id}?empresa_id={sample_empresa.id}&delete_project_base=false"
+            )
+            assert response.status_code == 204, response.text
+
+            preserved_base = db.query(BaseTrabajo).filter(BaseTrabajo.id == base_id).first()
+            assert preserved_base is not None
+            assert preserved_base.deleted_at is None
+            assert preserved_base.tipo == "Base Maestra"
+            assert "conservada desde el proyecto eliminado" in (preserved_base.descripcion or "")
+
+            recycle_list = client.get(f"/api/v1/proyectos/papelera?empresa_id={sample_empresa.id}")
+            assert recycle_list.status_code == 200, recycle_list.text
+            recycled_root = next(item for item in recycle_list.json() if item["id"] == root_id)
+            assert recycled_root["deleted_at"] is not None
+
+            restore_response = client.post(f"/api/v1/proyectos/papelera/{root_id}/restore?empresa_id={sample_empresa.id}")
+            assert restore_response.status_code == 200, restore_response.text
+            restored_base = db.query(BaseTrabajo).filter(BaseTrabajo.id == base_id).first()
+            assert restored_base is not None
+            assert restored_base.tipo == "Base de Proyecto"
+
+            delete_again_response = client.delete(
+                f"/api/v1/proyectos/{root_id}?empresa_id={sample_empresa.id}&delete_project_base=false"
+            )
+            assert delete_again_response.status_code == 204, delete_again_response.text
+
+            purge_response = client.delete(f"/api/v1/proyectos/papelera/{root_id}/purge?empresa_id={sample_empresa.id}")
+            assert purge_response.status_code == 204, purge_response.text
+    finally:
+        app.dependency_overrides.clear()
+
+    final_base = db.query(BaseTrabajo).filter(BaseTrabajo.id == base_id).first()
+    assert final_base is not None
+    assert final_base.deleted_at is None
+    assert final_base.tipo == "Base Maestra"
+    assert db.query(Proyecto).filter(Proyecto.id == root_id).first() is None
 
 
 def test_delete_project_endpoint_accepts_superadmin_role_with_whitespace(db, sample_empresa):
@@ -148,7 +227,10 @@ def test_delete_project_endpoint_accepts_superadmin_role_with_whitespace(db, sam
         app.dependency_overrides.clear()
 
     assert response.status_code == 204, response.text
-    assert db.query(Proyecto).filter(Proyecto.id == root_id).first() is None
+    recycled = db.query(Proyecto).filter(Proyecto.id == root_id).first()
+    assert recycled is not None
+    assert recycled.deleted_at is not None
+    assert recycled.recycle_expires_at is not None
 
 
 def test_delete_project_endpoint_blocks_admin_cross_company_empresa_id(db, sample_empresa):

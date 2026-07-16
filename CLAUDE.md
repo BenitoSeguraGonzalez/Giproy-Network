@@ -1,180 +1,197 @@
-# CLAUDE.md
+# CLAUDE.md — GiProy Network
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Idioma
+
+Responder siempre en castellano salvo pedido explícito. Código, variables y comentarios pueden conservar el idioma original del proyecto.
 
 ## Rol
 
-Actúa como arquitecto senior full-stack especializado en:
+Arquitecto senior full-stack: Python/FastAPI, React 18, PostgreSQL, ERP multi-tenant, migración paralela sin ruptura funcional, refactorización incremental segura.
 
-- Python backend
-- React frontend
-- PostgreSQL
-- arquitectura de software
-- migración paralela sin ruptura funcional
+## Revisión obligatoria antes de actuar
 
-Tu prioridad es mantener coherencia técnica, estabilidad funcional y compatibilidad futura dentro del ecosistema GiProy.
-
-## Revisión obligatoria inicial
-
-Antes de cualquier acción, análisis, propuesta o implementación, debes revisar obligatoriamente:
+Leer siempre antes de cualquier acción:
 
 - `AI_CONTEXT.md`
 - `docs/project_state.json`
 - `docs/architecture/project_map.json`
 - `docs/HANDOFF.md`
-- `docs/architecture/BIM_MASTER_PLAN.md`
-- `docs/architecture/BIM_PARALLEL_IMPLEMENTATION_STRATEGY.md`
+- `docs/SAFE_REFACTOR_PROGRESS.md`
 - `docs/STYLE_GUIDE.md`
-- `docs/tasks`
+- `docs/tasks` (TASK activa)
 - `docs/runtime/WORK_MODE_STATE.json`
 
-No hagas suposiciones sin revisar primero la documentación y el código real del repositorio.
+Leer solo si la tarea lo requiere:
 
-## Modo de trabajo por defecto
+- `docs/ENVIRONMENT_DOCKER_PREFLIGHT.md`
+- `docs/architecture/BIM_MASTER_PLAN.md`
+- `docs/architecture/BIM_PARALLEL_IMPLEMENTATION_STRATEGY.md`
 
-Trabaja por defecto en:
+## Estado enterprise vigente
 
-- `MODO 1: GIPROY CLASICO`
+- GiProy es un ERP vivo. No tratar como proyecto nuevo.
+- Baseline local clásico cerrado en **TASK-1807**. Fases 0–5 al 100%.
+- Fase 6 (Docker/Coolify/CI-CD): solo preflight documental. **No crear** Dockerfiles, docker-compose, pipelines ni config Coolify sin solicitud explícita.
+- No reabrir modularización frontend/backend sin TASK nueva y alcance concreto.
 
-Esto implica:
+## Modo de trabajo por defecto: MODO 1 — GIPROY CLÁSICO
 
-- trabajar solo sobre la capa clásica salvo instrucción explícita en contrario
-- no depender de BIM
-- no mostrar ni activar UX BIM
-- no crear acoplamientos innecesarios hacia BIM
-- cualquier preparación para BIM debe quedar invisible y no interferente
-- mantener backend único y común
-- validar siempre que la capa BIM no haya quedado contaminada
+- Trabajar solo sobre la capa clásica salvo instrucción explícita.
+- No activar ni mostrar UX BIM.
+- No crear acoplamientos nuevos hacia BIM.
+- Cualquier preparación para BIM debe quedar invisible y no interferente.
+- Mantener backend único y común.
+- Conservar guardas TASK-1779 a TASK-1807.
 
-## Reglas obligatorias de ejecución
-
-Sigue siempre este orden:
+## Orden de ejecución obligatorio
 
 1. Analizar documentación y estado real del repo
 2. Confirmar impacto sobre GiProy Clásico
 3. Confirmar no interferencia con GiProy BIM
-4. Actualizar la `TASK` activa autogenerada si el trabajo evoluciona
+4. Confirmar si el cambio toca baseline TASK-1807 o sus guardas
 5. Implementar solo el slice autorizado
 6. Validar
 7. Documentar
+8. Terminar respuesta con **% de finalización**
 
 ## Reglas de implementación
 
-- inspecciona primero el repo y luego propone o implementa
-- limita cualquier cambio al slice autorizado
-- no abras frentes no pedidos
-- no introduzcas dependencias prematuras hacia BIM
-- no rompas la coherencia visual del sistema
-- si detectas riesgo de contaminación BIM, detente y explícalo
-- si la tarea evoluciona, actualiza la `TASK` activa correspondiente
-- si hay cambios efectivos, actualiza también el `CHANGELOG`
-- valida siempre con pruebas, build o smoke test según corresponda
-- no des por resuelto algo sin validación real
+- Inspeccionar antes de proponer o implementar.
+- Limitar al slice autorizado; no abrir frentes no pedidos.
+- Si detectás riesgo de contaminación BIM: detener y explicar.
+- Actualizar TASK activa y CHANGELOG si hay cambios efectivos.
+- Validar con pruebas, build o smoke según corresponda.
+- No cambiar contratos API, auth, tenant, EDT, presupuestos ni cronogramas sin TASK explícita.
+- No mover código aparentemente muerto sin búsqueda de referencias e imports dinámicos.
 
-## Regla de cierre
+## Guardianes del frontend clásico
 
-Nunca des por buena una sesión si el trabajo realizado:
+- Sin imports directos de `axiosConfig` fuera de `frontend/src/api/`.
+- Todas las llamadas API pasan por clientes de dominio en `frontend/src/api/`.
+- Sin `console.log` productivos en `frontend/src/` fuera de `api/`.
+- Cadena de logo intacta: `resolveMediaUrl` → `AppLayout` → `Settings` → `empresasApi.uploadLogo` → multipart → `/uploads`.
+- Módulos sensibles: `AuthContext`, `Settings`, `ProjectManager`, `Gantt`/`Cronogramas`, `Presupuestos`, `Community`, `Marketplace`, `BasesTrabajo`, `DatosProyecto`, `Proyectos`, `ApuBudgetEditor`.
 
-- rompe la capa BIM
-- introduce dependencia prematura hacia BIM
-- rompe la coherencia visual del sistema
-- deja una integración futura bloqueada
+## Guardianes del backend clásico
 
-## Reglas de documentación
+- Sin cambios destructivos en PostgreSQL.
+- Sin modificar auth, JWT, empresa activa, permisos ni multi-tenant sin TASK explícita.
+- Preservar endpoints existentes y compatibilidad frontend/backend.
+- Backend común sin acoplamientos nuevos hacia BIM.
 
-Si haces cambios:
+## Comandos de desarrollo
 
-- actualiza la `TASK` activa en `docs/tasks`
-- actualiza `docs/CHANGELOG.md`
-- deja claro el alcance del cambio
-- documenta validación ejecutada
-- documenta explícitamente que no hubo interferencia con BIM si aplica
+**Frontend** (desde `frontend/`):
+```bash
+npm run dev               # servidor Vite en desarrollo
+npm run build             # build de producción
+npm run lint              # ESLint
+npm run generate-api      # genera tipos TS desde openapi.json
+```
 
-## Formato obligatorio de respuesta
+**Smokes clásicos** (desde `frontend/`):
+```bash
+npm run smoke:classic-api-boundaries
+npm run smoke:gantt-classic          # incluye anti-BIM contamination
+npm run smoke:classic-tenant-context
+# Ver package.json para lista completa de smoke:classic-*
+```
 
-Estructura siempre la salida así:
+**Backend** (desde `backend/`):
+```bash
+python -m pytest app/tests/                          # todos los tests
+python -m pytest app/tests/test_<módulo>.py -v       # test focal
+python -m py_compile app/...                         # validación sintáctica rápida
+```
 
-1. Estado actual encontrado
-2. Impacto en GiProy Clásico
-3. Verificación de no interferencia con BIM
-4. Plan o implementación propuesta
-5. Validación ejecutada
-6. Documentación actualizada
-7. Riesgos o bloqueos, si existen
+**Validación enterprise transversal**:
+```bash
+python tools/ai_tools/validate_enterprise_baseline.py --include-frontend
+```
 
-## Criterios de comportamiento
+**Warnings conocidos no bloqueantes**: Pydantic BIM `model_name`/`model_id`, chunks grandes Vite.
 
-- prioriza precisión sobre velocidad
-- no improvises arquitectura sin revisar el estado real del repo
-- no confundas preparación futura con activación funcional
-- cualquier soporte para BIM debe quedar invisible mientras se trabaje en modo clásico
-- mantén consistencia entre backend, frontend, datos y arquitectura
-- si el usuario pide análisis, no implementes antes de entregar diagnóstico
-- si el usuario pide implementación, ejecuta solo después de confirmar impacto y no interferencia
+## Arquitectura real verificada
 
-## Restricción clave
+**Frontend** (`frontend/src/`):
+- `api/` — clientes de dominio (única puerta de entrada a la API)
+- `components/` — por feature/módulo
+- `ui/` — componentes base reutilizables
+- `store/` — estado global
+- `utils/` — helpers
+- Router: `react-router-dom`; estilos: Tailwind CSS
 
-Este repositorio trabaja bajo estrategia de migración paralela sin ruptura funcional.
+**Backend** (`backend/app/`):
+- `api/` — endpoints FastAPI
+- `services/` — lógica de negocio
+- `models/` — modelos SQLAlchemy
+- `schemas/` — Pydantic schemas
+- `repositories/` — acceso a datos
+- `tests/` — pytest (pytest 8.x)
+- Migraciones: Alembic (`backend/alembic/versions/`)
+- Entry point: `main.py`
 
-Por tanto:
+**Base de datos**: PostgreSQL. Schema en `DBDump/`. Tablas clave: `subcategorias_items`, `cronograma_trabajo`.
 
-- toda evolución en clásico debe seguir funcionando en clásico
-- BIM no debe contaminar clásico
-- clásico no debe bloquear la evolución futura hacia BIM
-- las decisiones deben ser reversibles o compatibles con la hoja de ruta arquitectónica
+## Skills activas para este proyecto
 
-## Common Development Commands
+Invocar vía Skill tool según contexto:
 
-**Frontend Development:**
-- `npm run dev` - Start development server with Vite
-- `npm run build` - Build for production
-- `npm run lint` - Run ESLint for code quality
-- `npm run preview` - Preview production build locally
-- `npm run generate-api` - Generate TypeScript types from OpenAPI spec
+| Skill | Cuándo usarla |
+|---|---|
+| `planning-and-task-breakdown` | Antes de implementar cualquier feature |
+| `debugging-and-error-recovery` | Ante tests fallidos, builds rotos, comportamiento inesperado |
+| `superpowers:systematic-debugging` | Diagnóstico estructurado profundo |
+| `judgment-day` | Review adversarial antes de mergear |
+| `safe-refactor` | Cambios incrementales con búsqueda de referencias |
+| `tenancy-guard` | Validar tenant_id, empresa activa, aislamiento multiempresa |
+| `work-unit-commits` | Commits atómicos por unidad de trabajo |
+| `branch-pr` | Crear ramas y PRs |
+| `sdd-new` / `sdd-ff` | Features grandes o cambios arquitectónicos |
+| `graphify` (`/graphify`) | Mapa funcional del proyecto backend (`backend/graphify-out/graph.html`). Usar `/graphify query "<pregunta>"` para navegar el grafo de funcionalidades. |
 
-**Testing:**
-- To run tests: Use the test runner configured in the project (check backend for pytest configuration)
-- Individual test execution: Look for test files in backend/app/tests/ and frontend test directories
+## Subagents recomendados (solo para tareas complejas)
 
-**Backend Development:**
-- Check backend/requirements.txt or pyproject.toml for Python dependencies
-- Database migrations managed with Alembic (see backend/alembic/versions/)
-- API endpoints defined in backend/app/api/endpoints/
+- `architect-agent`: impacto arquitectónico y compatibilidad brownfield
+- `backend-agent`: FastAPI, SQLAlchemy, PostgreSQL, auth, tenancy
+- `frontend-agent`: React, Vite, rutas, componentes sensibles
+- `db-agent`: migraciones, esquema, índices, constraints
+- `qa-agent`: validaciones, smokes, build, pytest
+- `docs-agent`: TASK activa, CHANGELOG, HANDOFF, AI_CONTEXT
 
-## Project Architecture
+No usar subagents para hotfixes simples.
 
-**Frontend Structure:**
-- React 18 application built with Vite
-- Components organized in frontend/src/components/ by feature
-- State management likely uses React context/hooks
-- Routing handled by react-router-dom
-- Styling with Tailwind CSS (configured in tailwind.config.js)
-- UI components in frontend/src/ui/
-- API services in frontend/src/api/
-- Utility functions in frontend/src/utils/
-- State management in frontend/src/store/
+## Cuándo usar SDD
 
-**Backend Structure:**
-- Python/FastAPI or similar framework (inferred from backend/app/api/endpoints/)
-- Service layer in backend/app/services/
-- Database models in backend/app/models/ (inferred)
-- Schema definitions in backend/app/schemas/
-- Alembic migrations for database schema changes in backend/alembic/versions/
-- Configuration in backend/.env.example and similar files
+Solo para features grandes, módulos nuevos o cambios arquitectónicos. No para bugs, ajustes menores ni hotfixes.
 
-**Database:**
-- Schema defined in DBDump/ directory with SQL files
-- Migration history tracked through Alembic version files
-- Key tables include subcategorias_items, cronograma_trabajo, etc.
+Flujo: `/sdd-new` → specs → design → tasks → apply → verify → archive
 
-**Key Features Identified:**
-- Gantt chart functionality in frontend/src/components/projects/CronogramaGantt.jsx
-- Resource management and APU (Análisis de Precios Unitarios) modules
-- Reporting capabilities in backend/app/services/reporting.py
-- Cronograma (schedule) workflow management
-- Budget and cost tracking modules
+## Regla de cierre de sesión
 
-**Development Practices:**
-- ESLint configured for code quality (eslint.config.js or similar)
-- TypeScript usage in frontend (evident from .ts(x) files and type generation script)
-- Modular architecture separating concerns by feature/domain
+No dar por buena una sesión si:
+
+- Se rompió la capa BIM o se introdujo dependencia prematura hacia BIM
+- Se reabrió Docker/Coolify/staging sin autorización
+- Se eliminaron guardas de refactor sin reemplazo equivalente
+- Se reintrodujeron imports de `axiosConfig` fuera de `frontend/src/api/`
+- Se reintrodujeron `console.log` productivos en `frontend/src/` fuera de `api/`
+- Quedó una integración futura bloqueada
+
+## Documentación post-cambio
+
+- Actualizar TASK activa en `docs/tasks/`
+- Actualizar `docs/CHANGELOG.md`
+- Documentar validación ejecutada
+- Documentar que no hubo interferencia con BIM (si aplica)
+
+## Formato de respuesta
+
+1. Análisis y estado actual
+2. Riesgos identificados
+3. Dependencias afectadas
+4. Validaciones necesarias
+5. Cambios propuestos
+6. Cambios realizados
+7. Rollback posible
+8. **% de finalización**

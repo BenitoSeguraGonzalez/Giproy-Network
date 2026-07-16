@@ -1,0 +1,11 @@
+[Unit]
+Description=GiProy - actualización diaria del catálogo RUC SRI
+
+[Timer]
+OnCalendar=*-*-* 02:15:00 America/Guayaquil
+Persistent=true
+RandomizedDelaySec=120
+Unit=giproy-sri-ruc-sync.service
+
+[Install]
+WantedBy=timers.target

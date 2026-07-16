@@ -3,14 +3,14 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import CronogramaGantt from './components/projects/CronogramaGantt.jsx';
 import { AuthContext } from './context/authContextInstance';
+import { ganttFixturesApi } from './api/ganttFixtures';
 
 const Harness = () => {
     const [fixture, setFixture] = useState(null);
     const [trabajo, setTrabajo] = useState(null);
 
     useEffect(() => {
-        fetch('/gantt-ff-fixture.json')
-            .then((response) => response.json())
+        ganttFixturesApi.getFfFixture()
             .then((data) => {
                 const normalizedTrabajo = {
                     ...data.trabajo,

@@ -140,6 +140,67 @@ def test_public_procurement_materializer_preserves_classic_rendimientos(db, samp
     assert presupuesto.subtotal == Decimal("10.0000")
 
 
+def test_public_procurement_materializer_blocks_phantom_resource_descriptions(db, sample_empresa):
+    _seed_global_units(db)
+    empresa_id = sample_empresa.id
+
+    analysis = {
+        "title": "Prueba recurso fantasma",
+        "analysis_bundle": {
+            "summary": {},
+            "budget_items": [
+                {
+                    "codigo": "513060",
+                    "descripcion": "Rubro contaminado",
+                    "unidad": "u",
+                    "cantidad": 1,
+                    "precio_unitario": 10,
+                    "precio_total": 10,
+                    "matched_apu_temp_id": "apu-1",
+                    "capitulo": "General",
+                }
+            ],
+            "apus": [
+                {
+                    "temp_id": "apu-1",
+                    "codigo": "513060",
+                    "descripcion": "Rubro contaminado",
+                    "unidad": "u",
+                    "precio_unitario": 10,
+                    "resource_count": 1,
+                }
+            ],
+            "resources": [
+                {
+                    "temp_id": "eq-1",
+                    "apu_temp_id": "apu-1",
+                    "codigo": "101001",
+                    "descripcion": "Hora 1,00000 0,35000",
+                    "unidad": "Hora",
+                    "resource_type": "equipo",
+                    "cantidad": "1",
+                    "precio": "0.35",
+                    "rendimiento": "1",
+                },
+            ],
+        },
+    }
+
+    try:
+        public_procurement_project_materializer.materialize(
+            db,
+            analysis=analysis,
+            empresa_id=empresa_id,
+            current_user_id=None,
+        )
+        assert False, "Expected certification error for phantom resource"
+    except ValueError as exc:
+        assert "invalid_resource_description" in str(exc)
+
+    assert db.query(Proyecto).filter(Proyecto.empresa_id == empresa_id).count() == 0
+    assert db.query(APU).filter(APU.empresa_id == empresa_id).count() == 0
+
+
 def test_delete_full_project_cleans_imported_project_operational_dependents(db, sample_empresa):
     _seed_global_units(db)
 
@@ -166,10 +227,21 @@ def test_delete_full_project_cleans_imported_project_operational_dependents(db, 
                     "descripcion": "Rubro simple",
                     "unidad": "u",
                     "precio_unitario": 1,
-                    "resources": [],
+                    "resource_count": 1,
                 }
             ],
-            "resources": [],
+            "resources": [
+                {
+                    "temp_id": "mat-1",
+                    "apu_temp_id": "apu-1",
+                    "codigo": "MAT-1",
+                    "descripcion": "Material simple",
+                    "unidad": "u",
+                    "resource_type": "material",
+                    "cantidad": 1,
+                    "precio_unitario": 1,
+                }
+            ],
         },
     }
     result = public_procurement_project_materializer.materialize(

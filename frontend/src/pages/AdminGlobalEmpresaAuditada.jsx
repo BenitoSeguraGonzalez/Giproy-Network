@@ -10,8 +10,7 @@ import {
     ShieldCheck,
     Users,
 } from 'lucide-react';
-import api from '../api/axiosConfig';
-import { withoutTenant } from '../api/tenant';
+import adminGlobalApi from '../api/adminGlobal';
 import adminSupportApi from '../api/adminSupport';
 import { AuthContext } from '../context/AuthContext';
 import { Card, CardContent } from '../components/ui/card';
@@ -52,15 +51,14 @@ const AdminGlobalEmpresaAuditada = () => {
         const loadEmpresas = async () => {
             setLoading(true);
             try {
-                const response = await api.get('/empresas/', withoutTenant());
-                const items = response.data || [];
+                const items = await adminGlobalApi.getEmpresas();
                 setEmpresas(items);
                 if (items.length > 0) {
                     const initialId = selectedEmpresa?.id || items[0].id;
                     setEmpresaAuditadaId(String(initialId));
                 }
             } catch (error) {
-                console.error('Error cargando empresas auditables:', error);
+                globalThis.reportClientError?.('Error cargando empresas auditables:', error);
                 await appAlert({
                     title: 'No se pudieron cargar las empresas',
                     message: error.response?.data?.detail || 'Revise la conectividad con el backend.',
@@ -82,7 +80,7 @@ const AdminGlobalEmpresaAuditada = () => {
                 const data = await adminSupportApi.getCompanyConsole(empresaAuditadaId);
                 setConsoleData(data);
             } catch (error) {
-                console.error('Error cargando consola auditada:', error);
+                globalThis.reportClientError?.('Error cargando consola auditada:', error);
                 await appAlert({
                     title: 'No se pudo cargar la consola auditada',
                     message: error.response?.data?.detail || 'Revise la conectividad con el backend.',

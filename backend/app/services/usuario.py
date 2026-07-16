@@ -1,4 +1,3 @@
-import httpx
 from typing import List, Any, Optional
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
@@ -9,8 +8,6 @@ from app.models.usuario import Usuario
 from app.services.license_policy import validate_role_quota
 from app.services.license import license_service
 from app.core.phone_normalization import is_valid_phone, normalize_phone
-
-RUC_API_URL = "https://app.62.171.171.124.sslip.io/ConsultarRuc.php"
 
 class UsuarioService:
     COMMUNITY_ONLY_ROLE = "usuario_comunidad"
@@ -120,96 +117,19 @@ class UsuarioService:
             
         # 3. Creación
         new_user = usuario_repo.create(db=db, obj_in=user_in)
+        if self._role_key(new_user.rol) in {"administrador", "superadministrador"}:
+            from app.services.transferencias import transferencias_service
+
+            transferencias_service.ensure_admin_public_code(db, new_user)
         
         # 4. Actualizar métricas de uso (Sincronización reactiva)
         license_service.update_usage_metrics(db, final_empresa_id)
         
         return new_user
 
-    def validar_ruc(self, ruc: str, token: str) -> ValidarRucResponse:
-        """
-        Valida un RUC consultando el servicio externo de SRI.
-        """
-        ruc_clean = ruc.strip()
-        
-        # Validar que el RUC tenga 13 dígitos
-        if len(ruc_clean) != 13:
-            return ValidarRucResponse(
-                valido=False,
-                mensaje="El RUC debe tener exactamente 13 dígitos.",
-                ruc=ruc_clean
-            )
-        
-        # Validar que sean solo dígitos
-        if not ruc_clean.isdigit():
-            return ValidarRucResponse(
-                valido=False,
-                mensaje="El RUC debe ser numérico.",
-                ruc=ruc_clean
-            )
-        
-        try:
-            # Consultar el servicio externo
-            with httpx.Client(timeout=15.0) as client:
-                response = client.post(
-                    RUC_API_URL,
-                    json={"ruc": ruc_clean, "token": token},
-                    headers={
-                        "Content-Type": "application/json; charset=utf-8",
-                        "Accept": "application/json"
-                    }
-                )
-                
-                if response.status_code != 200:
-                    return ValidarRucResponse(
-                        valido=False,
-                        mensaje=f"Error del servidor: HTTP {response.status_code}",
-                        ruc=ruc_clean
-                    )
-                
-                data = response.json()
-                
-                # Verificar si hay error en la respuesta
-                if not data.get("ok", False):
-                    error_msg = data.get("error", "Error desconocido del servidor.")
-                    return ValidarRucResponse(
-                        valido=False,
-                        mensaje=error_msg,
-                        ruc=ruc_clean
-                    )
-                
-                # Obtener los datos
-                ruc_data = data.get("data", {})
-                
-                return ValidarRucResponse(
-                    valido=True,
-                    mensaje="RUC válido encontrado.",
-                    ruc=ruc_clean,
-                    razon_social=ruc_data.get("RAZON_SOCIAL", ""),
-                    estado_contribuyente=ruc_data.get("ESTADO_CONTRIBUYENTE", ""),
-                    clase_contribuyente=ruc_data.get("CLASE_CONTRIBUYENTE", ""),
-                    fecha_inicio_actividades=ruc_data.get("FECHA_INICIO_ACTIVIDADES", ""),
-                    actividad_economica=ruc_data.get("ACTIVIDAD_ECONOMICA", "")
-                )
-                
-        except httpx.TimeoutException:
-            return ValidarRucResponse(
-                valido=False,
-                mensaje="Tiempo de espera agotado. Intente más tarde.",
-                ruc=ruc_clean
-            )
-        except httpx.RequestError as e:
-            return ValidarRucResponse(
-                valido=False,
-                mensaje=f"Error de conexión: {str(e)}",
-                ruc=ruc_clean
-            )
-        except Exception as e:
-            return ValidarRucResponse(
-                valido=False,
-                mensaje=f"Error inesperado: {str(e)}",
-                ruc=ruc_clean
-            )
+    def validar_ruc(self, ruc: str, token: str, db: Session | None = None) -> ValidarRucResponse:
+        """Compatibilidad del contrato histórico; la fuente es ahora el catálogo local SRI."""
+        return self.validar_ruc_public(ruc, db=db)
 
     def update_usuario(self, db: Session, user_id: int, user_in: UsuarioUpdate, current_user: Usuario, target_empresa_id: Optional[int] = None) -> Usuario:
         # 1. Obtener usuario
@@ -267,6 +187,10 @@ class UsuarioService:
             
         # 3. Actualizar
         updated_user = usuario_repo.update(db=db, db_obj=user_to_update, obj_in=user_in)
+        if self._role_key(updated_user.rol) in {"administrador", "superadministrador"}:
+            from app.services.transferencias import transferencias_service
+
+            transferencias_service.ensure_admin_public_code(db, updated_user)
         
         # 4. Actualizar métricas de uso si cambió el rol o empresa
         license_service.update_usage_metrics(db, updated_user.empresa_id)
@@ -311,5 +235,48 @@ class UsuarioService:
         license_service.update_usage_metrics(db, deleted_empresa_id)
         
         return user_to_delete
+
+    def validar_ruc_public(self, ruc: str, db=None) -> ValidarRucResponse:
+        """Valida un RUC exclusivamente contra PostgreSQL (dataset SRI u override aprobado)."""
+        ruc_clean = ruc.strip()
+
+        if not ruc_clean.isdigit() or len(ruc_clean) != 13:
+            return ValidarRucResponse(
+                valido=False, mensaje="El RUC debe tener 13 dígitos.", ruc=ruc_clean
+            )
+
+        if db is None:
+            return ValidarRucResponse(
+                valido=False,
+                mensaje="La validación fiscal no está disponible en este contexto.",
+                ruc=ruc_clean,
+                verification_status="source_unavailable",
+            )
+        from app.services.sri_ruc import lookup_ruc
+
+        data = lookup_ruc(db, ruc_clean)
+        if not data:
+            return ValidarRucResponse(
+                valido=False,
+                mensaje="El RUC no consta en la importación vigente. Puede solicitar verificación manual.",
+                ruc=ruc_clean,
+                verification_status="manual_review_available",
+                requires_manual_review=True,
+            )
+        return ValidarRucResponse(
+            valido=True,
+            mensaje="RUC verificado con la fuente fiscal disponible.",
+            ruc=ruc_clean,
+            razon_social=data.get("business_name", ""),
+            estado_contribuyente=data.get("status", ""),
+            clase_contribuyente=data.get("taxpayer_type", ""),
+            fecha_inicio_actividades=data.get("start_date", ""),
+            actividad_economica=data.get("economic_activity", ""),
+            verification_status="verified",
+            source=data.get("source"),
+            source_date=data.get("source_date"),
+            requires_manual_review=False,
+        )
+
 
 usuario_service = UsuarioService()

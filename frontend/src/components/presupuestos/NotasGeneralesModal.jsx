@@ -45,7 +45,7 @@ const NotasGeneralesModal = ({
                     : await presupuestosApi.getGeneralNotes(presupuestoId);
                 setNotes(Array.isArray(data) ? data : []);
             } catch (error) {
-                console.error("Error cargando notas:", error);
+                globalThis.reportClientError?.("Error cargando notas:", error);
             } finally {
                 setLoading(false);
             }
@@ -77,7 +77,7 @@ const NotasGeneralesModal = ({
                 onNoteCreated(created);
             }
         } catch (error) {
-            console.error("Error guardando nota:", error);
+            globalThis.reportClientError?.("Error guardando nota:", error);
             appAlert(error.response?.data?.detail || "Error al guardar la nota.");
         } finally {
             setSaving(false);
@@ -114,7 +114,7 @@ const NotasGeneralesModal = ({
                 appAlert("No se detectaron correcciones ortográficas necesarias en la nota.");
             }
         } catch (error) {
-            console.error("Error revisando ortografía de la nota:", error);
+            globalThis.reportClientError?.("Error revisando ortografía de la nota:", error);
             appAlert("No fue posible completar la revisión ortográfica: " + (error.response?.data?.detail || error.message));
         } finally {
             setCheckingSpell(false);

@@ -103,6 +103,156 @@ class BimJsonImportBatchResponse(BaseModel):
     imported_count: int = 0
 
 
+class BimIfcManifestRequest(BaseModel):
+    model_name: str = Field(min_length=1, max_length=255)
+    version_label: str = Field(min_length=1, max_length=50)
+    source_filename: str = Field(min_length=1, max_length=255)
+    artifact_path: Optional[str] = Field(default=None, max_length=500)
+    discipline: Optional[str] = Field(default=None, max_length=100)
+    description: Optional[str] = None
+    notes: Optional[str] = None
+    checksum_sha256: Optional[str] = Field(default=None, max_length=64)
+    file_size_bytes: Optional[int] = Field(default=None, ge=0)
+    activate: bool = False
+
+
+class BimIfcManifestResponse(BaseModel):
+    model_id: int
+    version_id: int
+    model_name: str
+    version_label: str
+    source_filename: str
+    artifact_path: Optional[str] = None
+    status: str
+    activated: bool
+
+
+class BimIfcTextImportRequest(BaseModel):
+    model_name: str = Field(min_length=1, max_length=255)
+    version_label: str = Field(min_length=1, max_length=50)
+    source_filename: str = Field(min_length=1, max_length=255)
+    ifc_text: str = Field(min_length=1)
+    discipline: Optional[str] = Field(default=None, max_length=100)
+    description: Optional[str] = None
+    notes: Optional[str] = None
+    activate: bool = True
+
+
+class BimIfcTextImportResponse(BaseModel):
+    model_id: int
+    version_id: int
+    model_name: str
+    version_label: str
+    source_filename: str
+    checksum_sha256: str
+    created_storeys: int
+    created_elements: int
+    parsed_entity_count: int
+    parsed_ifc_classes: list[str] = Field(default_factory=list)
+    activated: bool
+
+
+class BimIfcFileImportResponse(BimIfcTextImportResponse):
+    artifact_path: str
+    file_size_bytes: int
+
+
+class BimImportJobResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    correlation_id: str
+    project_id: int = Field(validation_alias="proyecto_id")
+    company_id: int = Field(validation_alias="empresa_id")
+    requested_by: Optional[int] = None
+    version_id: Optional[int] = Field(default=None, validation_alias="bim_model_version_id")
+    model_name: str
+    version_label: str
+    discipline: Optional[str] = None
+    source_filename: str
+    checksum_sha256: str
+    file_size_bytes: int
+    status: str
+    stage: str
+    progress: int
+    attempt_count: int
+    max_attempts: int
+    cancellation_requested: bool
+    error_code: Optional[str] = None
+    error_message: Optional[str] = None
+    result: Optional[dict[str, Any]] = Field(default=None, validation_alias="result_json")
+    created_at: datetime = Field(validation_alias="fecha_creacion")
+    started_at: Optional[datetime] = Field(default=None, validation_alias="fecha_inicio")
+    finished_at: Optional[datetime] = Field(default=None, validation_alias="fecha_finalizacion")
+    updated_at: Optional[datetime] = Field(default=None, validation_alias="fecha_actualizacion")
+
+
+class BimIfcQualityFinding(BaseModel):
+    domain: str
+    severity: str
+    code: str
+    message: str
+    entity_ref: Optional[str] = None
+
+
+class BimIfcQualityReportResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    version_id: int = Field(validation_alias="bim_model_version_id")
+    project_id: int = Field(validation_alias="proyecto_id")
+    company_id: int = Field(validation_alias="empresa_id")
+    contract_version: str
+    source_checksum_sha256: str
+    schema_identifier: Optional[str] = None
+    step_status: str
+    schema_status: str
+    semantic_status: str
+    overall_status: str
+    error_count: int
+    warning_count: int
+    findings: list[BimIfcQualityFinding] = Field(default_factory=list)
+    summary: dict[str, Any] = Field(validation_alias="summary_json")
+    generated_at: datetime = Field(validation_alias="fecha_generacion")
+    updated_at: Optional[datetime] = Field(default=None, validation_alias="fecha_actualizacion")
+
+
+class BimViewerArtifactResponse(BaseModel):
+    artifact_id: int
+    version_id: int
+    artifact_path: str
+    artifact_type: str
+    contract_version: str
+    generation: int
+    checksum_sha256: str
+    file_size_bytes: int
+    status: str
+    element_count: int
+    storey_count: int
+    ifc_class_count: int
+    property_key_count: int
+
+
+class BimArtifactResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    version_id: int = Field(validation_alias="bim_model_version_id")
+    project_id: int = Field(validation_alias="proyecto_id")
+    company_id: int = Field(validation_alias="empresa_id")
+    artifact_type: str
+    contract_version: str
+    generation: int
+    artifact_path: str
+    checksum_sha256: str
+    file_size_bytes: int
+    source_checksum_sha256: Optional[str] = None
+    status: str
+    metadata: dict[str, Any] = Field(validation_alias="metadata_json")
+    created_at: datetime = Field(validation_alias="fecha_creacion")
+    updated_at: Optional[datetime] = Field(default=None, validation_alias="fecha_actualizacion")
+
+
 class BimJsonValidationIssue(BaseModel):
     severity: str
     code: str

@@ -80,7 +80,7 @@ const MarketplaceOrderDetail = () => {
             const response = await marketplaceApi.downloadOrderInvoice(orderId);
             triggerBlobDownload(response.data, `factura_marketplace_${orderId}.pdf`, 'application/pdf');
         } catch (error) {
-            console.error('Error descargando factura marketplace:', error);
+            globalThis.reportClientError?.('Error descargando factura marketplace:', error);
             appAlert('No se pudo descargar la factura del pedido.');
         } finally {
             setDownloading(null);
@@ -115,7 +115,7 @@ const MarketplaceOrderDetail = () => {
             const safeLabel = (download.label || 'descarga').replace(/[^\w.-]+/g, '_');
             triggerBlobDownload(response.data, `${safeLabel}.${extension}`, mimeType);
         } catch (error) {
-            console.error('Error descargando recurso marketplace:', error);
+            globalThis.reportClientError?.('Error descargando recurso marketplace:', error);
             appAlert('No se pudo generar la descarga solicitada.');
         } finally {
             setDownloading(null);
@@ -135,7 +135,7 @@ const MarketplaceOrderDetail = () => {
                     setDownloads(downloadData || []);
                 }
             } catch (error) {
-                console.error('Error cargando pedido:', error);
+                globalThis.reportClientError?.('Error cargando pedido:', error);
                 if (!cancelled) {
                     setOrder(null);
                     setDownloads([]);

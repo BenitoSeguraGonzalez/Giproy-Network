@@ -14,9 +14,15 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     REPORTS_DIR: Path = Path(__file__).resolve().parents[3] / "docs" / "reportes"
     SECRET_KEY: str = "change-this-in-env"
+    COMPANY_BACKUP_SECRET: Optional[str] = None
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     SESSION_INACTIVITY_TIMEOUT_MINUTES: int = 30
+    RUC_REVIEW_ENCRYPTION_KEY: Optional[str] = None
+    SRI_RUC_PRIVATE_DIR: Path = Path("runtime") / "sri_ruc"
+    SRI_RUC_DOWNLOAD_MAX_BYTES: int = 1_500_000_000
+    SRI_RUC_LOOKUPS_PER_IP_HOUR: int = 10
+    SRI_RUC_ALERT_EMAIL: Optional[str] = None
     AUTH_SESSION_TRACE_ENABLED: bool = True
     AUTH_SESSION_TRACE_FILE: str = "auth_session_trace.jsonl"
     BACKEND_CORS_ORIGINS: list[str] = [
@@ -33,6 +39,17 @@ class Settings(BaseSettings):
     BIM_ENABLED: bool = False
     BIM_ALLOWED_EMPRESA_IDS: str = ""
     BIM_ALLOWED_USER_IDS: str = ""
+    BIM_LOCAL_STORAGE_DIR: Path = Path("uploads") / "bim"
+    EMAIL_BACKEND: str = "mock"
+    EMAIL_FROM_EMAIL: str = "soporte@giproy.com"
+    EMAIL_FROM_NAME: str = "GiProy"
+    FRONTEND_PUBLIC_URL: str = "http://localhost:3010"
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    SMTP_USE_TLS: bool = True
+    SMTP_USE_SSL: bool = False
     
     # DB
     POSTGRES_USER: str = "postgres"

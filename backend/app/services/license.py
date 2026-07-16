@@ -34,45 +34,73 @@ DEFAULT_LICENSE_CATALOG = [
         "nombre": "Express",
         "codigo": "EXPRESS",
         "plan_kind": "express",
-        "descripcion": "Plan base del sistema para arranque de empresa y acceso inicial controlado.",
+        "descripcion": "Trial/freemium de 30 dias para arranque controlado de empresa.",
         "precio_mensual": 0,
         "precio_anual": 0,
         "sort_order": 0,
         "is_default_express": True,
-        "limites": {"administradores": 1, "usuarios_normales": 0, "usuarios": 1, "proyectos": 3, "almacenamiento_gb": 1, "modulos_permitidos": ["*"]},
+        "limites": {
+            "administradores": 1,
+            "usuarios_normales": 0,
+            "usuarios": 1,
+            "proyectos": 1,
+            "almacenamiento_gb": 0.05,
+            "modulos_permitidos": ["apus", "presupuestos"],
+            "trial_days": 30,
+            "watermark_reports": True,
+            "excel_exports": False,
+            "ads_enabled": True,
+        },
     },
     {
         "nombre": "Estándar",
         "codigo": "STANDARD",
         "plan_kind": "estandar",
         "descripcion": "Licencia SaaS estándar para operación regular de empresa.",
-        "precio_mensual": 39.99,
-        "precio_anual": 399.49,
+        "precio_mensual": 25,
+        "precio_anual": 250,
         "sort_order": 10,
         "is_default_express": False,
-        "limites": {"administradores": 1, "usuarios_normales": 4, "usuarios": 5, "proyectos": 25, "almacenamiento_gb": 20, "modulos_permitidos": ["*"]},
+        "limites": {
+            "administradores": 1,
+            "usuarios_normales": 4,
+            "usuarios": 5,
+            "proyectos": -1,
+            "almacenamiento_gb": 500,
+            "storage_unlimited": True,
+            "modulos_permitidos": ["apus", "presupuestos"],
+            "packs_opcionales": ["PACK_PLANIFICA", "PACK_LICITA", "PACK_CONECTA"],
+            "conecta_base_slots": 1,
+            "watermark_reports": False,
+            "excel_exports": True,
+            "support_sla_hours": 48,
+        },
     },
     {
         "nombre": "Profesional",
         "codigo": "PROFESSIONAL",
         "plan_kind": "profesional",
         "descripcion": "Licencia SaaS profesional para operación extendida.",
-        "precio_mensual": 69.99,
-        "precio_anual": 755.99,
+        "precio_mensual": 40,
+        "precio_anual": 400,
         "sort_order": 20,
         "is_default_express": False,
-        "limites": {"administradores": 2, "usuarios_normales": 13, "usuarios": 15, "proyectos": 100, "almacenamiento_gb": 80, "modulos_permitidos": ["*"]},
-    },
-    {
-        "nombre": "Empresarial",
-        "codigo": "ENTERPRISE",
-        "plan_kind": "empresarial",
-        "descripcion": "Licencia SaaS empresarial para operación multiárea y alta capacidad.",
-        "precio_mensual": 199.99,
-        "precio_anual": 2159.99,
-        "sort_order": 30,
-        "is_default_express": False,
-        "limites": {"administradores": -1, "usuarios_normales": -1, "usuarios": -1, "proyectos": -1, "almacenamiento_gb": 500, "modulos_permitidos": ["*"]},
+        "limites": {
+            "administradores": 2,
+            "usuarios_normales": 13,
+            "usuarios": 15,
+            "proyectos": -1,
+            "almacenamiento_gb": 500,
+            "storage_unlimited": True,
+            "modulos_permitidos": ["*"],
+            "packs_incluidos": ["PACK_PLANIFICA", "PACK_LICITA"],
+            "packs_opcionales": ["PACK_CONECTA", "PACK_EQUIPO"],
+            "conecta_base_slots": 2,
+            "team_pack_available": True,
+            "watermark_reports": False,
+            "excel_exports": True,
+            "support_sla_hours": 24,
+        },
     },
 ]
 
@@ -357,9 +385,6 @@ class LicenseService:
 
     @staticmethod
     def _sync_legacy_company_window(db: Session, empresa_id: int, current_assignment: EmpresaLicencia | None = None) -> None:
-        empresa = db.query(Empresa).filter(Empresa.id == empresa_id).first()
-        if not empresa:
-            return
         assignment = current_assignment
         if assignment is None:
             today = date.today()
@@ -376,9 +401,13 @@ class LicenseService:
                 .first()
             )
         if assignment:
-            empresa.license_start_date = assignment.starts_at
-            empresa.license_end_date = assignment.grace_ends_at or assignment.ends_at or assignment.starts_at
-            db.add(empresa)
+            db.query(Empresa).filter(Empresa.id == empresa_id).update(
+                {
+                    Empresa.license_start_date: assignment.starts_at,
+                    Empresa.license_end_date: assignment.grace_ends_at or assignment.ends_at or assignment.starts_at,
+                },
+                synchronize_session=False,
+            )
 
     @staticmethod
     def ensure_company_express_assignment(db: Session, empresa_id: int) -> EmpresaLicencia:
@@ -745,6 +774,32 @@ class LicenseService:
                     "activation_mode": target_status,
                 },
             )
+
+        if (
+            not bool(target_license.is_default_express)
+            and (payment_confirmed_at is not None or source == "marketplace_order")
+        ):
+            from app.services.license_notifications import license_notification_service
+
+            queued_notifications = license_notification_service.queue_paid_license_welcome(
+                db,
+                new_assignment,
+                licencia=target_license,
+                actor_usuario_id=actor_usuario_id,
+            )
+            if queued_notifications:
+                LicenseService._log_event(
+                    db,
+                    empresa_id=empresa_id,
+                    empresa_licencia_id=new_assignment.id,
+                    licencia_id=target_license.id,
+                    actor_usuario_id=actor_usuario_id,
+                    event_type="license_welcome_notifications_queued",
+                    payload={
+                        "notification_event_ids": [event.id for event in queued_notifications],
+                        "channels": sorted({event.channel for event in queued_notifications}),
+                    },
+                )
 
         LicenseService.run_license_housekeeping_for_company(db, empresa_id, today=reference, commit=False)
         db.commit()

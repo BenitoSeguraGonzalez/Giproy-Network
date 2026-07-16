@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
     buildDependencyRoute,
     distributeLaneOffset,
@@ -8,6 +9,11 @@ import {
     resolveDependencyVerticalAnchors,
     snapDependencyCoordinate,
 } from '../src/components/projects/cronogramasGanttDependencies.js';
+
+const ganttComponentSource = readFileSync(
+    new URL('../src/components/projects/CronogramaGantt.jsx', import.meta.url),
+    'utf8',
+);
 
 const parsePathPoints = (path) => path
     .split(/M|L/)
@@ -211,9 +217,11 @@ const fsRoute = buildDependencyRoute({
 });
 const fsPoints = parsePathPoints(fsRoute.d);
 assert.equal(fsPoints.at(-1).x, 220, 'FC debe terminar sobre el borde temporal exacto de inicio de la tarea destino');
-assert.equal(fsPoints.at(-1).y, 46, 'FC debe terminar sobre el marcador naranja superior, no en el centro lateral de la barra');
+assert.equal(fsPoints.at(-1).y, 48, 'FC debe llegar por la parte superior de la barra destino');
 assert.equal(fsPoints[0].x, sourceGeometry.rightPx, 'FC debe arrancar exactamente desde el borde de fin de la tarea origen');
-assert.equal(fsPoints.at(-2).x, fsPoints.at(-1).x, 'FC debe cerrar con llegada vertical al destino');
+assert.equal(fsPoints[1].x - fsPoints[0].x, 8, 'FC debe salir con un micro-codo horizontal desde el borde derecho');
+assert.equal(fsPoints.at(-2).x, fsPoints.at(-1).x, 'FC debe cerrar con caída vertical al borde superior del destino');
+assert.equal(fsPoints.at(-1).y - fsPoints.at(-2).y, 16, 'FC debe caer desde una separación suficiente para que la cabeza de flecha no invada la barra destino');
 
 const ssRoute = buildDependencyRoute({
     sourceGeometry,
@@ -226,7 +234,8 @@ const ssPoints = parsePathPoints(ssRoute.d);
 assert.equal(ssPoints.at(-1).x, 220, 'CC debe terminar sobre el borde temporal exacto de inicio de la tarea destino');
 assert.equal(ssPoints[0].x, sourceGeometry.leftPx, 'CC debe arrancar exactamente desde el borde de inicio de la tarea origen');
 assert.equal(ssPoints.at(-2).y, ssPoints.at(-1).y, 'CC en geometría inversa debe cerrar con un tramo horizontal final hasta el inicio exacto del destino');
-assert.ok(ssPoints.at(-2).x < sourceGeometry.leftPx, 'CC inversa debe salir por un carril exterior a la izquierda para no inventar lag visual sobre las barras');
+assert.equal(ssPoints[0].x - ssPoints[1].x, 8, 'CC debe salir con un micro-codo horizontal desde el borde izquierdo');
+assert.equal(ssPoints.at(-1).x - ssPoints.at(-2).x, 8, 'CC debe entrar con un micro-codo horizontal hacia el borde izquierdo');
 
 const ffRoute = buildDependencyRoute({
     sourceGeometry,
@@ -238,7 +247,9 @@ const ffRoute = buildDependencyRoute({
 const ffPoints = parsePathPoints(ffRoute.d);
 assert.equal(ffPoints.at(-1).x, 280, 'FF debe terminar sobre el borde temporal exacto de fin de la tarea destino');
 assert.equal(ffPoints[0].x, sourceGeometry.rightPx, 'FF debe arrancar exactamente desde el borde de fin de la tarea origen');
-assert.equal(ffPoints.at(-2).x, ffPoints.at(-1).x, 'FF debe cerrar con llegada vertical al destino');
+assert.equal(ffPoints[1].x - ffPoints[0].x, 8, 'FF debe salir con un micro-codo horizontal desde el borde derecho');
+assert.equal(ffPoints.at(-2).x - ffPoints.at(-1).x, 8, 'FF debe entrar con un micro-codo horizontal hacia el borde derecho');
+assert.equal(ffPoints.at(-2).y, ffPoints.at(-1).y, 'FF no debe caer verticalmente sobre el destino');
 
 const backwardFfTargetGeometry = {
     leftPx: 120,
@@ -264,7 +275,8 @@ const backwardFfRoute = buildDependencyRoute({
 const backwardFfPoints = parsePathPoints(backwardFfRoute.d);
 assert.equal(backwardFfPoints[0].x, 340, 'FF inverso debe salir desde el fin real de la predecesora');
 assert.equal(backwardFfPoints.at(-1).x, 180, 'FF inverso debe terminar sobre el fin real de la sucesora');
-assert.equal(backwardFfPoints.at(-2).x, backwardFfPoints.at(-1).x, 'FF inverso debe conservar una llegada vertical, no una flecha horizontal');
+assert.equal(backwardFfPoints.at(-2).y, backwardFfPoints.at(-1).y, 'FF inverso debe cerrar con codo horizontal, no con caída vertical');
+assert.equal(backwardFfPoints.at(-2).x - backwardFfPoints.at(-1).x, 8, 'FF inverso debe entrar con micro-codo hacia el borde derecho');
 assert.equal(
     backwardFfPoints.some((point) => point.x > 360),
     false,
@@ -282,7 +294,8 @@ const sfPoints = parsePathPoints(sfRoute.d);
 assert.equal(sfPoints.at(-1).x, 280, 'CF debe terminar sobre el borde temporal exacto de fin de la tarea destino');
 assert.equal(sfPoints[0].x, sourceGeometry.leftPx, 'CF debe arrancar exactamente desde el borde de inicio de la tarea origen');
 assert.equal(sfPoints.at(-2).y, sfPoints.at(-1).y, 'CF en geometría inversa debe cerrar con un tramo horizontal final hasta el fin exacto del destino');
-assert.ok(sfPoints.at(-2).x < sourceGeometry.leftPx, 'CF inversa debe salir por un carril exterior a la izquierda para no cruzar el cuerpo de las barras');
+assert.equal(sfPoints[0].x - sfPoints[1].x, 8, 'CF debe salir con un micro-codo horizontal desde el borde izquierdo');
+assert.equal(sfPoints.at(-2).x - sfPoints.at(-1).x, 8, 'CF debe entrar con un micro-codo horizontal hacia el borde derecho');
 
 const fsSameRowRoute = buildDependencyRoute({
     sourceGeometry,
@@ -293,7 +306,7 @@ const fsSameRowRoute = buildDependencyRoute({
 });
 const fsSameRowPoints = parsePathPoints(fsSameRowRoute.d);
 assert.equal(fsSameRowPoints.at(-1).x, 220, 'FC en misma fila debe seguir apuntando al borde temporal exacto de inicio del destino');
-assert.equal(fsSameRowPoints.at(-1).y, 12, 'FC en misma fila debe cerrar sobre el centro vertical común');
+assert.equal(fsSameRowPoints.at(-1).y, 0, 'FC en misma fila debe cerrar sobre el borde superior del destino');
 
 const milestoneLagRoute = buildDependencyRoute({
     sourceGeometry: milestoneLagSourceGeometry,
@@ -340,6 +353,50 @@ assert.equal(
     'La llegada vertical casi pegada debe conservar el borde exacto cuando no invade el cuerpo de la barra',
 );
 
+const alignedLeftEdgeTargetGeometry = {
+    leftPx: 140,
+    rightPx: 190,
+    topPx: 48,
+    bottomPx: 72,
+    centerY: 60,
+};
+const alignedLeftEdgeRoute = buildDependencyRoute({
+    sourceGeometry,
+    targetGeometry: alignedLeftEdgeTargetGeometry,
+    sourceY: sourceGeometry.centerY,
+    targetY: alignedLeftEdgeTargetGeometry.centerY,
+    dependencyType: 'FS',
+});
+const alignedLeftEdgePoints = parsePathPoints(alignedLeftEdgeRoute.d);
+assert.equal(
+    alignedLeftEdgePoints.at(-1).x,
+    alignedLeftEdgeTargetGeometry.leftPx,
+    'FC alineada por fecha debe seguir terminando en el inicio temporal exacto del destino',
+);
+assert.equal(
+    alignedLeftEdgePoints.at(-2).x,
+    alignedLeftEdgeTargetGeometry.leftPx,
+    'FC alineada por fecha debe cerrar con caída vertical sobre el inicio superior del destino',
+);
+assert.equal(
+    alignedLeftEdgePoints.some((point, index) => {
+        if (index === 0) return false;
+        const previous = alignedLeftEdgePoints[index - 1];
+        const isVerticalSegment = Math.abs(point.x - previous.x) <= 0.5
+            && Math.abs(point.y - previous.y) > 0.5;
+        return isVerticalSegment && Math.abs(point.x - alignedLeftEdgeTargetGeometry.leftPx) <= 0.5
+            && Math.min(point.y, previous.y) < alignedLeftEdgeTargetGeometry.topPx - 0.5
+            && Math.max(point.y, previous.y) > alignedLeftEdgeTargetGeometry.topPx + 0.5;
+    }),
+    false,
+    'FC alineada por fecha solo debe tener una caída vertical mínima hasta el borde superior del destino',
+);
+assert.equal(
+    horizontalSegmentsCoverGeometry(alignedLeftEdgePoints, alignedLeftEdgeTargetGeometry),
+    false,
+    'FC alineada por fecha no debe cruzar horizontalmente el cuerpo de la barra destino',
+);
+
 const backwardFsTargetGeometry = {
     leftPx: 120,
     rightPx: 150,
@@ -369,19 +426,20 @@ assert.equal(
 assert.equal(
     backwardFsPoints.at(-2).x,
     backwardFsTargetGeometry.leftPx,
-    'FC inversa debe terminar con tramo vertical sobre el inicio real de la barra destino',
+    'FC inversa debe cerrar con caída vertical al borde superior destino',
 );
 assert.equal(
-    Math.abs(backwardFsPoints.at(-2).y - backwardFsPoints.at(-1).y) > 0.5,
+    Math.abs(backwardFsPoints.at(-2).x - backwardFsPoints.at(-1).x) <= 0.5
+        && Math.abs(backwardFsPoints.at(-2).y - backwardFsPoints.at(-1).y) > 0.5,
     true,
-    'FC inversa debe conservar cabeza de flecha vertical',
+    'FC inversa debe cerrar con caída vertical tipo MS Project',
 );
 assert.equal(backwardFsPoints[0].x, 260, 'FC inversa debe salir exactamente del fin real de la predecesora');
 assert.equal(backwardFsPoints[0].y, 12, 'FC inversa no debe desplazar verticalmente la salida de la predecesora');
 assert.equal(
     Math.max(...backwardFsPoints.map((point) => point.x)),
-    260,
-    'FC inversa no debe añadir un carril exterior a la derecha de la predecesora',
+    268,
+    'FC inversa solo debe abrir el micro-codo minimo de salida a la derecha de la predecesora',
 );
 backwardFsPoints.forEach((point, index) => {
     if (index === 0) return;
@@ -401,7 +459,8 @@ const ffAboveRoute = buildDependencyRoute({
 });
 const ffAbovePoints = parsePathPoints(ffAboveRoute.d);
 assert.equal(ffAbovePoints.at(-1).x, 280, 'FF con destino arriba debe mantener la llegada en el fin exacto cuando no invade el cuerpo');
-assert.equal(ffAbovePoints.at(-1).y, -34, 'FF con destino arriba debe aterrizar fuera del cuerpo de la barra destino');
+assert.equal(ffAbovePoints.at(-1).y, -48, 'FF con destino arriba debe entrar por el centro lateral de la barra destino');
+assert.equal(ffAbovePoints.at(-2).x - ffAbovePoints.at(-1).x, 8, 'FF con destino arriba debe cerrar con micro-codo horizontal hacia el borde derecho');
 
 const milestoneGeometry = {
     leftPx: 320,
@@ -449,12 +508,35 @@ const milestoneToTaskPoints = parsePathPoints(milestoneToTaskRoute.d);
 assert.equal(
     milestoneToTaskPoints[0].x,
     milestoneGeometry.centerPx,
-    'La dependencia hito -> tarea debe salir del centro visual del hito por defecto',
+    'La dependencia hito -> tarea debe salir del centro visual del hito',
+);
+assert.equal(
+    milestoneToTaskPoints[1].x - milestoneToTaskPoints[0].x,
+    8,
+    'La dependencia hito -> tarea FC debe abrir con micro-codo horizontal desde el centro del hito',
 );
 assert.equal(
     milestoneToTaskPoints.at(-1).x,
     targetGeometryBelow.leftPx,
     'La dependencia hito -> tarea FC debe llegar al inicio temporal exacto de la tarea',
+);
+assert.equal(
+    milestoneToTaskPoints.at(-1).y,
+    targetGeometryBelow.topPx,
+    'La dependencia hito -> tarea FC debe llegar al borde superior de la tarea',
+);
+assert.equal(
+    milestoneToTaskPoints.some((point, index) => {
+        if (index === 0) return false;
+        const previous = milestoneToTaskPoints[index - 1];
+        const isVerticalSegment = Math.abs(point.x - previous.x) <= 0.5
+            && Math.abs(point.y - previous.y) > 0.5;
+        return isVerticalSegment && Math.abs(point.x - targetGeometryBelow.leftPx) <= 0.5
+            && Math.min(point.y, previous.y) < targetGeometryBelow.topPx - 0.5
+            && Math.max(point.y, previous.y) > targetGeometryBelow.topPx + 0.5;
+    }),
+    false,
+    'La dependencia hito -> tarea FC solo debe caer verticalmente desde la separación mínima sobre la tarea destino',
 );
 
 const projectStartMilestoneRoute = buildDependencyRoute({
@@ -522,8 +604,8 @@ assert.equal(
 );
 assert.equal(
     fractionalPoints.at(-1).y,
-    snapDependencyCoordinate(fractionalZoomTargetGeometry.topPx - 2 + 1.33),
-    'La llegada FC bajo zoom debe estabilizar verticalmente el marcador final',
+    snapDependencyCoordinate(fractionalZoomTargetGeometry.topPx),
+    'La llegada FC bajo zoom debe estabilizar el borde superior de destino',
 );
 
 const fanOutRoute = buildDependencyRoute({
@@ -574,5 +656,31 @@ const compactFfToLongTarget = buildDependencyRoute({
 const compactFfPoints = parsePathPoints(compactFfToLongTarget.d);
 assert.equal(compactFfPoints.at(-1).x, 980, 'FF debe terminar sobre el borde temporal exacto de fin de la barra destino');
 assert.equal(compactFfToLongTarget.controlX <= 1030, true, 'FF puede salir por derecha, pero no debe sobrepasar innecesariamente el carril sugerido');
+
+assert.match(
+    ganttComponentSource,
+    /aria-label="Editar dependencia seleccionada"/,
+    'La accion flotante de una dependencia seleccionada debe abrir/editar, no sugerir borrado',
+);
+assert.doesNotMatch(
+    ganttComponentSource,
+    /key=\{`remove-\$\{path\.key\}`\}/,
+    'La accion flotante no debe conservar la semantica interna de borrado directo',
+);
+assert.match(
+    ganttComponentSource,
+    /<Trash2 className="h-3\.5 w-3\.5" \/>/,
+    'La ruptura de dependencia debe quedar dentro del panel como accion destructiva explicita con icono',
+);
+assert.match(
+    ganttComponentSource,
+    /aria-label="Guardar dependencia"/,
+    'El panel compacto debe conservar guardado accesible mediante boton de icono',
+);
+assert.match(
+    ganttComponentSource,
+    /w-\[min\(440px,calc\(100vw-2rem\)\)\] overflow-y-auto overflow-x-hidden/,
+    'El panel de dependencia debe tener ancho suficiente y bloquear desplazamiento horizontal interno',
+);
 
 console.log('smoke-cronogramas-gantt-dependencies: ok');

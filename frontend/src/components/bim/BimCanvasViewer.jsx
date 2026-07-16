@@ -244,6 +244,7 @@ const BimCanvasViewer = ({
     selectedElement,
     selectedLink,
     linkedElementIds = [],
+    highlightedElementIds = [],
     elementLinkCounts = {},
     validationIssuesByElementId = {},
     onSelectElement,
@@ -260,14 +261,31 @@ const BimCanvasViewer = ({
     const [hoveredElementId, setHoveredElementId] = useState(null);
     const [hoverScreenPoint, setHoverScreenPoint] = useState(null);
     const [showOnlyLinked, setShowOnlyLinked] = useState(false);
+    const [activeIfcClass, setActiveIfcClass] = useState('all');
 
     const linkedElementIdSet = useMemo(() => new Set(linkedElementIds), [linkedElementIds]);
+    const highlightedElementIdSet = useMemo(() => new Set(highlightedElementIds), [highlightedElementIds]);
+    const ifcClassFilters = useMemo(() => {
+        const counts = elements.reduce((accumulator, element) => {
+            const ifcClass = element.ifc_class || 'Sin clase IFC';
+            accumulator[ifcClass] = (accumulator[ifcClass] || 0) + 1;
+            return accumulator;
+        }, {});
+        return Object.entries(counts)
+            .map(([ifcClass, count]) => ({ ifcClass, count }))
+            .sort((left, right) => right.count - left.count || left.ifcClass.localeCompare(right.ifcClass))
+            .slice(0, 4);
+    }, [elements]);
     const filteredElements = useMemo(() => {
+        const classFilteredElements =
+            activeIfcClass === 'all'
+                ? elements
+                : elements.filter((element) => (element.ifc_class || 'Sin clase IFC') === activeIfcClass);
         if (!showOnlyLinked) {
-            return elements;
+            return classFilteredElements;
         }
-        return elements.filter((element) => linkedElementIdSet.has(element.id));
-    }, [elements, linkedElementIdSet, showOnlyLinked]);
+        return classFilteredElements.filter((element) => linkedElementIdSet.has(element.id));
+    }, [activeIfcClass, elements, linkedElementIdSet, showOnlyLinked]);
     const laidOutElements = useMemo(() => buildElementLayout(filteredElements), [filteredElements]);
     const linkedLaidOutElements = useMemo(
         () => laidOutElements.filter((element) => linkedElementIdSet.has(element.id)),
@@ -368,7 +386,17 @@ const BimCanvasViewer = ({
 
     useEffect(() => {
         fitScene();
-    }, [canvasSize.height, canvasSize.width, showOnlyLinked]);
+    }, [activeIfcClass, canvasSize.height, canvasSize.width, showOnlyLinked]);
+
+    useEffect(() => {
+        if (activeIfcClass === 'all') {
+            return;
+        }
+        const availableClasses = new Set(elements.map((element) => element.ifc_class || 'Sin clase IFC'));
+        if (!availableClasses.has(activeIfcClass)) {
+            setActiveIfcClass('all');
+        }
+    }, [activeIfcClass, elements]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -428,6 +456,7 @@ const BimCanvasViewer = ({
 
         laidOutElements.forEach((element) => {
             const isActive = element.id === selectedElement?.id;
+            const isHighlighted = highlightedElementIdSet.has(element.id);
             const isHovered = element.id === hoveredElementId;
             const isLinked = linkedElementIdSet.has(element.id);
             const hasActiveLink = selectedLink?.bim_element_id === element.id;
@@ -436,6 +465,8 @@ const BimCanvasViewer = ({
             const hasValidationWarning = validationIssues.some((issue) => issue.severity === 'warning');
             context.fillStyle = isActive
                 ? ELEMENT_ACTIVE_FILL
+                : isHighlighted
+                  ? '#DBEAFE'
                 : hasActiveLink
                   ? '#FED7AA'
                   : isHovered
@@ -445,6 +476,8 @@ const BimCanvasViewer = ({
                       : ELEMENT_FILL;
             context.strokeStyle = isActive
                 ? ELEMENT_ACTIVE_BORDER
+                : isHighlighted
+                  ? '#2563EB'
                 : hasValidationError
                   ? ELEMENT_ERROR_BORDER
                   : hasValidationWarning
@@ -456,7 +489,7 @@ const BimCanvasViewer = ({
                     : isLinked
                       ? ELEMENT_LINKED_BORDER
                       : ELEMENT_BORDER;
-            context.lineWidth = (isActive ? 3 : hasValidationError ? 3 : isHovered || hasActiveLink || hasValidationWarning ? 2.5 : 2) / viewport.scale;
+            context.lineWidth = (isActive || isHighlighted ? 3 : hasValidationError ? 3 : isHovered || hasActiveLink || hasValidationWarning ? 2.5 : 2) / viewport.scale;
             if (element.geometryType === 'line' && element.linePoints?.length === 2) {
                 context.beginPath();
                 context.moveTo(element.linePoints[0].x, element.linePoints[0].y);
@@ -527,6 +560,7 @@ const BimCanvasViewer = ({
         laidOutElements,
         linkedElementIdSet,
         elementLinkCounts,
+        highlightedElementIdSet,
         selectedElement?.id,
         selectedLink?.bim_element_id,
         viewport,
@@ -654,7 +688,13 @@ const BimCanvasViewer = ({
     };
 
     return (
-        <div className="flex min-h-[320px] flex-col rounded-[1.5rem] border border-zinc-200 bg-white">
+        <div
+            data-bim-canvas-viewer="isolated"
+            data-bim-canvas-ifc-filter={activeIfcClass}
+            data-bim-canvas-filtered-elements={filteredElements.length}
+            data-bim-canvas-ifc-filter-count={ifcClassFilters.length}
+            className="flex min-h-[320px] flex-col rounded-[1.5rem] border border-zinc-200 bg-white"
+        >
             <div className="border-b border-zinc-200 px-5 py-4">
                 <div className="flex items-center justify-between gap-3">
                     <div>
@@ -709,6 +749,33 @@ const BimCanvasViewer = ({
                         Reset vista
                     </button>
                 </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setActiveIfcClass('all')}
+                        className={`rounded-[0.8rem] border px-2.5 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] transition-colors ${
+                            activeIfcClass === 'all'
+                                ? 'border-[#F39200] bg-orange-50 text-[#F39200]'
+                                : 'border-zinc-200 bg-white text-zinc-600 hover:border-[#F39200] hover:text-[#F39200]'
+                        }`}
+                    >
+                        Todas {elements.length}
+                    </button>
+                    {ifcClassFilters.map((item) => (
+                        <button
+                            key={item.ifcClass}
+                            type="button"
+                            onClick={() => setActiveIfcClass(item.ifcClass)}
+                            className={`rounded-[0.8rem] border px-2.5 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] transition-colors ${
+                                activeIfcClass === item.ifcClass
+                                    ? 'border-[#F39200] bg-orange-50 text-[#F39200]'
+                                    : 'border-zinc-200 bg-white text-zinc-600 hover:border-[#F39200] hover:text-[#F39200]'
+                            }`}
+                        >
+                            {item.ifcClass} {item.count}
+                        </button>
+                    ))}
+                </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
                         <Search className="h-3.5 w-3.5" />
@@ -735,6 +802,9 @@ const BimCanvasViewer = ({
                     </span>
                     <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-sky-700">
                         Vinculados {visibleLinkedCount}
+                    </span>
+                    <span className="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
+                        IFC {activeIfcClass === 'all' ? 'todas' : activeIfcClass}
                     </span>
                     <span className="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
                         Derivados {visibleDerivedCount}
@@ -874,6 +944,9 @@ const BimCanvasViewer = ({
                             <p className="mt-1">Geometría importada: admite rectángulos, líneas y polígonos 2D desde el paquete JSON BIM</p>
                             <p className="mt-1">Rojo/ámbar: elementos con hallazgos de validación BIM</p>
                             {showOnlyLinked ? <p className="mt-1 font-bold text-[#2563EB]">Filtro activo: solo elementos vinculados</p> : null}
+                            {activeIfcClass !== 'all' ? (
+                                <p className="mt-1 font-bold text-[#F39200]">Filtro IFC activo: {activeIfcClass}</p>
+                            ) : null}
                             {selectedElement ? (
                                 <p className="mt-2 font-bold text-[#F39200]">
                                     Activo: {selectedElement.nombre || selectedElement.global_id}
@@ -947,10 +1020,13 @@ const BimCanvasViewer = ({
                             >
                                 {laidOutElements.map((element) => {
                                     const isActive = element.id === selectedElement?.id;
+                                    const isHighlighted = highlightedElementIdSet.has(element.id);
                                     const isLinked = linkedElementIdSet.has(element.id);
                                     const hasActiveLink = selectedLink?.bim_element_id === element.id;
                                     const minimapColor = isActive
                                         ? ELEMENT_ACTIVE_FILL
+                                        : isHighlighted
+                                          ? '#2563EB'
                                         : hasActiveLink
                                           ? '#FB923C'
                                           : isLinked
@@ -958,6 +1034,8 @@ const BimCanvasViewer = ({
                                             : '#CBD5E1';
                                     const minimapBorderColor = isActive
                                         ? ELEMENT_ACTIVE_BORDER
+                                        : isHighlighted
+                                          ? '#1D4ED8'
                                         : hasActiveLink
                                           ? '#EA580C'
                                           : isLinked

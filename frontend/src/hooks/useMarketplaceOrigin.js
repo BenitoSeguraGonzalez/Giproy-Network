@@ -31,7 +31,7 @@ export const useMarketplaceOrigin = (entityType, entityId) => {
             })
             .catch((error) => {
                 if (!cancelled) {
-                    console.error('Error cargando origen marketplace:', error);
+                    globalThis.reportClientError?.('Error cargando origen marketplace:', error);
                     setOrigin(null);
                 }
             })

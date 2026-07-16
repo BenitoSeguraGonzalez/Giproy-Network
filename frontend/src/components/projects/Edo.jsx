@@ -726,7 +726,7 @@ const Edo = ({ project }) => {
             setReportPreview(response.data);
             setShowReportPreview(true);
         } catch (error) {
-            console.error('Error generando vista previa de EDO:', error);
+            globalThis.reportClientError?.('Error generando vista previa de EDO:', error);
             appAlert(await extractBlobErrorMessage(error, 'No fue posible generar la vista previa del reporte EDO.'));
         } finally {
             setLoadingReportPreview(false);
@@ -751,7 +751,7 @@ const Edo = ({ project }) => {
                 format === 'xlsx' ? undefined : 'application/pdf'
             );
         } catch (error) {
-            console.error('Error exportando reporte EDO:', error);
+            globalThis.reportClientError?.('Error exportando reporte EDO:', error);
             const fallbackMessage =
                 format === 'xlsx'
                     ? 'No fue posible exportar el reporte EDO en Excel.'
@@ -778,7 +778,7 @@ const Edo = ({ project }) => {
             });
             setPrintOptionsOpen(false);
         } catch (error) {
-            console.error('Error preparando lámina gráfica EDO:', error);
+            globalThis.reportClientError?.('Error preparando lámina gráfica EDO:', error);
             appAlert({
                 title: 'No se pudo generar el PDF',
                 message: error?.message || 'No fue posible generar la lámina gráfica EDO.',
@@ -797,7 +797,7 @@ const Edo = ({ project }) => {
             setSelectedIds((prev) => new Set(Array.from(prev).filter((id) => Boolean(findNodeById(data, id)))));
             setActiveNodeId((prev) => (prev && findNodeById(data, prev) ? prev : null));
         } catch (error) {
-            console.error("Error cargando EDO:", error);
+            globalThis.reportClientError?.("Error cargando EDO:", error);
         } finally {
             setLoading(false);
         }
@@ -878,7 +878,7 @@ const Edo = ({ project }) => {
             setStakeholderModal({ isOpen: false });
             loadTree();
         } catch (error) {
-            console.error(error);
+            globalThis.reportClientError?.(error);
             appAlert("Error al asignar stakeholder.");
         }
     };

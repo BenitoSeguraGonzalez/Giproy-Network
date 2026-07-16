@@ -42,6 +42,14 @@ export default defineConfig({
             return "maps"
           }
 
+          if (
+            id.includes("three") ||
+            id.includes("web-ifc") ||
+            id.includes("@thatopen")
+          ) {
+            return "bim-3d"
+          }
+
           if (id.includes("@radix-ui")) {
             return "radix"
           }

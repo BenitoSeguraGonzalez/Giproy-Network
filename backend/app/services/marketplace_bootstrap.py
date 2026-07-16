@@ -13,6 +13,22 @@ FIXED_MARKETPLACE_CATEGORIES = [
         "activa": True,
     },
     {
+        "nombre": "Packs SaaS",
+        "slug": "tienda-packs-saas",
+        "descripcion": "Packs comerciales SaaS que amplian capacidades sobre licencias base.",
+        "visibility_scope": "all",
+        "sort_order": 15,
+        "activa": True,
+    },
+    {
+        "nombre": "Modulos y servicios",
+        "slug": "tienda-modulos-servicios",
+        "descripcion": "Modulos independientes y servicios comerciales de pago unico o activacion manual.",
+        "visibility_scope": "all",
+        "sort_order": 18,
+        "activa": True,
+    },
+    {
         "nombre": "APUs",
         "slug": "tienda-apus",
         "descripcion": "Productos de tipo APU. Su flujo posterior podrá especializarse.",

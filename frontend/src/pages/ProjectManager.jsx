@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { proyectosApi } from '../api/proyectos';
-import api from '../api/axiosConfig';
+import { basesTrabajoApi } from '../api/basesTrabajo';
+import { edtApi } from '../api/edt';
+import { usuariosApi } from '../api/usuarios';
 import { 
     Users, 
     Briefcase, 
@@ -100,16 +102,16 @@ const ProjectManager = () => {
             setProyectos(projectsData);
 
             // Cargar Bases Maestras
-            const basesRes = await api.get('/bases-trabajo/', { params: { empresa_id: empId } });
+            const basesRes = await basesTrabajoApi.getAll({ empresa_id: empId });
             setBasesMaestras(basesRes.data.filter(b => b.tipo === 'Base Maestra'));
 
             // Cargar Usuarios de la empresa
-            const usersRes = await api.get('/usuarios/', { params: { empresa_id: empId } });
+            const usersData = await usuariosApi.getAll({ empresa_id: empId });
             // Mostrar solo colaboradores (rol 'usuario') para asignación
-            setUsuarios(usersRes.data.filter(u => u.rol === 'usuario'));
+            setUsuarios(usersData.filter(u => u.rol === 'usuario'));
             
         } catch (error) {
-            console.error("Error cargando datos del gestor:", error);
+            globalThis.reportClientError?.("Error cargando datos del gestor:", error);
         } finally {
             setLoading(false);
         }
@@ -124,17 +126,15 @@ const ProjectManager = () => {
     const fetchAssignments = async (item, type, edtId = null, modulo = 'todos') => {
         setLoadingAssignments(true);
         try {
-            let endpoint = type === 'project' 
-                ? `/proyectos/${item.id}/assigned-users`
-                : `/bases-trabajo/${item.id}/assigned-users`;
-            
             const params = { modulo };
             if (edtId) params.edt_id = edtId;
-            
-            const res = await api.get(endpoint, { params });
-            setAssignedUsers(res.data);
+
+            const data = type === 'project'
+                ? await proyectosApi.getAssignedUsers(item.id, params)
+                : await basesTrabajoApi.getAssignedUsers(item.id, params);
+            setAssignedUsers(data);
         } catch (error) {
-            console.error("Error cargando asignados:", error);
+            globalThis.reportClientError?.("Error cargando asignados:", error);
         } finally {
             setLoadingAssignments(false);
         }
@@ -152,13 +152,13 @@ const ProjectManager = () => {
         // Cargar EDT si es proyecto
         if (type === 'project') {
             try {
-                const edtRes = await api.get(`/edt/project/${item.id}`);
-                setEdtNodes(edtRes.data || []);
                 const empId = selectedEmpresa?.id || user?.empresa_id;
+                const edtData = await edtApi.getTree(item.id, empId);
+                setEdtNodes(edtData || []);
                 const dData = await proyectosApi.getAssignmentDashboard(item.id, empId, 'todos');
                 setDashboardData(dData);
             } catch (error) {
-                console.error("Error cargando EDT o Dashboard:", error);
+                globalThis.reportClientError?.("Error cargando EDT o Dashboard:", error);
             }
         }
 
@@ -175,7 +175,7 @@ const ProjectManager = () => {
             setDashboardData(data);
             setShowDashboardModal(true);
         } catch (error) {
-            console.error("Error cargando dashboard:", error);
+            globalThis.reportClientError?.("Error cargando dashboard:", error);
             appAlert("No se pudo cargar el dashboard de equipo.");
         } finally {
             setLoadingDashboard(false);
@@ -199,11 +199,12 @@ const ProjectManager = () => {
         let nodes = edtNodes;
         if (nodes.length === 0) {
             try {
-                const edtRes = await api.get(`/edt/project/${targetItem.id}`);
-                nodes = edtRes.data || [];
+                const empId = selectedEmpresa?.id || user?.empresa_id;
+                const edtData = await edtApi.getTree(targetItem.id, empId);
+                nodes = edtData || [];
                 setEdtNodes(nodes);
             } catch (error) {
-                console.error("Error cargando EDT:", error);
+                globalThis.reportClientError?.("Error cargando EDT:", error);
             }
         }
 
@@ -221,10 +222,6 @@ const ProjectManager = () => {
 
     const handleAssignUser = async (userId) => {
         try {
-            const endpoint = itemType === 'project'
-                ? `/proyectos/${targetItem.id}/assign`
-                : `/bases-trabajo/${targetItem.id}/assign`;
-            
             const params = { 
                 usuario_id: userId,
                 modulo: assignModulo,
@@ -232,7 +229,11 @@ const ProjectManager = () => {
             };
             if (selectedEdtNode) params.edt_id = selectedEdtNode.id;
 
-            await api.post(endpoint, null, { params });
+            if (itemType === 'project') {
+                await proyectosApi.assignUser(targetItem.id, params);
+            } else {
+                await basesTrabajoApi.assignUser(targetItem.id, params);
+            }
             
             await fetchAssignments(targetItem, itemType, selectedEdtNode?.id, assignModulo);
             
@@ -240,7 +241,7 @@ const ProjectManager = () => {
             const dData = await proyectosApi.getAssignmentDashboard(targetItem.id, empId, assignModulo);
             setDashboardData(dData);
         } catch (error) {
-            console.error("Error asignando:", error);
+            globalThis.reportClientError?.("Error asignando:", error);
             const msg = error.response?.data?.detail || "No se pudo realizar la vinculación.";
             appAlert(msg);
         }
@@ -250,10 +251,6 @@ const ProjectManager = () => {
         try {
             const confirmAction = await appConfirm(`¿Estás seguro de desvincular a este colaborador?`);
             if (!confirmAction) return;
-
-            const endpoint = itemType === 'project'
-                ? `/proyectos/${targetItem.id}/assign/${userId}`
-                : `/bases-trabajo/${targetItem.id}/assign/${userId}`;
             
             const params = {
                 modulo: assignModulo,
@@ -261,7 +258,11 @@ const ProjectManager = () => {
             };
             if (selectedEdtNode) params.edt_id = selectedEdtNode.id;
 
-            await api.delete(endpoint, { params });
+            if (itemType === 'project') {
+                await proyectosApi.unassignUser(targetItem.id, userId, params);
+            } else {
+                await basesTrabajoApi.unassignUser(targetItem.id, userId, params);
+            }
             
             setAssignedUsers(prev => prev.filter(u => u.id !== userId));
 
@@ -269,7 +270,7 @@ const ProjectManager = () => {
             const dData = await proyectosApi.getAssignmentDashboard(targetItem.id, empId, assignModulo);
             setDashboardData(dData);
         } catch (error) {
-            console.error("Error desasignando:", error);
+            globalThis.reportClientError?.("Error desasignando:", error);
             const msg = error.response?.data?.detail || "No se pudo quitar la asignación.";
             appAlert(msg);
         }

@@ -3,10 +3,16 @@ from decimal import Decimal
 import pytest
 from fastapi import HTTPException
 
+from app.models.apu import APU, APULinea
+from app.models.base_trabajo import BaseTrabajo
+from app.models.edt import EdtNode
 from app.models.empresa import Empresa
 from app.models.marketplace import MarketplaceAssetOrigin, MarketplaceProduct
-from app.models.presupuesto import Presupuesto
+from app.models.presupuesto import Presupuesto, PresupuestoDetalle
 from app.models.proyecto import Proyecto
+from app.models.recurso import CategoriaRecurso, Recurso
+from app.models.subcategoria_item import SubcategoriaItem
+from app.models.unidad import Unidad
 from app.models.usuario import Usuario
 from app.schemas.marketplace import (
     MarketplaceCheckoutItemRequest,
@@ -81,6 +87,61 @@ def _create_project(db, *, company: Empresa, code: str, total: Decimal, public_p
         "codigo_proceso": f"SERCOP-{code}",
         "export_readiness": {"can_export_marketplace": True},
     } if public_procurement else {}
+    base = BaseTrabajo(
+        codigo_unico=f"BASE-{code}",
+        nombre=f"Base {code}",
+        tipo="Base de Proyecto",
+        descripcion=f"Base tecnica {code}",
+        empresa_id=company.id,
+    )
+    db.add(base)
+    db.flush()
+    unidad = Unidad(
+        descripcion="u",
+        descripcion_completa="Unidad",
+        subcategoria_codigo=2,
+        es_global=False,
+        base_trabajo_id=base.id,
+        empresa_id=company.id,
+    )
+    categoria = CategoriaRecurso(nombre="Materiales", descripcion="Cat", base_trabajo_id=base.id, empresa_id=company.id)
+    subcategoria = SubcategoriaItem(
+        codigo=f"2-{code}",
+        descripcion="Materiales base",
+        subcategoria_codigo=2,
+        base_trabajo_id=base.id,
+        empresa_id=company.id,
+    )
+    db.add_all([unidad, categoria, subcategoria])
+    db.flush()
+    recurso = Recurso(
+        codigo=f"2-{code}-001",
+        descripcion="Recurso base",
+        descripcion_normalizada="recurso base",
+        precio=total,
+        unidad_id=unidad.id,
+        subcategoria_item_id=subcategoria.id,
+        base_trabajo_id=base.id,
+        empresa_id=company.id,
+    )
+    db.add(recurso)
+    db.flush()
+    apu = APU(
+        codigo=f"APU-{code}",
+        descripcion="APU base",
+        descripcion_normalizada="apu base",
+        unidad="u",
+        costo_directo=total,
+        precio_unitario_total=total,
+        base_trabajo_id=base.id,
+        empresa_id=company.id,
+        categoria_id=categoria.id,
+        subcategoria_item_id=subcategoria.id,
+    )
+    db.add(apu)
+    db.flush()
+    db.add(APULinea(apu_id=apu.id, recurso_id=recurso.id, cantidad=Decimal("1"), orden=1))
+    db.flush()
     project = Proyecto(
         nombre=f"Proyecto {code}",
         codigo=code,
@@ -91,19 +152,46 @@ def _create_project(db, *, company: Empresa, code: str, total: Decimal, public_p
         presupuesto_estimado=total,
         moneda="USD",
         empresa_id=company.id,
+        base_trabajo_id=base.id,
         plantillas_config={"public_procurement_import": trace} if trace else {},
     )
     db.add(project)
     db.flush()
+    edt = EdtNode(
+        proyecto_id=project.id,
+        empresa_id=company.id,
+        parent_id=None,
+        tipo_nodo="CUENTA_PAQUETE",
+        orden=1,
+        codigo="1",
+        nombre="Capitulo 1",
+    )
+    db.add(edt)
+    db.flush()
+    budget = Presupuesto(
+        codigo=f"{code}-P01",
+        descripcion=f"Presupuesto {code}",
+        proyecto_id=project.id,
+        empresa_id=company.id,
+        subtotal=total,
+        total=total,
+        moneda="USD",
+    )
+    db.add(budget)
+    db.flush()
     db.add(
-        Presupuesto(
-            codigo=f"{code}-P01",
-            descripcion=f"Presupuesto {code}",
-            proyecto_id=project.id,
-            empresa_id=company.id,
-            subtotal=total,
-            total=total,
-            moneda="USD",
+        PresupuestoDetalle(
+            presupuesto_id=budget.id,
+            apu_id=apu.id,
+            edt_id=edt.id,
+            tipo="RUBRO",
+            codigo_item="1.1",
+            descripcion="Rubro base",
+            unidad="u",
+            cantidad=Decimal("1"),
+            precio_unitario=total,
+            precio_total=total,
+            orden=1,
         )
     )
     db.commit()

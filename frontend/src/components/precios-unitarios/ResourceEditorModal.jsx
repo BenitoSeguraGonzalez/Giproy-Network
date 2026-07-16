@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, X, SpellCheck, Save, LayoutGrid, ChevronDown } from 'lucide-react';
+import { X, SpellCheck, Save, LayoutGrid, Package } from 'lucide-react';
 import { Input } from '../ui/input';
 import ClearSearchField from '../ui/ClearSearchField';
 import { Label } from '../ui/label';
@@ -11,7 +11,7 @@ import { maestrosApi } from '../../api/maestros';
 import { buildOmniClassOptions } from '../../utils/omniclass';
 import { normalizeDescriptionCapitalization, normalizeDisplayUnit } from '../../utils/descriptionCapitalization';
 import AnimatedSelect from '../ui/AnimatedSelect';
-import { APP_MODAL_CLOSE_BUTTON_CLASS } from '../ui/app-modal';
+import { AppModalShell, AppModalHeader, AppModalBody, AppModalFooter } from '../ui/app-modal';
 
 const ResourceEditorModal = ({
     isOpen,
@@ -44,7 +44,7 @@ const ResourceEditorModal = ({
             const res = await maestrosApi.getOmniClassSearch(term, currentOmniClassTable);
             setOmniclassOptions(buildOmniClassOptions(res || []));
         } catch (error) {
-            console.error('Error searching OmniClass:', error);
+            globalThis.reportClientError?.('Error searching OmniClass:', error);
         } finally {
             setIsOmniLoading(false);
         }
@@ -57,7 +57,7 @@ const ResourceEditorModal = ({
             const res = await maestrosApi.getOmniClassTabla(currentOmniClassTable);
             setOmniclassOptions(buildOmniClassOptions(res || []));
         } catch (error) {
-            console.error('Error preloading OmniClass:', error);
+            globalThis.reportClientError?.('Error preloading OmniClass:', error);
         } finally {
             setIsOmniLoading(false);
         }
@@ -127,7 +127,7 @@ const ResourceEditorModal = ({
                     setShowCpcDropdown(false);
                 }
             } catch (error) {
-                console.error('Error searching CPC:', error);
+                globalThis.reportClientError?.('Error searching CPC:', error);
             }
         }, 300);
         return () => clearTimeout(delayDebounceFn);
@@ -137,31 +137,28 @@ const ResourceEditorModal = ({
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-900/60 backdrop-blur-md p-4">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="bg-white w-full max-w-3xl rounded-[3rem] shadow-2xl overflow-hidden border border-white/20"
+            {isOpen && (
+                <AppModalShell
+                    isOpen={isOpen}
+                    onClose={onClose}
+                    size="lg"
+                    zIndex="z-[1000]"
+                    overlayClassName="overflow-y-auto"
+                    panelClassName="max-h-[calc(100vh-1.5rem)] flex flex-col"
                 >
-                    <div className="p-12 relative">
-                        <button onClick={onClose} className={`${APP_MODAL_CLOSE_BUTTON_CLASS} absolute right-8 top-8`}>
-                            <X className="h-4 w-4" />
-                        </button>
-                        <div className="mb-10">
-                            <h2 className="text-4xl font-black uppercase tracking-tighter text-zinc-900 leading-none">
-                                {title || (editingRecurso ? 'Modificar Recurso' : 'Nuevo Recurso')}
-                            </h2>
-                            <div className="flex items-center gap-3 mt-3">
-                                <div className="h-1 w-12 bg-[#F39200] rounded-full" />
-                                <p className="text-[10px] font-black text-[#F39200] uppercase tracking-[0.25em]">
-                                    {subtitle}
-                                </p>
-                            </div>
-                        </div>
-                        <form onSubmit={onSubmit} className="grid grid-cols-2 gap-x-10 gap-y-6">
-                            <div className="col-span-2 space-y-2">
-                                <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
+                    <AppModalHeader
+                        title={title || (editingRecurso ? 'Modificar recurso' : 'Nuevo recurso')}
+                        subtitle={subtitle}
+                        icon={Package}
+                        iconClassName="text-[#F39200]"
+                        iconWrapClassName="border border-orange-100 bg-orange-50"
+                        onClose={onClose}
+                    />
+                    <form onSubmit={onSubmit} className="min-h-0 flex flex-1 flex-col">
+                        <AppModalBody className="min-h-0 flex-1 overflow-y-auto bg-[#f7f7f5] p-4 md:p-5 custom-scrollbar">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                            <div className="md:col-span-2 space-y-2">
+                                <Label className="text-[9px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
                                     Descripción del Insumo / Recurso *
                                 </Label>
                                 <Input
@@ -169,13 +166,13 @@ const ResourceEditorModal = ({
                                     value={form.descripcion || ''}
                                     onChange={(e) => setForm((prev) => ({ ...prev, descripcion: e.target.value }))}
                                     onBlur={(e) => setForm((prev) => ({ ...prev, descripcion: normalizeDescriptionCapitalization(e.target.value) }))}
-                                    className="h-14 bg-zinc-50 border-zinc-200 rounded-[1.25rem] font-bold text-lg focus:ring-2 focus:ring-[#F39200]/20"
+                                    className="h-11 bg-zinc-50 border-zinc-200 rounded-xl font-bold text-sm focus:ring-2 focus:ring-[#F39200]/20"
                                     placeholder="Ej: Cemento Holcim 50kg"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
+                                <Label className="text-[9px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
                                     Precio Dolar (sin indirectos)*
                                 </Label>
                                 <Input
@@ -184,13 +181,13 @@ const ResourceEditorModal = ({
                                     value={form.precio || ''}
                                     onChange={(e) => setForm((prev) => ({ ...prev, precio: e.target.value }))}
                                     onBlur={() => setForm((prev) => ({ ...prev, precio: formatMonedaInput(prev.precio) }))}
-                                    className="h-14 bg-zinc-50 border-orange-100 rounded-[1.25rem] font-black text-xl text-[#F39200] focus:ring-2 focus:ring-orange-500/20"
+                                    className="h-11 bg-zinc-50 border-orange-100 rounded-xl font-black text-base text-[#F39200] focus:ring-2 focus:ring-orange-500/20"
                                     placeholder={formatMonedaInput(0)}
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
+                                <Label className="text-[9px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
                                     Unidad de Medida *
                                 </Label>
                                 <div className="flex items-center gap-3">
@@ -199,7 +196,7 @@ const ResourceEditorModal = ({
                                             required
                                             value={form.unidad_id || ''}
                                             onChange={(e) => setForm((prev) => ({ ...prev, unidad_id: e.target.value }))}
-                                            className="w-full h-14 bg-zinc-50 border border-zinc-200 rounded-[1.25rem] px-5 pr-12 font-bold outline-none focus:ring-2 focus:ring-zinc-900/10 appearance-none"
+                                            className="w-full h-11 bg-zinc-50 border border-zinc-200 rounded-xl px-4 pr-10 text-sm font-bold outline-none focus:ring-2 focus:ring-zinc-900/10 appearance-none"
                                         >
                                             {unidades.map((u) => (
                                                 <option key={u.id} value={u.id}>
@@ -207,7 +204,6 @@ const ResourceEditorModal = ({
                                                 </option>
                                             ))}
                                         </AnimatedSelect>
-                                        <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none group-hover:text-zinc-600 transition-colors" />
                                     </div>
                                     {enableOmniClass && (
                                         <button
@@ -218,7 +214,7 @@ const ResourceEditorModal = ({
                                                     handleOmniClassOpen();
                                                 }
                                             }}
-                                            className={`h-14 w-14 shrink-0 rounded-[1.25rem] border transition-all flex items-center justify-center ${
+                                            className={`h-11 w-11 shrink-0 rounded-xl border transition-all flex items-center justify-center ${
                                                 showOmniPanel || form.omniclass_codigo
                                                     ? 'border-blue-200 bg-blue-50 text-blue-600'
                                                     : 'border-zinc-200 bg-white text-zinc-400 hover:text-zinc-700'
@@ -236,24 +232,23 @@ const ResourceEditorModal = ({
                             </div>
 
                             {showEquipmentOwnershipField && (
-                                <div className="col-span-2 space-y-2">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
-                                        Ownership Clásico De Equipo
+                                <div className="md:col-span-2 space-y-2">
+                                    <Label className="text-[9px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
+                                        Propiedad Clásica Del Equipo
                                     </Label>
-                                    <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-3 items-start">
+                                    <div className="grid grid-cols-1 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)] gap-3 items-start">
                                         <div className="relative group">
                                             <AnimatedSelect
                                                 value={form.equipment_ownership_kind || ''}
                                                 onChange={(e) => setForm((prev) => ({ ...prev, equipment_ownership_kind: e.target.value }))}
-                                                className="w-full h-14 bg-zinc-50 border border-zinc-200 rounded-[1.25rem] px-5 pr-12 font-bold outline-none focus:ring-2 focus:ring-zinc-900/10 appearance-none"
+                                                className="w-full h-11 bg-zinc-50 border border-zinc-200 rounded-xl px-4 pr-10 text-sm font-bold outline-none focus:ring-2 focus:ring-zinc-900/10 appearance-none"
                                             >
                                                 <option value="">Sin declarar</option>
                                                 <option value="owned">Equipo propio</option>
                                                 <option value="rented">Equipo alquilado</option>
                                             </AnimatedSelect>
-                                            <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none group-hover:text-zinc-600 transition-colors" />
                                         </div>
-                                        <div className="rounded-[1.25rem] border border-blue-100 bg-blue-50/70 px-4 py-3 text-[11px] font-bold text-blue-700">
+                                        <div className="rounded-xl border border-blue-100 bg-blue-50/70 px-3 py-2 text-[10px] font-bold leading-snug text-blue-700">
                                             Define si el costo temporal del equipo es propio o alquilado para habilitar crashing económico real en Gantt.
                                         </div>
                                     </div>
@@ -261,16 +256,16 @@ const ResourceEditorModal = ({
                             )}
 
                             {governingKindOptions.length > 0 && (
-                                <div className="col-span-2 space-y-2">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
+                                <div className="md:col-span-2 space-y-2">
+                                    <Label className="text-[9px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
                                         Clasificación Gobernante Clásica
                                     </Label>
-                                    <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-3 items-start">
+                                    <div className="grid grid-cols-1 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)] gap-3 items-start">
                                         <div className="relative group">
                                             <AnimatedSelect
                                                 value={form.governing_resource_kind || ''}
                                                 onChange={(e) => setForm((prev) => ({ ...prev, governing_resource_kind: e.target.value }))}
-                                                className="w-full h-14 bg-zinc-50 border border-zinc-200 rounded-[1.25rem] px-5 pr-12 font-bold outline-none focus:ring-2 focus:ring-zinc-900/10 appearance-none"
+                                                className="w-full h-11 bg-zinc-50 border border-zinc-200 rounded-xl px-4 pr-10 text-sm font-bold outline-none focus:ring-2 focus:ring-zinc-900/10 appearance-none"
                                             >
                                                 {governingKindOptions.map((option) => (
                                                     <option key={option.value} value={option.value}>
@@ -278,17 +273,16 @@ const ResourceEditorModal = ({
                                                     </option>
                                                 ))}
                                             </AnimatedSelect>
-                                            <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none group-hover:text-zinc-600 transition-colors" />
                                         </div>
-                                        <div className="rounded-[1.25rem] border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-[11px] font-bold text-emerald-700">
+                                        <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 py-2 text-[10px] font-bold leading-snug text-emerald-700">
                                             Esta clasificación se usa para resolver el recurso gobernante del APU con la cascada oficial del cronograma.
                                         </div>
                                     </div>
                                 </div>
                             )}
 
-                            <div className="col-span-2 space-y-2 relative">
-                                <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
+                            <div className="md:col-span-2 space-y-2 relative">
+                                <Label className="text-[9px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
                                     Asociar Código CPC
                                 </Label>
                                 <div className="relative group">
@@ -302,7 +296,7 @@ const ResourceEditorModal = ({
                                         onFocus={() => setShowCpcDropdown(true)}
                                         placeholder="Buscar CPC..."
                                         searchIconClassName="left-4"
-                                        inputClassName="w-full h-14 pl-12 pr-10 bg-zinc-50 border border-zinc-100 rounded-[1.25rem] text-sm font-bold"
+                                        inputClassName="w-full h-11 pl-11 pr-10 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-bold"
                                     />
                                     {form.cod_cpc_id && (
                                         <button
@@ -320,7 +314,7 @@ const ResourceEditorModal = ({
                                             initial={{ opacity: 0, y: -10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, y: -10 }}
-                                            className="absolute z-[110] left-0 right-0 top-full mt-2 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-60 overflow-y-auto"
+                                            className="absolute z-[260] left-0 right-0 top-full mt-2 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-60 overflow-y-auto"
                                         >
                                             {cpcResults.map((cpc) => (
                                                 <button
@@ -352,7 +346,7 @@ const ResourceEditorModal = ({
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{ height: 'auto', opacity: 1 }}
                                         exit={{ height: 0, opacity: 0 }}
-                                        className="col-span-2 overflow-hidden"
+                                        className="md:col-span-2 overflow-hidden"
                                     >
                                         <div className="p-6 bg-blue-50/40 rounded-3xl border border-blue-100 space-y-4">
                                             <div className="flex items-center justify-between gap-3">
@@ -416,9 +410,9 @@ const ResourceEditorModal = ({
                                 )}
                             </AnimatePresence>
 
-                            <div className="col-span-2 space-y-2">
+                            <div className="md:col-span-2 space-y-2">
                                 <div className="flex justify-between items-center mb-1">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
+                                    <Label className="text-[9px] font-black uppercase tracking-widest ml-1 text-zinc-400 italic">
                                         Especificaciones / Ficha Técnica
                                     </Label>
                                     <button
@@ -432,27 +426,30 @@ const ResourceEditorModal = ({
                                 <textarea
                                     value={form.especificaciones || ''}
                                     onChange={(e) => setForm((prev) => ({ ...prev, especificaciones: e.target.value }))}
-                                    className="w-full h-32 p-5 bg-zinc-50 border border-zinc-100 rounded-[1.25rem] text-sm font-medium outline-none focus:ring-2 focus:ring-[#F39200]/10"
+                                    className="w-full h-24 p-4 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#F39200]/10"
                                     placeholder="..."
                                 />
                             </div>
 
-                            <div className="col-span-2 flex gap-4 pt-4">
-                                <button
-                                    type="button"
-                                    onClick={onClose}
-                                    className="flex-1 h-14 bg-zinc-100 text-zinc-500 font-black uppercase tracking-widest text-[11px] rounded-[1.25rem] hover:bg-zinc-200 transition-all"
-                                >
-                                    Cancelar Operación
-                                </button>
-                                <LiquidButton type="submit" className="flex-[2] h-14 rounded-[1.25rem]">
-                                    <Save className="w-4 h-4 mr-2" /> {submitLabel}
-                                </LiquidButton>
                             </div>
-                        </form>
-                    </div>
-                </motion.div>
-            </div>
+                        </AppModalBody>
+                        <AppModalFooter variant="flat" className="flex-wrap border-t border-[#ececec] bg-[#f7f7f5]">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                title="Cancelar"
+                                aria-label="Cancelar"
+                                className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                            <LiquidButton type="submit" title={submitLabel} aria-label={submitLabel} className="h-11 w-11 !min-w-0 rounded-xl !px-0">
+                                <Save className="w-4 h-4" />
+                            </LiquidButton>
+                        </AppModalFooter>
+                    </form>
+                </AppModalShell>
+            )}
         </AnimatePresence>
     );
 };

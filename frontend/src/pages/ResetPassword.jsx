@@ -4,7 +4,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../co
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { LiquidButton } from '../components/ui/liquid-button';
-import axios from 'axios';
+import { motion } from 'framer-motion';
+import { publicAuthApi } from '../api/publicAuth';
 import LogoGiproyCompleto from '../assets/LogoGiproyCompleto.png';
 
 const ResetPassword = () => {
@@ -26,10 +27,7 @@ const ResetPassword = () => {
         }
         setIsLoading(true);
         try {
-            await axios.post('http://localhost:8000/api/v1/auth/reset-password/', {
-                token,
-                new_password: password
-            });
+            await publicAuthApi.resetPassword({ token, newPassword: password });
             setSuccess(true);
         } catch (err) {
             setError(err.response?.data?.detail || "Token inválido o expirado.");

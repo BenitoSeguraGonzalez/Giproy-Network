@@ -1,8 +1,8 @@
 import React from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { AlertTriangle, Trash2, X } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { AlertTriangle, ArrowRight, RotateCcw, Trash2, X } from 'lucide-react';
 import { LiquidButton } from '../ui/liquid-button';
-import { APP_MODAL_CLOSE_BUTTON_CLASS } from '../ui/app-modal';
+import { AppModalShell, AppModalHeader, AppModalBody, AppModalFooter } from '../ui/app-modal';
 
 const BulkDeleteConfirmModal = ({
     isOpen,
@@ -19,32 +19,21 @@ const BulkDeleteConfirmModal = ({
 }) => (
     <AnimatePresence>
         {isOpen && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    className="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden border border-zinc-200"
-                >
-                    <div className="p-10 relative">
-                        <button
-                            onClick={onClose}
-                            disabled={loading}
-                            className={`${APP_MODAL_CLOSE_BUTTON_CLASS} absolute right-6 top-6`}
-                        >
-                            <X className="h-4 w-4" />
-                        </button>
-
-                        <div className="flex flex-col items-center text-center">
-                            <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mb-6 ${step === 1 ? 'bg-orange-50 text-orange-500' : 'bg-red-50 text-red-500'}`}>
-                                {step === 1 ? <AlertTriangle className="w-10 h-10" /> : <Trash2 className="w-10 h-10" />}
-                            </div>
-
+            <AppModalShell isOpen={isOpen} onClose={loading ? undefined : onClose} size="md" zIndex="z-[1000]">
+                <AppModalHeader
+                    title={step === 1 ? title : 'Confirmación final'}
+                    subtitle={step === 1 ? 'Revisión previa de la selección' : 'Acción irreversible pendiente'}
+                    icon={step === 1 ? AlertTriangle : Trash2}
+                    iconClassName={step === 1 ? 'text-[#F39200]' : 'text-red-600'}
+                    iconWrapClassName={step === 1 ? 'border border-orange-100 bg-orange-50' : 'border border-red-100 bg-red-50'}
+                    onClose={loading ? null : onClose}
+                />
+                <AppModalBody className="space-y-4 bg-[#f7f7f5]">
+                    <div className="text-center">
                             {step === 1 ? (
                                 <>
-                                    <h2 className="text-2xl font-black uppercase tracking-tight mb-4 text-zinc-900">{title}</h2>
-                                    <p className="text-zinc-500 text-sm font-medium mb-4">{summary}</p>
-                                    <div className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl p-4 mb-8 text-left">
+                                    <p className="text-sm font-bold leading-relaxed text-zinc-600">{summary}</p>
+                                    <div className="mt-4 w-full bg-white border border-zinc-200 rounded-2xl p-4 text-left">
                                         <div className="flex items-center justify-between mb-3">
                                             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Selección actual</span>
                                             <span className="text-[10px] font-black uppercase tracking-widest text-[#F39200]">{count} elementos</span>
@@ -63,47 +52,60 @@ const BulkDeleteConfirmModal = ({
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex flex-col w-full gap-3">
-                                        <LiquidButton
-                                            onClick={() => setStep(2)}
-                                            className="w-full !h-14 bg-[#1A1A1A] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl"
-                                        >
-                                            Entiendo, Continuar
-                                        </LiquidButton>
-                                        <button
-                                            onClick={onClose}
-                                            className="w-full h-14 bg-zinc-50 text-zinc-500 text-[11px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-100 transition-all"
-                                        >
-                                            Cancelar
-                                        </button>
-                                    </div>
                                 </>
                             ) : (
                                 <>
-                                    <h2 className="text-2xl font-black uppercase tracking-tight mb-4 text-red-600">CONFIRMACIÓN FINAL</h2>
-                                    <p className="text-zinc-500 text-sm font-medium mb-8">{finalWarning}</p>
-                                    <div className="flex flex-col w-full gap-3">
-                                        <LiquidButton
-                                            onClick={onConfirm}
-                                            disabled={loading}
-                                            className="w-full !h-14 bg-red-600 text-white text-[11px] font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2"
-                                        >
-                                            {loading ? "Procesando..." : "Confirmar Eliminación Permanente"}
-                                        </LiquidButton>
-                                        <button
-                                            onClick={onClose}
-                                            disabled={loading}
-                                            className="w-full h-14 bg-zinc-50 text-zinc-500 text-[11px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-100 transition-all"
-                                        >
-                                            Dar Marcha Atrás
-                                        </button>
-                                    </div>
+                                    <p className="rounded-2xl border border-red-100 bg-red-50 px-4 py-5 text-sm font-bold leading-relaxed text-red-700">{finalWarning}</p>
                                 </>
                             )}
-                        </div>
                     </div>
-                </motion.div>
-            </div>
+                </AppModalBody>
+                <AppModalFooter variant="flat" className="flex-wrap bg-[#f7f7f5]">
+                    {step === 1 ? (
+                        <>
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                title="Cancelar"
+                                aria-label="Cancelar"
+                                className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                            <LiquidButton
+                                onClick={() => setStep(2)}
+                                title="Continuar"
+                                aria-label="Continuar"
+                                className="h-11 w-11 !min-w-0 bg-[#1A1A1A] !px-0 text-white rounded-xl"
+                            >
+                                <ArrowRight className="h-4 w-4" />
+                            </LiquidButton>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                disabled={loading}
+                                title="Dar marcha atrás"
+                                aria-label="Dar marcha atrás"
+                                className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700 disabled:opacity-50"
+                            >
+                                <RotateCcw className="h-4 w-4" />
+                            </button>
+                            <LiquidButton
+                                onClick={onConfirm}
+                                disabled={loading}
+                                title={loading ? 'Procesando' : 'Confirmar eliminación'}
+                                aria-label={loading ? 'Procesando' : 'Confirmar eliminación'}
+                                className="h-11 w-11 !min-w-0 bg-red-600 !px-0 text-white rounded-xl"
+                            >
+                                {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <Trash2 className="h-4 w-4" />}
+                            </LiquidButton>
+                        </>
+                    )}
+                </AppModalFooter>
+            </AppModalShell>
         )}
     </AnimatePresence>
 );

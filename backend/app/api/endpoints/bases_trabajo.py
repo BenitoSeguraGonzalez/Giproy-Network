@@ -1,7 +1,7 @@
 import json
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from typing import List, Any, Optional
 from app.core.database import get_db
@@ -194,6 +194,117 @@ def read_bases_trabajo(
     bases = base_trabajo_repo.get_multi(db, empresa_id=target_empresa_id, skip=skip, limit=limit, user_id=user_id_filter)
     return bases
 
+
+@router.get("/papelera", response_model=List[BaseTrabajoResponse])
+def list_recycled_bases_trabajo(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: Usuario = Depends(deps.get_current_active_user),
+    empresa_id: Optional[int] = Query(None),
+) -> Any:
+    normalized_role = (current_user.rol or "").strip().lower()
+    if normalized_role not in ["administrador", "superadministrador"]:
+        raise HTTPException(status_code=403, detail="No tiene permisos para consultar la papelera de bases de trabajo.")
+    target_empresa_id = current_user.empresa_id
+    if normalized_role == "superadministrador" and empresa_id:
+        target_empresa_id = empresa_id
+    elif empresa_id and empresa_id != current_user.empresa_id:
+        raise HTTPException(status_code=403, detail="No tiene permisos para consultar bases de otra empresa.")
+    return base_trabajo_repo.get_deleted(db, empresa_id=target_empresa_id, skip=skip, limit=limit)
+
+
+@router.post("/papelera/purge-expired", response_model=dict)
+def purge_expired_recycled_bases_trabajo(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(deps.get_current_active_user),
+    empresa_id: Optional[int] = Query(None),
+) -> Any:
+    normalized_role = (current_user.rol or "").strip().lower()
+    if normalized_role not in ["administrador", "superadministrador"]:
+        raise HTTPException(status_code=403, detail="No tiene permisos para purgar la papelera de bases de trabajo.")
+    target_empresa_id = current_user.empresa_id
+    if normalized_role == "superadministrador" and empresa_id:
+        target_empresa_id = empresa_id
+    elif empresa_id and empresa_id != current_user.empresa_id:
+        raise HTTPException(status_code=403, detail="No tiene permisos para purgar bases de otra empresa.")
+    return {"purged": base_trabajo_repo.purge_expired(db, empresa_id=target_empresa_id)}
+
+
+@router.post("/papelera/{id}/restore", response_model=BaseTrabajoResponse)
+def restore_recycled_base_trabajo(
+    *,
+    db: Session = Depends(get_db),
+    id: int,
+    current_user: Usuario = Depends(deps.get_current_active_user),
+    empresa_id: Optional[int] = Query(None),
+) -> Any:
+    normalized_role = (current_user.rol or "").strip().lower()
+    if normalized_role not in ["administrador", "superadministrador"]:
+        raise HTTPException(status_code=403, detail="No tiene permisos para restaurar bases de trabajo.")
+    target_empresa_id = current_user.empresa_id
+    if normalized_role == "superadministrador" and empresa_id:
+        target_empresa_id = empresa_id
+    elif empresa_id and empresa_id != current_user.empresa_id:
+        raise HTTPException(status_code=403, detail="No tiene permisos para restaurar bases de otra empresa.")
+
+    base = base_trabajo_repo.get_by_id(db, id=id, empresa_id=target_empresa_id, include_deleted=True)
+    if not base or not base.deleted_at:
+        raise HTTPException(status_code=404, detail="Base de trabajo no encontrada en papelera.")
+    try:
+        restored = base_trabajo_repo.restore(db, base)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    record_audit_event(
+        db,
+        module="bases_trabajo",
+        event_type="base_restored_from_recycle_bin",
+        entity_type="base_trabajo",
+        entity_id=restored.id,
+        actor=current_user,
+        empresa_id=target_empresa_id,
+        message=f"Base de trabajo restaurada desde papelera: {restored.nombre}",
+        payload={"base_id": restored.id},
+    )
+    return restored
+
+
+@router.delete("/papelera/{id}/purge", status_code=status.HTTP_204_NO_CONTENT)
+def purge_recycled_base_trabajo(
+    *,
+    db: Session = Depends(get_db),
+    id: int,
+    current_user: Usuario = Depends(deps.get_current_active_user),
+    empresa_id: Optional[int] = Query(None),
+) -> None:
+    normalized_role = (current_user.rol or "").strip().lower()
+    if normalized_role not in ["administrador", "superadministrador"]:
+        raise HTTPException(status_code=403, detail="No tiene permisos para purgar bases de trabajo.")
+    target_empresa_id = current_user.empresa_id
+    if normalized_role == "superadministrador" and empresa_id:
+        target_empresa_id = empresa_id
+    elif empresa_id and empresa_id != current_user.empresa_id:
+        raise HTTPException(status_code=403, detail="No tiene permisos para purgar bases de otra empresa.")
+
+    base = base_trabajo_repo.get_by_id(db, id=id, empresa_id=target_empresa_id, include_deleted=True)
+    if not base or not base.deleted_at:
+        raise HTTPException(status_code=404, detail="Base de trabajo no encontrada en papelera.")
+    base_name = base.trash_original_nombre or base.nombre
+    base_trabajo_repo.delete(db, base)
+    record_audit_event(
+        db,
+        module="bases_trabajo",
+        event_type="base_purged_from_recycle_bin",
+        entity_type="base_trabajo",
+        entity_id=id,
+        actor=current_user,
+        empresa_id=target_empresa_id,
+        message=f"Base de trabajo purgada definitivamente desde papelera: {base_name}",
+        payload={"base_id": id},
+    )
+    return
+
+
 @router.post("/", response_model=BaseTrabajoResponse)
 def create_base_trabajo(
     *,
@@ -305,7 +416,38 @@ def delete_base_trabajo(
     base = base_trabajo_repo.get_by_id(db, id=id, empresa_id=target_empresa_id)
     if not base:
         raise HTTPException(status_code=404, detail="Base de trabajo no encontrada")
-    return base_trabajo_repo.delete(db, db_obj=base)
+    linked_project = None
+    if base.tipo == "Base de Proyecto":
+        from app.repositories.proyecto import proyecto_repo
+        linked_project = proyecto_repo.get_by_base_id(db, base_id=base.id, empresa_id=target_empresa_id)
+    if linked_project:
+        raise HTTPException(
+            status_code=409,
+            detail="Esta Base de Proyecto esta vinculada a un proyecto activo. Mueva el proyecto a papelera para conservar la recuperacion completa.",
+        )
+    deleted = base_trabajo_repo.soft_delete(
+        db,
+        base,
+        deleted_by_user_id=current_user.id,
+        reason="Base de trabajo movida a papelera por el usuario.",
+    )
+    record_audit_event(
+        db,
+        module="bases_trabajo",
+        event_type="base_moved_to_recycle_bin",
+        entity_type="base_trabajo",
+        entity_id=deleted.id,
+        actor=current_user,
+        empresa_id=target_empresa_id,
+        message=f"Base de trabajo movida a papelera: {deleted.trash_original_nombre or deleted.nombre}",
+        payload={
+            "base_id": deleted.id,
+            "deleted_at": deleted.deleted_at,
+            "recycle_expires_at": deleted.recycle_expires_at,
+            "retention_days": base_trabajo_repo.RECYCLE_RETENTION_DAYS,
+        },
+    )
+    return deleted
 
 @router.post("/{id}/activate", response_model=BaseTrabajoResponse)
 def activate_base_trabajo(

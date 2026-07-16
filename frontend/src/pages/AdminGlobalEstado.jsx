@@ -60,7 +60,7 @@ const AdminGlobalEstado = () => {
                 const data = await adminSystemApi.getStatus();
                 setStatusData(data);
             } catch (error) {
-                console.error('Error cargando estado del sistema:', error);
+                globalThis.reportClientError?.('Error cargando estado del sistema:', error);
             } finally {
                 setLoading(false);
             }

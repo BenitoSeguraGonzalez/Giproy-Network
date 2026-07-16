@@ -229,7 +229,7 @@ export const PresupuestoProvider = ({ children }) => {
             startTransition(() => setActivePresupuesto(data));
             return data;
         } catch (error) {
-            console.error("Error al refrescar presupuesto:", error);
+            globalThis.reportClientError?.("Error al refrescar presupuesto:", error);
         }
     }, [currentEmpresaId]); // Quitamos activePresupuesto?.id para estabilidad
 
@@ -239,7 +239,7 @@ export const PresupuestoProvider = ({ children }) => {
             patchLineInActivePresupuesto(updatedLine);
             return updatedLine;
         } catch (error) {
-            console.error("Error al actualizar línea del presupuesto:", error);
+            globalThis.reportClientError?.("Error al actualizar línea del presupuesto:", error);
             throw error;
         }
     }, [currentEmpresaId, patchLineInActivePresupuesto]);
@@ -297,7 +297,7 @@ export const PresupuestoProvider = ({ children }) => {
                 _budgetAction: existingLine ? 'incremented_existing' : 'created_new',
             };
         } catch (error) {
-            console.error("Detailed Error adding APU:", {
+            globalThis.reportClientError?.("Detailed Error adding APU:", {
                 error,
                 response: error.response?.data,
                 status: error.response?.status
@@ -311,7 +311,7 @@ export const PresupuestoProvider = ({ children }) => {
             await presupuestosApi.deleteLine(lineaId, currentEmpresaId);
             await refreshActivePresupuesto(activePresupuestoIdRef.current, { refreshPrices: false });
         } catch (error) {
-            console.error("Error al eliminar línea del presupuesto:", error);
+            globalThis.reportClientError?.("Error al eliminar línea del presupuesto:", error);
             throw error;
         }
     }, [currentEmpresaId, refreshActivePresupuesto]);
@@ -325,7 +325,7 @@ export const PresupuestoProvider = ({ children }) => {
             await refreshActivePresupuesto(activePresupuestoIdRef.current, { refreshPrices: false });
             return moveResult;
         } catch (error) {
-            console.error("Error al mover línea del presupuesto:", error);
+            globalThis.reportClientError?.("Error al mover línea del presupuesto:", error);
             throw error;
         }
     }, [currentEmpresaId, refreshActivePresupuesto]);
@@ -338,7 +338,7 @@ export const PresupuestoProvider = ({ children }) => {
             setNotesSummary(summary);
             return summary;
         } catch (error) {
-            console.error("Error al refrescar resumen de notas:", error);
+            globalThis.reportClientError?.("Error al refrescar resumen de notas:", error);
             return null;
         }
     }, [currentEmpresaId]); // Quitamos activePresupuesto?.id
@@ -349,7 +349,7 @@ export const PresupuestoProvider = ({ children }) => {
         try {
             await presupuestosApi.markOpened(targetId, currentEmpresaId);
         } catch (error) {
-            console.error("Error registrando apertura del presupuesto:", error);
+            globalThis.reportClientError?.("Error registrando apertura del presupuesto:", error);
         }
     }, [currentEmpresaId]); // Quitamos activePresupuesto?.id
 

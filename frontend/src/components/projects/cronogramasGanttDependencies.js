@@ -1,8 +1,9 @@
 const DEPENDENCY_CONNECTOR_GAP_PX = 2;
+const DEPENDENCY_CONNECTOR_STUB_PX = 8;
 const DEPENDENCY_CONNECTOR_LANE_PX = 24;
 const DEPENDENCY_GOVERNED_MARKER_INSET_PX = 0;
 const DEPENDENCY_ALIGNED_ANCHOR_TOLERANCE_PX = 12;
-const DEPENDENCY_FINAL_EDGE_CLEARANCE_PX = 8;
+const DEPENDENCY_TOP_ENTRY_CLEARANCE_PX = 16;
 const GANTT_BAR_HEIGHT_PX = 24;
 
 const DEPENDENCY_TYPE_LABELS = new Map([
@@ -119,37 +120,6 @@ const buildDependencyRouteResult = (points = []) => {
         actionX: actionPoint?.x ?? 0,
         actionY: actionPoint?.y ?? 0,
     };
-};
-
-const offsetBackwardFinishStartArrival = (points = [], targetGeometry = null) => {
-    if (!Array.isArray(points) || points.length < 3) return points;
-    const endPoint = points[points.length - 1];
-    const previous = points[points.length - 2];
-    const beforePrevious = points[points.length - 3];
-    if (!endPoint || !previous || !beforePrevious) return points;
-    const targetTop = Number(targetGeometry?.topPx);
-    const targetBottom = Number(targetGeometry?.bottomPx);
-    const targetLeft = Number(targetGeometry?.leftPx);
-    if (![targetTop, targetBottom, targetLeft].every(Number.isFinite)) return points;
-    const finalSegmentIsHorizontal = Math.abs(Number(previous.y) - Number(endPoint.y)) <= 0.5
-        && Math.abs(Number(previous.x) - Number(endPoint.x)) > 0.5;
-    const previousSegmentIsVertical = Math.abs(Number(beforePrevious.x) - Number(previous.x)) <= 0.5
-        && Math.abs(Number(beforePrevious.y) - Number(previous.y)) > 0.5;
-    if (!finalSegmentIsHorizontal || !previousSegmentIsVertical) return points;
-    if (Math.abs(Number(endPoint.x) - targetLeft) > 0.5) return points;
-    if (Number(previous.x) <= targetLeft + DEPENDENCY_FINAL_EDGE_CLEARANCE_PX + 0.5) return points;
-    const endY = Number(endPoint.y);
-    const arrivesAboveTarget = endY <= targetTop + 0.5;
-    const arrivesBelowTarget = endY >= targetBottom - 0.5;
-    if (!arrivesAboveTarget && !arrivesBelowTarget) return points;
-    const verticalDirection = arrivesAboveTarget ? 1 : -1;
-    const approachY = endY - (verticalDirection * DEPENDENCY_FINAL_EDGE_CLEARANCE_PX);
-    return [
-        ...points.slice(0, -2),
-        { x: previous.x, y: approachY },
-        { x: targetLeft, y: approachY },
-        { x: targetLeft, y: endY },
-    ];
 };
 
 export const normalizeDependencyType = (value) => {
@@ -371,20 +341,18 @@ export const buildDependencyRoute = ({
         y: sourceY + (isBackwardFinishStart ? 0 : sourceOffset),
     };
     const rawEndY = targetY + (isBackwardFinishStart ? 0 : targetOffset);
-    const targetVerticalApproachY = rawEndY > startPoint.y + 0.5
-        ? Number(targetGeometry.topPx || rawEndY) - DEPENDENCY_CONNECTOR_GAP_PX + targetOffset
-        : rawEndY < startPoint.y - 0.5
-            ? Number(targetGeometry.bottomPx || rawEndY) + DEPENDENCY_CONNECTOR_GAP_PX + targetOffset
-            : rawEndY;
     let endPoint = {
         x: targetAnchorX,
-        y: targetVerticalApproachY,
+        y: rawEndY,
     };
     const laneSpreadPx = Math.max(sourceLaneIndex, targetLaneIndex, 0) * 6;
     const sourceDirection = sourceAnchorSide === 'left' ? -1 : 1;
     const bandMinLeft = obstacleBand?.minLeft ?? Math.min(sourceGeometry.leftPx, targetGeometry.leftPx);
     const bandMaxRight = obstacleBand?.maxRight ?? Math.max(sourceGeometry.rightPx, targetGeometry.rightPx);
-    const sourceStubX = startPoint.x + (sourceDirection * (8 + laneSpreadPx));
+    const targetDirection = targetAnchorSide === 'left' ? -1 : 1;
+    const sourceStubDistance = DEPENDENCY_CONNECTOR_STUB_PX + laneSpreadPx;
+    const targetStubDistance = DEPENDENCY_CONNECTOR_STUB_PX + laneSpreadPx;
+    const sourceStubX = startPoint.x + (sourceDirection * sourceStubDistance);
     const forwardDelta = (endPoint.x - sourceStubX) * sourceDirection;
 
     const normalizePoints = (points = []) => points
@@ -399,6 +367,72 @@ export const buildDependencyRoute = ({
         void boundaryAnchor;
         return Number(geometry?.centerPx ?? geometry?.leftPx ?? fallbackX);
     };
+    const buildFinishStartPoints = () => {
+        const resolvedSourceStubX = startPoint.x + (sourceDirection * sourceStubDistance);
+        const targetTop = Number(targetGeometry?.topPx);
+        const targetEntryY = Number.isFinite(targetTop)
+            ? targetTop
+            : endPoint.y - (GANTT_BAR_HEIGHT_PX / 2);
+        const approachY = targetEntryY - DEPENDENCY_TOP_ENTRY_CLEARANCE_PX;
+        const targetEntryPoint = {
+            x: endPoint.x,
+            y: targetEntryY,
+        };
+        return normalizeRoutePoints([
+            startPoint,
+            { x: resolvedSourceStubX, y: startPoint.y },
+            { x: resolvedSourceStubX, y: approachY },
+            { x: targetEntryPoint.x, y: approachY },
+            targetEntryPoint,
+        ]);
+    };
+    const buildOrthogonalPoints = (middleX = null) => {
+        const resolvedSourceStubX = startPoint.x + (sourceDirection * sourceStubDistance);
+        const resolvedTargetStubX = endPoint.x + (targetDirection * targetStubDistance);
+        let resolvedMiddleX = middleX !== null && middleX !== undefined && Number.isFinite(Number(middleX))
+            ? Number(middleX)
+            : (resolvedSourceStubX + resolvedTargetStubX) / 2;
+        const targetTop = Number(targetGeometry?.topPx);
+        const targetBottom = Number(targetGeometry?.bottomPx);
+        const targetLeft = Number(targetGeometry?.leftPx);
+        const targetRight = Number(targetGeometry?.rightPx);
+        const targetBodyIsResolved = [targetTop, targetBottom, targetLeft, targetRight].every(Number.isFinite);
+        const routeHasVerticalDrop = Math.abs(startPoint.y - endPoint.y) > 0.5;
+        const targetLaneWouldCollapseIntoLeftEdge = routeHasVerticalDrop
+            && targetAnchorSide === 'left'
+            && resolvedSourceStubX > resolvedTargetStubX + 0.5
+            && resolvedMiddleX > resolvedTargetStubX + 0.5;
+        if (targetLaneWouldCollapseIntoLeftEdge) {
+            resolvedMiddleX = resolvedSourceStubX;
+        }
+        const targetCenterLineCrossesBody = targetBodyIsResolved
+            && endPoint.y > targetTop + 0.5
+            && endPoint.y < targetBottom - 0.5
+            && Math.min(resolvedMiddleX, resolvedTargetStubX) < targetRight - 0.5
+            && Math.max(resolvedMiddleX, resolvedTargetStubX) > targetLeft + 0.5;
+        if (targetCenterLineCrossesBody && Math.abs(startPoint.y - endPoint.y) > 0.5) {
+            const approachY = startPoint.y <= endPoint.y
+                ? targetTop - DEPENDENCY_TOP_ENTRY_CLEARANCE_PX
+                : targetBottom + DEPENDENCY_TOP_ENTRY_CLEARANCE_PX;
+            return normalizeRoutePoints([
+                startPoint,
+                { x: resolvedSourceStubX, y: startPoint.y },
+                { x: resolvedMiddleX, y: startPoint.y },
+                { x: resolvedMiddleX, y: approachY },
+                { x: resolvedTargetStubX, y: approachY },
+                { x: resolvedTargetStubX, y: endPoint.y },
+                endPoint,
+            ]);
+        }
+        return normalizeRoutePoints([
+            startPoint,
+            { x: resolvedSourceStubX, y: startPoint.y },
+            { x: resolvedMiddleX, y: startPoint.y },
+            { x: resolvedMiddleX, y: endPoint.y },
+            { x: resolvedTargetStubX, y: endPoint.y },
+            endPoint,
+        ]);
+    };
 
     if (sourceIsMilestone) {
         startPoint = {
@@ -412,21 +446,14 @@ export const buildDependencyRoute = ({
             y: Number(targetGeometry.centerY ?? rawEndY),
         };
     }
-    if ((sourceIsMilestone || targetIsMilestone) && Math.abs(startPoint.x - endPoint.x) <= DEPENDENCY_ALIGNED_ANCHOR_TOLERANCE_PX) {
-        const alignedX = sourceIsMilestone ? startPoint.x : endPoint.x;
-        const points = normalizePoints([
-            { ...startPoint, x: alignedX },
-            { ...endPoint, x: alignedX },
-        ]);
+
+    if (normalizedType === 'FS' && !targetIsMilestone) {
+        const points = buildFinishStartPoints();
         return buildDependencyRouteResult(points);
     }
 
     if (sourceIsMilestone && !targetIsMilestone && Math.abs(Number(lagDays || 0)) <= 0.0001) {
-        const points = normalizeRoutePoints([
-            startPoint,
-            { x: endPoint.x, y: startPoint.y },
-            endPoint,
-        ]);
+        const points = buildOrthogonalPoints();
         return buildDependencyRouteResult(points);
     }
 
@@ -436,22 +463,12 @@ export const buildDependencyRoute = ({
     }
 
     if (Math.abs(startPoint.x - endPoint.x) <= DEPENDENCY_ALIGNED_ANCHOR_TOLERANCE_PX) {
-        const alignedX = endPoint.x;
-        const points = normalizeRoutePoints([
-            startPoint,
-            { x: alignedX, y: startPoint.y },
-            { x: alignedX, y: endPoint.y },
-            endPoint,
-        ]);
+        const points = buildOrthogonalPoints();
         return buildDependencyRouteResult(points);
     }
 
     if (normalizedType === 'FF') {
-        const points = normalizeRoutePoints([
-            startPoint,
-            { x: endPoint.x, y: startPoint.y },
-            endPoint,
-        ]);
+        const points = buildOrthogonalPoints();
         return buildDependencyRouteResult(points);
     }
 
@@ -460,11 +477,7 @@ export const buildDependencyRoute = ({
         ? endPoint.x >= startPoint.x - DEPENDENCY_ALIGNED_ANCHOR_TOLERANCE_PX
         : endPoint.x <= startPoint.x + DEPENDENCY_ALIGNED_ANCHOR_TOLERANCE_PX;
     if (isLocallyForward || forwardDelta >= -0.5) {
-        points = normalizeRoutePoints([
-            startPoint,
-            { x: endPoint.x, y: startPoint.y },
-            endPoint,
-        ]);
+        points = buildOrthogonalPoints();
     } else {
         const outerX = sourceDirection > 0
             ? Math.max(
@@ -475,21 +488,10 @@ export const buildDependencyRoute = ({
                 bandMinLeft - DEPENDENCY_CONNECTOR_LANE_PX - laneSpreadPx,
                 Number(sharedExitX) || Number.POSITIVE_INFINITY,
             );
-        const routePoints = [
-            startPoint,
-            { x: sourceStubX, y: startPoint.y },
-            { x: outerX, y: startPoint.y },
-            { x: outerX, y: endPoint.y },
-            { x: endPoint.x, y: endPoint.y },
-        ];
         points = normalizeRoutePoints(
             isBackwardFinishStart
-                ? offsetBackwardFinishStartArrival([
-                    startPoint,
-                    { x: startPoint.x, y: endPoint.y },
-                    endPoint,
-                ], targetGeometry)
-                : routePoints,
+                ? buildOrthogonalPoints(startPoint.x + (sourceDirection * sourceStubDistance))
+                : buildOrthogonalPoints(outerX),
         );
     }
 

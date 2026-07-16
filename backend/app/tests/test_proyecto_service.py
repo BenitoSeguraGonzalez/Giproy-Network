@@ -77,6 +77,7 @@ def test_create_proyecto_with_invalid_empresa(db):
 def test_create_revision(db, sample_empresa):
     """Prueba la creación de una revisión (clonación completa)"""
     from app.models.presupuesto import Presupuesto, PresupuestoDetalle, PresupuestoIndirecto
+    from app.models.cronograma_trabajo import CronogramaTrabajo
     from app.models.edt import EdtNode, TipoNodoEdt
 
     # 1. Crear proyecto original con un presupuesto y un detalle
@@ -113,6 +114,52 @@ def test_create_revision(db, sample_empresa):
         edt_id=edt_node.id
     )
     db.add(detalle)
+    detalle_dependiente = PresupuestoDetalle(
+        presupuesto_id=presupuesto.id,
+        descripcion="Rubro 2",
+        cantidad=5.0,
+        precio_unitario=20.0,
+        precio_total=100.0,
+        edt_id=edt_node.id,
+        orden=1,
+    )
+    db.add(detalle_dependiente)
+    db.flush()
+    db.add(
+        CronogramaTrabajo(
+            presupuesto_id=presupuesto.id,
+            proyecto_id=original.id,
+            empresa_id=sample_empresa.id,
+            schedule_data={
+                "__config__": {"jornada_laboral_horas": 8.0},
+                str(detalle.id): {
+                    "duration": 1.0,
+                    "predecessors": [],
+                    "dependencies": [],
+                    "metadata": {
+                        "gantt_subbars": [
+                            {"budget_line_id": detalle.id, "percent": 100.0}
+                        ]
+                    },
+                },
+                str(detalle_dependiente.id): {
+                    "duration": 2.0,
+                    "predecessors": [detalle.id],
+                    "dependencies": [
+                        {
+                            "source_id": detalle.id,
+                            "target_id": detalle_dependiente.id,
+                            "type": "FS",
+                            "lag_days": 0.0,
+                            "lag_unit": "day",
+                            "lag_mode": "duration",
+                            "metadata": {"budget_line_id": detalle_dependiente.id},
+                        }
+                    ],
+                },
+            },
+        )
+    )
     indirecto = PresupuestoIndirecto(
         presupuesto_id=presupuesto.id,
         empresa_id=sample_empresa.id,
@@ -148,13 +195,24 @@ def test_create_revision(db, sample_empresa):
         .order_by(PresupuestoDetalle.id.asc())
         .all()
     )
-    assert len(rev_detalles) == 2
+    assert len(rev_detalles) == 3
     package_line = next(det for det in rev_detalles if det.parent_id is None)
     item_line = next(det for det in rev_detalles if det.descripcion == "Rubro 1")
+    item_line_2 = next(det for det in rev_detalles if det.descripcion == "Rubro 2")
     assert package_line.descripcion == "Cap 1"
     assert item_line.precio_total == 500.0
     assert item_line.edt_id != edt_node.id
     assert item_line.parent_id == package_line.id
+    assert item_line_2.parent_id == package_line.id
+
+    rev_cronograma = db.query(CronogramaTrabajo).filter(CronogramaTrabajo.presupuesto_id == rev_presupuestos[0].id).one()
+    rev_schedule_data = rev_cronograma.schedule_data or {}
+    assert str(item_line.id) in rev_schedule_data
+    assert str(item_line_2.id) in rev_schedule_data
+    assert rev_schedule_data[str(item_line_2.id)]["predecessors"] == [item_line.id]
+    assert rev_schedule_data[str(item_line_2.id)]["dependencies"][0]["source_id"] == item_line.id
+    assert rev_schedule_data[str(item_line_2.id)]["dependencies"][0]["target_id"] == item_line_2.id
+    assert rev_schedule_data[str(item_line.id)]["metadata"]["gantt_subbars"][0]["budget_line_id"] == item_line.id
 
     rev_edt_nodes = db.query(EdtNode).filter(EdtNode.proyecto_id == revision.id).all()
     assert len(rev_edt_nodes) == 1

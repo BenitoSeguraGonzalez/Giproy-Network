@@ -1,0 +1,145 @@
+{
+  "contract_version": "giproy_bim_dataset_manifest_v1",
+  "scale_policy": "Regression tiers are relative to this corpus; performance budgets are governed by BIM-TASK-0088.",
+  "datasets": [
+    {
+      "id": "bsi-pcert-ifc4-architecture",
+      "label": "buildingSMART PCERT Architecture",
+      "relative_path": "buildingsmart-pcert/Building-Architecture.ifc",
+      "scale": "small",
+      "discipline": "architecture",
+      "schema": "IFC4",
+      "mvd": "PCERT sample scene",
+      "source": {
+        "publisher": "buildingSMART International",
+        "url": "https://github.com/buildingSMART/Sample-Test-Files/blob/main/IFC%204.0.2.1%20%28IFC%204%29/PCERT-Sample-Scene/Building-Architecture.ifc",
+        "license_spdx": "CC-BY-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "buildingSMART International, Sample & Test Files, Building-Architecture.ifc"
+      },
+      "expected": {
+        "bytes": 225635,
+        "sha256": "3ff9b10bd00c7b96dded51e7ca5a6b69efbea38b049adcdd05fcd247de7e70d5",
+        "entity_count": 444,
+        "storey_count": 1,
+        "element_count": 13,
+        "required_ifc_classes": ["IFCWALL", "IFCSLAB", "IFCELEMENTQUANTITY"]
+      }
+    },
+    {
+      "id": "bsi-pcert-ifc4-structural",
+      "label": "buildingSMART PCERT Structural",
+      "relative_path": "buildingsmart-pcert/Building-Structural.ifc",
+      "scale": "small",
+      "discipline": "structural",
+      "schema": "IFC4",
+      "mvd": "PCERT sample scene",
+      "source": {
+        "publisher": "buildingSMART International",
+        "url": "https://github.com/buildingSMART/Sample-Test-Files/blob/main/IFC%204.0.2.1%20%28IFC%204%29/PCERT-Sample-Scene/Building-Structural.ifc",
+        "license_spdx": "CC-BY-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "buildingSMART International, Sample & Test Files, Building-Structural.ifc"
+      },
+      "expected": {
+        "bytes": 296640,
+        "sha256": "68be722391e7aaa53bb9278645a02aa4b6382f13cc07548a1612e9b1dc3def67",
+        "entity_count": 407,
+        "storey_count": 1,
+        "element_count": 15,
+        "required_ifc_classes": ["IFCBEAM", "IFCFOOTING", "IFCELEMENTQUANTITY"]
+      }
+    },
+    {
+      "id": "bsi-pcert-ifc4-hvac",
+      "label": "buildingSMART PCERT HVAC",
+      "relative_path": "buildingsmart-pcert/Building-Hvac.ifc",
+      "scale": "small",
+      "discipline": "hvac",
+      "schema": "IFC4",
+      "mvd": "PCERT sample scene",
+      "source": {
+        "publisher": "buildingSMART International",
+        "url": "https://github.com/buildingSMART/Sample-Test-Files/blob/main/IFC%204.0.2.1%20%28IFC%204%29/PCERT-Sample-Scene/Building-Hvac.ifc",
+        "license_spdx": "CC-BY-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "buildingSMART International, Sample & Test Files, Building-Hvac.ifc"
+      },
+      "expected": {
+        "bytes": 179727,
+        "sha256": "11a8552bc555fa44dfdc49374d1ab2da0a16104c10f086af509f500ce03fa2b3",
+        "entity_count": 156,
+        "storey_count": 1,
+        "element_count": 5,
+        "required_ifc_classes": ["IFCAIRTERMINAL", "IFCDUCTSEGMENT", "IFCDISTRIBUTIONSYSTEM"]
+      }
+    },
+    {
+      "id": "bsi-duplex-ifc2x3-architecture",
+      "label": "buildingSMART Duplex Architecture",
+      "relative_path": "buildingsmart-duplex/Duplex_A_20110907.ifc",
+      "scale": "medium",
+      "discipline": "architecture",
+      "schema": "IFC2X3",
+      "mvd": "Coordination View",
+      "source": {
+        "publisher": "buildingSMART International",
+        "url": "https://github.com/buildingSMART/Sample-Test-Files/blob/3c73e7a664cc47e4129affb079bd4c656d29a98e/IFC%202x3/Duplex%20Apartment/Duplex_A_20110907.ifc",
+        "license_spdx": "CC-BY-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "BSI (2020), Duplex Apartment Test Files, buildingSMART International"
+      },
+      "expected": {
+        "bytes": 2380763,
+        "sha256": "b347a2c8aa8fff6db896a4417a9c50c22ac0ccd7c5cfc22b99b8d29336c606ed",
+        "entity_count": 38898,
+        "storey_count": 4,
+        "element_count": 144,
+        "required_ifc_classes": ["IFCWALLSTANDARDCASE", "IFCDOOR", "IFCWINDOW"]
+      }
+    },
+    {
+      "id": "bsi-duplex-ifc2x3-mep",
+      "label": "buildingSMART Duplex MEP",
+      "relative_path": "buildingsmart-duplex/Duplex_MEP_20110907.ifc",
+      "scale": "large",
+      "discipline": "mep",
+      "schema": "IFC2X3",
+      "mvd": "Coordination View",
+      "source": {
+        "publisher": "buildingSMART International",
+        "url": "https://github.com/buildingSMART/Sample-Test-Files/blob/3c73e7a664cc47e4129affb079bd4c656d29a98e/IFC%202x3/Duplex%20Apartment/Duplex_MEP_20110907.ifc",
+        "license_spdx": "CC-BY-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "BSI (2020), Duplex Apartment Test Files, buildingSMART International"
+      },
+      "expected": {
+        "bytes": 17871432,
+        "sha256": "13976a8e223f177a6d7123679e4b02e750cd90c13f7bb20c593be125d9407119",
+        "entity_count": 311480,
+        "storey_count": 3,
+        "element_count": 926,
+        "required_ifc_classes": ["IFCFLOWSEGMENT", "IFCFLOWFITTING", "IFCFLOWTERMINAL"]
+      }
+    }
+  ],
+  "federations": [
+    {
+      "id": "bsi-pcert-duplex-multidiscipline",
+      "label": "PCERT and Duplex multidisciplinary federation",
+      "scale": "large",
+      "member_dataset_ids": [
+        "bsi-pcert-ifc4-architecture",
+        "bsi-pcert-ifc4-structural",
+        "bsi-pcert-ifc4-hvac",
+        "bsi-duplex-ifc2x3-architecture",
+        "bsi-duplex-ifc2x3-mep"
+      ],
+      "expected": {
+        "member_count": 5,
+        "total_bytes": 20954197,
+        "total_elements": 1103
+      }
+    }
+  ]
+}

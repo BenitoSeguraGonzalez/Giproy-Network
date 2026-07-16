@@ -1,4 +1,3 @@
-from datetime import date, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Body, Query
 from sqlalchemy.orm import Session, joinedload
 
@@ -7,13 +6,14 @@ from app.core.database import get_db
 from app.models.empresa import Empresa
 from app.models.usuario import Usuario
 from app.models.licencia import Licencia
-from app.models.empresa_licencia import EmpresaLicencia
 from app.models.empresa_uso import EmpresaUso
 from app.models.license_event import LicenseEvent
+from app.services.commercial_capabilities import commercial_capabilities_service
 from app.services.license import license_service
 from app.schemas.license import LicenseAssignment
 
 router = APIRouter()
+
 
 def check_superadmin(current_user: Usuario = Depends(get_current_user)):
     if current_user.rol.lower() != "superadministrador":
@@ -43,6 +43,7 @@ def read_current_company_license(
     next_assignment = snapshot["next_assignment"]
     uso = license_service.update_usage_metrics(db, target_empresa_id)
     empresa = db.query(Empresa).get(target_empresa_id)
+    commercial_state = commercial_capabilities_service.resolve_company_capabilities(db, target_empresa_id)
 
     return {
         "licencia_actual": licencia.nombre if licencia else "Sin Licencia",
@@ -66,6 +67,8 @@ def read_current_company_license(
         },
         "license_end_date": empresa.license_end_date,
         "license_banner_message": snapshot["banner_message"],
+        "saas_products": commercial_state["saas_products"],
+        "commercial_capabilities": commercial_state,
     }
 
 @router.get("/summary")
@@ -83,6 +86,7 @@ def read_admin_license_summary(
         "empresas": len(empresas),
         "activas": 0,
         "licencias_activas": 0,
+        "productos_saas_activos": 0,
         "usuarios_totales": 0,
         "usuarios_usados": 0,
         "alertas": 0
@@ -99,6 +103,8 @@ def read_admin_license_summary(
 
         is_active = empresa.activa
         license_status = snapshot["license_status"]
+        commercial_state = commercial_capabilities_service.resolve_company_capabilities(db, empresa.id)
+        saas_products = commercial_state["saas_products"]
         
         item = {
             "empresa_id": empresa.id,
@@ -137,13 +143,17 @@ def read_admin_license_summary(
                 "is_training": False,
                 "is_commercial": True,
                 "reset_periodical": False,
-            }
+            },
+            "saas_products": saas_products,
+            "saas_products_count": len(saas_products),
+            "commercial_capabilities": commercial_state,
         }
         
         items.append(item)
         
         if is_active: totals["activas"] += 1
         if licencia: totals["licencias_activas"] += 1
+        totals["productos_saas_activos"] += len(saas_products)
         totals["usuarios_totales"] += uso.max_usuarios
         totals["usuarios_usados"] += uso.usuarios_count
         if item["status"]["administradores"] != "ok" or license_status == "expired":

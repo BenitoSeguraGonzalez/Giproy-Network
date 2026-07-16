@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 
 from app.services.marketplace_bootstrap import FIXED_MARKETPLACE_CATEGORIES
 from app.services.marketplace_catalog_bootstrap import (
@@ -14,6 +15,8 @@ def test_fixed_marketplace_categories_have_unique_ordered_slugs():
 
     assert slugs == [
         "tienda-licencias",
+        "tienda-packs-saas",
+        "tienda-modulos-servicios",
         "tienda-apus",
         "tienda-bases-maestras",
         "tienda-proyectos",
@@ -46,6 +49,74 @@ def test_system_marketplace_products_have_unique_slugs_and_known_types():
     assert slugs
     assert len(slugs) == len(set(slugs))
     assert product_types == {"licencia", "addon", "adicional"}
+
+
+def test_system_marketplace_products_match_approved_saas_catalog():
+    slugs = {item["slug"] for item in SYSTEM_MARKETPLACE_PRODUCTS}
+
+    assert {
+        "sistema-licencia-express-trial-control",
+        "sistema-licencia-estandar-mensual",
+        "sistema-licencia-estandar-anual",
+        "sistema-licencia-profesional-mensual",
+        "sistema-licencia-profesional-anual",
+        "sistema-licencia-tester-control",
+        "sistema-licencia-academica-control",
+        "sistema-licencia-capacitacion-control",
+        "sistema-pack-planifica-mensual",
+        "sistema-pack-planifica-anual",
+        "sistema-pack-licita-mensual",
+        "sistema-pack-licita-anual",
+        "sistema-pack-bim-mensual",
+        "sistema-conecta-transferencias",
+        "sistema-pack-equipo-colaborador-mensual",
+        "sistema-pack-equipo-colaborador-anual",
+        "sistema-modulo-fusion",
+        "sistema-modulo-migracion",
+    }.issubset(slugs)
+
+
+def test_system_marketplace_products_are_superadmin_controlled():
+    for item in SYSTEM_MARKETPLACE_PRODUCTS:
+        commercial_meta = dict(item.get("commercial_meta") or {})
+
+        assert commercial_meta["requires_superadmin_edit"] is True
+        assert commercial_meta["commercial_code"]
+        assert commercial_meta["activation_policy"]
+
+
+def test_system_marketplace_products_reuse_legacy_products_when_possible():
+    reusable = {
+        legacy_slug
+        for item in SYSTEM_MARKETPLACE_PRODUCTS
+        for legacy_slug in item.get("legacy_slugs", [])
+    }
+
+    assert "sistema-addon-actualizacion-presupuestos" in reusable
+    assert "sistema-addon-pack-migracion-clasica" in reusable
+    assert "sistema-servicio-onboarding-equipo" in reusable
+    assert "sistema-licencia-profesional-plus" in reusable
+
+
+def test_saas_license_sale_prices_follow_approved_plan():
+    products = {item["slug"]: item for item in SYSTEM_MARKETPLACE_PRODUCTS}
+
+    assert products["sistema-licencia-estandar-mensual"]["precio"] == 25
+    assert products["sistema-licencia-estandar-anual"]["precio"] == 250
+    assert products["sistema-licencia-profesional-mensual"]["precio"] == 40
+    assert products["sistema-licencia-profesional-anual"]["precio"] == 400
+    assert products["sistema-pack-planifica-mensual"]["precio"] == 10
+    assert products["sistema-pack-planifica-anual"]["precio"] == 100
+    assert products["sistema-conecta-transferencias"]["precio"] == Decimal("24.99")
+    assert products["sistema-pack-equipo-colaborador-mensual"]["precio"] == 15
+    assert products["sistema-pack-equipo-colaborador-anual"]["precio"] == 150
+    assert products["sistema-pack-bim-mensual"]["precio"] == Decimal("99.99")
+    assert products["sistema-pack-bim-mensual"]["commercial_meta"]["requires_base_plan"] == [
+        "STANDARD",
+        "PROFESSIONAL",
+    ]
+    assert products["sistema-modulo-fusion"]["precio"] == 150
+    assert products["sistema-modulo-migracion"]["precio"] == 200
 
 
 def test_build_sample_sales_config_is_conservative_for_licenses():

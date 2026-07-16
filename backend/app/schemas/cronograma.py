@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -76,6 +76,63 @@ class CronogramaValoradoResponse(BaseModel):
     cash_flow: list[CronogramaCashFlowPoint] = Field(default_factory=list)
     has_line_overrides: bool = False
     updated_at: Optional[datetime] = None
+
+
+class CronogramaRecursoPeriodo(BaseModel):
+    periodo_id: str
+    label: str
+    cantidad: float = 0
+    costo: float = 0
+
+
+class CronogramaRecursoDemandRow(BaseModel):
+    recurso_id: int
+    categoria_id: int
+    categoria: str
+    subcategoria: str
+    codigo: Optional[str] = None
+    recurso: str
+    unidad: Optional[str] = None
+    precio_unitario: float = 0
+    periodos: list[CronogramaRecursoPeriodo] = Field(default_factory=list)
+    cantidad_total: float = 0
+    costo_total: float = 0
+
+
+class CronogramaRecursosSummary(BaseModel):
+    recursos: int = 0
+    periodos: int = 0
+    cantidad_total: float = 0
+    costo_total: float = 0
+
+
+class CronogramaRecursosResponse(BaseModel):
+    source: str = "cronograma_valorado"
+    mode: str = "read_only"
+    presupuesto_id: int
+    empresa_id: int
+    period_type: Optional[PeriodType] = None
+    distribution_mode: Optional[DistributionMode] = None
+    periodos: list[CronogramaRecursoPeriodo] = Field(default_factory=list)
+    recursos: list[CronogramaRecursoDemandRow] = Field(default_factory=list)
+    summary: CronogramaRecursosSummary
+
+
+class CronogramaRecursosStateResponse(BaseModel):
+    source: str = "cronograma_recursos_state"
+    mode: str = "persistent_state"
+    presupuesto_id: int
+    proyecto_id: int
+    empresa_id: int
+    version: int = 1
+    adjustments: dict[str, Any] = Field(default_factory=dict)
+    updated_by_id: Optional[int] = None
+    updated_at: Optional[datetime] = None
+
+
+class CronogramaRecursosStateUpdate(BaseModel):
+    version: Optional[int] = None
+    adjustments: dict[str, Any] = Field(default_factory=dict)
 
 
 class CronogramaConfigUpdate(BaseModel):

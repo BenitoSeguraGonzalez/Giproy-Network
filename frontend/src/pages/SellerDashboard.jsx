@@ -440,7 +440,7 @@ const SellerDashboard = () => {
     useEffect(() => {
         if (!canSell || !companyCanSell || !profileComplete) return;
         if (isSuperAdmin && !selectedEmpresa?.id && panelMode === 'company') return;
-        loadData().catch((error) => console.error('Error cargando panel vendedor marketplace:', error));
+        loadData().catch((error) => globalThis.reportClientError?.('Error cargando panel vendedor marketplace:', error));
     }, [canSell, companyCanSell, profileComplete, isSuperAdmin, selectedEmpresa?.id, panelMode]);
 
     useEffect(() => {
@@ -472,7 +472,7 @@ const SellerDashboard = () => {
             })
             .catch((error) => {
                 if (!cancelled) {
-                    console.error('Error cargando opciones marketplace:', error);
+                    globalThis.reportClientError?.('Error cargando opciones marketplace:', error);
                     setSourceOptions([]);
                 }
             })
@@ -537,7 +537,7 @@ const SellerDashboard = () => {
             setProductEditorOpen(false);
             await loadData();
         } catch (error) {
-            console.error('Error publicando producto:', error);
+            globalThis.reportClientError?.('Error publicando producto:', error);
             await appAlert(error?.response?.data?.detail || (isEditing ? 'No se pudo actualizar el producto.' : 'No se pudo publicar el producto.'));
         } finally {
             setSubmitting(false);
@@ -576,7 +576,7 @@ const SellerDashboard = () => {
             }
             await loadData();
         } catch (error) {
-            console.error('Error actualizando estado del producto:', error);
+            globalThis.reportClientError?.('Error actualizando estado del producto:', error);
             await appAlert(error?.response?.data?.detail || 'No se pudo actualizar el estado del producto.');
         }
     };
@@ -601,7 +601,7 @@ const SellerDashboard = () => {
             }
             await loadData();
         } catch (error) {
-            console.error('Error clonando producto marketplace:', error);
+            globalThis.reportClientError?.('Error clonando producto marketplace:', error);
             await appAlert(error?.response?.data?.detail || 'No se pudo clonar la publicación.');
         }
     };
@@ -622,7 +622,7 @@ const SellerDashboard = () => {
             }
             await loadData();
         } catch (error) {
-            console.error('Error retirando producto marketplace:', error);
+            globalThis.reportClientError?.('Error retirando producto marketplace:', error);
             await appAlert(error?.response?.data?.detail || 'No se pudo retirar la publicación.');
         }
     };
@@ -647,7 +647,7 @@ const SellerDashboard = () => {
             resetCategoryFormState();
             await loadData();
         } catch (error) {
-            console.error('Error guardando categoría marketplace:', error);
+            globalThis.reportClientError?.('Error guardando categoría marketplace:', error);
             await appAlert(error?.response?.data?.detail || 'No se pudo guardar la categoría.');
         } finally {
             setCategorySubmitting(false);
@@ -683,7 +683,7 @@ const SellerDashboard = () => {
             }
             await loadData();
         } catch (error) {
-            console.error('Error actualizando categoría marketplace:', error);
+            globalThis.reportClientError?.('Error actualizando categoría marketplace:', error);
             await appAlert(error?.response?.data?.detail || 'No se pudo actualizar la categoría.');
         }
     };

@@ -428,7 +428,11 @@ class APUService:
         affected_apu_ids = update_apu_operational_price(db, apu.id) or {apu.id}
         from app.services.presupuesto import propagate_apu_change_to_presupuestos
         for affected_apu_id in sorted(affected_apu_ids):
-            propagate_apu_change_to_presupuestos(db, affected_apu_id)
+            propagate_apu_change_to_presupuestos(
+                db,
+                affected_apu_id,
+                apply_active_functional_overlay=False,
+            )
         db.refresh(apu)
         return apu
 

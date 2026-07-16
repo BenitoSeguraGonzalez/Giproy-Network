@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ids:ids xmlns:ids="http://standards.buildingsmart.org/IDS" version="1.0">
+  <ids:specifications>
+    <ids:specification name="Wall fire rating" severity="error">
+      <ids:applicability>
+        <ids:entity><ids:name><ids:simpleValue>IFCWALL</ids:simpleValue></ids:name></ids:entity>
+      </ids:applicability>
+      <ids:requirements>
+        <ids:property id="wall-fire-rating">
+          <ids:propertySet><ids:simpleValue>Pset_WallCommon</ids:simpleValue></ids:propertySet>
+          <ids:baseName><ids:simpleValue>FireRating</ids:simpleValue></ids:baseName>
+          <ids:value><ids:simpleValue>60</ids:simpleValue></ids:value>
+        </ids:property>
+      </ids:requirements>
+    </ids:specification>
+  </ids:specifications>
+</ids:ids>

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BarChart3, Clock3, Loader2, TrendingUp, X } from 'lucide-react';
+import { BarChart3, CheckCircle2, Clock3, Loader2, TrendingUp, X } from 'lucide-react';
 import ClearSearchField from '../ui/ClearSearchField';
 import { cronogramasApi } from '../../api/cronogramas';
 import { includesNormalized, normalizeSearchToken } from '../../utils/normalizeSearch';
@@ -168,7 +168,7 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
                 setSelectedItemId(response.items?.[0]?.id ?? null);
             } catch (fetchError) {
                 if (cancelled) return;
-                console.error('Error cargando Pareto temporal del Gantt:', fetchError);
+                globalThis.reportClientError?.('Error cargando Pareto temporal del Gantt:', fetchError);
                 setError('No fue posible cargar el Pareto temporal del Gantt.');
             } finally {
                 if (!cancelled) setLoading(false);
@@ -260,7 +260,7 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
                         <div className="min-w-0">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-9 w-9 items-center justify-center rounded-2xl border border-orange-200 bg-orange-50">
-                                    <AnimatedSelectedIcon className="h-4 w-4 text-[#F39200]" />
+                                    <CheckCircle2 className="h-4 w-4 text-[#F39200]" />
                                 </div>
                                 <div className="min-w-0">
                                     <div className="text-[12px] font-black uppercase tracking-[0.18em] text-zinc-900">

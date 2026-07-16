@@ -1,3 +1,3914 @@
+### 2026-07-16 - Materiales y equipos de Campo BIM (BIM-TASK-0152)
+
+- Campo BIM V2 incorpora recepcion, consumo, retorno y saldo por recurso BIM.
+- La persistencia PostgreSQL `de2036a1b2c3` es tenant-aware, reversible y
+  bloquea saldo negativo sin tocar inventario, compras o contabilidad clasicos.
+- E07 pasa a completa; paridad 63,33% y programa 42,62% completado.
+
+### 2026-07-16 - Eventos no planificados BIM (BIM-TASK-0151)
+
+- Produccion BIM V2 incorpora eventos reales ligados a actividad y frente, con
+  retraso, coste y decision auditable.
+- La nueva persistencia PostgreSQL `de2035a1b2c3` permanece aislada por tenant
+  y no escribe Cronogramas ni Presupuestos clasicos.
+- E04 pasa a completa; paridad 62,50% y programa 40,98% completado.
+
+### 2026-07-16 - Inspecciones y punch list BIM (BIM-TASK-0150)
+
+- Campo BIM V2 sustituye `Riesgos` por una superficie unica de inspecciones,
+  checklist, histórico y punch list, conservando zona y exposicion 4D.
+- La migracion aditiva `de2034a1b2c3` agrega checklist JSON y hallazgos
+  tenant-aware con ciclo abierto, en curso, cerrado y reapertura.
+- PostgreSQL, build, 17 smokes BIM, Playwright 1920x900/2560x1300 y baseline
+  enterprise quedan verdes.
+- D07 queda completa y la paridad alcanza 61,67%; GiProy Clasico y TASK-1807
+  no cambian. No se realiza deploy.
+
+### 2026-07-16 - Diario de obra consolidado BIM (BIM-TASK-0149)
+
+- Campo BIM V2 incorpora diario por fecha con filtros, resumen operativo,
+  lista/detalle, observacion oficial, avance, recursos, costes y evidencia.
+- El flujo reutiliza partes 4D y persistencia existentes; no agrega tablas,
+  endpoints, PWA, movil, cache ni operacion offline.
+- PostgreSQL, build, 16 smokes BIM, Playwright 1920x900/2560x1300 y baseline
+  enterprise quedan verdes.
+- D05 y E05 quedan completas y la paridad alcanza 60,83%; GiProy Clasico y
+  TASK-1807 no cambian. No se realiza deploy.
+
+### 2026-07-16 - Incidencias y fotos de Campo BIM (BIM-TASK-0148)
+
+- Las incidencias BCF admiten evidencia JPEG, PNG y WebP verificada por firma,
+  limitada a 10 MB, deduplicada SHA-256 y persistida en PostgreSQL.
+- Campo BIM V2 incorpora una superficie lista/detalle para crear, buscar,
+  comentar, cambiar estado, enfocar contexto y revisar fotografias.
+- La migracion aditiva `de2033a1b2c3`, 8 pruebas PostgreSQL, 15 smokes BIM,
+  Playwright 1920x900/2560x1300 y baseline enterprise quedan verdes.
+- D04 queda completa y la paridad demostrada alcanza 59,17%; GiProy Clasico y
+  TASK-1807 no cambian. No se realiza deploy.
+
+### 2026-07-16 - Documentos CDE disponibles en Campo BIM (BIM-TASK-0147)
+
+- Campo BIM V2 incorpora un panel de escritorio para consultar, filtrar y
+  descargar la revision vigente de documentos CDE autorizados.
+- El flujo reutiliza API, versionado y ACL CDE; no duplica almacenamiento ni
+  introduce PWA, movil, cache u operacion offline.
+- Build, Playwright 1920x900/2560x1300, 14 smokes BIM, PostgreSQL CDE/ACL y
+  baseline enterprise quedan verdes; GiProy Clasico y TASK-1807 no cambian.
+- D03 queda completa y la paridad demostrada alcanza 58,33%. No se realiza
+  deploy.
+
+### 2026-07-16 - Dashboard CDE operacional BIM (BIM-TASK-0146)
+
+- Se agrega resumen CDE protegido con documentos visibles por ACL, RFIs,
+  submittals, revisiones, notificaciones, responsables y vencimientos.
+- Coordinacion BIM V2 abre en una tab `Resumen` compacta con estados, carga y
+  cola priorizada; no se agregan paneles simultaneos ni cambios clasicos.
+- PostgreSQL real pasa 25 pruebas CDE y validacion reversible hasta `de2032`;
+  build, Playwright, workspace V2, anti-BIM y baseline enterprise pasan.
+- C08 queda completa y el score alcanza 56,67%. No se realiza deploy.
+
+### 2026-07-13 - Revision CDE contextual BIM (BIM-TASK-0145)
+
+- Se agregan hilos sobre revision documental exacta con elemento/viewpoint,
+  responsable, vencimiento, comentarios y decisiones auditables.
+- La bandeja BIM notifica asignacion, comentario, resolucion, reapertura y
+  cierre sin acoplar correo ni notificaciones clasicas.
+- PostgreSQL `de2032`, 44 pruebas, build, Playwright, workspace V2, anti-BIM y
+  baseline enterprise pasan. C07 queda completa y el score alcanza 55,83%.
+- No se realiza deploy.
+
+### 2026-07-13 - Geolocalizacion BIM modelo-mapa (BIM-TASK-0144)
+
+- Se agrega ancla BIM versionada con WGS84, CRS, origen local, rumbo y zoom,
+  aislada por empresa y `proyecto_id`.
+- El mapa operativo representa modelos federados y sincroniza la seleccion con
+  la version activa del visor sin depender del mapa clasico.
+- R2/R3 del mismo proyecto raiz conservan ubicaciones independientes.
+- PostgreSQL `de2031`, pruebas focales y seleccionadas, build, Playwright,
+  workspace V2, anti-BIM y baseline enterprise pasan. C05 queda completa y el
+  score alcanza 55,00%.
+- No se realiza deploy.
+
+### 2026-07-13 - ACL documental granular BIM (BIM-TASK-0143)
+
+- Se agregan concesiones tenant-aware por documento y usuario para ver,
+  descargar, revisar y administrar el CDE BIM.
+- La primera ACL restringe permanentemente el documento; revocar todas las
+  concesiones no restaura acceso abierto por accidente.
+- La politica cubre listado, historial, descarga, nueva revision y archivo, con
+  gobierno limitado a creador, superadmin o administrador ACL.
+- PostgreSQL `de2030`, 43 pruebas, build, Playwright, workspace V2, anti-BIM y
+  baseline enterprise pasan. C04 queda completa y el score alcanza 53,33%.
+- No se realiza deploy.
+
+### 2026-07-13 - Gestion documental CDE BIM (BIM-TASK-0140)
+
+- Se agregan documentos y revisiones CDE inmutables, aislados por empresa y
+  proyecto, con emision vigente unica, historial y archivo logico.
+- Almacenamiento bajo `BIM_LOCAL_STORAGE_DIR` incorpora escritura atomica,
+  limite de 100 MB, bloqueo de ejecutables y checksum SHA-256 en descarga.
+- Coordinacion incorpora carga, historial, descarga y archivo documental sin
+  tocar Documentos de Proyecto clasico.
+- PostgreSQL `de2027`, 45 pruebas, build, Playwright, workspace V2, anti-BIM y
+  baseline enterprise pasan. C01 queda completa y el score alcanza 50,00%.
+- No se realiza deploy.
+
+### 2026-07-13 - Intercambio de planificacion BIM en producto (BIM-TASK-0139)
+
+- Planificacion agrega un tab para import-preview MSPDI/P6 XML con zona
+  horaria, moneda, conteos y perdidas semanticas visibles.
+- El usuario puede guardar, aprobar, rechazar y revertir revisiones BIM, y
+  descargar la exportacion XML sin escribir Cronograma clasico.
+- Exportacion, Playwright 1920x1080, 17 pruebas focales, build, workspace V2,
+  anti-BIM y baseline enterprise pasan.
+- B04 queda completa; P6/XER externo permanece parcial. Score: 49,17%.
+- No se realiza deploy.
+
+### 2026-07-13 - Nivelacion de recursos 4D por revision (BIM-TASK-0137/0138)
+
+- Se agregan escenarios CPM inmutables y reversibles con capacidad diaria,
+  restricciones FS/SS/FF/SF, checksum, aprobacion y supersede auditables.
+- `proyecto_id`, revision y `codigo_root` quedan trazados; los Gantt de
+  revisiones distintas no comparten lineas base, recursos ni escenarios.
+- El Workspace BIM V2 permite simular, comparar, aprobar y rechazar sin
+  escribir Cronograma clasico.
+- PostgreSQL real valida upgrade/downgrade `de2026a1b2c3`, `TIMESTAMPTZ` e
+  indice unico parcial. Ademas pasan 41 pruebas, build, Playwright, anti-BIM y
+  baseline enterprise. A09 queda completa y el score alcanza 48,33%.
+- No se realiza deploy en este slice.
+
+### 2026-07-13 - Gobierno QTO y paquete 5D (BIM-TASK-0136)
+
+- QTO incorpora aprobacion/rechazo auditables, control optimista y una unica
+  revision aprobada activa por version BIM.
+- La aprobacion exige cobertura WBS/coste del 100%; una revision nueva
+  supersede la anterior sin borrar historial.
+- El paquete 5D versionado conserva checksum, filas, totales y cobertura, pero
+  no escribe datos clasicos.
+- Migracion `de2025a1b2c3`, 31 pruebas acumuladas, build, Playwright, anti-BIM,
+  matriz y baseline enterprise pasan. A04 queda completa y el score es 47,50%.
+
+### 2026-07-13 - Motor QTO BIM versionado (BIM-TASK-0135)
+
+- Se agregan snapshots QTO inmutables sobre cantidades IFC, con agrupacion,
+  cobertura, checksum y trazabilidad por GlobalId.
+- WBS y codigos de coste permanecen latentes dentro de BIM; no existe escritura
+  automatica sobre EDT, APU, Presupuesto o Cronograma clasicos.
+- El panel de cantidades usa tabs QTO/Elemento y pasa Playwright a 1920x1080.
+- Migracion `de2024a1b2c3`, 29 pruebas acumuladas, build, smokes BIM/anti-BIM y
+  baseline enterprise pasan. No se realiza deploy.
+
+### 2026-07-13 - Revisiones y rollback de scheduling BIM (BIM-TASK-0134)
+
+- Se agrega persistencia BIM aislada para previews canonicos y su preflight.
+- Aprobacion, rechazo, supersede y rollback quedan versionados y auditables,
+  con una sola revision activa por empresa/proyecto.
+- Un comparador semantico certifica equivalencia pese al remapeo de IDs de
+  P6/MSPDI.
+- La migracion `de2023a1b2c3`, 43 pruebas y baseline enterprise pasan.
+- No se escribe Cronograma clasico ni se realiza deploy.
+
+### 2026-07-13 - Gate de formatos propietarios BIM (BIM-TASK-0133)
+
+- Se publica un contrato BIM de capacidades de scheduling por formato.
+- MSPDI XML, P6 XML y JSON canonico quedan disponibles; XER exige corpus
+  autorizado y MPP/Powerproject PP adaptador licenciado.
+- Ningun formato propietario activa parser o export ficticio.
+- Las 16 pruebas combinadas pasan; la matriz permanece en 46,67%.
+
+### 2026-07-13 - Intercambio Primavera P6 XML BIM (BIM-TASK-0132)
+
+- Se incorporan import-preview y exportacion PMXML `APIBusinessObjects` dentro
+  del dominio BIM, con XML endurecido y limites de volumen.
+- Proyecto, WBS, calendarios, actividades, restricciones, relaciones, recursos
+  y asignaciones conservan el subconjunto soportado en round-trip interno.
+- Baselines P6, riesgos, UDF, gastos y pasos se reportan como no soportados;
+  XER y la certificacion contra Oracle siguen pendientes.
+- B02 pasa de ausente a parcial y la matriz integral sube a 46,67%.
+- Se validan 6 pruebas P6 y 36 combinadas; no se realiza deploy.
+
+### 2026-07-13 - Intercambio MSPDI XML BIM seguro (BIM-TASK-0131)
+
+- Se incorporan import-preview y exportacion MSPDI XML dentro del dominio BIM,
+  con XML endurecido, limites de carga y contrato canonico validado.
+- WBS anidada, calendarios/excepciones, actividades, dependencias, recursos y
+  asignaciones conservan su subconjunto soportado en round-trip interno.
+- Baselines y referencias no representables quedan reportadas como warnings;
+  no existe aplicacion ni escritura sobre Cronograma clasico.
+- La suite ampliada descubre y corrige una normalizacion JSON focal del
+  importador MS Project clasico, preservando rutas y reglas de scheduling.
+- Pycompile, 12 pruebas focales, suite ampliada, matriz y baseline enterprise
+  pasan; no se realiza deploy.
+
+### 2026-07-13 - Entitlement comercial BIM y piloto Enterprise (TASK-2027/BIM-TASK-0123)
+
+- BIM requiere ahora licencia/compra valida ademas de la allowlist de rollout.
+- Empresarial, Tester, Academica y Capacitacion incluyen BIM; Estandar y
+  Profesional pueden comprar el modulo por USD 99.99/mes; Express queda fuera.
+- Marketplace valida el plan base al crear checkout y nuevamente al entregar el
+  derecho `PACK_BIM`, incluyendo proteccion contra drafts obsoletos.
+- Administradores Generales y Santiago Bermeo pasan a Enterprise localmente y
+  en beta sin cambiar sus fechas de vigencia.
+- Build, smokes BIM/anti-BIM, baseline, 74 pruebas focales y 163 ampliadas pasan.
+- Beta queda saludable, publica HTTP 200 y conserva `1/3=true`, `2=false`.
+
+### 2026-07-13 - Cierre local Gate D y revalidación Gate E (TASK-2023/2024/2025)
+
+- Los vínculos BIM enfocan el nodo EDT y la línea de Presupuesto exactos usando
+  props y scroll ya existentes, sin modificar esos módulos clásicos.
+- La navegación APU reutiliza el contrato contextual de Proyectos y retorna a
+  BIM protegiendo cualquier edición sin guardar; `APUs.jsx` no cambia.
+- Gate D queda al 100% local. Gate E pasa su preparación técnica con 120 pruebas
+  backend BIM, seis harness funcionales, build, baseline y matriz Chrome/Edge a
+  60 FPS con first render máximo de 859 ms.
+- La implementación técnica local queda al 100% y la liberación al 99%; el 1%
+  final sigue reservado al piloto humano real de diez jornadas y dos revisiones.
+
+### 2026-07-13 - Inicio controlado de Gate D/E BIM (TASK-2022)
+
+- `Proyectos` incorpora una puerta BIM unica, diferida y protegida por los
+  feature flags/allowlists existentes; con BIM apagado conserva sus secciones
+  clasicas y rechaza `?tab=bim` sin montar el workspace.
+- Los vinculos BIM pueden volver a EDT, Presupuesto o abrir el APU solicitado
+  mediante rutas clasicas existentes, sin cambiar sus contratos ni datos.
+- `BIM-TASK-0086` pasa a ejecucion parcial y `BIM-TASK-0090` registra el
+  prearranque de Gate E sin activar piloto ni fabricar evidencia externa.
+- No hay cambios backend, DB, auth/JWT, tenant, migraciones, despliegue ni
+  guardas de TASK-1807; el rollback es frontend-only.
+- Build, smokes flag off/on, guardas API/logging y baseline enterprise pasan;
+  TASK-2022 cierra al 100%, Gate D queda al 50% y el programa se estima al 98%.
+
+### 2026-07-13 - Semáforos de planificación APU en Gantt clásico (TASK-2021)
+
+- El rail superior de `Proyectos > Cronograma > Gantt` incorpora un panel
+  contextual para la actividad/APU seleccionada.
+- El panel abre por hover, se fija por clic y vuelve al comportamiento temporal
+  al desacoplarlo; usa portal y conserva el lenguaje visual del Gantt.
+- Expone producción, duración, trabajo, cuadrillas, equipos y costos, junto con
+  semáforos dimensionales que no dependen exclusivamente del color.
+- El cálculo es frontend y observacional sobre contratos existentes; no cambia
+  API, DB, gobernanza, auth, tenant, BIM ni TASK-1807.
+- Smoke matemático focal, build, smokes clásicos/anti-BIM y baseline enterprise
+  pasan.
+- Desplegado localmente y en la beta `giproy.excomconsultores.com` mediante
+  reconstrucción frontend-only; frontend/backend/PostgreSQL quedan saludables,
+  sin migraciones y con rollback de fuente e imagen preparado.
+
+### 2026-07-13 - Catálogo nacional RUC del SRI (TASK-2020)
+
+- Se sustituye EcuadorAPI por 6.843.565 RUC oficiales indexados en PostgreSQL,
+  con actualización condicional diaria de las 24 provincias.
+- El RUC empresarial pasa a ser obligatorio, único e inmutable en DB, API y
+  UI; razón social y perfil fiscal se sincronizan conservando el alias.
+- Se agrega fallback de revisión manual seguro, estado público descriptivo y
+  gestión de decisión para superadministrador.
+- Se incorporan gates de calidad, versionado/rollback, rate limit, historial
+  fiscal y exclusiones correctas del backup por empresa.
+- Beta queda desplegado y saludable; pruebas focales, build, smokes clásicos,
+  anti-BIM y baseline enterprise pasan.
+
+### 2026-07-13 - Compatibilidad de RUC con EcuadorAPI (TASK-2019)
+
+- El registro publico clasico acepta la respuesta actual de EcuadorAPI con la
+  ficha fiscal anidada bajo `data`.
+- Se conserva compatibilidad con el payload plano anterior y se agrega prueba
+  focal para ambos contratos.
+- Hotfix desplegado en el backend beta y verificado extremo a extremo.
+- Sin cambios de API, DB, auth, tenant, frontend o BIM.
+
+### 2026-07-11 - Productividad BIM 4D/5D (BIM-TASK-0103)
+
+- Cantidades BIM verificadas producen duracion por rendimiento y cuadrilla.
+- Recurso, formula, normalizacion y destino latente se guardan en `de2015`.
+- Inspector calcula, propone y decide sin escribir modulos clasicos.
+- `104` tests BIM, harness responsive, anti-BIM y baseline quedan en verde.
+
+### 2026-07-11 - Frentes y escenarios BIM 4D (BIM-TASK-0100/0102)
+
+- Se agregan frentes y componentes construibles logicos en PostgreSQL `de2014`.
+- What-if calcula impacto y conflictos sin editar IFC, baseline ni Cronograma.
+- Inspector BIM cubre alta, agrupacion, foco GUID y resultado de escenario.
+- `102` tests BIM, harness responsive, anti-BIM y baseline quedan en verde.
+
+### 2026-07-11 - Plan-real BIM 4D (BIM-TASK-0098/0099)
+
+- Se agregan baselines y dependencias inmutables en PostgreSQL `de2013`.
+- La desviacion plan-real declara metodologia y retorna viewpoints por GUID.
+- El inspector BIM crea revisiones, dependencias y enfoca actividad en modelo.
+- `100` tests BIM, harness responsive, anti-BIM y baseline quedan en verde.
+
+### 2026-07-11 - Simulacion BIM 4D (BIM-TASK-0095/0097)
+
+- Se agregan progreso inmutable, estados temporales y timeline reproducible.
+- Fragments aplica perfiles 4D reales con activacion explicita y rollback UX.
+- PostgreSQL 18 certifica migraciones reversibles y servicios 4D tenant-aware.
+- `99` tests BIM, harness desktop/movil, anti-BIM y baseline quedan en verde.
+
+### 2026-07-11 - Fundacion de planificacion BIM 4D (BIM-TASK-0091/0094)
+
+- Se agregan snapshots versionados de actividad y propuestas N:M hacia GUIDs.
+- La matriz BIM incorpora capacidades de lectura, vinculacion y progreso 4D.
+- El workspace BIM permite proponer, aprobar o rechazar vinculos con actividad.
+- Migracion aditiva, `98` tests, harness responsive y anti-BIM quedan en verde.
+
+### 2026-07-11 - Enterprise BIM y rollout controlado (BIM-TASK-0087/0090)
+
+- Se agregan capacidades BIM tenant-aware, auditoria, correlation id y metricas
+  operativas sanitizadas.
+- Se certifica presupuesto local Chrome/Edge desktop/tablet con FPS, memoria,
+  first render y disposal reproducibles.
+- Se agrega plan de rollout por empresa con gates y ensayo de rollback.
+- La navegacion clasica 0086 y el piloto real permanecen explicitamente abiertos.
+
+### 2026-07-11 - Propuestas de cantidad 5D (BIM-TASK-0085)
+
+- Se agregan cantidades trazables por fuente, version, GUID y unidades.
+- Aprobacion/rechazo permanece en BIM y nunca sobrescribe datos clasicos.
+
+### 2026-07-11 - Incidencias BCF operativas (BIM-TASK-0083/0084)
+
+- Se agrega dominio de topics, viewpoints, comentarios e historial tenant-aware.
+- Import/export BCF-XML 2.1 conserva GUIDs y contexto seleccionable.
+- Panel BIM completa creacion, reapertura, asignacion, revision y cierre.
+
+### 2026-07-11 - IDS y cierre Gate C (BIM-TASK-0082)
+
+- Perfiles IDS se importan y evalúan por version con hallazgos por requisito,
+  severidad y GUID, separados de la conformidad sintactica IFC.
+- Excepciones quedan auditadas y el reporte se exporta como CSV reproducible.
+- Panel BIM operativo completa importacion, validacion, enfoque y excepcion.
+
+### 2026-07-11 - Federacion BIM por disciplina (BIM-TASK-0081)
+
+- Se agregan revisiones inmutables de federacion con versiones fijadas,
+  transform, georreferencia, unidades, autor y justificacion.
+- El viewport Fragments carga varios artifacts y activa/desactiva disciplinas
+  sin reconstruir el contexto cuando la geometria federada no cambia.
+- Panel BIM compacto permite componer y ajustar la federacion; el backend
+  informa miembros alineados y desalineados por CRS/origen efectivo.
+
+### 2026-07-10 - Comparacion de versiones BIM (BIM-TASK-0080)
+
+- Change set reproducible clasifica altas, bajas, geometria/transform y
+  propiedades por GUID.
+- Fallback semantico para GUID cambiado queda marcado y solo opera si es unico.
+- Panel BIM permite filtrar cambios y enfocar el elemento.
+
+### 2026-07-10 - Vistas reproducibles y cierre Gate B (BIM-TASK-0079)
+
+- Se agrega contrato v2 para persistir/reproducir camara, seleccion,
+  visibilidad, colores, filtros, ghost, clipping, mediciones y unidades.
+- Replay WebGL y roundtrip backend declaran incompatibilidad por version.
+- Vistas legacy conservan compatibilidad y no se agrega migracion.
+- Gate B cierra localmente con 62 tests, smokes y corpus real S/M/L.
+
+### 2026-07-10 - Herramientas de revision Fragments (BIM-TASK-0078)
+
+- Viewport de producto agrega ocultar, aislar, ghost, clipping, medicion,
+  proyeccion y reset mediante APIs Fragments/Three reales.
+- Las unidades m/mm quedan persistidas y el estado es reversible/trazable.
+- Playwright valida cada herramienta en desktop/movil y la matriz Fragments
+  completa conserva canvas, seleccion y ausencia de overflow.
+
+### 2026-07-10 - Explorer BIM sincronizado (BIM-TASK-0077)
+
+- Se agrega busqueda BIM servidor paginada por GUID, nombre, clase, nivel,
+  sistema, clasificacion, descripcion y propiedades JSON.
+- Explorer arbol/tabla agrupa por estructura, nivel, clase o sistema y mantiene
+  seleccion sincronizada con viewer e inspector.
+- Un GUID seleccionado por raycast se resuelve aunque no este precargado.
+- Backend con 225 elementos y frontend con 1.005 elementos quedan validados.
+
+### 2026-07-10 - Shell UX profesional (BIM-TASK-0076)
+
+- Se agrega barra contextual permanente para empresa, proyecto, modelo y version.
+- Toolbar compacta y accesible controla modos Fragments/2D, explorer, inspector,
+  reset y refresh con estados reales y tooltips.
+- Las herramientas de carga BIM quedan colapsadas por defecto y los botones sin
+  accion se eliminan.
+- Playwright valida desktop/tablet/movil, teclado, canvas y ausencia de overflow;
+  smoke BIM, anti-BIM, build y guardas frontend pasan.
+
+### 2026-07-10 - Viewport Fragments de producto (BIM-TASK-0075)
+
+- `BimWorkspace` incorpora viewport nativo Fragments desde artifact registrado.
+- Se agregan resize, OrbitControls, raycast GlobalId, recovery WebGL y disposal.
+- El endpoint de contenido valida integridad/contrato antes de servir bytes.
+- Playwright valida desktop/tablet/movil sin canvas blanco ni overflow.
+
+### 2026-07-10 - Lifecycle artifacts y cierre Gate A (BIM-TASK-0074)
+
+- Se agrega registro BIM generacional para IFC fuente, viewer JSON/indices y
+  Fragments con contrato, checksum, tamaño, estado y metadata.
+- Regeneracion idempotente, escritura atomica, deteccion de corrupcion/contrato
+  incompatible y rollback quedan cubiertos.
+- Se exponen endpoints protegidos para listar, registrar, validar y revertir.
+- Gate A se certifica localmente con corpus real S/M/L procesado por jobs
+  observables: 13, 144 y 926 elementos sin publicar versiones incompletas.
+
+### 2026-07-10 - Conformidad IFC y calidad base (BIM-TASK-0073)
+
+- Se agrega analisis separado de STEP, schema y semantica GiProy bajo contrato
+  `giproy_bim_ifc_quality_v1`, expresamente sin certificacion declarada.
+- La revision BIM `de2003a1b2c3` persiste reportes por version, proyecto y
+  empresa con checksum, findings y resumen.
+- Los jobs IFC bloquean estructuras invalidas y generan reportes para versiones
+  validas o parcialmente compatibles.
+- Se añaden endpoints protegidos e inspector compacto de calidad en workspace.
+- Corpus real, invalido y parcial quedan cubiertos por tests, build y smokes.
+
+### 2026-07-10 - Job de importacion IFC observable (BIM-TASK-0072)
+
+- Se agrega persistencia BIM aditiva para jobs IFC con tenant/proyecto,
+  idempotencia, checksum, progreso, intentos, cancelacion, errores y resultados.
+- Se exponen endpoints BIM para crear `202`, listar, consultar, cancelar y
+  reintentar importaciones sin reemplazar el endpoint sincronico existente.
+- Las versiones exitosas quedan `ready_for_review` e inactivas; los fallos usan
+  savepoint y preservan la version activa anterior.
+- `BimWorkspace` incorpora panel compacto de importacion IFC solo para
+  superadministrador habilitado, con polling acotado y acciones con tooltips.
+- Se agregan tests de servicio, migracion y HTTP, smoke BIM/anti-BIM y build.
+
+### 2026-07-10 - Benchmark y plan de adecuacion final BIM (BIM-TASK-0070)
+
+- Se crea `docs/architecture/BIM_FINAL_ADEQUACY_PLAN.md` con benchmark de
+  buildingSMART, ISO, Autodesk, Trimble, Dalux, Solibri y Bentley.
+- El plan diferencia certificacion buildingSMART de conformidad openBIM
+  demostrada y evita claims de certificacion prematuros.
+- Se definen brechas P0/P1/P2, arquitectura backend de producto, arquitectura
+  UX del workspace final y backlog vertical `BIM-TASK-0071` a
+  `BIM-TASK-0090`.
+- Se fijan gates para datasets reales, pipeline observable, viewer Fragments
+  final, versiones/federacion, IDS, BCF, vinculos 5D, seguridad, rendimiento y
+  rollout controlado.
+- Se consolidan 29 decisiones confirmadas como baseline documental de producto
+  y arquitectura; se distinguen expresamente de capacidades implementadas.
+- El cierre BIM 1.0 exige piloto real de al menos 10 dias habiles, dos revisiones
+  de modelo, usuarios BIM/negocio y ciclo operativo con rollback demostrado.
+- `BIM-TASK-0008` se alinea con el estado real: ya existen smokes BIM positivos
+  y DOM/WebGL parciales; siguen pendientes datasets reales, permisos,
+  rendimiento y estabilidad de cierre.
+- Slice exclusivamente documental; sin frontend/backend, DB real, auth,
+  tenant, GiProy Clasico, Docker/Coolify o deploy.
+
+### 2026-07-10 - Seleccion por puntero en canvas fragments nativo (BIM-TASK-0069)
+
+- `BimFragmentsHarness.jsx` convierte el raycasting nativo fragments en
+  interaccion real de usuario mediante `pointerdown` sobre el canvas WebGL.
+- `readNativeRaycast` acepta coordenadas prioritarias del evento y conserva
+  fallback al centro del canvas para mantener robustez del harness.
+- Se expone `data-bim-fragments-native-pointer-selection="enabled"` y la
+  operacion `seleccion nativa por puntero`.
+- `validate-bim-viewer-dom.mjs` dispara `PointerEvent` real sobre el canvas
+  fragments y valida `localId`, `GlobalId`, `ItemData` y canvas no vacio en
+  desktop/mobile.
+- `smoke-bim-workspace-positive.mjs` protege el contrato estatico de seleccion
+  nativa por puntero.
+
+### 2026-07-09 - Filtro de categoria en canvas fragments nativo (BIM-TASK-0068)
+
+- `BimFragmentsHarness.jsx` agrega control compacto `Solo cat.` para aislar la
+  categoria IFC activa en el canvas fragments nativo.
+- El filtro usa localIds reales de `FragmentsModels` con `getLocalIds`,
+  `getItemsOfCategories`, `resetVisible`, `toggleVisible` y re-render explicito.
+- Se exponen `data-bim-fragments-native-category-filter` y
+  `data-bim-fragments-native-category-filtered-local-ids` para trazabilidad DOM.
+- `validate-bim-viewer-dom.mjs` pulsa el filtro, valida localIds de categoria,
+  operacion `categoria aislada` y reset a filtro total en desktop/mobile.
+- `smoke-bim-workspace-positive.mjs` protege el contrato estatico del filtro
+  nativo.
+
+### 2026-07-09 - Visibilidad por categoria en canvas fragments nativo (BIM-TASK-0067)
+
+- `BimFragmentsHarness.jsx` re-renderiza el canvas fragments nativo tras
+  alternar/restaurar visibilidad por categoria IFC.
+- Los controles exponen atributos DOM de contrato para toggle y reset.
+- `validate-bim-viewer-dom.mjs` pulsa los controles y valida reduccion de
+  visibles, aumento de ocultos, restauracion y operacion trazable.
+- Validado con smoke BIM positivo, smoke visual DOM BIM, smoke anti-BIM con
+  flag apagada y build frontend. Sin backend, migraciones, DB real ni deploy.
+
+### 2026-07-09 - Visibilidad de seleccion nativa fragments en harness BIM (BIM-TASK-0066)
+
+- `BimFragmentsHarness.jsx` agrega visibilidad operativa del `localId`
+  seleccionado por raycasting nativo.
+- El control compacto `Sel.` ejecuta `model.toggleVisible([localId])`, refresca
+  fragments y vuelve a renderizar el canvas nativo.
+- Se expone `data-bim-fragments-native-selection-visible` y el smoke DOM valida
+  cambio/restauracion de visibilidad.
+- Validado con smoke BIM positivo, smoke visual DOM BIM, smoke anti-BIM con
+  flag apagada y build frontend. Sin backend, migraciones, DB real ni deploy.
+
+### 2026-07-09 - Seleccion ItemData nativa fragments en harness BIM (BIM-TASK-0065)
+
+- `BimFragmentsHarness.jsx` conecta el hit real de `model.raycast` con
+  `model.getItemsData([localId])`.
+- Se exponen claves, nombre, tipo y categoria de la seleccion nativa en DOM con
+  atributos `data-bim-fragments-native-selection-*`.
+- La UI agrega bloque compacto `Seleccion fragments`, alineado con controles de
+  Proyectos y sin mocks visuales.
+- Validado con smoke BIM positivo, smoke visual DOM BIM, smoke anti-BIM con
+  flag apagada y build frontend. Sin backend, migraciones, DB real ni deploy.
+
+### 2026-07-09 - Raycasting nativo fragments en harness BIM (BIM-TASK-0064)
+
+- `BimFragmentsHarness.jsx` monta `model.object` de `FragmentsModels` en un
+  canvas WebGL propio y registra la camara con `model.useCamera(camera)`.
+- Se ejecuta `model.raycast({ camera, mouse, dom })` con coordenadas reales del
+  canvas y se exponen `localId`, `GlobalId` y estado de hit en DOM.
+- La UI agrega bloque compacto `Raycast fragments`, alineado con controles de
+  Proyectos y sin mocks visuales.
+- Validado con smoke BIM positivo, smoke visual DOM BIM, smoke anti-BIM con
+  flag apagada y build frontend. Sin backend, migraciones, DB real ni deploy.
+
+### 2026-07-09 - ItemData batch por categoria IFC en fragments (BIM-TASK-0063)
+
+- `BimFragmentsHarness.jsx` consulta `getItemsData` sobre una muestra de
+  localIds reales de la categoria IFC activa.
+- Se exponen `data-bim-fragments-category-itemdata`,
+  `data-bim-fragments-category-item-key-count` y
+  `data-bim-fragments-category-item-keys`.
+- La UI agrega bloque compacto `ItemData categoria`, alineado con controles de
+  Proyectos.
+- Validado con smoke BIM positivo, smoke visual DOM BIM, smoke anti-BIM con
+  flag apagada y build frontend. Sin backend, migraciones, DB real ni deploy.
+
+### 2026-07-09 - Trazabilidad GUID bidireccional en fragments (BIM-TASK-0062)
+
+- `BimFragmentsHarness.jsx` valida roundtrip real `localId -> GlobalId ->
+  localId` con `getGuidsByLocalIds` y `getLocalIdsByGuids`.
+- Se exponen `data-bim-fragments-roundtrip-guid`,
+  `data-bim-fragments-roundtrip-local-id` y
+  `data-bim-fragments-roundtrip-matched`.
+- La UI agrega bloque compacto `Trazabilidad GUID`, alineado con controles de
+  Proyectos.
+- Validado con smoke BIM positivo, smoke visual DOM BIM, smoke anti-BIM con
+  flag apagada y build frontend. Sin backend, migraciones, DB real ni deploy.
+
+### 2026-07-09 - Subset fragments por categoria IFC (BIM-TASK-0061)
+
+- `BimFragmentsHarness.jsx` genera subset binario por categoria IFC activa con
+  `getSubsetBuffer(localIds, false)`.
+- Se expone `data-bim-fragments-category-subset-bytes` y el smoke DOM exige
+  bytes positivos.
+- La UI agrega bloque compacto `Subset fragments`, alineado con controles de
+  Proyectos y trazable contra localIds reales.
+- Validado con smoke BIM positivo, smoke visual DOM BIM, smoke anti-BIM con
+  flag apagada y build frontend. Sin backend, migraciones, DB real ni deploy.
+
+### 2026-07-09 - Medicion por categoria IFC en fragments (BIM-TASK-0060)
+
+- `BimFragmentsHarness.jsx` calcula medicion agregada de la categoria IFC activa
+  con `getItemsVolume`, `getMergedBox` y `getItemsMaterialDefinition`.
+- Se exponen `data-bim-fragments-category-volume`,
+  `data-bim-fragments-category-box` y
+  `data-bim-fragments-category-materials` para verificacion trazable.
+- La UI agrega bloque compacto `Medicion categoria`, alineado con controles de
+  Proyectos.
+- Validado con smoke BIM positivo, smoke visual DOM BIM, smoke anti-BIM con
+  flag apagada y build frontend. Sin backend, migraciones, DB real ni deploy.
+
+### 2026-07-09 - Geometria y medicion fragments en harness BIM (BIM-TASK-0059)
+
+- `BimFragmentsHarness.jsx` consulta geometria y medicion desde
+  `FragmentsModels`.
+- Se usan `getItemsWithGeometry`, `getBoxes`, `getItemsVolume` y
+  `getItemsMaterialDefinition`.
+- La UI agrega bloque compacto `Geometria fragments` con items, cajas y volumen.
+- `validate-bim-viewer-dom.mjs` exige volumen positivo, caja geometrica y items
+  con geometria en desktop/mobile.
+- Sin backend, migraciones, DB real ni deploy a servidor.
+
+### 2026-07-09 - Estructura espacial real en harness fragments (BIM-TASK-0058)
+
+- `BimFragmentsHarness.jsx` consulta `getSpatialStructure()` desde
+  `FragmentsModels`.
+- El harness expone nodos, profundidad, hijos de raiz y nombre/tipo raiz con
+  atributos `data-bim-fragments-spatial-*`.
+- La UI agrega bloque compacto `Estructura espacial`, alineado con controles de
+  Proyectos y sin mocks visuales.
+- `validate-bim-viewer-dom.mjs` exige la estructura espacial en desktop/mobile.
+- Sin backend, migraciones, DB real ni deploy a servidor.
+
+### 2026-07-09 - Inspector ItemData profundo en fragments (BIM-TASK-0057)
+
+- `BimFragmentsHarness.jsx` agrega inspector frontend `ItemData` con claves
+  reales, `GlobalId` resuelto y tipo/clase IFC derivado de `FragmentsModels`.
+- El tipo se resuelve contra `getCategories` y `getItemsOfCategories` cuando el
+  `ItemData` no trae `ObjectType` o `PredefinedType`.
+- Se exponen `data-bim-fragments-sample-key-count`,
+  `data-bim-fragments-sample-keys`,
+  `data-bim-fragments-sample-guid-resolved` y
+  `data-bim-fragments-sample-type`.
+- `validate-bim-viewer-dom.mjs` exige inspector ItemData en desktop/mobile.
+- Sin backend, migraciones, DB real ni deploy a servidor.
+
+### 2026-07-09 - Visibilidad IFC 3D operativa en viewer BIM (BIM-TASK-0056)
+
+- `BimThreeViewer.jsx` agrega visibilidad por clase IFC dentro de la escena 3D.
+- La visibilidad se deriva de elementos reales y actualiza
+  `visibleThreeElements`.
+- Se exponen `data-bim-three-hidden-ifc-classes` y
+  `data-bim-three-visible-ifc-classes`.
+- El harness DOM/WebGL pulsa un control real, valida reduccion de elementos
+  visibles y ejecuta reset.
+- Sin backend, migraciones, DB real ni deploy a servidor.
+
+### 2026-07-09 - Filtro IFC 3D operativo en viewer BIM (BIM-TASK-0055)
+
+- `BimThreeViewer.jsx` agrega filtro por clase IFC dentro de la escena 3D.
+- El filtro se deriva de elementos reales del workspace o artefacto viewer, y
+  renderiza `visibleThreeElements`.
+- Se exponen `data-bim-three-ifc-filter`,
+  `data-bim-three-filtered-elements` y `data-bim-three-ifc-filter-count`.
+- Los smokes protegen filtros 3D reales, sin mocks ni backend nuevo.
+- Sin migraciones, DB real ni deploy a servidor.
+
+### 2026-07-09 - Inspector 3D contextual del viewer BIM (BIM-TASK-0054)
+
+- `BimThreeViewer.jsx` agrega inspector 3D compacto para hover/seleccion.
+- El inspector lee datos reales del elemento BIM o artefacto viewer: nombre,
+  clase IFC, `GlobalId`, propiedades, material y sistema cuando existen.
+- Se exponen `data-bim-three-inspector-*` para trazabilidad DOM.
+- `validate-bim-viewer-dom.mjs` y `smoke-bim-workspace-positive.mjs` protegen
+  que el inspector no sea un panel visual falso.
+- Sin backend, migraciones, DB real ni deploy a servidor.
+
+### 2026-07-09 - Hover 3D con raycasting trazable (BIM-TASK-0053)
+
+- `BimThreeViewer.jsx` agrega hover 3D mediante `THREE.Raycaster` sobre el
+  canvas WebGL.
+- El hover expone `elementId`, `GlobalId` y clase IFC con atributos
+  `data-bim-three-hover-*`.
+- `validate-bim-viewer-dom.mjs` dispara `pointermove` real sobre el canvas y
+  exige hover trazable.
+- Validado localmente con smoke BIM positivo y harness DOM/WebGL. Sin deploy a
+  servidor.
+
+### 2026-07-09 - Foco 3D de elemento seleccionado (BIM-TASK-0052)
+
+- `BimThreeViewer.jsx` agrega foco operativo sobre el elemento BIM seleccionado.
+- El foco ajusta camara y `OrbitControls.target` hacia la geometria del
+  elemento.
+- Se exponen `data-bim-three-focus-element` y
+  `data-bim-three-focus-global-id` para trazabilidad.
+- `validate-bim-viewer-dom.mjs` hace click real sobre `Enfocar elemento` y exige
+  `GlobalId` trazable.
+- Validado localmente con smoke BIM positivo y harness DOM/WebGL. Sin deploy a
+  servidor.
+
+### 2026-07-09 - Navegacion 3D profesional con OrbitControls (BIM-TASK-0051)
+
+- `BimThreeViewer.jsx` integra `OrbitControls` desde Three.js para navegacion
+  3D profesional en lugar de autorrotacion demostrativa.
+- El viewer conserva seleccion 3D por raycasting y agrega `Reset vista 3D`.
+- Se expone `data-bim-three-controls="orbit"` para trazabilidad DOM.
+- `validate-bim-viewer-dom.mjs` y `smoke-bim-workspace-positive.mjs` protegen
+  controles 3D reales, reset y ausencia de autorrotacion.
+- Validado localmente con smoke BIM positivo y harness DOM/WebGL. Sin deploy a
+  servidor.
+
+### 2026-07-09 - Seleccion 3D con raycasting en viewer BIM (BIM-TASK-0050)
+
+- `BimThreeViewer.jsx` incorpora seleccion real sobre canvas WebGL mediante
+  `THREE.Raycaster`.
+- La seleccion 3D expone `elementId`, `GlobalId` y clase IFC en atributos DOM
+  trazables.
+- `BimWorkspace.jsx` y el harness BIM conectan el hit 3D con el selector BIM
+  existente.
+- `validate-bim-viewer-dom.mjs` ejecuta clicks reales sobre el canvas 3D y exige
+  sincronizacion de seleccion.
+- Validado localmente con smoke BIM positivo y harness DOM/WebGL. Sin deploy a
+  servidor.
+
+### 2026-07-09 - Filtro operativo IFC en canvas BIM (BIM-TASK-0049)
+
+- `BimCanvasViewer.jsx` incorpora filtro real por clase IFC derivado de los
+  elementos BIM cargados.
+- El canvas agrega controles compactos alineados con el patron de Proyectos:
+  `Todas` y clases IFC detectadas.
+- Se exponen atributos DOM trazables para filtro activo, elementos filtrados y
+  clases disponibles.
+- `validate-bim-viewer-dom.mjs` y `smoke-bim-workspace-positive.mjs` protegen
+  el comportamiento real del filtro.
+- Validado localmente con smoke BIM positivo, harness DOM/WebGL, smoke anti-BIM
+  y build frontend. Sin deploy a servidor.
+
+### 2026-07-09 - Inspector y controles frontend de fragments (BIM-TASK-0048)
+
+- El harness fragments BIM pasa de indicador tecnico a superficie operativa
+  frontend alineada con Proyectos.
+- `BimFragmentsHarness.jsx` muestra localId, GlobalId, `ItemData`, categorias
+  IFC, visibilidad de categoria y totales visibles/ocultos.
+- Se agregan controles reales sobre `FragmentsModels`: seleccion de categoria,
+  toggle de visibilidad por categoria y reset de visibilidad.
+- `validate-bim-viewer-dom.mjs` exige controles visibles y datos reales sin
+  overflow desktop/mobile.
+- `smoke-bim-workspace-positive.mjs` protege el uso de APIs reales:
+  `getCategories`, `getItemsOfCategories`, `getVisible`, `toggleVisible`,
+  `resetVisible` y `getItemsByVisibility`.
+- Validado localmente con smoke BIM positivo, harness DOM/WebGL, smoke anti-BIM
+  y build frontend. Sin deploy a servidor.
+
+### 2026-07-09 - Consulta ItemData desde FragmentsModels (BIM-TASK-0047)
+
+- El harness fragments consulta `getItemsData([sampleLocalId],
+  { attributesDefault: true })` desde `FragmentsModels`.
+- Se exponen atributos DOM verificables para item data, localId y GlobalId de
+  muestra.
+- `validate-bim-viewer-dom.mjs` exige datos BIM consultables en desktop/mobile.
+- `smoke-bim-workspace-positive.mjs` protege la consulta de `ItemData`.
+- Validado localmente con harness DOM/WebGL y smoke BIM positivo. Sin deploy a
+  servidor.
+
+### 2026-07-09 - Simulacion IFC/fragments de volumen local (BIM-TASK-0046)
+
+- Se agrega builder IFC local para generar una simulacion geometrica de volumen
+  con 25 muros y relacion espacial.
+- Se agrega `smoke-bim-fragments-volume.mjs`, que procesa el IFC con
+  `IfcImporter` real y valida que el fragments resultante supere al fixture
+  base.
+- `smoke-bim-workspace-positive.mjs` protege la existencia del builder y del
+  smoke de volumen.
+- Validado localmente con smoke de volumen y smoke BIM positivo. Sin deploy a
+  servidor.
+
+### 2026-07-09 - Dataset IFC geometrico representativo local (BIM-TASK-0043)
+
+- Se corrige el harness fragments para esperar `model.getLocalIds()` y
+  `model.getGuids()`, que son lecturas asincronas de `FragmentsModels`.
+- El smoke DOM ahora exige localIds y GlobalIds consultables en desktop/mobile.
+- El fixture IFC geometrico local queda validado como dataset representativo de
+  harness, sin reemplazar datasets reales de obra.
+- `smoke-bim-workspace-positive.mjs` protege que el harness conserve la espera
+  explicita de identificadores.
+- Validado localmente con `validate-bim-viewer-dom`. Sin deploy a servidor.
+
+### 2026-07-09 - Quantities, materiales y sistemas IFC (BIM-TASK-0044)
+
+- El parser IFC textual BIM extrae quantities desde `IFCELEMENTQUANTITY` y
+  `IFCQUANTITY*`, enlazadas por `IFCRELDEFINESBYPROPERTIES`.
+- Se agregan materiales directos desde `IFCRELASSOCIATESMATERIAL` /
+  `IFCMATERIAL` y sistemas desde `IFCRELASSIGNSTOGROUP` / `IFCSYSTEM`.
+- Las quantities se persisten como propiedades BIM con prefijo `Quantity.`, los
+  materiales en metadata y el sistema en `system_name`.
+- Se agrega simulacion S5 para validar quantities/materiales/sistemas sin
+  nuevas migraciones ni contratos.
+- Validado localmente con py_compile, pytest focal IFC, smoke BIM positivo y
+  smoke anti-BIM. Sin deploy a servidor.
+
+### 2026-07-09 - Carga de fragments con FragmentsModels en harness (BIM-TASK-0042)
+
+- Se agrega `BimFragmentsHarness.jsx` para cargar bytes fragments con
+  `FragmentsModels.load(...)` en el harness BIM aislado.
+- Se agrega fixture binario fragments controlado para validar la carga en
+  navegador sin depender de servidor.
+- `validate-bim-viewer-dom.mjs` exige estado `loaded`, bytes no vacios y modelo
+  fragments registrado en desktop/mobile.
+- Validado localmente con harness DOM/WebGL, smoke BIM positivo, smoke anti-BIM
+  y build frontend. Sin deploy a servidor.
+
+### 2026-07-09 - Smoke local de fragments binarios (BIM-TASK-0041)
+
+- Se agrega `smoke-bim-fragments-importer.mjs` para producir fragments binarios
+  reales mediante `IfcImporter` de `@thatopen/fragments`.
+- El smoke usa WASM local de `web-ifc`, procesa una muestra IFC controlada y
+  valida `Uint8Array` con bytes no vacios.
+- `smoke-bim-workspace-positive.mjs` exige que la ruta IFC/3D conserve el smoke
+  de fragments binarios.
+- Validado localmente con smoke de fragments, smoke BIM positivo y smoke
+  anti-BIM. Sin deploy a servidor.
+
+### 2026-07-09 - Consumo de artefacto viewer en harness 3D (BIM-TASK-0040)
+
+- Se agrega adaptador frontend BIM para convertir
+  `giproy_bim_viewer_artifact` en elementos consumibles por `BimThreeViewer`.
+- El viewer 3D aislado acepta `viewerArtifact`, mantiene fallback a elementos
+  BIM y expone atributos DOM verificables de fuente de artefacto.
+- El harness BIM simula el flujo artefacto optimizado -> Three.js -> canvas
+  WebGL no vacio.
+- Se amplian smokes para validar adaptador, wiring de harness, anti-BIM y
+  canvas desktop/mobile sin overflow.
+- Validado localmente con smoke BIM positivo, smoke anti-BIM, harness DOM/WebGL
+  y build frontend. Sin deploy a servidor.
+
+### 2026-07-09 - Artefacto optimizado para viewer BIM (BIM-TASK-0039)
+
+- Se agrega `artifact_service.py` para generar un artefacto JSON local
+  optimizado para viewer BIM.
+- El artefacto indexa elementos por storey, clase IFC y propiedades, e incluye
+  bounds 2D derivados para carga/navegacion eficiente.
+- Se expone endpoint protegido
+  `/versions/{version_id}/artifacts/viewer` y cliente frontend
+  `generateViewerArtifact(...)`.
+- Se valida generacion, archivo JSON, indices, permisos y trazabilidad
+  `viewer_artifact_path`.
+- Validado localmente con 44 tests BIM focales, py_compile, smoke BIM positivo,
+  smoke anti-BIM y build frontend. Sin deploy a servidor.
+
+### 2026-07-09 - Parsing IFC profundo inicial (BIM-TASK-0038)
+
+- El parser IFC textual ahora resuelve relaciones espaciales
+  `IFCRELCONTAINEDINSPATIALSTRUCTURE` para asignar elementos a storeys.
+- Se agregan property sets simples mediante `IFCRELDEFINESBYPROPERTIES`,
+  `IFCPROPERTYSET` e `IFCPROPERTYSINGLEVALUE`.
+- Los elementos BIM importados pueden persistir `storey_name`, propiedades
+  semanticas y conteo de propiedades en metadata.
+- Se agrega simulacion S4 para relaciones espaciales y property sets.
+- Validado localmente con 42 tests BIM focales y py_compile. Sin deploy a
+  servidor.
+
+### 2026-07-09 - Storage local IFC controlado (BIM-TASK-0037)
+
+- Se agrega storage local BIM configurable mediante `BIM_LOCAL_STORAGE_DIR`.
+- El endpoint protegido `/imports/ifc-file` acepta archivos `.ifc` multipart,
+  calcula checksum SHA-256, guarda el archivo bajo `uploads/bim/{empresa}/{proyecto}`
+  y enlaza `artifact_path` en la version BIM.
+- `frontend/src/api/bimModels.js` expone `importIfcFile(...)` con `FormData`
+  dentro del cliente de dominio BIM.
+- Los tests usan `tmp_path`, por lo que no escriben en runtime real.
+- Validado localmente con 41 tests BIM focales, py_compile, smoke BIM positivo,
+  smoke anti-BIM y build frontend. Sin deploy a servidor.
+
+### 2026-07-09 - Parsing IFC semantico inicial local (BIM-TASK-0036)
+
+- Se abre la primera puerta real del motor BIM IFC: contenido STEP/IFC textual
+  se transforma en niveles y elementos persistidos en tablas BIM existentes.
+- Se agrega `backend/app/services/bim/ifc_parser.py` con parser inicial,
+  resumen de entidades/clases IFC y checksum SHA-256.
+- Se agrega endpoint BIM protegido `/imports/ifc-text` bajo feature flag,
+  tenant y rol `superadministrador`.
+- `frontend/src/api/bimModels.js` expone `importIfcText(...)` como cliente de
+  dominio, y el smoke BIM positivo lo protege.
+- Se agregan simulaciones locales S1/S2/S3 para parser IFC inicial:
+  arquitectura pequena, coordinacion multinivel y volumen medio sintetico.
+- Validado localmente con pytest BIM focal, py_compile, smoke BIM positivo,
+  smoke anti-BIM y build frontend. Sin deploy a servidor.
+- Quedan pendientes las siguientes puertas del motor BIM: storage local IFC,
+  relaciones espaciales profundas, property sets, quantities, fragments,
+  artefactos optimizados y simulaciones con datasets representativos.
+
+### 2026-07-09 - IFC/3D pasa a requisito central del cierre BIM (BIM-TASK-0035)
+
+- Se incorpora la primera fundacion local IFC/3D del carril BIM, sin despliegue
+  a servidor y sin activar navegacion visible fuera del perimetro BIM.
+- `frontend/package.json` incorpora el stack autorizado `three`, `web-ifc`,
+  `@thatopen/components`, `@thatopen/components-front` y
+  `@thatopen/fragments`.
+- Se agrega `BimThreeViewer.jsx` como viewer WebGL aislado con Three.js,
+  montado solo desde `BimWorkspace` y el harness BIM.
+- Se endurecen smokes BIM para exigir dependencias IFC/3D, componente 3D,
+  canvas WebGL no vacio y ausencia de contaminacion anti-BIM.
+- La documentacion BIM y la plantilla de lanzamiento pasan a tratar IFC/3D
+  como condicion de cierre: el siguiente slice debe implementar parsing
+  semantico IFC real, fragments/artefactos optimizados y simulaciones locales.
+
+### 2026-07-08 - Extender superficie visual del Gantt clasico con pocas lineas (TASK-2018)
+
+- Se corrige un problema visual del Gantt clasico donde proyectos con pocas
+  lineas hacian que el workspace se recortara a la altura de las filas reales.
+- `CronogramaGantt.jsx` deja de calcular `ganttWorkspaceHeight` por cantidad de
+  lineas y pasa a usar toda la altura disponible del modulo.
+- Se agrega un spacer visual inferior compartido por tabla y timeline para que
+  ambos paneles cubran el espacio disponible sin inventar filas ni alterar
+  datos.
+- Se refuerza `smoke-classic-cronogramas-api-boundary.mjs` para evitar regresar
+  al calculo por `rows.length`.
+- Sin cambios backend, contratos API, rutas, auth, tenant, permisos, datos,
+  Docker/Coolify/CI-CD ni BIM.
+
+### 2026-07-08 - Optimizar presentacion clasica de APUs (TASK-2017)
+
+- Se continua la optimizacion de velocidad de presentacion en Precios
+  Unitarios/APUs.
+- `BulkDeleteConfirmModal`, `ResourceEditorModal`,
+  `CommonReportPreviewModal` y `ReportGenerationModal` dejan de importarse de
+  forma eager desde `APUs.jsx`.
+- Los modales pasan a `React.lazy(...)` y se montan bajo
+  `React.Suspense fallback={null}` solo cuando su estado de apertura esta
+  activo.
+- El listado principal de APUs y el selector de APUs de base fuente usan
+  `apusApi.getAll(..., { summary: true })` para reducir payload inicial.
+- Se conserva completo `nestedApusCatalog`, porque sus `lineas` validan ciclos
+  entre APUs.
+- Se refuerza `smoke-classic-precios-unitarios-ui-guards.mjs` para evitar
+  regresion a imports eager y proteger el catalogo anidado completo.
+- Desplegado en frontend beta existente con backups
+  `bak-task2017-20260708-124517`; frontend/backend quedan healthy.
+- Validado localmente con smoke Precios Unitarios, smoke Presupuesto, smoke
+  Cronogramas, smoke anti-BIM, build frontend y baseline enterprise completo.
+
+### 2026-07-08 - Lazy-load de Tanteo y editor APU en Presupuesto clasico (TASK-2016)
+
+- Se continua la optimizacion de velocidad de presentacion en Presupuesto.
+- `TanteoTab` y `ApuEditorModal` dejan de importarse de forma eager desde
+  `PresupuestoDetail.jsx`.
+- Ambos pasan a `React.lazy(...)` y se montan bajo
+  `React.Suspense fallback={null}` solo cuando `tanteoVisible` o
+  `editingApuId` estan activos.
+- El drawer de edicion APU deja de arrastrar `ApuBudgetEditor` al primer render
+  del detalle de presupuesto.
+- Resultado build local: `PresupuestoDetail` baja de ~153,8 KB a ~104,1 KB;
+  `ApuEditorModal` y `TanteoTab` quedan como chunks diferidos bajo demanda.
+- Desplegado en frontend beta existente con backups
+  `bak-task2016-20260708-123556`; frontend/backend quedan healthy.
+- Validado con smoke Presupuesto, smoke anti-BIM, build frontend y baseline
+  enterprise completo.
+
+### 2026-07-08 - Lazy-load de modales secundarios en Presupuesto clasico (TASK-2015)
+
+- Se continua la optimizacion de velocidad de presentacion en Presupuesto.
+- `IndirectosModal`, `ParetoModal`, `NotasGeneralesModal`,
+  `CommonReportPreviewModal` y `ReportGenerationModal` dejan de importarse de
+  forma eager desde `PresupuestoDetail.jsx`.
+- Los modales pasan a `React.lazy(...)` y se montan bajo
+  `React.Suspense fallback={null}` solo cuando su estado de apertura esta
+  activo.
+- Se refuerza `smoke-classic-presupuesto-api-boundary.mjs` para proteger que
+  estos modales no vuelvan al chunk inicial de Presupuesto.
+- Resultado build local: `PresupuestoDetail` baja de ~198,6 KB a ~153,8 KB;
+  los modales/reporting quedan como chunks diferidos bajo demanda.
+- Desplegado en frontend beta existente con backups
+  `bak-task2015-20260708-122309`; frontend/backend quedan healthy.
+- Validado con smoke Presupuesto, smoke anti-BIM, build frontend y baseline
+  enterprise completo.
+
+### 2026-07-08 - Lazy-load interno de Pareto en Gantt clasico (TASK-2014)
+
+- Se continua la optimizacion del chunk funcional `CronogramaGantt`.
+- `GanttParetoModal` deja de importarse de forma eager y pasa a
+  `React.lazy(...)`, montandose solo cuando `paretoOpen=true`.
+- Se refuerza `smoke-classic-cronogramas-api-boundary.mjs` para proteger que el
+  modal Pareto del Gantt no vuelva al chunk inicial del Gantt.
+- Resultado build local: `CronogramaGantt` baja de ~567,2 KB a ~550,6 KB y
+  `GanttParetoModal` queda como chunk separado de ~17,7 KB.
+- Desplegado en frontend beta existente con backups
+  `bak-task2014-20260708-101711`; frontend/backend quedan healthy.
+- Validado con build frontend, smoke Cronogramas, smoke anti-BIM y baseline
+  enterprise completo.
+
+### 2026-07-08 - Lazy-load de rutas protegidas clasicas (TASK-2013)
+
+- Se continua la auditoria transversal de rendimiento frontend detectando que
+  `AppRouter.jsx` aun importaba de forma eager rutas protegidas pesadas.
+- `Dashboard`, `Proyectos`, `BasesTrabajo`, `Subcategorias` y
+  `OtrosServicios` pasan a `lazyWithChunkRecovery(...)`, conservando rutas
+  publicas directas y el `Suspense` protegido existente.
+- Se agrega `smoke-classic-route-lazy-boundary.mjs` y se incorpora al baseline
+  enterprise con `--include-frontend`.
+- Resultado build local: el chunk inicial `index` baja de ~638,8 KB a
+  ~260,4 KB; `Proyectos` queda en chunk propio de ~220,2 KB.
+- Desplegado en frontend beta existente con backups
+  `bak-task2013-20260708-072434`; frontend/backend quedan healthy.
+- Validado con build frontend, smoke lazy-router, smoke API boundaries,
+  smoke anti-BIM y baseline enterprise completo.
+
+### 2026-07-08 - Lazy metadata Gantt y catalogos APU resumidos (TASK-2012)
+
+- Se agrega `metadata_mode=summary` opt-in en `GET
+  /cronogramas-trabajo/{presupuesto_id}` para que la carga inicial de Gantt
+  clasico conserve metadatos de pintura/navegacion y difiera metadatos pesados
+  de edicion.
+- Se agrega `GET
+  /cronogramas-trabajo/{presupuesto_id}/lineas/{linea_id}/metadata` para
+  hidratar metadata completa bajo demanda al seleccionar linea o abrir editor.
+- `Cronogramas.jsx` carga Gantt con `compact=true` y `metadataMode='summary'`;
+  `CronogramaGantt.jsx` hidrata sin tocar `drafts`, evitando cambios pendientes
+  falsos.
+- Se agrega `summary=true` opt-in en `GET /apus/`; Catalogo APU y listados
+  laterales de `ApuBudgetEditor` usan resumen, mientras la edicion conserva
+  `getById(...)` completo.
+- Resultado servidor beta, caso `presupuesto_id=29`: Gantt compact summary baja
+  de ~364 KB gzip a ~153 KB gzip; listado APU summary baja de ~405-525 ms a
+  ~22-23 ms y de ~45,9 KB gzip a ~8,2 KB gzip.
+- Desplegado en beta existente con backups `bak-task2012-20260708-071124`;
+  backend/frontend healthy.
+- Validado con `py_compile`, pytest focal (`58 passed`), smokes clasicos
+  Cronogramas/Presupuesto/anti-BIM y `npm run build`.
+
+### 2026-07-08 - Optimizacion de carga Gantt clasico en servidor (TASK-2011)
+
+- Se diagnostica el cuello de Gantt en `giproy.excomconsultores.com`: el calculo
+  interno del presupuesto `29` queda en ~2,24-2,47 s, pero el endpoint publico
+  enviaba ~10,46 MB y tardaba ~6,46-18,27 s.
+- Se agrega cache contextual por respuesta para calculos repetidos de calendario
+  laboral en Cronograma Trabajo.
+- Se habilita `GZipMiddleware` para respuestas grandes y se agrega
+  `compact=true` opt-in en `GET /cronogramas-trabajo/{presupuesto_id}`.
+- La carga clasica de Gantt usa `compact=true`, evitando duplicar
+  `schedule_data` en la respuesta inicial sin cambiar el contrato por defecto.
+- Resultado servidor: respuesta completa ~3,68-3,79 s con ~556 KB comprimidos;
+  respuesta compacta ~3,02-3,76 s con ~364 KB comprimidos y 224 filas.
+- Waterfall HTTP autenticado equivalente a Cronogramas baja a ~8,18-8,71 s.
+- Se reconstruyen `backend` y `frontend` beta existentes; ambos quedan healthy.
+- Validado con `py_compile`, pytest focal Cronograma Trabajo (`56 passed`),
+  `npm run build` y smoke anti-BIM/imports/logs focal.
+
+### 2026-07-07 - Saneamiento de fechas y subtramos automaticos Gantt clasico (TASK-2010)
+
+- Se corrige la causa raiz de las fechas extremas del Gantt clasico en servidor:
+  `_build_workday_auto_segments(...)` ya no devuelve subtramos parciales cuando
+  no puede representar el 100% de la duracion solicitada.
+- Se evita persistir como override automatico `start_date/end_date` fuera del
+  horizonte operativo y se limpian subtramos automaticos renovables obsoletos o
+  masivos sin tocar subtramos manuales.
+- Se sanea `cronogramas_trabajo.id=3` en servidor con backup previo: 22 fechas
+  fuera de horizonte y 26 grupos de subtramos automaticos masivos retirados.
+- Se aplica el mismo saneamiento en la DB local `giproy_erp` con backup DB y
+  backup JSON especifico para evitar repropagar el defecto desde el entorno
+  local.
+- Validacion servidor: presupuesto `29` reconstruye Gantt en ~2,8 s, con 0
+  fechas persistidas >= 2100, 0 subtramos automaticos masivos y 0 fechas
+  imposibles en respuesta.
+- Validacion local: presupuesto `29` reconstruye Gantt en ~1,85 s con los
+  mismos contadores en cero.
+- Sin migraciones DB, rutas, auth/JWT/tenant, BIM ni contratos API.
+
+### 2026-07-07 - Optimizacion de timeout Gantt clasico en servidor (TASK-2009)
+
+- Se corrige el timeout del Gantt en `giproy.excomconsultores.com` causado por
+  `schedule_data` con `end_date` extremos (`3719`, `4492`) que inflaban la
+  ventana de calendario hasta 2467 anos.
+- `_estimate_calendar_window` ahora acota candidatos de calendario a un
+  horizonte operativo razonable de 3650 dias.
+- Se agrega cache contextual de overrides y fast-path para metadata Gantt ya
+  normalizada.
+- La resolucion de fechas de filas ignora overrides explicitos fuera del mismo
+  horizonte para no devolver anos imposibles al frontend.
+- El caso pesado del presupuesto `29` baja de ~68 s a ~6-8 s en servidor.
+- Sin cambios DB, migraciones, rutas, auth/JWT/tenant, BIM ni contratos API.
+
+### 2026-07-07 - Toolhint de Modo Trabajo en editor light APU Gantt (TASK-2008)
+
+- Se agrega ayuda contextual junto al selector `Modo Trabajo` del editor light
+  de APUs en Gantt.
+- El hint explica el comportamiento de `Fijo` y `Variable`, su efecto sobre
+  trabajo, rendimiento, tiempo y costo operativo, y la regla por defecto para
+  APUs con/sin anidados.
+- Cambio solo visual/informativo; no se altera la logica de calculo ni contratos
+  API.
+- Validado con build frontend, smoke Cronogramas, smoke anti-BIM y barridos
+  `axiosConfig`/`console.log`.
+
+### 2026-07-07 - Refresco de revisiones y Pareto Gantt clasico (TASK-2007)
+
+- Se corrige la regresion al eliminar revisiones: la UI refresca de forma
+  coherente historial inline, selector Kanban, calendario y mapa de presupuestos
+  sin requerir recarga completa.
+- Se restaura el boton `Clonar Proyecto Completo` directamente en cada fila del
+  portafolio/listado.
+- Se compacta la cabecera operativa de Proyectos: las cards KPI pasan a chips
+  informativos dentro de la barra de busqueda/filtros/vistas, ganando espacio
+  para la lista sin tocar funcionalidades.
+- Si la revision eliminada era la activa, Proyectos redirige a R000 o cierra la
+  vista si no hay fallback.
+- El clonado completo de proyecto/presupuesto reutiliza el mismo refresco de
+  familia para no dejar caches visuales incoherentes.
+- Se corrige el crash al activar Pareto en Gantt reemplazando la referencia
+  inexistente `AnimatedSelectedIcon` por `CheckCircle2`.
+- Se agregan guardas smoke para el flujo de revisiones y el icono Pareto.
+- Validado con build frontend, smoke Proyectos, smoke Cronogramas, smoke
+  anti-BIM y barridos `axiosConfig`/`console.log`.
+- Sin cambios backend, DB, API, auth/JWT/tenant, BIM ni Docker/Coolify.
+
+### 2026-07-07 - Clonado de dependencias Gantt en revisiones (TASK-2006)
+
+- Se corrige la regresion de revisiones clonadas: `create_revision` ahora copia
+  el `CronogramaTrabajo` del presupuesto origen y remapea IDs de lineas.
+- El clonado preserva claves de linea, predecesoras, dependencias FS/SS/FF/SF y
+  metadata Gantt conocida como `budget_line_id`.
+- Se agrega cobertura backend para que una revision clonada conserve
+  dependencias Gantt con los nuevos IDs de presupuesto.
+- Se repara la revision local `Proyecto Prueba Compartir 1` R001: el
+  `cronograma_trabajo_id=8` queda con 187 lineas operativas y 29 filas con
+  dependencias.
+- Validado con servicio de cronograma sobre el presupuesto reparado, pytest
+  focal/completo de `test_proyecto_service.py`, `py_compile` y smoke anti-BIM.
+- Sin cambios frontend productivos, API, auth/JWT/tenant, BIM ni
+  Docker/Coolify.
+
+### 2026-07-07 - Restauracion de clonado completo de Proyecto (TASK-2005)
+
+- Se restaura la accion visible `Clonar Proyecto Completo` en el header de
+  proyecto clasico.
+- Se corrige la regresion de creacion de revision: el frontend usaba `res.data`
+  aunque `proyectosApi.createRevision` ya devuelve directamente el objeto.
+- Tras crear la revision, Proyectos refresca portafolio/familia de revisiones y
+  activa la nueva revision sin requerir recarga manual.
+- Se agrega guarda smoke para conservar el copy y la activacion inmediata.
+- Validado con build frontend, smoke Proyectos, smoke anti-BIM, guardas
+  `axiosConfig`/`console.log` y pytest focal backend de revision completa.
+- Sin cambios DB, API, auth/JWT/tenant, BIM ni Docker/Coolify.
+
+### 2026-07-07 - Restauracion de empresas asociadas en Transferencias (TASK-2004)
+
+- Se corrige una regresion de datos locales en `Envios y Transferencias`: el
+  historico de TASK-1955 mostraba asociaciones de empresa que ya no estaban en
+  `transfer_allowed_company_recipients`.
+- Se restaura la relacion saliente `Santiago Bermeo -> Jesus Benito Segura
+  Gonzalez`, visible al operar con Santiago como empresa activa.
+- Se restaura tambien `Administradores Generales -> Santiago Bermeo`, presente
+  en el backup historico de limpiezas.
+- Se valida por endpoint que las empresas activas 1, 2 y 3 recuperan sus
+  destinatarios esperados.
+- Sin cambios de codigo, API, auth/JWT/tenant, Marketplace, BIM ni
+  Docker/Coolify.
+
+### 2026-07-07 - Endurecimiento del editor light APU en Gantt clasico (TASK-2003)
+
+- Se corrige el precio del editor light de APUs anidados en modo `Fijo`: al
+  modificar cantidad se recalcula rendimiento y el footer economico usa los
+  subtotales activos de recursos, sin variar el precio por preview temporal.
+- Se compacta de nuevo el editor light: header y metricas superiores quedan en
+  una sola fila, y la banda operativa reduce altura para ganar espacio de
+  trabajo.
+- Se prioriza Mano de Obra sobre Equipos y Herramientas cuando hay empate de
+  recurso gobernante.
+- Se elimina la tarjeta redundante `Cantidad`, el contador de recursos visibles
+  y la edicion manual de `Cuadrilla`.
+- El selector se compacta y queda etiquetado como `Modo Trabajo`.
+- El selector manual de gobernante ya no muestra la opcion de categoria
+  `Mano de Obra`; solo quedan automatico y recursos candidatos reales.
+- El modal de cantidades queda por encima de la banda operativa y ordena siempre
+  el APU padre antes de los hijos.
+- Se corrige la regresion del boton de recarga/restauracion del editor light:
+  ahora limpia tambien cantidad, lineas fuente y politica de trabajo del draft.
+- Se corrige la regresion del menu `Herramientas` del Gantt: las acciones ya no
+  se desmontan por blur del trigger antes de ejecutar su `onClick`.
+- Validado con build frontend, smoke anti-BIM, smoke focal de Cronogramas y
+  guardas rapidas de `axiosConfig`/`console.log`.
+- Sin cambios backend, DB, API, auth/JWT/tenant, BIM ni Docker/Coolify.
+
+### 2026-07-07 - Compactacion del editor light APU en Gantt clasico (TASK-2002)
+
+- Se eleva la capa del modal del editor light de APUs en Gantt mediante una
+  constante semantica de z-index para quedar por encima del header/layout.
+- Se compactan header, acciones, subheader de resumen superior y footer/totales
+  para recuperar altura operativa en resoluciones/DPI ajustados.
+- El modal interno de ajuste trazable conserva jerarquia local dentro del editor.
+- Validado con build frontend, smoke anti-BIM y smoke focal de Cronogramas.
+- Sin cambios backend, DB, API, auth/JWT/tenant, BIM ni Docker/Coolify.
+
+### 2026-07-03 - Docker beta automatizable para servidor clasico (TASK-2001)
+
+- Se estudia el servidor beta `192.168.18.106`: Ubuntu 24.04, Docker/Compose
+  activos, Traefik/Cloudflared existentes y redes `proxy`/`backend`.
+- Se crea paquete Docker aislado para GiProy Clasico beta con backend,
+  frontend, PostgreSQL dedicado, migracion Alembic controlada y volumenes de
+  uploads/reportes/logs.
+- Se agrega `.dockerignore` conservador para excluir secretos, dumps, backups,
+  uploads, logs, venvs, node_modules y artefactos pesados del build context.
+- Se crean scripts repetibles de preflight, backup y deploy bajo `deploy/`.
+- Se corrige `@react-leaflet/core` a `2.1.0` para que `npm ci` sea reproducible
+  en Docker; `2.1.1` no existe en npm.
+- El servicio de migracion Docker usa `alembic upgrade heads` porque el repo
+  mantiene multiples heads Alembic.
+- El deploy beta detecta DB vacia y ejecuta bootstrap controlado de esquema con
+  `Base.metadata.create_all` seguido de `alembic stamp heads`; despliegues
+  posteriores usan migraciones normales.
+- Se alinea PostgreSQL beta a `postgres:18` y se prepara importacion de la base
+  local actual como semilla inicial del servidor.
+- El volumen de PostgreSQL 18 se monta en `/var/lib/postgresql`, no en
+  `/var/lib/postgresql/data`, para evitar reinicios por layout incompatible.
+- Se importa la base local actual como semilla inicial del servidor beta.
+- Quedan healthy `giproy-beta-postgres`, `giproy-beta-backend` y
+  `giproy-beta-frontend`; `https://giproy.excomconsultores.com` responde 200.
+- Validado: OpenAPI responde, datos iniciales presentes (`usuarios=6`,
+  `empresas=3`, `proyectos=5`, `presupuestos=5`) y flags Docker mantienen
+  `BIM_ENABLED=false` / `CREATE_TABLES_ON_STARTUP=false`.
+- Se agrega `deploy/scripts/giproy-beta-import-seed.sh` para repetir la carga de
+  semilla local de forma automatizada en futuros despliegues beta.
+- Se descarta el `setup_server.sh` legacy para este frente por contener pasos
+  destructivos de DB.
+- Sin cambios funcionales en API, auth/JWT/tenant, presupuestos, cronogramas,
+  frontend clasico ni BIM.
+
+### 2026-07-03 - Regla unica de explosion APU en Gantt clasico (TASK-2000)
+
+- Se agrega `backend/app/services/apu_explosion.py` como rutina unica clasica
+  para explotar APUs anidados.
+- Gantt, Cronograma Recursos y Reportes de Uso de Recursos reutilizan esa
+  rutina para evitar formulas divergentes.
+- En APUs anidados, `Equipos y Herramientas` y `Mano de Obra` conservan la
+  cantidad nativa del recurso y aplican el factor heredado al
+  trabajo/rendimiento relativo; `Materiales` y `Transporte` mantienen cantidad
+  equivalente multiplicada por el factor.
+- La aplicacion global de Gantt respeta el contrato nuevo y mantiene soporte de
+  snapshots legados equivalentes.
+- Los snapshots historicos de `row.metadata` se regeneran desde APU/base oficial
+  cuando la fuente esta disponible, evitando que el editor light siga mostrando
+  cantidades decimales obsoletas para mano de obra/equipos anidados.
+- Validacion focal: `py_compile` OK y pytest clasico Gantt/recursos/reporting
+  OK (`60 passed`, warnings Pydantic conocidos).
+- Sin tocar BIM, Docker/Coolify, auth/JWT/tenant ni contratos API clasicos.
+
+### 2026-07-03 - Bloqueo de etiquetas JSON BIM duplicadas (BIM-TASK-0034)
+
+- `backend/app/services/bim/import_service.py` rechaza importaciones JSON con
+  `version_label` ya existente para el mismo modelo BIM.
+- `backend/app/api/endpoints/bim_models.py` traduce el duplicado JSON a HTTP 400
+  sin exponer errores internos.
+- `backend/app/tests/test_bim_foundation.py` agrega prueba HTTP focal de doble
+  import JSON y prueba batch todo-o-nada con labels duplicados.
+- Validacion focal: `py_compile` OK, suite BIM backend combinada OK con 36 tests
+  y smoke anti-BIM clasico OK.
+- Sin cambios frontend productivos, sin tocar GiProy Clasico, DB real,
+  auth/JWT/tenant compartido, EDT/APUs/Presupuesto, Docker/Coolify, staging ni
+  produccion.
+
+### 2026-07-03 - Bloqueo de etiquetas IFC duplicadas (BIM-TASK-0033)
+
+- `backend/app/services/bim/import_service.py` rechaza manifiestos IFC con
+  `version_label` ya existente para el mismo modelo BIM.
+- La validacion se ejecuta antes de mutar estado, evitando rollbacks
+  innecesarios en errores de contrato.
+- `backend/app/tests/test_bim_foundation.py` agrega prueba HTTP focal de doble
+  registro del mismo manifiesto y confirma que queda una sola version.
+- Validacion focal: `py_compile` OK, suite BIM backend combinada OK con 34 tests
+  y smoke anti-BIM clasico OK.
+- Sin cambios frontend productivos, sin tocar GiProy Clasico, DB real,
+  auth/JWT/tenant compartido, EDT/APUs/Presupuesto, Docker/Coolify, staging ni
+  produccion.
+
+### 2026-07-03 - Cliente frontend BIM para manifiesto IFC (BIM-TASK-0032)
+
+- `frontend/src/api/bimModels.js` agrega
+  `bimModelsApi.registerIfcManifest(projectId, payload, empresaId)`.
+- El cliente apunta a `/bim/projects/{projectId}/imports/ifc-manifest` usando
+  `withTenantConfig`, manteniendo transporte BIM dentro de `frontend/src/api`.
+- `frontend/scripts/smoke-bim-workspace-positive.mjs` cubre el contrato del
+  cliente BIM.
+- Validacion focal: smoke BIM positivo OK via `cmd /c`, smoke anti-BIM clasico
+  OK y `npm run build` OK con warning conocido de chunks grandes Vite.
+- Sin UI visible nueva, sin tocar `Proyectos.jsx`, GiProy Clasico, backend
+  productivo, DB real, auth/JWT/tenant compartido, EDT/APUs/Presupuesto,
+  Docker/Coolify, staging ni produccion.
+
+### 2026-07-03 - Registro de manifiesto IFC BIM versionado (BIM-TASK-0031)
+
+- Se agregan schemas `BimIfcManifestRequest` y `BimIfcManifestResponse`.
+- `backend/app/services/bim/import_service.py` registra manifiestos IFC como
+  versiones BIM con `status="ifc_manifest_registered"`, checksum/tamano opcional
+  en notas y activacion controlada.
+- `backend/app/api/endpoints/bim_models.py` expone
+  `POST /bim/projects/{project_id}/imports/ifc-manifest` bajo feature flag y rol
+  `superadministrador`.
+- `backend/app/tests/test_bim_foundation.py` cubre registro positivo y rechazo
+  de artefactos no `.ifc`; la suite BIM backend combinada sube a 33 tests.
+- Sin parsing IFC, sin dependencias 3D nuevas, sin cambios frontend productivos,
+  sin tocar GiProy Clasico, DB real, auth/JWT/tenant compartido,
+  EDT/APUs/Presupuesto, Docker/Coolify, staging ni produccion.
+
+### 2026-07-03 - Restriccion de scopes publicos en vistas BIM (BIM-TASK-0030)
+
+- Se endurece `backend/app/api/endpoints/bim_view_states.py` para aceptar solo
+  scopes publicos `personal` y `company` en creacion/duplicacion de view states.
+- El scope interno `workspace_context` queda reservado al servicio de contexto y
+  no puede inyectarse por API publica.
+- `backend/app/tests/test_bim_foundation.py` agrega prueba HTTP focal para scope
+  invalido en creacion y duplicacion.
+- Validacion focal: `py_compile` OK, suite BIM backend combinada OK con 31 tests
+  y smoke anti-BIM clasico OK.
+- Sin cambios frontend productivos, sin tocar GiProy Clasico, DB real,
+  auth/JWT/tenant compartido, EDT/APUs/Presupuesto, Docker/Coolify, staging ni
+  produccion.
+
+### 2026-07-01 - Cobertura de workspace context BIM por usuario (BIM-TASK-0029)
+
+- Se agregan pruebas HTTP focales para `GET/PUT /bim/projects/{project_id}/workspace-context`.
+- La cobertura valida que dos usuarios del mismo proyecto conservan contexto BIM
+  independiente y que el endpoint no persiste nada con BIM apagado.
+- `backend/app/tests/test_bim_foundation.py` sube la suite BIM backend combinada
+  a 30 tests.
+- Validacion focal: `py_compile` OK, suite BIM backend combinada OK con 30 tests
+  y smoke anti-BIM clasico OK.
+- Sin cambios productivos backend/frontend, sin tocar GiProy Clasico, DB real,
+  auth/JWT/tenant compartido, EDT/APUs/Presupuesto, Docker/Coolify, staging ni
+  produccion.
+
+### 2026-07-01 - Guarda backend de validacion previa a importacion BIM (BIM-TASK-0028)
+
+- Se endurece `backend/app/api/endpoints/bim_models.py` para validar antes de
+  importar en `json-package` y `json-batch`.
+- Los imports BIM con errores de validacion responden 400 y no crean modelos,
+  versiones, storeys ni elementos parciales; las advertencias no bloquean.
+- `backend/app/tests/test_bim_foundation.py` agrega pruebas HTTP focales para
+  paquete unico y batch invalido.
+- Validacion focal: `py_compile` OK, suite BIM backend combinada OK con 28 tests
+  y smoke anti-BIM clasico OK.
+- Sin cambios frontend productivos, sin tocar GiProy Clasico, DB real,
+  auth/JWT/tenant compartido, EDT/APUs/Presupuesto, Docker/Coolify, staging ni
+  produccion.
+
+### 2026-07-01 - Permisos de duplicacion de vistas BIM compartidas (BIM-TASK-0027)
+
+- Se endurece `backend/app/api/endpoints/bim_view_states.py` para impedir que
+  usuarios regulares dupliquen vistas BIM hacia scope `company`.
+- `backend/app/tests/test_bim_foundation.py` incluye el router BIM de view states
+  en el cliente focal y agrega prueba HTTP de bloqueo 403.
+- Validacion focal: `py_compile` OK, suite BIM backend combinada OK con 26 tests
+  y smoke anti-BIM clasico OK.
+- Sin cambios frontend productivos, sin tocar GiProy Clasico, DB real,
+  auth/JWT/tenant compartido, EDT/APUs/Presupuesto, Docker/Coolify, staging ni
+  produccion.
+
+### 2026-07-01 - Guarda UX de validacion previa a importacion BIM (BIM-TASK-0026)
+
+- Se agrega `validatePayloadsBeforeImport(...)` en
+  `frontend/src/components/bim/BimWorkspace.jsx`.
+- La importacion de paquete unico y batch valida primero con
+  `bimModelsApi.validateJsonBatch(...)` y bloquea la importacion si existen
+  errores BIM; las advertencias no bloquean.
+- `frontend/scripts/smoke-bim-workspace-positive.mjs` cubre la presencia de la
+  guarda para paquete unico y batch.
+- Validacion focal: smoke BIM positivo OK, smoke visual DOM OK, smoke anti-BIM
+  clasico OK y `npm run build` OK con warning conocido de chunks grandes Vite.
+- Sin cambios en `Proyectos.jsx`, sin activar `BimTab`, sin tocar backend, DB,
+  auth/JWT/tenant, EDT/APUs/Presupuesto, Docker/Coolify, staging ni produccion.
+
+### 2026-07-01 - Importacion JSON batch transaccional (BIM-TASK-0025)
+
+- Se endurece `backend/app/services/bim/import_service.py` para separar la
+  materializacion interna de paquetes BIM del commit final.
+- `json-package` conserva una transaccion de paquete unico y `json-batch` pasa a
+  ser todo-o-nada: confirma al final o revierte todos los modelos staged si un
+  paquete falla.
+- Se agrega cobertura en `backend/app/tests/test_bim_foundation.py` para rollback
+  de batch BIM tras fallo intermedio.
+- Validacion focal: `py_compile` OK, suite BIM backend combinada OK con 25
+  tests y smoke anti-BIM clasico OK.
+- Sin cambios frontend productivos, sin tocar DB real, Proyectos clasico,
+  EDT/APUs/Presupuesto, auth/JWT/tenant, Docker/Coolify, staging ni produccion.
+
+### 2026-07-01 - Validacion controlada de migracion Alembic BIM (BIM-TASK-0024)
+
+- Se agrega `backend/app/tests/test_bim_alembic_migration.py` para ejecutar la
+  migracion principal BIM `de2001a1b2c3` contra SQLite en memoria.
+- La prueba simula tablas clasicas referenciadas, verifica tablas/columnas e
+  indices BIM principales, valida idempotencia de `upgrade()` y confirma que
+  `downgrade()` remueve solo tablas BIM.
+- Validacion focal: `py_compile` OK, `pytest app\tests\test_bim_alembic_migration.py`
+  OK con 3 tests, suite BIM backend combinada OK con 24 tests y smoke anti-BIM
+  clasico OK.
+- Sin aplicar migraciones sobre DB real, sin cambios frontend productivos, sin
+  tocar auth/JWT/tenant, EDT/APUs/Presupuesto, Proyectos clasico,
+  Docker/Coolify, staging ni produccion.
+
+### 2026-07-01 - Smoke visual DOM del viewer BIM aislado (BIM-TASK-0023)
+
+- Se agrega `frontend/bim-viewer-harness.html` como punto de montaje de prueba
+  fuera del router productivo.
+- Se agrega `frontend/src/features/bim/BimViewerHarness.jsx` para montar
+  `BimCanvasViewer` con elementos BIM sinteticos dentro del perimetro BIM.
+- Se agrega `frontend/scripts/validate-bim-viewer-dom.mjs`, que levanta Vite,
+  abre Playwright en desktop/mobile y verifica canvas visible, pixeles no
+  vacios, geometria/overlays BIM, ausencia de overflow horizontal y sin errores
+  de consola relevantes.
+- Validacion focal: smoke BIM positivo OK, smoke visual DOM OK, smoke anti-BIM
+  clasico OK y `npm run build` OK con warning conocido de chunks grandes Vite.
+- Sin cambios en `Proyectos.jsx`, sin activar `BimTab`, sin tocar backend, DB,
+  auth/JWT/tenant, EDT/APUs/Presupuesto, Cronogramas, Docker/Coolify, staging ni
+  produccion.
+
+### 2026-07-01 - Smoke frontend BIM positivo aislado (BIM-TASK-0022)
+
+- Se agrega `frontend/scripts/smoke-bim-workspace-positive.mjs` para validar la
+  shell frontend BIM incubada sin activar BIM visible en GiProy Clasico.
+- El smoke comprueba artefactos BIM dedicados, clientes API de dominio,
+  `BimWorkspace`, `BimCanvasViewer`, canvas 2D, interaccion basica y ausencia de
+  imports clasicos o `axiosConfig` directo desde el workspace BIM.
+- Validacion focal: `cmd /c node frontend\scripts\smoke-bim-workspace-positive.mjs`
+  OK y `node frontend/scripts/smoke-classic-no-bim-contamination.mjs` OK.
+- Sin cambios en `Proyectos.jsx`, sin activar `BimTab`, sin tocar backend, DB,
+  auth/JWT/tenant, EDT/APUs/Presupuesto, Cronogramas, Docker/Coolify, staging ni
+  produccion.
+
+### 2026-07-01 - Links BIM latentes con APUs y Presupuesto (BIM-TASK-0021)
+
+- Se agregan pruebas focales backend para links BIM -> APUs y BIM ->
+  Presupuesto sin activar navegacion visible clasica.
+- `backend/app/tests/test_bim_foundation.py` pasa a 21 pruebas: links EDT, APUs
+  y Presupuesto quedan cubiertos con idempotencia/listado y bloqueo cross-company
+  o cross-project.
+- Validacion focal: `py_compile` OK y `pytest app/tests/test_bim_foundation.py`
+  OK con 21 tests.
+- Sin cambios frontend, sin activar `BimTab`, sin modificar pantallas, servicios
+  ni flujos clasicos de APUs/Presupuesto, sin tocar DB real, auth/JWT/tenant
+  compartido, Cronogramas, Docker/Coolify, staging ni produccion.
+
+### 2026-07-01 - Links BIM latentes con EDT (BIM-TASK-0020)
+
+- Se agregan pruebas focales backend para links BIM -> EDT sin activar
+  navegacion visible clasica.
+- `backend/app/tests/test_bim_foundation.py` pasa a 17 pruebas: crea modelo BIM
+  por JSON, crea nodo EDT minimo, vincula elemento BIM al EDT, valida
+  idempotencia/listado y bloquea links hacia EDT de otro proyecto/empresa.
+- Validacion focal: `py_compile` OK y `pytest app/tests/test_bim_foundation.py`
+  OK con 17 tests.
+- Sin cambios frontend, sin activar `BimTab`, sin modificar componentes EDT
+  clasicos, sin tocar DB real, auth/JWT/tenant compartido, APUs, Presupuesto,
+  Cronogramas, Docker/Coolify, staging ni produccion.
+
+### 2026-07-01 - Importacion JSON BIM y workspace activo (BIM-TASK-0019)
+
+- Se agregan pruebas focales positivas de importacion JSON BIM incubada.
+- `backend/app/tests/test_bim_foundation.py` pasa a 15 pruebas: importacion de
+  modelo/version/storey/elemento, workspace activo y validacion de duplicados
+  con resumen de geometria 2D.
+- Validacion focal: `py_compile` OK y `pytest app/tests/test_bim_foundation.py`
+  OK con 15 tests.
+- Sin cambios frontend, sin activar `BimTab`, sin tocar DB real, rutas clasicas,
+  auth/JWT/tenant compartido, EDT/APUs/Presupuesto, Cronogramas,
+  Docker/Coolify, staging ni produccion.
+
+### 2026-07-01 - Contratos API BIM bajo flags y tenant (BIM-TASK-0018)
+
+- Se amplian pruebas focales BIM para cubrir endpoints HTTP en una app FastAPI
+  minima con routers BIM.
+- `backend/app/tests/test_bim_foundation.py` pasa a 13 pruebas: flags,
+  configuracion DB, readiness sin creacion runtime, tenant helper y endpoints
+  `/bim/feature-flags/me` y `/bim/projects/{project_id}/workspace`.
+- Se valida que workspace BIM retorna 403 con BIM apagado, responde workspace
+  vacio cuando esta habilitado para la empresa y conserva frontera tenant para
+  usuarios normales.
+- Validacion focal: `py_compile` OK y `pytest app/tests/test_bim_foundation.py`
+  OK con 13 tests.
+- Sin cambios frontend, sin activar `BimTab`, sin tocar DB real, rutas clasicas,
+  auth/JWT/tenant compartido, EDT/APUs/Presupuesto, Cronogramas,
+  Docker/Coolify, staging ni produccion.
+
+### 2026-07-01 - Gobierno runtime de esquema BIM y tests focales (BIM-TASK-0017)
+
+- Se endurecen servicios BIM para que no creen tablas en runtime despues de la
+  migracion Alembic principal.
+- `model_registry`, `view_state_service` y `system_bim_setting` verifican
+  readiness; las escrituras fallan explicitamente si falta aplicar Alembic.
+- Se agrega `backend/app/tests/test_bim_foundation.py` con cobertura de flags
+  BIM por entorno/allowlist, configuracion DB `admin-bim`, `superadmin_only` y
+  no creacion runtime de tablas BIM.
+- La misma suite cubre la frontera tenant de resolucion de proyecto BIM:
+  usuarios normales no cruzan empresa y superadmin solo cruza al declarar
+  `empresa_id`.
+- Validacion focal: `py_compile` OK, `pytest app/tests/test_bim_foundation.py`
+  OK con 9 tests, y smoke anti-BIM clasico OK.
+- Sin cambios frontend, sin activar `BimTab`, sin tocar DB real, rutas clasicas,
+  auth/JWT/tenant, EDT/APUs/Presupuesto, Cronogramas, Docker/Coolify, staging
+  ni produccion.
+
+### 2026-07-01 - Migracion Alembic del dominio BIM principal (BIM-TASK-0016)
+
+- Se crea `backend/alembic/versions/de2001a1b2c3_bim_domain_tables.py` para
+  regularizar tablas principales BIM mediante Alembic.
+- La migracion cubre `bim_models`, `bim_model_versions`, `bim_elements`,
+  `bim_storeys`, `bim_view_states`, `bim_link_edt`, `bim_link_apu` y
+  `bim_link_presupuesto`.
+- El upgrade es aditivo e idempotente: no recrea tablas ya existentes por la
+  incubacion runtime previa y completa indices faltantes si aplica.
+- Se actualiza la documentacion BIM para marcar `BIM-TASK-0002` como
+  parcialmente regularizada: Alembic principal creado, pendiente validar en DB
+  local y reducir fallbacks runtime `checkfirst`.
+- Sin activar UX BIM en Proyectos, sin cambios frontend, auth/JWT/tenant,
+  EDT/APUs/Presupuesto, Docker/Coolify, staging ni produccion.
+
+### 2026-07-01 - Alineacion documental del estado real BIM (BIM-TASK-0015)
+
+- Se crea `docs/architecture/BIM_CODE_STATE.md` como fotografia oficial del
+  estado real del codigo BIM.
+- Se actualiza el indice BIM para dejar de declarar la ejecucion como no
+  iniciada y reflejar incubacion funcional parcial.
+- Se actualiza el plan maestro BIM para separar vision madura, estado real y
+  brechas pendientes.
+- Se actualiza el indice de TASKs BIM con `BIM-TASK-0015` y estado real por
+  slice estructural.
+- Se documenta deuda critica: las tablas principales BIM requieren migracion
+  Alembic no destructiva; el codigo actual aun usa creacion runtime `checkfirst`
+  en servicios BIM.
+- Sin cambios backend, frontend, DB, rutas, auth, tenant, Docker/Coolify ni UX
+  clasica. BIM sigue apagado en `Proyectos` clasico.
+
+### 2026-06-30 - Editor light Gantt trazable para recursos explotados (TASK-2000)
+
+- Se retira el selector no solicitado `APU / Presupuesto` del editor light de
+  APU en Gantt.
+- Se reconstruye y endurece el slice del editor light tras recuperacion del
+  archivo Gantt: modal trazable, selector de trabajo del APU, guardas de
+  cancelacion, foco y persistencia diferida quedan nuevamente activos.
+- El total del modal trazable muestra cantidad, rendimiento y trabajo alineados
+  bajo sus columnas; el rendimiento total sale de `trabajo_total / cantidad`.
+- La tarjeta `Precio en presupuesto` lee el total oficial de la linea de
+  presupuesto y los totales derivados por Gantt quedan marcados como preview
+  operativo.
+- Se restauran guardas de calendario oficial fusionado, APUs anidados agrupados
+  como Materiales, color sobrio para anidados, preflight de aplicacion global y
+  lock de edicion Gantt.
+- La tabla de recursos conserva una sola lectura operativa del APU; la cantidad
+  de presupuesto queda solo como referencia informativa.
+- Los recursos procedentes de APUs anidados explotados dejan de editar cantidad
+  inline y abren un modal de ajuste trazable por origen APU padre/hijo.
+- Se incorpora politica unica del APU abierto: `Trabajo fijo` conserva trabajo
+  relativo y recalcula rendimiento; `Trabajo variable` permite ajustar
+  rendimiento y variar trabajo/costo preview.
+- Las lineas fuente ajustadas y la politica elegida se conservan en metadatos
+  del borrador Gantt del editor light.
+- La intencion de borrador y el resumen de modificacion funcional conservan la
+  politica de trabajo y las lineas fuente para auditoria.
+- Al aplicar globalmente Gantt, los aportes trazables aceptados actualizan las
+  `apu_lineas` reales por `linea_id`; en hijos anidados se usa
+  `inherited_factor` para volver de cantidad equivalente a cantidad nativa.
+- Los APUs afectados y sus padres se recalculan antes de crear la modificacion
+  funcional activa, y el resumen oficial expone
+  `operational_apu_application`.
+- La auditoria oficial separa lineas de presupuesto y `apu_lineas`, e incorpora
+  APUs hijos/padres recalculados en `affected_apu_ids`.
+- Recursos de cronograma y reportes de uso de recursos quedan cubiertos con
+  pruebas focales que leen las `apu_lineas` materializadas tras aplicar Gantt.
+- Gantt, Cronograma Recursos y Reportes de Uso de Recursos bloquean APUs sin
+  recursos hoja alcanzables con `apu_resources_incomplete`, evitando calculos
+  oficiales sobre APUs incompletos.
+- Cronogramas muestra ese bloqueo con mensaje conciso y primeras lineas/APUs
+  afectados, sin exponer el objeto tecnico ni romper la vista.
+- El editor light de APU mueve `Trabajo fijo` / `Trabajo variable` a politica
+  unica del APU con el selector visual de Proyectos, y deja el modal trazable
+  solo para ajustar aportes padre/hijo.
+- El modal trazable queda compacto, sin selector interno ni texto auxiliar largo,
+  y sus acciones siguen la politica visual de modales de Proyectos.
+- El pie del modal trazable alinea los totales bajo `Cantidad` y `Trabajo` para
+  mejorar la lectura inmediata del ajuste.
+- El editor light usa `apu_operational_resources_v1.resources` cuando existe
+  snapshot con anidados, de forma que el modal trazable muestra aportes de APU
+  padre e hijos y no solo recursos directos del padre.
+- Las lineas fuente del modal trazable incorporan descripcion, codigo y unidad
+  del APU origen; la UI deja de mostrar IDs tecnicos como lectura principal para
+  APUs padre/hijo.
+- Se deja documentado que la certificacion transversal completa del goal sigue
+  pendiente en datos reales tras reinicio administrativo del runtime y en
+  invalidaciones por ultimo cambio.
+- Sin cambios BIM, DB, auth, tenant ni explosion base de materiales.
+
+### 2026-06-30 - Incidencia presupuesto operativo y Gantt bloqueado (TASK-1999)
+
+- Se corrige la incidencia que impedia abrir Presupuesto y Gantt en `Santiago
+  Bermeo`, proyecto `Proyecto Prueba Compartir 1`, revision `0`.
+- Causa raiz: la base real no tenia aplicada la rama Alembic no destructiva
+  `ab1984c0d1e2 -> de1991a1b2c3`, por lo que faltaba
+  `project_functional_modifications`.
+- Se aplica `alembic upgrade de1991a1b2c3`; quedan disponibles
+  `cronogramas_gantt_drafts`, `cronogramas_gantt_edit_locks` y
+  `project_functional_modifications`.
+- Verificado: presupuesto operativo `13` serializa `201` lineas y Gantt
+  serializa `187` filas.
+- Sin cambios BIM, Docker/Coolify, auth, tenant ni datos destructivos.
+
+### 2026-06-29 - Endurecimiento transversal de fuente oficial APU/reportes (TASK-1998)
+
+- Se centraliza la resolucion de precios APU oficiales por proyecto/revision/base
+  en `project_functional_modification_service`.
+- Reportes APU y `Presupuesto + APUs` aplican la fuente oficial activa y separan
+  cache por firma de modificacion activa.
+- Ediciones directas de APU y movimientos de lineas registran modificacion
+  funcional oficial de origen `apu`.
+- Tanteos de presupuesto aplicados/revertidos desplazan fuentes anteriores,
+  recalculan sin reaplicar overlays obsoletos e invalidan solo borradores Gantt
+  relacionados.
+- `APUs.jsx` envia contexto de proyecto/revision en preview/export de reportes
+  APU.
+
+### 2026-06-29 - Overlay oficial contextual en APUs de proyecto (TASK-1997)
+
+- `GET /apus/` y `GET /apus/{id}` pueden recibir contexto de proyecto/revision
+  para resolver modificacion oficial activa.
+- APUs de proyecto superpone `precio_unitario_total` desde `price_preview` si
+  existe una modificacion determinada para proyecto/revision/base.
+- `APUResponse` expone `official_source` y `official_price_overridden` como
+  metadatos aditivos.
+- `APUs.jsx` y `ApuBudgetEditor.jsx` envian `proyecto_id` cuando trabajan desde
+  proyecto/presupuesto activo.
+- Se actualiza el smoke de presupuesto para conservar el fallback APU con
+  contexto de proyecto sin romper el flujo legacy.
+
+### 2026-06-29 - Endurecimiento inicial de precio oficial Gantt-Presupuesto (TASK-1996)
+
+- Al aplicar globalmente Gantt, el backend aplica los `price_preview` de las
+  intenciones del editor light a las lineas de presupuesto afectadas.
+- `refresh_presupuesto_prices(...)` reaplica la modificacion oficial activa tras
+  recalcular desde APUs base, evitando que una lectura de presupuesto borre una
+  determinacion previa de Gantt.
+- Presupuesto registra una `ProjectFunctionalModification` de origen
+  `presupuesto` al crear, fusionar, actualizar o actualizar masivamente
+  cantidades de lineas.
+- Se valida la ley de ultima modificacion para que presupuesto reemplace una
+  modificacion activa previa de Gantt en el mismo proyecto/revision/base.
+
+### 2026-06-29 - Contrato normalizado de modificacion oficial activa (TASK-1995)
+
+- `resolve_official_source(...)` devuelve una `summary` funcional estable para
+  la modificacion activa.
+- La `summary` expone lineas, APUs, recursos, payloads aplicados y snapshots
+  operativos del editor light, incluyendo cantidades, rendimientos y precios.
+- El editor light de Gantt adjunta `price_preview` a la intencion aplicada para
+  conservar la firma economica calculada en el modal.
+- El fallback `base_proyecto` conserva una `summary` vacia y estable.
+- No se recalculan todavia precios ni se migran consumidores visuales.
+
+### 2026-06-29 - Firma de origen para trabajo no aprobado de cronogramas (TASK-1989)
+
+- El borrador Gantt persistente conserva `work_origin` en su snapshot base.
+- El backend rechaza mezclar intenciones, reaperturas o aplicaciones globales
+  con origen distinto al del trabajo no aprobado activo.
+- La aplicacion global con intenciones pendientes debe firmar tambien
+  `application_result.work_origin`; Gantt ya lo envia desde el borrador activo.
+- El preflight y la respuesta de borrador exponen el origen operativo sin
+  cambiar rutas ni recalcular precios.
+- Alcance clasico: sin BIM, sin Docker/Coolify, sin cambios destructivos DB y
+  sin tocar la explosion de APUs anidados.
+
+### 2026-06-29 - Control de estado real de politica transversal (TASK-1990)
+
+- Se documenta el estado real actual: borradores Gantt, lock, preflight,
+  invalidaciones, firma de persistencia y firma de origen quedan implementados.
+- Se separan brechas pendientes: resolvedor de fuente oficial, modificacion
+  activa, pipeline todo-o-nada, origen `valorados`, panel comun y grid trazable
+  de APUs anidados.
+- No se cambia comportamiento funcional adicional; queda como control de
+  implementacion para evitar ambiguedad en siguientes slices.
+
+### 2026-06-29 - Resolvedor comun inicial de fuente funcional APU (TASK-1991)
+
+- Se extrae la resolucion de `apu_resource_modifications_v1` a
+  `functional_source.resolve_active_apu_resource_modification(...)`.
+- `cronograma_trabajo_service` consume el resolvedor comun sin cambiar la
+  salida operacional de Gantt.
+- Se añade cobertura focal del resolvedor y se mantiene la paridad del modelo
+  de duracion/coste de cronogramas.
+
+### 2026-06-29 - Contrato persistente de modificacion activa (TASK-1992)
+
+- Se crea `ProjectFunctionalModification` como entidad persistente para la
+  futura fuente oficial unica por proyecto/revision/base.
+- Se añade migracion no destructiva y servicio de consulta/creacion activa con
+  supersesion auditada de la modificacion previa del mismo alcance.
+- No se recalculan precios ni se conecta aun a Gantt global o Presupuesto.
+
+### 2026-06-29 - Resolvedor de fuente oficial determinada (TASK-1993)
+
+- `project_functional_modification_service.resolve_official_source(...)` ya
+  devuelve `modificacion_activa` si existe y `base_proyecto` como fallback.
+- El contrato entrega snapshot, patch, origen y alcance normalizado para que los
+  consumidores migren sin calcular fuentes paralelas.
+
+### 2026-06-29 - Registro de modificacion activa al aplicar Gantt global (TASK-1994)
+
+- Al cerrar un borrador Gantt aplicado, el endpoint registra una
+  `ProjectFunctionalModification` con fuente `gantt`.
+- La modificacion activa guarda intenciones, lineas persistidas, snapshot de
+  preview, firma de aplicacion y referencia al borrador/cronograma.
+- No se recalculan todavia APUs ni Presupuesto desde esta nueva fuente.
+
+### 2026-06-27 - Firma backend de aplicacion global Gantt (TASK-1988)
+
+- `gantt_workflow_service.mark_draft_applied(...)` ya no permite cerrar un
+  borrador Gantt pendiente como `applied` sin firma de persistencia global.
+- `CronogramaGantt` envia `application_result.persisted_line_ids` despues de
+  persistir filas y sincronizar el Valorado, cerrando la puerta a aplicaciones
+  simbolicas sin trazabilidad.
+- Se actualiza el smoke de Cronogramas para exigir esa firma de cierre.
+- Alcance clasico: sin BIM, sin Docker/Coolify, sin cambios destructivos DB y
+  sin tocar la regla de explosion de materiales/APUs anidados.
+
+### 2026-06-27 - Cancelacion de borradores Gantt por cambio de estado de proyecto (TASK-1987)
+
+- `gantt_workflow_service` puede cancelar borradores Gantt activos de un proyecto con auditoria.
+- `proyecto_service.update_proyecto(...)` cancela borradores Gantt no propagados cuando cambia realmente `Proyecto.estado`.
+- La cancelacion no recalcula precios, no aplica Gantt y no borra trazabilidad: solo retira del flujo activo el trabajo pendiente incompatible con el nuevo estado general.
+- Alcance clasico: sin BIM, sin Docker/Coolify, sin cambios destructivos DB y sin propagacion global de borradores Gantt.
+
+### 2026-06-27 - Advertencias de borrador Gantt en reportes oficiales (TASK-1986)
+
+- `ReportingService` advierte en reportes de Cronogramas cuando existe un borrador Gantt activo con intenciones pendientes, invalidadas o pendientes de reajuste.
+- Los borradores Gantt siguen excluidos de los calculos oficiales: la advertencia no modifica precios, recursos, periodos ni totales.
+- La clave de cache de export de `cronograma_valorado` incorpora la firma del borrador Gantt activo para no servir reportes desfasados.
+- `CommonReportPreviewModal` muestra una banda informativa sobria y el reporte de Uso de Recursos conserva columnas estables en XLSX/PDF.
+- Alcance clasico: sin BIM, sin Docker/Coolify, sin cambios destructivos DB y sin propagacion global de borradores Gantt.
+
+### 2026-06-26 - Borradores Gantt backend y lock exclusivo de edicion (TASK-1985)
+
+- Se implementa el primer slice tecnico de la politica `TASK-1984`: borrador
+  Gantt persistente y lock exclusivo de edicion por cronograma.
+- Se agregan modelos, migracion no destructiva, servicio `gantt_workflow_service`
+  y endpoints en `cronogramas-trabajo` para leer borrador, guardar intenciones y
+  ejecutar preflight de aplicacion, marcar aplicado y adquirir/renovar/liberar
+  lock.
+- `cronogramasApi` expone metodos de dominio para el nuevo contrato sin
+  introducir imports directos de `axiosConfig` fuera de `frontend/src/api`.
+- `Cronogramas` y `CronogramaGantt` quedan cableados al nuevo contrato: el
+  editor light toma lock, guarda intenciones como borrador persistente, rehidrata
+  previews pendientes y no propaga valores oficiales desde el editor light.
+- La confirmacion global de Gantt ejecuta preflight automatico: bloquea
+  borradores con intenciones invalidadas y solo cierra el borrador como
+  `applied` despues de que el flujo clasico persiste y sincroniza.
+- Presupuesto invalida parcialmente los borradores Gantt activos cuando cambia
+  la fuente oficial: lineas editadas, bulk de cantidades, fusiones y tanteos de
+  APU solo marcan como invalidadas las intenciones relacionadas.
+- La vista de Gantt muestra las intenciones invalidadas y permite descartarlas
+  con confirmacion, limpiando sus previews persistentes y conservando las
+  intenciones compatibles.
+- La vista de Gantt permite preparar reajuste de invalidadas sin reutilizar
+  valores derivados antiguos: conserva la intencion operativa compatible, limpia
+  previews/snapshots stale, marca `adjustment_required` y bloquea la aplicacion
+  global hasta reabrir/aceptar el editor light desde la base vigente.
+- `CronogramaGantt` elimina de memoria local previews que backend ya retiro del
+  borrador, cerrando fugas visuales al descartar o preparar reajustes.
+- El lock exclusivo de Gantt ahora permite solicitar liberacion cuando otro
+  usuario esta trabajando: la solicitud queda persistida/auditada, el editor no
+  se abre sin lock y el propietario puede liberar explicitamente desde la UI.
+- Se refuerza el smoke de Cronogramas para cubrir metodos y endpoints del nuevo
+  carril y bloquear que el editor light vuelva a prometer aplicacion global.
+- No duplica el motor de aplicacion global, no recalcula Presupuesto desde el
+  endpoint de borrador, no modifica precios oficiales fuera del flujo clasico y
+  no toca BIM, Docker/Coolify, CI/CD, staging ni produccion.
+- Validacion: `py_compile` focal OK, 33 tests focales OK, smoke Cronogramas OK,
+  smoke anti-BIM OK, build frontend OK y baseline enterprise con frontend OK
+  con warnings conocidos.
+
+### 2026-06-26 - Politica transversal de precios, Gantt y modificaciones activas (TASK-1984)
+
+- Se documenta la politica universal para eliminar ambiguedad entre Base
+  Proyecto, modificacion activa, Presupuesto, Tanteos y borradores Gantt.
+- Se confirma que Gantt trabaja con dos niveles: confirmacion del editor light
+  como borrador backend y confirmacion global para propagar al sistema.
+- Se define invalidacion parcial por dependencia real, locks exclusivos de
+  edicion Gantt, preflight automatico, auditoria por intencion + snapshot y
+  advertencias de pendientes en reportes.
+- Se cierra la matriz funcional de opciones: preview local, borrador Gantt,
+  aplicacion global, edicion desde Presupuesto, tanteos, invalidacion parcial,
+  locks de edicion y reglas de APUs anidados explotados.
+- Se crea `docs/gantt-price-policy-hardening-execplan.md` como plan de
+  implementacion por fases, sin cambios de codigo ni datos.
+
+### 2026-06-25 - Cancelacion transaccional del editor light Gantt (TASK-1983)
+
+- Cerrar el editor light con `X` restaura ahora el borrador exacto existente al
+  abrirlo.
+- La sesion se invalida antes del rollback para impedir que una sincronizacion
+  tardia vuelva a introducir cantidad, rendimiento o snapshot operativo.
+- Aceptar y Cancelar limpian su snapshot temporal y la identidad de sesion.
+- Se refuerza el smoke Cronogramas, sin cambios en explosion, Presupuestos,
+  backend, BIM ni baseline `TASK-1807`.
+- Validacion: smokes Cronogramas/anti-BIM, build frontend y baseline enterprise
+  en verde; solo warnings conocidos.
+
+### 2026-06-25 - Trabajo fijo al editar recursos explotados en Gantt (TASK-1982)
+
+- Se corrige la inversion del editor light: al cambiar la cantidad de un
+  recurso explotado, el trabajo relativo permanece fijo y el rendimiento se
+  deriva automaticamente.
+- La fuente canonica es la suma auditable de
+  `source_lines[].trabajo_relativo`, con fallback al trabajo persistido.
+- Cantidad y rendimiento equivalente se guardan en una sola actualizacion de
+  metadata.
+- El backend normaliza snapshots explotados antes de consumirlos para que la
+  regla sea universal en Gantt y cronogramas derivados.
+- Santiago Bermeo se usa como caso real de auditoria, no como parche por
+  empresa: 18 snapshots anidados y 230 recursos sin corrupcion persistida.
+- Se agregan pruebas y guardas contra la regresion, sin tocar cantidad de
+  presupuesto, explosion base, BIM ni baseline `TASK-1807`.
+- Validacion: `py_compile` OK, 21 tests focales, smokes Cronogramas/anti-BIM,
+  build frontend y baseline enterprise en verde; solo warnings conocidos.
+- El bundle frontend queda generado en `dist`; el reinicio NSSM fue bloqueado
+  por permisos y la defensa backend entrara al reiniciar administrativamente.
+
+### 2026-06-24 - Entrada natural en cantidad y rendimiento del editor light Gantt (TASK-1981)
+
+- `Gantt > editor light de APU` deja de persistir/formatear `Cantidad` y
+  `Rendimiento` en cada tecla.
+- Los calculos visibles siguen reaccionando al valor local mientras se escribe,
+  pero la normalizacion visual y la persistencia de metadata ocurren al salir
+  del campo.
+- Se refuerza `smoke-classic-cronogramas-api-boundary.mjs` para bloquear la
+  regresion.
+- Se blinda la sincronizacion interna del modal para que no sobrescriba con
+  `formatoCantidad` el input que esta enfocado; `Escape` cancela sin persistir.
+- Al recibir foco, los campos `Cantidad` y `Rendimiento` seleccionan todo el
+  valor para reducir errores de tipeado.
+- Se estabiliza `resourceLines` con `useMemo` para evitar re-render loops al
+  entrar o interactuar con Gantt tras la nueva sincronizacion de inputs.
+- Reinicio de servicios Windows intentado y bloqueado por permisos locales
+  (`OpenService ERROR 5: Acceso denegado`); el build queda generado.
+- Validacion frontend: smoke Cronogramas OK, smoke anti-BIM OK, `npm run build`
+  OK con warning conocido de chunks grandes Vite y baseline enterprise con
+  frontend OK con warnings conocidos Pydantic BIM `model_name/model_id`.
+- Sin cambios en explosion de materiales/APUs anidados, snapshots operativos,
+  backend, DB, contratos API, auth/JWT, tenant, EDT, Presupuestos base, BIM,
+  Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-24 - Ajuste color anidado en editor light Gantt (TASK-1980)
+
+- `Gantt > editor ligero de recursos` sustituye el color rojo/naranja del
+  origen operativo `Anidado` por un ocre sobrio, aplicado a descripcion, unidad
+  de medida y etiqueta.
+- El rojo queda reservado para estados con semantica de alerta/conflicto, no
+  para indicar que un recurso proviene de APU anidado.
+- Se refuerza `smoke-classic-cronogramas-api-boundary.mjs` para bloquear la
+  regresion visual.
+- Validacion frontend: smoke Cronogramas OK, smoke anti-BIM OK, `npm run build`
+  OK con warning conocido de chunks grandes Vite y baseline enterprise con
+  frontend OK con warnings conocidos Pydantic BIM `model_name/model_id`.
+- Sin cambios en explosion de materiales/APUs anidados, snapshots operativos,
+  backend, DB, contratos API, auth/JWT, tenant, EDT, Presupuestos base, BIM,
+  Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-24 - Restaurar doble click para editar APU desde lineas de presupuesto (TASK-1979)
+
+- `LineasPresupuestoTab` recupera el doble click sobre lineas con `apu_id` para
+  abrir directamente el editor de APU desde Presupuestos.
+- La restauracion cubre las dos rutas de renderizado de lineas y evita
+  interferir con inputs, botones de accion o arrastre.
+- Se refuerza `smoke-classic-presupuesto-api-boundary.mjs` para bloquear la
+  regresion.
+- Validacion frontend: smoke Presupuestos OK, smoke Cronogramas OK, smoke
+  anti-BIM OK y `npm run build` OK con warning conocido de chunks grandes Vite.
+- Sin backend, DB, contratos API, auth/JWT, tenant, EDT, Presupuestos base, BIM,
+  Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-24 - Correccion categoria APUs hijos en editor APU desde Presupuestos (TASK-1978)
+
+- `ApuBudgetEditor` corrige la clasificacion de APUs hijos cuando el APU se
+  edita desde una linea de Presupuestos: el APU hijo conserva `apu_hijo_id`,
+  pero se muestra como linea de `Materiales` y no como categoria principal
+  separada.
+- Se elimina la cabecera especial `APUs Relacionados (Hijos)` del editor
+  embebido de Presupuestos.
+- El catalogo lateral puede seguir usando la familia APUs para localizar APUs
+  agregables, separando catalogo de clasificacion funcional de linea.
+- Se refuerza `smoke-classic-presupuesto-api-boundary.mjs` para bloquear la
+  regresion.
+- Validacion frontend: smoke Presupuestos OK, smoke Cronogramas OK, smoke
+  anti-BIM OK, baseline enterprise con frontend OK y `npm run build` OK con
+  warning conocido de chunks grandes Vite.
+- La explosion de materiales en Gantt queda fuera del cambio y validada por el
+  smoke de Cronogramas.
+- Sin backend, DB, contratos API, auth/JWT, tenant, EDT, Presupuestos base, BIM,
+  Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-24 - Ajuste visual de metricas y origen de recursos en Gantt (TASK-1977)
+
+- `Gantt > editor ligero de recursos` integra `Precio en presupuesto` en la
+  fila principal junto a `Cantidad`, `Cantidad presupuesto`,
+  `Trabajo gobernante` y `Jornada`, conservando una sola linea en escritorio.
+- Se elimina la tarjeta duplicada inferior de `Precio en presupuesto`.
+- El listado de recursos colorea descripcion, unidad y etiqueta segun origen
+  operativo: directo, anidado, consolidado, no fusionado o modificacion activa.
+- Validacion frontend: `npm run build` OK con warning conocido de chunks grandes
+  Vite; smokes Cronogramas y anti-BIM OK.
+- Sin backend, DB, contratos API, auth/JWT, tenant, EDT, Presupuestos base, BIM,
+  Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-24 - Saneamiento global Gantt por snapshots operativos de APUs anidados (TASK-1976)
+
+- `Cronograma Trabajo` conserva `apu_operational_resources_v1` al aplicar filas
+  computadas sobre `schedule_data`.
+- La respuesta del backend devuelve lineas Gantt con snapshot operativo aunque
+  el cronograma historico aun no lo tuviera persistido.
+- Se agrega `backend/scripts/sanitize_gantt_operational_apu_snapshots.py` para
+  auditar y sanear todos los cronogramas Gantt existentes por empresa.
+- Se sanea la base local clasica: 4 cronogramas revisados, 422 lineas con
+  snapshot operativo, 46 lineas con APUs anidados explotados y 0 snapshots
+  faltantes.
+- Santiago Bermeo queda incluido: empresa `3`, presupuesto `13`, cronograma
+  `1`, 187 lineas saneadas y 18 lineas con APUs anidados explotados.
+- La ruta critica queda corregida de forma universal: el CPM clasico usa la
+  duracion visible `start_date/end_date` del Gantt cuando existe, y solo cae a
+  la duracion tecnica del APU explotado si no hay ventana visible persistida.
+  Santiago Bermeo fue el caso de deteccion, no un parche especifico.
+- `Gantt > editor ligero de recursos` evita reinyectar indefinidamente el mismo
+  snapshot operativo en metadata, corrigiendo el React #185 y estabilizando el
+  pintado rojo de la ruta critica cuando el CPM marca membresia critica.
+- Se agrega certificacion DOM real de Santiago Bermeo para ruta critica visual:
+  `frontend/scripts/validate-gantt-santiago-critical-visual-dom.mjs` confirma
+  30/30 tareas criticas renderizadas en rojo, sin criticas azules ni tareas no
+  criticas en rojo.
+- Backups previos en `tmp/gantt_operational_apu_snapshot_backup_task_1976_*`.
+- Sin modificar APUs contractuales, cantidades de obra, Presupuestos base, EDT,
+  auth/JWT, tenant, BIM, Docker/Coolify, CI/CD, staging, produccion ni
+  `TASK-1807`.
+
+### 2026-06-23 - Ajuste operativo de recursos por APUs anidados en Cronogramas (TASK-1975)
+
+- `Cronograma de Trabajo` genera un snapshot operativo plano por APU en metadata,
+  explotando APUs anidados y consolidando recursos por clave fuerte.
+- La configuracion del cronograma incorpora `apu_resource_modifications_v1` como
+  base funcional de modificaciones activas por revision; si existe una
+  modificacion activa confirmada, manda sobre la base de proyecto sin alterar la
+  base global.
+- El rendimiento equivalente se calcula con trabajo relativo:
+  `cantidad * rendimiento`, consolidando cantidades y trabajo antes de derivar
+  el nuevo rendimiento.
+- `Cronograma Recursos` consume el snapshot operativo cuando existe y conserva
+  fallback al calculo recursivo historico.
+- `Gantt > editor ligero de recursos` muestra recursos funcionales del APU,
+  permite editar cantidad de recurso, bloquea rendimiento cuando hay anidados
+  explotados y muestra un indicador discreto de estado operativo.
+- `resolveApuLineSimulatedSubtotal` acepta cantidad simulada para que la edicion
+  de cantidad del recurso refleje subtotales coherentes sin multiplicaciones
+  ad-hoc en el modal.
+- La aceptacion desde el editor confirma explicitamente que la modificacion del
+  APU aplica globalmente a la revision activa, sin cambiar la cantidad de obra
+  del presupuesto ni la base global del proyecto, y persiste la modificacion en
+  config antes de sincronizar las lineas afectadas.
+- Validacion focal: py_compile backend OK, pytest focal Cronogramas OK
+  (22 passed), `npm run build` OK con warning conocido de chunks grandes,
+  smoke Cronogramas OK, smoke anti-BIM OK y baseline enterprise con frontend OK.
+- Sin migraciones DB, auth/JWT, tenant, EDT, Presupuestos base, BIM,
+  Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-23 - Diagnostico documental de APUs anidados en tiempo y recursos (TASK-1974)
+
+- Se crea `docs/anidados-tiempo/PROBLEMA_APUS_ANIDADOS_TIEMPO_RECURSOS.md`
+  para formalizar el problema de APUs anidados en duracion, recursos por
+  periodo, histogramas, flujo de caja y cronogramas.
+- El documento usa como evidencia `conversacion-1`, `conversacion-2` y el Excel
+  `Analisis para Project - Nueva Version 2026.xlsx`.
+- Se concluye que el APU anidado y el APU explotado no son matematicamente
+  equivalentes, y que no debe haber correcciones silenciosas de costo, tiempo,
+  cuadrilla, rendimiento ni alcance.
+- Se agrega el plan funcional inferido: base de modificaciones por revision,
+  snapshot ejecutable + delta auditable, explosion de anidados a recursos
+  funcionales consolidados, rendimiento equivalente por trabajo relativo,
+  indicador discreto por APU y por recurso funcional, y resolvedor unico para
+  propagacion en Cronogramas.
+- Sin backend, frontend, DB, API, auth/JWT, tenant, Presupuestos, Cronogramas,
+  BIM, Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-22 - Prioridad Mano de Obra en empate de gobernanza Gantt (TASK-1973)
+
+- `Gantt > editor ligero de APU > Recursos operativos` ajusta el desempate de
+  gobernanza automatica.
+- Cuando Mano de Obra y Equipos y Herramientas empatan en rendimiento, la
+  seleccion automatica prioriza Mano de Obra.
+- La jerarquia interna existente se conserva despues de la prioridad de
+  categoria.
+- El selector automatico informa `Desempate por categoria` cuando esa regla
+  resuelve el candidato.
+- Sin backend, DB, auth/JWT, tenant, contratos API, EDT, Presupuestos,
+  Cronograma Valorado, BIM, Docker/Coolify, CI/CD, staging, produccion ni
+  reapertura de `TASK-1807`.
+
+### 2026-06-22 - Separacion visual del modal de recursos Gantt (TASK-1972)
+
+- `Gantt > editor ligero de APU > Rendimientos operativos` corrige el
+  solapamiento visual con el header global en equipos con DPI/escalado distinto.
+- El overlay del modal sube por encima del header de `AppLayout`, que usa una
+  capa alta para permanecer sticky.
+- El modal queda alineado desde arriba con respiracion superior estable en
+  desktop y altura maxima relativa al viewport.
+- Sin cambios funcionales, backend, DB, auth/JWT, tenant, contratos API, EDT,
+  Presupuestos, Cronograma Valorado, BIM, Docker/Coolify, CI/CD, staging,
+  produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-22 - Gobernanza operativa Mano de Obra en Gantt clasico (TASK-1971)
+
+- `Gantt > editor ligero de APU > Recursos operativos` vuelve a considerar
+  Mano de Obra como candidato valido de gobernanza junto con Equipos y
+  Herramientas.
+- La seleccion visible prioriza el calculo operativo del modal antes de usar
+  metadata previa del backend, evitando que un candidato antiguo o parcial
+  oculte la mano de obra.
+- El selector manual de gobernanza muestra candidatos validos de Equipos y Mano
+  de Obra cuando comparten rendimiento gobernante.
+- La columna `Tiempo` del modal pasa a `Trabajo`.
+- El rendimiento fijo `1` de Materiales y Transporte se oculta visualmente para
+  no presentar ese valor como dato operativo editable.
+- Sin backend, DB, auth/JWT, tenant, contratos API, EDT, Presupuestos,
+  Cronograma Valorado, BIM, Docker/Coolify, CI/CD, staging, produccion ni
+  reapertura de `TASK-1807`.
+
+### 2026-06-22 - Baja purgada y recuperacion SaaS por backup cliente (TASK-1970)
+
+- `Administracion Global > Empresas` incorpora baja purgada y recuperacion desde
+  copia `.giproybackup` validada.
+- `Empresa` conserva ficha minima de recuperacion (`lifecycle_status`,
+  hash/manifiesto de backup, conteos purgados y auditoria) sin mantener datos
+  operativos restaurables.
+- La eliminacion fisica directa de empresas queda bloqueada; la ruta valida es
+  baja purgada con copia cliente y frase `CONFIRMO BAJA PURGADA`.
+- Restore queda bloqueado para empresas en `access_mode=readonly`; en solo
+  lectura se permite backup, no restore.
+- La identidad de backup expone identificador fiscal normalizado como fundamento
+  funcional y conserva fingerprint como guarda tecnica anti-mezcla.
+- Sin BIM, Docker/Coolify, CI/CD, staging, produccion ni reapertura de
+  `TASK-1807`.
+
+### 2026-06-22 - Ocultar derechos SaaS no operativos en Settings Empresa (TASK-1969)
+
+- `Settings Empresa > Mi Empresa > Licencia y SaaS` deja de mostrar `Equipo`,
+  `Fusion` y `Migracion` como derechos efectivos visibles.
+- `Equipo` queda gobernado por el sistema de licencias, sin chip redundante en
+  Settings.
+- `Fusion` y `Migracion` se ocultan por obsoletas/no funcionales.
+- El backend, catalogo SaaS y resolvedor de capacidades quedan intactos.
+- Se refuerza el smoke visual de Settings para bloquear la reaparicion de esas
+  etiquetas.
+- Sin cambios backend, DB, auth/JWT, tenant, contratos API, BIM,
+  Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-22 - Retiro de gestion operativa Conecta desde Settings Empresa (TASK-1968)
+
+- `Settings Empresa > Mi Empresa` deja de mostrar el panel
+  `Cupos usuario-usuario`.
+- `Settings Empresa` deja de importar `conectaApi` y no gestiona asignacion ni
+  liberacion de cupos Conecta.
+- La zona visible queda como `Licencia y SaaS`, limitada a licencia, acciones
+  Marketplace y derechos SaaS.
+- `Envios y Transferencias` queda como dominio operativo de Conecta
+  empresa-a-empresa.
+- Se refuerzan smokes de Settings y Conecta API para bloquear el retorno de
+  gestion Conecta usuario-usuario en Settings.
+- Sin cambios backend, DB, auth/JWT, tenant, contratos API, BIM,
+  Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-22 - Compactacion visual de Licencia y Conecta en Settings Empresa (TASK-1967)
+
+- `Settings Empresa > Mi Empresa > Licencia y Conecta` adopta una estructura
+  compacta alineada con patrones visuales de Proyectos.
+- El resumen de licencia queda como KPIs densos con estado operativo.
+- Las acciones de renovacion/cambio de plan reutilizan `ProjectSectionIconButton`
+  y conservan los mismos destinos de Marketplace.
+- Los bloques SaaS y Conecta reducen copy, espaciado, tarjetas grandes y
+  listados sobredimensionados.
+- Se agregan marcadores DOM compactos y se refuerza
+  `smoke-classic-settings-empresa-visual-structure.mjs`.
+- Sin cambios funcionales, backend, DB, auth/JWT, tenant, contratos API, BIM,
+  Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-22 - Migracion de Ajuste SaaS fuera de Settings Empresa (TASK-1966)
+
+- `Settings Empresa` deja de mostrar la opcion `Ajuste SaaS`.
+- `Administracion Global` incorpora rutas propias:
+  - `/admin-global/superadministradores`;
+  - `/admin-global/integraciones`.
+- `Superadministradores` conserva la edicion de cuentas con privilegio maximo
+  usando `usuariosApi`.
+- La vista global usa operaciones tenantless controladas `getAllGlobal` y
+  `updateGlobal` para no depender de la empresa activa.
+- `Integraciones` concentra `EcuadorAPI` usando `adminConfigApi`, fuera del
+  menu de empresa.
+- `/settings?tab=superadmins` redirige al nuevo submodulo SaaS.
+- La edicion del propio perfil superadministrador redirige a
+  `/admin-global/superadministradores?edit_user=me`.
+- Se agrega `frontend/scripts/smoke-classic-saas-settings-migration.mjs` y se
+  integra al baseline enterprise.
+- Validacion: smokes focales SaaS/Settings/anti-BIM OK, `npm run build` OK y
+  `validate_enterprise_baseline.py --include-frontend` OK.
+- Sin cambios backend, DB, auth/JWT, tenant, EDT, presupuestos, cronogramas,
+  BIM, Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-22 - Depuracion de console.error productivo en frontend clasico (TASK-1965)
+
+- Se elimina `console.error(` productivo de `frontend/src`.
+- Se agrega `frontend/src/utils/clientErrorReporter.js` como reporter cliente
+  controlado, sin salida a consola productiva.
+- El reporter conserva un buffer corto en `globalThis.__giproyClientErrors` y
+  emite el evento interno `giproy:client-error`.
+- `frontend/src/main.jsx` instala el reporter antes de montar la aplicacion.
+- Las llamadas runtime pasan a `globalThis.reportClientError?.(...)`.
+- Se refuerza `frontend/scripts/smoke-classic-api-boundaries.mjs` para bloquear
+  futuras reintroducciones de `console.error(` dentro de `frontend/src`.
+- Sin cambios backend, DB, auth/JWT, tenant, EDT, presupuestos, cronogramas,
+  BIM, Docker/Coolify, CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-22 - Autoridad temporal Gantt/Datos Proyecto y documentacion de duracion (TASK-1964)
+
+- El Gantt clasico ahora conserva referencia explicita a la ultima
+  `fecha_inicio` externa de Datos Proyecto.
+- Si Datos Proyecto cambia su fecha de inicio, el cronograma de trabajo desplaza
+  lineas, ventanas manuales y subbarras por delta temporal.
+- Si el usuario cambia despues la fecha dentro de Gantt, Gantt queda como guia
+  operativa hasta el siguiente cambio externo de Datos Proyecto.
+- Se alinean etiquetas focales de Cronograma Valorado/Gantt hacia `periodos`
+  (`Pn`) para evitar mezcla visual con `tramos`.
+- Se agrega `docs/architecture/GANTT_DURATION_AND_CRITICAL_PATH.md` con reglas
+  de duracion, anidados y ruta critica.
+- Se documenta `docs/tasks/TASK-1964.md` y se refuerza el smoke clasico de
+  frontera de Cronogramas.
+- Sin BIM, Docker/Coolify, CI/CD, staging, produccion, DB destructiva,
+  auth/JWT, tenant global ni reapertura de `TASK-1807`.
+
+### 2026-06-21 - Reporte Uso de Recursos por Rango clasico (TASK-1963)
+
+- Se agrega la variante `resources_range` del reporte `cronograma_valorado`.
+- El reporte solicita `date_start` y `date_end`; por defecto la UI toma el
+  periodo completo del proyecto/cronograma.
+- El backend prorratea cantidades y costos por solape temporal de periodos y
+  conserva preview, Excel, PDF y PDF desde Excel.
+- La cache de exportacion incluye filtros normalizados para no reutilizar
+  archivos de rangos distintos.
+- `Proyecto > Cronogramas > Recursos` muestra un menu con reporte completo y
+  reporte por rango.
+- `Settings > Plantillas` se amplia para mostrar las salidas clasicas actuales
+  de Cronogramas y variantes faltantes de VAE/Formula Polinomica.
+- Se agrega `docs/reportes/cronograma_uso_recursos_rango.config.json`.
+- Validacion: `py_compile` focal OK, pytest focal reporting Cronogramas OK
+  (18 passed), smoke Cronogramas OK, smoke Settings OK, smoke anti-BIM OK,
+  JSON config OK, `npm run build` OK y baseline enterprise con frontend OK.
+- Warnings conocidos aceptados: Pydantic BIM `model_name/model_id` y chunks
+  grandes Vite.
+- Sin cambios DB, auth/JWT, tenant, EDT, presupuestos, BIM, Docker/Coolify,
+  CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-21 - Reporte visible en Cronogramas Recursos clasico (TASK-1962)
+
+- Se expone en `Proyecto > Cronogramas > Recursos` el boton directo
+  `Reporte de Uso de Recursos`.
+- El boton reutiliza la variante existente `resources` del reporte
+  `cronograma_valorado`; no se crean endpoints ni contratos nuevos.
+- El reporte consolida recursos finales por categoria/subcategoria, cantidades,
+  costos, periodos y recursos gobernantes; el preview es ejecutivo, Excel
+  conserva matriz completa y PDF entrega lectura ejecutiva.
+- Se refuerza `smoke-classic-cronogramas-api-boundary.mjs` para conservar el
+  acceso visible desde la pestaña Recursos.
+- Validacion: smoke focal Cronogramas OK, smoke anti-BIM OK y `npm run build`
+  OK con warning conocido de chunks grandes Vite.
+- Sin backend, DB, auth/JWT, tenant, EDT, presupuestos, BIM, Docker/Coolify,
+  CI/CD, staging, produccion ni reapertura de `TASK-1807`.
+
+### 2026-06-20 - Rediseño visual global de Settings empresa iniciado (TASK-1961)
+
+- Se documenta el alcance global de rediseño visual de Settings empresa clasico.
+- Se confirma que el alcance no corresponde al control SaaS global ni a UX BIM.
+- Se inventarian las secciones vigentes de Settings empresa para preservar funcionalidad.
+- Se inicia la separacion visual de Mi Empresa mediante tabs internos:
+  - Datos empresa.
+  - Licencia y Conecta.
+- Se inicia la reorganizacion visual de Usuarios dentro de Settings empresa:
+  - resumen compacto por total, administradores, colaboradores y bloqueados.
+  - tabs internos por rol/estado.
+  - bloqueo de vista si superadministrador no tiene empresa activa seleccionada.
+- Se compactan secciones restantes de Settings empresa:
+  - `Preferencias Empresa`.
+  - `Codigos Proyecto`.
+  - `Plantillas`.
+- Backup Empresa / Restore Empresa queda marcado como zona visual de empresa completa y conserva tabs internas.
+- Se cambia el encabezado visible de `Ajustes Globales` a `Settings Empresa`.
+- Se agrega smoke focal `frontend/scripts/smoke-classic-settings-empresa-visual-structure.mjs`.
+- Se agrega harness Playwright para certificacion visual renderizada de Settings empresa:
+  `frontend/settings-empresa-harness.html`,
+  `frontend/src/settings-empresa-harness.jsx` y
+  `frontend/scripts/validate-settings-empresa-visual-dom.mjs`.
+- Se corrige el render de Licencia/Conecta para no romper cuando faltan datos numericos de almacenamiento o informacion de licencia.
+- Validacion renderizada: `validate-settings-empresa-visual-dom.mjs` OK en viewports `desktop` y `wide`.
+
+### 2026-06-20 - Settings Backup Empresa / Restore Empresa y auditoria cross-company (TASK-1960)
+
+- **Restore Empresa simplificado**: la restauracion destructiva 1:1 usa una
+  unica frase final `CONFIRMO IMPORTACION`; se retira la triple confirmacion
+  operativa de la UI y del contrato.
+- **Copia interna invisible**: al confirmar un restore externo, backend crea
+  automaticamente la copia interna previa; administradores no tienen accion
+  manual ni acceso a esas copias.
+- **Superadmin protegido**: las copias automaticas internas siguen listadas y
+  recuperables solo para superadministradores.
+- **Auditoria de engaño**: el preflight bloquea copias de otra empresa y
+  registra intentos agrupables por empresa solicitante, empresa de la copia,
+  usuario, hash y contador; se expone endpoint superadmin.
+- **Settings compacto**: Backup/Restore sale del bloque inmenso de `Mi Empresa`
+  y queda en el menu izquierdo como `Backup Empresa`, con zonas internas
+  `Backup Empresa` y `Restore Empresa`.
+- **Guardas**: se actualiza smoke focal de Settings backup para impedir
+  reintroducir preparacion manual, triple confirmacion o frase antigua.
+- **Validacion**: py_compile focal OK, pytest focal backup OK, smokes clasicos
+  OK, `npm run build` OK con warning conocido de chunks grandes y baseline
+  enterprise con frontend OK.
+- **No interferencia**: sin BIM, Docker/Coolify, CI/CD, staging, produccion ni
+  cambios fuera del slice autorizado.
+
+### 2026-06-20 - Plan de backup-restauracion completa 1:1 de empresa (TASK-1959)
+
+- **TASK de control**: se documenta el diseno enterprise para backup y
+  restauracion completa 1:1 de empresa desde GiProy Clasico.
+- **Plan completo**: se agrega
+  `docs/architecture/COMPANY_FULL_BACKUP_RESTORE_PLAN.md` con alcance,
+  formato, flujos, permisos, auditoria, retencion, Marketplace, archivos y
+  fases de implementacion.
+- **Alcance cerrado**: copia cifrada propia, datos activos y papelera,
+  documentacion, binarios, Comunidad y politica especial para Marketplace.
+- **Restauracion destructiva controlada**: misma empresa obligatoria, backup
+  automatico previo interno, triple confirmacion, correo del usuario y boton
+  final no accidental.
+- **Recuperacion superadmin**: copias automaticas internas viven 30 dias,
+  solo superadministrador puede restaurarlas, y una copia restaurada se elimina
+  a la semana junto con las anteriores a su fecha.
+- **Fase 1 implementada**: se agrega contrato backend, tablas aditivas de
+  auditoria/copia interna, endpoint de preflight de exportacion sin borrado,
+  cliente API clasico y panel minimo en Ajustes.
+- **Fase 2 implementada**: se agrega export no destructivo `.giproybackup`
+  cifrado, con payload comprimido, `manifest.json`, `data/tables/*.json`,
+  archivos fisicos en `files/*`, hash de backup y auditoria de finalizacion.
+- **Preflight seguro**: valida permisos `administrador`/`superadministrador`,
+  identidad de empresa, conteos principales, papelera, Comunidad, Marketplace y
+  referencias fisicas bloqueantes.
+- **Comunidad incluida**: el snapshot logico incorpora `Otros > Comunidad`,
+  incluidos posts, respuestas, adjuntos, DM, sanciones, infracciones y alertas
+  vinculadas a la empresa.
+- **Preflight de restauracion**: se agrega subida de `.giproybackup` para
+  validar formato, cifrado, manifest, hashes, archivos, misma empresa,
+  Comunidad, papelera e impacto Marketplace sin borrar datos.
+- **Fase 5 implementada**: se agrega preparacion de copia automatica previa
+  interna cifrada antes de restaurar, con artefacto registrado, hash, usuario,
+  expiracion a 30 dias, auditoria y listado visible solo para
+  superadministrador.
+- **Fase 6 implementada**: se agrega restauracion destructiva desde archivo
+  `.giproybackup` solo para `superadministrador`, con copia interna previa
+  vigente, triple confirmacion backend, auditoria critica y reescritura 1:1 de
+  datos restaurables.
+- **Papelera y Comunidad restauradas**: el restore recupera datos activos,
+  borrado logico/papelera y `Otros > Comunidad` desde el snapshot cifrado.
+- **Archivos verificados**: los binarios declarados se restauran desde el
+  paquete y se validan por hash.
+- **Marketplace protegido**: auditoria y compras se preservan; productos
+  propios actuales que no existan en la copia se cancelan/despublican y quedan
+  para auditoria/superadministrador.
+- **UI destructiva protegida**: Ajustes muestra el bloque de triple
+  confirmacion solo para superadministradores, exige seleccionar copia interna
+  previa y separa el boton final `Ejecutar restauracion destructiva`.
+- **Recovery interno superadmin**: se agrega restauracion directa desde una
+  copia automatica interna registrada, sin subir archivo externo, con la misma
+  triple confirmacion backend y auditoria critica diferenciada.
+- **Retencion aplicada**: al listar copias internas, las vencidas a 30 dias y
+  las restauradas con `cleanup_after` cumplido desaparecen del sistema y su
+  archivo interno se elimina.
+- **Validacion**: py_compile focal OK, pytest focal de backup OK, smoke
+  anti-BIM OK, smoke de Ajustes backup OK, `npm run build` OK con warning
+  conocido de chunks grandes y baseline enterprise con frontend OK.
+- **No interferencia**: sin BIM, Docker/Coolify, CI/CD, staging, produccion ni
+  eliminacion de guardas TASK-1807.
+
+### 2026-06-19 - Orden por ultima revision en listado de Proyectos (TASK-1958)
+
+- **Trabajo activo arriba**: el listado clasico de Proyectos se ordena por
+  ultima actualizacion descendente.
+- **Columna nueva**: se agrega `Actualizacion` con formato
+  `Rev. X: dd/mm/yy hh:mm`.
+- **Descripcion prioritaria**: el nombre y la descripcion del Proyecto ganan
+  espacio visual dentro de la misma tabla.
+- **Icono no ambiguo**: la accion destructiva por fila usa `ArchiveX` rojo para
+  mover a papelera; la Papelera global conserva `Trash2`.
+- **Guarda focal**: el smoke de Proyectos valida ordenacion local, columna de
+  actualizacion y separacion visual de iconos.
+- **No interferencia**: sin backend, DB, API, auth/JWT, tenant, BIM,
+  Docker/Coolify, CI/CD ni guardas TASK-1807.
+
+### 2026-06-19 - Cards compactos y legibles en Bases de Trabajo (TASK-1957)
+
+- **Nombre completo visible**: el card clasico de Bases de Trabajo deja de
+  truncar `activeBase.nombre` y permite salto de linea seguro.
+- **Descripcion sin dependencia del hint**: la descripcion principal deja de
+  usar `line-clamp-2` y se muestra en un area interna con scroll para textos
+  largos, manteniendo el hint solo como apoyo.
+- **Compactacion visual**: se reducen padding, radio, separaciones y metricas
+  inferiores para no ampliar la ficha.
+- **Guarda focal**: el smoke de BasesTrabajo valida que no se reintroduzcan los
+  recortes principales del nombre/descripcion.
+- **No interferencia**: sin backend, DB, API, auth/JWT, tenant, BIM,
+  Docker/Coolify, CI/CD ni guardas TASK-1807.
+
+### 2026-06-19 - Indicador compacto de nuevos Envios y Transferencias (TASK-1956)
+
+- **Header sin redundancia**: el indicador clasico queda solo como icono de
+  comunicacion con badge de nuevos pendientes; se retiran los textos visibles
+  `Comunicación` y `Nuevos`.
+- **Roles acotados**: el indicador sigue visible solo para `administrador` y
+  `superadministrador`.
+- **Frecuencia ajustada**: el header consulta
+  `transferenciasApi.getTraySummary(...)` al montar/cambiar empresa o usuario,
+  y luego cada `30` segundos con `setInterval(..., 30000)`.
+- **Bandeja sincronizada**: `EnviosTransferencias` tambien refresca cada 30
+  segundos y escucha `giproy:transfer-signal-opened` para cambiar a `entrada`
+  si el usuario pulsa el icono estando ya en la pantalla.
+- **Guarda focal**: smokes validan polling de 30 segundos, icono con badge de
+  nuevos y ausencia de textos redundantes.
+- **Validacion**: smokes header/Transferencias/anti-BIM OK y `npm run build`
+  OK con warning conocido de chunks grandes Vite.
+- **No interferencia**: sin backend, DB, API, auth/JWT, tenant, BIM,
+  Docker/Coolify, CI/CD ni guardas TASK-1807.
+
+### 2026-06-19 - Limpieza global de Envios y Transferencias (TASK-1955)
+
+- **Datos en blanco para pruebas**: se limpia toda la actividad operativa de
+  `Envios y Transferencias` en la base local: envios, items, resultados y
+  referencias de importacion, eventos, destinatarios habilitados y guardas de
+  validacion.
+- **Backup previo**: aplicacion respaldada en
+  `tmp/transfer_all_activity_cleanup_20260619_155124.json`; dry-run previo en
+  `tmp/transfer_all_activity_cleanup_20260619_155119.json`.
+- **Alcance controlado**: eliminados 5 envios, 5 items, 5 resultados, 5
+  referencias, 19 eventos, 3 destinatarios y 3 guardas. No habia requisitos
+  Marketplace ni packs extra que ajustar.
+- **Herramienta reproducible**: se agrega
+  `backend/scripts/cleanup_all_transfer_activity.py`, con dry-run por defecto y
+  `--apply` explicito.
+- **Validacion**: dry-run posterior con todas las tablas operativas en `0`,
+  `py_compile` del script OK, smokes Transferencias/anti-BIM/Conecta OK y
+  pytest focal de Transferencias 15 passed.
+- **No interferencia**: sin borrar empresas, usuarios, codigos publicos,
+  proyectos, bases, APUs, EDT, presupuestos, cronogramas, compras Marketplace,
+  licencias ni packs comprados; sin BIM, Docker/Coolify, CI/CD ni TASK-1807.
+
+### 2026-06-19 - Reactivacion de papelera clasica en backend vivo (TASK-1954)
+
+- **Causa raiz funcional**: el backend vivo en `localhost:3001` estaba
+  desfasado frente al repo; su OpenAPI no exponia `/api/v1/proyectos/papelera`
+  ni `delete_project_base`, aunque el codigo local si los tenia desde
+  TASK-1951/TASK-1952. Por eso la UI clasica de papelera recibia `422`.
+- **Correccion operativa**: se reinicia `GiProy-Backend` mediante el launcher
+  oficial y se confirma PID nuevo. El OpenAPI vivo ya expone rutas de papelera
+  y `delete_project_base`.
+- **Estado de datos Santiago Bermeo**: antes del reinicio, `empresa_id=3`
+  tenia `projects_deleted=0`, `bases_deleted=0` y solo el Proyecto activo
+  `id=7`. Los proyectos borrados durante la prueba no quedaron en papelera; si
+  deben recuperarse, requiere TASK separada de recuperacion desde backup.
+- **Validacion real**: `GET /api/v1/proyectos/papelera` sin token devuelve
+  `401`, no `422`; con token valido para `Santiago Bermeo`, devuelve `200` y
+  `[]`. La papelera de Bases tambien esta expuesta y
+  `GET /api/v1/bases-trabajo/papelera?empresa_id=3` devuelve `200` y `[]`.
+  `GiProy-Backend`, `GiProy-Frontend` y `localhost:5173` quedan levantados.
+- **Mejora secundaria**: `AppDialogProvider` ahora normaliza `detail`,
+  `description`, `error`, `Error.message` y listas de validacion antes del
+  fallback generico.
+- **No interferencia**: sin BIM, Docker/Coolify, CI/CD, cambios destructivos de
+  DB, auth/JWT, tenant, EDT, presupuestos, cronogramas ni reapertura de
+  TASK-1807.
+
+### 2026-06-18 - Snapshot inmutable en importacion de Proyectos transferidos (TASK-1953)
+
+- **Causa raiz**: la importacion de un Proyecto transferido priorizaba clonado
+  vivo si el Proyecto fuente seguia existiendo, pudiendo recalcular contra un
+  estado posterior al envio en vez de usar el snapshot exportado.
+- **Correccion**: los payloads modernos de Proyecto que incluyen
+  `base_trabajo`/`apus` se importan desde el snapshot inmutable; el clonado vivo
+  queda solo como fallback para envios legacy sin grafo Base/APU.
+- **Guarda realista**: se agrego cobertura con Base de Proyecto de 177 APUs y
+  presupuesto de 5 APUs enlazados, incluyendo lineas operativas con `tipo=None`
+  y verificacion de que APUs posteriores al envio no se importan.
+- **Validacion**: pytest focal de Transferencias 28 passed y `py_compile`
+  focal OK.
+- **No interferencia**: sin BIM, frontend, DB, migraciones, contratos API,
+  auth/JWT, tenant global, Docker/Coolify ni reapertura de TASK-1807.
+
+### 2026-06-18 - Decision explicita sobre Base de Proyecto al borrar Proyecto (TASK-1952)
+
+- **Pregunta obligatoria en UI**: el modal de eliminacion de Proyecto ahora
+  pregunta si la Base de Proyecto asociada tambien se mueve a papelera.
+- **Conservacion de base**: si el usuario decide no borrar la base, el Proyecto
+  se mueve a papelera y la base queda viva como `Base Maestra`, reutilizable en
+  Bases de Trabajo.
+- **Compatibilidad conservada**: `delete_project_base=true` queda como default
+  del endpoint para mantener el comportamiento anterior de TASK-1951.
+- **Restauracion coherente**: si se restaura un Proyecto cuya base fue
+  preservada, la base vuelve a tiparse como `Base de Proyecto`.
+- **Purga segura**: purgar un Proyecto cuya base fue preservada elimina el
+  Proyecto, pero no elimina la base conservada.
+- **Validacion**: `py_compile`, pytest focal 5 passed, `npm run build`,
+  smokes clasicos y `validate_enterprise_baseline.py --include-frontend`: OK.
+- **No interferencia**: sin BIM, Docker/Coolify, CI/CD, migracion nueva,
+  auth/JWT, tenant global ni reapertura de guardas TASK-1807.
+
+### 2026-06-18 - Papelera de reciclaje para Proyectos y Bases de Trabajo (TASK-1951)
+
+- **Borrado seguro clasico**: Proyectos y Bases de Trabajo ya no se eliminan
+  fisicamente desde la accion normal; pasan a papelera durante 7 dias.
+- **Proyecto/Base coherentes**: al mover un Proyecto a papelera se mueve tambien
+  su Base de Proyecto asociada, conservando la ley operativa de que un Proyecto
+  no vive sin APUs/base.
+- **Restauracion y purga separadas**: se agregan endpoints y modales para
+  listar papelera, restaurar y borrar definitivamente, con validacion de
+  conflictos de nombre/codigo antes de restaurar.
+- **Datos originales preservados**: se guardan nombres/codigos originales en
+  campos `trash_original_*` y se liberan restricciones unicas mientras el
+  registro permanece en papelera.
+- **Validacion enterprise**: `py_compile`, pytest focal, migracion local
+  `de1951a1b2c3`, `npm run build`, smokes clasicos y
+  `validate_enterprise_baseline.py --include-frontend`: OK.
+- **No interferencia**: sin BIM, Docker/Coolify, CI/CD, auth/JWT, tenant global
+  ni reapertura de guardas TASK-1807.
+
+### 2026-06-18 - Recuperacion correcta de proyecto historico en Santiago Bermeo (TASK-1950)
+
+- **Candidato correcto identificado**: tras confirmar que el borrado era
+  reciente pero la creacion tenia meses de antiguedad, se recupero
+  `Proyecto Prueba Compartir 1` (`proyecto_id=7`) de `Santiago Bermeo`.
+- **Recuperacion desde backup verificado**: `db_backup.json` contenia el grafo
+  completo y se restauro Proyecto, Base `34`, Presupuesto `13`, EDT, APUs,
+  recursos, cronogramas, formula polinomica y calendario.
+- **Integridad validada**: 15 nodos EDT, 201 lineas de presupuesto, 177 APUs,
+  866 lineas de APU y 216 recursos; 0 lineas operativas sin APU y 0 APUs fuera
+  de la Base de Proyecto.
+- **Trazabilidad**: script focal
+  `backend/scripts/recover_santiago_project7_from_backup.py`, reporte
+  `tmp/santiago_project7_recovery_apply_20260618_173219.json` y auditoria
+  `project_recovered_from_backup` para `proyecto_id=7`.
+- **Correccion documental**: TASK-1949 queda marcada como recuperacion de un
+  candidato no objetivo; el Proyecto `30` no se elimina sin autorizacion
+  explicita.
+- **No interferencia**: sin BIM, frontend, rutas API, auth/JWT, tenant global,
+  Docker/Coolify, CI/CD ni guardas del baseline TASK-1807.
+
+### 2026-06-18 - Recuperacion operativa de proyecto borrado en Santiago Bermeo (TASK-1949)
+
+- **Recuperacion de datos clasicos**: se recupero para `Santiago Bermeo`
+  el Proyecto `compras publicas prueba1.pdf - recibido 4 - recuperado`
+  como `proyecto_id=30`, clonando desde el Proyecto fuente vivo `22`.
+- **Integridad preservada**: la recuperacion uso `classic_asset_portability_service`
+  para conservar Base de Proyecto, APUs, recursos, EDT y presupuesto sin
+  inserciones manuales parciales.
+- **Resultado validado**: 23 nodos EDT, 1 presupuesto, 247 lineas, 212 APUs y
+  287 recursos; 0 lineas operativas sin APU y 0 APUs fuera de la Base clonada.
+- **Trazabilidad**: backup operativo previo en
+  `tmp/project_recovery_santiago_before_20260618_172159.json` y auditoria
+  estructurada `project_recovered_manual` para `proyecto_id=30`.
+- **No interferencia**: sin cambios de codigo, frontend, API, auth, tenant,
+  BIM, Docker/Coolify, CI/CD ni guardas del baseline TASK-1807.
+
+### 2026-06-18 - Proyecto transferido con Base/APUs acotados al presupuesto (TASK-1948)
+
+- **Exportacion optimizada**: el snapshot de Proyecto en `Envios y
+  Transferencias` ya no arrastra toda la Base de Proyecto; incluye solo el
+  grafo transitivo que nace en los APUs usados por el presupuesto.
+- **APUs anidados cubiertos**: el recorte conserva APUs hijos por
+  `APULinea.apu_hijo_id` y los recursos usados por cada nivel.
+- **Categorias sincronizadas**: categorias, subcategorias y unidades viajan
+  alineadas con recursos/APUs para evitar referencias cruzadas o recursos sin
+  subcategoria en la empresa receptora.
+- **Motor comun**: la importacion viva de proyectos por Transferencias usa
+  `classic_asset_portability_service` con recorte de Base al presupuesto,
+  manteniendo Bases de Trabajo completas.
+- **Guardas**: pytest focal verifica exportacion e importacion de un proyecto
+  con APU padre, APU hijo anidado y contenido no usado; solo se importa/exporta
+  lo relacionado al presupuesto.
+- **No interferencia**: sin UX BIM, sin Docker/Coolify/CI-CD, sin cambios
+  auth/JWT/tenant global ni rutas API visibles.
+
+### 2026-06-18 - Reconexion de Nuevo Proyecto con empresa activa (TASK-1947)
+
+- **Regresion corregida**: `Nuevo proyecto` vuelve a abrir el modal de
+  creacion en la vista activa y a crear usando la empresa activa del contexto
+  clasico.
+- **Causa raiz visual**: la rama `PROJECTS_HTML_REFERENCE_LANDING` tenia el
+  boton, pero no montaba el modal `showCreateModal`; el modal seguia solo en la
+  rama legacy.
+- **Causa raiz tenant**: `Proyectos.jsx` enviaba `empId`, pero
+  `proyectosApi.create` lo descartaba y ejecutaba `POST /proyectos/` sin
+  `withTenantConfig`.
+- **Modal compartido**: el modal de creacion queda extraido en
+  `renderCreateProjectModal()` y montado tanto en la rama HTML activa como en
+  la rama legacy.
+- **Cliente de dominio**: `proyectosApi.create(proyectoData, empresaId)` ahora
+  conserva tenant mediante `withTenantConfig({}, empresaId)`.
+- **Guarda focal**: el smoke de Proyectos valida que la rama activa monte el
+  modal y que la creacion preserve `empresaId` en el cliente API.
+- **No interferencia**: sin backend, DB, rutas, auth, permisos, BIM,
+  Docker/Coolify/CI-CD ni reapertura de TASK-1807.
+
+### 2026-06-18 - Alineacion de encabezados de Presupuesto (TASK-1946)
+
+- **Regresion visual corregida**: el header del listado de items en
+  `Proyectos > Presupuesto` vuelve a alinearse con las columnas reales.
+- **Causa raiz**: el ancho de `ACCIONES` estaba duplicado; las filas usaban el
+  espacio ampliado para controles actuales y el encabezado/placeholders
+  conservaban el ancho legacy.
+- **Arreglo robusto**: se centralizan los anchos del grid en
+  `BUDGET_COLUMN_WIDTH`, reutilizado por header, capitulos, lineas y
+  placeholders.
+- **Localizacion visible**: se normalizan los rotulos a `CÓD. EDT`, `UNIDAD` y
+  `P. UNITARIO`.
+- **Guarda focal**: el smoke de Presupuestos valida centralizacion y
+  reutilizacion del ancho de acciones sin depender de una cadena completa de
+  clases.
+- **No interferencia**: sin backend, API, DB, auth, tenant, BIM,
+  Docker/Coolify/CI-CD ni reapertura de TASK-1807.
+
+### 2026-06-18 - Correccion de codigo publico de empresa local (TASK-1945)
+
+- **Causa raiz corregida**: el error `No se pudo cargar el codigo publico de
+  empresa` se debia a que PostgreSQL local no tenia aplicada la migracion
+  `de1933a1b2c3_transfer_company_public_codes`.
+- **Migracion aplicada**: se ejecuta la revision aditiva `de1933a1b2c3` y se
+  crea `transfer_company_public_codes`.
+- **Codigos saneados**: se generan codigos activos para las 3 empresas locales;
+  `Administradores Generales` y `Santiago Bermeo` ya tienen codigos distintos.
+- **Validacion focal**: `test_transferencias_recipients.py` OK y smoke
+  anti-BIM clasico OK.
+- **No interferencia**: sin frontend, sin cambios API/auth/tenant, sin BIM,
+  sin Docker/Coolify/CI-CD y sin reabrir TASK-1807.
+
+### 2026-06-18 - Limpieza de comunicaciones entre empresas de prueba (TASK-1944)
+
+- **Datos saneados**: se limpian todas las comunicaciones de `Envios y
+  Transferencias` entre `Administradores Generales` y `Santiago Bermeo`.
+- **Backup previo**: aplicacion respaldada en
+  `tmp/transfer_company_communications_cleanup_20260618_124624.json`.
+- **Alcance controlado**: eliminados 4 envios, 4 items, 3 resultados de
+  importacion, 3 referencias, 15 eventos, 1 destinatario y 1 guarda de codigo.
+- **Activos conservados**: no se borran empresas, codigos publicos, proyectos,
+  bases, APUs, EDT, presupuestos, compras Marketplace ni licencias.
+- **Herramienta reproducible**: se agrega script con dry-run por defecto y
+  `--apply` explicito para futuras limpiezas controladas.
+- **No interferencia**: sin frontend, sin UX BIM, sin Docker/Coolify/CI-CD,
+  sin cambios API/auth/tenant y sin reabrir TASK-1807.
+
+### 2026-06-18 - Retirada de funcion Portatil del header clasico (TASK-1943)
+
+- **Header saneado**: se elimina el boton visible `Portatil` del header
+  clasico para superadministradores.
+- **Override manual desactivado**: `AppLayout` deja de leer, escribir o
+  escuchar el override manual de `Portable Workspace`.
+- **Compatibilidad inerte**: el helper legacy `portableWorkspace` ya no activa
+  compactacion aunque existan preferencias antiguas persistidas localmente.
+- **APUs acotado**: el editor APU conserva compactacion solo por viewport real,
+  sin engancharse a la funcion manual retirada.
+- **Guarda frontend**: el smoke del header bloquea que vuelva el boton
+  `Portatil` o la activacion manual.
+- **No interferencia**: sin backend, DB, auth, tenant, BIM, Docker/Coolify ni
+  CI/CD.
+
+### 2026-06-18 - Renombrado visible Preflight a Validación (TASK-1942)
+
+- **Etiqueta visible**: `Envios y Transferencias` deja de mostrar `Preflight`
+  al usuario final y pasa a mostrar `Validación`.
+- **Modal de envio**: la cabecera queda como `Validación técnica`, el texto de
+  ayuda usa `validación` y el boton principal de revision previa se renombra.
+- **Email SaaS**: la alerta Gmail usa `Completa la validación Gmail` para
+  conservar consistencia de lenguaje.
+- **Compatibilidad**: se mantienen endpoint, cliente, schemas y nombres
+  tecnicos `preflight` para no romper contratos API ni tests backend.
+- **No interferencia**: sin BIM, sin Docker/Coolify/CI-CD, sin auth/tenant ni
+  cambios de base de datos.
+
+### 2026-06-17 - Motor comun de portabilidad clasica en Transferencias (TASK-1941)
+
+- **Rutina comun**: se agrega `classic_asset_portability_service` para copiar
+  proyectos clasicos vivos entre empresas con Base, APUs, EDT y Presupuesto.
+- **Transferencias sin duplicar importacion**: `Envios y Transferencias` usa el
+  motor comun cuando importa proyectos vivos, manteniendo fallback legacy para
+  snapshots antiguos.
+- **Marketplace alineado**: el checkout de Marketplace delega la copia
+  Proyecto/Base/APU/EDT/Presupuesto al mismo motor comun cuando entrega
+  Proyectos referenciados o materializados.
+- **Relacion Presupuesto/APU preservada**: las lineas operativas importadas ya
+  no se crean con `apu_id=None` si el origen tenia APU; se valida que apunten a
+  APUs de la base clonada de la empresa receptora.
+- **Snapshot inmutable completo**: el snapshot de proyecto incluye Base de
+  Proyecto, unidades, recursos y APUs para que el fallback de importacion no
+  dependa del proyecto origen vivo.
+- **Ley de Proyecto**: en Transferencias, Datos + EDT + Presupuesto no bastan
+  si no existe Base de Proyecto/APUs; el preflight bloquea proyectos sin APUs o
+  con lineas operativas sin `apu_id`.
+- **Base clonada mas segura**: el clonado profundo de bases replica unidades no
+  globales al contexto destino y evita arrastrar unidades privadas de la empresa
+  origen.
+- **Compatibilidad**: `base_trabajo_repo.create` conserva `commit=True` por
+  defecto y permite `commit=False` para operaciones atomicas superiores.
+- **Guardas**: pytest focal/combinado cubre Transferencias, Compras Publicas y
+  Marketplace con 45 pruebas; baseline enterprise con frontend y smoke anti-BIM
+  OK.
+- **No interferencia**: sin BIM, sin Docker/Coolify/CI-CD, sin auth/JWT ni
+  cambios destructivos de datos.
+
+### 2026-06-17 - Saneamiento de recepcion en envios actuales (TASK-1940)
+
+- **Datos saneados**: se corrige 1 envio existente ya realizado que estaba
+  `enviado` sin `received_at`.
+- **Coherencia receptor**: el envio `id=2` queda con marca de recepcion para
+  que bandeja y timeline sean coherentes con la lectura `Recibido`.
+- **Script reproducible**: se agrega
+  `backend/scripts/sanitize_transfer_sent_receipts.py` con dry-run y `--apply`.
+- **Backup previo**: aplicacion respaldada en
+  `tmp/transfer_sent_receipts_backup_20260617_191619.json`.
+- **Auditoria**: se registra `transfer_shipment_receipt_sanitized` y se agrega
+  etiqueta castellana `Recepcion saneada por el sistema`.
+- **No interferencia**: sin BIM, sin migraciones, sin cambios destructivos,
+  sin auth/JWT y sin Docker/Coolify/CI-CD.
+
+### 2026-06-17 - Estado visible contextual en Transferencias (TASK-1939)
+
+- **Bandeja sin ambiguedad**: un envio persistido como `enviado` se muestra
+  como `Enviado` para la empresa emisora y como `Recibido` para la empresa
+  receptora.
+- **Contrato conservado**: no cambia el estado interno ni la persistencia; se
+  ajusta la presentacion por direccion de bandeja.
+- **Color receptor**: la entrada recibida usa tono `cyan`, coherente con
+  recepcion.
+- **Guarda focal**: pytest verifica el mismo envio desde emisor y receptor.
+- **No interferencia**: sin BIM, sin DB/migraciones, sin auth/JWT, sin Docker/
+  Coolify/CI-CD.
+
+### 2026-06-17 - Historico de Transferencias en castellano (TASK-1938)
+
+- **Historico corregido**: el modal de trazabilidad deja de mostrar codigos
+  tecnicos como `transfer_shipment_cancelled`.
+- **Backend en castellano**: el timeline de transferencias devuelve `label` y
+  `type_label` traducidos para eventos auditados y estados principales.
+- **Fallback frontend**: la UI traduce eventos conocidos aunque reciba datos
+  legados con labels tecnicos.
+- **Guardas**: pytest valida etiqueta castellana de cancelacion y smoke
+  frontend bloquea volver a renderizar `{event.type}` como texto visible.
+- **No interferencia**: sin BIM, sin Docker/Coolify/CI-CD y sin cambios en DB,
+  auth/JWT ni contratos ajenos a transferencias.
+
+### 2026-06-17 - Cancelacion emisora, historico y saneamiento de importacion (TASK-1937)
+
+- **Cancelacion visible**: la bandeja de `Envios y Transferencias` muestra
+  `Cancelar envio` para salidas aun no importadas.
+- **Historico operativo**: entrada y salida incorporan accion `Historial` con
+  modal de trazabilidad por fecha/hora.
+- **Importacion no duplicable**: una importacion completada sigue devolviendo
+  resultado idempotente y no recrea Proyecto/Base.
+- **Saneamiento de espacio**: tras importar se reemplaza el payload pesado por
+  metadata minima con contrato, hash, origen, destino, resultado y referencia
+  importada.
+- **Arquitectura documentada**: el plan deja importacion/exportacion como motor
+  universal regido por contexto para ventas publicas, Marketplace y envios
+  directos.
+- **Guardas**: pytest cubre cancelacion antes/despues de importar y saneamiento;
+  smoke frontend cubre acciones y cliente `cancelShipment`.
+- **No interferencia**: sin BIM, sin Docker/Coolify/CI-CD y sin cambios en
+  auth/JWT global.
+
+### 2026-06-17 - Retirada de accion Abrir en Transferencias (TASK-1936)
+
+- **Accion eliminada**: la bandeja de `Envios y Transferencias` deja de mostrar
+  `Abrir`; el receptor solo puede `Importar`, `Rechazar` o `Revalidar compras`
+  segun estado.
+- **API limpia**: se elimina `openShipment` del cliente frontend y
+  `POST /transferencias/shipments/{shipment_id}/open` del backend.
+- **Regla de cancelacion**: el emisor puede cancelar mientras el envio no haya
+  sido importado.
+- **Marketplace claro**: los bloqueos aplican antes de importar o usar el
+  envio; ya no existe apertura intermedia.
+- **Contrato actualizado**: `can_open_or_import` pasa a `can_import_or_use` y
+  `abierto` sale del listado de estados nuevos.
+- **Legacy no destructivo**: `opened_at` permanece solo como campo historico de
+  persistencia; no se elimina columna ni dato.
+- **Guardas**: la smoke de transferencias falla si vuelve el boton `Abrir` o
+  el cliente `openShipment`.
+- **No interferencia**: sin BIM, sin Docker/Coolify/CI-CD y sin cambios en
+  auth/JWT global.
+
+### 2026-06-17 - Refresco global por cambio de empresa activa (TASK-1935)
+
+- **Norma transversal**: cambiar la empresa activa como Superadministrador
+  remonta el contenido protegido bajo `AppLayout`, evitando datos visibles del
+  tenant anterior sin recargar navegador.
+- **Evento comun**: la capa tenant frontend expone
+  `giproy:working-company-changed` con `empresa` y `empresa_id`.
+- **AuthContext reforzado**: al seleccionar empresa se mantiene la limpieza de
+  base/proyecto y se emite la senal global de cambio.
+- **Guarda de regresion**: `smoke-classic-superadmin-tenant-context.mjs`
+  valida evento, dispatcher y remonte visual por `selectedEmpresa.id`.
+- **Norma documentada**: `STYLE_GUIDE` incorpora el remonte visual por tenant
+  como regla para todos los modulos clasicos.
+- **No interferencia**: sin backend, DB, auth/JWT, BIM ni Docker/Coolify/CI-CD.
+
+### 2026-06-17 - Cierre multitenant Superadmin Transferencias (TASK-1934)
+
+- **Fuga de contexto corregida**: `Envios y Transferencias` deja de depender
+  implicitamente de `localStorage` para operar como superadministrador; la
+  pagina usa `selectedEmpresa` de `AuthContext`.
+- **Empresa explicita**: `transferenciasApi` acepta `empresaId` en bandeja,
+  resumen, codigo, destinatarios, preflight, envio, apertura, rechazo,
+  importacion y revalidacion Marketplace.
+- **Cambio de empresa seguro**: al cambiar empresa se limpian bandeja,
+  destinatarios, modales y rechazo pendiente, y se recarga todo con la empresa
+  operativa.
+- **Header seguro**: el semaforo de comunicaciones solicita `tray-summary` con
+  la empresa seleccionada.
+- **Regresion cubierta**: test backend reproduce envio de `Administradores
+  Generales` a `Santiago Bermeo`; el mismo superadministrador ve `salida` en
+  la emisora y `entrada` en la receptora.
+- **No interferencia**: sin UX BIM, sin Docker/Coolify/CI-CD y sin cambios
+  auth/JWT globales.
+
+### 2026-06-17 - Codigo publico de empresa Transferencias (TASK-1933)
+
+- **Identidad corregida**: el codigo `XXX - XXX` de `Envios y
+  Transferencias` pasa a ser codigo publico de empresa, no de usuario.
+- **Superadmin con empresa operativa**: las rutas de transferencias aceptan y
+  validan `empresa_id`; superadministrador puede operar la empresa
+  seleccionada y administradores normales quedan bloqueados fuera de su tenant.
+- **Saneamiento**: nuevo endpoint superadmin
+  `/transferencias/admin/sanitize-company-codes` para generar codigos faltantes
+  de empresas existentes.
+- **Compatibilidad**: se conserva el modelo legacy por usuario como fallback,
+  sin usarlo como identidad funcional activa.
+- **UI clara**: el modal de empresas rotula el valor como `Codigo publico de
+  empresa`.
+- **No interferencia**: cambio aditivo, sin UX BIM, sin Docker/Coolify/CI-CD y
+  sin tocar rutas no relacionadas.
+
+### 2026-06-17 - Normalizacion de combobox Transferencias (TASK-1932)
+
+- **Combobox corregidos**: los triggers de `SearchableSelect` en
+  `Envios y Transferencias` recuperan estructura completa: `flex`,
+  centrado vertical, `justify-between`, padding, radio amplio y borde fino.
+- **Referencia Proyectos**: la presentacion queda alineada con
+  `Proyectos > Datos Proyecto > Tipo de Proyecto`.
+- **Controles coherentes**: buscador, entrada de codigo, fechas y selectores
+  comparten altura/radio/superficie blanca.
+- **Smoke reforzado**: la guarda focal comprueba que no se pierda la alineacion
+  del trigger ni el truncado del valor visible.
+- **No interferencia**: sin backend, DB, auth, tenant, Marketplace, BIM ni
+  Docker/Coolify/CI-CD.
+
+### 2026-06-16 - Semaforizacion compacta y empresas visibles (TASK-1931)
+
+- **Gestion visible**: se agrega boton `Empresas` antes de `Nuevo envio` para
+  abrir un modal propio de empresas para comunicarse.
+- **Fijas vs Conecta**: el modal separa empresas fijas incluidas en plan y
+  adicionales `Conecta`, mostrando expiracion en las adicionales.
+- **Capacidad real**: `/transferencias/recipients` agrega campos aditivos para
+  fijas disponibles y capacidad usada/disponible de `Conecta`.
+- **Semaforos compactos**: `Empresas`, `Enviados`, `Recibidos`, `Nuevos` y
+  `Bloqueados` pasan a microindicadores en la barra principal, inspirados en
+  el patron compacto de `Cronogramas > Gantt`.
+- **Nuevo envio enfocado**: el modal de envio deja de administrar empresas y
+  solo consume destinatarios ya habilitados.
+- **No interferencia**: sin migraciones, sin auth/tenant/permisos, sin UX BIM
+  y sin Docker/Coolify/CI-CD.
+
+### 2026-06-16 - Empresas para comunicarse por codigo (TASK-1930)
+
+- **Entrada de codigo**: el modal de `Nuevo envio` incorpora campo de codigo
+  de conexion para validar empresas destino mediante el backend existente.
+- **Listado operativo**: se muestra la lista de empresas habilitadas para
+  comunicarse, con distincion de destinatarios fijos/adicionales y seleccion
+  directa para el envio.
+- **Confirmacion explicita**: la asociacion exige resolver codigo, revisar la
+  empresa detectada y confirmar antes de consumir slot fijo o adicional.
+- **Cliente de dominio**: `transferenciasApi` expone `resolveRecipientCode` y
+  `createRecipient`; la pagina no conoce rutas ni `axiosConfig`.
+- **Smoke reforzado**: `smoke-classic-transferencias-ui.mjs` protege la entrada
+  por codigo y los metodos del cliente API.
+- **No interferencia**: sin backend nuevo, DB, migraciones, auth, tenant,
+  licencias, Marketplace funcional, UX BIM ni Docker/Coolify/CI-CD.
+
+### 2026-06-16 - Implementacion visual Proyectos en Transferencias (TASK-1929)
+
+- **Toolbar homologada**: `Nuevo envio` y `Refrescar` pasan al patron tecnico
+  soft de `ProjectHeaderActionButton`.
+- **Filtros Proyectos**: la direccion de bandeja usa `ProjectSegmentedSwitch`,
+  la busqueda usa `ClearSearchField`, el estado queda integrado como filtro
+  compacto y las fechas usan `AnimatedDateInput` compacto.
+- **Densidad operativa**: metricas superiores, listado, timeline y acciones de
+  fila se compactan para acercarse al portafolio de `Proyectos`.
+- **Modales tecnicos**: nuevo envio y rechazo usan secciones soft, cierre
+  homogeneo y acciones con `LiquidButton`/boton tecnico.
+- **Smoke reforzado**: `smoke-classic-transferencias-ui.mjs` certifica tambien
+  componentes visuales de `TASK-1929`.
+- **QA**: smoke transferencias OK, smoke anti-BIM OK y `npm run build` OK.
+  Warning conocido no bloqueante: chunks grandes Vite.
+- **No interferencia**: sin backend, DB, API, auth, tenant, licencias,
+  Marketplace funcional, UX BIM ni Docker/Coolify/CI-CD.
+
+### 2026-06-16 - Plan de adecuacion visual Transferencias (TASK-1928)
+
+- **Diagnostico visual**: `Envios y Transferencias` queda funcional, pero se
+  documenta que toolbar, botones, combobox/filtros, KPIs, listado, acciones y
+  modales no estan suficientemente alineados con `Proyectos`.
+- **Adenda de plan**: se agrega al plan funcional una adenda especifica para
+  homologar la pantalla con el look & feel de `Proyectos` y `Datos de Proyecto`.
+- **TASK preparada**: se crea `TASK-1929` como implementacion pendiente,
+  acotada a frontend clasico y sin cambios backend/API/DB/auth/tenant/licencias
+  ni Marketplace funcional.
+- **No interferencia**: sin codigo productivo, sin UX BIM, sin Docker/Coolify/
+  CI-CD/staging/produccion y sin reabrir el baseline funcional `TASK-1926`.
+
+### 2026-06-16 - Saneamiento operativo bandeja Transferencias (TASK-1927)
+
+- **Causa raiz**: la pantalla `Otros Servicios > Envios y Transferencias`
+  llamaba correctamente a `/api/v1/transferencias/tray`, pero PostgreSQL local
+  no tenia aplicada la migracion `de1917a1b2c3`; el backend fallaba con
+  `UndefinedTable` sobre `transfer_shipments`.
+- **Correccion local**: se aplica la migracion Alembic existente y aditiva
+  `de1917a1b2c3`, creando las tablas `transfer_*` necesarias.
+- **Verificacion**: `alembic current` incluye `de1917a1b2c3 (head)`, las tablas
+  `transfer_*` existen y `transferencias_service.list_tray(...)` devuelve
+  `total=0`, metricas a cero e `items=[]` sin error.
+- **No interferencia**: sin cambios de codigo frontend/backend, sin contratos
+  API nuevos, sin cambios auth/tenant/licencias, sin BIM y sin Docker/Coolify/
+  CI-CD/staging/produccion.
+
+### 2026-06-16 - Cierre enterprise de Envios y Transferencias (TASK-1926)
+
+- **Plan completado**: se cierra el plan de `Otros Servicios > Envios y
+  Transferencias` al 100% dentro del alcance clasico aprobado.
+- **Guardas de licencia**: se refuerzan tests para `EXPRESS`, `TESTER`,
+  `ACADEMIC` y `TRAINING`; no pueden resolver/asociar destinatarios ni abrir o
+  importar envios recibidos.
+- **E2E focal backend**: quedan cubiertos flujos mockup emisor/receptor sin
+  Marketplace, con Marketplace bloqueante, importacion idempotente, fallo
+  recuperable, rechazo motivado y Conecta acumulable.
+- **E2E frontend focal**: la ruta `/servicios/envios-transferencias`, la card
+  de Otros Servicios, el semaforo header, bandeja, preflight y guardas UI quedan
+  validados por smoke.
+- **QA final**: `py_compile` backend focal OK, pytest focal OK (`54 passed`),
+  `npm run build` OK, smokes transferencias/anti-BIM OK y baseline enterprise
+  `--include-frontend` OK.
+- **No interferencia**: sin Docker/Coolify/CI-CD, sin UX BIM, sin dependencias
+  nuevas hacia BIM, sin cambios destructivos de DB y sin reabrir el baseline
+  clasico TASK-1807.
+
+### 2026-06-16 - UI clasica de Envios y Transferencias (TASK-1925)
+
+- **Bandeja operativa**: se crea `frontend/src/pages/EnviosTransferencias.jsx`
+  como primera pantalla real de `Otros Servicios > Envios y Transferencias`.
+- **Ruta clasica**: se agrega `/servicios/envios-transferencias` y la card del
+  menu de Otros Servicios abre la bandeja real.
+- **Semaforo header**: el indicador de Comunicacion/Nuevos navega ahora a la
+  bandeja de entrada real con `?bandeja=entrada`.
+- **Look & feel clasico**: UI compacta alineada con `Proyectos` y
+  `Datos de Proyecto`, sin landing, sin estilo SaaS global y sin UX BIM.
+- **Nuevo envio**: modal tecnico con destinatario, activo, descripcion
+  obligatoria, preflight, hash de snapshot y confirmacion Marketplace.
+- **Bandeja**: filtros entrada/salida, estado, rango de fechas, busqueda omni,
+  estados por color, timeline resumido y acciones abrir/importar/rechazar/
+  revalidar compras.
+- **Guardas UI**: se agrega
+  `frontend/scripts/smoke-classic-transferencias-ui.mjs` para ruta, header,
+  API de dominio, controles del sistema, ausencia de `axiosConfig`,
+  `console.log`, `<select>`, `window.prompt` e inputs fecha nativos.
+- **QA frontend**: `npm run build` OK, smokes de transferencias OK, anti-BIM OK
+  y baseline enterprise `--include-frontend` OK. Warning conocido: chunks
+  grandes Vite.
+- **No interferencia**: sin backend nuevo en este slice, sin Docker/Coolify/
+  CI-CD, sin activar BIM y sin romper guardas clasicas de API frontend.
+
+### 2026-06-16 - Producto Conecta para destinatarios adicionales (TASK-1924)
+
+- **Producto unico**: el catalogo sistema define `Conecta` como producto
+  exclusivo de `Envios y Transferencias`, con contexto/subtitulo funcional y
+  sin crear duplicados activos.
+- **Precio y regla comercial**: precio inicial `24,99 USD`, 3 empresas destino
+  adicionales por compra, vigencia de 30 dias desde fecha/hora exacta de compra.
+- **Compras acumulables**: checkout con cantidad mayor a 1 genera packs
+  independientes; cada pack conserva su propio `marketplace_order_item_id`,
+  `purchased_at`, `expires_at`, `slots_total` y `slots_used`.
+- **Cumplimiento Marketplace**: `marketplace_checkout_service` activa
+  `TransferExtraRecipientPack` al detectar
+  `commercial_code=CONECTA_TRANSFERENCIAS`.
+- **Expiracion segura**: packs expirados no habilitan nuevos destinatarios
+  adicionales ni reactivan relaciones expiradas; la nueva compra exige nuevo
+  proceso de asociacion.
+- **QA focal**: `py_compile` OK y pytest focal Marketplace/transferencias OK
+  (`18 passed`). Warnings conocidos: Pydantic BIM `model_name/model_id` y
+  deprecations de dependencias de test.
+- **No interferencia**: sin frontend, sin UX BIM, sin Docker/Coolify/CI-CD y
+  sin romper compra/venta general de Marketplace.
+
+### 2026-06-16 - Semaforo header de recepcion (TASK-1923)
+
+- **Header clasico**: `AppLayout` muestra un indicador permanente de
+  comunicacion/transferencias para Administrador y Superadministrador.
+- **Cliente API**: se agrega `frontend/src/api/transferencias.js` para consumir
+  `GET /transferencias/tray-summary`, manteniendo la regla de `axiosConfig`
+  solo dentro de `frontend/src/api`.
+- **Lectura simple**: muestra total y nuevos (`Comunicación` / `Nuevos`) con
+  version compacta para anchos menores.
+- **Semaforo visual**: circulo sobrio gris sin novedades y verde con pulso
+  cuando existen envios nuevos.
+- **Polling ligero**: refresco cada 60 segundos, sin WebSocket/SSE ni
+  desplegable complejo.
+- **Navegacion preparada**: click a
+  `/servicios?modulo=envios-transferencias&bandeja=entrada` para la futura
+  bandeja de entrada.
+- **QA frontend**: `npm run build` OK, smoke header OK, smoke anti-BIM OK,
+  baseline enterprise `--include-frontend` OK y guarda focal sin `axiosConfig`
+  directo ni `console.log` en `AppLayout`. Warning conocido: chunks grandes Vite.
+- **No interferencia**: sin UX BIM, sin rutas BIM, sin Docker/Coolify/CI-CD y
+  sin UI final de bandeja fuera de TASK-1925.
+
+### 2026-06-16 - Importacion idempotente y rechazo (TASK-1922)
+
+- **Importacion recibida**: se agregan endpoints para abrir, rechazar e
+  importar envios recibidos por la empresa activa.
+- **Copia nueva**: Proyecto se importa como nueva cabecera con EDT y
+  presupuestos del snapshot; Base de Trabajo se importa como nueva base y queda
+  preparada para copiar catalogo clasico contenido en el payload.
+- **Idempotencia**: `TransferImportResult` evita duplicados ante doble click,
+  retry o repeticion de solicitud despues de una importacion completada.
+- **Trazabilidad**: `TransferImportReference`, metadata de importacion y eventos
+  auditados conservan envio, empresa emisora, entidad origen y entidad destino.
+- **Rechazo motivado**: el receptor debe indicar motivo; el emisor recibe evento
+  auditable `transfer_shipment_rejected_notification`.
+- **Bloqueo Marketplace**: un envio `bloqueado_marketplace` no puede abrirse ni
+  importarse hasta completar/revalidar compras obligatorias.
+- **Fallo recuperable**: `fallo_importacion` persiste como resultado fallido y
+  permite reintento controlado sin duplicar activos.
+- **Endpoints**:
+  `POST /transferencias/shipments/{shipment_id}/open`,
+  `POST /transferencias/shipments/{shipment_id}/reject` y
+  `POST /transferencias/shipments/{shipment_id}/import`.
+- **QA focal**: `py_compile` OK y pytest focal de transferencias OK
+  (`21 passed`). Warnings conocidos: Pydantic BIM `model_name/model_id`,
+  deprecations de dependencias de test y warning SQLite por rollback provocado
+  en test de bloqueo Marketplace.
+- **No interferencia**: sin frontend, sin UX BIM, sin Docker/Coolify/CI-CD,
+  sin cambios destructivos en PostgreSQL y sin permisos masivos nuevos.
+
+### 2026-06-16 - Bandeja API de entrada/salida (TASK-1921)
+
+- **Bandeja clasica**: se agrega API de bandeja para `todos`, `entrada` y
+  `salida`, con filtros por estado, fecha inicio/fin, paginacion y busqueda
+  omni por empresa legal, alias, descripcion y activo.
+- **Visual contract**: cada item expone estado con label, color y bandera
+  recuperable; `fallo_importacion` queda representado como estado recuperable.
+- **Alias empresa**: el alias se usa como etiqueta visual preferente sin perder
+  el nombre legal para busqueda, auditoria y trazabilidad.
+- **Timeline y metricas**: se agrega timeline resumido por envio y metricas de
+  enviados, recibidos, nuevos, bloqueados, listos, importados, rechazados,
+  cancelados, expirados y fallos de importacion.
+- **Semaforo preparado**: `GET /transferencias/tray-summary` deja disponible el
+  resumen de entrada para el futuro indicador del header, sin UI activa.
+- **Endpoints**:
+  `GET /transferencias/tray`,
+  `GET /transferencias/tray-summary` y
+  `GET /transferencias/shipments/{shipment_id}/timeline`.
+- **QA focal**: `py_compile` OK y pytest focal de transferencias OK
+  (`16 passed`). Warnings conocidos: Pydantic BIM `model_name/model_id` y
+  deprecations de dependencias de test.
+- **No interferencia**: sin frontend, sin UX BIM, sin Docker/Coolify/CI-CD y
+  sin cambios en auth/JWT/tenant ni APIs existentes fuera de transferencias.
+
+### 2026-06-16 - Requisitos Marketplace en transferencias (TASK-1920)
+
+- **Compra obligatoria**: se implementa evaluacion de requisitos Marketplace
+  por envio y empresa receptora; todos los productos detectados son
+  obligatorios.
+- **Precio vigente**: la consulta/revalidacion usa el precio actual del
+  producto Marketplace para la empresa receptora, no el precio historico del
+  emisor.
+- **Compra por empresa**: la verificacion busca pedidos `completed` de usuarios
+  pertenecientes a la empresa receptora.
+- **Bloqueo operativo**: sin compra completa, el envio mantiene
+  `can_open_or_import=false`; al revalidar compra completa pasa de
+  `bloqueado_marketplace` a `listo_para_importar`.
+- **UI preparada**: la respuesta incluye `purchase_url`, `checkout_items`,
+  `total_pending_price` y ayuda contextual compacta para boton de compra y
+  `Revalidar compras`.
+- **Endpoints**:
+  `GET /transferencias/shipments/{id}/marketplace-requirements` y
+  `POST /transferencias/shipments/{id}/marketplace-requirements/revalidate`.
+- **QA focal**: `py_compile` OK y pytest focal de transferencias/Marketplace OK
+  (`15 passed`). Warnings conocidos: Pydantic BIM `model_name/model_id` y
+  deprecations de dependencias de test.
+- **No interferencia**: no se modifica el checkout general ni pedidos
+  historicos Marketplace; sin frontend, BIM, Docker/Coolify/CI-CD ni auth/JWT.
+
+### 2026-06-16 - Preflight, dry-run y snapshot de envio (TASK-1919)
+
+- **Preflight clasico**: se implementa `dry-run` para envios de Proyecto y Base
+  de Trabajo, validando licencia, destinatario habilitado, activo y descripcion
+  sin crear registros cuando es simulacion.
+- **Snapshot inmutable**: cada envio creado guarda `contract_version=transfer-v1`,
+  hash SHA-256 canonico y payload exportable en `transfer_shipment_items`.
+- **Contenido autorizado**: Proyecto exporta datos del proyecto, EDT y
+  presupuestos con detalles/indirectos; Base de Trabajo exporta categorias,
+  subcategorias, recursos, APUs y lineas APU.
+- **Exclusiones contractuales**: cronogramas, Gantt, planificacion temporal,
+  documentos y uploads quedan fuera del snapshot y se reportan como secciones
+  excluidas.
+- **Marketplace**: el preflight detecta activos adquiridos o marcados
+  `purchase_bound`; si hay dependencias Marketplace exige confirmacion doble y
+  crea el envio en estado `bloqueado_marketplace`.
+- **Cancelacion**: se agrega cancelacion de envio solo antes de apertura.
+- **Endpoints**: `POST /transferencias/preflight`,
+  `POST /transferencias/shipments` y
+  `POST /transferencias/shipments/{shipment_id}/cancel`.
+- **QA focal**: `py_compile` OK, pytest focal de contrato/destinatarios/
+  preflight/snapshot OK (`13 passed`), JSON documental OK, smoke anti-BIM OK
+  y baseline enterprise OK. Warnings conocidos: Pydantic BIM
+  `model_name/model_id` y deprecations de dependencias de test.
+- **No interferencia**: sin frontend, sin UX BIM, sin Docker/Coolify/CI-CD y
+  sin cambios en auth/JWT/tenant ni en APIs existentes.
+
+### 2026-06-16 - Codigos publicos y destinatarios de transferencia (TASK-1918)
+
+- **Codigos publicos**: se implementa generacion unica `XXX - XXX` para
+  usuarios `administrador` y `superadministrador`, con hook en alta/promocion
+  de usuarios y saneamiento operativo de administradores existentes.
+- **Destinatarios empresa-a-empresa**: se agregan endpoints para ver codigo
+  propio, resolver codigo destino, confirmar alta y listar destinatarios. La
+  resolucion devuelve solo empresa, alias y nombre legal; no expone usuario
+  propietario del codigo.
+- **Guardas comerciales**: se bloquea la funcionalidad para licencias no
+  permitidas y se fija el limite de 3 destinatarios fijos por empresa emisora.
+  Los paquetes adicionales quedan preparados sobre
+  `transfer_extra_recipient_packs` para el slice `Conecta`.
+- **Anti-abuso**: 3 fallos consecutivos pausan validacion durante 5 minutos y
+  12 fallos en ventana de 24 horas bloquean la empresa emisora durante 7 dias.
+  Los eventos quedan auditados en `transfer_audit_events`.
+- **QA focal**: `py_compile` OK, pytest focal de contrato/codigos/
+  destinatarios/endpoints OK (`8 passed`), JSON documental OK, smoke anti-BIM
+  OK y baseline enterprise OK. Warnings conocidos: Pydantic BIM
+  `model_name/model_id` y deprecations de dependencias de test.
+- **No interferencia**: sin frontend, sin UX BIM, sin Docker/Coolify/CI-CD y
+  sin cambios en auth/JWT/tenant ni contratos existentes.
+
+### 2026-06-16 - Implementacion base Envios y Transferencias (TASK-1917)
+
+- **Backend clasico**: se crea la base tecnica del dominio
+  `Envios y Transferencias` con modelos para codigos publicos de
+  administradores, empresas destinatarias, paquetes adicionales, envios,
+  items, requisitos Marketplace, auditoria, resultado de importacion y
+  referencias de origen.
+- **Contrato API**: se expone `/api/v1/transferencias/contract` con
+  `transfer-v1`, estados aprobados, roles permitidos, licencias bloqueadas y
+  garantias tecnicas de dry-run, snapshot hash, adaptador separado, compra
+  Marketplace completa e idempotencia.
+- **DB no destructiva**: se agrega migracion Alembic
+  `de1917a1b2c3_transferencias_foundation.py`, encadenada tras
+  `de1912a1b2c3`, solo con creacion de tablas nuevas `transfer_*`.
+- **QA focal**: `py_compile` backend OK, `pytest`
+  `test_transferencias_contract.py` OK, JSON documental OK, smoke anti-BIM OK
+  y baseline enterprise OK. Warnings conocidos: Pydantic BIM
+  `model_name/model_id` y deprecations de dependencias de test.
+- **No interferencia**: sin frontend, sin UX BIM, sin Docker/Coolify/CI-CD,
+  sin cambios en auth/JWT/tenant ni en contratos existentes de Proyectos,
+  EDT, Presupuestos, Cronogramas o Marketplace productivo.
+
+### 2026-06-16 - Plan funcional Envios y Transferencias (TASK-1916)
+
+- **Plan fisico creado**: se documenta
+  `docs/Plan de Negocio/PLAN_ENVIOS_TRANSFERENCIAS.md` como plan rector para
+  `Otros Servicios > Envios y Transferencias`.
+- **Alcance funcional**: el modulo queda definido para transferir Bases de
+  Trabajo y Proyectos entre empresas, solo para Administrador y
+  Superadministrador, bloqueado para plan EXPRESS/prueba.
+- **Reglas comerciales**: se fijan destinatarios fijos, destinatarios
+  adicionales por paquetes Marketplace de 3 usuarios/1 mes, codigo publico
+  `XXX - XXX`, bandeja entrada/salida, semaforo de header y bloqueo por
+  dependencias Marketplace.
+- **Roadmap**: se deja la secuencia TASK-1917 a TASK-1926 para contrato,
+  destinatarios, preflight/snapshot, Marketplace, bandeja, import idempotente,
+  semaforo, paquetes, UI y baseline enterprise.
+- **Criterio visual**: la futura UI debe tomar `Proyectos` y
+  `Datos de Proyecto` como referencia principal de look & feel, con bandeja
+  operativa inicial, toolbar compacta, filtros segmentados, superficies soft y
+  componentes comunes del sistema clasico.
+- **Adenda funcional**: se documentan decisiones cerradas de licencia,
+  destinatarios, codigo publico y envio. La funcion base queda para `STANDARD`
+  y `PROFESSIONAL`; `EXPRESS`, `TESTER`, `ACADEMIC` y `TRAINING` quedan
+  bloqueadas. Los destinatarios son empresas destino validadas por codigo de
+  administrador, `Conecta` amplia 3 empresas destino por 30 dias desde compra,
+  es acumulable y parte de precio inicial `24,99`.
+- **Contenido transferible**: Proyecto queda limitado a datos del proyecto, EDT
+  y presupuestos; Base de Trabajo se transfiere completa. Quedan fuera
+  cronogramas, Gantt, documentacion y uploads. Los Proyectos deben estar
+  aptos/completos/exportables y los originados/comprados en Marketplace obligan
+  al receptor a comprar los productos requeridos si no los posee.
+- **Marketplace cerrado**: `Conecta` queda como producto exclusivo de Envios y
+  Transferencias: 3 empresas destino adicionales por compra, 30 dias desde
+  fecha/hora exacta, compras independientes, precio inicial `24,99 USD` y
+  destinatarios ligados al paquete concreto. Todos los productos Marketplace
+  incluidos en un activo enviado son obligatorios; sin compra completa no hay
+  apertura, importacion ni uso, y el precio aplicable es el vigente para la
+  empresa receptora al comprar.
+- **Recepcion/importacion**: el receptor puede rechazar con motivo y el emisor
+  debe verlo; toda importacion crea copia nueva sin fusion, conserva referencia
+  de origen y deja trazabilidad de pendiente/importado/resultado.
+- **Estados y bandeja**: se confirman estados compartidos por emisor/receptor
+  con acciones por rol y se agrega `fallo_importacion` como contingencia
+  tecnica auditable. La bandeja futura debe tener selector/filtro de estado con
+  colores, busqueda omni por nombre legal/alias/descripcion/activo, alias de
+  empresa como etiqueta visual preferente y rango de fechas por defecto desde
+  un mes atras hasta hoy, conservando historico permanente.
+- **Semaforo header**: para Administrador/Superadministrador debe mostrarse
+  siempre, con conteo total y conteo de nuevos, ejemplo `Comunicacion: 14` y
+  `Nuevos: 2`, indicador visual simple tipo circulo/parpadeo, refresco cada 30
+  o 60 segundos y sin desplegable complejo en la primera implementacion.
+- **Caducidad**: el envio caduca a los 60 dias. Si expira, solo se notifica por
+  canales normales del sistema; no puede reenviarse ni reactivarse desde el
+  historico. El historico debe indicar si fue importado y conservar siempre la
+  trazabilidad completa.
+- **UX visual**: se confirma que no basta copiar el aspecto de `Proyectos`;
+  deben reutilizarse tambien componentes y funcionamiento existente cuando
+  aplique. La bandeja debe ser lista compacta, con toolbar que incluya
+  `Nuevo envio` y `Refrescar`, y el preflight debe abrirse como modal tecnico.
+  Se acepta ayuda contextual Marketplace compacta para bloqueos por productos
+  obligatorios, con lista de productos, estado adquirido/pendiente, precio
+  vigente estimado, compra y `Revalidar compras`.
+- **Cierre de plan**: no quedan decisiones funcionales abiertas dentro del
+  alcance actual. El baneo por abuso de codigos queda fijado en 12 intentos
+  fallidos en 24 horas por empresa emisora, con baneo de 7 dias. `Conecta`
+  queda como nombre comercial visible y `Envios y Transferencias` como
+  contexto/subtitulo cuando haga falta claridad.
+- **Optimizaciones incorporadas**: se agregan como criterios obligatorios de
+  implementacion el `dry-run` de preflight, `contract_version`, hash/huella de
+  snapshot, adaptador de transferencia separado de venta, timeline visible,
+  metricas minimas, reintento controlado de `fallo_importacion`, E2E con
+  empresa mockup, guarda anti-regresion de licencias bloqueadas y checklist
+  visual contra `Proyectos`.
+- **TASKs de ejecucion**: se crean fisicamente `TASK-1917` a `TASK-1926` para
+  contrato tecnico, codigos/destinatarios, preflight/snapshot, requisitos
+  Marketplace, bandeja API, importacion idempotente, semaforo header, producto
+  `Conecta`, UI clasica y baseline enterprise.
+- **No interferencia**: cambio solo documental; sin backend, frontend, DB,
+  migraciones, BIM, Docker/Coolify/CI-CD ni cambios runtime.
+
+### 2026-06-16 - Cierre documental plan SaaS email, alias y empresas (TASK-1915)
+
+- **Cierre de plan**: quedan cerradas documentalmente `TASK-1911` a
+  `TASK-1914`, cubriendo alias de empresa, email corporativo SaaS, soporte
+  Gmail, URL publica editable, gestion SaaS de empresas, filtro por estado,
+  doble confirmacion de suspension y pulido visual de Empresas SaaS.
+- **Sin TASK tecnica abierta**: la carga de credenciales reales SMTP/Gmail se
+  clasifica como operacion de superadministracion desde
+  `Administracion Global > Email corporativo`, no como deuda tecnica pendiente
+  del plan.
+- **No interferencia**: cierre solo documental; sin backend, frontend
+  funcional, DB, migraciones, BIM, Docker/Coolify/CI-CD ni cambios runtime.
+
+### 2026-06-15 - Ajuste visual toolbar Empresas SaaS (TASK-1914)
+
+- **Pulido visual SaaS**: `Administracion Global > Empresas SaaS` reorganiza
+  buscador, filtros de estado y accion `Actualizar` en una unica toolbar
+  compacta, evitando los controles apilados de anchura completa.
+- **Lectura operativa**: los filtros conservan el segmentado por estado y ahora
+  muestran contador por categoria sin alterar la logica de pendientes,
+  suspendidas, activas o expiradas.
+- **Guardas**: la smoke SaaS de empresas valida la nueva estructura compacta,
+  manteniendo el aislamiento respecto a `Settings`.
+
+### 2026-06-15 - Aislamiento SaaS de gestion de empresas (TASK-1913)
+
+- **Seguridad SaaS**: la card `Empresas` de `Administracion Global` ya no abre
+  `/settings?tab=empresas`; ahora usa la ruta exclusiva
+  `/admin-global/empresas`.
+- **Settings protegido**: cualquier intento de abrir `/settings?tab=empresas`
+  redirige a `/admin-global/empresas` y `Settings` deja de renderizar la rama
+  de gestion SaaS de empresas.
+- **Pendientes visibles**: el backend expone `registration_status` para
+  distinguir empresas activas, suspendidas, con validacion expirada y
+  pendientes de validacion de email. La vista SaaS muestra `Pendiente
+  validacion` e incorpora filtro por estado.
+- **Suspension protegida**: suspender una empresa desde SaaS requiere doble
+  confirmacion.
+- **Guarda enterprise**: nueva smoke
+  `smoke-classic-saas-empresas-boundary.mjs` integrada en el baseline con
+  frontend para evitar regresiones de enlace o superficie.
+
+### 2026-06-15 - Alias de empresa y email corporativo SaaS clasico (TASK-1911/TASK-1912)
+
+- **Alias de empresa**: se agrega `Empresa.alias` nullable con migracion Alembic
+  no destructiva y se expone en schemas de empresa/registro publico.
+- **Registro publico**: el modal clasico permite capturar alias de empresa y el
+  email de activacion muestra ese alias cuando existe.
+- **Display clasico**: `Login`, `AppLayout` y `Settings` usan un helper
+  compartido para mostrar alias de empresa de forma preferente sin perder el
+  nombre legal.
+- **Email corporativo SaaS**: `Administracion Global > Email corporativo`
+  incorpora configuracion persistente de backend email, remitente, URL publica
+  de activacion, SMTP, usuario, password y TLS/SSL, restringida al menu SaaS de
+  superadministrador.
+- **Aislamiento Settings**: `Settings` queda sin gestion de email corporativo
+  SaaS; cualquier email de empresa en Settings corresponde a otro alcance y no
+  usa `/admin-config/email-settings`.
+- **Correccion de navegacion SaaS**: `Superadministradores` conserva
+  `/settings?tab=superadmins` y la card `Email corporativo` apunta a
+  `/admin-global/email-corporativo`; la smoke valida ambos enlaces por seccion.
+- **Soporte Gmail**: la UI incluye preset para `smtp.gmail.com:587` con
+  STARTTLS; se requiere contrasena de aplicacion de Google. Al detectar
+  `@gmail.com` o `@googlemail.com` en remitente/usuario SMTP, la pantalla SaaS
+  completa automaticamente backend `smtp`, host, puerto y TLS seguros. La prueba
+  Gmail queda protegida si falta `SMTP_PASSWORD` nueva o previamente guardada,
+  y el backend traduce el error `535 5.7.8 BadCredentials` a una guia de
+  correccion para superadministrador. Al guardar una password Gmail se eliminan
+  espacios del codigo de aplicacion pegado. El preflight incluye el caso en que
+  Google no ofrece app passwords para la cuenta, con enlace directo a
+  `https://myaccount.google.com/`.
+- **Ayuda SMTP**: `Email corporativo` incluye boton de ayuda con Gmail
+  587/STARTTLS, Gmail 465/SSL, SMTP generico y URL publica de activacion.
+- **Email de prueba**: superadministrador puede enviar un email de prueba desde
+  el panel SaaS para verificar credenciales y conectividad SMTP.
+- **URL publica editable**: `FRONTEND_PUBLIC_URL` queda persistida en
+  `SystemConfig`, con valor inicial
+  `https://giproy-network.excompc.dpdns.org`, para generar enlaces de
+  confirmacion actualizables.
+- **Entrega real**: el registro pendiente ya no considera `EMAIL_BACKEND=mock`
+  como entrega real de email; se debe configurar SMTP para completar altas con
+  confirmacion.
+- **Dependencia email**: `backend/requirements.txt` incluye
+  `email-validator==2.2.0` para evitar validacion degradada de campos email en
+  Pydantic/FastAPI.
+- **Validacion**: `py_compile` backend OK, pytest focal de registro/config
+  SaaS/email OK (`12 passed`), `npm run build` OK, smoke anti-BIM OK, smoke de
+  fronteras API clasicas OK, nuevas smokes `admin-config/email-settings` y
+  alias de empresa OK, guardas `axiosConfig`/`console.log` OK y baseline
+  enterprise `--include-frontend` OK.
+- **DB local**: `alembic upgrade de1912a1b2c3` aplicado; `empresas.alias` e
+  `ix_empresas_alias` existen fisicamente y `alembic current` incluye
+  `de1912a1b2c3`.
+- **Suite backend completo**: `pytest app/tests -q` deja `440 passed` y `7
+  failed` en cronogramas/base de trabajo ajenos al plan activo; no se toman
+  como bloqueo del slice alias/email.
+- **No interferencia**: sin BIM, Docker/Coolify/CI-CD, EDT, presupuestos,
+  cronogramas ni cambios destructivos en PostgreSQL.
+
+### 2026-06-11 - Sistema de validacion RUC Ecuador: DB config, geolocalizacion y guardas enterprise
+
+- **Config en DB**: se crea modelo `SystemConfig` (tabla `system_config`) para almacenar claves de configuracion. `ECUADOR_API_KEY` se guarda ahi con seed por defecto desde `main.py`.
+- **Admin config API**: endpoints `GET/PUT /admin-config` para superadmins, con frontend en `adminConfig.js`.
+- **UI de configuracion**: en `Settings > Ajuste SaaS` se agrega card "EcuadorAPI" con key enmascarada y modal de edicion. Solo superadmin.
+- **Geolocalizacion por IP**: `RegisterModal` consulta `ipapi.co/json` desde el browser al abrirse y auto-selecciona el pais del cliente.
+- **Guarda backend**: endpoint `POST /register` valida RUC contra EcuadorAPI si pais es Ecuador; rechaza si no pasa.
+- **Guarda frontend**: `RegisterModal.handleSubmit` valida RUC estructural + API antes de enviar si pais es Ecuador.
+- **Bugfix**: `usuario.py:validar_ruc_public` usaba `settings.ECUADOR_API_KEY` directo en vez de la variable resuelta.
+- **Deteccion de ISP**: el pais se detecta desde el navegador del cliente, no del servidor.
+- **Sin archivos**: cero referencias a `EcuadorAPi.txt` en el codigo. La key vive en DB (SystemConfig) con seed inicial.
+- **Validacion**: `py_compile` backend OK, tests auth OK (10 pasaron).
+- **No interferencia**: sin cambios en auth/JWT, tenant, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI-CD.
+
+### 2026-06-11 - Validacion y auto-llenado de RUC Ecuador en registro publico
+
+- **Registro publico**: el campo `Identificacion Fiscal / Documento (RUC/DNI/NIT)` ahora valida RUC ecuatoriano en frontend: 13 digitos, provincia 01-24, tercer digito 0-5 (persona natural), terminacion `001` y digito verificador modulo 10.
+- **Feedback visual**: al salir del campo, si el RUC no cumple la estructura, se muestra borde rojo, fondo rojo y mensaje de error (mismo comportamiento que contrasena).
+- **Auto-llenado**: si el RUC pasa validacion estructural, se consulta EcuadorAPI (`GET /register/validar-ruc`). Cuando retorna datos, se auto-completan `Nombres`, `Apellidos` y `Nombre Completo`.
+- **Feedback de error en blur**: si la consulta SRI retorna `valido=false` o falla por red, el campo RUC muestra borde rojo con mensaje de error (mismo patron que passwordMismatch). Caso: RUC valido estructuralmente pero no encontrado en SRI → mensaje "El RUC no pudo ser verificado contra el registro civil."; error de red → "No se pudo verificar el RUC. Verifica tu conexión e intenta de nuevo."
+- **Backend publico**: nuevo endpoint `GET /api/v1/register/validar-ruc?ruc=XXX` que consulta EcuadorAPI usando `ECUADOR_API_KEY` del backend (sin exponerla al frontend).
+- **Config**: se agregan `ECUADOR_API_KEY` y `ECUADOR_API_BASE_URL` a `core/config.py` con valores por defecto para EcuadorAPI.
+- **Utilidad compartida**: `rucValidator.js` exporta `validarRucEcuador` y `requiereValidacionRucEcuador` para reuso.
+- **Validacion**: `py_compile` backend OK, sintaxis frontend OK.
+- **No interferencia**: sin DB, auth/JWT, tenant, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI/CD ni datos runtime.
+- **Pendiente**: registrar `ECUADOR_API_KEY` en `backend/.env` para activar la consulta externa.
+
+### 2026-06-10 - Normalizacion internacional de movil en registro publico (TASK-1910)
+
+- **Registro publico**: el campo `Movil de Contacto` normaliza al perder foco usando el prefijo internacional del pais.
+- **Regla Ecuador**: se acepta `09XXXXXXXX`, `9XXXXXXXX` o `+593 9XXXXXXXX`; al normalizar se quita el `0` local y se conserva `+593`.
+- **Aviso inline**: si el movil no cumple longitud/formato, el campo muestra resaltado y mensaje antes de enviar.
+- **Submit protegido**: `RegisterModal` aplica la misma validacion antes de llamar a `/register`.
+- **Validacion**: `npm run build` OK, smoke anti-BIM OK, smoke de fronteras API clasicas OK y guarda focal sin `console.*`/`axiosConfig` en archivos tocados. Warning conocido: chunks grandes Vite.
+- **No interferencia**: sin backend, DB, auth/JWT, tenant, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI/CD ni datos runtime.
+
+### 2026-06-10 - Validacion visual de contrasenas en registro publico (TASK-1909)
+
+- **Registro publico**: los campos `Contraseña` y `Confirmar Contraseña` permiten ver/ocultar el texto digitado con iconos.
+- **Comprobacion al salir**: al abandonar cualquiera de los dos campos, si ambos tienen datos y no coinciden, se muestra aviso inline y resaltado visual.
+- **Guardas frontend**: se conserva la validacion final del submit y se retiran trazas `console.error` del archivo tocado.
+- **Validacion**: `npm run build` OK, smoke anti-BIM OK y smoke de fronteras API clasicas OK. Warning conocido: chunks grandes Vite.
+- **No interferencia**: sin backend, DB, auth/JWT, tenant, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI/CD ni datos runtime.
+
+### 2026-06-10 - Validacion email obligatoria en registro publico (TASK-1908)
+
+- **Registro pendiente**: `/register` ya no devuelve token ni activa empresa/administrador de forma inmediata; crea ambos inactivos y responde `pending_email_verification`.
+- **Email obligatorio**: se agrega token de validacion con enlace `/verify-registration`, caducidad de 5 horas y envio mediante `send_transactional_email`.
+- **RUC protegido**: el alta publica persiste `Empresa.ruc` y bloquea una segunda empresa para el mismo RUC de administrador con mensaje controlado.
+- **Purgado de caducados**: los registros pendientes no validados se pueden eliminar por completo mediante `backend/scripts/cleanup_expired_registration_verifications.py`; el registro tambien purga pendientes caducados del mismo email/RUC antes de reintentar.
+- **Frontend clasico**: el modal de registro deja de auto-iniciar sesion y muestra instruccion de validar email; se agrega pagina publica `/verify-registration`.
+- **QA local PostgreSQL**: se crea de forma no destructiva la tabla `registration_verification_tokens` en `giproy_erp` para test real y se elimina la empresa historica `giproyecuador@gmail.com` solicitada para repetir el flujo.
+- **Validacion focal**: `py_compile` backend OK y `pytest app/tests/test_public_registration_verification.py -q` OK (`3 passed`).
+- **Baseline enterprise**: `tools/ai_tools/validate_enterprise_baseline.py --include-frontend` OK completo, con warnings conocidos.
+- **No interferencia**: sin BIM, Docker/Coolify/CI/CD, EDT, presupuestos, cronogramas ni datos runtime.
+
+### 2026-06-09 - Plan y fundacion de avisos de ciclo de vida de licencias (TASK-1898/TASK-1899)
+
+- **Plan SaaS licencias**: se documenta `LICENSE_LIFECYCLE_NOTIFICATION_PLAN` con bienvenida, aviso 7 dias, solo lectura, recordatorios, cierre, backup y recuperacion superadmin.
+- **TASKs de trabajo**: se crea la cadena `TASK-1898` a `TASK-1906` para separar fundacion, email real, bienvenida, caducidad, solo lectura, backup/cuarentena, recuperacion SaaS y purga fisica.
+- **Backend no destructivo**: se agrega `LicenseNotificationEvent` y migracion Alembic para cola/auditoria idempotente de avisos por canal, destinatario y dedupe key.
+- **Compra formalizada general**: Marketplace registra `purchase_formalized` para cualquier compra completada por PayPal/confirmacion online, transferencia validada o checkout clasico.
+- **Fin de compra con vigencia**: se agrega fundacion `purchase_lifecycle_ended` para productos con `product_meta.duration_months` cuando llegan a su fecha de fin.
+- **Mensajes cliente**: los payloads transaccionales incorporan `title`, `subject`, `body`, `severity` y `action_label` para que email e in-app consuman una comunicacion legible.
+- **Consumo y entrega**: se agrega API `license-notifications` para listar avisos internos pendientes, marcarlos como leidos y despachar emails pendientes en modo mock superadministrador.
+- **Housekeeping de vencimiento**: se agrega endpoint superadministrador para detectar productos comprados vencidos, generar `purchase_lifecycle_ended` y despachar email mock opcional.
+- **Email transaccional**: `email_utils` agrega adaptador `send_transactional_email` con backend `mock` por defecto y `smtp` configurable; el dispatcher marca `sent` o `failed` con evidencia de entrega.
+- **Reintento controlado**: el dispatcher, endpoints de despacho/housekeeping y runner soportan `retry_failed` para recuperar emails fallidos despues de corregir la configuracion SMTP.
+- **Comunicación interna**: `AppLayout` consume `license-notifications` y muestra avisos internos de compra/licencia en el header principal, con ack para avisos de una sola vez.
+- **Caducidad de licencia**: se colan avisos `license_expiring_soon`, `license_readonly` y `license_data_deletion_today` para ventana de 7 dias, solo lectura y ultimo dia de disponibilidad.
+- **Housekeeping integral**: se agrega `/api/v1/license-notifications/housekeeping/run` para que superadministracion pueda probar manualmente compra con vigencia, caducidad de licencia, solo lectura y despacho opcional.
+- **Estado antes de avisar**: el housekeeping integral ahora ejecuta primero el housekeeping de licencias, de modo que una licencia vencida pasa a `expired/read_only` antes de colar `license_readonly`.
+- **QA local PostgreSQL**: se crea de forma no destructiva `license_notification_events` en `giproy_erp`; `dry-run` 2027-03-05 genera `license_expiring_soon` y `dry-run` 2027-03-13 genera `license_readonly`, sin persistir eventos.
+- **Runner operativo**: se agrega `backend/scripts/license_notification_housekeeping.py` para ejecutar por tarea programada externa el fin de compra con vigencia, caducidad de licencia y despacho opcional de emails pendientes.
+- **Bienvenida inicial**: `assign_license_to_company` registra eventos `email` e `in_app` cuando una licencia comercial queda pagada/confirmada, incluyendo flujo Marketplace/transferencia.
+- **Auditoria**: se registra `license_welcome_notifications_queued` en `license_events` con canales y eventos generados.
+- **No alcance actual**: no se configura proveedor SMTP real, UI de recuperacion, backup/cuarentena ni purga fisica; quedan en TASKs posteriores.
+- **Validacion**: `py_compile` backend focal OK incluyendo runner, pytest de notificaciones OK (`13 passed`), E2E Marketplace SaaS OK (`1 passed`), `npm run build` OK, smoke anti-BIM OK y guardas textuales frontend OK.
+
+### 2026-06-09 - Licencia activa visible en header principal (TASK-1897)
+
+- **Header clasico**: `AppLayout` muestra el bloque como `Contexto Operativo -> Empresa -> Licencia activa`.
+- **Estado compacto**: el header reutiliza `getLicenseStatusLabel` y `getLicenseStatusTone` para exponer el estado de licencia en escritorio.
+- **Sin contrato nuevo**: se reutiliza `licenseInfo` de `AuthContext`; no hay llamadas API, backend, DB ni migraciones nuevas.
+- **No interferencia**: sin BIM, Docker/Coolify/CI/CD, auth/JWT/tenant, EDT, presupuestos, cronogramas ni archivos runtime.
+
+### 2026-06-09 - Plantilla Modo BIM alineada al baseline clasico (TASK-1896)
+
+- **Prompt BIM**: `docs/plantillas prompt/Prompt Modo BIM.txt` queda actualizado con la misma estructura operativa del Modo Clasico.
+- **Gobierno enterprise**: incorpora baseline `TASK-1807`, Fase 6 documental, pausa Docker/Coolify/CI/CD y reglas de no reapertura sin TASK explicita.
+- **Aislamiento BIM**: formaliza backend unico con dominio BIM aislado, frontend BIM desacoplado, feature flags/allowlists y rollback limpio.
+- **TASKs BIM**: exige estructura TASK propia para BIM, independiente del carril clasico, sin reutilizar ni mezclar numeracion de TASKs clasicas.
+- **Carril paralelo**: se crea `docs/tasks/bim` con `BIM_TASK_INDEX.md`, `README.md` y la serie `BIM-TASK-0000` a `BIM-TASK-0014`.
+- **Documentos maestros BIM**: `BIM_INDEX`, `BIM_EXECUTION_ROADMAP`, `BIM_MASTER_PLAN`, `BIM_PARALLEL_IMPLEMENTATION_STRATEGY` y `BIM_VALIDATION_PLAN` quedan alineados a la estructura paralela.
+- **Proteccion clasica**: exige validar GiProy Clasico con BIM apagado y prohibe dependencias prematuras desde modulos clasicos hacia BIM.
+- **Reglas tecnicas**: agrega reglas de frontend BIM, backend BIM e integracion futura BIM `<->` EDT/APUs/Presupuesto, conservando guardas `axiosConfig` y `console.log`.
+- **Validacion**: cambio documental acotado; sin backend, frontend productivo, DB, migraciones, BIM runtime, Docker/Coolify/CI/CD ni archivos runtime.
+
+### 2026-06-09 - Registro publico de empresa administradora (TASK-1895)
+
+- **Registro publico**: el formulario queda alineado con el contrato real de alta de empresa + usuario administrador inicial.
+- **Credenciales**: el label pasa a `Email (login)`, el email ocupa una fila completa y la contrasena/confirmacion quedan debajo en una segunda fila compacta.
+- **Rol**: el selector `Rol de Colaborador` queda oculto en el registro publico; `/register` conserva el rol administrador server-side.
+- **Ubicacion**: el flujo visual queda `Pais -> Provincia -> Canton -> Ciudad`, reutilizando `maestrosApi` y `SearchableSelect`.
+- **Pais por defecto**: el registro publico abre con `Ecuador` preseleccionado para activar el flujo automatico de provincias/cantones.
+- **Validacion UX**: antes de enviar se exige completar todos los datos visibles excepto `alias`; las advertencias usan `appAlert`.
+- **Scroll y densidad**: el formulario usa campos compactos en modo registro y scroll especifico `MotionScrollbar` + `giproy-motion-scrollbar-hide`.
+- **Validacion**: `npm run build` OK, anti-BIM OK y smoke de fronteras API clasicas OK. Warning conocido: chunks grandes Vite.
+
+### 2026-06-09 - Formas de pago comerciales globales y transferencia bancaria activa (TASK-1894)
+
+- **Politica global**: las formas de pago activas/listas aplican a todas las compras disponibles del checkout comercial clasico, no solo a compras publicas.
+- **Backend Marketplace**: `create_checkout_draft` valida que el metodo de pago solicitado exista, este activo y tenga readiness operativo antes de crear drafts.
+- **Transferencia bancaria**: el submit de comprobante revalida que `bank_transfer` siga activo/listo para evitar drafts antiguos con metodo desactivado.
+- **E2E SaaS**: la certificacion con empresa mockup ahora prueba bloqueo de transferencia inactiva, activacion admin de `bank_transfer` y compra de licencia base + pack SaaS con el mismo metodo.
+- **Dato local**: `bank_transfer` queda activo como primer metodo de pago comercial local; PayPhone y PayPal siguen registrados pero incompletos/inactivos hasta configurar credenciales.
+
+### 2026-06-08 - Equipo operativo MVP: cupos, EDT, locks y propuestas (TASK-1893)
+
+- **Backend Equipo**: se agregan modelos persistentes `SaasEquipoSeat`, `SaasEquipoEdtAssignment`, `SaasEquipoLock` y `SaasEquipoChangeProposal`.
+- **Migracion**: se agrega Alembic `cd1893e4f5a6_saas_equipo_collaboration.py` con tablas nuevas no destructivas.
+- **Servicio**: `saas_equipo_service` resuelve cupos desde capacidades comerciales/`PACK_EQUIPO`, asigna asientos, sincroniza alcance EDT con `ProyectoAsignacion`, revoca permisos, gestiona locks y revisa propuestas.
+- **API clasica**: nuevo router `/api/v1/equipo` para limites, contexto operativo, lectura operacional, asientos, asignaciones EDT, locks, propuestas y resumen superadministrador.
+- **Aprobacion controlada**: las propuestas aprobadas por administrador solo aplican campos permitidos sobre lineas de presupuesto (`descripcion`, `unidad`, `cantidad`, `precio_unitario`, `notas`).
+- **Frontend clasico**: `frontend/src/api/equipo.js` encapsula la API; `SaaS / Superadministrador` permite ver cupos, crear asignaciones colaborador/proyecto/EDT, revocar alcances, liberar locks y aprobar/rechazar propuestas.
+- **Presupuesto clasico**: se agrega MVP de uso diario para colaboradores Equipo: lock de linea y propuesta de cantidad mediante `equipoApi` y `appPrompt`, sin escritura directa del presupuesto.
+- **Guardas**: se agrega `smoke-classic-equipo-api-boundary.mjs` para evitar rutas `/equipo` hardcodeadas fuera del cliente API.
+- **Validacion**: `py_compile` OK, pytest Equipo/EDT/Marketplace SaaS OK (`3 passed`), `npm run build` OK, anti-BIM OK, smoke Equipo API boundary OK, smoke Presupuesto API boundary OK y baseline enterprise con frontend OK. Warnings conocidos: Pydantic legacy, SQLAlchemy legacy y chunks grandes Vite.
+- **Pendiente fuera de MVP**: extension controlada a cronogramas/reporting si se autoriza.
+
+### 2026-06-08 - MVP Equipo Slice 1 perimetro EDT anti-fuga (TASK-1892)
+
+- **Backend EDT**: `GET /api/v1/edt/project/{proyecto_id}` ahora aplica permisos por `ProyectoAsignacion` para usuarios no administradores.
+- **Anti-fuga**: un colaborador asignado a una rama EDT recibe solo esa rama, sus descendientes y el contexto ancestro minimo; no recibe ramas hermanas.
+- **Escritura protegida**: crear, editar, mover, borrar y operaciones bulk de EDT quedan reservadas a administradores/superadministradores durante el MVP.
+- **Empresa mockup**: se agrega `backend/app/tests/test_equipo_edt_mvp.py` para verificar colaborador asignado, usuario sin asignacion, administrador completo y filtrado de presupuesto sin borrar lineas ocultas.
+- **Plan por slices**: `TASK-1884` y el plan de negocio separan Equipo en slices: perimetro, entrega comercial, asignacion UI, locks, bitacora y aprobacion/rechazo.
+- **Validacion**: `py_compile` OK, pytest MVP Equipo OK (`1 passed`), pytest combinado con E2E Marketplace SaaS OK (`2 passed`), anti-BIM OK y baseline enterprise con frontend OK. Warnings conocidos: Pydantic BIM `model_name/model_id`, deprecations legacy/TestClient y chunks grandes Vite.
+
+### 2026-06-08 - Certificacion E2E Marketplace SaaS con empresa mockup (TASK-1891)
+
+- **E2E aplicacion**: se agrega `backend/app/tests/test_marketplace_saas_policy_e2e.py` usando rutas reales `/api/v1` con `TestClient`.
+- **Flujo certificado**: catalogo Marketplace, checkout draft, transferencia bancaria, confirmacion superadmin, entrega de licencia base y entrega de Pack Conecta como `saas_right`.
+- **Empresa mockup**: se valida una empresa compradora con licencia `Estándar`, producto SaaS adicional `PACK_CONECTA`, capacidades comerciales, cupos Conecta y resumen admin.
+- **Permisos**: un administrador comprador no puede editar productos SaaS administrados; superadministrador si puede hacerlo.
+- **Correccion**: `marketplace_service._normalize_product_meta` conserva metadata comercial existente/nueva en ediciones parciales, evitando que una edicion de precio borre `delivery_kind`, `commercial_code` u otros datos de entrega SaaS.
+- **Validacion**: pytest E2E OK (`1 passed`), pytest focal combinado OK (`39 passed`), `npm run build` OK, smokes clasicos OK y baseline enterprise con frontend OK. Warnings conocidos: Pydantic BIM `model_name/model_id`, deprecations legacy/TestClient y chunks grandes Vite.
+
+### 2026-06-08 - TASK de certificacion E2E Marketplace SaaS (TASK-1891)
+
+- **Control QA**: se crea `TASK-1891` para impedir cierre al 100% sin simulacion de aplicacion completa.
+- **Criterio**: la certificacion debe usar empresa mockup, compra/entrega Marketplace, visibilidad de productos por empresa, cupos Conecta, permisos superadmin y validaciones enterprise.
+- **No alcance**: no activa Docker/Coolify/staging/produccion, BIM ni cambios destructivos en datos runtime reales.
+
+### 2026-06-08 - Auditoria y KPIs Conecta admin (TASK-1890)
+
+- **Backend**: se agrega `GET /api/v1/conecta/admin/summary` solo para superadministrador.
+- **KPIs**: el resumen informa empresas habilitadas, cupos contratados/usados/disponibles, cupos activos bloqueados por 30 dias, liberaciones y excepciones.
+- **Frontend**: `conectaApi.getAdminSummary()` alimenta un KPI global Conecta en `SaaS / Superadministrador`.
+- **Pruebas**: se amplian tests de endpoints Conecta para resumen admin y restriccion de acceso no-superadmin.
+- **Validacion**: `py_compile` OK; pytest focal Conecta OK (`12 passed`); smoke Conecta OK; anti-BIM OK; `npm run build` OK; baseline enterprise con frontend OK. Warnings conocidos: Pydantic BIM y chunks grandes Vite.
+
+### 2026-06-08 - UI clasica Conecta en SaaS y Superadministrador (TASK-1889)
+
+- **Cliente API**: se agrega `frontend/src/api/conecta.js` para encapsular `/api/v1/conecta` dentro de `frontend/src/api`.
+- **Settings**: se muestra Conecta como producto SaaS separado de licencia base, con cupos contratados/usados/disponibles, asignacion por email invitado y liberacion normal.
+- **SaaS / Superadministrador**: `AdminGlobalLicencias` muestra cupos Conecta por empresa y permite liberacion excepcional auditada solo desde superadministracion.
+- **Guardas**: se agrega smoke `smoke-classic-conecta-api-boundary.mjs` para evitar rutas `/conecta` hardcodeadas fuera del cliente, imports directos de `axiosConfig` en UI y `console.log` productivos.
+- **Validacion**: smokes de frontera OK, anti-BIM OK, tenant superadmin OK, `npm run build` OK y baseline enterprise con frontend OK. Warning conocido: chunks grandes Vite.
+
+### 2026-06-08 - Endpoints clasicos Conecta y frontera API (TASK-1888)
+
+- **Conecta API**: se agrega router clasico `/api/v1/conecta` con limites, listado de slots, creacion y liberacion.
+- **Tenant activo**: usuarios no superadministradores operan siempre sobre su empresa activa; superadministrador puede indicar `empresa_id`.
+- **Regla server-side**: la API delega cupos, bloqueo de 30 dias y auditoria en `saas_conecta_service`.
+- **Excepcion controlada**: `force=true` para liberacion anticipada solo es efectivo con rol `superadministrador`.
+- **No alcance**: sin UI, sin Marketplace nuevo, sin permisos sobre proyectos/EDT/presupuestos/cronogramas, sin BIM, Docker/Coolify/CI/CD ni datos runtime.
+- **Validacion**: `py_compile` OK; pytest focal Conecta servicio/endpoints OK (`10 passed`), con warnings conocidos/no bloqueantes.
+
+### 2026-06-08 - Backend Conecta, cupos y regla de 30 dias (TASK-1887)
+
+- **Conecta backend**: se agrega el modelo persistente `SaasConectaSlot` y la migracion `saas_conecta_slots`.
+- **Politica de cupos**: `saas_conecta_service` resuelve cupos por empresa desde `commercial_capabilities_service`, separando cupos base de licencia y Pack Conecta comprado.
+- **Regla comercial**: se bloquea la liberacion/reasignacion antes de 30 dias salvo excepcion explicita de superadministrador.
+- **Auditoria**: asignacion y liberacion de cupos registran `LicenseEvent` sin enlazar proyectos, EDT, presupuestos ni cronogramas.
+- **Alcance controlado**: sin endpoints, sin UI, sin checkout nuevo, sin auth/JWT/tenant, sin permisos de proyecto, sin BIM, sin Docker/Coolify/CI/CD ni datos runtime.
+- **Validacion**: `py_compile` OK; pytest focal `test_saas_conecta_service.py` OK (`5 passed`).
+
+### 2026-06-08 - Contrato Conecta MVP y TASKs de ejecucion (TASK-1883)
+
+- **Decision Conecta**: el MVP queda definido como conexion usuario-usuario dentro de empresa activa.
+- **Separacion funcional**: Conecta no concede acceso automatico a proyectos, EDT, presupuestos, cronogramas, archivos ni colaboracion federada.
+- **Politica SaaS**: los cupos deben resolverse server-side desde `commercial_capabilities_service`, usando licencia base/derechos SaaS y regla de no reasignacion antes de 30 dias.
+- **TASKs hijas**: se crean `TASK-1887` backend/cupos, `TASK-1888` endpoints/frontera API, `TASK-1889` UI clasica y `TASK-1890` auditoria/KPIs.
+- **Alcance controlado**: solo documentacion; sin codigo, DB, migraciones, endpoints, UI, auth/JWT/tenant, BIM, Docker/Coolify/CI/CD ni datos runtime.
+
+### 2026-06-08 - Marca de agua PDF server-side en reporting SaaS (TASK-1881 Slice 2)
+
+- **Reporting backend**: los PDFs modernos de `/reporting/export` reciben marca de agua desde `commercial_capabilities_service` cuando `requires_watermark=true`.
+- **Politica SaaS**: PDF puede emitirse con marca de agua para licencias no comerciales o restringidas; `xlsx` y `pdf_excel` siguen bloqueados si `excel_exports=false`.
+- **Cobertura PDF**: la marca aplica en PDF comun de reportes, PDF documental EDO/EDT, PDF ejecutivo de Uso de Recursos y conversion `pdf_excel`.
+- **Cache seguro**: el cache de exportacion moderna incorpora el marcador de marca de agua para evitar servir PDFs desactualizados tras cambios de licencia.
+- **Cierre TASK-1881**: quedan implementadas las guardas server-side de Excel/PDF y marca de agua sin cambios frontend.
+- **Validacion**: `py_compile` OK; pytest focal de reporting OK (`16 passed`, 1 warning Pydantic conocido); smoke anti-BIM OK; baseline enterprise sin frontend OK con warnings conocidos Pydantic BIM `model_name/model_id`.
+- **No interferencia**: sin frontend, DB, migraciones, auth/JWT/tenant, EDT, presupuestos, cronogramas funcionales, BIM, Docker/Coolify/CI/CD ni datos runtime.
+
+### 2026-06-08 - Guarda backend de Excel en reporting SaaS (TASK-1881 Slice 1)
+
+- **Reporting backend**: `/reporting/export` consulta `commercial_capabilities_service` antes de construir exportaciones modernas.
+- **Politica SaaS**: los formatos `xlsx` y `pdf_excel` devuelven `403` cuando la capacidad efectiva `excel_exports` es falsa.
+- **Compatibilidad clasica**: se conserva la guarda comercial previa para no relajar PDF no comercial hasta implementar marca de agua server-side.
+- **Validacion**: `py_compile` OK; pytest focal de reporting OK (`14 passed`, 1 warning Pydantic conocido); smoke anti-BIM OK.
+- **No interferencia**: sin frontend, DB, migraciones, auth/JWT/tenant, EDT, presupuestos, cronogramas funcionales, BIM, Docker/Coolify/CI/CD ni datos runtime.
+
+### 2026-06-08 - Guia de renovacion y cambio de plan SaaS (TASK-1882 Slice 4)
+
+- **Settings / Mi Empresa**: se agrega franja contextual de gestion de plan con mensajes orientados a renovacion cuando la licencia esta en gracia, solo lectura o estado vencido.
+- **CTA comercial**: `Renovar plan actual` y `Evaluar cambio` abren Marketplace con `?saas=1&q=...&intent=...`, enfocando el producto oficial correspondiente.
+- **Marketplace**: la tienda lee `q` desde la URL y aplica busqueda inicial sobre el catalogo SaaS oficial sin cambiar checkout ni entrega.
+- **Cierre TASK-1882**: quedan implementadas las vistas clasicas de estado/capacidades en Superadministracion, Marketplace y Settings.
+- **Validacion**: `npm run build` OK; smoke anti-BIM OK; smoke API boundaries OK; smoke Marketplace Admin API OK; guardas textuales sin `axiosConfig`, `console.log` productivo ni BIM en `Settings.jsx` y `Marketplace.jsx`.
+- **No interferencia**: sin backend, API nueva, DB, auth/JWT/tenant, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI/CD ni datos runtime.
+
+### 2026-06-08 - Estado SaaS visible en Settings (TASK-1882 Slice 3)
+
+- **Settings / Mi Empresa**: se agrega lectura de productos SaaS adicionales, derechos efectivos y capacidades comerciales resueltas por backend.
+- **Separacion comercial**: la licencia de funcionamiento se mantiene separada de packs/modulos comprados; Settings no edita productos SaaS.
+- **Marketplace**: `?saas=1` abre directamente el filtro `Planes SaaS` para continuar la exploracion del catalogo oficial.
+- **Alcance controlado**: no se cambia checkout, entrega, permisos, backend, DB ni contratos API; la UX guiada de renovacion/cambio de plan queda pendiente en TASK-1882.
+- **Validacion**: `npm run build` OK; smoke anti-BIM OK; smoke API boundaries OK; smoke Marketplace Admin API OK; guardas textuales sin `axiosConfig`, `console.log` productivo ni BIM en `Settings.jsx` y `Marketplace.jsx`.
+- **No interferencia**: sin backend, API nueva, DB, auth/JWT/tenant, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI/CD ni datos runtime.
+
+### 2026-06-08 - Catalogo SaaS oficial visible en Marketplace (TASK-1882 Slice 2)
+
+- **Marketplace clasico**: se agrega acceso `Planes SaaS` para filtrar licencias, packs y modulos oficiales vendibles.
+- **Catalogo oficial**: las fichas SaaS oficiales se identifican por `product_meta.requires_superadmin_edit` y `commercial_code` `LIC_`, `PACK_` o `MOD_`.
+- **Trazabilidad comercial**: las tarjetas muestran badge `Licencia SaaS`, `Pack SaaS` o `Modulo SaaS`, y la busqueda contempla el codigo comercial.
+- **Alcance controlado**: no se cambia checkout, entrega, permisos, backend, DB ni contratos API; Settings y la UX guiada de renovacion/cambio de plan quedan pendientes en TASK-1882.
+- **Validacion**: `npm run build` OK; smoke anti-BIM OK; smoke Marketplace Admin API OK; smoke API boundaries OK; guarda textual sin `axiosConfig`, `console.log` productivo ni BIM en `Marketplace.jsx`.
+- **No interferencia**: sin backend, API nueva, DB, auth/JWT/tenant, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI/CD ni datos runtime.
+
+### 2026-06-08 - UI Superadministrador de capacidades SaaS por empresa (TASK-1882 Slice 1)
+
+- **Superadministracion/SaaS**: `AdminGlobalLicencias` muestra una nueva franja `Capacidades comerciales efectivas` por empresa.
+- **Lectura comercial**: se visualizan derechos efectivos, capacidades habilitadas, exportes permitidos y restricciones como marca de agua, no comercial o solo lectura.
+- **Separacion vigente**: la licencia de funcionamiento, los productos SaaS adicionales y las capacidades resueltas quedan en bloques separados para control de empresas.
+- **Alcance controlado**: no se agregan compras, renovaciones, upgrades ni cambios de plan desde UI; Marketplace/Settings quedan pendientes dentro de TASK-1882.
+- **Validacion**: `npm run build` OK; smoke anti-BIM OK; smoke Marketplace Admin API OK; smoke API boundaries OK; guarda textual sin `axiosConfig`, `console.log` productivo ni BIM en el archivo tocado.
+- **No interferencia**: sin backend, API nueva, DB, auth/JWT/tenant, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI/CD ni datos runtime.
+
+### 2026-06-08 - Resolvedor backend de capacidades comerciales SaaS (TASK-1880)
+
+- **Licencias/SaaS**: se agrega `commercial_capabilities_service` para resolver capacidades efectivas por empresa combinando licencia base, packs incluidos, productos SaaS comprados y restricciones comerciales.
+- **Derechos normalizados**: codigos vendibles como `PACK_PLANIFICA_MONTHLY` se traducen a derechos efectivos como `PACK_PLANIFICA`; se exponen derechos incluidos, comprados y efectivos.
+- **Superadministracion/SaaS**: `/admin-licenses/me` y `/admin-licenses/summary` agregan `commercial_capabilities` y conservan `saas_products` separado de la licencia de funcionamiento.
+- **Alcance controlado**: el resolvedor es contrato backend de lectura; no aplica aun bloqueos en cronogramas, presupuestos, exportaciones ni modulos sensibles.
+- **Validacion**: `py_compile` OK; tests focales Marketplace/Licencias 26 passed; smoke anti-BIM OK; baseline enterprise con frontend incluido OK con warnings conocidos.
+- **No interferencia**: sin migraciones, sin cambios destructivos en DB, sin auth/JWT/tenant/permisos/EDT/presupuestos/cronogramas/BIM/Docker/Coolify/CI/CD ni datos runtime.
+
+### 2026-06-08 - Derechos SaaS y visibilidad por empresa en Superadministracion (TASK-1873/TASK-1874/TASK-1879)
+
+- **Contrato SaaS**: se cierran documentalmente la matriz canonica y el contrato de producto vendible; la licencia base se lee desde `EmpresaLicencia` y los productos SaaS adicionales se leen aparte.
+- **Marketplace**: los productos con `product_meta.delivery_kind` que contiene `saas_right` se entregan como `MarketplaceOrderItem.delivered_entity_type = "saas_right"`.
+- **Auditoria**: se registra `LicenseEvent` `saas_right_marketplace_purchase_activated` con orden, item, producto, codigo comercial, periodo, duracion y politica.
+- **Superadministracion/SaaS**: el resumen de empresas incluye `saas_products` y `saas_products_count`; `AdminGlobalLicencias` muestra el bloque `Productos SaaS adicionales` separado de la licencia de funcionamiento.
+- **Validacion**: `py_compile` OK; tests focales Marketplace/Licencias 24 passed; `npm run build` OK con warning conocido de chunks grandes; smoke anti-BIM OK; baseline enterprise con frontend incluido OK con warnings conocidos.
+- **No interferencia**: sin migraciones, sin cambios destructivos en DB, sin auth/JWT/tenant/EDT/presupuestos/cronogramas/BIM/Docker/Coolify/CI/CD.
+
+### 2026-06-08 - Renovacion, upgrade y downgrade desde Marketplace (TASK-1878)
+
+- **Licencias Marketplace**: la entrega clasifica compras como `new_subscription`, `renewal_queued`, `upgrade_immediate`, `upgrade_queued`, `downgrade_queued` o `plan_change_queued`.
+- **Politica aplicada**: upgrade desde `EXPRESS` activa inmediato; renovacion y cambios comerciales con licencia activa no Express quedan en cola; downgrade no reduce capacidades del periodo vigente.
+- **Auditoria**: `EmpresaLicencia.detalles.marketplace_delivery` y `LicenseEvent` incluyen `transition_kind`; el evento tambien incluye `assignment_status`.
+- **Limites de alcance**: sin prorrateos, cobros parciales, UI de cambio de plan ni derechos de packs/modulos.
+- **Validacion**: `py_compile` OK; `pytest app/tests/test_license_service_special_flags.py app/tests/test_marketplace_bootstrap_contract.py -q` OK, 23 passed.
+- **No interferencia**: sin cambios de API publica, auth, tenant, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI/CD ni datos operativos.
+
+### 2026-06-08 - Politica SaaS de retencion, vencimiento y renovacion (TASK-1875)
+
+- **Contrato documental**: se cierra la politica mixta del plan aprobado: dia 0 bloqueo de escritura, dias 1-15 solo lectura, dias 16-30 retencion sin operacion normal y dia 30 cola de eliminacion auditada.
+- **Renovacion**: misma licencia se mantiene por continuidad/cola; reactivacion desde gracia o retencion sin borrar datos.
+- **Upgrade/downgrade**: upgrade desde `EXPRESS` inmediato; cambios comerciales entre planes quedan por defecto en cola para evitar prorrateos implicitos; downgrade no reduce capacidades del periodo ya pagado.
+- **Control de datos**: ninguna politica de esta fase elimina proyectos, presupuestos, EDT, cronogramas, APUs, bases, usuarios ni archivos.
+- **Validacion**: revision documental; sin build/test por no cambiar codigo.
+- **No interferencia**: sin backend, frontend, API, DB, auth, tenant, BIM, Docker/Coolify/CI/CD ni datos runtime.
+
+### 2026-06-08 - Entrega idempotente de licencias base desde Marketplace (TASK-1877)
+
+- **Marketplace clasico**: los productos `licencia` se entregan usando el `MarketplaceOrderItem` real como huella de idempotencia.
+- **Licencias**: las compras confirmadas crean `EmpresaLicencia` con `source="marketplace_order"` y metadata `marketplace_delivery` en `detalles`.
+- **Auditoria**: se registra `LicenseEvent` `license_marketplace_purchase_activated` con orden, item, producto, codigo comercial, ciclo y duracion.
+- **Flujos cubiertos**: pago online confirmado, transferencia bancaria validada y checkout clasico legado crean el item de orden antes de entregar la licencia.
+- **Validacion**: `py_compile` OK; `pytest app/tests/test_license_service_special_flags.py app/tests/test_marketplace_bootstrap_contract.py -q` OK, 21 passed.
+- **No interferencia**: sin cambios de API publica, auth, tenant, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI/CD ni datos operativos.
+
+### 2026-06-08 - Empresas actuales alineadas a politica SaaS Marketplace (TASK-1886)
+
+- **Licencias**: `DEFAULT_LICENSE_CATALOG` queda alineado al plan aprobado para `EXPRESS`, `STANDARD` y `PROFESSIONAL`.
+- **Empresas actuales**: se ejecuta `align_companies_to_saas_policy.py`; `Administradores Generales` pasa de `ENTERPRISE` legacy a `PROFESSIONAL`, mientras `Jesús Benito Segura González` conserva `STANDARD` y `Santiago Bermeo` conserva `PROFESSIONAL`.
+- **Legacy**: `EXPRES` y `ENTERPRISE` quedan inactivas; `TESTER`, `ACADEMIC` y `TRAINING` quedan normalizadas como licencias especiales oficiales.
+- **Trazabilidad**: se registra `LicenseEvent` `license_saas_policy_alignment` y se conserva detalle de licencia previa en `EmpresaLicencia.detalles`.
+- **Validacion**: `py_compile` OK; tests focales SaaS/Marketplace 13 passed; tests de licencias especiales 8 passed; smoke anti-BIM OK.
+- **No interferencia**: sin auth, tenant, permisos, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI/CD ni eliminacion de datos operativos.
+
+### 2026-06-08 - Catalogo SaaS Marketplace alineado al plan aprobado (TASK-1876)
+
+- **Marketplace clasico**: se adecuan las categorias sistema con `Packs SaaS` y `Modulos y servicios`.
+- **Productos SaaS**: quedan activos para venta `Estandar` mensual/anual, `Profesional` mensual/anual, packs `Planifica`, `Licita`, `Conecta`, `Equipo por colaborador` mensual/anual, y modulos independientes `Fusion` / `Migracion`.
+- **Control superadmin**: se crean entradas de control no vendibles para `Express Trial`, `Tester`, `Academica` y `Capacitacion`; todos los productos SaaS incluyen metadata `requires_superadmin_edit`.
+- **Reutilizacion**: el bootstrap reutiliza productos sistema legacy mediante `legacy_slugs` cuando hay equivalencia y desactiva productos sistema antiguos fuera del plan.
+- **Base local**: se ejecutan seeds idempotentes de categorias y catalogo; quedan 14 productos sistema activos del plan aprobado.
+- **Validacion**: `py_compile` OK, `pytest app/tests/test_marketplace_bootstrap_contract.py -q` OK con 12 passed y smoke anti-BIM OK.
+- **No interferencia**: sin cambios de auth, tenant, EDT, presupuestos, cronogramas, BIM, Docker/Coolify/CI/CD ni contratos API.
+
+### 2026-06-08 - Programa SaaS Marketplace aceptado y TASKs de ejecucion (TASK-1872)
+
+- **Plan de negocio**: se adapta el plan de adecuacion para fijar como direccion aceptada que Marketplace venda, Licencias gobierne acceso y una entrega SaaS backend idempotente active licencias/derechos.
+- **TASKs de control**: se crea `TASK-1872` como control madre del programa SaaS Marketplace.
+- **TASKs futuras**: se crean `TASK-1873` a `TASK-1885` para matriz comercial, contrato de producto, retencion, catalogo, entrega idempotente, renovacion/upgrade, derechos SaaS, resolvedor de capacidades, reporting, UI, Conecta, Equipo y KPIs.
+- **No interferencia**: solo documentacion; sin backend, frontend, API, DB, BIM, Docker/Coolify/CI/CD ni cambios sobre el baseline `TASK-1807`.
+
+### 2026-06-08 - Plan de adecuacion Marketplace para productos SaaS (TASK-1871)
+
+- **Plan de negocio**: se analiza `Plan Aprobado V1.docx` y se resume el modelo comercial SaaS de licencias base, packs, modulos independientes, retencion, precios, alertas y KPIs.
+- **Marketplace clasico**: se documenta la ruta para convertir licencias, packs y modulos en productos vendibles sin escribir codigo ni crear productos reales.
+- **Licencias**: se identifican brechas frente al dominio actual de `Licencia`, `EmpresaLicencia`, cuotas y housekeeping.
+- **No interferencia**: sin backend, frontend, API, DB, BIM, Docker/Coolify/CI/CD ni cambios sobre el baseline `TASK-1807`.
+
+### 2026-06-04 - FC despejado sobre cabeza de flecha (TASK-1870)
+
+- **Cronogramas clasico / Gantt**: la llegada `FC/FS` aumenta la separacion previa al borde superior de `10px` a `16px`, dejando el tramo horizontal claramente por encima de la cabeza de flecha y una caida vertical limpia al inicio del sucesor.
+- **Guardas**: `smoke-cronogramas-gantt-dependencies` valida la separacion `FC` de `16px`.
+- **No interferencia**: sin backend, API, DB, calendario, BIM, Docker/Coolify/CI/CD.
+
+### 2026-06-04 - Separacion FC y panel sin scroll horizontal (TASK-1868/TASK-1869)
+
+- **Cronogramas clasico / Gantt**: la llegada `FC/FS` aumenta la separacion previa al borde superior de `4px` a `10px`, manteniendo el punto final exacto sobre la barra destino para que la cabeza de flecha no invada el Gantt.
+- **Panel de dependencia**: el panel seleccionado pasa a ancho responsive `min(440px, calc(100vw - 2rem))`, bloquea `overflow-x` y permite ver encabezado/restriccion calculada sin desplazamiento horizontal.
+- **Guardas**: `smoke-cronogramas-gantt-dependencies` valida la separacion `FC` de `10px` y el contrato de panel sin scroll horizontal.
+- **No interferencia**: sin backend, API, DB, calendario, BIM, Docker/Coolify/CI/CD.
+
+### 2026-06-04 - UX compacta de dependencias Gantt (TASK-1866/TASK-1867)
+
+- **Cronogramas clasico / Gantt**: el CTA flotante de una dependencia seleccionada deja de usar `X` y semantica de borrado; ahora usa `Pencil` con `Editar dependencia seleccionada`.
+- **Panel de dependencia**: se compacta a shortcode/contexto minimo, relacion, desfase, unidad y acciones por icono.
+- **Acciones**: `Trash2` queda como accion destructiva explicita dentro del panel, `Check` guarda la dependencia y `X` solo cierra el editor.
+- **Guardas**: `smoke-cronogramas-gantt-dependencies` valida que no vuelva el CTA flotante con semantica de borrado directo y que el panel conserve acciones accesibles por icono.
+- **No interferencia**: sin backend, API, DB, calendario, BIM, Docker/Coolify/CI/CD.
+
+### 2026-06-04 - Micro-codos y FC tipo MS Project en Gantt (TASK-1864/TASK-1865)
+
+- **Cronogramas clasico / Gantt**: las dependencias reducen el codo base de `14px` a `8px` y afinan el grosor visual de las lineas para acercarse al patron de MS Project, manteniendo el area invisible de interaccion.
+- **FC/FS**: la relacion `FC` conserva salida desde el fin del predecesor, pero ahora llega por el borde superior de la barra sucesora con caida vertical final y separacion minima previa.
+- **Resto de relaciones**: `CC/SS`, `FF` y `CF/SF` conservan anclas laterales centro con micro-codos y evasion minima cuando un tramo horizontal invadiria el cuerpo de la barra.
+- **Hitos**: el centro del rombo se conserva como ancla visual; en hito -> tarea `FC`, la tarea sucesora recibe por arriba.
+- **Guardas**: `smoke-cronogramas-gantt-dependencies` valida codos `8px`, llegada superior `FC`, zoom fraccional, hitos y no adopcion de llegada superior en relaciones no `FC`.
+- **No interferencia**: sin backend, API, DB, calendario, BIM, Docker/Coolify/CI/CD.
+
+### 2026-06-03 - Entrada lateral desde hitos Gantt (TASK-1863)
+
+- **Cronogramas clasico / Gantt**: los hitos conservan el centro del rombo como ancla visual correcta.
+- **Norma visual**: hito -> tarea mantiene salida desde el centro del hito, pero entra al item sucesor por lateral centro con codo horizontal compacto.
+- **Guarda**: `smoke-cronogramas-gantt-dependencies` valida que la relacion hito -> tarea no caiga verticalmente sobre el borde del item destino.
+- **No interferencia**: sin backend, API, DB, calendario, BIM, Docker/Coolify/CI/CD.
+
+### 2026-06-03 - Carril lateral anti-caida vertical Gantt (TASK-1862)
+
+- **Cronogramas clasico / Gantt**: se corrige el caso de zoom/alineacion donde una dependencia `FC/FS` con `source.right === target.left` podia seguir leyendose como caida vertical sobre el borde izquierdo del destino.
+- **Ruteo visual**: el tronco vertical se desplaza al carril lateral de salida y, si el tramo cruzaria la barra destino, se conserva la evasion superior/inferior antes de entrar por el lateral centro.
+- **Guarda**: `smoke-cronogramas-gantt-dependencies` agrega el caso exacto de fecha alineada y bloquea verticales sobre el borde destino o cruces horizontales sobre la barra.
+- **No interferencia**: sin backend, API, DB, calendario, BIM, Docker/Coolify/CI/CD.
+
+### 2026-06-03 - Codos compactos en secuenciacion Gantt (TASK-1861)
+
+- **Cronogramas clasico / Gantt**: las lineas de dependencia salen y entran por el centro del lateral semantico de cada barra, con codo horizontal compacto de 14px para que la cabeza de flecha no tape el tramo visible.
+- **Ruteo minimo con evasion**: si un tramo largo cruzaria el cuerpo de una barra destino, se desvía por fuera del cuerpo y conserva solo el codo corto final hacia el lateral.
+- **Relaciones cubiertas**: `FC/FS`, `CC/SS`, `FF` y `CF/SF`, incluyendo rutas inversas, destino arriba/abajo, zoom fraccional y barras largas.
+- **Guardas**: `smoke-cronogramas-gantt-dependencies` valida que no vuelvan las caidas verticales a esquinas/marcadores ni los tramos largos sobre barras.
+- **No interferencia**: sin cambios backend, API, DB, auth, tenant, BIM, Docker/Coolify/CI/CD.
+
+### 2026-06-03 - Calendario oficial en Gantt clasico (TASK-1860)
+
+- **Cronogramas clasico / Gantt**: la vista fusiona `trabajo.holiday_calendar` con la configuracion local de jornada antes de recalcular dependencias, barras, subbarras, validaciones y previews.
+- **Causa corregida**: el backend ya usaba feriados oficiales, pero varias rutas frontend seguian usando solo `configDraft`, lo que podia mostrar una relacion `FF` como si fuera `FC/FS`.
+- **Saneamiento Santiago Bermeo**: se respalda `schedule_data` en `tmp/gantt_schedule_backup_task_1860_20260603_080501.json` y se recalculan 187 lineas del cronograma empresa 3, proyecto 7, presupuesto 13.
+- **Resultado DB**: 0 discrepancias entre fechas superiores y subbarras automaticas laborales, 0 limites en feriado/fin de semana/fuera de jornada, y 5 relaciones `FF` verificadas con delta maximo de 1 segundo.
+- **No interferencia**: sin backend nuevo, sin contratos API, sin BIM, sin Docker/Coolify/CI/CD.
+
+### 2026-06-01 - Saneamiento Gantt Santiago Bermeo (TASK-1859 operational)
+
+- **Saneamiento Gantt (presupuesto 13, empresa Santiago Bermeo)**: se ejecuta `update_schedule` con el fix TASK-1859 sobre los 187 items del cronograma, detectando y corrigiendo 5 items con `end_date` incorrectos por no respetar el calendario laboral.
+- **Items corregidos**: Linea 118 (end corregido de 30-abr a 6-may, +6d por feriados 3-abr, 30-abr, 1-may), Linea 122 (end corregido de 29-abr a 5-may), mas 3 items con ajustes menores de precision (Lineas 49, 113, 116).
+- **Anclajes verificados**: 30 relaciones FS+0 verificadas con anclaje exacto preservado, 6 relaciones SS/FF sin incidencias, 2 relaciones con lag no nulo correctas.
+- **Validacion calendario**: 0 items con start/end en feriados o fines de semana post-fix. Calendario activo: 4 feriados nacionales (3-abr, 30-abr, 1-may, 25-may) + fines de semana. Proyecto sin canton definido (no aplican feriados locales como 13-abr Fundacion Cuenca).
+- **No interferencia**: sin cambios de codigo, API, DB (solo datos schedule_data), BIM, Docker/Coolify/CI/CD.
+
+### 2026-06-01 - Anclaje exacto dependencias Gantt (TASK-1859)
+
+- **TASK-1859 (Cronogramas clasico / Gantt)**: se separa el anclaje geometrico de dependencias del ajuste de calendario laboral.
+- **Causa raiz**: `_add_work_duration` alineaba a calendario incluso con duracion cero, y el bucle post-anclaje en `_resolve_rows_dates` desplazaba start_dates determinados por dependencias.
+- **Backend**: `_add_work_duration` con duracion=0 retorna el valor exacto sin alinear. El bucle post-anclaje en `_resolve_rows_dates` solo ejecuta para filas sin dependencias.
+- **Frontend**: `addGanttDependencyLagDuration` con lag=0 retorna la fecha exacta sin pasar por `alignGanttDependencyStartBoundary`.
+- **Test**: nuevo test `test_simple_calendar_fs_with_zero_lag_preserves_exact_anchor_even_on_holiday` verifica que FS+0 preserva el anclaje en feriado. 15/15 tests pasan en el modulo de calendario avanzado.
+- **No interferencia**: sin cambios de API, DB, BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-27 - Adecuacion visual Recursos operacional
+
+- **TASK-1854 a TASK-1858 (Cronogramas clasico / recursos)**: se alinea visualmente `Cronogramas > Recursos` con el modelo operativo `Gantt | Valorado | Flujo | Recursos`.
+- **Workspace operacional**: la cabecera queda mas compacta, los KPIs pasan a una franja tecnica y el listado se reorganiza como matriz categorizada por periodos.
+- **Periodos completos**: cada recurso conserva todos los periodos, incluidos ceros, con capacidad editable y sobrecargas visibles.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin backend/DB/API nuevos, sin BIM, UX BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-27 - Activacion local estado Recursos
+
+- **TASK-1853 (Cronogramas clasico / recursos)**: se corrige el error runtime `No fue posible cargar el estado colaborativo de recursos`.
+- **Causa confirmada**: la migracion `ae8f9a0b1c2d` existia en codigo pero la tabla `cronogramas_recursos_state` no estaba aplicada en la base local `giproy_erp`.
+- **Correccion DB no destructiva**: se aplica `alembic upgrade ae8f9a0b1c2d` y se verifica la existencia de la tabla con columnas esperadas.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin cambios de codigo productivo, sin BIM, UX BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Aplicacion solo en Recursos
+
+- **TASK-1852 (Cronogramas clasico / recursos)**: una intencion `ready_to_apply` puede aplicarse dentro del estado colaborativo de Recursos como `adjustments.leveling_application_result`.
+- **Rollback incorporado**: se guarda `rollback_snapshot` para restaurar la propuesta y la intencion previas.
+- **Alcance cerrado**: la aplicacion queda marcada como `applied_to_resources` y `applied_scope: resources_state_only`.
+- **No toca Gantt**: no modifica fechas, barras, duraciones, predecesoras, Valorado ni Flujo.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin backend/DB/migraciones nuevas, sin BIM, UX BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Intencion de aplicacion Recursos
+
+- **TASK-1851 (Cronogramas clasico / recursos)**: la previsualizacion de propuestas aprobadas permite preparar una intencion colaborativa de aplicacion.
+- **Semaforo operativo**: se guarda `adjustments.leveling_application_intent` con `status: ready_to_apply`, `requested_at`, resumen de origen y `applied: false`.
+- **Confirmacion previa**: la accion usa `appConfirm` y puede cancelarse sin eliminar la propuesta aprobada.
+- **No aplicacion todavia**: no guarda `applied: true`, no modifica Gantt, fechas, predecesoras, Valorado ni Flujo.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin backend/DB/migraciones nuevas, sin BIM, UX BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Previsualizacion de aplicacion Recursos
+
+- **TASK-1850 (Cronogramas clasico / recursos)**: las propuestas aprobadas muestran una previsualizacion de aplicacion dentro de `Recursos`.
+- **Impacto visible**: se resumen movimientos, recursos afectados, cantidad sugerida y pendientes antes de cualquier aplicacion real.
+- **No aplicacion todavia**: la previsualizacion no guarda `applied: true`, no modifica Gantt, fechas, predecesoras, Valorado ni Flujo.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin backend/DB/migraciones nuevas, sin BIM, UX BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Aprobacion colaborativa Recursos
+
+- **TASK-1849 (Cronogramas clasico / recursos)**: la propuesta persistente de nivelacion puede aprobarse colaborativamente sin aplicarla al cronograma.
+- **Gobierno multiusuario**: la propuesta pasa a `status: approved`, registra `approved_at` y conserva `applied: false`.
+- **No aplicacion todavia**: aprobar o descartar no modifica Gantt, fechas, predecesoras, Valorado ni Flujo.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin backend/DB/migraciones nuevas, sin BIM, UX BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Propuesta persistente Recursos
+
+- **TASK-1848 (Cronogramas clasico / recursos)**: la simulacion de nivelacion puede guardarse como `adjustments.leveling_proposal` en el estado colaborativo versionado de Recursos.
+- **Multiusuario**: la propuesta queda persistida con resumen, movimientos sugeridos, pendientes y marca `applied: false`.
+- **No aplicacion todavia**: guardar o quitar la propuesta no modifica Gantt, fechas, predecesoras, Valorado ni Flujo.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin backend/DB/migraciones nuevas, sin BIM, UX BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Simulacion automatica Recursos
+
+- **TASK-1847 (Cronogramas clasico / recursos)**: la vista `Recursos` agrega una simulacion automatica no destructiva de nivelacion.
+- **Propuesta operativa**: se calculan movimientos sugeridos desde periodos sobrecargados hacia periodos posteriores con capacidad disponible, y se muestran remanentes pendientes.
+- **No aplicacion todavia**: la simulacion no guarda movimientos, no modifica Gantt, no recalcula Valorado/Flujo y no altera fechas ni predecesoras.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin backend/DB, sin BIM, UX BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Lectura de sobrecargas Recursos
+
+- **TASK-1846 (Cronogramas clasico / recursos)**: la vista `Recursos` compara demanda por periodo contra capacidades manuales persistidas.
+- **Senales operativas**: se agrega KPI de sobrecargas, resaltado por periodo y excedente cuantificado.
+- **No aplicacion todavia**: la lectura no mueve Gantt, no modifica fechas, no recalcula Valorado/Flujo y no ejecuta nivelacion.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin BIM, UX BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Capacidades manuales persistentes Recursos
+
+- **TASK-1845 (Cronogramas clasico / recursos)**: la pestaña operacional `Recursos` permite guardar capacidades manuales por recurso y periodo en `adjustments.manual_limits`.
+- **Persistencia colaborativa**: el guardado usa `cronogramasApi.updateRecursosState` con version optimista; ante conflicto multiusuario se recarga el estado.
+- **No aplicacion todavia**: las capacidades quedan persistidas pero no modifican Gantt, Valorado, Flujo ni fechas.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin BIM, UX BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Vista Recursos consume estado colaborativo
+
+- **TASK-1844 (Cronogramas clasico / recursos)**: la pestaña operacional `Recursos` carga tambien el estado persistente colaborativo creado en TASK-1842.
+- **Lectura segura**: se muestra version del estado y cantidad de bloques de ajustes, sin guardar cambios ni aplicar nivelacion.
+- **Degradacion controlada**: si falla el estado colaborativo, el listado de recursos sigue visible y muestra advertencia focal.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin cambiar Gantt/Valorado/Flujo, sin BIM, UX BIM, Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Cliente API estado Recursos Cronogramas
+
+- **TASK-1843 (Cronogramas clasico / recursos)**: se agregan `cronogramasApi.getRecursosState` y `cronogramasApi.updateRecursosState` para consumir la persistencia colaborativa de Recursos.
+- **Frontera API protegida**: el smoke clasico de Cronogramas valida los metodos y el endpoint `/cronogramas/valorados/{presupuesto_id}/recursos/state`.
+- **Sin consumo visual todavia**: no se modifica `Cronogramas.jsx`, no se toca `CronogramaGantt.jsx` y no se aplica nivelacion.
+- **No interferencia**: sin BIM, UX BIM, Docker/Coolify/CI/CD, DB adicional, auth, tenant ni permisos nuevos.
+
+### 2026-05-26 - Persistencia backend estado Recursos Cronogramas
+
+- **TASK-1842 (Cronogramas clasico / recursos)**: se agrega la primera capa persistente colaborativa para `Recursos` con `cronogramas_recursos_state`.
+- **Estado versionado**: el backend guarda `adjustments` JSON por presupuesto con `version` optimista para evitar pisadas entre usuarios.
+- **Endpoints nuevos**: se exponen `GET/PUT /cronogramas/valorados/{presupuesto_id}/recursos/state`, reutilizando tenant, permisos y acceso de Cronogramas.
+- **Capa no aplicada todavia**: los ajustes se guardan pero aun no modifican Gantt, Valorado, Flujo ni nivelacion.
+- **No interferencia**: sin tocar `CronogramaGantt.jsx`, sin BIM, UX BIM, Docker/Coolify/CI/CD ni cambios destructivos.
+
+### 2026-05-26 - Vista operacional Recursos read-only
+
+- **TASK-1841 (Cronogramas clasico / recursos)**: se agrega la pestaña operacional `Recursos` junto a `Gantt` y `Valorado`, consumiendo el endpoint read-only `cronogramasApi.getRecursos`.
+- **Lectura no tipo reporte**: la vista presenta recursos finales consolidados por categoria/subcategoria, con cantidades y costos por todos los periodos, incluidos ceros, sin usar una tabla tipo Excel.
+- **Capa exterior segura**: no se toca `CronogramaGantt.jsx`, no se modifica el comportamiento visual del Gantt y no se activan persistencia ni nivelacion todavia.
+- **No interferencia**: sin BIM, UX BIM, Docker/Coolify/CI/CD, DB, auth, tenant ni permisos nuevos.
+
+### 2026-05-26 - Cliente API read-only Recursos Cronogramas
+
+- **TASK-1840 (Cronogramas clasico / recursos)**: se agrega `cronogramasApi.getRecursos(presupuestoId, empresaId)` para consumir el endpoint read-only de recursos desde la frontera API clasica.
+- **Guarda frontend**: el smoke clasico de Cronogramas valida el metodo y endpoint `/cronogramas/valorados/${presupuestoId}/recursos`.
+- **Sin UI todavia**: no se consume desde `Cronogramas.jsx`, no se crea vista y no se toca Gantt.
+- **No interferencia**: sin persistencia, sin nivelacion, sin BIM, sin Docker/Coolify/CI/CD, sin DB, auth, tenant ni permisos nuevos.
+
+### 2026-05-26 - Endpoint read-only Recursos Cronogramas
+
+- **TASK-1839 (Cronogramas clasico / recursos)**: se expone `GET /api/v1/cronogramas/valorados/{presupuesto_id}/recursos` como endpoint read-only para la futura vista operativa `Recursos`.
+- **Contrato backend**: el endpoint reutiliza resolucion de presupuesto, tenant y acceso de modulo existentes; serializa el cronograma valorado vigente y delega en `cronograma_recursos_service`.
+- **Sin persistencia**: no guarda ajustes, no nivela recursos y no cambia contratos de Gantt.
+- **No interferencia**: sin cambios en `CronogramaGantt.jsx`, `Cronogramas.jsx`, BIM, Docker/Coolify/CI/CD, DB destructiva, auth, JWT ni permisos nuevos.
+
+### 2026-05-26 - Motor read-only Recursos Cronogramas
+
+- **TASK-1838 (Cronogramas clasico / recursos)**: se crea `cronograma_recursos_service` como primera pieza funcional de la vista operativa `Recursos`, derivando demanda por periodos desde el cronograma valorado vigente.
+- **APUs anidados**: el motor explota APUs hijos recursivamente y solo devuelve recursos finales unicos.
+- **Periodos completos**: cada recurso conserva todos los periodos, incluidos periodos con cantidad/costo cero.
+- **Seguridad**: incluye guarda contra ciclos de APUs anidados; sin endpoint, sin cliente frontend, sin vista, sin persistencia y sin nivelacion todavia.
+- **No interferencia**: sin cambios en `CronogramaGantt.jsx`, `Cronogramas.jsx`, BIM, Docker/Coolify/CI/CD, DB, auth, tenant ni permisos.
+
+### 2026-05-26 - Contrato rector Gantt Valorado Flujo Recursos
+
+- **TASK-1837 (Cronogramas clasico / recursos)**: se fija la meta confirmada: implementar el modelo operativo `Gantt | Valorado | Flujo | Recursos`, no continuar reportes como objetivo principal.
+- **Regla de inferencia**: antes de decidir siguientes pasos, recordar que `Recursos` es una vista/funcionalidad operativa del cronograma, con APUs anidados explotados, recursos finales unicos y persistencia futura por colaboracion multiusuario.
+- **Camino seguro**: avanzar por capas exteriores, empezando por motor backend de lectura, endpoint, cliente API y vista read-only, sin tocar Gantt salvo necesidad explicita y validada.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM, sin Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Plantilla Excel Uso de Recursos Cronograma
+
+- **TASK-1836 (Cronogramas clasico / reportes)**: se agrega la plantilla dedicada `docs/reportes/001 - Uso de Recursos Cronograma.xlsx` para la salida Excel del reporte `Uso de Recursos`.
+- **Excel por periodos**: se agrega prueba focal para confirmar que el workbook conserva todos los periodos definidos, incluyendo columnas con cantidad y costo en cero.
+- **Alcance seguro**: sin tocar `CronogramaGantt.jsx`, `Cronogramas.jsx`, rutas, auth, tenant, DB, presupuestos, EDT ni datos.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM, sin Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Certificacion segura de Uso de Recursos
+
+- **TASK-1835 (Cronogramas clasico / reportes)**: se retoma la implementacion por pasos con una certificacion backend focal del reporte `Uso de Recursos`, sin tocar Gantt ni la UI operativa de Cronogramas.
+- **APUs anidados**: la prueba valida explosion recursiva, recursos finales unicos y suma de cantidades/costos.
+- **Periodos completos**: la prueba valida que cada recurso conserva todos los periodos definidos, incluidos los periodos con cantidad y costo cero.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM, sin Docker/Coolify/CI/CD, sin cambios de DB, rutas, auth, tenant ni permisos.
+
+### 2026-05-26 - Reporte de uso de recursos por periodos
+
+- **TASK-1825 (Cronogramas clasico / reportes)**: se agrega `Cronogramas > Reporte > Uso de Recursos` como variante clasica de `cronograma_valorado`, con salida GiProy/preview, Excel y PDF.
+- **Ajuste visual GiProy**: la vista previa del reporte deja de usar la tabla generica y adopta un informe ejecutivo dedicado con cabecera, KPIs, resumen por categoria, recursos gobernantes, demanda por periodos y listado consolidado; la matriz completa queda reservada para Excel.
+- **Documento GiProy**: el PDF GiProy de `Uso de Recursos` deja de usar el renderer generico tipo tabla y pasa a documento ejecutivo propio con anexo categorizado/subcategorizado por periodos.
+- **Anexo por periodos**: el listado final de recursos del documento GiProy muestra todos los periodos definidos, incluyendo cantidades y costos en cero.
+- **APUs anidados**: el reporte explota recursivamente los APUs hijos y solo presenta recursos finales unicos, acumulando cantidades y costos directos por periodo y total.
+- **Plantilla**: se crea `docs/reportes/001 - Uso de Recursos Cronograma.xlsx` como plantilla base del Excel dedicado.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM, sin Docker/Coolify/CI/CD y sin contratos API nuevos.
+
+### 2026-05-26 - APUs anidados visibles como materiales en Gantt clasico
+
+- **TASK-1824 (Frontend clasico / Gantt)**: el editor de recursos/rendimientos del Gantt vuelve a mostrar los APUs anidados dentro de `Materiales`, conservando la etiqueta `APU hijo`.
+- **Caso verificado**: en `Santiago Bermeo`, item `1.3.9`, el APU hijo `Hormigon simple f'c = 210 kg/cm2` existia en BD pero quedaba oculto por el filtro visual de categorias del modal.
+- **Guarda**: el smoke clasico de Cronogramas/Gantt bloquea que `apu_hijo_id` vuelva a mapearse a una categoria no visible.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM, sin backend, sin DB, sin contratos API y sin tocar Docker/Coolify/CI/CD.
+
+### 2026-05-26 - Plan de anulacion de debilidades clasicas
+
+- **TASK-1821 ajuste anti-solape (Frontend clasico / laminas graficas)**: el motor PDF EDT/EDO conserva el visual de cards vigente, pero ahora calcula capacidad real por fila, parte ramas con demasiados hermanos y valida colisiones horizontales antes de renderizar.
+- **TASK-1819 (Backend clasico / Compras Publicas)**: queda formalizado el control enterprise de importadores con certificacion APUs-recursos-presupuesto, fixtures reales `prueba1.pdf`/`prueba2.pdf`, bloqueo de recursos fantasma, ciclos y huerfanos.
+- **TASK-1820 (Frontend clasico / multi-tenant)**: se agrega smoke de control para asegurar que el cambio de empresa superadministrador limpia base/proyecto activos y desactiva bases en empresa saliente/entrante.
+- **TASK-1821 (Frontend clasico / laminas graficas)**: se agrega smoke de layout para proteger la familia comun de cards EDT/EDO, paginacion legible y calculos anti-solape del motor PDF clasico.
+- **TASK-1822 (Frontend clasico / Precios Unitarios)**: se agrega smoke UI para modales `AppModalShell`, `z-[1000]`, footer compacto por iconos y densidad responsive del editor/listados APU.
+- **TASK-1823 (Frontend clasico / deuda tecnica)**: se documenta el mapa de deuda tecnica frontal sin reabrir modularizacion amplia ni tocar Docker/Coolify/CI/CD.
+- **Baseline enterprise**: se integran los nuevos smokes al validador `tools/ai_tools/validate_enterprise_baseline.py --include-frontend`.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM, sin acoplamientos hacia BIM y sin tocar Docker/Coolify/CI/CD.
+
+### 2026-05-25 - Modal shell Precios Unitarios y descripcion recursos Compras Publicas
+
+- **TASK-1818 (Frontend clasico / EDT-EDO)**: se corrige el motor de laminas graficas PDF para imprimir cards profesionales; EDT adopta la misma familia visual que EDO, con cuerpo compacto y paginado/calculo de tamano conservador para evitar solapes.
+- **TASK-1815 (Frontend clasico / Precios Unitarios)**: se migran los modales de recursos, borrado masivo, importacion de recursos y subcategorias al shell modal comun definido en el libro de estilo.
+- **TASK-1817 (Frontend clasico / APUs)**: se compacta el editor de APUs con cabeceras negras de altura comun, baseline responsive minimo `1920x1080`, buscador lateral reducido, acciones superiores solo por icono, filas de recursos mas densas y listados de APUs/Recursos/Subcategorias con menos espacio vacio.
+- **Correccion eje Z**: los modales de Precios Unitarios quedan por encima de la cabecera operativa clasica, evitando que el header tape formularios como `Modificar recurso`.
+- **Footer por iconos**: los modales de Analisis de Precio / Precios Unitarios pasan a acciones inferiores solo con iconos visibles, conservando `title` y `aria-label`.
+- **TASK-1816 (Backend clasico / Compras Publicas)**: el parser conserva descripciones de recursos con rangos numericos previos a la unidad y filas partidas en PDF, por ejemplo `Camioneta desde 2200 hasta 3500 cc`.
+- **Reparacion focal de dato importado**: en `base_trabajo_id=48` se actualiza el recurso `104003` de `Camioneta desde` a `Camioneta desde 2200 hasta 3500 cc`.
+- **Regresion real actualizada**: `tmp/compras publicas prueba1.pdf` queda certificado con 224 rubros, 212 APUs, 305 recursos unicos, 1556 lineas APU y 0 incidencias de certificacion.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM, sin acoplamientos hacia BIM y sin tocar Docker/Coolify/CI/CD.
+
+### 2026-05-25 - Certificacion y correccion importador APUs-recursos compras publicas
+
+- **TASK-1813 / TASK-1814 (Backend clasico / importador compras publicas)**: se formaliza y aplica la norma de correspondencia `lineas de presupuesto -> APUs -> recursos/APUs anidados`.
+- **Correccion de causa raiz**: el importador une etiquetas de recursos partidas por salto de linea en PDFs SOCE/SERCOP para evitar recursos fantasma como `Hora 1,00000 0,35000` o `Material MAT-xxxxx`.
+- **APUs anidados**: se evita que una coincidencia por descripcion enlace un recurso con su propio APU padre, eliminando ciclos artificiales como `Extractores de olores baño -> Extractores de olores baño`.
+- **Certificacion materializada**: la materializacion bloquea recursos/APUs fuera del grafo alcanzable, ciclos de APUs anidados, APUs vacios en importacion certificada y descripciones de recurso generadas por deriva del parser.
+- **Regresion real**: `tmp/compras publicas prueba1.pdf` y `tmp/compras publicas prueba2.pdf` quedan cubiertos por test focal para impedir recursos fantasma y ciclos de APUs anidados.
+- **Importacion completa certificada**: `tmp/compras publicas prueba1.pdf` materializa 224 rubros, 212 APUs, 287 recursos unicos y 1560 lineas APU con certificacion valida.
+- **Ejecucion real**: en `Administradores Generales` queda importado `compras publicas prueba1.pdf` como `proyecto_id=22`, `base_trabajo_id=48`, `presupuesto_id=29`, con auditoria limpia y tenant correcto.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM, sin acoplamientos hacia BIM y sin tocar Docker/Coolify/CI/CD.
+
+### 2026-05-25 - Desactivacion de bases al cambiar empresa superadmin
+
+- **TASK-1812 (Frontend clasico / multi-tenant)**: al cambiar empresa como `superadministrador`, `AuthContext` desactiva bases de trabajo en la empresa saliente y en la empresa entrante usando `basesTrabajoApi.deactivateAll`.
+- **Regla confirmada**: el cambio de empresa debe comportarse como contexto limpio; no se arrastran base de trabajo ni proyecto activo.
+- **Alcance**: solo orquestacion frontend sobre endpoint existente; sin cambios backend, DB destructiva, contratos API, auth, JWT, permisos, EDT, presupuestos, cronogramas ni datos de negocio.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM y sin acoplamientos hacia BIM.
+
+### 2026-05-25 - Filtro tenant estricto en BasesTrabajo clasico
+
+- **TASK-1811 (Frontend clasico / multi-tenant)**: `BasesTrabajo` descarta y deja de pintar cualquier base cuyo `empresa_id` no coincida con la empresa operativa seleccionada.
+- **Motivo**: tras cambiar de `Santiago Bermeo` a `Administradores Generales` como `superadministrador`, el backend/BD estaban correctos, pero la pantalla podia conservar estado frontend previo.
+- **Alcance**: solo frontera visual y estado local de `BasesTrabajo`; sin cambios backend, DB, contratos API, auth, JWT, permisos, EDT, presupuestos, cronogramas ni datos.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM y sin acoplamientos hacia BIM.
+
+### 2026-05-25 - Limpieza defensiva de contexto al cambiar empresa
+
+- **TASK-1810 (Frontend clasico / multi-tenant)**: se agrega una guarda en `AuthContext` para limpiar base de trabajo y proyecto activos si pertenecen a una empresa distinta de la empresa operativa seleccionada.
+- **Diagnostico**: la BD local no muestra mezcla multi-tenant en `Administradores Generales`; solo existe una base con `empresa_id=1`. Las otras bases pertenecen a `Santiago Bermeo` (`empresa_id=3`).
+- **Alcance**: solo estado frontend persistido; sin cambios backend, DB, contratos API, auth, JWT, permisos, EDT, presupuestos, cronogramas ni datos.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM y sin acoplamientos hacia BIM.
+
+### 2026-05-25 - Correccion z-index selector empresa clasico
+
+- **TASK-1809 (Frontend clasico)**: se corrige el apilamiento visual del selector de empresa/auditoria del header para que no quede cubierto por cabeceras internas de Proyectos/Cronogramas.
+- **Alcance**: solo `AppLayout`; sin cambios de backend, DB, contratos API, auth, tenant, EDT, presupuestos, cronogramas ni datos.
+- **No interferencia BIM**: sin cambios BIM, sin UX BIM y sin acoplamientos hacia BIM.
+
+### 2026-05-22 - Cobertura focal de serializacion de categorias Comunidad
+
+- **TASK-1748 (Fase 4 backend seguro)**: se agrega prueba focal para el helper puro de serializacion de categorias en Comunidad.
+- **Contrato cubierto**: categoria interna, nombre de empresa objetivo, conteo exclusivo de temas activos y normalizacion de fecha legacy.
+- **Progreso**: `docs/SAFE_REFACTOR_PROGRESS.md` actualiza Fase 4 a 78%.
+- **No interferencia BIM**: sin cambios en codigo BIM, UX BIM, imports BIM ni dependencias BIM.
+
+### 2026-05-21 - Cobertura focal de listado de adjuntos Comunidad
+
+- **TASK-1747 (Fase 4 backend seguro)**: se agrega prueba focal para el helper puro de listado de adjuntos en Comunidad.
+- **Contrato cubierto**: serializacion de adjunto activo, normalizacion de fechas legacy y exclusion de adjuntos eliminados.
+- **Progreso**: `docs/SAFE_REFACTOR_PROGRESS.md` actualiza Fase 4 a 76%.
+- **No interferencia BIM**: sin cambios en codigo BIM, UX BIM, imports BIM ni dependencias BIM.
+
+### 2026-05-21 - Cobertura focal de politica de adjuntos Comunidad
+
+- **TASK-1746 (Fase 4 backend seguro)**: se actualiza y amplia prueba focal para el helper puro de politica de adjuntos en Comunidad.
+- **Contrato cubierto**: rechazo total en Publico, content type requerido en interno, adjunto interno con tipo conocido y ambito no soportado.
+- **Progreso**: `docs/SAFE_REFACTOR_PROGRESS.md` actualiza Fase 4 a 74%.
+- **No interferencia BIM**: sin cambios en codigo BIM, UX BIM, imports BIM ni dependencias BIM.
+
+### 2026-05-21 - Cobertura focal de ordenacion de publicaciones Comunidad
+
+- **TASK-1745 (Fase 4 backend seguro)**: se agrega prueba focal para el helper puro de ordenacion de publicaciones en Comunidad.
+- **Contrato cubierto**: prioridad de fijados, fallback por actividad reciente y orden explicito por fecha de creacion.
+- **Progreso**: `docs/SAFE_REFACTOR_PROGRESS.md` actualiza Fase 4 a 72%.
+- **No interferencia BIM**: sin cambios en codigo BIM, UX BIM, imports BIM ni dependencias BIM.
+
+### 2026-05-21 - Cobertura focal de actividad visible Comunidad
+
+- **TASK-1744 (Fase 4 backend seguro)**: se agrega prueba focal para el helper puro de ultima actividad de publicaciones en Comunidad.
+- **Contrato cubierto**: normalizacion de fechas naive, actividad visible mas reciente y exclusion de respuestas eliminadas.
+- **Progreso**: `docs/SAFE_REFACTOR_PROGRESS.md` actualiza Fase 4 a 70%.
+- **No interferencia BIM**: sin cambios en codigo BIM, UX BIM, imports BIM ni dependencias BIM.
+
+### 2026-05-21 - Cobertura focal de normalizacion datetime Comunidad
+
+- **TASK-1743 (Fase 4 backend seguro)**: se agrega prueba focal para el helper puro de normalizacion datetime en Comunidad.
+- **Contrato cubierto**: preservacion timezone-aware, normalizacion naive a UTC, fallback naive normalizado y retorno nulo controlado.
+- **Progreso**: `docs/SAFE_REFACTOR_PROGRESS.md` actualiza Fase 4 a 68%.
+- **No interferencia BIM**: sin cambios en codigo BIM, UX BIM, imports BIM ni dependencias BIM.
+
+### 2026-05-21 - Cobertura focal de emision de sanciones Comunidad
+
+- **TASK-1742 (Fase 4 backend seguro)**: se agrega prueba focal para el helper puro de emision de sanciones en Comunidad.
+- **Contrato cubierto**: combinacion tipo/ambito invalida, bypass de superadministrador, sancion interna valida por administrador y bloqueo de empresa objetivo ajena.
+- **Progreso**: `docs/SAFE_REFACTOR_PROGRESS.md` actualiza Fase 4 a 66%.
+- **No interferencia BIM**: sin cambios en codigo BIM, UX BIM, imports BIM ni dependencias BIM.
+
+### 2026-05-21 - Cobertura focal de revision de apelaciones Comunidad
+
+- **TASK-1741 (Fase 4 backend seguro)**: se agrega prueba focal para el helper puro de revision de apelaciones de sanciones en Comunidad.
+- **Contrato cubierto**: bypass de superadministrador, administrador de empresa interna, bloqueo por rol, bloqueo por ambito no interno y bloqueo por empresa activa distinta.
+- **Progreso**: `docs/SAFE_REFACTOR_PROGRESS.md` actualiza Fase 4 a 64%.
+- **No interferencia BIM**: sin cambios en codigo BIM, UX BIM, imports BIM ni dependencias BIM.
+
+### 2026-05-21 - Cobertura focal de acceso a conversaciones DM Comunidad
+
+- **TASK-1740 (Fase 4 backend seguro)**: se agrega prueba focal para el helper puro de acceso a conversaciones directas en Comunidad.
+- **Contrato cubierto**: participante valido, conversacion sin empresa, bloqueo de usuario no participante y bloqueo por empresa fuera del contexto activo.
+- **Progreso**: `docs/SAFE_REFACTOR_PROGRESS.md` actualiza Fase 4 a 62%.
+- **No interferencia BIM**: sin cambios en codigo BIM, UX BIM, imports BIM ni dependencias BIM.
+
+### 2026-05-21 - Cobertura focal de visibilidad de publicaciones Comunidad
+
+- **TASK-1739 (Fase 4 backend seguro)**: se agrega prueba focal para el helper puro de visibilidad de publicaciones en Comunidad.
+- **Contrato cubierto**: publicacion eliminada, publicacion publica, publicacion interna de empresa activa, bloqueo de empresa ajena y bypass de superadministrador.
+- **Progreso**: `docs/SAFE_REFACTOR_PROGRESS.md` actualiza Fase 4 a 60%.
+- **No interferencia BIM**: sin cambios en codigo BIM, UX BIM, imports BIM ni dependencias BIM.
+
 ### 2026-05-21 - Cobertura focal de scope de categorias Comunidad
 
 - **TASK-1738 (Fase 4 backend seguro)**: se agrega prueba focal para el helper puro de scope de categorias en Comunidad.
@@ -11145,3 +15056,725 @@ Cambios realizados
 - **UX diagnostico**: los errores/avisos tecnicos dejan de imprimirse dentro del modal principal; se muestra un resumen y se abre una ventana `Diagnostico SOCE/SERCOP` con el detalle.
 - **Gobernanza**: las divergencias de APUs duplicados y ambiguedades se reportan como incidencias bloqueantes y la materializacion exige consentimiento expreso de superadministrador.
 - **No BIM**: cambios limitados a Proyectos clasico y backend comun; smoke anti-contaminacion BIM en OK.
+
+# 2026-05-22 - Recuperacion de archivos locales runtime desde copia pre-refactor
+- **TASK-1749 (Incidencia runtime clasica)**: se restaura de forma no destructiva el contenido faltante de `backend/uploads` desde la copia pre-refactor ubicada en `e:\Repositorios\GiProy Network\GiProy Network`.
+- **Alcance**: recuperados logos de empresas, adjuntos de Comunidad, imagenes de Proyecto y documentos PDF referenciados por BD.
+- **Validacion**: cruce BD/filesystem con `OK 12` y `MISSING 0`; endpoints `/uploads/...` y proxy de imagen de proyecto responden `200` con tipo de contenido correcto.
+- **Gobernanza Git**: se excluyen `uploads/`, `backend/uploads/` y la carpeta local `GiProy Network/` para evitar mezclar binarios runtime o copias locales con el refactor.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Ajuste conservador de gitignore enterprise
+- **TASK-1750 (Higiene Git)**: se refuerza `.gitignore` sin borrar archivos ni sacar contenido del indice.
+- **Protecciones nuevas**: `.pytest_cache/`, `*.db`, `*.jsonl`, `backups/`, compresiones y respaldos (`*.gz`, `*.tar`, `*.tar.gz`, `*.tgz`, `*.zip`, `*.7z`).
+- **Launcher**: se protegen artefactos runtime de `tools/launcher/.opencode` sin ignorar el codigo fuente oficial de `tools/launcher`.
+- **Contexto IA**: `docs/runtime/WORK_MODE_STATE.json` queda re-incluido de forma explicita para mantener continuidad operativa.
+- **No perdida**: no se ejecuta `git rm`, no se borran uploads, backups ni trazas; los archivos ya versionados permanecen bajo control hasta una decision explicita de saneamiento.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Cobertura focal de serializacion de temas Comunidad
+- **TASK-1751 (Fase 4 backend clasico)**: se amplia `backend/app/tests/test_community_permissions.py` para cubrir `_serialize_topic`.
+- **Contrato cubierto**: categoria, empresa objetivo, conteo/lista de miembros, acceso por membresia, seguimiento del usuario y normalizacion de fechas legacy.
+- **Alcance**: solo test backend y documentacion; sin cambios productivos, sin frontend, sin DB y sin contratos API nuevos.
+- **Validacion**: pytest focal de Comunidad OK, baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Correccion focal de links ofuscados Comunidad
+- **TASK-1752 (Fase 4 backend clasico)**: se corrige `_detect_first_link` para conservar el protocolo ofuscado cuando aparece antes de un dominio `www`.
+- **Caso cubierto**: textos como `hpps:\\www...` vuelven a reportarse como link ofuscado completo en vez de solo dominio.
+- **Alcance**: helper puro de moderacion Comunidad; sin cambios DB, auth, tenant, frontend ni contratos API.
+- **Validacion**: suite completa `test_community_permissions.py` OK con 61 tests; baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Cobertura focal de infracciones y alertas Comunidad
+- **TASK-1753 (Fase 4 backend clasico)**: se amplia `backend/app/tests/test_community_permissions.py` para cubrir `_serialize_infraction` y `_serialize_admin_alert`.
+- **Contrato cubierto**: usuario objetivo, empresa objetivo, link detectado, sancion disparada, infraccion asociada, estado de lectura y fechas legacy normalizadas.
+- **Alcance**: solo test backend y documentacion; sin cambios productivos, sin frontend, sin DB y sin contratos API nuevos.
+- **Validacion**: pytest focal de Comunidad OK, suite completa Comunidad OK, baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Cobertura focal de respuestas Comunidad
+- **TASK-1754 (Fase 4 backend clasico)**: se amplia `backend/app/tests/test_community_permissions.py` para cubrir `_serialize_reply`.
+- **Contrato cubierto**: autor visible, permisos de edicion/borrado, adjuntos activos, exclusion de adjuntos eliminados y fechas normalizadas.
+- **Alcance**: solo test backend y documentacion; sin cambios productivos, sin frontend, sin DB y sin contratos API nuevos.
+- **Validacion**: pytest focal de Comunidad OK, suite completa Comunidad OK, baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Cobertura focal de publicaciones Comunidad
+- **TASK-1755 (Fase 4 backend clasico)**: se amplia `backend/app/tests/test_community_permissions.py` para cubrir `_serialize_post`.
+- **Contrato cubierto**: tema/categoria, conteo de respuestas visibles, permisos de autor, adjuntos activos, exclusion de adjuntos eliminados y fechas normalizadas.
+- **Alcance**: solo test backend y documentacion; sin cambios productivos, sin frontend, sin DB y sin contratos API nuevos.
+- **Validacion**: pytest focal de Comunidad OK, suite completa Comunidad OK, baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Cobertura focal de conversaciones DM Comunidad
+- **TASK-1756 (Fase 4 backend clasico)**: se amplia `backend/app/tests/test_community_permissions.py` para cubrir `_serialize_dm_thread`.
+- **Contrato cubierto**: contraparte, empresa de contraparte, conteo de mensajes visibles, exclusion de eliminados, truncamiento de preview y fecha de ultimo mensaje normalizada.
+- **Alcance**: solo test backend y documentacion; sin cambios productivos, sin frontend, sin DB y sin contratos API nuevos.
+- **Validacion**: pytest focal de Comunidad OK, suite completa Comunidad OK, baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Cobertura focal de mensajes DM Comunidad
+- **TASK-1757 (Fase 4 backend clasico)**: se amplia `backend/app/tests/test_community_permissions.py` para cubrir `_serialize_dm_message` sin contexto de empresa.
+- **Contrato cubierto**: autor visible, menciones vacias cuando no hay empresa activa en el hilo y fechas legacy normalizadas.
+- **Alcance**: solo test backend y documentacion; sin cambios productivos, sin frontend, sin DB y sin contratos API nuevos.
+- **Validacion**: pytest focal de Comunidad OK, suite completa Comunidad OK, baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Cobertura focal de menciones Comunidad
+- **TASK-1758 (Fase 4 backend clasico)**: se amplia `backend/app/tests/test_community_permissions.py` para cubrir `_serialize_mention`.
+- **Contrato cubierto**: `user_id`, handle estable desde alias normalizado y nombre visible.
+- **Alcance**: solo test backend y documentacion; sin cambios productivos, sin frontend, sin DB y sin contratos API nuevos.
+- **Validacion**: pytest focal de Comunidad OK, suite completa Comunidad OK, baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Cobertura focal de rol y empresa activa Comunidad
+- **TASK-1759 (Fase 4 backend clasico)**: se amplia `backend/app/tests/test_community_permissions.py` para cubrir helpers puros de rol y resolucion de empresa activa.
+- **Contrato cubierto**: superadministrador, administrador, moderador, normalizacion de rol y acotacion de empresa activa para usuarios no superadministradores.
+- **Alcance**: solo test backend y documentacion; sin cambios productivos, sin frontend, sin DB y sin contratos API nuevos.
+- **Validacion**: pytest focal de Comunidad OK, suite completa Comunidad OK, baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Cobertura focal de expiracion de adjuntos Comunidad
+- **TASK-1760 (Fase 4 backend clasico)**: se completa cobertura de `_attachment_expiration_for_scope`.
+- **Contrato cubierto**: retencion de 30 dias para `interno_empresa` y retorno `None` para `publico` y `mensajes_directos`.
+- **Alcance**: solo test backend y documentacion; sin cambios productivos, sin frontend, sin DB y sin contratos API nuevos.
+- **Validacion**: pytest focal de Comunidad OK, suite completa Comunidad OK, baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Cierre formal de Fase 4 backend seguro
+- **TASK-1761 (Fase 4 backend clasico)**: se cierra formalmente la Fase 4 al 100% tras completar cobertura focal de helpers backend clasicos y baseline reproducible.
+- **Decision de control**: no se introduce codigo productivo nuevo; la siguiente fase queda bloqueada hasta autorizacion de slice concreto.
+- **Alcance**: solo documentacion de progreso, CHANGELOG, TASK y estado runtime; sin frontend, sin DB, sin auth, sin tenant, sin ERP funcional y sin contratos API nuevos.
+- **Validacion**: suite completa `test_community_permissions.py` OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Auditoria conservadora de indice Git
+- **TASK-1762 (Higiene Git)**: se documenta el estado real del indice antes de abrir Fase 5.
+- **Hallazgo**: existen 49 archivos ya versionados que ahora coinciden con reglas de ignore; Git los seguira controlando hasta una decision explicita de `git rm --cached`.
+- **Proteccion adicional**: `.gitignore` refuerza `.runtime/` y `.aider.tags.cache.v4/` como runtime local/generado.
+- **Alcance**: no se elimina ningun archivo, no se mueve contenido, no se modifica codigo productivo, no se cambia DB y no se ejecuta saneamiento destructivo del indice.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-22 - Auditoria inicial de modularizacion frontend clasica
+- **TASK-1763 (Fase 5 frontend clasico)**: se inicia Fase 5 en modo auditoria, sin cambios visuales ni funcionales.
+- **Inventario**: `frontend/src` contiene 217 archivos y mantiene carpetas `api`, `components`, `context`, `hooks`, `layouts`, `pages`, `routes`, `utils`, entre otras.
+- **Riesgo principal**: `CronogramaGantt.jsx`, `Proyectos.jsx`, `Cronogramas.jsx`, `MarketplaceAdminDashboard.jsx` y `Community.jsx` son superficies grandes que no deben moverse ni dividirse sin pruebas focales.
+- **No BIM**: BIM permanece aislado en rutas/componentes/API propias; no se activa UX BIM ni se agrega acoplamiento hacia BIM.
+- **Validacion**: baseline enterprise con frontend incluido OK antes de registrar la auditoria; cambios posteriores son documentales.
+
+# 2026-05-22 - Mapa de dependencias frontend clasico
+- **TASK-1764 (Fase 5 frontend clasico)**: se documentan dependencias frontend y llamadas API directas antes de cualquier modularizacion.
+- **Hallazgo**: existen 60 llamadas directas `api/axios/fetch` fuera de `frontend/src/api`, principalmente en `Settings`, `ProjectManager`, `FormulaPolinomicaTab`, auth/reset y cargas globales.
+- **Decision de seguridad**: no se migran llamadas todavia; auth, tenant, Settings, ProjectManager, Gantt, Presupuestos, Community y Marketplace quedan como superficies sensibles.
+- **Contexto IA**: `AI_CONTEXT.md` apunta ahora a los mapas frontend para evitar reanalisis completo y guiar slices concretos.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Inventario reproducible de dependencias frontend
+- **TASK-1765 (Fase 5 frontend clasico)**: se agrega `tools/ai_tools/frontend_dependency_inventory.py` y el snapshot `docs/frontend_dependency_inventory.json`.
+- **Resultado reproducible**: 208 archivos frontend escaneados, 119991 lineas, 35 clientes API, 61 llamadas directas fuera de `frontend/src/api`, 132 referencias BIM y 35 limites lazy.
+- **Baseline**: `validate_enterprise_baseline.py` valida ahora tambien `docs/frontend_dependency_inventory.json`.
+- **Alcance**: tooling y documentacion; sin cambios visuales, sin rutas, sin clientes API productivos, sin DB, sin auth y sin tenant.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Cola priorizada de slices frontend seguros
+- **TASK-1766 (Fase 5 frontend clasico)**: se prioriza la cola de posibles micro-slices frontend antes de tocar codigo productivo.
+- **Candidatos**: cliente global de paises/maestros, auth reset, polinomica, Settings admin y ProjectManager, cada uno con validacion minima definida.
+- **Bloqueos**: no tocar como primer cambio real `AuthContext`, `Settings`, `ProjectManager`, `CronogramaGantt`, `Cronogramas`, `PresupuestoDetail`, `Community`, `MarketplaceAdminDashboard` ni BIM.
+- **Alcance**: documentacion de gobierno; sin cambios visuales, sin rutas, sin clientes API productivos, sin DB, sin auth y sin tenant.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Cliente global tenantless para paises
+- **TASK-1767 (Fase 5 frontend clasico)**: se agrega `maestrosApi.getPaises()` y se migra la lectura simple de paises en `RegisterModal` y `BasesTrabajo`.
+- **Resultado**: el inventario reproducible baja de 61 a 59 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: lectura global tenantless `GET /paises/`; sin cambios visuales, sin rutas, sin payloads, sin DB, sin auth y sin tenant nuevo.
+- **Superficies evitadas**: no se tocaron `Settings`, `Community`, `MarketplaceAdminDashboard`, `AuthContext`, Gantt, Presupuestos ni BIM.
+- **Validacion**: suite Comunidad OK, py_compile tooling OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Cliente admin tenantless para catalogo de licencias
+- **TASK-1768 (Fase 5 frontend clasico)**: se agrega `adminLicensesApi.getCatalog()` y `AdminGlobalLicencias` deja de llamar directo a `/admin-licenses/catalog`.
+- **Resultado**: se elimina una llamada directa desde pantalla admin hacia endpoint de catalogo; el conteo heuristico global queda en 59 por otras llamadas fuera de clientes.
+- **Alcance**: lectura tenantless de catalogo de licencias; sin cambios visuales, sin rutas, sin payloads, sin DB, sin auth y sin tenant nuevo.
+- **Superficies evitadas**: no se tocaron `Settings`, `ProjectManager`, `AuthContext`, Gantt, Presupuestos, Community, Marketplace ni BIM.
+- **Validacion**: build frontend OK y smoke no-BIM OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Cliente admin global tenantless para gobernanza
+- **TASK-1769 (Fase 5 frontend clasico)**: se crea `adminGlobalApi` para lecturas tenantless de empresas y usuarios globales.
+- **Migracion**: `AdminGlobalGobernanza` usa `adminGlobalApi.getEmpresas()` y `adminGlobalApi.getUsuarios()` para sus metricas de solo lectura.
+- **Resultado**: el inventario reproducible baja de 59 a 58 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: pantalla admin global de lectura; sin cambios visuales, sin rutas, sin payloads, sin DB, sin auth y sin tenant nuevo.
+- **Superficies evitadas**: no se tocaron `Settings`, `ProjectManager`, `AuthContext`, Gantt, Presupuestos, Community, Marketplace ni BIM.
+- **Validacion**: build frontend OK y smoke no-BIM OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Reutilizacion adminGlobalApi en pantallas admin
+- **TASK-1770 (Fase 5 frontend clasico)**: `AdminGlobalEmpresaAuditada` y `AdminGlobalComunicados` reutilizan `adminGlobalApi.getEmpresas()`.
+- **Resultado**: el inventario reproducible baja de 58 a 54 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: lecturas tenantless de empresas en pantallas admin; sin cambios visuales, sin rutas, sin payloads, sin DB, sin auth y sin tenant nuevo.
+- **Superficies evitadas**: no se tocaron `Settings`, `ProjectManager`, `AuthContext`, Gantt, Presupuestos, Community, Marketplace operativo ni BIM.
+- **Validacion**: build frontend OK y smoke no-BIM OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Reutilizacion adminGlobalApi en layout clasico
+- **TASK-1771 (Fase 5 frontend clasico)**: `AppLayout` reutiliza `adminGlobalApi.getEmpresas()` para poblar el selector de empresa del superadministrador.
+- **Resultado**: el inventario reproducible baja de 54 a 53 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: lectura tenantless de empresas en layout protegido; sin cambios visuales, sin rutas, sin payloads, sin DB, sin auth y sin tenant nuevo.
+- **Superficies evitadas**: no se tocaron `Settings`, `ProjectManager`, `AuthContext`, Gantt, Presupuestos, Community, Marketplace operativo ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Cliente publico auth para recuperacion/reset
+- **TASK-1772 (Fase 5 frontend clasico)**: se crea `publicAuthApi` para centralizar recuperacion y reset de password.
+- **Resultado**: `ForgotPassword` y `ResetPassword` dejan de usar `axios` directo con `http://localhost:8000`; el inventario reproducible baja de 53 a 51 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: auth publica de recuperacion/reset; sin cambios en `AuthContext`, login, refresh, sesiones, rutas visibles, payloads backend, DB, tenant ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Consulta publica de cuentas por email en cliente auth
+- **TASK-1773 (Fase 5 frontend clasico)**: `Login` usa `publicAuthApi.getAccountsByEmail()` para la consulta publica previa a password.
+- **Resultado**: el inventario reproducible baja de 51 a 50 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: solo consulta publica `/auth/accounts-by-email`; sin cambios en `AuthContext`, password login, refresh, logout, tokens, rutas visibles, payloads backend, DB, tenant global ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Registro publico en cliente auth
+- **TASK-1774 (Fase 5 frontend clasico)**: `RegisterModal` usa `publicAuthApi.register()` para el alta publica de cuenta.
+- **Resultado**: el inventario reproducible baja de 50 a 49 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: solo registro publico `/register`; sin cambios en `AuthContext`, login, refresh, logout, sesiones, rutas visibles, payloads backend, DB, tenant global ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Transporte API para trazas de sesion
+- **TASK-1775 (Fase 5 frontend clasico)**: `sessionTrace` delega el envio de trazas en `frontend/src/api/sessionTrace.js`.
+- **Resultado**: el inventario reproducible baja de 49 a 48 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: solo telemetria no bloqueante de sesion; sin cambios en `AuthContext`, login, refresh, logout, expiracion, tokens, payloads backend, DB, tenant global ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Cliente API para Formula Polinomica
+- **TASK-1776 (Fase 5 frontend clasico)**: se crea `polinomicaApi` y `FormulaPolinomicaTab` deja de llamar directo a `axiosConfig`.
+- **Resultado**: el inventario reproducible baja de 48 a 40 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: solo centralizacion de llamadas del frontend; sin cambios de UI, formulas, payloads, persistencia, reporting, backend, DB, auth, tenant global ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK, pruebas focales de integridad numerica OK con 31 passed y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Lecturas globales de paises en Community y Marketplace
+- **TASK-1777 (Fase 5 frontend clasico)**: `Community` y `MarketplaceAdminDashboard` reutilizan `maestrosApi.getPaises()`.
+- **Resultado**: el inventario reproducible baja de 40 a 38 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: solo lectura global de paises; sin cambios en formularios, permisos, publicaciones, productos, importadores, payloads, backend, DB, auth, tenant global ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Lectura global de paises en Settings
+- **TASK-1778 (Fase 5 frontend clasico)**: `Settings` reutiliza `maestrosApi.getPaises()` para cargar paises.
+- **Resultado**: el inventario reproducible baja de 38 a 37 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: solo lectura global de paises; sin cambios en empresas, usuarios, logos, plantillas, proyectos, licencias, payloads, backend, DB, auth, tenant global ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Cliente API para ProjectManager clasico
+- **TASK-1779 (Fase 5 frontend clasico)**: `ProjectManager` deja de importar `axiosConfig` directamente y usa clientes de dominio para proyectos, bases de trabajo, usuarios y EDT.
+- **Resultado**: el inventario reproducible baja de 37 a 30 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: centralizacion de transporte API para lecturas/asignaciones existentes; sin cambios visuales, sin rutas, sin payloads, sin backend, sin DB, sin auth y sin tenant global nuevo.
+- **Superficies evitadas**: no se tocaron Gantt, Presupuestos, Settings sensible, Community operativo, Marketplace operativo ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Cliente externo de geocodificacion clasica
+- **TASK-1780 (Fase 5 frontend clasico)**: se crea `geocodingApi` para encapsular llamadas externas a Overpass y Nominatim usadas por `DatosProyecto`.
+- **Resultado**: el inventario reproducible baja de 30 a 28 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: solo transporte externo de geocodificacion; sin cambios en seleccion de candidatos, fallback, mensajes, mapa, backend, DB, auth, tenant ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Alta de usuario Comunidad via usuariosApi
+- **TASK-1781 (Fase 5 frontend clasico)**: `Community` usa `usuariosApi.create()` para crear usuarios `usuario_comunidad`.
+- **Resultado**: el inventario reproducible baja de 28 a 27 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: solo transporte API del alta ya existente; sin cambios en formulario, rol, validacion de empresa activa, backend, DB, auth, tenant global ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Fixture local Gantt FF via cliente API
+- **TASK-1782 (Fase 5 frontend clasico)**: `gantt-ff-harness` usa `ganttFixturesApi.getFfFixture()` para cargar `/gantt-ff-fixture.json`.
+- **Resultado**: el inventario reproducible baja de 27 a 26 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: solo harness local de validacion Gantt; sin cambios en `CronogramaGantt`, fixtures, scripts Playwright, backend, DB, auth, tenant ni BIM.
+- **Validacion**: build frontend OK, smoke Gantt clasico OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-24 - Lecturas iniciales de Settings via clientes API
+- **TASK-1783 (Fase 5 frontend clasico)**: `Settings.fetchData` usa clientes de dominio para lecturas de empresas, usuarios y proyectos.
+- **Resultado**: el inventario reproducible baja de 26 a 21 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: solo lecturas iniciales; sin cambios en escrituras, logos, plantillas, UI, backend, DB, auth, tenant global ni BIM.
+- **Validacion**: build frontend OK, smoke no-BIM OK y baseline enterprise con frontend incluido OK.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Escrituras basicas de empresa en Settings via empresasApi
+- **TASK-1784 (Fase 5 frontend clasico)**: `Settings` usa `empresasApi` para crear, actualizar, activar/desactivar y eliminar empresas.
+- **Resultado**: el inventario reproducible baja de 21 a 16 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: escrituras basicas de empresa; sin cambios en uploads de logo, plantillas, usuarios, UI, backend, DB, auth, tenant global ni BIM.
+- **Validacion**: build frontend OK y baseline enterprise con frontend incluido OK, incluyendo smoke no-BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Escrituras de usuarios en Settings via usuariosApi
+- **TASK-1785 (Fase 5 frontend clasico)**: `Settings` usa `usuariosApi` para crear, actualizar y eliminar usuarios.
+- **Resultado**: el inventario reproducible baja de 16 a 13 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: escrituras de usuarios preservando payloads y `empresa_id`; sin cambios en formulario, roles, validaciones, logos, plantillas, AuthContext, backend, DB, tenant global ni BIM.
+- **Validacion**: build frontend OK y baseline enterprise con frontend incluido OK, incluyendo smoke no-BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Settings sin llamadas API directas
+- **TASK-1786 (Fase 5 frontend clasico)**: `Settings` deja de importar `axiosConfig` directamente y reutiliza clientes API para logos, plantillas, configuracion de empresa y refresco de empresas.
+- **Resultado**: el inventario reproducible baja de 13 a 6 llamadas directas fuera de `frontend/src/api`; las restantes quedan concentradas en `AuthContext`.
+- **Alcance**: solo transporte API de operaciones ya existentes; sin cambios en rutas backend, payloads, formularios, validaciones, UI, backend, DB, auth, tenant global ni BIM.
+- **Validacion**: build frontend OK y baseline enterprise con frontend incluido OK, incluyendo smoke no-BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - AuthContext via cliente auth
+- **TASK-1787 (Fase 5 frontend clasico)**: `AuthContext` usa `authApi` para login, refresh, usuario actual y logout; la lectura de licencia usa `adminLicensesApi.getMyLicense(params)`.
+- **Resultado**: el inventario reproducible baja de 6 a 0 llamadas directas fuera de `frontend/src/api`.
+- **Alcance**: solo transporte API; sin cambios en interceptores, token storage, seleccion de empresa/base/proyecto, rutas backend, payloads, headers, backend, DB, tenant global ni BIM.
+- **Validacion**: build frontend OK y baseline enterprise con frontend incluido OK, incluyendo smoke no-BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Inventario reproducible de tamaño frontend
+- **TASK-1788 (Fase 5 frontend clasico)**: se crea `tools/ai_tools/frontend_size_inventory.py` y `docs/FRONTEND_SIZE_INVENTORY.md`.
+- **Resultado**: snapshot reproducible de 219 archivos fuente, 120733 lineas y 6713248 bytes; se identifican superficies grandes antes de extraer helpers o dividir componentes.
+- **Baseline**: `validate_enterprise_baseline.py` valida ahora `docs/frontend_size_inventory.json`.
+- **Alcance**: tooling/documentacion; sin cambios productivos frontend, backend, DB, rutas, UI, tenant global ni BIM.
+- **Validacion**: baseline enterprise con frontend incluido OK, incluyendo smoke no-BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Guarda arquitectonica frontend en baseline
+- **TASK-1789 (Fase 5 frontend clasico)**: se crea `tools/ai_tools/validate_frontend_architecture.py`.
+- **Resultado**: el baseline enterprise bloquea regresiones si reaparecen llamadas API directas fuera de `frontend/src/api` y valida que los snapshots frontend sigan estructuralmente utiles.
+- **Baseline**: `validate_enterprise_baseline.py --include-frontend` ejecuta la nueva guarda y pasa OK.
+- **Alcance**: tooling de validacion; sin cambios productivos frontend, backend, DB, rutas, UI, auth, tenant global ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Smoke focal de fronteras API clasicas
+- **TASK-1790 (Fase 5 frontend clasico)**: se crea `frontend/scripts/smoke-classic-api-boundaries.mjs`.
+- **Resultado**: el baseline valida que `AuthContext` y `Settings` sigan usando clientes API y no vuelvan a importar `axiosConfig` directamente.
+- **Script**: `npm run smoke:classic-api-boundaries`.
+- **Baseline**: `validate_enterprise_baseline.py --include-frontend` ejecuta el nuevo smoke y pasa OK.
+- **Alcance**: validacion estatica focal; sin cambios productivos frontend, backend, DB, rutas, UI, auth runtime, tenant global ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Smoke focal de logo de empresa clasico
+- **TASK-1791 (Fase 5 frontend clasico)**: se crea `frontend/scripts/smoke-classic-company-logo-boundary.mjs`.
+- **Resultado**: el baseline valida la cadena de logo de empresa seleccionada: `resolveMediaUrl`, `empresasApi.uploadLogo`, endpoint multipart y montaje backend `/uploads`.
+- **Script**: `npm run smoke:classic-company-logo`.
+- **Baseline**: `validate_enterprise_baseline.py --include-frontend` ejecuta el nuevo smoke y pasa OK.
+- **Alcance**: validacion estatica focal; sin cambios productivos frontend, backend, DB, rutas, UI, auth, tenant global ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Smoke focal de ProjectManager clasico
+- **TASK-1792 (Fase 5 frontend clasico)**: se crea `frontend/scripts/smoke-classic-project-manager-api-boundary.mjs`.
+- **Resultado**: el baseline valida que `ProjectManager` conserve clientes API de proyectos, bases, usuarios y EDT, incluyendo asignaciones y helpers tenant.
+- **Script**: `npm run smoke:classic-project-manager`.
+- **Baseline**: `validate_enterprise_baseline.py --include-frontend` ejecuta el nuevo smoke y pasa OK.
+- **Alcance**: validacion estatica focal; sin cambios productivos frontend, backend, DB, rutas, UI, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Smoke focal de Formula Polinomica clasica
+- **TASK-1793 (Fase 5 frontend clasico)**: se crea `frontend/scripts/smoke-classic-formula-polinomica-api-boundary.mjs`.
+- **Resultado**: el baseline valida que `FormulaPolinomicaTab` conserve `polinomicaApi` y `presupuestosApi`, endpoints criticos y tenant params por proyecto.
+- **Script**: `npm run smoke:classic-formula-polinomica`.
+- **Baseline**: `validate_enterprise_baseline.py --include-frontend` ejecuta el nuevo smoke y pasa OK.
+- **Alcance**: validacion estatica focal; sin cambios productivos frontend, calculos, backend, DB, rutas, UI, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Smoke focal de Community clasica
+- **TASK-1794 (Fase 5 frontend clasico)**: se crea `frontend/scripts/smoke-classic-community-api-boundary.mjs`.
+- **Resultado**: el baseline valida que `Community` conserve `communityApi`, `maestrosApi`, `usuariosApi`, empresa activa, adjuntos multipart, DM, moderacion, sanciones, apelaciones, alertas, infracciones y tenant params criticos.
+- **Script**: `npm run smoke:classic-community`.
+- **Baseline**: `validate_enterprise_baseline.py --include-frontend` ejecuta el nuevo smoke y pasa OK.
+- **Alcance**: validacion estatica focal; sin cambios productivos frontend, clientes API productivos, backend, DB, rutas, UI, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Smoke focal de Marketplace Admin clasico
+- **TASK-1795 (Fase 5 frontend clasico)**: se crea `frontend/scripts/smoke-classic-marketplace-admin-api-boundary.mjs`.
+- **Resultado**: el baseline valida que `MarketplaceAdminDashboard` conserve `marketplaceApi`, `maestrosApi`, endpoints administrativos, uploads multipart, importador Portal, descargas blob y maestros tenantless.
+- **Script**: `npm run smoke:classic-marketplace-admin`.
+- **Baseline**: `validate_enterprise_baseline.py --include-frontend` ejecuta el nuevo smoke y pasa OK.
+- **Alcance**: validacion estatica focal; sin cambios productivos frontend, clientes API productivos, backend, DB, rutas, UI, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Smoke focal de Presupuestos clasico
+- **TASK-1796 (Fase 5 frontend clasico)**: se crea `frontend/scripts/smoke-classic-presupuesto-api-boundary.mjs`.
+- **Resultado**: el baseline valida que Presupuestos conserve clientes de dominio para carga, lineas, notas, indirectos, tanteo, catalogo APU, EDT y reporting, con tenant params y `refresh_prices`.
+- **Script**: `npm run smoke:classic-presupuesto`.
+- **Baseline**: `validate_enterprise_baseline.py --include-frontend` ejecuta el nuevo smoke y pasa OK.
+- **Alcance**: validacion estatica focal; sin cambios productivos frontend, clientes API productivos, calculos, backend, DB, rutas, UI, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Smoke focal de Cronogramas/Gantt clasico
+- **TASK-1797 (Fase 5 frontend clasico)**: se crea `frontend/scripts/smoke-classic-cronogramas-api-boundary.mjs`.
+- **Resultado**: el baseline valida que Cronogramas/Gantt conserve clientes de dominio para Valorado, Trabajo, calendario, reportes, export/import MS Project, commit delta, blobs, multipart y tenant activo.
+- **Script**: `npm run smoke:classic-cronogramas`.
+- **Baseline**: `validate_enterprise_baseline.py --include-frontend` ejecuta el nuevo smoke y pasa OK.
+- **Alcance**: validacion estatica focal; sin cambios productivos frontend, clientes API productivos, calculos, scheduling, backend, DB, rutas, UI, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - BasesTrabajo sin import directo de axiosConfig
+- **TASK-1798 (Fase 5 frontend clasico)**: `BasesTrabajo` elimina el import directo de `axiosConfig` y usa `maestrosApi.getPaises()` para paises.
+- **Resultado**: no quedan imports directos de `axiosConfig` fuera de `frontend/src/api`; se agrega `frontend/scripts/smoke-classic-bases-trabajo-api-boundary.mjs`.
+- **Snapshot IA**: se regenera `docs/frontend_dependency_inventory.json`.
+- **Script**: `npm run smoke:classic-bases-trabajo`.
+- **Baseline**: `validate_enterprise_baseline.py --include-frontend` ejecuta el nuevo smoke y pasa OK.
+- **Alcance**: micro-limpieza de transporte API; sin cambios visuales, rutas backend, payloads, DB, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - BasesTrabajo sin trazas DEBUG productivas
+- **TASK-1799 (Fase 5 frontend clasico)**: se eliminan `console.log` productivos de `BasesTrabajo` con prefijos `DEBUG BASES` y `DEBUG CREATE`.
+- **Resultado**: la consola deja de exponer empresa activa y payload de creacion en flujo normal; los errores operativos conservan diagnostico sin prefijo DEBUG.
+- **Smoke**: `smoke-classic-bases-trabajo-api-boundary.mjs` ahora bloquea la reintroduccion de `DEBUG BASES` y `DEBUG CREATE`.
+- **Snapshot IA**: se regenera `docs/logging_inventory.json`.
+- **Validacion**: `npm run smoke:classic-bases-trabajo`, `npm run build` y `.\.venv\Scripts\python.exe tools/ai_tools/validate_enterprise_baseline.py --include-frontend` pasan OK.
+- **Alcance**: micro-limpieza de logging frontend; sin cambios visuales, rutas backend, clientes API, payloads, DB, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - DatosProyecto sin console.log productivos
+- **TASK-1800 (Fase 5 frontend clasico)**: se eliminan `console.log` productivos de `DatosProyecto` vinculados a cantones, detalle inicial y datos dependientes.
+- **Resultado**: Datos de Proyecto deja de exponer respuestas de maestros y detalle del proyecto en consola durante carga normal.
+- **Smoke**: se crea `frontend/scripts/smoke-classic-datos-proyecto-logging-boundary.mjs`, se agrega `smoke:classic-datos-proyecto` y el baseline lo ejecuta con `--include-frontend`.
+- **Snapshot IA**: se regenera `docs/logging_inventory.json`.
+- **Validacion**: `.\.venv\Scripts\python.exe tools\ai_tools\validate_enterprise_baseline.py --include-frontend` pasa OK.
+- **Alcance**: micro-limpieza de logging frontend; sin cambios visuales, guardados, geocodificacion, reportes, uploads, rutas backend, payloads, DB, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - ApuBudgetEditor sin console.log productivos
+- **TASK-1801 (Fase 5 frontend clasico)**: se eliminan `console.log` productivos del fallback de revision a maestro en `ApuBudgetEditor`.
+- **Resultado**: el editor APU de presupuesto conserva el fallback operativo pero deja de emitir trazas normales de recursos, APUs y subcategorias.
+- **Smoke**: `smoke-classic-presupuesto-api-boundary.mjs` ahora cubre `ApuBudgetEditor`, ausencia de `console.log` y preservacion de clientes/fallbacks criticos.
+- **Snapshot IA**: se regenera `docs/logging_inventory.json`.
+- **Validacion**: `.\.venv\Scripts\python.exe tools\ai_tools\validate_enterprise_baseline.py --include-frontend` pasa OK.
+- **Alcance**: micro-limpieza de logging frontend; sin cambios visuales, calculos, lineas APU, fallback revision/maestro, rutas backend, payloads, DB, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Proyectos sin console.log productivos
+- **TASK-1802 (Fase 5 frontend clasico)**: se eliminan `console.log` productivos de `Proyectos.jsx` en creacion de proyecto y apertura/seleccion de revisiones.
+- **Resultado**: la pantalla de Proyectos deja de exponer payloads, empresa activa y revisiones en consola durante flujo normal.
+- **Smoke**: se crea `frontend/scripts/smoke-classic-proyectos-logging-boundary.mjs`, se agrega `smoke:classic-proyectos` y el baseline lo ejecuta con `--include-frontend`.
+- **Snapshot IA**: se regenera `docs/logging_inventory.json`.
+- **Validacion**: `.\.venv\Scripts\python.exe tools\ai_tools\validate_enterprise_baseline.py --include-frontend` pasa OK.
+- **Alcance**: micro-limpieza de logging frontend; sin cambios visuales, creacion, revisiones, modal, presupuestos por revision, rutas backend, payloads, DB, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - AuthContext sin console.log productivos
+- **TASK-1803 (Fase 5 frontend clasico)**: se eliminan las ultimas trazas `console.log` productivas del frontend clasico, ubicadas en `AuthContext`.
+- **Resultado**: `frontend/src` queda sin `console.log` productivos fuera de `api`; se preservan device id, check no bloqueante, expiracion, limpieza de timers y `clearSessionState`.
+- **Smoke**: `smoke-classic-api-boundaries.mjs` ahora bloquea `console.log` en `AuthContext` y valida el flujo critico.
+- **Snapshot IA**: se regenera `docs/logging_inventory.json`.
+- **Validacion**: `.\.venv\Scripts\python.exe tools\ai_tools\validate_enterprise_baseline.py --include-frontend` pasa OK.
+- **Alcance**: micro-limpieza de logging frontend; sin cambios visuales, login, refresh, logout, token storage, device id, rutas backend, payloads, DB, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Cierre formal de Fase 5 frontend seguro
+- **TASK-1804 (Fase 5 frontend clasico)**: se cierra formalmente la fase sin cambios funcionales adicionales.
+- **Resultado**: Fase 5 queda al 100%; no hay imports directos de `axiosConfig` fuera de `frontend/src/api` ni `console.log` productivos en `frontend/src` fuera de `api`.
+- **Validacion**: `.\.venv\Scripts\python.exe tools\ai_tools\validate_enterprise_baseline.py --include-frontend` pasa OK.
+- **No cambios productivos**: cierre documental y de evidencia; sin UI, rutas, payloads, DB, auth, tenant runtime, calculos ni BIM.
+- **Siguiente tramo**: fases posteriores deben abrirse aparte: entornos, Docker, CI/CD, staging y produccion.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Plantilla Modo Clasico alineada con baseline seguro
+- **TASK-1808 (Gobernanza IA)**: se actualiza `docs/plantillas prompt/Prompt Modo Clasico.txt`.
+  - **Baseline protegido**: la plantilla ahora referencia el cierre local clasico `TASK-1807` y evita reabrir refactors cerrados sin TASK nueva.
+  - **Guardas frontend/backend**: se incorporan reglas sobre clientes API, `axiosConfig`, `console.log`, smokes focales, auth, tenant y contratos sensibles.
+  - **Despliegue pausado**: Docker, Coolify, CI/CD, staging y produccion siguen bloqueados salvo solicitud explicita.
+
+# 2026-05-25 - Cierre baseline local clasico
+- **TASK-1807 (Gobernanza de refactor seguro)**: se cierra documentalmente el baseline local clasico sin activar despliegue.
+  - **Fases locales**: gobierno, higiene, snapshots, validacion, backend seguro y frontend clasico quedan documentados como 100%.
+  - **Despliegue pausado**: Docker, Coolify, CI/CD, staging y produccion siguen planificados pero no iniciados hasta solicitud explicita.
+  - **No interferencia BIM**: no se toca codigo BIM ni se activa UX BIM.
+
+# 2026-05-25 - Preflight Fase 6 entornos y Docker
+- **TASK-1805 (Fase 6 entornos/Docker)**: se crea `docs/ENVIRONMENT_DOCKER_PREFLIGHT.md`.
+- **Resultado**: queda documentado el contrato real observado para backend `3001`, frontend `3010`, proxy Vite `/api -> http://localhost:3001`, frontend con `baseURL: '/api/v1'`, PostgreSQL separado y BIM desactivado por defecto.
+- **No Docker todavia**: no se crean Dockerfiles, compose ni cambios de servicios.
+- **Alcance**: documentacion y preflight; sin codigo productivo, puertos, `.env` reales, DB, auth, tenant runtime, uploads ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+
+# 2026-05-25 - Pausa explicita de despliegue Docker/Coolify
+- **TASK-1806 (Gobernanza de despliegue)**: se documenta que Docker, Coolify, CI/CD, staging y produccion quedan planificados pero pausados.
+- **Resultado**: no se deben crear ni activar Dockerfiles, `.dockerignore`, compose, Coolify, pipelines, staging, cambios de puertos/proxy ni migraciones de entorno hasta solicitud explicita del usuario.
+- **Alcance**: documentacion de gobernanza; sin codigo productivo, servicios, DB, auth, tenant runtime ni BIM.
+- **No BIM**: sin cambios en codigo BIM, sin UX BIM y sin dependencias BIM.
+### 2026-07-10 - Corpus IFC real licenciado y reproducible (BIM-TASK-0071)
+
+- Se incorporan cinco modelos oficiales buildingSMART CC BY 4.0: PCERT
+  Architecture/Structural/HVAC y Duplex Architecture/MEP.
+- Un manifiesto comun fija procedencia, atribucion, schema, MVD, disciplina,
+  tier, bytes, SHA-256, entidades, storeys, elementos y clases requeridas.
+- El parser BIM amplia compatibilidad MEP IFC2x3 y procesa 1103 elementos del
+  corpus; checksum y rutas quedan protegidos por tests negativos.
+- `IfcImporter` convierte los cinco IFC reales a Fragments no vacios mediante
+  WASM local de `web-ifc`.
+- Validado con 49 pytest BIM, py_compile, smoke BIM positivo, smoke de corpus,
+  smoke anti-BIM y build Vite.
+- Sin endpoints, DB real, auth, tenant, GiProy Clasico ni deploy.
+### 2026-07-11 - Campo y valor ganado BIM (BIM-TASK-0104/0105)
+
+- Partes de campo generan progreso 4D atomico con cantidad y horas reales.
+- Evidencias se validan y persisten como `BYTEA` en PostgreSQL `de2016`.
+- BAC/PV/EV/AC, SPI y CPI quedan reproducibles e inspeccionables en BIM.
+- `106` tests BIM, PostgreSQL reversible, harness responsive y baseline pasan.
+### 2026-07-11 - Correccion: SYNCHRO como benchmark funcional
+
+- Se retira completamente el conector Bentley creado por interpretacion previa.
+- No quedan OAuth, credenciales, iTwin/iModel, endpoints, tablas ni UX externa.
+- PostgreSQL vuelve a `de2016`; 4D/5D nativo `0091-0105` se conserva.
+- `0106-0112` pasan a cubrir capacidades profesionales propias de GiProy BIM.
+
+### 2026-07-11 - Playback y capacidad 4D nativos (BIM-TASK-0106/0107)
+
+- Playback temporal profesional con velocidades, scrubber, navegación y foco GUID.
+- Recursos y asignaciones 4D aislados en PostgreSQL, con histogramas y sobrecarga.
+- Nuevo head aditivo `de2017a1b2c3`; sin conexión, API ni dependencia de terceros.
+- Validación: `108 passed` BIM, PostgreSQL reversible, build Vite y guardas Classic/BIM.
+
+### 2026-07-11 - Conflictos espacio-tiempo nativos (BIM-TASK-0108)
+
+- Análisis derivado de solapes por frente, componente o geometría compartida.
+- Evidencia reproducible con severidad, intervalo, actividades, elementos y GUID.
+- Panel BIM con resumen y foco en modelo; `109 passed`, build y smokes en verde.
+
+### 2026-07-12 - Cierre BIM 4D nativo (BIM-TASK-0109/0112)
+
+- Gantt BIM compacto con dependencias, ruta crítica, selección GUID y navegación
+  temporal sincronizada con playback/Fragments.
+- Informes 4D/5D JSON y CSV para Gantt, plan-real, recursos, conflictos,
+  productividad y campo/EVM.
+- Corpus certificado: cinco IFC reales S/M/L, 20,954,197 bytes, 1,103 elementos
+  y conversión Fragments no vacía; dataset mayor convertido en 1.551 s.
+- Rendimiento WebGL: 60 FPS Chrome/Edge desktop/tablet, render máximo 1.377 s,
+  remontajes ~0.8 s y heap estable ~32.5 MB.
+- Gate final: `109 passed`, PostgreSQL reversible `de2010 -> de2017`, build,
+  anti-BIM, smokes BIM y baseline enterprise completos.
+- Plan nativo `BIM-TASK-0091` a `0112` cerrado al `100%`, sin conexión Bentley.
+
+### 2026-07-12 - Roadmap de paridad avanzada BIM 4D
+
+- Se abre `BIM-TASK-0113` a `0117` para el núcleo 4D avanzado.
+- Se diferencia explícitamente subset lógico, preview por clipping y geometría
+  materializada; ninguna etapa se declarará cerrada con mocks visuales.
+- Perform, Control, Field, IA y cualquier conexión Bentley quedan fuera.
+### 2026-07-12 - Particiones constructivas BIM 4D (BIM-TASK-0113)
+
+- Cerradas las particiones constructivas no destructivas con persistencia
+  PostgreSQL `de2018a1b2c3`, endpoints protegidos y preview WebGL real.
+- Validado rollback sin modificar geometria IFC, `111` pruebas BIM, build,
+  smokes anti-BIM/BIM y baseline enterprise. La materializacion queda en
+  `BIM-TASK-0114`.
+### 2026-07-12 - Materializacion parametrica BIM 4D (BIM-TASK-0114)
+
+- Se agregan artefactos PostgreSQL inmutables `de2019a1b2c3` con segmentos 3D,
+  volumen, superficie, checksum y trazabilidad al GlobalId fuente.
+- El workspace materializa y renderiza `bounding_box_v1` desde API real,
+  declarando expresamente que no es CSG exacto sobre la malla IFC.
+- `113` pruebas BIM, PostgreSQL reversible, build, harness WebGL desktop/mobile,
+  smokes BIM/anti-BIM y baseline enterprise quedan en verde.
+### 2026-07-12 - Equipos y trayectorias BIM 4D (BIM-TASK-0115)
+
+- Se agregan equipos y planes de movimiento en PostgreSQL `de2020a1b2c3`,
+  ligados a snapshots de actividad y aislados de Equipo/Cronograma clasicos.
+- Playback interpolado, geometria temporal, radios operacionales y conflictos
+  espacio-temporales se consumen desde API real en WebGL.
+- `115` pruebas BIM, PostgreSQL reversible, build, harness responsive, smokes y
+  baseline enterprise quedan en verde.
+### 2026-07-12 - Seguridad y riesgo BIM 4D (BIM-TASK-0116)
+
+- PostgreSQL `de2021a1b2c3` persiste riesgos, controles, ventanas, zonas de
+  exclusion e inspecciones con evidencia.
+- Se evalua exposicion de trayectorias de equipo y se visualiza score/zona en
+  WebGL desde contratos BIM reales.
+- `117` pruebas BIM, PostgreSQL reversible, build, harness responsive, smokes y
+  baseline enterprise quedan en verde.
+### 2026-07-12 - Gate avanzado BIM 4D (BIM-TASK-0117)
+
+- Gate reproducible valida 50.000 actividades, 300 frames y entregable JSON con
+  SHA-256 estable.
+- Federacion WebGL carga cinco modelos Fragments simultaneos a 60 FPS en
+  Chrome/Edge desktop/tablet; el corpus separado convierte cinco IFC reales.
+- El plan avanzado `0113-0117` cierra al 100% dentro de su alcance, sin declarar
+  paridad total con SYNCHRO ni capacidades Perform/Control/Field/CSG exacto.
+
+### 2026-07-13 - CSG exacto aislado BIM (BIM-TASK-0118)
+
+- Se añade un harness BIM con `three-bvh-csg` que ejecuta sustracción e
+  intersecciones reales sobre una malla cerrada no trivial.
+- La suma de volúmenes de las dos particiones conserva el volumen fuente con
+  delta inferior a `0.00001 m3`; la prueba exige triangulación CSG derivada.
+- Playwright valida canvas WebGL no vacío, ausencia de errores/overflow y
+  layout responsive en desktop y mobile.
+- Build, smoke BIM positivo, smoke anti-BIM y baseline enterprise quedan en
+  verde, sin rutas visibles, persistencia, contratos clásicos ni conexión
+  Bentley.
+
+### 2026-07-13 - Artefactos CSG PostgreSQL (BIM-TASK-0119)
+
+- La migración aditiva `de2022a1b2c3` incorpora artefactos CSG inmutables por
+  especificación/revisión, sin sustituir `bounding_box_v1`.
+- El backend valida GlobalId, posiciones, normales, índices, triángulos y
+  conservación; recalcula los volúmenes y genera SHA-256 canónico.
+- Se agregan endpoints tenant-aware y métodos del cliente BIM para crear/listar
+  artefactos; el harness demuestra round-trip por checksum.
+- Suite BIM `120 passed`, migración PostgreSQL reversible, build, smokes BIM y
+  anti-BIM, y baseline enterprise quedan en verde.
+
+### 2026-07-13 - CSG sobre IFC real (BIM-TASK-0120)
+
+- El corpus buildingSMART PCERT Architecture se verifica por SHA-256 y se
+  convierte a Fragments (`18,439` bytes).
+- `web-ifc` extrae el sólido ExpressId `448` / GlobalId
+  `1yP7NInQz5uQzbiOpVFFJr`; CSG lo parte sobre su eje Z.
+- El volumen fuente `143.555999 m3` se conserva con delta
+  `0.000000926 m3`, muy por debajo de la tolerancia `0.01%`.
+- El gate es local y reproducible, sin modificar GiProy Clásico ni conectar con
+  Bentley.
+
+### 2026-07-13 - Round-trip FragmentsModels hacia CSG (BIM-TASK-0121)
+
+- El IFC real buildingSMART se convierte a Fragments y la triangulación se
+  obtiene desde `FragmentsModels.getItemsGeometry`, no desde una ruta paralela.
+- El localId `464` resuelve el GlobalId `3_4VN63S96DfWiJjgG8j1C`; CSG conserva
+  `6.345857 m3` con delta `0` a seis decimales.
+- El harness WebGL responsive produce el contrato CSG persistible, verifica
+  POST/GET por checksum y libera todos los recursos Three/Fragments.
+- Suite BIM `120 passed`, PostgreSQL reversible hasta `de2022a1b2c3`, build,
+  smoke BIM, anti-BIM y baseline enterprise quedan en verde.
+
+### 2026-07-13 - Artefacto CSG en panel de producto (BIM-TASK-0122)
+
+- El panel BIM consulta la revision CSG PostgreSQL mas reciente y reconstruye
+  sus segmentos como mallas Three.js persistidas.
+- El render exacto tiene prioridad y conserva el artefacto parametrico como
+  fallback; revision, metodo, checksum y volumen quedan visibles.
+- Playwright valida ambos caminos en desktop/mobile con canvas no vacio; build,
+  smoke BIM, anti-BIM y baseline enterprise quedan en verde.
+- La implementacion técnica local alcanza una estimacion conservadora del
+  `97%`; Gate D autorizado y el piloto real Gate E permanecen pendientes.
+### 2026-07-13 - Allowlist BIM para empresas piloto (TASK-2026)
+
+- BIM queda habilitado exclusivamente para `Administradores Generales`
+  (`empresa_id=1`) y `Santiago Bermeo` (`empresa_id=3`).
+- La configuración persistida usa `is_enabled=true`, `superadmin_only=false` y
+  `allowed_company_ids=1,3`; cualquier otra empresa queda denegada por backend
+  y sin entrada BIM visible.
+- La mutación es transaccional y queda auditada con su estado anterior para
+  rollback. No cambia Proyectos, auth, JWT, contratos ni datos clásicos.
+- La prueba focal pasa con `41 passed`. Gate E continúa abierto hasta designar
+  responsables, ejecutar diez jornadas y procesar dos revisiones reales.
+- La tabla avanzada `bim_rollout_plans` aún no existe en la base local; su
+  migración queda reservada a un despliegue controlado.
+- El despliegue beta sincroniza exclusivamente el perimetro BIM actual, aplica
+  la rama aditiva `de2002` a `de2022a1b2c3` y reconstruye backend/frontend con
+  BIM apagado durante la intervencion.
+- Tras verificar migracion, tres contenedores saludables, home `200`, endpoint
+  BIM protegido `401` y chunk BIM `200`, se reactiva la allowlist `1,3` y se
+  registra `bim_pilot_allowlist_reactivated`.
+- Se conservan dump de PostgreSQL, fuentes e imagen backend predeploy para
+  rollback. Gate E humano continua pendiente y no se declara certificado.
+### 2026-07-13 - Workspace BIM V2 ordenado y desplegado (BIM-TASK-0124)
+
+- BIM se reorganiza en Visor, Coordinacion, Planificacion 4D, Produccion, Campo
+  e Informes, con Administracion separada y restringida.
+- La shell limita herramientas simultaneas, mantiene el visor como superficie
+  principal y mueve Timeline/Gantt a un drawer inferior minimizable.
+- Se agregan busqueda unificada real, persistencia y redimensionado de layout,
+  reset, atajos, estados vacio/error y guarda minima 1920x1080.
+- `BIM-TASK-0125` elimina posteriormente la rama anterior y el flag de
+  convivencia: V2 queda como unico workspace y el rollback pasa a imagen/fuente
+  respaldada. GiProy Clasico y TASK-1807 no cambian.
+- Build, smokes BIM/anti-BIM, baseline enterprise y Playwright WebGL pasan.
+- Desplegado frontend-only en beta; contenedores saludables, bundle V2
+  verificable y acceso BIM limitado a empresas 1 y 3.
+
+### 2026-07-13 - Workspace BIM V2 sustituye al anterior (BIM-TASK-0125)
+
+- Se elimina la rama JSX legacy, su importador embebido y el flag
+  `VITE_BIM_WORKSPACE_V2`; V2 queda como unico workspace BIM compilado.
+- La importacion IFC real permanece en Administracion mediante jobs observables.
+- Dockerfile y Compose dejan de aceptar una seleccion entre workspaces.
+- El rollback es externo por imagen/fuentes respaldadas, sin dos experiencias
+  conviviendo dentro del producto.
+- Linter focal, build, smokes BIM/anti-BIM, WebGL/DOM y baseline enterprise: OK.
+- Desplegado frontend-only en beta con backup
+  `bim-workspace-v2-unique-20260713-191942`; bundle publico V2 unico y los tres
+  contenedores saludables.
+
+### 2026-07-13 - Gantt y modelo BIM bidireccionales (BIM-TASK-0126)
+
+- Planificacion 4D usa una sola superficie con timeline, Gantt y cursor de
+  corte compartido, en lugar de dos pestañas independientes.
+- La seleccion actividad-modelo y modelo-actividades es muchos-a-muchos y se
+  proyecta en Fragments federado, plano 2D y viewer Three.
+- El Gantt incorpora linea base, busqueda, filtros, escalas, dependencias,
+  virtualizacion y centrado de seleccion.
+- GiProy Clasico, Cronograma, auth, tenant, PostgreSQL y TASK-1807 no cambian.
+- Build, smokes BIM/anti-BIM, Playwright 1920x1080 y baseline enterprise: OK.
+- Desplegado en beta como frontend-only. Home y chunk BIM responden `200`, el
+  endpoint protegido responde `401` y backend/PostgreSQL conservan uptime.
+- El particionado Vite validado queda restaurado en beta: `BimTab` pesa
+  `276630` bytes y Three/Fragments viven en `bim-3d`.
+- Rollback: backup `bim-task-0126-20260713-195506` e imagen
+  `giproy-beta-frontend:bim-task-0126-predeploy-20260713-195506`.
+- Allowlist `1,3` intacta y Gate E humano sin alteracion.
+### 2026-07-13 - Contrato de adecuacion integral SYNCHRO (BIM-TASK-0127)
+
+- Se congelan 60 capacidades publicas de SYNCHRO 4D/Modeler, Control, Field,
+  Perform, Cost, handover y plataforma empresarial.
+- El baseline conservador registra 16 completas, 23 parciales y 21 ausentes:
+  45,83% de paridad integral, sin alterar el 100% del nucleo 4D GiProy.
+- El 100% queda condicionado a evidencia por capacidad, Gate E humano, Gate K,
+  baseline enterprise y rollback probado.
+- No hay cambios de codigo, DB, API, auth, tenant, GiProy Clasico ni deploy.
+### 2026-07-13 - Validador reproducible de paridad SYNCHRO (BIM-TASK-0128)
+
+- La matriz de 60 capacidades dispone ahora de contrato JSON versionado.
+- Un validador comprueba IDs, grupos, evidencia, sincronizacion Markdown/JSON,
+  score y requisitos obligatorios de liberacion.
+- El modo `--require-complete` impide declarar release mientras el score no sea
+  100% y mantiene Gate E, Gate K, anti-BIM y rollback como condiciones.
+- No hay cambios productivos, DB, API, frontend, GiProy Clasico ni deploy.
+### 2026-07-13 - Factibilidad de scheduling interoperable (BIM-TASK-0129)
+
+- P6 XML y MSPDI XML quedan definidos como intercambios nativos prioritarios.
+- XER necesita corpus autorizado; MPP y Powerproject PP solo se admitiran con
+  adaptador o SDK licenciado, sin ingenieria inversa de formatos propietarios.
+- Todo import pasa por snapshot BIM, preview y reporte de perdida antes de una
+  eventual aplicacion controlada sobre Cronograma clasico.
+- No hay codigo, dependencias, DB, API, cambios clasicos ni deploy.
+### 2026-07-13 - Preflight canonico de scheduling BIM (BIM-TASK-0130)
+
+- Nuevo contrato BIM para calendarios, WBS, actividades, dependencias,
+  recursos, asignaciones y baselines de herramientas externas.
+- El preflight detecta duplicados, referencias ausentes, ciclos, restricciones,
+  hitos, zonas IANA y campos no representables con checksum determinista.
+- El endpoint protegido es solo lectura y no escribe Cronograma ni PostgreSQL.
+- Nueve pruebas focales y baseline enterprise pasan; se agrega `tzdata` para
+  paridad Windows/Linux.
+### 2026-07-13 - Workflow RFI integral sobre CDE BIM (BIM-TASK-0141)
+
+- Se agregan RFI y eventos auditables con tenant/proyecto, responsable,
+  vencimiento, prioridad, documento CDE, `GlobalId` y bloqueo optimista.
+- Se implementa el workflow gobernado de borrador, envio, respuesta, cierre y
+  anulacion mediante endpoints y servicios exclusivos del dominio BIM.
+- El Workspace BIM V2 incorpora el tab `RFI` en Coordinacion, validado en
+  navegador a 1920x1080 y sin dependencia desde GiProy Clasico.
+- PostgreSQL real pasa upgrade/downgrade `de2028a1b2c3`; suites backend,
+  workspace, anti-BIM y baseline enterprise quedan verdes.
+- C02 pasa a completa y la paridad demostrada queda en 50,83%.
+### 2026-07-13 - Submittals y planos de ingenieria BIM (BIM-TASK-0142)
+
+- Se agregan expedientes, revisiones y eventos BIM vinculados a la revision
+  documental CDE exacta evaluada.
+- Se implementan envio, revision, aprobacion, rechazo, anulacion y reenvio con
+  nueva emision, permisos por actor y bloqueo optimista.
+- Coordinacion incorpora el tab `Submittals`, validado a 1920x1080 con ciclo
+  completo de rechazo, reenvio y aprobacion.
+- PostgreSQL real, suites backend/frontend, anti-BIM y baseline enterprise
+  quedan verdes; C03 pasa a completa y la paridad queda en 52,50%.

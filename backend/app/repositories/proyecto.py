@@ -4,20 +4,49 @@ from app.schemas.proyecto import ProyectoCreate, ProyectoUpdate
 from typing import List, Optional
 
 class ProyectoRepository:
-    def get_by_id(self, db: Session, id: int, empresa_id: int) -> Optional[Proyecto]:
-        return db.query(Proyecto).filter(Proyecto.id == id, Proyecto.empresa_id == empresa_id).first()
+    def get_by_id(self, db: Session, id: int, empresa_id: int, include_deleted: bool = False) -> Optional[Proyecto]:
+        query = db.query(Proyecto).filter(Proyecto.id == id, Proyecto.empresa_id == empresa_id)
+        if not include_deleted:
+            query = query.filter(Proyecto.deleted_at.is_(None))
+        return query.first()
 
-    def get_by_base_id(self, db: Session, base_id: int, empresa_id: int) -> Optional[Proyecto]:
-        return db.query(Proyecto).filter(Proyecto.base_trabajo_id == base_id, Proyecto.empresa_id == empresa_id).first()
+    def get_by_base_id(self, db: Session, base_id: int, empresa_id: int, include_deleted: bool = False) -> Optional[Proyecto]:
+        query = db.query(Proyecto).filter(Proyecto.base_trabajo_id == base_id, Proyecto.empresa_id == empresa_id)
+        if not include_deleted:
+            query = query.filter(Proyecto.deleted_at.is_(None))
+        return query.first()
 
     def get_multi(self, db: Session, empresa_id: int, skip: int = 0, limit: int = 100) -> List[Proyecto]:
-        return db.query(Proyecto).filter(Proyecto.empresa_id == empresa_id).offset(skip).limit(limit).all()
+        return (
+            db.query(Proyecto)
+            .filter(Proyecto.empresa_id == empresa_id, Proyecto.deleted_at.is_(None))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
-    def get_revisions_by_codigo_root(self, db: Session, codigo_root: str, empresa_id: int) -> List[Proyecto]:
-        return db.query(Proyecto).filter(
-            Proyecto.codigo_root == codigo_root, 
-            Proyecto.empresa_id == empresa_id
-        ).order_by(Proyecto.revision.asc()).all()
+    def get_revisions_by_codigo_root(self, db: Session, codigo_root: str, empresa_id: int, include_deleted: bool = False) -> List[Proyecto]:
+        query = db.query(Proyecto).filter(
+            Proyecto.codigo_root == codigo_root,
+            Proyecto.empresa_id == empresa_id,
+        )
+        if not include_deleted:
+            query = query.filter(Proyecto.deleted_at.is_(None))
+        return query.order_by(Proyecto.revision.asc()).all()
+
+    def get_deleted_roots(self, db: Session, empresa_id: int, skip: int = 0, limit: int = 100) -> List[Proyecto]:
+        return (
+            db.query(Proyecto)
+            .filter(
+                Proyecto.empresa_id == empresa_id,
+                Proyecto.revision == 0,
+                Proyecto.deleted_at.isnot(None),
+            )
+            .order_by(Proyecto.deleted_at.desc(), Proyecto.id.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def create(self, db: Session, obj_in: ProyectoCreate, empresa_id: int) -> Proyecto:
         # Simple creation, business logic moved to service

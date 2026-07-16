@@ -1,0 +1,132 @@
+Como modelo de lenguaje, no puedo generar un archivo PDF directamente, pero te proporcionaré el contenido completo del "Runbook" en formato **Markdown (`.md`)**. Este formato es ideal porque puedes copiarlo y pegarlo en cualquier editor de texto (Notion, VS Code, GitHub Pages) o herramienta online que genere PDFs a partir de Markdown, manteniendo una estructura profesional y fácil de seguir.
+
+Este documento está diseñado para ser el manual de operaciones de tu sistema SaaS eXcom Consultores.
+
+***
+
+```markdown
+# 📖 Runbook Operacional: Plataforma SaaS eXcom Consultores
+
+**Versión:** 1.0 (Post-Implementación)
+**Fecha Última Revisión:** [Día/Mes/Año]
+**Propósito:** Guía paso a paso para la monitorización, gestión y recuperación de fallos del ecosistema SaaS.
+**Audiencia:** Equipo de Operaciones / Administrador de Sistemas.
+
+---
+
+## 🚀 I. Visión General del Sistema (Architecture Overview)
+
+El sistema está diseñado sobre una arquitectura en contenedores Docker que garantiza el aislamiento de servicios. El acceso externo se gestiona mediante Cloudflare Tunnel, lo que simplifica la exposición y mejora la seguridad.
+
+**🌐 Servicios Principales:**
+*   **Cloudflare Tunnel / Traefik:** Puerta de enlace (Ingress Controller) centralizado.
+*   **Docker Compose Network:** Red interna `proxy` para contenedores.
+*   **PostgreSQL:** Base de datos transaccional principal (fuera de Docker).
+*   **Redis:** Caché y sistema de mensajería rápido.
+*   **Prometheus/Grafana:** Sistema de monitoreo centralizado.
+*   **Portainer:** Interfaz gráfica para la gestión de contenedores Docker.
+
+**🔗 Endpoints Públicos (Subdominios):**
+*   [https://portainer.excomconsultores.com](https://portainer.excomconsultores.com)
+*   [https://grafana.excomconsultores.com](https://grafana.excomconsultores.com)
+*   [https://prometheus.excomconsultores.com](https://prometheus.excomconsultores.com)
+*   [https://whoami.excomconsultores.com](https://whoami.excomconsultores.com)
+
+---
+
+## 🔑 II. Acceso y Credenciales (Access & Credentials)
+
+| Servicio | Endpoint / Método | Usuario Típico | Propósito Principal | Notas de Seguridad |
+| :--- | :--- | :--- | :--- | :--- |
+| **Administración** | `https://portainer...` | [Usuario Admin] | Gestión, despliegue y revisión manual de contenedores. | Requiere MFA/Autenticación fuerte. |
+| **Monitorización** | `https://grafana...` | [Analista Grafana] | Visualización de métricas de salud del sistema. | Revisar Dashboards de Alertas. |
+| **Ingreso Manual** | SSH / IP Privada | benito (Admin) | Acceso directo a scripts, logs y configuración de host. | Solo para tareas críticas o debugging. |
+| **PostgreSQL DB** | `172.18.0.1:5432` | [User DB] | Base de Datos Transaccional Principal. | Uso vía pgAdmin / Cliente local. |
+
+---
+
+## 🔍 III. Tareas Rutinarias (Daily Routine Checks)
+
+Estas tareas deben revisarse al inicio y al final de la jornada laboral.
+
+### A. Revisión del Sistema de Monitoreo
+1.  **Grafana:** Acceder a `grafana.excomconsultores.com`.
+    *   Verificar el dashboard **"Estado General del Sistema"**.
+    *   Confirmar que todos los **Exporters** (Node, Redis, PG, cAdvisor) estén reportando estado **UP**.
+2.  **Alertas:** Revisar la pestaña de alertas en Grafana. Asegurarse de que no haya eventos *Pending*, *Firing* o *Problem*.
+
+### B. Revisión de Logs y Backups (Tareas Automáticas)
+1.  **Backup PostgreSQL (Cron: 02:00):**
+    *   Verificar el log en `/home/benito/logs/postgresql-backup.log`. Debe indicar éxito.
+    *   Verificar la recepción de notificación `ntfy` para confirmar que el envío fue exitoso.
+    *   Verificar directorio `/opt/backups/postgresql` y su contenido (archivos `.tar.gz`).
+2.  **Backup Docker (Cron: 03:00):**
+    *   Verificar el log de ejecución en `/home/benito/logs/docker-backup-cron.log`.
+    *   Confirmar la recepción de notificación `ntfy` para validar que los volúmenes y configuraciones fueron respaldados exitosamente.
+
+---
+
+## 🚨 IV. Guía de Respuesta a Incidentes (Incident Response)
+
+Esta sección detalla qué hacer cuando las alertas se disparan o un servicio falla completamente.
+
+### Escenario 1: Alerta Crítica de Disponibilidad (Servicio Caído)
+**Problema:** El servicio X (ej: Redis, PostgreSQL) reporta `DOWN` en Prometheus/Grafana.
+**Flujo de Acción:**
+1.  **Confirmación:** Verificar el estado manualmente vía Portainer o SSH (`docker ps`). ¿Está detenido?
+2.  **Diagnóstico Inicial (Docker):** Si está detenido, intentar reiniciar el contenedor: `docker compose restart [servicio]`.
+3.  **Diagnóstico Avanzado (PostgreSQL/Redis):** Si el reinicio falla, revisar los logs específicos del servicio en Docker para buscar errores de conexión o recursos.
+4.  **Escalada:** Si después de 5 minutos de intentos no hay solución, se considera un incidente Nivel 1 y se notifica al equipo principal.
+
+### Escenario 2: Alerta Crítica de Recursos (CPU/RAM/Disco)
+**Problema:** Un recurso crítico excede el umbral de alerta (ej: Disco lleno).
+**Flujo de Acción:**
+1.  **Identificación del Culpa:** Consultar Grafana para saber qué servicio o proceso está consumiendo los recursos.
+2.  **Mitigación Inmediata:** Si es disco, identificar la fuente más grande de datos (logs o backups antiguos).
+3.  **Acción Correctiva:**
+    *   Si son logs: Purga logs innecesarios con cuidado (`find /var/log -type f -mtime +90 -delete`).
+    *   Si es memoria/CPU: Identificar la aplicación que genera el pico y escalarlo, o limitar su consumo.
+
+### Escenario 3: Fallo de Backups (Backup no ejecutado o notificación fallida)
+**Problema:** No se recibió la notificación `ntfy` para PostgreSQL o Docker en las franjas horarias esperadas.
+**Flujo de Acción:**
+1.  **Verificación del Cron:** Verificar los logs cron (`/var/log/cron`) y el log local del script (ej: `/home/benito/logs/`).
+2.  **Ejecución Manual Forzada:** Ejecutar manualmente ambos scripts en SSH para confirmar la funcionalidad:
+    ```bash
+    # Backup PG
+    /home/benito/scripts/backup-postgresql.sh
+    # Backup Docker
+    /home/benito/scripts/backup-docker.sh
+    ```
+3.  **Validación:** Comprobar que los archivos de destino se hayan creado y, si es posible, intentar la notificación `ntfy` manualmente para aislar el fallo del sistema de mensajería.
+
+---
+
+## 🌪️ V. Procedimientos de Recuperación ante Desastres (Disaster Recovery - DR)
+
+Este procedimiento solo debe usarse si el servidor principal está inaccesible o ha sufrido un daño irreversible (Ej: Fallo eléctrico total, ataque de ransomware).
+
+**Objetivo:** Restaurar la operatividad mínima del negocio utilizando copias remotas.
+**Requisito Previo:** Acceso al repositorio de Backups Remotos (S3/Wasabi/B2).
+
+### 💾 Paso 1: Aislamiento y Preparación
+*   Detener cualquier intento de restauración hasta que se haya verificado la integridad del último backup remoto conocido (`[Fecha]` / `[Hora]`).
+*   Desplegar el entorno en una infraestructura temporal o secundaria.
+
+### 🐘 Paso 2: Restauración de Base de Datos (PostgreSQL)
+1.  **Descarga:** Descargar el archivo `.dump` más reciente y verificado del almacenamiento remoto.
+2.  **Limpieza:** Asegurar que la base de datos local esté vacía.
+3.  **Restauración:** Ejecutar el proceso de restauración completo (usando `pg_restore -d [nombre_base]`). **(Este es un procedimiento crítico y requiere la participación del DBA).**
+
+### 🐳 Paso 3: Restauración de Servicios Docker
+1.  **Configuración:** Usar los archivos de configuración (`docker-compose.yml`) guardados en el backup local/remoto.
+2.  **Volúmenes:** Restablecer los volúmenes críticos usando las copias de seguridad de datos del contenedor (si es necesario).
+3.  **Inicio:** Iniciar todo el stack con `docker compose up -d`.
+
+### 🌐 Paso 4: Validación Final
+1.  Verificar que todos los servicios respondan al `ping` y sean visibles en Grafana/Traefik.
+2.  Ejecutar las pruebas funcionales de negocio (ej: ¿Se puede crear un usuario? ¿Se puede cargar una sesión?).
+
+---
+**⚠️ Recordatorio Importante:** Este Runbook debe revisarse e incluirse en la formación continua del equipo operativo. La documentación es parte integral del servicio.
+```

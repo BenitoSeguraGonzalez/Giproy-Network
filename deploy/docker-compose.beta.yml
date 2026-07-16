@@ -1,0 +1,181 @@
+name: giproy-beta
+
+services:
+  postgres:
+    image: postgres:18
+    container_name: giproy-beta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - giproy_beta_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+
+  migrate:
+    build:
+      context: ../
+      dockerfile: backend/Dockerfile
+    image: giproy-beta-backend:${GIPROY_IMAGE_TAG:-local}
+    environment:
+      PROJECT_NAME: ${PROJECT_NAME}
+      API_V1_STR: ${API_V1_STR}
+      SECRET_KEY: ${SECRET_KEY}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_SERVER: postgres
+      POSTGRES_PORT: "5432"
+      CREATE_TABLES_ON_STARTUP: "false"
+      BIM_ENABLED: "false"
+      BIM_ALLOWED_EMPRESA_IDS: ${BIM_ALLOWED_EMPRESA_IDS:-}
+      BIM_ALLOWED_USER_IDS: ${BIM_ALLOWED_USER_IDS:-}
+      REPORTS_DIR: /app/reports
+      AUTH_SESSION_TRACE_FILE: /app/logs/auth_session_trace.jsonl
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-mock}
+      EMAIL_FROM_EMAIL: ${EMAIL_FROM_EMAIL:-soporte@giproy.com}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-GiProy}
+      FRONTEND_PUBLIC_URL: ${FRONTEND_PUBLIC_URL}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      SMTP_USE_SSL: ${SMTP_USE_SSL:-false}
+    command: ["alembic", "-c", "alembic.ini", "upgrade", "heads"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - giproy_beta_uploads:/app/backend/uploads
+      - giproy_beta_logs:/app/logs
+    networks:
+      - backend
+    profiles:
+      - tools
+
+  bootstrap:
+    build:
+      context: ../
+      dockerfile: backend/Dockerfile
+    image: giproy-beta-backend:${GIPROY_IMAGE_TAG:-local}
+    environment:
+      PROJECT_NAME: ${PROJECT_NAME}
+      API_V1_STR: ${API_V1_STR}
+      SECRET_KEY: ${SECRET_KEY}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_SERVER: postgres
+      POSTGRES_PORT: "5432"
+      CREATE_TABLES_ON_STARTUP: "false"
+      BIM_ENABLED: "false"
+      BIM_ALLOWED_EMPRESA_IDS: ${BIM_ALLOWED_EMPRESA_IDS:-}
+      BIM_ALLOWED_USER_IDS: ${BIM_ALLOWED_USER_IDS:-}
+      REPORTS_DIR: /app/reports
+      AUTH_SESSION_TRACE_FILE: /app/logs/auth_session_trace.jsonl
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-mock}
+      EMAIL_FROM_EMAIL: ${EMAIL_FROM_EMAIL:-soporte@giproy.com}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-GiProy}
+      FRONTEND_PUBLIC_URL: ${FRONTEND_PUBLIC_URL}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      SMTP_USE_SSL: ${SMTP_USE_SSL:-false}
+    command: ["sh", "-c", "python scripts/docker_bootstrap_schema.py && alembic -c alembic.ini stamp heads"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - giproy_beta_uploads:/app/backend/uploads
+      - giproy_beta_logs:/app/logs
+    networks:
+      - backend
+    profiles:
+      - tools
+
+  backend:
+    build:
+      context: ../
+      dockerfile: backend/Dockerfile
+    image: giproy-beta-backend:${GIPROY_IMAGE_TAG:-local}
+    container_name: giproy-beta-backend
+    restart: unless-stopped
+    environment:
+      PROJECT_NAME: ${PROJECT_NAME}
+      API_V1_STR: ${API_V1_STR}
+      SECRET_KEY: ${SECRET_KEY}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_SERVER: postgres
+      POSTGRES_PORT: "5432"
+      CREATE_TABLES_ON_STARTUP: "false"
+      BIM_ENABLED: "false"
+      BIM_ALLOWED_EMPRESA_IDS: ${BIM_ALLOWED_EMPRESA_IDS:-}
+      BIM_ALLOWED_USER_IDS: ${BIM_ALLOWED_USER_IDS:-}
+      REPORTS_DIR: /app/reports
+      AUTH_SESSION_TRACE_FILE: /app/logs/auth_session_trace.jsonl
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-mock}
+      EMAIL_FROM_EMAIL: ${EMAIL_FROM_EMAIL:-soporte@giproy.com}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-GiProy}
+      FRONTEND_PUBLIC_URL: ${FRONTEND_PUBLIC_URL}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      SMTP_USE_SSL: ${SMTP_USE_SSL:-false}
+      RUC_REVIEW_ENCRYPTION_KEY: ${RUC_REVIEW_ENCRYPTION_KEY}
+      SRI_RUC_PRIVATE_DIR: /app/backend/runtime/sri_ruc
+      SRI_RUC_ALERT_EMAIL: ${SRI_RUC_ALERT_EMAIL:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - giproy_beta_uploads:/app/backend/uploads
+      - giproy_beta_logs:/app/logs
+      - giproy_beta_sri_ruc:/app/backend/runtime/sri_ruc
+    networks:
+      - backend
+
+  frontend:
+    build:
+      context: ../
+      dockerfile: frontend/Dockerfile
+    image: giproy-beta-frontend:${GIPROY_IMAGE_TAG:-local}
+    container_name: giproy-beta-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.giproy-beta.rule=Host(`${GIPROY_HOST}`)
+      - traefik.http.routers.giproy-beta.entrypoints=web
+      - traefik.http.services.giproy-beta.loadbalancer.server.port=80
+    networks:
+      - proxy
+      - backend
+
+volumes:
+  giproy_beta_postgres_data:
+  giproy_beta_uploads:
+  giproy_beta_logs:
+  giproy_beta_sri_ruc:
+
+networks:
+  proxy:
+    external: true
+  backend:
+    external: true

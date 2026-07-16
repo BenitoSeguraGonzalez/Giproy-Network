@@ -30,6 +30,15 @@ from app.services.bim.view_state_service import (
 
 router = APIRouter()
 
+ALLOWED_PUBLIC_VIEW_STATE_SCOPES = {"personal", "company"}
+
+
+def _normalize_public_view_state_scope(scope: Optional[str]) -> str:
+    normalized_scope = (scope or "personal").strip() or "personal"
+    if normalized_scope not in ALLOWED_PUBLIC_VIEW_STATE_SCOPES:
+        raise HTTPException(status_code=400, detail="Scope BIM de vista no soportado.")
+    return normalized_scope
+
 
 def _resolve_project(db: Session, project_id: int, current_user: Usuario, empresa_id: Optional[int]) -> Proyecto:
     resolved_company_id = current_user.empresa_id
@@ -98,9 +107,11 @@ def create_bim_view_state(
     view_name = (payload.nombre or "").strip()
     if not view_name:
         raise HTTPException(status_code=400, detail="El nombre de la vista BIM es obligatorio.")
-    normalized_scope = (payload.scope or "personal").strip() or "personal"
+    normalized_scope = _normalize_public_view_state_scope(payload.scope)
     if normalized_scope == "company" and current_user.rol.lower() != "superadministrador":
         raise HTTPException(status_code=403, detail="Solo superadministrador puede crear vistas BIM compartidas.")
+    if payload.viewer_state and payload.viewer_state.source_version_id != payload.active_version_id:
+        raise HTTPException(status_code=400, detail="La vista BIM reproducible no corresponde a la version activa declarada.")
 
     state = upsert_named_view_state_for_project(
         db,
@@ -204,6 +215,10 @@ def duplicate_bim_view_state(
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
 
+    target_scope = _normalize_public_view_state_scope(payload.scope) if payload and payload.scope is not None else None
+    if target_scope == "company" and current_user.rol.lower() != "superadministrador":
+        raise HTTPException(status_code=403, detail="Solo superadministrador puede duplicar vistas BIM compartidas.")
+
     duplicated_state = duplicate_view_state_for_project(
         db,
         project_id=project.id,
@@ -211,7 +226,7 @@ def duplicate_bim_view_state(
         user_id=current_user.id,
         view_state_id=view_state_id,
         name=payload.nombre if payload else None,
-        target_scope=payload.scope if payload else None,
+        target_scope=target_scope,
     )
     if duplicated_state is None:
         raise HTTPException(status_code=404, detail="La vista BIM no existe para este usuario y proyecto.")

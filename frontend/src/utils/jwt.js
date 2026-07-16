@@ -12,7 +12,7 @@ export const decodeJWT = (token) => {
 
         return JSON.parse(jsonPayload);
     } catch (e) {
-        console.error("Error decodificando JWT:", e);
+        globalThis.reportClientError?.("Error decodificando JWT:", e);
         return null;
     }
 };

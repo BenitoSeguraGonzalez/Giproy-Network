@@ -46,6 +46,15 @@ class BaseTrabajo(Base):
     fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
     ultima_modificacion = Column(DateTime(timezone=True), onupdate=func.now())
 
+    # Papelera clasica: borrado reversible durante ventana operativa.
+    deleted_at = Column(DateTime(timezone=True), nullable=True, index=True)
+    deleted_by_user_id = Column(Integer, ForeignKey("usuarios.id", ondelete="SET NULL"), nullable=True, index=True)
+    recycle_expires_at = Column(DateTime(timezone=True), nullable=True, index=True)
+    deletion_reason = Column(Text, nullable=True)
+    trash_original_nombre = Column(String(255), nullable=True)
+    trash_original_codigo_unico = Column(String(100), nullable=True)
+    trash_original_activa = Column(Boolean, nullable=True)
+
     # Relaciones
     empresa = relationship("Empresa")
     pais = relationship("Pais")

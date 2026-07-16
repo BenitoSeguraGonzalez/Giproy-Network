@@ -44,7 +44,7 @@ const AdminGlobalSesiones = () => {
             const data = await adminSessionsApi.getAll();
             setSessions(data || []);
         } catch (error) {
-            console.error('Error cargando sesiones:', error);
+            globalThis.reportClientError?.('Error cargando sesiones:', error);
             await appAlert({
                 title: 'No se pudieron cargar las sesiones',
                 message: error.response?.data?.detail || 'Revise la conectividad con el backend.',
@@ -123,7 +123,7 @@ const AdminGlobalSesiones = () => {
             await adminSessionsApi.revoke(sessionItem.user_id);
             await loadSessions();
         } catch (error) {
-            console.error('Error revocando sesión:', error);
+            globalThis.reportClientError?.('Error revocando sesión:', error);
             await appAlert({
                 title: 'No se pudo revocar la sesión',
                 message: error.response?.data?.detail || 'Inténtelo de nuevo en unos segundos.',

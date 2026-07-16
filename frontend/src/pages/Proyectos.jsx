@@ -44,6 +44,7 @@ import {
     Copy,
     FileText,
     UploadCloud,
+    ArchiveX,
     Trash2,
     AlertTriangle,
     XCircle,
@@ -57,7 +58,8 @@ import {
     KanbanSquare,
     ListTodo,
     MessageSquareText,
-    Store
+    Store,
+    RotateCcw
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -79,6 +81,7 @@ import MarketplaceOriginBadgeSet, { getMarketplaceOwnershipTone } from '../compo
 import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
 import useMarketplaceOriginsMap from '../hooks/useMarketplaceOriginsMap';
 import { lazyWithChunkRecovery } from '../utils/lazyImportRecovery';
+import { useBimFeatureAccess } from '../hooks/bim/useBimFeatureAccess';
 import ProjectSegmentedSwitch from '../components/projects/ProjectSegmentedSwitch';
 import AnimatedSelect from '../components/ui/AnimatedSelect';
 import AnimatedDateInput from '../components/ui/AnimatedDateInput';
@@ -91,6 +94,7 @@ const Cronogramas = lazyWithChunkRecovery(() => import('../components/projects/C
 const DesagregacionTab = lazyWithChunkRecovery(() => import('../components/projects/DesagregacionTab'));
 const FormulaPolinomicaTab = lazyWithChunkRecovery(() => import('../components/projects/FormulaPolinomicaTab'));
 const PresupuestoDetail = lazyWithChunkRecovery(() => import('../components/presupuestos/PresupuestoDetail'));
+const BimTab = lazyWithChunkRecovery(() => import('../components/projects/BimTab'));
 
 const MotionDiv = motion.div;
 const MotionAside = motion.aside;
@@ -116,18 +120,17 @@ const CLASSIC_SECTIONS = [
     { id: 'formula', label: 'Formula Polinomica', icon: <Settings2 className="w-4 h-4" />, color: 'text-rose-500', bg: 'bg-rose-500' },
 ];
 
-const CLASSIC_BIM_ACCESS_DISABLED = Object.freeze({
-    feature: 'bim',
-    enabled: false,
-    environment_enabled: false,
-    scoped: false,
-    company_match: false,
-    user_match: false,
-    allowed_company_ids: [],
-    allowed_user_ids: [],
-    resolved_company_id: null,
-    resolved_user_id: null,
-    resolved_role: null,
+const BIM_SECTION = {
+    id: 'bim',
+    label: 'BIM',
+    icon: <Database className="w-4 h-4" />,
+    color: 'text-cyan-600',
+    bg: 'bg-cyan-600',
+};
+
+const BIM_TARGET_TABS = Object.freeze({
+    edt: 'edt_wbs',
+    presupuesto: 'presupuesto',
 });
 
 const PROJECTS_HTML_REFERENCE_LANDING = true;
@@ -277,6 +280,70 @@ const getProjectEstimatedTimeMeta = (project, detailsMap) => {
 
 const hasProjectRevisions = (project) => Number(project?.num_revisiones || 1) > 1;
 const getProjectRevisionCount = (project) => Math.max(1, Number(project?.num_revisiones || 1));
+
+const getProjectUpdateDateValue = (project) => (
+    project?.ultima_modificacion ||
+    project?.fecha_modificacion ||
+    project?.fecha_actualizacion ||
+    project?.updated_at ||
+    project?.fecha_creacion ||
+    project?.created_at ||
+    null
+);
+
+const getProjectUpdateTimestamp = (project) => {
+    const dateValue = getProjectUpdateDateValue(project);
+    if (!dateValue) return 0;
+    const timestamp = new Date(dateValue).getTime();
+    return Number.isFinite(timestamp) ? timestamp : 0;
+};
+
+const formatProjectUpdateDateTime = (dateValue) => {
+    if (!dateValue) return 'Sin fecha';
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return 'Sin fecha';
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear()).slice(-2);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
+
+const resolveLatestProjectRevisionEntry = (project, revisions = []) => {
+    const entries = [project, ...(Array.isArray(revisions) ? revisions : [])].filter(Boolean);
+    if (entries.length === 0) return project;
+    return entries
+        .map((entry, index) => ({ entry, index, timestamp: getProjectUpdateTimestamp(entry) }))
+        .sort((left, right) => {
+            if (right.timestamp !== left.timestamp) return right.timestamp - left.timestamp;
+            const rightRevision = Number(right.entry?.revision || 0);
+            const leftRevision = Number(left.entry?.revision || 0);
+            if (rightRevision !== leftRevision) return rightRevision - leftRevision;
+            return left.index - right.index;
+        })[0]?.entry || project;
+};
+
+const getProjectRevisionUpdateMeta = (project, revisions = []) => {
+    const latestEntry = resolveLatestProjectRevisionEntry(project, revisions);
+    const revision = Number(latestEntry?.revision || 0);
+    const dateValue = getProjectUpdateDateValue(latestEntry);
+    return {
+        revision,
+        timestamp: getProjectUpdateTimestamp(latestEntry),
+        label: `Rev. ${revision}: ${formatProjectUpdateDateTime(dateValue)}`,
+    };
+};
+
+const sortProjectsByLatestUpdate = (projects = []) => (
+    [...projects]
+        .map((project, index) => ({ project, index, timestamp: getProjectUpdateTimestamp(project) }))
+        .sort((left, right) => {
+            if (right.timestamp !== left.timestamp) return right.timestamp - left.timestamp;
+            return left.index - right.index;
+        })
+        .map(({ project }) => project)
+);
 
 const getProjectWorkflowState = (project) => {
     const normalizedState = String(project?.estado || '').trim().toLowerCase();
@@ -699,7 +766,8 @@ const getPublicProcurementProcessingStage = (elapsedMs) => {
 
 const Proyectos = () => {
     const { user, selectedEmpresa, setSelectedEmpresa, selectedBaseTrabajo, setSelectedBaseTrabajo, setActiveProject, licenseInfo } = useContext(AuthContext);
-    const bimAccess = CLASSIC_BIM_ACCESS_DISABLED;
+    const { access: bimAccess, loading: bimAccessLoading } = useBimFeatureAccess();
+    const bimEnabled = !bimAccessLoading && bimAccess.enabled;
     const normalizedRole = (user?.rol || '').trim().toLowerCase();
     const publicProcurementCompanyName = normalizePublicProcurementCompanyName(
         selectedEmpresa?.nombre || user?.empresa?.nombre || user?.empresa_nombre
@@ -724,6 +792,7 @@ const Proyectos = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProject, setSelectedProject] = useState(null);
     const [activeTab, setActiveTab] = useState('datos');
+    const [bimNavigationContext, setBimNavigationContext] = useState(null);
     const [selectedPresupuestoId, setSelectedPresupuestoId] = useState(null);
     const [resolvingPresupuesto, setResolvingPresupuesto] = useState(false);
     const [projectPermissions, setProjectPermissions] = useState(null);
@@ -747,6 +816,28 @@ const Proyectos = () => {
             { replace }
         );
     }, [location.pathname, location.search, navigate, selectedProject?.id]);
+    const handleBimNavigateTarget = useCallback((link) => {
+        const targetType = String(link?.target_type || '').toLowerCase();
+        const projectTab = BIM_TARGET_TABS[targetType];
+        if (projectTab) {
+            setBimNavigationContext({
+                targetType,
+                targetId: Number(link?.target_id) || null,
+            });
+            activateProjectTab(projectTab);
+            return;
+        }
+
+        if (targetType === 'apu' && link?.target_id) {
+            const params = new URLSearchParams({
+                ...PROJECT_APU_EDITOR_QUERY,
+                apu_id: String(link.target_id),
+                project_id: String(selectedProject?.id || ''),
+                return_tab: 'bim',
+            });
+            navigate(`/apus?${params.toString()}`);
+        }
+    }, [activateProjectTab, navigate, selectedProject?.id]);
     const buildRevisionBudgetEntry = useCallback((operativo, fallbackMoneda = 'USD') => {
         const subtotal = Number(operativo?.subtotal || 0);
 
@@ -843,7 +934,7 @@ const Proyectos = () => {
                         redirectToSection('presupuesto');
                     }
                 } catch (error) {
-                    console.error("Error fetching permissions:", error);
+                    globalThis.reportClientError?.("Error fetching permissions:", error);
                     setProjectPermissions({ is_restricted: false, edt_ids: [], has_assignment: true });
                 }
             } else {
@@ -861,10 +952,14 @@ const Proyectos = () => {
     }, [activeTab, selectedProject?.id]);
 
     useEffect(() => {
-        if (!bimAccess.enabled && activeTab === 'bim') {
+        setBimNavigationContext(null);
+    }, [selectedProject?.id]);
+
+    useEffect(() => {
+        if (!bimAccessLoading && !bimAccess.enabled && activeTab === 'bim') {
             activateProjectTab('datos', { replace: true });
         }
-    }, [activateProjectTab, activeTab, bimAccess.enabled]);
+    }, [activateProjectTab, activeTab, bimAccess.enabled, bimAccessLoading]);
 
     useEffect(() => {
         let cancelled = false;
@@ -889,7 +984,7 @@ const Proyectos = () => {
                     setSelectedPresupuestoId(presupuestos[0].id);
                 }
             } catch (error) {
-                console.error("Error resolviendo presupuesto operativo:", error);
+                globalThis.reportClientError?.("Error resolviendo presupuesto operativo:", error);
                 if (!cancelled) {
                     appAlert("No se pudo cargar el presupuesto operativo de la revisión.");
                     setSelectedPresupuestoId(null);
@@ -949,6 +1044,11 @@ const Proyectos = () => {
     const [projectToDelete, setProjectToDelete] = useState(null);
     const [deleteStep, setDeleteStep] = useState(1); // 1: Advertencia inicial, 2: Confirmación final
     const [deleting, setDeleting] = useState(false);
+    const [deleteProjectBase, setDeleteProjectBase] = useState(true);
+    const [showRecycleModal, setShowRecycleModal] = useState(false);
+    const [recycledProjects, setRecycledProjects] = useState([]);
+    const [recycleLoading, setRecycleLoading] = useState(false);
+    const [recycleActionId, setRecycleActionId] = useState(null);
     const [projectDetailsMap, setProjectDetailsMap] = useState({});
     const [editingEstimatedId, setEditingEstimatedId] = useState(null);
     const [editingEstimatedValue, setEditingEstimatedValue] = useState('');
@@ -961,7 +1061,10 @@ const Proyectos = () => {
     const selectedProjectDetail = selectedProjectRootCode ? (projectDetailsMap[selectedProjectRootCode] || null) : null;
     const isSidebarExpanded = isSidebarPinned || isSidebarHovered;
     const isProjectHeaderCollapsed = true;
-    const sectionItems = CLASSIC_SECTIONS;
+    const sectionItems = useMemo(
+        () => (bimEnabled ? [...CLASSIC_SECTIONS, BIM_SECTION] : CLASSIC_SECTIONS),
+        [bimEnabled],
+    );
     const activeSectionMeta = sectionItems.find((section) => section.id === activeTab) || CLASSIC_SECTIONS[0];
     const [portfolioView, setPortfolioView] = useState('lista');
     const [portfolioFilter, setPortfolioFilter] = useState('todos');
@@ -1059,7 +1162,7 @@ const Proyectos = () => {
                 const baseRes = await basesTrabajoApi.getById(project.base_trabajo_id, projectEmpresaId);
                 setSelectedBaseTrabajo(baseRes.data);
             } catch (error) {
-                console.error('Error sincronizando base de trabajo del proyecto:', error);
+                globalThis.reportClientError?.('Error sincronizando base de trabajo del proyecto:', error);
             }
         }
 
@@ -1113,7 +1216,7 @@ const Proyectos = () => {
                     await activateProjectSelection(project, { replace: true });
                 }
             } catch (error) {
-                console.error('Error sincronizando proyecto adquirido:', error);
+                globalThis.reportClientError?.('Error sincronizando proyecto adquirido:', error);
             }
         };
 
@@ -1165,7 +1268,7 @@ const Proyectos = () => {
             );
             setProjectDetailsMap(Object.fromEntries(detailEntries));
         } catch (error) {
-            console.error("Error cargando proyectos:", error);
+            globalThis.reportClientError?.("Error cargando proyectos:", error);
         } finally {
             setLoading(false);
         }
@@ -1177,7 +1280,7 @@ const Proyectos = () => {
             // Solo bases de tipo "Base Maestra" para clonar
             setBasesMaestras(res.data.filter(b => b.tipo === 'Base Maestra'));
         } catch (error) {
-            console.error("Error cargando bases maestras:", error);
+            globalThis.reportClientError?.("Error cargando bases maestras:", error);
         }
     };
 
@@ -1243,7 +1346,7 @@ const Proyectos = () => {
             setEditingEstimatedId(null);
             await fetchProyectos();
         } catch (error) {
-            console.error("Error actualizando presupuesto estimado:", error);
+            globalThis.reportClientError?.("Error actualizando presupuesto estimado:", error);
             appAlert("No se pudo actualizar el presupuesto estimado del proyecto.");
         }
     };
@@ -1269,7 +1372,7 @@ const Proyectos = () => {
             setEditingDateRoot(null);
             await fetchProyectos();
         } catch (error) {
-            console.error("Error actualizando fecha de presentación:", error);
+            globalThis.reportClientError?.("Error actualizando fecha de presentación:", error);
             appAlert("No se pudo actualizar la fecha global de presentación.");
         }
     };
@@ -1332,14 +1435,13 @@ const Proyectos = () => {
                 source_base_id: newProject.source_base_id || null
             };
 
-            console.log("Creando proyecto con payload:", payload);
             const empId = selectedEmpresa?.id || user?.empresa_id;
             await proyectosApi.create(payload, empId);
             setShowCreateModal(false);
             setNewProject({ nombre: '', codigo: '', descripcion: '', presupuesto_estimado: 0, moneda: 'USD', source_base_id: '' });
             fetchProyectos();
         } catch (error) {
-            console.error("Error al crear proyecto:", error);
+            globalThis.reportClientError?.("Error al crear proyecto:", error);
             const detail = error.response?.data?.detail;
 
             let message = "Error Desconocido";
@@ -1458,7 +1560,7 @@ const Proyectos = () => {
                 elapsedSeconds: Math.floor((Date.now() - startedAt) / 1000),
             });
         } catch (error) {
-            console.error('Error al previsualizar importacion de compra publica:', error);
+            globalThis.reportClientError?.('Error al previsualizar importacion de compra publica:', error);
             const detail = error?.response?.data?.detail;
             setPublicProcurementProgress({
                 phase: 'error',
@@ -1538,7 +1640,7 @@ const Proyectos = () => {
                 closePublicProcurementImporter();
             }
         } catch (error) {
-            console.error('Error al materializar compra publica como proyecto:', error);
+            globalThis.reportClientError?.('Error al materializar compra publica como proyecto:', error);
             const detail = error?.response?.data?.detail;
             appAlert(typeof detail === 'string' ? detail : 'No se pudo crear el proyecto desde la compra publica.');
         } finally {
@@ -1577,7 +1679,7 @@ const Proyectos = () => {
             setMarketplaceExportProject(project);
             setMarketplaceExportModalOpen(true);
         } catch (error) {
-            console.error('Error preparando exportacion a marketplace:', error);
+            globalThis.reportClientError?.('Error preparando exportacion a marketplace:', error);
             appAlert(error?.response?.data?.detail || 'No se pudo preparar la exportacion completa a Marketplace. Revisa el proyecto y vuelve a intentar.');
         } finally {
             setMarketplaceExportLoading(false);
@@ -1679,7 +1781,7 @@ const Proyectos = () => {
             setMarketplaceExportPreview(null);
             setMarketplaceExportForm(null);
         } catch (error) {
-            console.error('Error exportando proyecto a marketplace:', error);
+            globalThis.reportClientError?.('Error exportando proyecto a marketplace:', error);
             appAlert(error?.response?.data?.detail || 'No se pudo exportar el proyecto a Marketplace.');
         } finally {
             setMarketplaceExportSubmitting(false);
@@ -1700,7 +1802,6 @@ const Proyectos = () => {
             // Forzamos el uso del empresa_id del proyecto para evitar conflictos de sesión en el Superadmin
             const empIdForApi = project.empresa_id;
             
-            console.log("Iniciando apertura de proyecto:", rootCode, "Empresa:", empIdForApi);
             // alert(`Abriendo: ${rootCode} (Empresa: ${empIdForApi})`); // Debug 1
 
             const revisions = await proyectosApi.getRevisions(
@@ -1708,7 +1809,6 @@ const Proyectos = () => {
                 { empresa_id: empIdForApi }
             );
             
-            console.log("Revisiones obtenidas:", revisions);
             // alert(`Revisiones encontradas: ${revisions?.length || 0}`); // Debug 2
 
             if (!revisions || revisions.length === 0) {
@@ -1717,14 +1817,12 @@ const Proyectos = () => {
             }
 
             if (revisions.length === 1 && mode === 'open') {
-                console.log("Acceso directo a revisión única");
                 // alert("Cargando revisión única..."); // Debug 3
                 await activateProjectSelection(revisions[0]);
                 return;
             }
 
             // Si hay múltiples revisiones, mostramos el modal
-            console.log("Mostrando modal de múltiples revisiones");
             // alert("Múltiples versiones: abriendo selector..."); // Debug 4
             setProjectRevisions(revisions);
             const revisionBudgets = {};
@@ -1749,7 +1847,7 @@ const Proyectos = () => {
             setRevisionBudgetMap(revisionBudgets);
             setShowRevisionModal(true);
         } catch (error) {
-            console.error("Error al cargar proyecto:", error);
+            globalThis.reportClientError?.("Error al cargar proyecto:", error);
             appAlert(`No se pudo abrir el proyecto: ${error.response?.data?.detail || error.message}`);
         } finally {
             setLoadingRevisions(false);
@@ -1782,28 +1880,39 @@ const Proyectos = () => {
             }
             navigate('/precios-unitarios');
         } catch (error) {
-            console.error("Error al activar revisión del proyecto:", error);
+            globalThis.reportClientError?.("Error al activar revisión del proyecto:", error);
             appAlert("No se pudo activar la base de la revisión.");
         }
     };
 
     const handleCreateRevision = async (projectId) => {
         const confirmed = await appConfirm({
-            title: 'Generar nueva revisión',
-            message: '¿Está seguro de generar una nueva revisión? Se clonarán todos los datos del proyecto y presupuestos.',
-            confirmLabel: 'Generar',
+            title: 'Clonar proyecto completo',
+            message: '¿Está seguro de clonar el proyecto completo como una nueva revisión? Se copiarán datos del proyecto, base, EDT y presupuestos.',
+            confirmLabel: 'Clonar completo',
             cancelLabel: 'Cancelar',
             tone: 'warning'
         });
         if (!confirmed) return;
         try {
             const empId = selectedEmpresa?.id || user?.empresa_id;
-            const res = await proyectosApi.createRevision(projectId, empId);
+            const createdRevision = await proyectosApi.createRevision(projectId, empId);
+            const rootCode = createdRevision?.codigo_root || createdRevision?.codigo;
+            const revisionEmpresaId = createdRevision?.empresa_id || empId;
+            await fetchProyectos();
+            if (rootCode) {
+                try {
+                    await refreshRevisionFamilyState(rootCode, revisionEmpresaId, selectedProject);
+                } catch (refreshError) {
+                    globalThis.reportClientError?.("Error refrescando revisiones tras clonado completo:", refreshError);
+                }
+            }
+            setShowRevisionModal(false);
+            setRevisionModalMode('open');
+            await activateProjectSelection(createdRevision, { replace: true });
             appAlert("Nueva revisión generada con éxito.");
-            fetchProyectos();
-            await activateProjectSelection(res.data);
         } catch (error) {
-            console.error("Error al crear revisión:", error);
+            globalThis.reportClientError?.("Error al crear revisión:", error);
             appAlert("No se pudo generar la nueva revisión.");
         }
     };
@@ -1823,6 +1932,63 @@ const Proyectos = () => {
             { replace: true }
         );
     }, [location.pathname, location.search, navigate, setActiveProject]);
+
+    const refreshRevisionFamilyState = useCallback(async (rootCode, empresaId, rootProjectFallback = null) => {
+        if (!rootCode) return [];
+
+        const refreshed = await proyectosApi.getRevisions(rootCode, { empresa_id: empresaId });
+        const revisionList = Array.isArray(refreshed) ? refreshed : [];
+        const rootProject = revisionList.find((revisionProject) => Number(revisionProject?.revision || 0) === 0)
+            || rootProjectFallback
+            || revisionList[0]
+            || null;
+        const mergedRevisionList = rootProject
+            ? buildInlineRevisionList(rootProject, revisionList)
+            : revisionList;
+        const revisionBudgets = {};
+
+        await Promise.all(
+            mergedRevisionList.map(async (revisionProject) => {
+                try {
+                    const presRes = await presupuestosApi.getByProyecto(
+                        revisionProject.id,
+                        revisionProject.empresa_id || empresaId
+                    );
+                    const presupuestos = presRes?.data || [];
+                    revisionBudgets[revisionProject.id] = buildRevisionBudgetEntry(
+                        presupuestos[0] || null,
+                        revisionProject.moneda || rootProject?.moneda || 'USD'
+                    );
+                } catch {
+                    revisionBudgets[revisionProject.id] = buildRevisionBudgetEntry(
+                        null,
+                        revisionProject.moneda || rootProject?.moneda || 'USD'
+                    );
+                }
+            })
+        );
+
+        setProjectRevisions(mergedRevisionList);
+        setRevisionBudgetMap(revisionBudgets);
+        setInlineRevisionsByRoot((current) => ({
+            ...current,
+            [rootCode]: mergedRevisionList,
+        }));
+        setInlineRevisionBudgetMapByRoot((current) => ({
+            ...current,
+            [rootCode]: revisionBudgets,
+        }));
+        setKanbanRevisionOptionsByRoot((current) => ({
+            ...current,
+            [rootCode]: mergedRevisionList,
+        }));
+        setPortfolioCalendarRevisionMapByRoot((current) => ({
+            ...current,
+            [rootCode]: mergedRevisionList,
+        }));
+
+        return mergedRevisionList;
+    }, [buildRevisionBudgetEntry]);
 
     const handlePersistKanbanPhase = useCallback(async (project, targetColumnId, approvedRevision = null) => {
         if (!project || !targetColumnId) return;
@@ -1864,7 +2030,7 @@ const Proyectos = () => {
                 plantillas_config: nextPlantillasConfig,
             }, empId);
         } catch (error) {
-            console.error('Error actualizando estado Kanban del proyecto:', error);
+            globalThis.reportClientError?.('Error actualizando estado Kanban del proyecto:', error);
             setProyectos(previousProjects);
             appAlert('No se pudo mover el proyecto a la fase seleccionada.');
         } finally {
@@ -1899,38 +2065,22 @@ const Proyectos = () => {
 
         try {
             const empId = selectedEmpresa?.id || user?.empresa_id;
+            const rootCode = revisionProject.codigo_root || revisionProject.codigo;
             await proyectosApi.deleteRevision(revisionProject.id, empId);
 
-            const refreshed = await proyectosApi.getRevisions(
-                revisionProject.codigo_root || revisionProject.codigo,
-                { empresa_id: empId }
-            );
-            setProjectRevisions(refreshed || []);
-
-            const revisionBudgets = {};
-            await Promise.all(
-                (refreshed || []).map(async (rev) => {
-                    try {
-                        const presRes = await presupuestosApi.getByProyecto(rev.id, rev.empresa_id || empId);
-                        const presupuestos = presRes?.data || [];
-                        const operativo = presupuestos[0] || null;
-                        revisionBudgets[rev.id] = buildRevisionBudgetEntry(
-                            operativo,
-                            rev.moneda || 'USD'
-                        );
-                    } catch {
-                        revisionBudgets[rev.id] = {
-                            total: null,
-                            moneda: rev.moneda || 'USD'
-                        };
-                    }
-                })
-            );
-            setRevisionBudgetMap(revisionBudgets);
+            const refreshed = await refreshRevisionFamilyState(rootCode, empId, selectedProject);
+            if (selectedProject?.id === revisionProject.id) {
+                const fallbackProject = refreshed.find((entry) => Number(entry?.revision || 0) === 0) || refreshed[0] || null;
+                if (fallbackProject) {
+                    await activateProjectSelection(fallbackProject, { replace: true });
+                } else {
+                    handleCloseSelectedProject();
+                }
+            }
             await fetchProyectos();
             await appAlert('Revisión eliminada correctamente.');
         } catch (error) {
-            console.error("Error eliminando revisión:", error);
+            globalThis.reportClientError?.("Error eliminando revisión:", error);
             await appAlert(error?.response?.data?.detail || 'No se pudo eliminar la revisión.');
         }
     };
@@ -1965,6 +2115,7 @@ const Proyectos = () => {
 
         setProjectToDelete(project);
         setDeleteStep(1);
+        setDeleteProjectBase(true);
         setShowDeleteModal(true);
     }, [canManagePortfolioDeletes]);
 
@@ -1990,25 +2141,96 @@ const Proyectos = () => {
         try {
             setDeleting(true);
             const empId = projectToDelete.empresa_id || selectedEmpresa?.id || user?.empresa_id;
-            await proyectosApi.delete(projectToDelete.id, empId);
+            await proyectosApi.delete(projectToDelete.id, empId, { deleteProjectBase });
             await fetchProyectos();
             setShowDeleteModal(false);
             setProjectToDelete(null);
             setDeleteStep(1);
+            setDeleteProjectBase(true);
             // Si el proyecto borrado era el que estaba abierto, cerrarlo
             if (selectedProject && (selectedProject.codigo_root === projectToDelete.codigo_root)) {
                 setSelectedProject(null);
             }
         } catch (error) {
-            console.error("Error eliminando proyecto:", error);
+            globalThis.reportClientError?.("Error eliminando proyecto:", error);
             appAlert(error?.response?.data?.detail || "Error al eliminar el proyecto. Verifique sus permisos.");
         } finally {
             setDeleting(false);
         }
     };
 
+    const formatRecycleDateTime = (dateString) => {
+        if (!dateString) return 'N/A';
+        return new Date(dateString).toLocaleString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const fetchRecycledProjects = async () => {
+        const empId = selectedEmpresa?.id || user?.empresa_id;
+        setRecycleLoading(true);
+        try {
+            const data = await proyectosApi.getRecycleBin(empId ? { empresa_id: empId } : {});
+            setRecycledProjects(Array.isArray(data) ? data : []);
+        } catch (error) {
+            globalThis.reportClientError?.('Error cargando papelera de proyectos:', error);
+            appAlert(error?.response?.data?.detail || 'No se pudo cargar la papelera de proyectos.');
+        } finally {
+            setRecycleLoading(false);
+        }
+    };
+
+    const openProjectRecycleModal = async () => {
+        setShowRecycleModal(true);
+        await fetchRecycledProjects();
+    };
+
+    const handleRestoreRecycledProject = async (project) => {
+        if (!project?.id) return;
+        const empId = project.empresa_id || selectedEmpresa?.id || user?.empresa_id;
+        setRecycleActionId(project.id);
+        try {
+            await proyectosApi.restoreFromRecycleBin(project.id, empId);
+            await fetchRecycledProjects();
+            await fetchProyectos();
+        } catch (error) {
+            globalThis.reportClientError?.('Error restaurando proyecto:', error);
+            appAlert(error?.response?.data?.detail || 'No se pudo restaurar el proyecto.');
+        } finally {
+            setRecycleActionId(null);
+        }
+    };
+
+    const handlePurgeRecycledProject = async (project) => {
+        if (!project?.id) return;
+        const confirmed = await appConfirm({
+            title: 'Borrado definitivo',
+            message: `Se eliminará definitivamente ${project.trash_original_nombre || project.nombre}. Esta acción no se puede deshacer. ¿Desea continuar?`,
+            confirmLabel: 'Borrar definitivamente',
+            cancelLabel: 'Cancelar',
+            tone: 'danger'
+        });
+        if (!confirmed) return;
+
+        const empId = project.empresa_id || selectedEmpresa?.id || user?.empresa_id;
+        setRecycleActionId(project.id);
+        try {
+            await proyectosApi.purgeFromRecycleBin(project.id, empId);
+            await fetchRecycledProjects();
+        } catch (error) {
+            globalThis.reportClientError?.('Error purgando proyecto:', error);
+            appAlert(error?.response?.data?.detail || 'No se pudo borrar definitivamente el proyecto.');
+        } finally {
+            setRecycleActionId(null);
+        }
+    };
+
     const filteredProjects = useMemo(() => (
-        proyectos.filter((project) => {
+        sortProjectsByLatestUpdate(proyectos.filter((project) => {
             const matchesSearch =
                 includesNormalized(project.nombre, searchTerm) ||
                 includesNormalized(project.codigo, searchTerm) ||
@@ -2026,7 +2248,7 @@ const Proyectos = () => {
                 return !hasProjectRevisions(project);
             }
             return true;
-        })
+        }))
     ), [portfolioFilter, proyectos, searchTerm, selectedEmpresa]);
 
     const portfolioMetrics = useMemo(() => {
@@ -2395,7 +2617,7 @@ const Proyectos = () => {
                     setPortfolioCalendarEntriesAvailable(true);
                 }
             } catch (error) {
-                console.error('Error cargando entradas del calendario del portafolio:', error);
+                globalThis.reportClientError?.('Error cargando entradas del calendario del portafolio:', error);
                 if (!cancelled) {
                     setPortfolioCalendarEntries([]);
                     setPortfolioCalendarEntriesAvailable(false);
@@ -2442,7 +2664,7 @@ const Proyectos = () => {
                     setPortfolioTodosMode('remote');
                 }
             } catch (error) {
-                console.error('Error cargando pendientes personales:', error);
+                globalThis.reportClientError?.('Error cargando pendientes personales:', error);
                 if (!cancelled) {
                     setPortfolioTodos(readLocalTodos());
                     setPortfolioTodosMode('local');
@@ -2501,7 +2723,7 @@ const Proyectos = () => {
                     }));
                 }
             } catch (error) {
-                console.error('Error cargando familias de revisiones para el calendario:', error);
+                globalThis.reportClientError?.('Error cargando familias de revisiones para el calendario:', error);
             }
         };
 
@@ -2691,7 +2913,7 @@ const Proyectos = () => {
             }));
             setInlineRevisionBudgetMapByRoot((current) => ({ ...current, [rootCode]: revisionBudgets }));
         } catch (error) {
-            console.error('Error cargando revisiones inline:', error);
+            globalThis.reportClientError?.('Error cargando revisiones inline:', error);
             appAlert('No se pudo cargar el historial de revisiones del proyecto.');
             setExpandedProjectRoot(null);
         } finally {
@@ -2726,7 +2948,7 @@ const Proyectos = () => {
             }));
             return merged;
         } catch (error) {
-            console.error('Error cargando revisiones para Kanban:', error);
+            globalThis.reportClientError?.('Error cargando revisiones para Kanban:', error);
             appAlert('No se pudo cargar la lista de revisiones disponibles.');
             return [];
         } finally {
@@ -2891,7 +3113,7 @@ const Proyectos = () => {
             }
             closePortfolioCalendarComposer();
         } catch (error) {
-            console.error('Error guardando entrada del calendario:', error);
+            globalThis.reportClientError?.('Error guardando entrada del calendario:', error);
             appAlert(error?.response?.data?.detail || 'No se pudo guardar la entrada del calendario.');
         }
     }, [
@@ -2931,7 +3153,7 @@ const Proyectos = () => {
                 closePortfolioCalendarComposer();
             }
         } catch (error) {
-            console.error('Error eliminando entrada del calendario:', error);
+            globalThis.reportClientError?.('Error eliminando entrada del calendario:', error);
             appAlert(error?.response?.data?.detail || 'No se pudo eliminar la entrada del calendario.');
         }
     }, [
@@ -3027,7 +3249,7 @@ const Proyectos = () => {
             }
             closePortfolioTodoComposer();
         } catch (error) {
-            console.error('Error guardando pendiente personal:', error);
+            globalThis.reportClientError?.('Error guardando pendiente personal:', error);
             const nowIso = new Date().toISOString();
             if (portfolioTodoEditingItem?.id) {
                 const nextItems = portfolioTodos.map((item) => (
@@ -3096,7 +3318,7 @@ const Proyectos = () => {
                 )));
             }
         } catch (error) {
-            console.error('Error actualizando pendiente personal:', error);
+            globalThis.reportClientError?.('Error actualizando pendiente personal:', error);
             const nextItems = portfolioTodos.map((item) => (
                 item.id === todo.id
                     ? {
@@ -3134,7 +3356,7 @@ const Proyectos = () => {
                 closePortfolioTodoComposer();
             }
         } catch (error) {
-            console.error('Error eliminando pendiente personal:', error);
+            globalThis.reportClientError?.('Error eliminando pendiente personal:', error);
             persistPortfolioTodosLocal(portfolioTodos.filter((item) => item.id !== todo.id));
         }
     }, [closePortfolioTodoComposer, persistPortfolioTodosLocal, portfolioTodoEditingItem?.id, portfolioTodos, portfolioTodosMode, selectedEmpresa?.id, user?.empresa_id]);
@@ -3142,6 +3364,115 @@ const Proyectos = () => {
     const handlePortfolioViewChange = useCallback((nextView) => {
         setPortfolioView(nextView);
     }, []);
+
+    const renderCreateProjectModal = () => (
+        <AnimatePresence>
+            {showCreateModal && (
+                <AppModalShell isOpen={true} size="lg" zIndex="z-[100]" overlayClassName="overflow-y-auto" panelClassName="my-8">
+                    <AppModalHeader
+                        title="Nuevo Proyecto"
+                        subtitle="Sincronización técnica y administrativa"
+                        icon={Briefcase}
+                        iconClassName="text-[#F39200]"
+                        iconWrapClassName="border-orange-200 bg-orange-50"
+                        onClose={() => setShowCreateModal(false)}
+                    />
+                    <div className="p-10">
+                        <form onSubmit={handleCreateProject} className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2 opacity-60">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Código de Proyecto (Auto)</Label>
+                                    <div className="h-11 bg-zinc-100 border border-zinc-200 rounded-xl flex items-center px-4 text-xs font-bold text-zinc-500">
+                                        [ Generado Automáticamente ]
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Nombre de la Obra</Label>
+                                    <Input
+                                        required
+                                        value={newProject.nombre}
+                                        onChange={e => setNewProject({ ...newProject, nombre: e.target.value })}
+                                        className="h-11 bg-white border-zinc-200 rounded-xl focus:ring-[#F39200]"
+                                        placeholder="Nombre completo del proyecto"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Base de Trabajo Inicial (PU)</Label>
+                                <div className="bg-orange-50/50 p-4 rounded-[1.5rem] border border-orange-100 space-y-3">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Database className="w-3.5 h-3.5 text-[#F39200]" />
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-[#F39200]">Clonación Maestra</span>
+                                    </div>
+                                    <SearchableSelect
+                                        options={basesMaestras.map(b => ({ id: b.id, nombre: `${b.codigo_unico} - ${b.nombre}` }))}
+                                        value={newProject.source_base_id}
+                                        onChange={val => setNewProject({ ...newProject, source_base_id: val })}
+                                        valueKey="id"
+                                        placeholder="Seleccione la base para clonar los Precios Unitarios..."
+                                    />
+                                    <p className="text-[8px] font-bold text-zinc-400 italic">Al crear el proyecto, se generará una copia privada de esta base para evitar alterar otras obras.</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Presupuesto Referencial</Label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs">$</span>
+                                        <Input
+                                            type="text"
+                                            value={formatCurrencyInput(newProject.presupuesto_estimado, isInputFocused)}
+                                            onChange={handleAmountChange}
+                                            onFocus={() => setIsInputFocused(true)}
+                                            onBlur={() => setIsInputFocused(false)}
+                                            className="h-11 bg-white border-zinc-200 rounded-xl pl-8 font-black tabular-nums"
+                                            placeholder="0,00"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Moneda</Label>
+                                    <AnimatedSelect
+                                        value={newProject.moneda}
+                                        onChange={e => setNewProject({ ...newProject, moneda: e.target.value })}
+                                        className="w-full h-11 bg-zinc-100 border border-zinc-200 rounded-xl px-4 text-xs font-black uppercase appearance-none outline-none"
+                                    >
+                                        <option value="USD">Dólares (USD)</option>
+                                        <option value="EUR">Euros (EUR)</option>
+                                    </AnimatedSelect>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Descripción</Label>
+                                <textarea
+                                    value={newProject.descripcion}
+                                    onChange={e => setNewProject({ ...newProject, descripcion: e.target.value })}
+                                    className="w-full h-24 p-4 bg-white border border-zinc-200 rounded-xl text-sm font-medium outline-none focus:border-[#F39200] transition-all"
+                                    placeholder="Detalles adicionales del proyecto..."
+                                />
+                            </div>
+
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCreateModal(false)}
+                                    className="flex-1 h-12 bg-zinc-100 text-zinc-500 font-black uppercase tracking-widest text-[11px] rounded-2xl hover:bg-zinc-200 transition-all"
+                                >
+                                    Cancelar
+                                </button>
+                                <LiquidButton type="submit" className="flex-[2] !h-12 !rounded-2xl bg-[#1A1A1A] text-white">
+                                    <Save className="w-4 h-4" /> Crear Proyecto
+                                </LiquidButton>
+                            </div>
+                        </form>
+                    </div>
+                </AppModalShell>
+            )}
+        </AnimatePresence>
+    );
 
     const renderHtmlPortfolioLanding = () => (
         <div className="min-h-full bg-[#F2F4F7] text-[#2B241C]">
@@ -3194,6 +3525,13 @@ const Proyectos = () => {
                                         />
                                     )}
                                     <ProjectSectionIconButton
+                                        icon={Trash2}
+                                        label="Papelera"
+                                        onClick={openProjectRecycleModal}
+                                        hintContent={<GiproyActionHint title="Papelera" detail="Consulta proyectos eliminados y restaura o purga elementos dentro de los 7 días de retención." />}
+                                        className={`${PROJECTS_COMPACT_ACTION_BUTTON_CLASS} text-zinc-600 hover:text-rose-700`}
+                                    />
+                                    <ProjectSectionIconButton
                                         icon={Plus}
                                         label={licenseInfo?.access_mode === 'readonly'
                                             ? 'Solo lectura'
@@ -3222,51 +3560,9 @@ const Proyectos = () => {
                     </div>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    {portfolioMetricCards.map((metricCard) => {
-                        const MetricIcon = metricCard.icon;
-                        return (
-                            <div
-                                key={metricCard.id}
-                                className="rounded-[1.4rem] border border-zinc-200 bg-white px-4 py-3 transition-colors hover:border-zinc-300"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border ${metricCard.iconBoxClasses}`}>
-                                        <MetricIcon className="h-4.5 w-4.5" />
-                                    </div>
-
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex items-center justify-between gap-2">
-                                            <div className="truncate text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                                                {metricCard.label}
-                                            </div>
-                                            <span className={`inline-flex h-6 shrink-0 items-center rounded-full border px-2 text-[8px] font-black uppercase tracking-[0.18em] ${metricCard.tagClasses}`}>
-                                                {metricCard.tag}
-                                            </span>
-                                        </div>
-
-                                        <div className="mt-1.5 flex items-end justify-between gap-3">
-                                            <div className="min-w-0">
-                                                <div className="truncate text-[1.7rem] font-black leading-none tracking-tight text-[#1A1A1A]">
-                                                    {metricCard.value}
-                                                </div>
-                                                <div className="mt-1 text-[11px] font-semibold text-zinc-500">
-                                                    {metricCard.caption}
-                                                </div>
-                                            </div>
-
-                                            <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${metricCard.dotClasses}`} />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
                 <div className="rounded-[1.55rem] border border-zinc-200 bg-white px-4 py-2.5">
-                    <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-                        <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+                    <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
+                        <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center">
                             <div className="relative w-full xl:w-[340px]">
                                 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
                                 <input
@@ -3320,9 +3616,35 @@ const Proyectos = () => {
                                     </div>
                                 )}
                             </div>
+
+                            <div className="flex min-w-0 flex-wrap items-center gap-2">
+                                {portfolioMetricCards.map((metricCard) => {
+                                    const MetricIcon = metricCard.icon;
+                                    return (
+                                        <div
+                                            key={metricCard.id}
+                                            className="inline-flex h-10 min-w-[138px] items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50/80 px-2.5"
+                                            title={`${metricCard.label}: ${metricCard.value} · ${metricCard.caption}`}
+                                        >
+                                            <span className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border ${metricCard.iconBoxClasses}`}>
+                                                <MetricIcon className="h-3.5 w-3.5" />
+                                            </span>
+                                            <span className="min-w-0">
+                                                <span className="block truncate text-[8px] font-black uppercase tracking-[0.16em] text-zinc-400">
+                                                    {metricCard.label}
+                                                </span>
+                                                <span className="block truncate text-[13px] font-black leading-tight text-[#1A1A1A]">
+                                                    {metricCard.value}
+                                                </span>
+                                            </span>
+                                            <span className={`ml-auto h-1.5 w-1.5 shrink-0 rounded-full ${metricCard.dotClasses}`} />
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
 
-                        <div className="flex items-center gap-2 xl:ml-auto">
+                        <div className="flex items-center gap-2 2xl:ml-auto">
                             <button
                                 type="button"
                                 title="Calendario del portafolio"
@@ -3352,24 +3674,26 @@ const Proyectos = () => {
                     <div className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
                         <div
                             ref={portfolioListViewportRef}
-                            className="relative max-h-[calc(100vh-21rem)] overflow-x-hidden overflow-y-auto overscroll-contain"
+                            className="relative max-h-[calc(100vh-15rem)] overflow-x-hidden overflow-y-auto overscroll-contain"
                             style={expandedInlineProject ? { paddingBottom: '25rem' } : undefined}
                         >
                             <table className="w-full table-fixed">
                                 <colgroup>
+                                    <col style={{ width: '9%' }} />
+                                    <col style={{ width: '25%' }} />
                                     <col style={{ width: '12%' }} />
-                                    <col style={{ width: '20%' }} />
-                                    <col style={{ width: '11%' }} />
-                                    <col style={{ width: '14%' }} />
-                                    <col style={{ width: '13%' }} />
-                                    <col style={{ width: '12%' }} />
+                                    <col style={{ width: '9%' }} />
                                     <col style={{ width: '10%' }} />
+                                    <col style={{ width: '13%' }} />
+                                    <col style={{ width: '7%' }} />
                                     <col style={{ width: '8%' }} />
+                                    <col style={{ width: '7%' }} />
                                 </colgroup>
                                 <thead>
                                     <tr className="border-b border-zinc-200 bg-zinc-50/80">
                                         <th className="px-3 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">ID / CÓD</th>
                                         <th className="py-4 pl-12 pr-3 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Proyecto</th>
+                                        <th className="px-3 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Actualizacion</th>
                                         <th className="px-3 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Cliente</th>
                                         <th className="px-3 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Estado</th>
                                         <th className="px-3 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Presupuesto</th>
@@ -3383,7 +3707,7 @@ const Proyectos = () => {
                                 <tbody>
                                     {loading ? (
                                         <tr>
-                                            <td colSpan={8} className="px-8 py-20 text-center">
+                                            <td colSpan={9} className="px-8 py-20 text-center">
                                                 <div className="flex flex-col items-center gap-4">
                                                     <div className="h-10 w-10 animate-spin rounded-full border-4 border-zinc-200 border-t-[#136191]" />
                                                     <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Cargando portafolio...</p>
@@ -3392,7 +3716,7 @@ const Proyectos = () => {
                                         </tr>
                                     ) : filteredProjects.length === 0 ? (
                                         <tr>
-                                            <td colSpan={8} className="px-8 py-20 text-center">
+                                            <td colSpan={9} className="px-8 py-20 text-center">
                                                 <div className="flex flex-col items-center gap-4">
                                                     <Building2 className="h-10 w-10 text-zinc-300" />
                                                     <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">No hay proyectos para la vista actual</p>
@@ -3408,6 +3732,7 @@ const Proyectos = () => {
                                             const referentialBudget = getProjectEntityBudget(project);
                                             const presentationMeta = getProjectPresentationMeta(project);
                                             const inlineRevisions = inlineRevisionsByRoot[rootCode] || [];
+                                            const revisionUpdateMeta = getProjectRevisionUpdateMeta(project, inlineRevisions);
                                             const isExpanded = expandedProjectRoot === rootCode;
                                             const budgetDelta = calculatedBudget !== null ? calculatedBudget - referentialBudget : null;
                                             const budgetDeltaPct = referentialBudget > 0 && budgetDelta !== null
@@ -3435,15 +3760,26 @@ const Proyectos = () => {
                                                                 </button>
                                                                 <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#136191]" />
                                                                 <div className="min-w-0 flex-1">
-                                                                    <div className="truncate text-sm font-black uppercase tracking-[0.03em] text-[#1A1A1A]">
+                                                                    <div className="text-sm font-black uppercase leading-snug tracking-[0.03em] text-[#1A1A1A] break-words [overflow-wrap:anywhere]">
                                                                         {project.nombre}
                                                                     </div>
+                                                                    <p className="mt-1 line-clamp-2 text-[12px] font-semibold leading-snug text-zinc-500 break-words [overflow-wrap:anywhere]">
+                                                                        {project.descripcion || 'Sin descripcion registrada.'}
+                                                                    </p>
                                                                     <div className="mt-2 flex flex-wrap items-center gap-2">
                                                                         <div className="inline-flex rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">
                                                                             {Math.max(inlineRevisions.length || 0, Number(project.num_revisiones || 1))} versiones
                                                                         </div>
                                                                     </div>
                                                                 </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-3 py-4 align-top">
+                                                            <div className="text-[12px] font-black leading-snug text-[#1A1A1A]">
+                                                                {revisionUpdateMeta.label}
+                                                            </div>
+                                                            <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+                                                                Mas reciente
                                                             </div>
                                                         </td>
                                                         <td className="break-words px-3 py-4 align-top text-sm font-semibold leading-snug text-zinc-600">
@@ -3545,6 +3881,20 @@ const Proyectos = () => {
                                                         </td>
                                                         <td className="px-3 py-4 align-top">
                                                             <div className="flex items-center justify-center gap-1.5" onClick={(event) => event.stopPropagation()}>
+                                                                {!projectPermissions?.is_restricted && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={(event) => {
+                                                                            event.stopPropagation();
+                                                                            handleCreateRevision(project.id);
+                                                                        }}
+                                                                        className={`${PROJECTS_PORTFOLIO_ACTION_BUTTON_CLASS} ${PROJECTS_SOFT_ACTION_MICRO_BUTTON_ACCENT_CLASS}`}
+                                                                        title="Clonar Proyecto Completo"
+                                                                        aria-label={`Clonar proyecto completo ${project.nombre || project.codigo || project.id}`}
+                                                                    >
+                                                                        <Copy className="h-4 w-4" />
+                                                                    </button>
+                                                                )}
                                                                 {canExportProjectsToMarketplace && (
                                                                     <ProjectMarketplaceExportButton
                                                                         project={project}
@@ -3563,10 +3913,10 @@ const Proyectos = () => {
                                                                         onClickCapture={(event) => openProjectDeleteModal(project, event)}
                                                                         onClick={(event) => openProjectDeleteModal(project, event)}
                                                                         className={`${PROJECTS_PORTFOLIO_ACTION_BUTTON_CLASS} ${PROJECTS_SOFT_ACTION_MICRO_BUTTON_DANGER_CLASS} opacity-100`}
-                                                                        title="Eliminar proyecto"
-                                                                        aria-label={`Eliminar proyecto ${project.nombre || project.codigo || project.id}`}
+                                                                        title="Mover proyecto a papelera"
+                                                                        aria-label={`Mover proyecto a papelera ${project.nombre || project.codigo || project.id}`}
                                                                     >
-                                                                        <Trash2 className="pointer-events-none h-4 w-4" />
+                                                                        <ArchiveX className="pointer-events-none h-4 w-4" />
                                                                     </button>
                                                                 )}
                                                             </div>
@@ -4968,8 +5318,33 @@ const Proyectos = () => {
                                     <h2 className="text-2xl font-black uppercase tracking-tight mb-4">¿Eliminar Proyecto?</h2>
                                     <p className="text-zinc-500 text-sm font-medium mb-8">
                                         Estás a punto de eliminar <strong>{projectToDelete?.nombre}</strong>.
-                                        Esta acción borrará todas sus revisiones, presupuestos y datos asociados de forma permanente.
+                                        Esta acción moverá el proyecto y sus revisiones a papelera durante 7 días.
                                     </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setDeleteProjectBase((value) => !value)}
+                                        className={`mb-6 flex w-full items-start gap-3 rounded-[1.25rem] border px-4 py-3 text-left transition ${
+                                            deleteProjectBase
+                                                ? 'border-rose-200 bg-rose-50 text-rose-800'
+                                                : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                                        }`}
+                                    >
+                                        <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
+                                            deleteProjectBase ? 'border-rose-300 bg-white' : 'border-emerald-300 bg-white'
+                                        }`}>
+                                            {deleteProjectBase ? <Check className="h-3.5 w-3.5" /> : null}
+                                        </span>
+                                        <span className="min-w-0">
+                                            <span className="block text-[10px] font-black uppercase tracking-[0.16em]">
+                                                {deleteProjectBase ? 'Mover tambien la Base de Proyecto' : 'Conservar Base como Base Maestra'}
+                                            </span>
+                                            <span className="mt-1 block text-[11px] font-semibold leading-relaxed">
+                                                {deleteProjectBase
+                                                    ? 'La base asociada tambien quedara en papelera junto al proyecto.'
+                                                    : 'Se borrara el proyecto, pero la base quedara disponible como Base de Trabajo reutilizable.'}
+                                            </span>
+                                        </span>
+                                    </button>
                                     <div className="flex flex-col w-full gap-3">
                                         <LiquidButton
                                             onClick={() => setDeleteStep(2)}
@@ -4989,7 +5364,9 @@ const Proyectos = () => {
                                 <>
                                     <h2 className="text-2xl font-black uppercase tracking-tight mb-4 text-red-600">CONFIRMACIÓN FINAL</h2>
                                     <p className="text-zinc-500 text-sm font-medium mb-8">
-                                        ¿Estás absolutamente seguro? Esta acción es <strong>IRREVERSIBLE</strong> y no se podrán recuperar los datos.
+                                        ¿Estás seguro? {deleteProjectBase
+                                            ? 'El proyecto y su base quedaran ocultos de la operacion normal y podran restaurarse desde la papelera mientras no expiren.'
+                                            : 'El proyecto quedara oculto en papelera y la base asociada se convertira en Base de Trabajo reutilizable.'}
                                     </p>
                                     <div className="flex flex-col w-full gap-3">
                                         <LiquidButton
@@ -5002,7 +5379,7 @@ const Proyectos = () => {
                                             ) : (
                                                 <Trash2 className="w-4 h-4" />
                                             )}
-                                            Confirmar Eliminación Permanente
+                                            Mover a Papelera
                                         </LiquidButton>
                                         <button
                                             onClick={() => setShowDeleteModal(false)}
@@ -5016,6 +5393,101 @@ const Proyectos = () => {
                             )}
                         </div>
                     </div>
+                </AppModalShell>
+            )}
+        </AnimatePresence>
+    );
+
+    const renderProjectRecycleModal = () => (
+        <AnimatePresence>
+            {showRecycleModal && (
+                <AppModalShell
+                    isOpen={showRecycleModal}
+                    size="lg"
+                    zIndex="z-[200]"
+                    panelClassName="rounded-[2.5rem] max-h-[calc(100vh-4rem)] flex flex-col"
+                    onClose={() => setShowRecycleModal(false)}
+                >
+                    <AppModalHeader
+                        title="Papelera de proyectos"
+                        subtitle="Retención operativa de 7 días antes del borrado definitivo."
+                        icon={Trash2}
+                        onClose={() => setShowRecycleModal(false)}
+                    />
+                    <div className="min-h-0 overflow-y-auto px-6 py-5">
+                        {recycleLoading ? (
+                            <div className="flex items-center justify-center py-16">
+                                <div className="flex flex-col items-center gap-4 text-zinc-400">
+                                    <div className="h-10 w-10 animate-spin rounded-full border-4 border-zinc-100 border-t-[#F39200]" />
+                                    <p className="text-[10px] font-black uppercase tracking-widest">Cargando papelera...</p>
+                                </div>
+                            </div>
+                        ) : recycledProjects.length === 0 ? (
+                            <div className="rounded-[2rem] border border-dashed border-zinc-200 bg-zinc-50/70 px-6 py-12 text-center">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Sin proyectos en papelera</p>
+                                <p className="mt-3 text-sm font-medium text-zinc-500">Los proyectos eliminados se mostrarán aquí durante 7 días.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {recycledProjects.map((project) => {
+                                    const projectName = project.trash_original_nombre || project.nombre;
+                                    const projectCode = project.trash_original_codigo || project.codigo;
+                                    const isBusy = recycleActionId === project.id;
+                                    return (
+                                        <div key={project.id} className="rounded-[1.5rem] border border-zinc-200 bg-white px-4 py-3.5 shadow-[0_8px_20px_rgba(0,0,0,0.03)]">
+                                            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-[12px] font-black uppercase tracking-tight text-zinc-900">{projectName}</p>
+                                                    <div className="mt-1 flex flex-wrap gap-2 text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
+                                                        <span>{projectCode || 'Sin código'}</span>
+                                                        <span>Eliminado: {formatRecycleDateTime(project.deleted_at)}</span>
+                                                        <span>Expira: {formatRecycleDateTime(project.recycle_expires_at)}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex shrink-0 items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRestoreRecycledProject(project)}
+                                                        disabled={isBusy}
+                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-emerald-100 bg-emerald-50 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 disabled:opacity-50"
+                                                    >
+                                                        <RotateCcw className="h-3.5 w-3.5" />
+                                                        Restaurar
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handlePurgeRecycledProject(project)}
+                                                        disabled={isBusy}
+                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-rose-100 bg-rose-50 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-rose-700 transition hover:border-rose-300 disabled:opacity-50"
+                                                    >
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                        Borrar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                    <AppModalFooter>
+                        <button
+                            type="button"
+                            onClick={() => setShowRecycleModal(false)}
+                            className="h-11 rounded-[1rem] bg-zinc-50 px-5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-zinc-100"
+                        >
+                            Cerrar
+                        </button>
+                        <LiquidButton
+                            onClick={fetchRecycledProjects}
+                            disabled={recycleLoading}
+                            className="!h-11 bg-[#1A1A1A] text-white"
+                        >
+                            <RotateCcw className="mr-2 h-4 w-4" />
+                            Actualizar
+                        </LiquidButton>
+                    </AppModalFooter>
                 </AppModalShell>
             )}
         </AnimatePresence>
@@ -5052,7 +5524,7 @@ const Proyectos = () => {
                                 <>
                                     <ProjectHeaderActionButton
                                         icon={Copy}
-                                        label="Generar Revisión"
+                                        label="Clonar Proyecto Completo"
                                         onClick={() => handleCreateRevision(selectedProject.id)}
                                         tone="warning"
                                         size={isProjectHeaderCollapsed ? 'md' : 'lg'}
@@ -5102,7 +5574,7 @@ const Proyectos = () => {
                         </div>
                         <div className="space-y-1">
                             {sectionItems.filter(section => {
-                                if (section.id === 'bim') return bimAccess.enabled;
+                                if (section.id === 'bim') return bimEnabled;
                                 if (!projectPermissions) return true;
                                 const allowed = projectPermissions.allowed_modules || [];
                                 if (allowed.includes('todos')) return true;
@@ -5169,7 +5641,7 @@ const Proyectos = () => {
 
                     {/* Contenido de Sección */}
                     <main className={`flex-1 flex flex-col min-w-0 min-h-0 ${
-                        selectedPresupuestoId || activeTab === 'cronogramas' || activeTab === 'desagregacion' || activeTab === 'edo_obs' || activeTab === 'edt_wbs'
+                        selectedPresupuestoId || activeTab === 'cronogramas' || activeTab === 'desagregacion' || activeTab === 'edo_obs' || activeTab === 'edt_wbs' || activeTab === 'bim'
                             ? 'overflow-hidden p-6'
                             : activeTab === 'datos' || activeTab === 'stakeholders' || activeTab === 'formula'
                                 ? 'overflow-hidden p-6'
@@ -5193,13 +5665,22 @@ const Proyectos = () => {
                                 ) : activeTab === 'edo_obs' ? (
                                     <Edo project={selectedProject} />
                                 ) : activeTab === 'edt_wbs' ? (
-                                    <Edt project={selectedProject} />
+                                    <Edt
+                                        project={selectedProject}
+                                        initialFocusNodeId={bimNavigationContext?.targetType === 'edt' ? bimNavigationContext.targetId : null}
+                                    />
                                 ) : activeTab === 'cronogramas' ? (
                                     <Cronogramas project={selectedProject} initialProjectDetail={selectedProjectDetail} />
                                 ) : activeTab === 'desagregacion' ? (
                                     <DesagregacionTab project={selectedProject} />
                                 ) : activeTab === 'formula' ? (
                                     <FormulaPolinomicaTab projectId={selectedProject.id} activeRevision={selectedProject} />
+                                ) : activeTab === 'bim' && bimEnabled ? (
+                                    <BimTab
+                                        project={selectedProject}
+                                        access={bimAccess}
+                                        onNavigateTarget={handleBimNavigateTarget}
+                                    />
                                 ) : activeTab === 'presupuesto' ? (
                                     <PresupuestoProvider>
                                         <div className="h-full min-h-0 flex flex-col">
@@ -5208,6 +5689,7 @@ const Proyectos = () => {
                                                     <PresupuestoDetail
                                                         inlineProyectoId={selectedProject.id}
                                                         inlinePresupuestoId={selectedPresupuestoId}
+                                                        initialFocusLineId={bimNavigationContext?.targetType === 'presupuesto' ? bimNavigationContext.targetId : null}
                                                         onBack={() => setSelectedPresupuestoId(null)}
                                                     />
                                                 </div>
@@ -5281,8 +5763,10 @@ const Proyectos = () => {
                 {renderHtmlPortfolioLanding()}
                 {renderMarketplaceExportModal()}
                 {renderPublicProcurementImporterModal()}
+                {renderCreateProjectModal()}
                 {renderPortfolioCalendarModal()}
                 {renderProjectDeleteModal()}
+                {renderProjectRecycleModal()}
             </>
         );
     }
@@ -5344,6 +5828,13 @@ const Proyectos = () => {
                                     />
                                 )}
                                 <ProjectSectionIconButton
+                                    icon={Trash2}
+                                    label="Papelera"
+                                    onClick={openProjectRecycleModal}
+                                    hintContent={<GiproyActionHint title="Papelera" detail="Consulta proyectos eliminados y restaura o purga elementos dentro de los 7 días de retención." />}
+                                    className={`${PROJECTS_COMPACT_ACTION_BUTTON_CLASS} text-zinc-600 hover:text-rose-700`}
+                                />
+                                <ProjectSectionIconButton
                                     icon={Plus}
                                     label={licenseInfo?.access_mode === 'readonly' ? 'Solo lectura' : (licenseInfo?.usados?.proyectos >= licenseInfo?.limites?.proyectos && licenseInfo?.limites?.proyectos !== -1 ? 'Límite alcanzado' : 'Nuevo Proyecto')}
                                     onClick={() => setShowCreateModal(true)}
@@ -5389,19 +5880,21 @@ const Proyectos = () => {
                                 ) : (
                                     <Table className="table-fixed min-w-[1560px]">
                                         <colgroup>
-                                            <col className="w-[180px]" />
-                                            <col className="w-[420px]" />
                                             <col className="w-[150px]" />
-                                            <col className="w-[180px]" />
-                                            <col className="w-[180px]" />
-                                            <col className="w-[150px]" />
-                                            <col className="w-[190px]" />
-                                            <col className="w-[110px]" />
+                                            <col className="w-[400px]" />
+                                            <col className="w-[170px]" />
+                                            <col className="w-[130px]" />
+                                            <col className="w-[160px]" />
+                                            <col className="w-[160px]" />
+                                            <col className="w-[130px]" />
+                                            <col className="w-[170px]" />
+                                            <col className="w-[90px]" />
                                         </colgroup>
                                         <TableHeader className="bg-zinc-50/50 border-b border-zinc-100">
                                             <TableRow className="hover:bg-transparent">
                                                 <TableHead className="font-black text-zinc-400 uppercase tracking-widest text-[9px] py-6 px-8">ID / Cód</TableHead>
                                                 <TableHead className="font-black text-zinc-400 uppercase tracking-widest text-[9px] py-6">Proyecto</TableHead>
+                                                <TableHead className="font-black text-zinc-400 uppercase tracking-widest text-[9px] py-6">Actualizacion</TableHead>
                                                 <TableHead className="font-black text-zinc-400 uppercase tracking-widest text-[9px] py-6 text-center">Estado</TableHead>
                                                 <TableHead className="font-black text-zinc-400 uppercase tracking-widest text-[9px] py-6">Presupuesto Calculado</TableHead>
                                                 <TableHead className="font-black text-zinc-400 uppercase tracking-widest text-[9px] py-6">Presupuesto Entidad</TableHead>
@@ -5413,7 +5906,7 @@ const Proyectos = () => {
                                         <TableBody>
                                             {proyectos.filter(p => includesNormalized(p.nombre, searchTerm) || includesNormalized(p.codigo, searchTerm)).length === 0 ? (
                                                 <TableRow>
-                                                    <TableCell colSpan={8} className="py-20 text-center">
+                                                    <TableCell colSpan={9} className="py-20 text-center">
                                                         <div className="flex flex-col items-center gap-3">
                                                             <Building2 className="w-12 h-12 text-zinc-100" />
                                                             <p className="text-zinc-400 font-bold uppercase tracking-widest text-[10px]">No hay proyectos registrados</p>
@@ -5421,17 +5914,18 @@ const Proyectos = () => {
                                                     </TableCell>
                                                 </TableRow>
                                             ) : (
-                                                proyectos.filter(p =>
+                                                sortProjectsByLatestUpdate(proyectos.filter(p =>
                                                     includesNormalized(p.nombre, searchTerm) ||
                                                     includesNormalized(p.codigo, searchTerm) ||
                                                     includesNormalized(p.descripcion, searchTerm)
-                                                ).map((proy) => {
+                                                )).map((proy) => {
                                                     const projectOriginData = originsMap.get(`proyecto:${proy.id}`) || null;
                                                     const hasMultipleRevisions = hasProjectRevisions(proy);
                                                     const projectCalculatedBudget = getProjectCalculatedBudget(proy);
                                                     const entityBudget = getProjectEntityBudget(proy);
                                                     const projectEstimatedTime = getProjectEstimatedTimeMeta(proy, projectDetailsMap);
                                                     const displayState = getProjectDisplayState(proy, proyectos);
+                                                    const revisionUpdateMeta = getProjectRevisionUpdateMeta(proy);
                                                     return (
                                                     <TableRow
                                                         key={proy.id}
@@ -5442,19 +5936,28 @@ const Proyectos = () => {
                                                             <span className="block truncate font-bold text-[#1A1A1A] text-xs whitespace-nowrap">#{proy.codigo || proy.id}</span>
                                                         </TableCell>
                                                         <TableCell className="font-black tracking-tight text-sm text-[#1A1A1A]">
-                                                            <div className="flex min-w-0 items-center gap-2 whitespace-nowrap">
+                                                            <div className="flex min-w-0 items-start gap-2">
                                                                 <MarketplaceOriginBadgeSet
                                                                     origin={projectOriginData}
                                                                     mode="tooltip"
                                                                     label={`Origen de ${proy.nombre}`}
                                                                 />
-                                                                <span className="min-w-0 truncate text-zinc-900 uppercase">{proy.nombre}</span>
-                                                                {proy.num_revisiones > 1 && (
-                                                                    <span className="shrink-0 px-2 py-0.5 bg-zinc-100 text-zinc-500 text-[9px] font-black rounded-full border border-zinc-200">
-                                                                        {proy.num_revisiones} VERSIONES
-                                                                    </span>
-                                                                )}
+                                                                <div className="min-w-0">
+                                                                    <div className="text-zinc-900 uppercase leading-snug break-words [overflow-wrap:anywhere]">{proy.nombre}</div>
+                                                                    <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-snug text-zinc-500 break-words [overflow-wrap:anywhere]">
+                                                                        {proy.descripcion || 'Sin descripcion registrada.'}
+                                                                    </p>
+                                                                    {proy.num_revisiones > 1 && (
+                                                                        <span className="mt-1 inline-flex shrink-0 px-2 py-0.5 bg-zinc-100 text-zinc-500 text-[9px] font-black rounded-full border border-zinc-200">
+                                                                            {proy.num_revisiones} VERSIONES
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-xs font-black text-[#1A1A1A] leading-snug">
+                                                            <span className="block">{revisionUpdateMeta.label}</span>
+                                                            <span className="mt-1 block text-[9px] font-semibold uppercase tracking-[0.14em] text-zinc-400">Mas reciente</span>
                                                         </TableCell>
                                                         <TableCell className="text-center">
                                                             <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${displayState === 'Planificación' ? 'bg-orange-50 text-[#F39200] border border-orange-100' :
@@ -5562,10 +6065,10 @@ const Proyectos = () => {
                                                                         onClickCapture={(e) => openProjectDeleteModal(proy, e)}
                                                                         onClick={(e) => openProjectDeleteModal(proy, e)}
                                                                         className="p-2 rounded-lg hover:bg-red-50 transition-colors text-red-500 hover:text-red-600"
-                                                                        title="Eliminar Proyecto"
-                                                                        aria-label={`Eliminar proyecto ${proy.nombre || proy.codigo || proy.id}`}
+                                                                        title="Mover proyecto a papelera"
+                                                                        aria-label={`Mover proyecto a papelera ${proy.nombre || proy.codigo || proy.id}`}
                                                                     >
-                                                                        <Trash2 className="pointer-events-none w-4 h-4" />
+                                                                        <ArchiveX className="pointer-events-none w-4 h-4" />
                                                                     </button>
                                                                 )}
                                                                 <button className="p-2 rounded-lg hover:bg-zinc-200 transition-colors text-zinc-400 hover:text-[#1A1A1A]">
@@ -5589,114 +6092,10 @@ const Proyectos = () => {
             {/* Importador Compras Públicas */}
             {renderMarketplaceExportModal()}
             {renderPublicProcurementImporterModal()}
+            {renderProjectRecycleModal()}
 
             {/* Modal de Creación */}
-            <AnimatePresence>
-                {showCreateModal && (
-                    <AppModalShell isOpen={true} size="lg" zIndex="z-[100]" overlayClassName="overflow-y-auto" panelClassName="my-8">
-                            <AppModalHeader
-                                title="Nuevo Proyecto"
-                                subtitle="Sincronización técnica y administrativa"
-                                icon={Briefcase}
-                                iconClassName="text-[#F39200]"
-                                iconWrapClassName="border-orange-200 bg-orange-50"
-                                onClose={() => setShowCreateModal(false)}
-                            />
-                            <div className="p-10">
-                                <form onSubmit={handleCreateProject} className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2 opacity-60">
-                                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Código de Proyecto (Auto)</Label>
-                                            <div className="h-11 bg-zinc-100 border border-zinc-200 rounded-xl flex items-center px-4 text-xs font-bold text-zinc-500">
-                                                [ Generado Automáticamente ]
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Nombre de la Obra</Label>
-                                            <Input
-                                                required
-                                                value={newProject.nombre}
-                                                onChange={e => setNewProject({ ...newProject, nombre: e.target.value })}
-                                                className="h-11 bg-white border-zinc-200 rounded-xl focus:ring-[#F39200]"
-                                                placeholder="Nombre completo del proyecto"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Base de Trabajo Inicial (PU)</Label>
-                                        <div className="bg-orange-50/50 p-4 rounded-[1.5rem] border border-orange-100 space-y-3">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <Database className="w-3.5 h-3.5 text-[#F39200]" />
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-[#F39200]">Clonación Maestra</span>
-                                            </div>
-                                            <SearchableSelect
-                                                options={basesMaestras.map(b => ({ id: b.id, nombre: `${b.codigo_unico} - ${b.nombre}` }))}
-                                                value={newProject.source_base_id}
-                                                onChange={val => setNewProject({ ...newProject, source_base_id: val })}
-                                                valueKey="id"
-                                                placeholder="Seleccione la base para clonar los Precios Unitarios..."
-                                            />
-                                            <p className="text-[8px] font-bold text-zinc-400 italic">Al crear el proyecto, se generará una copia privada de esta base para evitar alterar otras obras.</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Presupuesto Referencial</Label>
-                                            <div className="relative">
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs">$</span>
-                                                <Input
-                                                    type="text"
-                                                    value={formatCurrencyInput(newProject.presupuesto_estimado, isInputFocused)}
-                                                    onChange={handleAmountChange}
-                                                    onFocus={() => setIsInputFocused(true)}
-                                                    onBlur={() => setIsInputFocused(false)}
-                                                    className="h-11 bg-white border-zinc-200 rounded-xl pl-8 font-black tabular-nums"
-                                                    placeholder="0,00"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Moneda</Label>
-                                            <AnimatedSelect
-                                                value={newProject.moneda}
-                                                onChange={e => setNewProject({ ...newProject, moneda: e.target.value })}
-                                                className="w-full h-11 bg-zinc-100 border border-zinc-200 rounded-xl px-4 text-xs font-black uppercase appearance-none outline-none"
-                                            >
-                                                <option value="USD">Dólares (USD)</option>
-                                                <option value="EUR">Euros (EUR)</option>
-                                            </AnimatedSelect>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Descripción</Label>
-                                        <textarea
-                                            value={newProject.descripcion}
-                                            onChange={e => setNewProject({ ...newProject, descripcion: e.target.value })}
-                                            className="w-full h-24 p-4 bg-white border border-zinc-200 rounded-xl text-sm font-medium outline-none focus:border-[#F39200] transition-all"
-                                            placeholder="Detalles adicionales del proyecto..."
-                                        />
-                                    </div>
-
-                                    <div className="flex gap-4 pt-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowCreateModal(false)}
-                                            className="flex-1 h-12 bg-zinc-100 text-zinc-500 font-black uppercase tracking-widest text-[11px] rounded-2xl hover:bg-zinc-200 transition-all"
-                                        >
-                                            Cancelar
-                                        </button>
-                                        <LiquidButton type="submit" className="flex-[2] !h-12 !rounded-2xl bg-[#1A1A1A] text-white">
-                                            <Save className="w-4 h-4" /> Crear Proyecto
-                                        </LiquidButton>
-                                    </div>
-                                </form>
-                            </div>
-                    </AppModalShell>
-                )}
-            </AnimatePresence>
+            {renderCreateProjectModal()}
 
             {/* Modal para Seleccionar Revisión a Abrir */}
             <AnimatePresence>
@@ -5840,11 +6239,36 @@ const Proyectos = () => {
 
                                     {deleteStep === 1 ? (
                                         <>
-                                            <h2 className="text-2xl font-black uppercase tracking-tight mb-4">¿Eliminar Proyecto?</h2>
-                                            <p className="text-zinc-500 text-sm font-medium mb-8">
-                                                Estás a punto de eliminar <strong>{projectToDelete?.nombre}</strong>.
-                                                Esta acción borrará todas sus revisiones, presupuestos y datos asociados de forma permanente.
-                                            </p>
+                                                <h2 className="text-2xl font-black uppercase tracking-tight mb-4">¿Eliminar Proyecto?</h2>
+                                                <p className="text-zinc-500 text-sm font-medium mb-8">
+                                                    Estás a punto de eliminar <strong>{projectToDelete?.nombre}</strong>.
+                                                    Esta acción moverá el proyecto y sus revisiones a papelera durante 7 días.
+                                                </p>
+                                            <button
+                                                type="button"
+                                                onClick={() => setDeleteProjectBase((value) => !value)}
+                                                className={`mb-6 flex w-full items-start gap-3 rounded-[1.25rem] border px-4 py-3 text-left transition ${
+                                                    deleteProjectBase
+                                                        ? 'border-rose-200 bg-rose-50 text-rose-800'
+                                                        : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                                                }`}
+                                            >
+                                                <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
+                                                    deleteProjectBase ? 'border-rose-300 bg-white' : 'border-emerald-300 bg-white'
+                                                }`}>
+                                                    {deleteProjectBase ? <Check className="h-3.5 w-3.5" /> : null}
+                                                </span>
+                                                <span className="min-w-0">
+                                                    <span className="block text-[10px] font-black uppercase tracking-[0.16em]">
+                                                        {deleteProjectBase ? 'Mover tambien la Base de Proyecto' : 'Conservar Base como Base Maestra'}
+                                                    </span>
+                                                    <span className="mt-1 block text-[11px] font-semibold leading-relaxed">
+                                                        {deleteProjectBase
+                                                            ? 'La base asociada tambien quedara en papelera junto al proyecto.'
+                                                            : 'Se borrara el proyecto, pero la base quedara disponible como Base de Trabajo reutilizable.'}
+                                                    </span>
+                                                </span>
+                                            </button>
                                             <div className="flex flex-col w-full gap-3">
                                                 <LiquidButton
                                                     onClick={() => setDeleteStep(2)}
@@ -5864,7 +6288,9 @@ const Proyectos = () => {
                                         <>
                                             <h2 className="text-2xl font-black uppercase tracking-tight mb-4 text-red-600">CONFIRMACIÓN FINAL</h2>
                                             <p className="text-zinc-500 text-sm font-medium mb-8">
-                                                ¿Estás absolutamente seguro? Esta acción es <strong>IRREVERSIBLE</strong> y no se podrán recuperar los datos.
+                                                ¿Estás seguro? {deleteProjectBase
+                                                    ? 'El proyecto y su base quedaran ocultos de la operacion normal y podran restaurarse desde la papelera mientras no expiren.'
+                                                    : 'El proyecto quedara oculto en papelera y la base asociada se convertira en Base de Trabajo reutilizable.'}
                                             </p>
                                             <div className="flex flex-col w-full gap-3">
                                                 <LiquidButton
@@ -5877,7 +6303,7 @@ const Proyectos = () => {
                                                     ) : (
                                                         <Trash2 className="w-4 h-4" />
                                                     )}
-                                                    Confirmar Eliminación Permanente
+                                                    Mover a Papelera
                                                 </LiquidButton>
                                                 <button
                                                     onClick={() => setShowDeleteModal(false)}

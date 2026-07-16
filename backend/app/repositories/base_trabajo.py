@@ -7,13 +7,18 @@ from app.schemas.base_trabajo import BaseTrabajoCreate, BaseTrabajoUpdate
 from app.core.apu_status import normalize_apu_revision_status
 from app.core.unit_normalization import canonicalize_unit_symbol
 from typing import List, Optional, Any
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 logger = logging.getLogger(__name__)
 
 class BaseTrabajoRepository:
-    def get_by_id(self, db: Session, id: int, empresa_id: int) -> Optional[BaseTrabajo]:
-        return db.query(BaseTrabajo).filter(BaseTrabajo.id == id, BaseTrabajo.empresa_id == empresa_id).first()
+    RECYCLE_RETENTION_DAYS = 7
+
+    def get_by_id(self, db: Session, id: int, empresa_id: int, include_deleted: bool = False) -> Optional[BaseTrabajo]:
+        query = db.query(BaseTrabajo).filter(BaseTrabajo.id == id, BaseTrabajo.empresa_id == empresa_id)
+        if not include_deleted:
+            query = query.filter(BaseTrabajo.deleted_at.is_(None))
+        return query.first()
 
     def get_multi(self, db: Session, empresa_id: int, skip: int = 0, limit: int = 100, user_id: Optional[int] = None) -> List[BaseTrabajo]:
         from app.models.proyecto import Proyecto
@@ -30,7 +35,8 @@ class BaseTrabajoRepository:
             Proyecto, 
             Proyecto.base_trabajo_id == BaseTrabajo.id
         ).filter(
-            BaseTrabajo.empresa_id == empresa_id
+            BaseTrabajo.empresa_id == empresa_id,
+            BaseTrabajo.deleted_at.is_(None),
         )
         
         # Filtro por asignación de usuario si se proporciona
@@ -56,6 +62,19 @@ class BaseTrabajoRepository:
             
         return final_bases
 
+    def get_deleted(self, db: Session, empresa_id: int, skip: int = 0, limit: int = 100) -> List[BaseTrabajo]:
+        return (
+            db.query(BaseTrabajo)
+            .filter(
+                BaseTrabajo.empresa_id == empresa_id,
+                BaseTrabajo.deleted_at.isnot(None),
+            )
+            .order_by(BaseTrabajo.deleted_at.desc(), BaseTrabajo.id.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
     def get_active(self, db: Session, empresa_id: int) -> Optional[BaseTrabajo]:
         """
         Obtiene la base de trabajo activa de la empresa, incluyendo la revisión del proyecto si aplica.
@@ -70,7 +89,8 @@ class BaseTrabajoRepository:
             Proyecto.base_trabajo_id == BaseTrabajo.id
         ).filter(
             BaseTrabajo.empresa_id == empresa_id,
-            BaseTrabajo.activa == True
+            BaseTrabajo.activa == True,
+            BaseTrabajo.deleted_at.is_(None),
         ).first()
 
         if not result:
@@ -84,12 +104,16 @@ class BaseTrabajoRepository:
         from datetime import datetime
         year = datetime.now().year
         # Conteo por empresa: el código es único dentro de cada empresa (SaaS multi-tenant)
-        count = db.query(BaseTrabajo).filter(BaseTrabajo.empresa_id == empresa_id).count()
+        count = db.query(BaseTrabajo).filter(
+            BaseTrabajo.empresa_id == empresa_id,
+            BaseTrabajo.deleted_at.is_(None),
+        ).count()
         candidate = f"BT-{year}-{str(count + 1).zfill(3)}"
         # Loop de seguridad: saltar si ya existe ese código en la misma empresa
         while db.query(BaseTrabajo).filter(
             BaseTrabajo.codigo_unico == candidate,
-            BaseTrabajo.empresa_id == empresa_id
+            BaseTrabajo.empresa_id == empresa_id,
+            BaseTrabajo.deleted_at.is_(None),
         ).first():
             count += 1
             candidate = f"BT-{year}-{str(count + 1).zfill(3)}"
@@ -103,7 +127,8 @@ class BaseTrabajoRepository:
         """
         # Primero, desactivar todas las bases de esta empresa
         db.query(BaseTrabajo).filter(
-            BaseTrabajo.empresa_id == empresa_id
+            BaseTrabajo.empresa_id == empresa_id,
+            BaseTrabajo.deleted_at.is_(None),
         ).update({'activa': False})
         
         # Luego, activar la base seleccionada
@@ -123,12 +148,13 @@ class BaseTrabajoRepository:
         """
         result = db.query(BaseTrabajo).filter(
             BaseTrabajo.empresa_id == empresa_id,
-            BaseTrabajo.activa == True
+            BaseTrabajo.activa == True,
+            BaseTrabajo.deleted_at.is_(None),
         ).update({'activa': False})
         db.commit()
         return result
 
-    def create(self, db: Session, obj_in: BaseTrabajoCreate, empresa_id: int) -> BaseTrabajo:
+    def create(self, db: Session, obj_in: BaseTrabajoCreate, empresa_id: int, *, commit: bool = True) -> BaseTrabajo:
         data = obj_in.model_dump(exclude={"source_base_id", "empresa_id", "content_revision"})
         
         # Autogenerar código único si no viene
@@ -181,7 +207,10 @@ class BaseTrabajoRepository:
                 db.rollback()
                 raise RuntimeError(f"Fallo al crear subcategorías por defecto en base {db_obj.id}: {str(e)}") from e
 
-        db.commit()
+        if commit:
+            db.commit()
+        else:
+            db.flush()
         db.refresh(db_obj)
 
         return db_obj
@@ -253,6 +282,39 @@ class BaseTrabajoRepository:
             Recurso.empresa_id == source_empresa_id
         ).all()
         
+        source_unit_ids = {rec.unidad_id for rec in old_recursos if rec.unidad_id}
+        unit_map = {}
+        if source_unit_ids:
+            source_units = db.query(Unidad).filter(Unidad.id.in_(source_unit_ids)).all()
+            for unit in source_units:
+                if unit.es_global:
+                    unit_map[unit.id] = unit.id
+                    continue
+                existing_unit = (
+                    db.query(Unidad)
+                    .filter(
+                        Unidad.descripcion == unit.descripcion,
+                        Unidad.subcategoria_codigo == unit.subcategoria_codigo,
+                        Unidad.empresa_id == target_empresa_id,
+                        Unidad.base_trabajo_id == target_id,
+                    )
+                    .first()
+                )
+                if existing_unit:
+                    unit_map[unit.id] = existing_unit.id
+                    continue
+                new_unit = Unidad(
+                    descripcion=unit.descripcion,
+                    descripcion_completa=unit.descripcion_completa,
+                    subcategoria_codigo=unit.subcategoria_codigo,
+                    es_global=False,
+                    empresa_id=target_empresa_id,
+                    base_trabajo_id=target_id,
+                )
+                db.add(new_unit)
+                db.flush()
+                unit_map[unit.id] = new_unit.id
+
         recurso_map = {} # {old_id: new_id}
         for rec in old_recursos:
             # El código se mantiene porque es C-SSSS-RRRRR y las subcategorías clonadas mantienen el mismo SSSS (en teoría)
@@ -263,7 +325,7 @@ class BaseTrabajoRepository:
                 descripcion=rec.descripcion,
                 descripcion_normalizada=rec.descripcion_normalizada,
                 precio=rec.precio,
-                unidad_id=rec.unidad_id,
+                unidad_id=unit_map.get(rec.unidad_id, rec.unidad_id),
                 cod_cpc_id=rec.cod_cpc_id,
                 especificaciones=rec.especificaciones,
                 subcategoria_item_id=subcat_map.get(rec.subcategoria_item_id),
@@ -290,7 +352,7 @@ class BaseTrabajoRepository:
         logger.debug(
             "Clone base source=%s target=%s found subcats=%s recursos=%s apus=%s",
             source_id,
-            new_base.id,
+            target_id,
             len(old_subcats),
             len(old_recursos),
             len(old_apus),
@@ -381,6 +443,109 @@ class BaseTrabajoRepository:
                 raise ValueError(f"Ya existe una base de trabajo con el nombre '{db_obj.nombre}'")
             raise e
         return db_obj
+
+    def _now_utc(self) -> datetime:
+        return datetime.now(timezone.utc)
+
+    def _trash_text(self, value: Optional[str], item_id: int) -> str:
+        base = (value or "sin-nombre").strip() or "sin-nombre"
+        return f"{base} [papelera {item_id}]"
+
+    def soft_delete(
+        self,
+        db: Session,
+        db_obj: BaseTrabajo,
+        *,
+        deleted_by_user_id: Optional[int] = None,
+        reason: Optional[str] = None,
+        commit: bool = True,
+    ) -> BaseTrabajo:
+        if db_obj.deleted_at:
+            return db_obj
+        deleted_at = self._now_utc()
+        db_obj.trash_original_nombre = db_obj.trash_original_nombre or db_obj.nombre
+        db_obj.trash_original_codigo_unico = db_obj.trash_original_codigo_unico or db_obj.codigo_unico
+        db_obj.trash_original_activa = bool(db_obj.activa)
+        db_obj.deleted_at = deleted_at
+        db_obj.deleted_by_user_id = deleted_by_user_id
+        db_obj.recycle_expires_at = deleted_at + timedelta(days=self.RECYCLE_RETENTION_DAYS)
+        db_obj.deletion_reason = reason
+        db_obj.activa = False
+        db_obj.nombre = self._trash_text(db_obj.nombre, db_obj.id)
+        db_obj.codigo_unico = self._trash_text(db_obj.codigo_unico, db_obj.id)
+        db.add(db_obj)
+        if commit:
+            db.commit()
+            db.refresh(db_obj)
+        else:
+            db.flush()
+        return db_obj
+
+    def restore(self, db: Session, db_obj: BaseTrabajo) -> BaseTrabajo:
+        if not db_obj.deleted_at:
+            return db_obj
+        original_name = db_obj.trash_original_nombre or db_obj.nombre
+        original_code = db_obj.trash_original_codigo_unico or db_obj.codigo_unico
+        name_conflict = db.query(BaseTrabajo).filter(
+            BaseTrabajo.empresa_id == db_obj.empresa_id,
+            BaseTrabajo.id != db_obj.id,
+            BaseTrabajo.deleted_at.is_(None),
+            BaseTrabajo.nombre == original_name,
+        ).first()
+        if name_conflict:
+            raise ValueError(f"No se puede restaurar la base porque ya existe una base activa con el nombre '{original_name}'.")
+        code_conflict = db.query(BaseTrabajo).filter(
+            BaseTrabajo.empresa_id == db_obj.empresa_id,
+            BaseTrabajo.id != db_obj.id,
+            BaseTrabajo.deleted_at.is_(None),
+            BaseTrabajo.codigo_unico == original_code,
+        ).first()
+        if code_conflict:
+            raise ValueError(f"No se puede restaurar la base porque ya existe una base activa con el codigo '{original_code}'.")
+
+        should_restore_active = bool(db_obj.trash_original_activa)
+        if should_restore_active:
+            active_base = db.query(BaseTrabajo).filter(
+                BaseTrabajo.empresa_id == db_obj.empresa_id,
+                BaseTrabajo.id != db_obj.id,
+                BaseTrabajo.deleted_at.is_(None),
+                BaseTrabajo.activa == True,
+            ).first()
+            should_restore_active = active_base is None
+
+        db_obj.nombre = original_name
+        db_obj.codigo_unico = original_code
+        db_obj.activa = should_restore_active
+        db_obj.deleted_at = None
+        db_obj.deleted_by_user_id = None
+        db_obj.recycle_expires_at = None
+        db_obj.deletion_reason = None
+        db_obj.trash_original_nombre = None
+        db_obj.trash_original_codigo_unico = None
+        db_obj.trash_original_activa = None
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+
+    def purge_expired(self, db: Session, empresa_id: int, *, limit: int = 100) -> int:
+        now = self._now_utc()
+        expired = (
+            db.query(BaseTrabajo)
+            .filter(
+                BaseTrabajo.empresa_id == empresa_id,
+                BaseTrabajo.deleted_at.isnot(None),
+                BaseTrabajo.recycle_expires_at <= now,
+            )
+            .order_by(BaseTrabajo.recycle_expires_at.asc(), BaseTrabajo.id.asc())
+            .limit(limit)
+            .all()
+        )
+        count = 0
+        for base in expired:
+            self.delete(db, base)
+            count += 1
+        return count
 
     def delete(self, db: Session, db_obj: BaseTrabajo):
         from app.models.apu import APU, APULinea

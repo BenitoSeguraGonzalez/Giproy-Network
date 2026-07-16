@@ -1,22 +1,22 @@
 {
-  "generated_at": "2026-05-21T11:54:44.007994+00:00",
+  "generated_at": "2026-05-25T12:23:59.420071+00:00",
   "mode": "GIPROY CLASICO",
   "scope": "logging inventory; read-only source scan; no product code changes",
   "root": "E:/Repositorios/GiProy Network",
   "totals": {
-    "scanned_files": 938,
-    "scanned_lines": 232710,
-    "matched_lines": 1674
+    "scanned_files": 968,
+    "scanned_lines": 236343,
+    "matched_lines": 1670
   },
   "kind_counts": {
-    "python_print": 1193,
+    "python_print": 1197,
     "python_logger": 17,
-    "frontend_console": 424,
+    "frontend_console": 416,
     "powershell_write": 40
   },
   "sensitive_term_counts": {
     "password": 39,
-    "token": 24,
+    "token": 23,
     "authorization": 0,
     "session": 33,
     "email": 51
@@ -146,7 +146,7 @@
     },
     "frontend_product": {
       "description": "Frontend src code: React modules, services, hooks and stores.",
-      "count": 330,
+      "count": 311,
       "samples": [
         {
           "path": "frontend/src/components/ErrorBoundary.jsx",
@@ -171,14 +171,14 @@
         },
         {
           "path": "frontend/src/components/RegisterModal.jsx",
-          "line": 37,
+          "line": 38,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error('Error fetching paises:', err);"
         },
         {
           "path": "frontend/src/components/RegisterModal.jsx",
-          "line": 87,
+          "line": 88,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Registration error:\", err);"
@@ -220,42 +220,21 @@
         },
         {
           "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
-          "line": 260,
-          "kind": "frontend_console",
-          "sensitive_hits": [],
-          "text": "console.log(\"No resources in revision\", projectRevision, \"falling back to master...\");"
-        },
-        {
-          "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
-          "line": 272,
-          "kind": "frontend_console",
-          "sensitive_hits": [],
-          "text": "console.log(\"No APUs in revision\", projectRevision, \"falling back to master...\");"
-        },
-        {
-          "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
-          "line": 280,
-          "kind": "frontend_console",
-          "sensitive_hits": [],
-          "text": "console.log(\"No subcategories in revision\", projectRevision, \"falling back to master...\");"
-        },
-        {
-          "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
-          "line": 336,
+          "line": 333,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error loading APU for budget:\", error);"
         },
         {
           "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
-          "line": 534,
+          "line": 531,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error saving APU from budget:\", error);"
         },
         {
           "path": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
-          "line": 704,
+          "line": 701,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.warn('No se pudo resolver el impacto del APU anidado', error);"
@@ -808,161 +787,126 @@
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 797,
+          "line": 792,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error al cargar categorías:\", error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 804,
-          "kind": "frontend_console",
-          "sensitive_hits": [],
-          "text": "console.log(\"Solicitando cantones al API para:\", provincia);"
-        },
-        {
-          "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 806,
-          "kind": "frontend_console",
-          "sensitive_hits": [],
-          "text": "console.log(\"Cantones recibidos:\", data);"
-        },
-        {
-          "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 809,
+          "line": 802,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error al cargar cantones:\", error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 901,
+          "line": 894,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error loading project types:\", e);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 905,
+          "line": 898,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error loading provinces:\", e);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 911,
+          "line": 904,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error loading project details:\", e);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 921,
-          "kind": "frontend_console",
-          "sensitive_hits": [],
-          "text": "console.log(\"Detalle cargado:\", detalle);"
-        },
-        {
-          "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 939,
-          "kind": "frontend_console",
-          "sensitive_hits": [],
-          "text": "console.log(\"Cargando cantones para:\", detalle.provincia);"
-        },
-        {
-          "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 943,
-          "kind": "frontend_console",
-          "sensitive_hits": [],
-          "text": "console.log(\"Datos dependientes cargados correctamente\");"
-        },
-        {
-          "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 946,
+          "line": 936,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error al cargar datos iniciales:\", error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1054,
+          "line": 1044,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error uploading image:\", error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1066,
+          "line": 1056,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error cargando documentos del proyecto:\", error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1098,
+          "line": 1088,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error subiendo documento PDF:\", error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1119,
+          "line": 1109,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error abriendo visor PDF:\", error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1141,
+          "line": 1131,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error descargando documento PDF:\", error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1164,
+          "line": 1154,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error eliminando documento PDF:\", error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1460,
+          "line": 1450,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error guardando detalle del proyecto:\", error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1498,
+          "line": 1488,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error('Error guardando nombre del proyecto:', error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1578,
+          "line": 1568,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "]).catch(e => console.error(\"Error al guardar en segundo plano (unmount)\", e));"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1683,
+          "line": 1673,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error georreferenciando dirección:\", error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1723,
+          "line": 1713,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error('Error generando vista previa del acta:', error);"
         },
         {
           "path": "frontend/src/components/projects/DatosProyecto.jsx",
-          "line": 1754,
+          "line": 1744,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error('Error exportando acta de constitución:', error);"
@@ -1228,14 +1172,14 @@
         },
         {
           "path": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
-          "line": 130,
+          "line": 131,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error('[PolinomicaTab] Error resolving presupuesto:', resolveError);"
         },
         {
           "path": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
-          "line": 142,
+          "line": 143,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error('[PolinomicaTab] Error loading indices catalog:', catalogError);"
@@ -1340,72 +1284,49 @@
         },
         {
           "path": "frontend/src/context/AuthContext.jsx",
-          "line": 82,
+          "line": 77,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.warn(\"No se pudo cargar info de licencia:\", e.message);"
         },
         {
           "path": "frontend/src/context/AuthContext.jsx",
-          "line": 93,
-          "kind": "frontend_console",
-          "sensitive_hits": [],
-          "text": "console.log('Device ID Initialized:', id);"
-        },
-        {
-          "path": "frontend/src/context/AuthContext.jsx",
-          "line": 98,
-          "kind": "frontend_console",
-          "sensitive_hits": [],
-          "text": "console.log('Backend Connectivity: OK');"
-        },
-        {
-          "path": "frontend/src/context/AuthContext.jsx",
-          "line": 103,
+          "line": 95,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.warn('Silent warning in initialization:', error);"
         },
         {
           "path": "frontend/src/context/AuthContext.jsx",
-          "line": 150,
+          "line": 142,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Sesión inválida o expirada durante checkAuth\", error);"
         },
         {
           "path": "frontend/src/context/AuthContext.jsx",
-          "line": 160,
+          "line": 152,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.warn(\"No se pudo rehidratar la sesión actual, pero no se invalidará localmente.\", error);"
         },
         {
           "path": "frontend/src/context/AuthContext.jsx",
-          "line": 241,
+          "line": 229,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.warn(\"No se pudo invalidar la sesión en backend al cerrar sesión:\", error.message);"
         },
         {
           "path": "frontend/src/context/AuthContext.jsx",
-          "line": 249,
+          "line": 237,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.warn(\"No se pudieron desactivar las bases al cerrar sesión:\", error.message);"
         },
         {
           "path": "frontend/src/context/AuthContext.jsx",
-          "line": 263,
-          "kind": "frontend_console",
-          "sensitive_hits": [
-            "token"
-          ],
-          "text": "console.log(`Sesión finalizada: ${message || 'expiración de token'}`);"
-        },
-        {
-          "path": "frontend/src/context/AuthContext.jsx",
-          "line": 284,
+          "line": 271,
           "kind": "frontend_console",
           "sensitive_hits": [
             "token"
@@ -1414,7 +1335,7 @@
         },
         {
           "path": "frontend/src/context/AuthContext.jsx",
-          "line": 323,
+          "line": 310,
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.warn(\"No se pudo renovar la sesión activa:\", error?.message || error);"
@@ -1551,12 +1472,89 @@
           "kind": "frontend_console",
           "sensitive_hits": [],
           "text": "console.error(\"Error al cargar detalle del APU:\", error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 1328,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error loading bases:\", error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 1558,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al preparar vista previa:\", error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 1591,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar Excel:\", error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 1624,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar PDF:\", error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 1657,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error al exportar PDF desde Excel:\", error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 2310,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.warn('No se pudo resolver el impacto del APU anidado', error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 2435,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error persistiendo orden de líneas APU:', error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 2458,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error drop editor:\", error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 2491,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(\"Error fetching units for resource category:\", error);"
+        },
+        {
+          "path": "frontend/src/pages/APUs.jsx",
+          "line": 2577,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error(error);"
+        },
+        {
+          "path": "frontend/src/pages/AdminGlobalAuditoria.jsx",
+          "line": 74,
+          "kind": "frontend_console",
+          "sensitive_hits": [],
+          "text": "console.error('Error cargando auditoría:', error);"
         }
       ]
     },
     "scripts_and_tools": {
       "description": "CLI scripts, local tools, launchers and maintenance helpers.",
-      "count": 485,
+      "count": 489,
       "samples": [
         {
           "path": "backend/scripts/add_activa_column.py",
@@ -2981,7 +2979,7 @@
     },
     "other_source": {
       "description": "Other source files outside primary product paths.",
-      "count": 843,
+      "count": 854,
       "samples": [
         {
           "path": "audit_users.py",

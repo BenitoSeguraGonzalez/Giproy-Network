@@ -166,3 +166,11 @@ No puede declararse “100% funcional” si falla cualquiera de estos grupos:
 - datasets usados
 - criterio final de liberación
 
+## 12. Trazabilidad documental paralela
+
+Toda validacion BIM debe quedar asociada a una TASK del carril
+`docs/tasks/bim` con ID `BIM-TASK-*`.
+
+Las evidencias de smoke, simulacion, permisos, rendimiento y estabilidad deben
+referenciarse desde la TASK BIM correspondiente y, cuando agreguen nuevos
+artefactos permanentes, enlazarse tambien desde `BIM_INDEX.md`.

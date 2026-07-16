@@ -210,7 +210,7 @@ const TeamDashboardModal = ({ isOpen, onClose, project, dashboardData, onAssign 
             const summary = await proyectosApi.getUserSummary(project.id, personNode.real_user_id, empId);
             setSelectedUserSummary(summary);
         } catch (error) {
-            console.error("Error al cargar resumen de usuario:", error);
+            globalThis.reportClientError?.("Error al cargar resumen de usuario:", error);
             const errorMsg = error.response?.data?.detail || error.message;
             if (errorMsg === "Not Found" || error.response?.status === 404) {
                 appAlert("El servidor no encuentra la información solicitada. Por favor, asegúrate de que los servicios estén activos.");

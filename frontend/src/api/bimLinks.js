@@ -10,6 +10,13 @@ export const bimLinksApi = {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/elements`, withTenantConfig({}, empresaId));
         return response.data;
     },
+    searchElementsByProject: async (projectId, params = {}, empresaId = null) => {
+        const response = await axiosInstance.get(
+            `/bim/projects/${projectId}/elements/search`,
+            withTenantConfig({ params }, empresaId),
+        );
+        return response.data;
+    },
     create: async (projectId, payload, empresaId = null) => {
         const response = await axiosInstance.post(`/bim/projects/${projectId}/links`, payload, withTenantConfig({}, empresaId));
         return response.data;

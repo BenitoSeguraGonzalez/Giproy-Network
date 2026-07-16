@@ -99,22 +99,30 @@ def _normalize_role(role: Optional[str]) -> str:
 
 def _detect_first_link(text: str) -> Optional[str]:
     raw_text = text or ""
+    normalized_text = raw_text.lower()
+    normalized_text = normalized_text.replace("[.]", ".").replace("(dot)", ".")
+    normalized_text = re.sub(r"\sdot\s", ".", normalized_text, flags=re.IGNORECASE)
+    normalized_text = normalized_text.replace("\\\\", "//").replace("\\", "/")
+    obfuscated_protocol_match = OBFUSCATED_PROTOCOL_PATTERN.search(normalized_text)
+
     match = LINK_PATTERN.search(raw_text)
-    if not match:
-        normalized_text = raw_text.lower()
-        normalized_text = normalized_text.replace("[.]", ".").replace("(dot)", ".")
-        normalized_text = re.sub(r"\sdot\s", ".", normalized_text, flags=re.IGNORECASE)
-        normalized_text = normalized_text.replace("\\\\", "//").replace("\\", "/")
+    if match:
+        detected = match.group(1)
+        if (
+            obfuscated_protocol_match
+            and detected.lower().startswith("www.")
+            and obfuscated_protocol_match.start() <= match.start(1)
+        ):
+            return obfuscated_protocol_match.group(0).strip()
+        return detected
 
-        match = OBFUSCATED_PROTOCOL_PATTERN.search(normalized_text)
-        if match:
-            return match.group(0).strip()
+    if obfuscated_protocol_match:
+        return obfuscated_protocol_match.group(0).strip()
 
-        match = OBFUSCATED_DOMAIN_PATTERN.search(normalized_text)
-        if match and ("." in match.group(0) or "www" in match.group(0)):
-            return match.group(0).strip()
-        return None
-    return match.group(1)
+    match = OBFUSCATED_DOMAIN_PATTERN.search(normalized_text)
+    if match and ("." in match.group(0) or "www" in match.group(0)):
+        return match.group(0).strip()
+    return None
 
 
 def _sanitize_handle_seed(value: Optional[str]) -> str:

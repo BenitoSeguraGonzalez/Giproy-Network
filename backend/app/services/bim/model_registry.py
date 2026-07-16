@@ -25,27 +25,22 @@ REQUIRED_BIM_TABLES = (
 
 
 def ensure_bim_domain_tables(db: Session) -> None:
-    bind = db.get_bind()
-    if bind is None:
-        return
-    for table in (
-        BimModel.__table__,
-        BimModelVersion.__table__,
-        BimElement.__table__,
-        BimStorey.__table__,
-        BimViewState.__table__,
-        BimLinkEdt.__table__,
-        BimLinkApu.__table__,
-        BimLinkPresupuesto.__table__,
-    ):
-        table.create(bind=bind, checkfirst=True)
+    if not bim_tables_ready(db):
+        missing_tables = ", ".join(_missing_bim_tables(db))
+        raise RuntimeError(
+            "El esquema BIM principal no esta disponible. "
+            f"Ejecuta la migracion Alembic de BIM antes de escribir datos. Faltan: {missing_tables}."
+        )
 
 
 def bim_tables_ready(db: Session) -> bool:
-    ensure_bim_domain_tables(db)
+    return not _missing_bim_tables(db)
+
+
+def _missing_bim_tables(db: Session) -> list[str]:
     inspector = inspect(db.bind)
     available_tables = set(inspector.get_table_names())
-    return all(name in available_tables for name in REQUIRED_BIM_TABLES)
+    return [name for name in REQUIRED_BIM_TABLES if name not in available_tables]
 
 
 def list_models_for_project(db: Session, *, project_id: int, company_id: int) -> list[BimModel]:

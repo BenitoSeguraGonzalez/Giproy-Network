@@ -1,0 +1,8 @@
+{
+    "gateway_url": "http://localhost:8082",
+    "models": {
+        "DeepSeek V4 Flash": "opencode/deepseek-v4-flash-free",
+        "Qwen3 Coder": "opencode/qwen3-coder-free",
+        "Nemotron 3 Super": "opencode/nemotron-3-super-free"
+    }
+}

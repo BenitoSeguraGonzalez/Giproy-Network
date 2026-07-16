@@ -1,0 +1,78 @@
+# Git and local editor state
+.git/
+.gitignore_bkp
+.claude/
+.agents/
+.atl/
+.remember/
+.vscode/
+.idea/
+
+# Python local/runtime artifacts
+**/__pycache__/
+**/.pytest_cache/
+**/*.py[cod]
+**/.venv/
+**/venv/
+**/env/
+backend/.runtime_mpp_cache/
+backend/tmp/
+
+# Node build/runtime artifacts
+**/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+config.json
+*API Key*.txt
+EcuadorAPi.txt
+
+# Runtime data and generated logs
+.runtime/
+logs/
+uploads/
+backend/uploads/
+**/*.log
+**/*.jsonl
+fatal_errors.log
+auth_debug.log
+auth_session_trace.jsonl
+backend/auth_debug.log
+backend/auth_session_trace.jsonl
+
+# Database dumps, backups and large local archives
+backups/
+Backup DB Dump/
+DBDump/
+*.sql
+*.dump
+*.bak
+*.gz
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+deploy.tar.gz
+db_backup.json
+
+# Generated reports and analysis artifacts
+backend/graphify-out/
+docs/runtime/*
+!docs/runtime/
+!docs/runtime/WORK_MODE_STATE.json
+
+# Local launchers and Windows-only helpers
+*.lnk
+*.bat
+*.ps1

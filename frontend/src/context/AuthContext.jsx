@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AuthContext } from './authContextInstance';
 export { AuthContext };
-import api from '../api/axiosConfig';
+import { authApi } from '../api/auth';
+import { adminLicensesApi } from '../api/adminLicenses';
 import basesTrabajoApi from '../api/basesTrabajo';
-import { withoutTenant } from '../api/tenant';
 import { getDeviceId } from '../utils/deviceId';
 import { decodeJWT } from '../utils/jwt';
 import {
@@ -12,6 +12,7 @@ import {
     storeAuthRedirectMessage,
 } from '../utils/authSession';
 import { traceSessionEvent } from '../utils/sessionTrace';
+import { dispatchWorkingCompanyChanged } from '../api/tenant';
 
 
 export const AuthProvider = ({ children }) => {
@@ -58,9 +59,7 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('giproy_token');
         if (!token) return null;
 
-        const { data } = await api.post('/login/refresh', {}, {
-            skipTenant: true,
-        });
+        const data = await authApi.refreshAccessToken();
 
         if (data?.access_token) {
             localStorage.setItem('giproy_token', data.access_token);
@@ -72,12 +71,9 @@ export const AuthProvider = ({ children }) => {
 
     const refreshLicenseInfo = useCallback(async (empresaId = null) => {
         try {
-            const config = withoutTenant();
-            if (empresaId) {
-                config.params = { empresa_id: empresaId };
-            }
-            const resLic = await api.get('/admin-licenses/me', config);
-            setLicenseInfo(resLic.data);
+            const params = empresaId ? { empresa_id: empresaId } : {};
+            const data = await adminLicensesApi.getMyLicense(params);
+            setLicenseInfo(data);
         } catch (e) {
             console.warn("No se pudo cargar info de licencia:", e.message);
             setLicenseInfo(null);
@@ -90,13 +86,10 @@ export const AuthProvider = ({ children }) => {
             try {
                 const id = await getDeviceId();
                 setDeviceId(id);
-                console.log('Device ID Initialized:', id);
 
                 // Check ligero no bloqueante: si falla no debe contaminar la consola
                 // con un falso error de conectividad cuando la app ya está operativa.
-                api.get('/usuarios/me', withoutTenant()).then(() => {
-                    console.log('Backend Connectivity: OK');
-                }).catch(() => {
+                authApi.getCurrentUser().catch(() => {
                     // No-op deliberado: checkAuth() resolverá la sesión real enseguida.
                 });
             } catch (error) {
@@ -110,7 +103,7 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('giproy_token');
         if (token) {
             try {
-                const { data } = await api.get('/usuarios/me', withoutTenant());
+                const data = await authApi.getCurrentUser();
                 setUser(data);
 
                 // Sincronizar selectedEmpresa con los datos más recientes de la empresa del usuario
@@ -147,7 +140,7 @@ export const AuthProvider = ({ children }) => {
                         requestId: error?.response?.headers?.['x-request-id'] || null,
                         responseStatus: status,
                     });
-                    console.error("Sesión inválida o expirada durante checkAuth", error);
+                    globalThis.reportClientError?.("Sesión inválida o expirada durante checkAuth", error);
                     clearSessionState(typeof detail === 'string' ? detail : null);
                 } else {
                     traceSessionEvent('frontend_check_auth_failed', {
@@ -173,11 +166,7 @@ export const AuthProvider = ({ children }) => {
         body.append('username', email);
         body.append('password', password);
 
-        const { data } = await api.post('/login/access-token', body, {
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            params,
-            skipTenant: true,
-        });
+        const data = await authApi.login(body, params);
 
         localStorage.setItem('giproy_token', data.access_token);
         const now = Date.now();
@@ -188,6 +177,20 @@ export const AuthProvider = ({ children }) => {
 
 
     const selectEmpresa = useCallback((empresa) => {
+        const isSuperadmin = user?.rol?.toLowerCase() === 'superadministrador';
+        if (isSuperadmin) {
+            const empresaIdsToDeactivate = new Set(
+                [selectedEmpresa?.id, empresa?.id]
+                    .filter((empresaId) => empresaId !== null && empresaId !== undefined)
+                    .map((empresaId) => Number(empresaId))
+            );
+            empresaIdsToDeactivate.forEach((empresaId) => {
+                basesTrabajoApi.deactivateAll(empresaId).catch((error) => {
+                    console.warn("No se pudieron desactivar las bases al cambiar de empresa:", error.message);
+                });
+            });
+        }
+
         setSelectedEmpresa(empresa);
 
         // Cambiar de empresa debe comportarse como un login limpio:
@@ -202,7 +205,8 @@ export const AuthProvider = ({ children }) => {
         } else {
             localStorage.removeItem('giproy_working_company');
         }
-    }, []);
+        dispatchWorkingCompanyChanged(empresa);
+    }, [selectedEmpresa?.id, user?.rol]);
 
     const selectBaseTrabajo = useCallback((base) => {
         // La base de trabajo persiste en memoria y en localStorage
@@ -236,7 +240,7 @@ export const AuthProvider = ({ children }) => {
         // Desactivar todas las bases de trabajo en la BD antes de cerrar sesión.
         // Esto garantiza que al volver a entrar, ninguna base aparezca como activa.
         try {
-            await api.post('/login/logout', {}, { skipTenant: true });
+            await authApi.logout();
         } catch (error) {
             console.warn("No se pudo invalidar la sesión en backend al cerrar sesión:", error.message);
         }
@@ -260,7 +264,6 @@ export const AuthProvider = ({ children }) => {
         let cancelled = false;
 
         const handleExpiration = (message) => {
-            console.log(`Sesión finalizada: ${message || 'expiración de token'}`);
             clearLifecycleTimers();
             clearSessionState(message);
         };
@@ -360,6 +363,34 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('giproy_working_project');
         }
     }, []);
+
+    useEffect(() => {
+        if (!selectedEmpresa) {
+            return;
+        }
+
+        const empresaId = Number(selectedEmpresa.id);
+        const baseEmpresaId = selectedBaseTrabajo?.empresa_id != null
+            ? Number(selectedBaseTrabajo.empresa_id)
+            : null;
+        const projectEmpresaId = activeProject?.empresa_id != null
+            ? Number(activeProject.empresa_id)
+            : null;
+
+        if (baseEmpresaId !== null && baseEmpresaId !== empresaId) {
+            setSelectedBaseTrabajo(null);
+            localStorage.removeItem('giproy_working_base');
+        }
+
+        if (projectEmpresaId !== null && projectEmpresaId !== empresaId) {
+            setActiveProject(null);
+            localStorage.removeItem('giproy_working_project');
+        }
+    }, [
+        activeProject?.empresa_id,
+        selectedBaseTrabajo?.empresa_id,
+        selectedEmpresa,
+    ]);
 
     return (
         <AuthContext.Provider value={{

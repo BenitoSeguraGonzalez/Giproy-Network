@@ -1,0 +1,100 @@
+# ✅ [NOMBRE DEL CLIENTE] – Plataforma SaaS eXcom Consultores
+## Manual de Operación y Transición a Producción (Fase I & II Cierre)
+
+**Versión:** 1.0
+**Fecha de Entrega:** [DD/MM/AAAA]
+**Proyecto Liderado Por:** [Tu Empresa/Equipo]
+
+---
+
+### 👤 1. Lista de Stakeholders y Puntos de Contacto
+
+Esta lista define a las personas responsables (dueños, usuarios clave, soporte) en diferentes aspectos del sistema una vez que el proyecto pasa a la operación continua.
+
+| Rol / Área | Nombre Representativo | Responsabilidad Principal | Nivel de Acceso Típico |
+| :--- | :--- | :--- | :--- |
+| **Patrocinador Ejecutivo** | [Nombre - Directivo Cliente] | Aprobación presupuestaria, toma de decisiones de alto nivel. | Lectura (Reportes) |
+| **Dueño del Producto (Product Owner)** | [Nombre - Usuario Clave/Negocio] | Definición de requerimientos futuros, validación funcional del negocio. | Administrador (Configuración SaaS) |
+| **Soporte Técnico Nivel 2** | [Nombre - Equipo Cliente] | Manejo de fallos operativos día a día, revisión de alertas. | Usuario Avanzado/Administrativo |
+| **Operaciones e Infraestructura** | [Nombre - Equipo TI Interno] | Gestión del servidor, actualizaciones del SO, gestión de backups manuales. | Root / Administrador Docker |
+| **Soporte L1 (Primer Contacto)** | [Nombre - Mesa de Ayuda] | Primer punto de contacto para fallos reportados por usuarios finales. | Usuario Básico |
+
+---
+
+### 🚀 2. Resumen Ejecutivo y Objetivos de la Transición
+
+Este sistema ha sido diseñado y construido para proporcionar una plataforma SaaS robusta, altamente disponible y completamente automatizada. Tras completar las Fases I (Construcción Funcional) y II (Endurecimiento y Validación), el sistema está listo para operar en su capacidad máxima de resiliencia y seguridad.
+
+**Objetivo Principal:** Garantizar la continuidad operativa del servicio con niveles de disponibilidad garantizados mediante monitorización 24/7 y procesos automatizados de recuperación ante desastres (DR).
+
+**Estado Actual:** **OPERACIONAL Y VALIDADO.**
+*   **Riesgo Crítico:** Mitigado.
+*   **Vulnerabilidad Detectada:** Cerrada.
+*   **Próximo Paso:** Transición a la Operación y Mantenimiento Continuo.
+
+---
+
+### ⚙️ 3. Arquitectura Técnica (Visión de Alto Nivel)
+
+La arquitectura utiliza un enfoque *Containerized* (Docker) y desacoplado, lo que garantiza el aislamiento de servicios y una recuperación rápida ante fallos específicos.
+
+#### Componentes Clave:
+1.  **Ingreso Público:** Cloudflare Tunnel ➡ Traefik. Actúa como puerta única segura al servicio.
+2.  **Capa de Servicios:** Docker Compose gestiona la orquestación de microservicios (Portainer, Grafana, Redis).
+3.  **Base de Datos:** PostgreSQL (Servidor dedicado fuera de Docker) - Asegura estabilidad y rendimiento.
+4.  **Monitorización (Observabilidad):** Prometheus + Grafana. Mide el estado de *todos* los componentes en tiempo real (CPU, Memoria, DB, Servicios).
+
+#### Seguridad Estructural:
+*   Acceso mediante subdominios verificados (`*.excomconsultores.com`).
+*   Aislamiento de red mediante Docker networks privadas y Traefik Ingress Rules.
+*   **Seguridad Perimetral:** Implementación de UFW (Firewall), Fail2Ban, y gestión estricta de claves SSH.
+
+---
+
+### 🛡️ 4. Validación y Resiliencia Operacional (Garantías)
+
+Esta sección documenta las pruebas críticas que han sido superadas exitosamente, garantizando la continuidad del negocio.
+
+#### A. Continuidad del Negocio (Business Continuity)
+| Proceso | Herramientas Utilizadas | Frecuencia | Garantía Lograda |
+| :--- | :--- | :--- | :--- |
+| **Backup de Datos** | `pg_dump` / Script dedicado | Diario (Madrugada) | Mantiene el RPO (Punto de Recuperación Objetivo) en [X] horas. |
+| **Backup del Entorno** | Script Docker Backup | Diario (Madrugada) | Mantiene la capacidad de restaurar la configuración completa de los servicios (Docker Volumes). |
+| **Restaurabilidad** | Pruebas Manuales / Automatizadas | Ejecutado y Verificado | Se ha completado una restauración *simulada* exitosa en un entorno de prueba. |
+
+#### B. Seguridad Reforzada (Hardening)
+1.  **Control de Acceso:** El acceso se gestiona mediante `Cloudflare Zero Trust`, eliminando la exposición directa del puerto 22 (SSH). Solo las claves SSH son válidas; no se utiliza autenticación por contraseña.
+2.  **Auditoría de Permisos:** Los permisos de servicio han sido minimizados al nivel necesario (`Principio de Mínimo Privilegio`).
+3.  **Monitorización Activa:** La configuración de alertas (Prometheus Alertmanager/Grafana) está activa para notificar inmediatamente fallos críticos (Ej: DB caída, Disco lleno).
+
+---
+
+### 📋 5. Protocolo Operativo Diario (El Runbook)
+
+Este procedimiento debe ser seguido por el personal de **Operaciones e Infraestructura** ante incidentes o tareas rutinarias.
+
+#### A. Tareas Diarias Programadas
+*   **Verificación:** Revisar el dashboard de Grafana y Prometheus para confirmar que todos los *Targets* (Exporters) están en estado `UP`.
+*   **Validación de Logs:** Verificar la recepción de notificaciones de respaldo (`ntfy`) y revisar `/home/benito/logs/*` para asegurar que los backups se ejecutaron sin errores críticos.
+
+#### B. Flujo de Respuesta a Incidentes (Triage)
+1.  **Detección:** Alerta recibida vía `Prometheus Alertmanager` o `Uptime Kuma`.
+2.  **Clasificación:** Determinar la gravedad (Nivel 1 - Crítico, Nivel 2 - Alto, Nivel 3 - Bajo).
+    *   *Ejemplo:* Servicio caído = **Nivel 1**. Alerta de disco lleno = **Nivel 2**.
+3.  **Resolución (Según Gravedad):** Ejecutar el procedimiento específico detallado en este manual o escalar a Soporte Técnico Nivel 2 si excede las capacidades del personal L1.
+
+---
+
+### ✨ 6. Compromiso de Mantenimiento Continuo y Sostenibilidad
+
+El objetivo no es solo que el sistema funcione hoy, sino garantizar su funcionamiento óptimo durante años. Por lo tanto, la responsabilidad pasa a un ciclo continuo de mejora:
+
+*   **Actualizaciones:** Se mantendrá un calendario trimestral de revisión de parches (SO, Docker Engine, Bases de Datos).
+*   **Optimización:** Monitorear las tendencias de crecimiento para pre-escalar recursos antes de que sea necesario hacerlo bajo presión.
+*   **Revisión de Seguridad:** Revisión anual o bianual del perímetro de seguridad y los roles de acceso.
+
+***
+**[FIRMAS DIGITALES / FÍSICAS]**
+
+**Aprobación por el Cliente:** ____________________________ (Dueño del Producto)
+**Aceptación Técnica por el Proveedor:** __________________ (Equipo Técnico)

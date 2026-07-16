@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Request 
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 import os
@@ -12,10 +13,42 @@ import app.models
 from app.api.api import api_router
 from app.models.usuario import Usuario
 from app.schemas.token import TokenPayload
+from app.models.system_config import SystemConfig
 from app.services.system_maintenance import get_or_create_system_maintenance, is_system_maintenance_active
 
 if settings.CREATE_TABLES_ON_STARTUP:
     Base.metadata.create_all(bind=engine)
+
+# Asegurar que system_config exista para la configuración operativa administrable.
+try:
+    SystemConfig.__table__.create(bind=engine, checkfirst=True)
+except Exception:
+    pass
+
+# Seed defaults in SystemConfig if missing
+_DEFAULT_SYSTEM_CONFIGS = {
+    "FRONTEND_PUBLIC_URL": (
+        "https://giproy-network.excompc.dpdns.org",
+        "URL pública usada para enlaces de activación y validación de registro.",
+    ),
+    "EMAIL_BACKEND": (
+        "mock",
+        "Backend de email transaccional: smtp o mock.",
+    ),
+}
+try:
+    db = None
+    db = SessionLocal()
+    for clave, (valor, descripcion) in _DEFAULT_SYSTEM_CONFIGS.items():
+        existing = db.query(SystemConfig).filter(SystemConfig.clave == clave).first()
+        if not existing:
+            db.add(SystemConfig(clave=clave, valor=valor, descripcion=descripcion))
+    db.commit()
+except Exception:
+    pass
+finally:
+    if db is not None:
+        db.close()
 
 app = FastAPI(
     title=settings.PROJECT_NAME, 
@@ -38,6 +71,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(GZipMiddleware, minimum_size=1024)
+
 app.add_middleware(LicenseMiddleware)
 
 
@@ -53,12 +88,14 @@ MAINTENANCE_EXACT_PATHS = {
     "/",
     "/api/v1/login/access-token",
     "/api/v1/login/logout",
+    "/api/v1/register",
     "/api/v1/usuarios/me",
     "/api/v1/admin-maintenance/active",
     "/api/v1/system-announcements/active",
 }
 
 MAINTENANCE_PREFIX_PATHS = (
+    "/api/v1/register/",
     "/api/v1/password-recovery/",
     "/api/v1/reset-password/",
 )

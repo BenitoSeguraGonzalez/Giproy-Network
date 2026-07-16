@@ -8,14 +8,14 @@ WORKSPACE_CONTEXT_NAME = "__last_workspace_context__"
 
 
 def ensure_bim_view_state_table(db: Session) -> None:
-    bind = db.get_bind()
-    if bind is None:
-        return
-    BimViewState.__table__.create(bind=bind, checkfirst=True)
+    if not bim_view_state_table_ready(db):
+        raise RuntimeError(
+            "La tabla bim_view_states no esta disponible. "
+            "Ejecuta la migracion Alembic de BIM antes de escribir vistas."
+        )
 
 
 def bim_view_state_table_ready(db: Session) -> bool:
-    ensure_bim_view_state_table(db)
     inspector = inspect(db.bind)
     return "bim_view_states" in set(inspector.get_table_names())
 

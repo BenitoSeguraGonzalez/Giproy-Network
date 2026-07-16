@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mockup Proyectos Compacto</title>
+  <style>
+    :root {
+      --orange: #f39200;
+      --blue: #136191;
+      --ink: #1a1a1a;
+      --muted: #6b7280;
+      --bg: #f2f4f7;
+      --line: #e5e7eb;
+      --soft: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+      font-size: 14px;
+    }
+    .app { padding: 14px 18px 18px; }
+    .shell {
+      min-height: calc(100vh - 28px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .topbar {
+      height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 28px;
+      padding: 0 11px;
+      border: 1px solid #fed7aa;
+      border-radius: 999px;
+      background: #fff7ed;
+      color: var(--orange);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    h1 {
+      margin: 0;
+      min-width: 0;
+      flex: 1;
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .iconbar { display: flex; gap: 8px; }
+    .iconbtn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #f8fafc;
+      color: #374151;
+      font-weight: 900;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 2px 7px rgba(15, 23, 42, .08);
+    }
+    .toolbar {
+      min-height: 52px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+    .metrics {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+    }
+    .metric {
+      min-width: 0;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 7px;
+      height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      white-space: nowrap;
+    }
+    .metric .label {
+      color: #9ca3af;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .metric .value {
+      color: var(--ink);
+      font-size: 17px;
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+    }
+    .metric.accent .value { color: var(--blue); }
+    .metric.warn .value { color: var(--orange); }
+    .search {
+      width: min(420px, 31vw);
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fff;
+      color: #9ca3af;
+      font-weight: 700;
+    }
+    .filters {
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fff;
+      padding: 0 13px;
+      color: #4b5563;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .modes {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 3px;
+      border-radius: 14px;
+      background: #eef0f3;
+      box-shadow: inset 2px 2px 5px rgba(15, 23, 42, .12);
+    }
+    .mode {
+      height: 30px;
+      min-width: 82px;
+      border: 0;
+      border-radius: 11px;
+      background: transparent;
+      color: #64748b;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .mode.active {
+      background: #fff;
+      color: var(--blue);
+      box-shadow: 0 3px 10px rgba(15, 23, 42, .14);
+    }
+    .table-wrap { padding: 12px 16px 16px; }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+    th {
+      height: 38px;
+      padding: 0 12px;
+      background: #f8fafc;
+      color: #8b8f99;
+      text-align: left;
+      font-size: 9px;
+      font-weight: 950;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--line);
+    }
+    td {
+      height: 64px;
+      padding: 0 12px;
+      border-bottom: 1px solid #f0f1f3;
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: 0; }
+    .code { font-weight: 900; line-height: 1.25; }
+    .project { font-weight: 950; text-transform: uppercase; }
+    .sub { margin-top: 4px; color: var(--muted); font-size: 12px; font-weight: 650; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      height: 26px;
+      padding: 0 11px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: var(--blue);
+      border: 1px solid #bfdbfe;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .money { font-weight: 950; }
+    .actions { display: flex; justify-content: flex-end; gap: 7px; }
+    .mini {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #f8fafc;
+      display: grid;
+      place-items: center;
+      color: #475569;
+      font-weight: 900;
+    }
+    .height-note {
+      margin: 10px 16px 0;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    @media (max-width: 1280px) {
+      h1 { font-size: 18px; }
+      .toolbar { grid-template-columns: 1fr auto; }
+      .modes { grid-column: 1 / -1; justify-self: end; }
+      .metric:nth-child(4) { display: none; }
+      .search { width: 360px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="shell">
+      <header class="topbar">
+        <span class="badge">▣ Gestión de proyectos</span>
+        <h1>Portafolios de infraestructura e ingeniería</h1>
+        <div class="iconbar">
+          <button class="iconbtn" title="Volver">←</button>
+          <button class="iconbtn" title="Equipo">♙</button>
+          <button class="iconbtn" title="Papelera">⌫</button>
+          <button class="iconbtn" title="Nuevo">＋</button>
+        </div>
+      </header>
+
+      <div class="toolbar">
+        <div class="metrics">
+          <div class="metric accent"><span class="label">Proyectos</span><span class="value">3</span></div>
+          <div class="metric"><span class="label">Revisiones</span><span class="value">3</span></div>
+          <div class="metric warn"><span class="label">En revisión</span><span class="value">0</span></div>
+          <div class="metric"><span class="label">Presupuesto</span><span class="value">93.543,44</span></div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div class="search">⌕ Buscar proyecto, cliente, código...</div>
+          <button class="filters">Filtros</button>
+        </div>
+        <div class="modes">
+          <button class="mode">Calendario</button>
+          <button class="mode active">Lista</button>
+          <button class="mode">Kanban</button>
+        </div>
+      </div>
+
+      <p class="height-note">Altura ocupada por cabecera + KPIs + búsqueda: aprox. 110 px. La tabla empieza casi inmediatamente.</p>
+
+      <main class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:12%">ID / Cód</th>
+              <th>Proyecto</th>
+              <th style="width:14%">Actualización</th>
+              <th style="width:12%">Cliente</th>
+              <th style="width:12%">Estado</th>
+              <th style="width:12%">Presupuesto</th>
+              <th style="width:9%">Plazo</th>
+              <th style="width:9%">Fecha fin</th>
+              <th style="width:10%; text-align:right;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="code">#SantiagoBermeo-<br>2026-001</td>
+              <td><div class="project">Proyecto Prueba Compartir 1</div><div class="sub">Sin descripción registrada · 1 versión</div></td>
+              <td><b>Rev. 0</b><div class="sub">07/07/26 11:20</div></td>
+              <td>Santiago Bermeo</td>
+              <td><span class="pill">Planificación</span></td>
+              <td><div class="money">93.489,01 USD</div><div class="sub">Ref: 93.486,42</div></td>
+              <td><b>180 días</b></td>
+              <td><b>28/11/2026</b></td>
+              <td><div class="actions"><button class="mini">⧉</button><button class="mini">▣</button><button class="mini">⌫</button></div></td>
+            </tr>
+            <tr>
+              <td class="code">#JesúsBenitoSegura<br>TRF11</td>
+              <td><div class="project">Test APUS Optimizado - Recibido 11</div><div class="sub">Test Apus Optimizado · 1 versión</div></td>
+              <td><b>Rev. 0</b><div class="sub">19/06/26 11:23</div></td>
+              <td>Santiago Bermeo</td>
+              <td><span class="pill">Planificación</span></td>
+              <td><div class="money">28,69 USD</div><div class="sub">Ref: 0,00</div></td>
+              <td><b>Sin plazo</b></td>
+              <td><b>19/6/2026</b></td>
+              <td><div class="actions"><button class="mini">⧉</button><button class="mini">▣</button><button class="mini">⌫</button></div></td>
+            </tr>
+            <tr>
+              <td class="code">#JesúsBenitoSegura<br>TRF10</td>
+              <td><div class="project">Test APUS Optimizado - Recibido 10</div><div class="sub">Test Apus Optimizado · 1 versión</div></td>
+              <td><b>Rev. 0</b><div class="sub">19/06/26 11:20</div></td>
+              <td>Santiago Bermeo</td>
+              <td><span class="pill">Planificación</span></td>
+              <td><div class="money">25,74 USD</div><div class="sub">Ref: 0,00</div></td>
+              <td><b>Sin plazo</b></td>
+              <td><b>19/6/2026</b></td>
+              <td><div class="actions"><button class="mini">⧉</button><button class="mini">▣</button><button class="mini">⌫</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </main>
+    </section>
+  </div>
+</body>
+</html>

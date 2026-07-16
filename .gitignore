@@ -2,10 +2,12 @@
 # Python
 # =========================
 __pycache__/
+.pytest_cache/
 *.pyc
 *.pyo
 *.pyd
 *.sqlite3
+*.db
 .venv/
 venv/
 env/
@@ -42,9 +44,19 @@ Thumbs.db
 # =========================
 tmp/
 temp/
+.runtime/
 .runtime_mpp_cache/
 logs/
 *.log
+*.jsonl
+uploads/
+backend/uploads/
+
+# =========================
+# Local backups / restored copies
+# =========================
+GiProy Network/
+backups/
 
 # =========================
 # Database dumps
@@ -53,12 +65,29 @@ DBDump/
 *.sql
 *.dump
 *.bak
+*.gz
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
 
 # =========================
 # AI / generated
 # =========================
 .claude/
+.aider.tags.cache.v4/
 TODO.md
+
+# =========================
+# Local launcher runtime
+# =========================
+tools/launcher/.opencode/node_modules/
+tools/launcher/.opencode/.cache/
+tools/launcher/.opencode/dist/
+tools/launcher/.opencode/build/
+tools/launcher/.opencode/package-lock.json
+tools/launcher/docs/tasks/todo.md
 
 # =========================
 # Binary / shortcuts
@@ -68,4 +97,9 @@ TODO.md
 # =========================
 # Local docs and exports
 # =========================
-docs/runtime/
+docs/runtime/*
+!docs/runtime/
+!docs/runtime/WORK_MODE_STATE.json
+
+# Agent tooling
+.atl/

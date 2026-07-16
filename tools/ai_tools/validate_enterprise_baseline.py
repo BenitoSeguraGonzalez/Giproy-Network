@@ -39,6 +39,8 @@ def check_json(root: Path, results: list[CheckResult]) -> None:
         "docs/runtime/WORK_MODE_STATE.json",
         "docs/repo_hygiene_inventory.json",
         "docs/logging_inventory.json",
+        "docs/frontend_dependency_inventory.json",
+        "docs/frontend_size_inventory.json",
     ):
         path = root / relative
         try:
@@ -131,9 +133,166 @@ def check_frontend(root: Path, results: list[CheckResult]) -> None:
     run_command(
         root,
         results,
+        "frontend:smoke route lazy boundary",
+        [node, "scripts/smoke-classic-route-lazy-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke API boundaries",
+        [node, "scripts/smoke-classic-api-boundaries.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke admin config email API",
+        [node, "scripts/smoke-classic-admin-config-email-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke SaaS empresas boundary",
+        [node, "scripts/smoke-classic-saas-empresas-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke SaaS settings migration",
+        [node, "scripts/smoke-classic-saas-settings-migration.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke SRI RUC registration",
+        [node, "scripts/smoke-classic-sri-ruc-registration.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke company alias display",
+        [node, "scripts/smoke-classic-company-alias-display.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke company logo",
+        [node, "scripts/smoke-classic-company-logo-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke ProjectManager API",
+        [node, "scripts/smoke-classic-project-manager-api-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke Formula Polinomica API",
+        [node, "scripts/smoke-classic-formula-polinomica-api-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke Community API",
+        [node, "scripts/smoke-classic-community-api-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke Marketplace Admin API",
+        [node, "scripts/smoke-classic-marketplace-admin-api-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke Equipo API",
+        [node, "scripts/smoke-classic-equipo-api-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke Presupuesto API",
+        [node, "scripts/smoke-classic-presupuesto-api-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke Cronogramas API",
+        [node, "scripts/smoke-classic-cronogramas-api-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke BasesTrabajo API",
+        [node, "scripts/smoke-classic-bases-trabajo-api-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke DatosProyecto logging",
+        [node, "scripts/smoke-classic-datos-proyecto-logging-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke Proyectos logging",
+        [node, "scripts/smoke-classic-proyectos-logging-boundary.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
         "frontend:smoke no BIM",
         [node, "scripts/smoke-classic-no-bim-contamination.mjs"],
         frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke tenant context",
+        [node, "scripts/smoke-classic-superadmin-tenant-context.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke hierarchy PDF layout",
+        [node, "scripts/smoke-classic-hierarchy-pdf-layout.mjs"],
+        frontend,
+    )
+    run_command(
+        root,
+        results,
+        "frontend:smoke precios unitarios UI",
+        [node, "scripts/smoke-classic-precios-unitarios-ui-guards.mjs"],
+        frontend,
+    )
+
+
+def check_frontend_architecture(root: Path, results: list[CheckResult]) -> None:
+    run_command(
+        root,
+        results,
+        "frontend:architecture guard",
+        [sys.executable, "tools/ai_tools/validate_frontend_architecture.py"],
+        root,
     )
 
 
@@ -153,6 +312,7 @@ def main() -> int:
     results: list[CheckResult] = []
 
     check_json(root, results)
+    check_frontend_architecture(root, results)
     check_backend_compile(root, results)
     check_fastapi_import(root, results)
     if args.include_frontend:

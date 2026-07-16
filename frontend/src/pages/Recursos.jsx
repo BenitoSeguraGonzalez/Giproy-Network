@@ -13,7 +13,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { LiquidButton } from '../components/ui/liquid-button';
-import { AppModalShell, AppModalHeader } from '../components/ui/app-modal';
+import { AppModalShell, AppModalHeader, AppModalBody, AppModalFooter } from '../components/ui/app-modal';
 import BulkDeleteConfirmModal from '../components/precios-unitarios/BulkDeleteConfirmModal';
 import ResourceEditorModal from '../components/precios-unitarios/ResourceEditorModal';
 import ImportFormatHint from '../components/precios-unitarios/ImportFormatHint';
@@ -507,7 +507,7 @@ const Recursos = () => {
                         const resolved = resolveExactCpcMatch(results, code);
                         if (resolved) nextCpcMap[code] = resolved;
                     } catch (error) {
-                        console.error('Error resolviendo CPC en importador de recursos:', error);
+                        globalThis.reportClientError?.('Error resolviendo CPC en importador de recursos:', error);
                     }
                 }
 
@@ -518,7 +518,7 @@ const Recursos = () => {
                         const resolved = resolveExactOmniMatch(results || [], omni.codigo, omni.titulo);
                         if (resolved) nextOmniMap[omni.key] = resolved;
                     } catch (error) {
-                        console.error('Error resolviendo OmniClass en importador de recursos:', error);
+                        globalThis.reportClientError?.('Error resolviendo OmniClass en importador de recursos:', error);
                     }
                 }
 
@@ -546,7 +546,7 @@ const Recursos = () => {
                 const response = await recursosApi.searchCPC(bulkCpcSearchTerm);
                 setBulkCpcResults(response.data || []);
             } catch (error) {
-                console.error('Error buscando CPC para asignacion masiva:', error);
+                globalThis.reportClientError?.('Error buscando CPC para asignacion masiva:', error);
                 setBulkCpcResults([]);
             } finally {
                 setBulkCpcSearching(false);
@@ -563,7 +563,7 @@ const Recursos = () => {
             const filtered = (res.data || []).filter(c => c.id >= 1 && c.id <= 4);
             setCategorias(filtered);
         } catch (error) {
-            console.error("Error fetching categories:", error);
+            globalThis.reportClientError?.("Error fetching categories:", error);
         }
     }, [selectedBaseTrabajo, selectedEmpresa, user?.empresa_id]);
 
@@ -619,7 +619,7 @@ const Recursos = () => {
                 setRecursos([]);
             }
         } catch (error) {
-            console.error("Error cargando subcategorías:", error);
+            globalThis.reportClientError?.("Error cargando subcategorías:", error);
         } finally {
             setLoading(false);
         }
@@ -639,7 +639,7 @@ const Recursos = () => {
             setAllSubcategorias(subcatsRes.data || []);
             setAllRecursos(recursosRes.data || []);
         } catch (error) {
-            console.error('[Recursos] Error construyendo índice global de búsqueda:', error);
+            globalThis.reportClientError?.('[Recursos] Error construyendo índice global de búsqueda:', error);
         } finally {
             setGlobalSearchLoading(false);
         }
@@ -653,7 +653,7 @@ const Recursos = () => {
             const res = await recursosApi.getAll(selectedBaseTrabajo.id, null, empId);
             setRecursos(res.data || []);
         } catch (error) {
-            console.error("[Recursos] Error cargando recursos:", error);
+            globalThis.reportClientError?.("[Recursos] Error cargando recursos:", error);
         } finally {
             setLoading(false);
         }
@@ -666,7 +666,7 @@ const Recursos = () => {
             const res = await recursosApi.getUnidades(selectedCat, selectedBaseTrabajo.id, empId);
             setUnidades(res.data);
         } catch (error) {
-            console.error("Error cargando unidades:", error);
+            globalThis.reportClientError?.("Error cargando unidades:", error);
         }
     }, [selectedBaseTrabajo, selectedCat, selectedEmpresa?.id, user?.empresa_id]);
 
@@ -806,7 +806,7 @@ const Recursos = () => {
                 appAlert("Ortografía correcta.");
             }
         } catch (error) {
-            console.error(error);
+            globalThis.reportClientError?.(error);
         }
     };
 
@@ -1331,7 +1331,7 @@ const Recursos = () => {
                                 ) : visibleRecursos.length === 0 ? (
                                     <div className="text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-zinc-100"><Package className="w-16 h-16 text-zinc-100 mx-auto mb-4" /><h3 className="text-lg font-black uppercase text-zinc-400">Sin recursos</h3><p className="text-sm text-zinc-400 mb-8 font-medium">{cpcFilterMode === 'without_cpc' ? 'No hay recursos sin CPC en este alcance.' : selectedSubcatId ? 'Agregue recursos técnicos a esta subcategoría.' : 'No hay recursos en la categoría activa.'}</p><LiquidButton onClick={openCreate} className="mx-auto">Crear Primer Recurso</LiquidButton></div>
                                 ) : (
-                                    <div className="grid grid-cols-1 gap-4">
+                                    <div className="grid grid-cols-1 gap-2">
                                         {visibleRecursos.map(recurso => (
                                             <motion.div
                                                 key={recurso.id}
@@ -1343,9 +1343,9 @@ const Recursos = () => {
                                                 draggable
                                                 onDragStart={(e) => handleDragStart(e, recurso.id)}
                                                 onDoubleClick={() => openEdit(recurso)}
-                                                className={`group relative flex items-center gap-4 p-5 bg-white border border-zinc-100 rounded-[1.5rem] hover:border-[#F39200]/30 transition-all cursor-pointer ${!recurso.revisado ? 'border-red-100 bg-red-50/10' : ''} ${selectedRecursos.includes(recurso.id) ? 'border-[#F39200] bg-orange-50/20 ring-1 ring-[#F39200]' : ''}`}
+                                                className={`group relative flex items-center gap-3 px-4 py-3 bg-white border border-zinc-100 rounded-xl hover:border-[#F39200]/30 transition-all cursor-pointer ${!recurso.revisado ? 'border-red-100 bg-red-50/10' : ''} ${selectedRecursos.includes(recurso.id) ? 'border-[#F39200] bg-orange-50/20 ring-1 ring-[#F39200]' : ''}`}
                                             >
-                                                <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-2">
                                                     <SoftSelectToggle
                                                         checked={selectedRecursos.includes(recurso.id)}
                                                         onChange={(e) => { e.stopPropagation(); toggleSelect(recurso.id); }}
@@ -1361,7 +1361,7 @@ const Recursos = () => {
                                                     <h4 className={`text-sm font-black tracking-tight leading-tight ${!recurso.revisado ? 'text-red-700' : 'text-zinc-800'}`}>{renderResourceDescription(recurso.descripcion)}</h4>
                                                     {recurso.cpc && <p className="text-[9px] font-bold text-[#F39200] mt-1 italic">CPC: {recurso.cpc.codCPC} - {recurso.cpc.descripcion}</p>}
                                                 </div>
-                                                <div className="text-right px-4 flex flex-col justify-center border-l border-zinc-100 min-w-[140px]">
+                                                <div className="text-right px-3 flex flex-col justify-center border-l border-zinc-100 min-w-[116px]">
                                                     <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Precio Base</p>
                                                     <p className="text-base font-black text-zinc-900 tracking-tighter leading-none">{formatMoneda(recurso.precio)}</p>
                                                 </div>
@@ -1373,15 +1373,15 @@ const Recursos = () => {
                                                                 event.stopPropagation();
                                                                 handleOpenBulkCpc();
                                                             }}
-                                                            className="p-2 bg-orange-50 hover:bg-orange-100 rounded-lg text-[#F39200] shadow-sm border border-orange-100"
+                                                            className="p-1.5 bg-orange-50 hover:bg-orange-100 rounded-lg text-[#F39200] shadow-sm border border-orange-100"
                                                             title={`Asignar CPC a ${selectedRecursos.length} recursos seleccionados`}
                                                         >
                                                             <Tags className="w-4 h-4" />
                                                         </button>
                                                     )}
-                                                    <button onClick={() => handleDuplicate(recurso.id)} className="p-2 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-[#F39200]" title="Duplicar"><Copy className="w-4 h-4" /></button>
-                                                    <button onClick={() => openEdit(recurso)} className="p-2 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-[#F39200]" title="Editar"><Edit2 className="w-4 h-4" /></button>
-                                                    <button onClick={() => handleDelete(recurso.id)} className="p-2 hover:bg-red-50 rounded-lg text-zinc-400 hover:text-red-500" title="Borrar"><Trash2 className="w-4 h-4" /></button>
+                                                    <button onClick={() => handleDuplicate(recurso.id)} className="p-1.5 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-[#F39200]" title="Duplicar"><Copy className="w-4 h-4" /></button>
+                                                    <button onClick={() => openEdit(recurso)} className="p-1.5 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-[#F39200]" title="Editar"><Edit2 className="w-4 h-4" /></button>
+                                                    <button onClick={() => handleDelete(recurso.id)} className="p-1.5 hover:bg-red-50 rounded-lg text-zinc-400 hover:text-red-500" title="Borrar"><Trash2 className="w-4 h-4" /></button>
                                                 </div>
                                             </motion.div>
                                         ))}
@@ -1417,7 +1417,7 @@ const Recursos = () => {
                         isOpen={showBulkCpcModal}
                         onClose={() => setShowBulkCpcModal(false)}
                         size="lg"
-                        zIndex="z-[100]"
+                        zIndex="z-[1000]"
                         panelClassName="max-h-[86vh] flex flex-col"
                     >
                         <AppModalHeader
@@ -1495,7 +1495,7 @@ const Recursos = () => {
                         isOpen={showImportModal}
                         onClose={() => setShowImportModal(false)}
                         size="xl"
-                        zIndex="z-[100]"
+                        zIndex="z-[1000]"
                         panelClassName="max-h-[90vh] flex flex-col"
                     >
                         <AppModalHeader
@@ -1506,7 +1506,7 @@ const Recursos = () => {
                             iconWrapClassName="border-orange-200 bg-orange-50"
                             onClose={() => setShowImportModal(false)}
                         />
-                        <div className="flex-1 overflow-y-auto p-8 bg-[#F8FAFC] custom-scrollbar">
+                        <AppModalBody className="flex-1 overflow-y-auto p-5 md:p-6 bg-[#F8FAFC] custom-scrollbar">
                             <div className="space-y-4">
                                 <ImportFormatHint
                                     tone="blue"
@@ -1638,24 +1638,28 @@ const Recursos = () => {
                                     </div>
                                 )}
                             </div>
-                        </div>
-                        <div className="border-t border-zinc-200 bg-white px-8 py-5">
+                        </AppModalBody>
+                        <AppModalFooter variant="flat" className="border-t border-zinc-200 bg-white px-5 py-4 md:px-6">
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowImportModal(false)}
-                                    className="flex-1 py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest text-zinc-400 hover:bg-zinc-100 transition-colors"
+                                    title="Cancelar"
+                                    aria-label="Cancelar"
+                                    className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700"
                                 >
-                                    Cancelar
+                                    <X className="h-4 w-4" />
                                 </button>
                                 <button
                                     onClick={handleImport}
                                     disabled={validImportRows.length === 0}
-                                    className="flex-1 py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:text-zinc-400 transition-all shadow-lg flex items-center justify-center gap-2"
+                                    title={`Confirmar ${validImportRows.length} registros`}
+                                    aria-label={`Confirmar ${validImportRows.length} registros`}
+                                    className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#F39200] text-white transition hover:bg-[#d97f00] disabled:bg-zinc-200 disabled:text-zinc-400"
                                 >
-                                    <Plus className="w-4 h-4" /> Confirmar {validImportRows.length} Registros
+                                    <Plus className="w-4 h-4" />
                                 </button>
                             </div>
-                        </div>
+                        </AppModalFooter>
                     </AppModalShell>
                 )}
             </AnimatePresence>

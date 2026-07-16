@@ -1,4 +1,5 @@
 const WORKING_COMPANY_STORAGE_KEY = 'giproy_working_company';
+export const WORKING_COMPANY_CHANGED_EVENT = 'giproy:working-company-changed';
 
 const TENANTLESS_EXACT_PATHS = new Set([
     '/',
@@ -44,6 +45,16 @@ export const getStoredWorkingCompany = () => {
 };
 
 export const getStoredWorkingCompanyId = () => getStoredWorkingCompany()?.id ?? null;
+
+export const dispatchWorkingCompanyChanged = (empresa = null) => {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent(WORKING_COMPANY_CHANGED_EVENT, {
+        detail: {
+            empresa,
+            empresa_id: empresa?.id ?? null,
+        },
+    }));
+};
 
 export const withoutTenant = (config = {}) => ({
     ...config,

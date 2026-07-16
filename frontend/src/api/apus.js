@@ -7,10 +7,18 @@ import { withTenantConfig, withTenantParams } from './tenant';
 
 export const apusApi = {
     /** @returns {Promise<{data: Schemas['APUResponse'][]}>} */
-    getAll: (params) => api.get('/apus/', { params: withTenantParams(params) }),
+    getAll: (params = {}, options = {}) => api.get('/apus/', {
+        params: withTenantParams({
+            ...(params || {}),
+            ...(options.summary ? { summary: true } : {}),
+        }),
+    }),
     
     /** @returns {Promise<{data: Schemas['APUResponse']}>} */
-    getById: (id, empresaId = null) => api.get(`/apus/${id}`, withTenantConfig({}, empresaId)),
+    getById: (id, empresaId = null, options = {}) => api.get(`/apus/${id}`, {
+        ...withTenantConfig({}, empresaId),
+        params: withTenantParams(options, empresaId)
+    }),
     /** @returns {Promise<{data: Schemas['APUResponse'][]}>} */
     getBatchDetails: (apuIds, empresaId = null) => api.post('/apus/batch/details', {
         apu_ids: apuIds

@@ -589,6 +589,7 @@ def _extract_detected_resource_metrics(resource: dict) -> dict:
     numbers = [match.group(0).replace(".", "").replace(",", ".") if "," in match.group(0) else match.group(0) for match in number_matches]
 
     unit = resource.get("unidad") or None
+    initial_unit = unit
     quantity = resource.get("cantidad") or None
     price = resource.get("precio") or None
     total = resource.get("total") or None
@@ -600,7 +601,14 @@ def _extract_detected_resource_metrics(resource: dict) -> dict:
     if len(numbers) >= 1 and total in (None, ""):
         total = numbers[-1]
 
-    unit_match = re.search(r"\b(Hora|hora|m3|m2|km|kg|lt|gl|und|ml|m|l|u)\b", working)
+    unit_matches = list(re.finditer(r"\b(Hora|hora|m3|m2|km|kg|lt|gl|und|ml|m|l|u)\b", working))
+    unit_match = None
+    for candidate in reversed(unit_matches):
+        if re.search(r"\d", working[candidate.end():]):
+            unit_match = candidate
+            break
+    if unit_match is None and unit_matches:
+        unit_match = unit_matches[-1]
     if unit in (None, "") and unit_match:
         unit = unit_match.group(1)
     if unit in (None, ""):
@@ -613,12 +621,11 @@ def _extract_detected_resource_metrics(resource: dict) -> dict:
     parenthetical_label_match = re.match(r"^(.+?\([^)]+\))\s+\d", working)
     if parenthetical_label_match:
         label = parenthetical_label_match.group(1).strip()
-    if number_matches:
+    if number_matches and not unit_match and initial_unit in (None, ""):
         first_number_index = number_matches[0].start()
         if (
             first_number_index > 0
             and not parenthetical_label_match
-            and (not unit_match or first_number_index < unit_match.start())
         ):
             label_candidate = working[:first_number_index].strip()
             if len(label_candidate) >= 3:
@@ -670,6 +677,88 @@ def _normalize_detected_resource(resource: dict) -> dict:
     normalized["total"] = metrics.get("total") or normalized.get("total")
     normalized["weight_percentage"] = metrics.get("weight_percentage") or normalized.get("weight_percentage")
     return normalized
+
+
+def _resource_description_needs_split_prefix(value: str) -> bool:
+    description = _clean_text(value).lower()
+    if not description:
+        return True
+    if re.fullmatch(r"(hora|m3|m2|m|km|kg|lt|l|gl|u|und|ml)(?:\s+\d+(?:[.,]\d+)*)*", description):
+        return True
+    return re.fullmatch(r"(equipo|material|mano de obra|transporte)\s+[a-z]{3}-\d{3,}", description) is not None
+
+
+def _looks_like_split_resource_label(line: str) -> bool:
+    cleaned = _clean_text(line)
+    if not cleaned:
+        return False
+    upper = cleaned.upper()
+    if any(token in upper for token in ["CODIGO", "CÓDIGO", "DESCRIPCION", "DESCRIPCIÓN", "SUBTOTAL", "TOTAL", "INDIRECTOS"]):
+        return False
+    if re.match(r"^[A-Z0-9]{3,20}\s+", cleaned) and _is_valid_resource_code(cleaned.split(" ", 1)[0]):
+        return False
+    letter_count = len(re.findall(r"[A-Za-zÁÉÍÓÚáéíóúÑñ]", cleaned))
+    return letter_count >= 3
+
+
+def _split_resource_label_fragment(line: str) -> str:
+    cleaned = _clean_text(line)
+    if not cleaned:
+        return ""
+    unit_match = re.search(r"\b(Hora|hora|m3|m2|km|kg|lt|gl|und|ml|m|l|u)\b", cleaned)
+    if unit_match and unit_match.start() > 0:
+        return cleaned[:unit_match.start()].strip(" -")
+    number_match = re.search(r"\s\d+(?:[.,]\d+)?", cleaned)
+    if number_match and number_match.start() > 0:
+        return cleaned[:number_match.start()].strip(" -")
+    return cleaned.strip(" -")
+
+
+def _apply_split_resource_label(resource: dict, prefix: str) -> dict:
+    prefix = _clean_text(prefix)
+    if not prefix or not _resource_description_needs_split_prefix(resource.get("descripcion")):
+        return resource
+    merged = dict(resource)
+    merged["descripcion"] = f"{prefix} {resource.get('descripcion') or ''}".strip()
+    return _normalize_detected_resource(merged)
+
+
+def _merge_split_resource_rows(lines: list[str]) -> list[str]:
+    merged_lines: list[str] = []
+    index = 0
+    unit_pattern = rf"(?:{SOCE_BUDGET_UNIT_PATTERN}|Hora)"
+
+    while index < len(lines):
+        current = _clean_text(lines[index])
+        next_line = _clean_text(lines[index + 1]) if index + 1 < len(lines) else ""
+        following_line = _clean_text(lines[index + 2]) if index + 2 < len(lines) else ""
+
+        code_unit_match = re.match(rf"^([A-Z0-9]{{3,20}})\s+({unit_pattern})\s+(.+)$", next_line, re.IGNORECASE)
+        suffix_numbers = list(re.finditer(r"\d+(?:[.,]\d+)?%?", following_line))
+
+        if (
+            current
+            and len(re.findall(r"[A-Za-zÁÉÍÓÚáéíóúÑñ]", current)) >= 3
+            and not any(token in current.upper() for token in ["CODIGO", "CÓDIGO", "DESCRIPCION", "DESCRIPCIÓN", "SUBTOTAL", "TOTAL", "INDIRECTOS"])
+            and code_unit_match
+            and _is_valid_resource_code(code_unit_match.group(1))
+            and len(suffix_numbers) >= 3
+        ):
+            suffix_metric_start = suffix_numbers[-3].start()
+            suffix_label = following_line[:suffix_metric_start].strip()
+            suffix_metrics = following_line[suffix_metric_start:].strip()
+            if suffix_label:
+                merged_lines.append(
+                    f"{code_unit_match.group(1)} {current} {suffix_label} "
+                    f"{code_unit_match.group(2)} {code_unit_match.group(3)} {suffix_metrics}"
+                )
+                index += 3
+                continue
+
+        merged_lines.append(lines[index])
+        index += 1
+
+    return merged_lines
 
 
 def _merge_unique_items(items: list[dict], signature_builder) -> tuple[list[dict], int]:
@@ -1951,10 +2040,12 @@ def _parse_detected_resource_line(line: str, current_section: str, current_apu: 
 
 
 def _extract_apu_resource_pairs(lines: list[str]) -> tuple[list[dict], list[dict]]:
+    lines = _merge_split_resource_rows(lines)
     apus: list[dict] = []
     resources: list[dict] = []
     current_apu: dict | None = None
     current_section = ""
+    pending_resource_label = ""
 
     for raw_line in lines:
         line = _clean_text(raw_line)
@@ -1979,6 +2070,7 @@ def _extract_apu_resource_pairs(lines: list[str]) -> tuple[list[dict], list[dict
                 "nested_apu_count": 0,
             }
             current_section = ""
+            pending_resource_label = ""
             continue
 
         if current_apu is None:
@@ -2015,21 +2107,33 @@ def _extract_apu_resource_pairs(lines: list[str]) -> tuple[list[dict], list[dict
             or upper.startswith("MANO DE OBRA ")
         ):
             current_section = upper.split(" PESO ", 1)[0].title()
+            pending_resource_label = ""
             continue
 
         if upper.startswith("SUBTOTAL DE "):
             current_section = ""
+            pending_resource_label = ""
             continue
 
         if current_section:
             resource = _parse_detected_resource_line(line, current_section, current_apu, len(resources) + 1)
             if resource:
+                resource = _apply_split_resource_label(resource, pending_resource_label)
+                pending_resource_label = ""
                 resources.append(resource)
                 current_apu["resources"].append(resource)
                 current_apu["resource_count"] += 1
                 if resource.get("is_nested_apu"):
                     current_apu["nested_apu_links"].append(resource["codigo"])
                     current_apu["nested_apu_count"] += 1
+                continue
+
+            if _looks_like_split_resource_label(line):
+                fragment = _split_resource_label_fragment(line)
+                if fragment:
+                    pending_resource_label = f"{pending_resource_label} {fragment}".strip()
+            else:
+                pending_resource_label = ""
 
     if current_apu:
         apus.append(current_apu)
@@ -2043,6 +2147,7 @@ def _extract_apu_resource_pairs(lines: list[str]) -> tuple[list[dict], list[dict
             if candidate:
                 apu_signatures.setdefault(candidate, []).append(apu["temp_id"])
     for resource in resources:
+        parent_temp_id = str(resource.get("apu_temp_id") or "").strip()
         code = str(resource.get("codigo") or "").strip()
         desc_signature = _normalize_signature_fragment(str(resource.get("descripcion") or ""))
         semantic_desc_signature = _build_semantic_phrase_key(resource.get("descripcion"))
@@ -2051,7 +2156,7 @@ def _extract_apu_resource_pairs(lines: list[str]) -> tuple[list[dict], list[dict
             matched_apu = apu_signatures[desc_signature][0]
         if matched_apu is None and semantic_desc_signature and len(apu_signatures.get(semantic_desc_signature) or []) == 1:
             matched_apu = apu_signatures[semantic_desc_signature][0]
-        if matched_apu:
+        if matched_apu and matched_apu != parent_temp_id:
             resource["is_nested_apu"] = True
             resource["nested_apu_target"] = matched_apu
 
@@ -2088,6 +2193,7 @@ def _resolve_nested_apu_links(apus: list[dict], resources: list[dict]) -> tuple[
         code = str(resource.get("codigo") or "").strip()
         if not resource.get("is_nested_apu"):
             continue
+        parent_temp_id = str(resource.get("apu_temp_id") or "").strip()
         desc_signature = _normalize_signature_fragment(str(resource.get("descripcion") or ""))
         semantic_desc_signature = _build_semantic_phrase_key(resource.get("descripcion"))
         if code:
@@ -2134,6 +2240,11 @@ def _resolve_nested_apu_links(apus: list[dict], resources: list[dict]) -> tuple[
                     }
                 )
                 continue
+        if target_apu is not None and str(target_apu.get("temp_id") or "").strip() == parent_temp_id:
+            resource["is_nested_apu"] = False
+            resource.pop("nested_apu_target", None)
+            resource.pop("nested_apu_status", None)
+            continue
         if target_apu is None:
             if resource.get("is_nested_apu"):
                 resource["nested_apu_status"] = "pending_reference"

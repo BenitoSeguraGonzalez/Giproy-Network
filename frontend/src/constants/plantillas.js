@@ -36,8 +36,49 @@ export const PLANTILLAS_OPCIONES = {
         label: "Cronograma Valorado",
         options: [
             { id: "001", nombre: "001 - Cronograma Valorado General" },
-            { id: "002", nombre: "002 - Cronograma Valorado SERCOP" },
-            { id: "003", nombre: "003 - Curva S" }
+            { id: "002", nombre: "002 - Cronograma Valorado SERCOP" }
+        ]
+    },
+    cronograma_gantt: {
+        label: "Cronograma Gantt",
+        options: [
+            { id: "001", nombre: "001 - Reporte Gantt" }
+        ]
+    },
+    cronograma_integrado: {
+        label: "Cronograma Integrado",
+        options: [
+            { id: "001", nombre: "001 - Gantt + Valorado + Flujo de Caja" }
+        ]
+    },
+    cronograma_flujo_caja: {
+        label: "Cronograma Flujo de Caja",
+        options: [
+            { id: "001", nombre: "001 - Flujo de Caja" }
+        ]
+    },
+    cronograma_pareto: {
+        label: "Cronograma Pareto Temporal",
+        options: [
+            { id: "001", nombre: "001 - Pareto Temporal" }
+        ]
+    },
+    cronograma_uso_recursos: {
+        label: "Cronograma Uso de Recursos",
+        options: [
+            { id: "001", nombre: "001 - Uso de Recursos Cronograma" }
+        ]
+    },
+    cronograma_uso_recursos_rango: {
+        label: "Cronograma Uso de Recursos por Rango",
+        options: [
+            { id: "001", nombre: "001 - Uso de Recursos Cronograma" }
+        ]
+    },
+    curva_s: {
+        label: "Curva S",
+        options: [
+            { id: "001", nombre: "001 - Lamina Curva S" }
         ]
     },
     edo: {
@@ -80,13 +121,15 @@ export const PLANTILLAS_OPCIONES = {
         label: "Desagregación técnologica",
         options: [
             { id: "001", nombre: "001 - VAE Proyecto - General" },
-            { id: "002", nombre: "002 - VAE Proyecto - SERCOP" }
+            { id: "002", nombre: "002 - VAE Proyecto - SERCOP" },
+            { id: "003", nombre: "003 - VAE APU" }
         ]
     },
     formulas_polinomicas: {
         label: "Formulas Polinómicas",
         options: [
-            { id: "001", nombre: "001 - Formula Polinomica" }
+            { id: "001", nombre: "001 - Formula Polinomica" },
+            { id: "002", nombre: "002 - Formula Polinómica - sin desglose de equipo" }
         ]
     }
 };

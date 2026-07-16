@@ -8,6 +8,7 @@ from app.schemas.cronograma_trabajo import (
     CronogramaTrabajoDependency,
     CronogramaTrabajoLinea,
 )
+from app.services import cronograma_trabajo as cronograma_trabajo_module
 from app.services.cronograma_trabajo import cronograma_trabajo_service
 
 
@@ -275,7 +276,28 @@ def test_simple_calendar_builds_auto_subbars_across_workday_cut():
     assert {segment["source"] for segment in segments} == {"gantt_workday_auto_segment"}
 
 
-def test_simple_calendar_fs_obeys_external_holiday_before_remaining_workday():
+def test_workday_auto_segments_do_not_return_partial_sequences(monkeypatch):
+    config = CronogramaTrabajoConfig(
+        hora_inicio_jornada=8,
+        jornada_laboral_horas=8,
+        dias_laborables_semana=5,
+    )
+    monkeypatch.setattr(cronograma_trabajo_module, "MAX_WORKDAY_AUTO_SEGMENTS", 2)
+
+    segments = cronograma_trabajo_service._build_workday_auto_segments(
+        budget_line_id="28",
+        start_date=datetime(2026, 4, 30, 8, 0),
+        duration_days=5,
+        config=config,
+        holiday_dates=set(),
+    )
+
+    assert segments == []
+
+
+def test_simple_calendar_fs_with_zero_lag_preserves_exact_anchor_even_on_holiday():
+    """TASK-1859: FS+0 retorna source_finish exacto (anclaje puro) aunque caiga en feriado.
+    El ajuste calendario solo aplica al end_date via _build_finish_from_start."""
     config = CronogramaTrabajoConfig(
         hora_inicio_jornada=8,
         jornada_laboral_horas=8,
@@ -298,7 +320,19 @@ def test_simple_calendar_fs_obeys_external_holiday_before_remaining_workday():
         holiday_dates=holidays,
     )
 
-    assert target_start == datetime(2026, 5, 4, 8, 0)
+    # TASK-1859: anclaje exacto, no alineado a workday
+    assert target_start == datetime(2026, 4, 30, 13, 47)
+
+    # El end_date SI respeta calendario al consumir duracion desde el anclaje.
+    # _build_finish_from_start alinea el start a workday antes de consumir horas:
+    # 04/05 08:00 + 0.3375d*8h = 04/05 10:42
+    target_finish = cronograma_trabajo_service._build_finish_from_start(
+        target_start,
+        0.3375,
+        config,
+        holiday_dates=holidays,
+    )
+    assert target_finish == datetime(2026, 5, 4, 10, 42)
 
 
 def test_workday_auto_segments_replace_renewable_seed_but_keep_manual_subbars():

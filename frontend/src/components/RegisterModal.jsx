@@ -1,65 +1,154 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Mail, Lock, UserPlus, CheckCircle2, AlertCircle } from 'lucide-react';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
+import { X, CheckCircle2, AlertCircle } from 'lucide-react';
 import { LiquidButton } from './ui/liquid-button';
 import { APP_MODAL_CLOSE_BUTTON_CLASS } from './ui/app-modal';
-import api from '../api/axiosConfig';
+import { maestrosApi } from '../api/maestros';
+import { publicAuthApi } from '../api/publicAuth';
 import PersonnelFormFields from './PersonnelFormFields';
+import MotionScrollbar from './ui/MotionScrollbar';
 import LogoGiproyCompleto from '../assets/LogoGiproyCompleto.png';
-import { formatInternationalPhone, isValidPhone, resolveCountryPhonePrefix } from '../utils/phoneFormatter';
+import { appAlert } from '../utils/appDialog';
+import { formatInternationalPhone, getInternationalPhoneValidationMessage, resolveCountryPhonePrefix } from '../utils/phoneFormatter';
+import { validarRucEcuador, requiereValidacionRucEcuador } from '../utils/rucValidator';
 
 const MotionDiv = motion.div;
 
+const REGISTER_REQUIRED_FIELDS = [
+    ['email', 'Email (login)'],
+    ['password', 'Contraseña'],
+    ['confirmPassword', 'Confirmar contraseña'],
+    ['ruc', 'Identificación fiscal / documento'],
+    ['nombres', 'Nombres'],
+    ['apellidos', 'Apellidos'],
+    ['nacionalidad', 'Nacionalidad'],
+    ['profesion', 'Profesión / cargo'],
+    ['pais', 'País'],
+    ['provincia', 'Provincia'],
+    ['canton', 'Cantón'],
+    ['ciudad', 'Ciudad'],
+    ['movil', 'Móvil de contacto'],
+];
+
+const isBlank = (value) => String(value ?? '').trim().length === 0;
+
+const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value ?? '').trim());
+
 const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
+    const formScrollRef = useRef(null);
     const [formData, setFormData] = useState({
         nombre_completo: '',
         email: '',
         password: '',
         confirmPassword: '',
         // Campos extendidos
-        ruc: '', nombres: '', apellidos: '', alias: '', nacionalidad: '', profesion: '', ciudad: '', provincia: '', canton: '', pais: '', movil: '',
+        ruc: '', nombres: '', apellidos: '', alias: '', empresa_alias: '', nacionalidad: '', profesion: '', ciudad: '', provincia: '', canton: '', pais: 'Ecuador', movil: '',
         acepta_politica_privacidad: false, acepta_politicas_comunicacion: false, autoriza_publicidad: false
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [step, setStep] = useState(1); // 1: Form, 2: Success
+    const [rucVerified, setRucVerified] = useState(false);
+    const [rucLookup, setRucLookup] = useState(null);
+    const [certificateCode, setCertificateCode] = useState('');
+    const [manualReviewStatus, setManualReviewStatus] = useState(null);
+    const isRucRequired = requiereValidacionRucEcuador(formData.pais);
+    const canSubmit = !isLoading
+        && !isBlank(formData.email) && isValidEmail(formData.email)
+        && !isBlank(formData.password)
+        && !isBlank(formData.ruc) && (!isRucRequired || rucVerified)
+        && formData.password === formData.confirmPassword
+        && formData.acepta_politica_privacidad
+        && formData.acepta_politicas_comunicacion
+        && formData.autoriza_publicidad;
     const [paises, setPaises] = useState([]);
+    const [countryDetected, setCountryDetected] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
+            const approvedToken = new URLSearchParams(window.location.search).get('ruc_verification_token');
+            if (approvedToken) {
+                setFormData(prev => ({ ...prev, ruc_verification_token: approvedToken }));
+            }
+            setFormData(prev => (isBlank(prev.pais) ? { ...prev, pais: 'Ecuador' } : prev));
             const fetchPaises = async () => {
                 try {
-                    const response = await api.get('/paises/');
-                    setPaises(response.data);
+                    const data = await maestrosApi.getPaises();
+                    setPaises(Array.isArray(data) ? data : []);
                 } catch (err) {
-                    console.error('Error fetching paises:', err);
+                    setPaises([]);
                 }
             };
             fetchPaises();
+
+            setFormData(prev => ({ ...prev, pais: 'Ecuador' }));
+            setCountryDetected(true);
         }
     }, [isOpen]);
 
-    const handleChange = (e) => {
-        const { id, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [id]: type === 'checkbox' ? checked : value
-        }));
+    const handleManualReview = async () => {
+        setError(null);
+        if (!isValidEmail(formData.email) || certificateCode.trim().length < 4) {
+            setError('Indica el correo del registro y el código del certificado del SRI.');
+            return;
+        }
+        setIsLoading(true);
+        try {
+            const result = await publicAuthApi.requestRucManualReview({
+                ruc: formData.ruc,
+                email: formData.email,
+                certificate_code: certificateCode.trim(),
+            });
+            setManualReviewStatus(result.message || 'En revisión manual.');
+        } catch (err) {
+            setError(err.response?.data?.detail || 'No se pudo registrar la solicitud de revisión.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
 
+        const missingFields = REGISTER_REQUIRED_FIELDS
+            .filter(([key]) => isBlank(formData[key]))
+            .map(([, label]) => label);
+
+        if (missingFields.length > 0) {
+            await appAlert({
+                title: 'Datos incompletos',
+                message: `Completa todos los datos obligatorios antes de crear la empresa. Falta: ${missingFields.join(', ')}. Los alias de usuario y empresa son opcionales.`,
+                tone: 'warning',
+                size: 'wide',
+            });
+            return;
+        }
+
+        if (!isValidEmail(formData.email)) {
+            await appAlert({
+                title: 'Email inválido',
+                message: 'El campo Email (login) debe contener una dirección de correo válida.',
+                tone: 'warning',
+            });
+            return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
-            setError("Las contraseñas no coinciden");
+            await appAlert({
+                title: 'Credenciales no coinciden',
+                message: 'La contraseña y su confirmación deben ser iguales.',
+                tone: 'warning',
+            });
             return;
         }
 
         if (!formData.acepta_politica_privacidad) {
-            setError("Debe aceptar la política de privacidad");
+            await appAlert({
+                title: 'Política requerida',
+                message: 'Debe aceptar la política de privacidad para crear la empresa y su usuario administrador.',
+                tone: 'warning',
+            });
             return;
         }
 
@@ -67,24 +156,39 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
         try {
             // Eliminar confirmPassword antes de enviar al backend
             const { confirmPassword: _, ...submitData } = formData;
+            submitData.nombre_completo = `${submitData.nombres || ''} ${submitData.apellidos || ''}`.trim();
             if (submitData.movil) {
-                if (!isValidPhone(submitData.movil)) {
-                    setError("El móvil debe tener un formato válido");
+                const mobileValidationMessage = getInternationalPhoneValidationMessage(submitData.movil, submitData.pais);
+                if (mobileValidationMessage) {
+                    await appAlert({
+                        title: 'Móvil inválido',
+                        message: mobileValidationMessage,
+                        tone: 'warning',
+                    });
                     setIsLoading(false);
                     return;
                 }
                 submitData.movil = formatInternationalPhone(submitData.movil, resolveCountryPhonePrefix(submitData.pais));
             }
-            const response = await api.post('/register', submitData);
+
+            // Si el país es Ecuador, el RUC debe estar validado estructural y externamente
+            if (requiereValidacionRucEcuador(submitData.pais)) {
+                const rucCheck = validarRucEcuador(submitData.ruc);
+                if (!rucCheck.valido) {
+                    await appAlert({
+                        title: 'RUC inválido',
+                        message: rucCheck.mensaje,
+                        tone: 'warning',
+                    });
+                    setIsLoading(false);
+                    return;
+                }
+            }
+            await publicAuthApi.register(submitData);
 
             setStep(2);
-            // Small delay before logging in automatically or notifying parent
-            setTimeout(() => {
-                onRegisterSuccess(response.data.access_token);
-            }, 2000);
 
         } catch (err) {
-            console.error("Registration error:", err);
             let errorMessage = "Error al crear la cuenta. Intente de nuevo.";
 
             if (err.response?.data?.detail) {
@@ -146,40 +250,60 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
                                 )}
 
                                 <form onSubmit={handleSubmit} className="space-y-8">
-                                    <div className="max-h-[50vh] overflow-y-auto pr-4 custom-scrollbar">
-                                        <PersonnelFormFields
-                                            formData={formData}
-                                            setFormData={setFormData}
-                                            paises={paises}
-                                        />
-
-                                        <div className="mt-8 pt-8 border-t border-zinc-100 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="confirmPassword" name="password" className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1 italic">Confirmar Contraseña</Label>
-                                                <Input
-                                                    id="confirmPassword"
-                                                    type="password"
-                                                    required
-                                                    value={formData.confirmPassword}
-                                                    onChange={handleChange}
-                                                    className="h-12 rounded-xl bg-zinc-50 border-zinc-200"
-                                                />
-                                            </div>
+                                    <div className="relative">
+                                        <div
+                                            ref={formScrollRef}
+                                            className="giproy-motion-scrollbar-hide max-h-[52vh] overflow-y-auto pr-5"
+                                        >
+                                            <PersonnelFormFields
+                                                formData={formData}
+                                                setFormData={setFormData}
+                                                paises={paises}
+                                                publicRegister
+                                                countryLocked={countryDetected}
+                                                onRucStatusChange={(verified, lookup) => {
+                                                    setRucVerified(verified);
+                                                    setRucLookup(lookup);
+                                                    if (verified) setManualReviewStatus(null);
+                                                }}
+                                            />
+                                            {rucLookup?.requires_manual_review && (
+                                                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                                                    <p className="text-xs font-black text-amber-900">En revisión manual</p>
+                                                    <p className="mt-1 text-[11px] text-amber-800">El RUC no consta en la importación vigente. Indica el código del certificado SRI; no adjuntes documentos.</p>
+                                                    <input
+                                                        value={certificateCode}
+                                                        onChange={(event) => setCertificateCode(event.target.value)}
+                                                        placeholder="Código del certificado SRI"
+                                                        className="mt-3 h-10 w-full rounded-lg border border-amber-200 bg-white px-3 text-xs outline-none focus:ring-2 focus:ring-amber-300"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleManualReview}
+                                                        disabled={isLoading}
+                                                        className="mt-3 h-10 rounded-lg bg-amber-700 px-4 text-[11px] font-black uppercase tracking-wide text-white disabled:opacity-50"
+                                                    >
+                                                        Solicitar verificación
+                                                    </button>
+                                                    {manualReviewStatus && <p className="mt-3 text-[11px] font-bold text-amber-900">{manualReviewStatus}</p>}
+                                                </div>
+                                            )}
                                         </div>
+                                        <MotionScrollbar targetRef={formScrollRef} className="right-0" />
                                     </div>
 
                                     <div className="pt-4">
                                         <LiquidButton
                                             type="submit"
-                                            className="w-full bg-[#F39200] hover:bg-[#E94E1B] text-white font-black uppercase tracking-widest h-14 rounded-2xl shadow-xl shadow-orange-500/10 active:scale-[0.98] transition-all text-sm"
-                                            disabled={isLoading}
+                                            className={`w-full text-white font-black uppercase tracking-widest h-14 rounded-2xl shadow-xl transition-all text-sm ${canSubmit ? 'bg-[#F39200] hover:bg-[#E94E1B] shadow-orange-500/10 active:scale-[0.98]' : 'bg-zinc-300 cursor-not-allowed shadow-zinc-500/10'}`}
+                                            disabled={!canSubmit}
                                         >
                                             {isLoading ? 'PROCESANDO REGISTRO...' : 'CREAR MI CUENTA AHORA'}
                                         </LiquidButton>
                                     </div>
 
                                     <p className="text-[10px] text-center text-zinc-400 font-bold uppercase tracking-tighter leading-relaxed px-4">
-                                        Al registrarte, se creará una cuenta personal con 1 año de validez y una empresa exclusiva para tu gestión bajo el modelo SaaS.
+                                        Al registrarte, se creará una empresa con 1 año de validez y tu cuenta quedará como administrador inicial bajo el modelo SaaS.
                                     </p>
                                 </form>
                             </>
@@ -194,8 +318,14 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
                                 </MotionDiv>
                                 <h2 className="text-2xl font-black uppercase tracking-tight text-zinc-900">¡Cuenta Creada!</h2>
                                 <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest mt-2 px-8">
-                                    Bienvenido a la red GIPROY. Iniciando sesión automáticamente...
+                                    Revisa el correo del administrador para validar el email y activar la empresa.
                                 </p>
+                                <LiquidButton
+                                    onClick={onClose}
+                                    className="mt-8 bg-[#1A1A1A] text-white h-12 px-8 font-black uppercase tracking-widest rounded-xl"
+                                >
+                                    Entendido
+                                </LiquidButton>
                             </div>
                         )}
                     </div>

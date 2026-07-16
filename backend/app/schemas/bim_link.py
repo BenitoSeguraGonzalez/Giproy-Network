@@ -20,6 +20,14 @@ class BimElementOptionResponse(BaseModel):
     metadata_json: Optional[dict] = None
 
 
+class BimElementPageResponse(BaseModel):
+    items: list[BimElementOptionResponse]
+    total: int
+    page: int
+    page_size: int
+    pages: int
+
+
 class BimLinkResponse(BaseModel):
     id: int
     target_type: Literal["edt", "apu", "presupuesto"]

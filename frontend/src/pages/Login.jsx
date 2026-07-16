@@ -13,8 +13,9 @@ import { Eye, EyeOff, UserPlus, ArrowLeft, Building2, ChevronRight, CheckCircle2
 import LogoGiproyCompleto from '../assets/LogoGiproyCompleto.png';
 import RegisterModal from '../components/RegisterModal';
 import { appAlert } from '../utils/appDialog';
-import api from '../api/axiosConfig';
+import { publicAuthApi } from '../api/publicAuth';
 import { resolveMediaUrl } from '../utils/mediaUrl';
+import { getCompanyDisplayName } from '../utils/companyDisplayName';
 
 const Login = () => {
     const [step, setStep] = useState('email'); // 'email', 'selection', 'password'
@@ -25,6 +26,13 @@ const Login = () => {
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('register') === '1' && params.get('ruc_verification_token')) {
+            setIsRegisterOpen(true);
+        }
+    }, []);
     
     const [accounts, setAccounts] = useState([]);
     const [selectedAccount, setSelectedAccount] = useState(null);
@@ -57,8 +65,7 @@ const Login = () => {
         setError(null);
         setIsLoading(true);
         try {
-            const res = await api.get('/auth/accounts-by-email', { params: { email: email.toLowerCase() } });
-            const foundAccounts = res.data;
+            const foundAccounts = await publicAuthApi.getAccountsByEmail(email.toLowerCase());
 
             if (foundAccounts.length === 0) {
                 setError("No se encontró ninguna cuenta con este correo electrónico.");
@@ -95,7 +102,7 @@ const Login = () => {
             }
             navigate('/');
         } catch (err) {
-            console.error("Login component error:", err);
+            globalThis.reportClientError?.("Login component error:", err);
             const detail = err.response?.data?.detail;
             const message = typeof detail === 'string' ? detail : (Array.isArray(detail) ? JSON.stringify(detail) : "Clave incorrecta. Por favor, verifique sus credenciales.");
             setError(message);
@@ -204,7 +211,7 @@ const Login = () => {
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-xs font-black uppercase text-[#1A1A1A] truncate">{acc.empresa_nombre}</p>
+                                <p className="text-xs font-black uppercase text-[#1A1A1A] truncate">{getCompanyDisplayName(acc)}</p>
                                 <p className={`text-[8px] font-bold uppercase tracking-widest ${acc.activo ? 'text-zinc-400' : 'text-red-500'}`}>
                                     {acc.activo ? 'Cuenta Activa' : 'Cuenta Suspendida'}
                                 </p>
@@ -236,7 +243,7 @@ const Login = () => {
                             )}
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black uppercase text-[#1A1A1A] leading-tight truncate max-w-[140px]">{selectedAccount?.empresa_nombre}</span>
+                            <span className="text-[10px] font-black uppercase text-[#1A1A1A] leading-tight truncate max-w-[140px]">{getCompanyDisplayName(selectedAccount)}</span>
                             <span className="text-[8px] font-bold text-zinc-400 truncate max-w-[140px]">{email}</span>
                         </div>
                     </div>

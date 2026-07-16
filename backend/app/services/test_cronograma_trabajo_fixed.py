@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime
 from unittest.mock import Mock, patch
 from app.services.cronograma_trabajo import cronograma_trabajo_service
 from app.models.presupuesto import Presupuesto
@@ -402,6 +403,7 @@ def test_build_response_skips_budget_price_refresh_on_read(mock_db):
     proyecto = Mock()
     proyecto.id = 20
     proyecto.empresa_id = 30
+    proyecto.fecha_inicio = None
 
     mock_db.query.return_value.filter.return_value.first.side_effect = [
         schedule,
@@ -432,6 +434,103 @@ def test_build_response_skips_budget_price_refresh_on_read(mock_db):
         cronograma_trabajo_service._build_response(mock_db, schedule)
 
     assert mock_build_rows.call_args.kwargs["refresh_budget_prices"] is False
+
+
+def test_sync_config_with_external_project_start_shifts_gantt_when_datos_proyecto_changes():
+    config = cronograma_trabajo_service._resolve_config(
+        {
+            "fecha_inicio_proyecto": "2026-01-12T08:00:00",
+            "fecha_inicio_referencia_proyecto": "2026-01-12T08:00:00",
+            "fecha_inicio_autoridad": "gantt",
+        }
+    )
+    detail = Mock(fecha_inicio=datetime(2026, 1, 19, 8, 0, 0))
+    lineas = {
+        "101": {
+            "start_date": "2026-01-13T08:00:00",
+            "end_date": "2026-01-14T17:00:00",
+            "metadata": {
+                "manual_temporal_window": {
+                    "starts_at": "2026-01-13T08:00:00",
+                    "ends_at": "2026-01-14T17:00:00",
+                },
+                "gantt_subbars": [
+                    {
+                        "starts_at": "2026-01-13T08:00:00",
+                        "ends_at": "2026-01-13T17:00:00",
+                    }
+                ],
+            },
+        }
+    }
+
+    next_config, shifted_lineas, changed = (
+        cronograma_trabajo_service._sync_config_with_external_project_start(
+            config=config,
+            lineas=lineas,
+            detail=detail,
+        )
+    )
+
+    assert changed is True
+    assert next_config.fecha_inicio_autoridad == "datos_proyecto"
+    assert next_config.fecha_inicio_proyecto == datetime(2026, 1, 19, 8, 0, 0)
+    assert next_config.fecha_inicio_referencia_proyecto == datetime(2026, 1, 19, 8, 0, 0)
+    assert shifted_lineas["101"]["start_date"] == "2026-01-20T08:00:00"
+    assert (
+        shifted_lineas["101"]["metadata"]["manual_temporal_window"]["starts_at"]
+        == "2026-01-20T08:00:00"
+    )
+    assert (
+        shifted_lineas["101"]["metadata"]["gantt_subbars"][0]["starts_at"]
+        == "2026-01-20T08:00:00"
+    )
+
+
+def test_sync_config_initializes_project_start_without_shifting_legacy_schedule():
+    config = cronograma_trabajo_service._resolve_config({})
+    detail = Mock(fecha_inicio=datetime(2026, 1, 19, 8, 0, 0))
+    lineas = {
+        "101": {
+            "start_date": "2026-01-20T08:00:00",
+            "end_date": "2026-01-21T17:00:00",
+        }
+    }
+
+    next_config, next_lineas, changed = (
+        cronograma_trabajo_service._sync_config_with_external_project_start(
+            config=config,
+            lineas=lineas,
+            detail=detail,
+        )
+    )
+
+    assert changed is True
+    assert next_config.fecha_inicio_autoridad == "datos_proyecto"
+    assert next_config.fecha_inicio_proyecto == datetime(2026, 1, 19, 8, 0, 0)
+    assert next_config.fecha_inicio_referencia_proyecto == datetime(2026, 1, 19, 8, 0, 0)
+    assert next_lineas["101"]["start_date"] == "2026-01-20T08:00:00"
+    assert next_lineas["101"]["end_date"] == "2026-01-21T17:00:00"
+
+
+def test_mark_gantt_start_authority_preserves_project_reference_for_future_sync():
+    config = cronograma_trabajo_service._resolve_config(
+        {
+            "fecha_inicio_proyecto": "2026-02-03T08:00:00",
+            "fecha_inicio_referencia_proyecto": "2026-02-01T08:00:00",
+            "fecha_inicio_autoridad": "datos_proyecto",
+        }
+    )
+    detail = Mock(fecha_inicio=datetime(2026, 2, 1, 8, 0, 0))
+
+    next_config = cronograma_trabajo_service._mark_gantt_start_authority(
+        config=config,
+        detail=detail,
+    )
+
+    assert next_config.fecha_inicio_autoridad == "gantt"
+    assert next_config.fecha_inicio_proyecto == datetime(2026, 2, 3, 8, 0, 0)
+    assert next_config.fecha_inicio_referencia_proyecto == datetime(2026, 2, 1, 8, 0, 0)
 
 
 def test_build_initial_creation_schedule_data_creates_single_100_percent_seed_per_line(mock_db):

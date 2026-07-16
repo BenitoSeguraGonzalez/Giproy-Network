@@ -276,6 +276,91 @@ def create_proyecto(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error inesperado: {str(e)}")
 
+
+@router.get("/papelera", response_model=List[ProyectoResponse])
+def list_recycled_projects(
+    db: Session = Depends(deps.get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: Usuario = Depends(deps.get_current_active_user),
+    empresa_id: Optional[int] = Query(None),
+) -> Any:
+    normalized_role = (current_user.rol or "").strip().lower()
+    if normalized_role not in ["administrador", "superadministrador"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tiene permisos para consultar la papelera de proyectos.")
+    target_empresa_id = current_user.empresa_id
+    if normalized_role == "superadministrador" and empresa_id:
+        target_empresa_id = empresa_id
+    elif empresa_id and empresa_id != current_user.empresa_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tiene permisos para consultar proyectos de otra empresa.")
+    return proyecto_service.list_recycled_projects(db=db, empresa_id=target_empresa_id, skip=skip, limit=limit)
+
+
+@router.post("/papelera/purge-expired", response_model=dict)
+def purge_expired_recycled_projects(
+    db: Session = Depends(deps.get_db),
+    current_user: Usuario = Depends(deps.get_current_active_user),
+    empresa_id: Optional[int] = Query(None),
+) -> Any:
+    normalized_role = (current_user.rol or "").strip().lower()
+    if normalized_role not in ["administrador", "superadministrador"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tiene permisos para purgar la papelera de proyectos.")
+    target_empresa_id = current_user.empresa_id
+    if normalized_role == "superadministrador" and empresa_id:
+        target_empresa_id = empresa_id
+    elif empresa_id and empresa_id != current_user.empresa_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tiene permisos para purgar proyectos de otra empresa.")
+    purged = proyecto_service.purge_expired_recycled_projects(db=db, empresa_id=target_empresa_id)
+    return {"purged": purged}
+
+
+@router.post("/papelera/{id}/restore", response_model=ProyectoResponse)
+def restore_recycled_project(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int,
+    current_user: Usuario = Depends(deps.get_current_active_user),
+    empresa_id: Optional[int] = Query(None),
+) -> Any:
+    normalized_role = (current_user.rol or "").strip().lower()
+    if normalized_role not in ["administrador", "superadministrador"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tiene permisos para restaurar proyectos.")
+    target_empresa_id = current_user.empresa_id
+    if normalized_role == "superadministrador" and empresa_id:
+        target_empresa_id = empresa_id
+    elif empresa_id and empresa_id != current_user.empresa_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tiene permisos para restaurar proyectos de otra empresa.")
+    try:
+        restored = proyecto_service.restore_full_project(db=db, proyecto_id=id, empresa_id=target_empresa_id, current_user=current_user)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    if not restored:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Proyecto no encontrado en papelera.")
+    return restored
+
+
+@router.delete("/papelera/{id}/purge", status_code=status.HTTP_204_NO_CONTENT)
+def purge_recycled_project(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int,
+    current_user: Usuario = Depends(deps.get_current_active_user),
+    empresa_id: Optional[int] = Query(None),
+) -> None:
+    normalized_role = (current_user.rol or "").strip().lower()
+    if normalized_role not in ["administrador", "superadministrador"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tiene permisos para purgar proyectos.")
+    target_empresa_id = current_user.empresa_id
+    if normalized_role == "superadministrador" and empresa_id:
+        target_empresa_id = empresa_id
+    elif empresa_id and empresa_id != current_user.empresa_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tiene permisos para purgar proyectos de otra empresa.")
+    success = proyecto_service.purge_recycled_project(db=db, proyecto_id=id, empresa_id=target_empresa_id, current_user=current_user)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Proyecto no encontrado en papelera.")
+    return
+
+
 @router.get("/{codigo_root}/revisiones", response_model=List[ProyectoResponse])
 def get_revisions(
     *,
@@ -300,7 +385,10 @@ def get_revisions(
     if not revisions and user_role == "superadministrador" and not empresa_id:
         # Búsqueda global para Superadmin
         from app.models.proyecto import Proyecto
-        revisions = db.query(Proyecto).filter(Proyecto.codigo_root == codigo_root).order_by(Proyecto.revision.asc()).all()
+        revisions = db.query(Proyecto).filter(
+            Proyecto.codigo_root == codigo_root,
+            Proyecto.deleted_at.is_(None),
+        ).order_by(Proyecto.revision.asc()).all()
 
     if not revisions:
         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail="No se encontraron revisiones para este código raíz.")
@@ -410,7 +498,13 @@ def update_proyecto(
     if current_user.rol.lower() == "superadministrador" and empresa_id:
         target_empresa_id = empresa_id
 
-    proyecto = proyecto_service.update_proyecto(db=db, proyecto_id=id, obj_in=proyecto_in, empresa_id=target_empresa_id)
+    proyecto = proyecto_service.update_proyecto(
+        db=db,
+        proyecto_id=id,
+        obj_in=proyecto_in,
+        empresa_id=target_empresa_id,
+        user_id=current_user.id,
+    )
     if not proyecto:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Proyecto no encontrado o acceso denegado.")
     
@@ -449,10 +543,11 @@ def delete_proyecto(
     db: Session = Depends(deps.get_db),
     id: int,
     current_user: Usuario = Depends(deps.get_current_active_user),
-    empresa_id: Optional[int] = Query(None)
+    empresa_id: Optional[int] = Query(None),
+    delete_project_base: bool = Query(True, description="Si es false, conserva la Base de Proyecto como Base Maestra reutilizable.")
 ) -> None:
     """
-    Elimina un proyecto y todos sus datos relacionados (revisiones, presupuestos, base específica).
+    Mueve un proyecto y todos sus datos relacionados a papelera durante 7 dias.
     Solo accesible para Administradores y Superadministradores.
     """
     normalized_role = (current_user.rol or "").strip().lower()
@@ -472,7 +567,13 @@ def delete_proyecto(
         )
 
     try:
-        success = proyecto_service.delete_full_project(db=db, proyecto_id=id, empresa_id=target_empresa_id)
+        success = proyecto_service.soft_delete_full_project(
+            db=db,
+            proyecto_id=id,
+            empresa_id=target_empresa_id,
+            current_user=current_user,
+            delete_project_base=delete_project_base,
+        )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except Exception as exc:

@@ -11,7 +11,8 @@ import {
   Users,
   Wrench,
 } from 'lucide-react';
-import axios from '../../api/axiosConfig';
+import { polinomicaApi } from '../../api/polinomica';
+import { presupuestosApi } from '../../api/presupuestos';
 import reportingApi from '../../api/reporting';
 import { extractBlobErrorMessage } from '../../utils/apiBlobErrors';
 import { appAlert } from '../../utils/appDialog';
@@ -118,7 +119,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
     if (!projectId) return;
     setLoading(true);
     try {
-      const response = await axios.get('/presupuestos/', { params: { proyecto_id: projectId } });
+      const response = await presupuestosApi.getByProyecto(projectId);
       const budgets = response.data;
       const currentPres = budgets.find((budget) => budget.revision === activeRevision?.revision) || budgets[0];
       if (!currentPres) {
@@ -127,7 +128,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
       }
       setPresupuestoId(currentPres.id);
     } catch (resolveError) {
-      console.error('[PolinomicaTab] Error resolving presupuesto:', resolveError);
+      globalThis.reportClientError?.('[PolinomicaTab] Error resolving presupuesto:', resolveError);
       setError('Error al cargar presupuestos');
     } finally {
       setLoading(false);
@@ -136,24 +137,23 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
 
   const fetchIndicesCatalog = useCallback(async () => {
     try {
-      const response = await axios.get('/polinomica/indices-inec');
-      setIndicesCatalog(response.data || []);
+      const data = await polinomicaApi.getIndicesInec();
+      setIndicesCatalog(data || []);
     } catch (catalogError) {
-      console.error('[PolinomicaTab] Error loading indices catalog:', catalogError);
+      globalThis.reportClientError?.('[PolinomicaTab] Error loading indices catalog:', catalogError);
     }
   }, []);
 
   const fetchResources = useCallback(async (budgetId) => {
     if (!budgetId) return;
-    const response = await axios.get(`/polinomica/${budgetId}/resources`);
-    setResources(response.data || []);
+    const data = await polinomicaApi.getResources(budgetId);
+    setResources(data || []);
   }, []);
 
   const loadFormula = useCallback(async (budgetId) => {
     if (!budgetId) return;
     try {
-      const response = await axios.get(`/polinomica/${budgetId}`);
-      const loadedFormula = response.data;
+      const loadedFormula = await polinomicaApi.getFormula(budgetId);
       if (
         loadedFormula
         && Array.isArray(loadedFormula.monomios)
@@ -161,9 +161,9 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
         && Number(loadedFormula.resources_detected || 0) > 0
       ) {
         const finalType = loadedFormula.tipo || 'SIN_DESGLOSE';
-        const regenerated = await axios.post(`/polinomica/${budgetId}/regenerate`, null, { params: { tipo: finalType } });
-        setFormulaData(regenerated.data);
-        if (regenerated.data?.tipo) setSelectedType(regenerated.data.tipo);
+        const regenerated = await polinomicaApi.regenerate(budgetId, finalType);
+        setFormulaData(regenerated);
+        if (regenerated?.tipo) setSelectedType(regenerated.tipo);
         return;
       }
       setFormulaData(loadedFormula);
@@ -172,7 +172,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
       if (loadError?.response?.status === 404) {
         setFormulaData(null);
       } else {
-        console.error('[PolinomicaTab] Error loading formula:', loadError);
+        globalThis.reportClientError?.('[PolinomicaTab] Error loading formula:', loadError);
         throw loadError;
       }
     }
@@ -205,16 +205,16 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
     if (!presupuestoId) return;
     try {
       setCalculating(true);
-      const response = await axios.post(`/polinomica/${presupuestoId}/assignments`, payload);
-      if (response.data?.id) {
-        setFormulaData(response.data);
-        if (response.data?.tipo) setSelectedType(response.data.tipo);
+      const data = await polinomicaApi.saveAssignments(presupuestoId, payload);
+      if (data?.id) {
+        setFormulaData(data);
+        if (data?.tipo) setSelectedType(data.tipo);
       } else {
         await loadFormula(presupuestoId);
       }
       await fetchResources(presupuestoId);
     } catch (assignmentError) {
-      console.error('[PolinomicaTab] Save assignment error:', assignmentError);
+      globalThis.reportClientError?.('[PolinomicaTab] Save assignment error:', assignmentError);
       setError('Error al guardar la asignación');
     } finally {
       setCalculating(false);
@@ -229,11 +229,11 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
     if (!presupuestoId) return;
     try {
       setCalculating(true);
-      const response = await axios.post(`/polinomica/${presupuestoId}/indices`, payload);
-      setFormulaData(response.data);
+      const data = await polinomicaApi.saveIndices(presupuestoId, payload);
+      setFormulaData(data);
       await fetchResources(presupuestoId);
     } catch (indicesError) {
-      console.error('[PolinomicaTab] Save formula indices error:', indicesError);
+      globalThis.reportClientError?.('[PolinomicaTab] Save formula indices error:', indicesError);
       setError('Error al guardar la selección de índices');
     } finally {
       setCalculating(false);
@@ -245,12 +245,12 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
     const finalType = typeToUse || selectedType;
     setCalculating(true);
     try {
-      const response = await axios.post(`/polinomica/${presupuestoId}/regenerate`, null, { params: { tipo: finalType } });
-      setFormulaData(response.data);
+      const data = await polinomicaApi.regenerate(presupuestoId, finalType);
+      setFormulaData(data);
       setSelectedType(finalType);
       await fetchResources(presupuestoId);
     } catch (generateError) {
-      console.error('[PolinomicaTab] Generate formula error:', generateError);
+      globalThis.reportClientError?.('[PolinomicaTab] Generate formula error:', generateError);
       const detail = generateError?.response?.data?.detail;
       setError(detail || 'Error al generar la fórmula');
     } finally {
@@ -277,7 +277,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
       setReportPreview(response.data);
       setShowReportPreview(true);
     } catch (previewError) {
-      console.error('Report generation error:', previewError);
+      globalThis.reportClientError?.('Report generation error:', previewError);
       appAlert({ title: 'Error', message: 'No se pudo generar el reporte de Fórmula Polinómica.', tone: 'danger' });
     } finally {
       setGeneratingReport(false);
@@ -304,7 +304,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
         format === 'xlsx' ? undefined : 'application/pdf',
       );
     } catch (exportError) {
-      console.error('Report export error:', exportError);
+      globalThis.reportClientError?.('Report export error:', exportError);
       appAlert({
         title: 'Error',
         message: await extractBlobErrorMessage(exportError, fallbackMessage),

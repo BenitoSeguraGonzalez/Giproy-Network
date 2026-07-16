@@ -8,8 +8,7 @@ import {
     Users,
     Waypoints
 } from 'lucide-react';
-import api from '../api/axiosConfig';
-import { withoutTenant } from '../api/tenant';
+import adminGlobalApi from '../api/adminGlobal';
 import { AuthContext } from '../context/AuthContext';
 import { Card, CardContent } from '../components/ui/card';
 
@@ -24,14 +23,14 @@ const AdminGlobalGobernanza = () => {
 
         const loadData = async () => {
             try {
-                const [empresasRes, usuariosRes] = await Promise.all([
-                    api.get('/empresas/', withoutTenant()),
-                    api.get('/usuarios/', withoutTenant()),
+                const [empresasData, usuariosData] = await Promise.all([
+                    adminGlobalApi.getEmpresas(),
+                    adminGlobalApi.getUsuarios(),
                 ]);
-                setEmpresas(empresasRes.data || []);
-                setUsuarios(usuariosRes.data || []);
+                setEmpresas(empresasData || []);
+                setUsuarios(usuariosData || []);
             } catch (error) {
-                console.error('Error cargando gobernanza:', error);
+                globalThis.reportClientError?.('Error cargando gobernanza:', error);
             }
         };
 
@@ -127,7 +126,7 @@ const AdminGlobalGobernanza = () => {
                                             <h2 className="text-xl font-black uppercase tracking-tight text-zinc-900">Empresas</h2>
                                         </div>
                                     </div>
-                                    <button onClick={() => navigate('/settings?tab=empresas')} className="inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600 hover:border-orange-200 hover:text-[#F39200] transition-colors">
+                                    <button onClick={() => navigate('/admin-global/empresas')} className="inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600 hover:border-orange-200 hover:text-[#F39200] transition-colors">
                                         Abrir gestión <ArrowUpRight className="w-4 h-4" />
                                     </button>
                                 </div>

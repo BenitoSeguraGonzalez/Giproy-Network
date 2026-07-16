@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xmlns="http://schemas.microsoft.com/project">
+  <Name>MSPDI Interoperable</Name>
+  <GUID>4f91f10d-287d-48ca-8217-43ce84a0f973</GUID>
+  <StartDate>2026-07-14T08:00:00-05:00</StartDate>
+  <StatusDate>2026-07-13T12:00:00-05:00</StatusDate>
+  <MinutesPerDay>480</MinutesPerDay>
+  <Calendars>
+    <Calendar>
+      <UID>1</UID>
+      <Name>Laboral</Name>
+      <IsBaseCalendar>1</IsBaseCalendar>
+      <WeekDays>
+        <WeekDay><DayType>1</DayType><DayWorking>0</DayWorking></WeekDay>
+        <WeekDay><DayType>2</DayType><DayWorking>1</DayWorking></WeekDay>
+        <WeekDay><DayType>3</DayType><DayWorking>1</DayWorking></WeekDay>
+        <WeekDay><DayType>4</DayType><DayWorking>1</DayWorking></WeekDay>
+        <WeekDay><DayType>5</DayType><DayWorking>1</DayWorking></WeekDay>
+        <WeekDay><DayType>6</DayType><DayWorking>1</DayWorking></WeekDay>
+        <WeekDay><DayType>7</DayType><DayWorking>0</DayWorking></WeekDay>
+        <WeekDay><DayType>0</DayType><DayWorking>0</DayWorking><TimePeriod><FromDate>2026-07-24T00:00:00</FromDate><ToDate>2026-07-24T00:00:00</ToDate></TimePeriod></WeekDay>
+      </WeekDays>
+    </Calendar>
+  </Calendars>
+  <Tasks>
+    <Task>
+      <UID>0</UID><ID>0</ID><Name>MSPDI Interoperable</Name><Summary>1</Summary><OutlineLevel>0</OutlineLevel>
+    </Task>
+    <Task>
+      <UID>1</UID><ID>1</ID><Name>Obra</Name><WBS>1</WBS><OutlineNumber>1</OutlineNumber><OutlineLevel>1</OutlineLevel><Summary>1</Summary>
+    </Task>
+    <Task>
+      <UID>2</UID><ID>2</ID><Name>Inicio</Name><WBS>1.1</WBS><OutlineNumber>1.1</OutlineNumber><OutlineLevel>2</OutlineLevel><Summary>0</Summary><Milestone>1</Milestone><CalendarUID>1</CalendarUID><Start>2026-07-14T08:00:00-05:00</Start><Finish>2026-07-14T08:00:00-05:00</Finish><Duration>PT0H0M0S</Duration><PercentComplete>100</PercentComplete><ActualFinish>2026-07-14T08:00:00-05:00</ActualFinish>
+    </Task>
+    <Task>
+      <UID>3</UID><ID>3</ID><Name>Ejecucion</Name><WBS>1.2</WBS><OutlineNumber>1.2</OutlineNumber><OutlineLevel>2</OutlineLevel><Summary>0</Summary><CalendarUID>1</CalendarUID><Start>2026-07-14T08:00:00-05:00</Start><Finish>2026-07-18T17:00:00-05:00</Finish><Duration>PT40H0M0S</Duration><PercentComplete>25</PercentComplete>
+      <PredecessorLink><PredecessorUID>2</PredecessorUID><Type>1</Type><LinkLag>0</LinkLag></PredecessorLink>
+    </Task>
+  </Tasks>
+  <Resources>
+    <Resource><UID>1</UID><ID>1</ID><Name>Cuadrilla</Name><Initials>MO</Initials><Type>1</Type><MaxUnits>1</MaxUnits><StandardRate>12.5</StandardRate></Resource>
+  </Resources>
+  <Assignments>
+    <Assignment><UID>1</UID><TaskUID>3</TaskUID><ResourceUID>1</ResourceUID><Units>1</Units><Work>PT40H0M0S</Work><Cost>500</Cost><ActualWork>PT8H0M0S</ActualWork><ActualCost>100</ActualCost></Assignment>
+  </Assignments>
+</Project>

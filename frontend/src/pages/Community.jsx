@@ -25,7 +25,8 @@ import {
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { communityApi } from '../api/community';
-import api from '../api/axiosConfig';
+import { maestrosApi } from '../api/maestros';
+import { usuariosApi } from '../api/usuarios';
 import { Card, CardContent } from '../components/ui/card';
 import { AppModalBody, AppModalHeader, AppModalShell } from '../components/ui/app-modal';
 import PersonnelFormFields from '../components/PersonnelFormFields';
@@ -976,8 +977,8 @@ const Community = () => {
     useEffect(() => {
         const loadPaises = async () => {
             try {
-                const response = await api.get('/paises/');
-                setPaises(Array.isArray(response.data) ? response.data : []);
+                const data = await maestrosApi.getPaises();
+                setPaises(Array.isArray(data) ? data : []);
             } catch {
                 setPaises([]);
             }
@@ -1283,13 +1284,11 @@ const Community = () => {
         setCommunityUserSubmitting(true);
         try {
             const { confirmPassword, ...payload } = communityUserForm;
-            await api.post('/usuarios/', {
+            await usuariosApi.create({
                 ...payload,
                 empresa_id: empresaId,
                 rol: 'usuario_comunidad',
-            }, {
-                params: { empresa_id: empresaId },
-            });
+            }, { empresa_id: empresaId });
             setCommunityUserForm({
                 ...EMPTY_COMMUNITY_USER_FORM,
                 empresa_id: empresaId,

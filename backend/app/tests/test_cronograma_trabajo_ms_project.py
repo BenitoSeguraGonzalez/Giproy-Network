@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
 from io import BytesIO
 import os
@@ -42,6 +43,7 @@ def _build_work_schedule_fixture(db, sample_empresa):
         codigo="GANTT-QA",
         codigo_root="GANTT-QA",
         revision=1,
+        fecha_inicio=datetime(2026, 4, 1, 8, 0, tzinfo=timezone.utc),
         empresa_id=sample_empresa.id,
         base_trabajo_id=base.id,
     )
@@ -284,7 +286,7 @@ def test_ms_project_xml_export_and_controlled_import_roundtrip(db, sample_empres
     )
     imported_line = imported.schedule_data[str(line_2.id)]
 
-    assert imported_line.start_date.isoformat().startswith("2026-04-08T08:00:00")
+    assert imported_line.start_date.isoformat().startswith("2026-04-02T12:00:00")
     assert imported_line.duration == 3.0
     assert imported_line.progress_pct == 55
     assert imported_line.dependencies[0].type == "SS"
@@ -451,6 +453,10 @@ def test_ms_project_mpp_export_endpoint_returns_attachment(db, sample_empresa, m
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
+        "app.api.endpoints.cronogramas_trabajo.apu_resource_readiness_service.ensure_budget_ready",
+        lambda *args, **kwargs: None,
+    )
+    monkeypatch.setattr(
         "app.api.endpoints.cronogramas_trabajo.license_service.ensure_commercial_exports_allowed",
         lambda *args, **kwargs: None,
     )
@@ -479,7 +485,7 @@ def test_ms_project_mpp_export_endpoint_returns_attachment(db, sample_empresa, m
         app.dependency_overrides.clear()
 
     assert proyecto.id == presupuesto.proyecto_id
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
     assert response.headers["content-type"].startswith("application/vnd.ms-project")
     assert f"Cronograma_Trabajo_Project_{presupuesto.id}.mpp" in response.headers["content-disposition"]
     assert response.content == b"FAKE-MPP-BINARY-CONTENT"
@@ -556,6 +562,10 @@ def test_read_cronograma_trabajo_allows_superadmin_without_explicit_empresa_id(d
         "app.api.endpoints.cronogramas_trabajo._verify_module_access",
         lambda *args, **kwargs: None,
     )
+    monkeypatch.setattr(
+        "app.api.endpoints.cronogramas_trabajo.apu_resource_readiness_service.ensure_budget_ready",
+        lambda *args, **kwargs: None,
+    )
 
     try:
         with TestClient(app) as client:
@@ -564,7 +574,7 @@ def test_read_cronograma_trabajo_allows_superadmin_without_explicit_empresa_id(d
         app.dependency_overrides.clear()
 
     assert proyecto.id == presupuesto.proyecto_id
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
     payload = response.json()
     assert payload["presupuesto_id"] == presupuesto.id
     assert payload["empresa_id"] == sample_empresa.id

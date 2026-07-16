@@ -15,6 +15,43 @@ export const resolveCountryPhonePrefix = (countryName) => {
     return COUNTRY_PREFIX_MAP[String(countryName).trim().toLowerCase()] || '';
 };
 
+const getDigits = (value) => String(value ?? '').replace(/\D/g, '');
+
+const getNationalDigits = (phone, prefix) => {
+    let digits = getDigits(phone);
+    const cleanPrefix = getDigits(prefix);
+
+    if (cleanPrefix && digits.startsWith(cleanPrefix)) {
+        digits = digits.substring(cleanPrefix.length);
+    }
+
+    if (cleanPrefix === '593' && digits.startsWith('0')) {
+        digits = digits.substring(1);
+    }
+
+    return digits;
+};
+
+export const getInternationalPhoneValidationMessage = (phone, countryName) => {
+    if (!phone) return 'El móvil de contacto es obligatorio.';
+
+    const prefix = resolveCountryPhonePrefix(countryName);
+    const digits = getDigits(phone);
+
+    if (digits.length < 7) {
+        return 'El móvil debe tener al menos 7 dígitos.';
+    }
+
+    if (prefix === '593') {
+        const nationalDigits = getNationalDigits(phone, prefix);
+        if (nationalDigits.length !== 9 || !nationalDigits.startsWith('9')) {
+            return 'Para Ecuador usa 09XXXXXXXX o +593 9XXXXXXXX.';
+        }
+    }
+
+    return '';
+};
+
 /**
  * Formatea un número de teléfono basándose en el prefijo del país.
  * @param {string} phone - El número de teléfono a formatear.
@@ -25,17 +62,17 @@ export const formatInternationalPhone = (phone, prefix) => {
     if (!phone) return '';
     
     // Eliminar caracteres no numéricos
-    let cleaned = phone.replace(/\D/g, '');
+    let cleaned = getDigits(phone);
     
     // Si no hay prefijo, devolvemos el número limpio
     if (!prefix) return cleaned;
 
     // Limpiar el prefijo de cualquier '+'
-    const cleanPrefix = prefix.replace(/\D/g, '');
+    const cleanPrefix = getDigits(prefix);
 
     // Caso especial: si el número ya empieza con el prefijo, no lo duplicamos
     if (cleaned.startsWith(cleanPrefix)) {
-        return `+${cleaned}`;
+        cleaned = cleaned.substring(cleanPrefix.length);
     }
 
     // Caso especial Ecuador: si empieza con 0, quitarlo (ej: 099 -> 99)

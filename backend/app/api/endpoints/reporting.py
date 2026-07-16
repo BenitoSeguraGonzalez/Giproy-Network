@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db, get_current_user
 from app.core.database import SessionLocal
 from app.models.usuario import Usuario
+from app.services.commercial_capabilities import commercial_capabilities_service
 from app.services.license import license_service
 from app.services.reporting import reporting_service
 from app.schemas.reporting import ReportPreviewRequest, ReportExportRequest
@@ -15,6 +16,7 @@ import urllib.parse
 router = APIRouter()
 _warm_exports_lock = threading.Lock()
 _warm_exports_inflight: set[tuple] = set()
+EXCEL_REPORT_FORMATS = {"xlsx", "pdf_excel"}
 
 
 def _sanitize_filename_part(value: Optional[str], fallback: str = "Documento") -> str:
@@ -96,11 +98,39 @@ def _resolve_target_empresa_id(current_user: Usuario, empresa_id: Optional[int])
     return target_empresa_id
 
 
+def _ensure_reporting_export_allowed(
+    payload: ReportExportRequest,
+    db: Session,
+    target_empresa_id: int,
+) -> dict:
+    commercial_state = commercial_capabilities_service.resolve_company_capabilities(db, target_empresa_id)
+    report_format = str(payload.format or "").strip().lower()
+    excel_exports_allowed = bool(
+        commercial_state.get("capabilities", {}).get("excel_exports", True)
+    )
+    if report_format in EXCEL_REPORT_FORMATS and not excel_exports_allowed:
+        raise HTTPException(
+            status_code=403,
+            detail="La licencia activa de su empresa no permite exportaciones Excel comerciales.",
+        )
+    return commercial_state
+
+
+def _build_reporting_watermark_text(commercial_state: dict) -> Optional[str]:
+    restrictions = commercial_state.get("restrictions", {}) if isinstance(commercial_state, dict) else {}
+    if not restrictions.get("requires_watermark"):
+        return None
+    reason = "USO NO COMERCIAL" if restrictions.get("non_commercial") else "VERSION CON MARCA DE AGUA"
+    return f"GIPROY - {reason}"
+
+
 def _build_export_response_parts(
     payload: ReportExportRequest,
     db: Session,
     target_empresa_id: int,
 ) -> tuple[io.BytesIO, str, str]:
+    commercial_state = _ensure_reporting_export_allowed(payload, db, target_empresa_id)
+    watermark_text = _build_reporting_watermark_text(commercial_state)
     template_id = payload.template_id or "001"
     cache_key = reporting_service._build_report_export_cache_key(
         db,
@@ -108,9 +138,14 @@ def _build_export_response_parts(
         payload.entity_ids,
         target_empresa_id,
         template_id,
-        payload.variant,
-        payload.format,
+        variant=payload.variant,
+        export_format=payload.format,
+        filters=payload.filters,
+        project_id=payload.project_id,
+        base_trabajo_id=payload.base_trabajo_id,
+        revision=payload.revision,
     )
+    cache_key = (*cache_key, "watermark", watermark_text or "")
     cached_payload = reporting_service.get_cached_report_export(cache_key)
 
     def _generate_xlsx_buffer_only() -> io.BytesIO:
@@ -119,7 +154,10 @@ def _build_export_response_parts(
                 db,
                 payload.entity_ids,
                 target_empresa_id,
-                template_id
+                template_id,
+                project_id=payload.project_id,
+                base_trabajo_id=payload.base_trabajo_id,
+                revision=payload.revision,
             )
         if payload.report_type == "presupuesto":
             if payload.variant == "indirectos":
@@ -151,7 +189,7 @@ def _build_export_response_parts(
         if payload.report_type == "polinomica":
             return reporting_service.generate_polinomica_report(db, payload.entity_ids[0], target_empresa_id, template_id)
         if payload.report_type == "cronograma_valorado":
-            return reporting_service.generate_cronograma_valorado_report(db, payload.entity_ids[0], target_empresa_id, template_id, payload.variant)
+            return reporting_service.generate_cronograma_valorado_report(db, payload.entity_ids[0], target_empresa_id, template_id, payload.variant, payload.filters)
         if payload.report_type == "acta_constitucion":
             return reporting_service.generate_acta_constitucion_report(db, payload.entity_ids[0], target_empresa_id, template_id)
         if payload.report_type == "stakeholders":
@@ -192,7 +230,7 @@ def _build_export_response_parts(
         elif payload.report_type == "cronograma_valorado":
             context, revision = _resolve_presupuesto_download_meta(db, payload.entity_ids[0], target_empresa_id)
             report_label = "Cronograma Valorado"
-            if payload.variant in {"gantt", "cash_flow", "flujo_caja", "caja", "integrado", "pareto"}:
+            if payload.variant in {"gantt", "cash_flow", "flujo_caja", "caja", "integrado", "pareto", "resources", "resource_usage", "uso_recursos", "uso_de_recursos", "resources_range", "resource_usage_range", "uso_recursos_rango"}:
                 report_label = {
                     "gantt": "Cronograma Gantt",
                     "cash_flow": "Flujo de Caja",
@@ -200,6 +238,13 @@ def _build_export_response_parts(
                     "caja": "Flujo de Caja",
                     "integrado": "Cronograma Integrado",
                     "pareto": "Pareto Temporal",
+                    "resources": "Uso de Recursos",
+                    "resource_usage": "Uso de Recursos",
+                    "uso_recursos": "Uso de Recursos",
+                    "uso_de_recursos": "Uso de Recursos",
+                    "resources_range": "Uso de Recursos por Rango",
+                    "resource_usage_range": "Uso de Recursos por Rango",
+                    "uso_recursos_rango": "Uso de Recursos por Rango",
                 }.get(payload.variant, report_label)
             filename = _build_report_filename(report_label, context, revision, "pdf")
         else:
@@ -238,7 +283,7 @@ def _build_export_response_parts(
         elif payload.report_type == "cronograma_valorado":
             context, revision = _resolve_presupuesto_download_meta(db, payload.entity_ids[0], target_empresa_id)
             report_label = "Cronograma Valorado"
-            if payload.variant in {"gantt", "cash_flow", "flujo_caja", "caja", "integrado", "pareto"}:
+            if payload.variant in {"gantt", "cash_flow", "flujo_caja", "caja", "integrado", "pareto", "resources", "resource_usage", "uso_recursos", "uso_de_recursos", "resources_range", "resource_usage_range", "uso_recursos_rango"}:
                 report_label = {
                     "gantt": "Cronograma Gantt",
                     "cash_flow": "Flujo de Caja",
@@ -246,6 +291,13 @@ def _build_export_response_parts(
                     "caja": "Flujo de Caja",
                     "integrado": "Cronograma Integrado",
                     "pareto": "Pareto Temporal",
+                    "resources": "Uso de Recursos",
+                    "resource_usage": "Uso de Recursos",
+                    "uso_recursos": "Uso de Recursos",
+                    "uso_de_recursos": "Uso de Recursos",
+                    "resources_range": "Uso de Recursos por Rango",
+                    "resource_usage_range": "Uso de Recursos por Rango",
+                    "uso_recursos_rango": "Uso de Recursos por Rango",
                 }.get(payload.variant, report_label)
             filename = _build_report_filename(report_label, context, revision, "xlsx")
         else:
@@ -262,7 +314,12 @@ def _build_export_response_parts(
             payload.entity_ids,
             target_empresa_id,
             template_id,
-            payload.variant
+            payload.variant,
+            payload.filters,
+            watermark_text,
+            project_id=payload.project_id,
+            base_trabajo_id=payload.base_trabajo_id,
+            revision=payload.revision,
         )
     elif payload.format == "pdf_excel":
         xlsx_cache_key = reporting_service._build_report_export_cache_key(
@@ -271,8 +328,12 @@ def _build_export_response_parts(
             payload.entity_ids,
             target_empresa_id,
             template_id,
-            payload.variant,
-            "xlsx",
+            variant=payload.variant,
+            export_format="xlsx",
+            filters=payload.filters,
+            project_id=payload.project_id,
+            base_trabajo_id=payload.base_trabajo_id,
+            revision=payload.revision,
         )
         cached_xlsx_payload = reporting_service.get_cached_report_export(xlsx_cache_key)
         if cached_xlsx_payload is not None:
@@ -280,7 +341,7 @@ def _build_export_response_parts(
         else:
             xlsx_buffer = _generate_xlsx_buffer_only()
             reporting_service.set_cached_report_export(xlsx_cache_key, xlsx_buffer.getvalue())
-        file_buffer = reporting_service._convert_excel_buffer_to_pdf(xlsx_buffer)
+        file_buffer = reporting_service._convert_excel_buffer_to_pdf(xlsx_buffer, watermark_text=watermark_text)
     else:
         file_buffer = _generate_xlsx_buffer_only()
 
@@ -312,8 +373,12 @@ def _build_warm_exports_key(payload_data: dict, target_empresa_id: int, export_f
         tuple(int(entity_id) for entity_id in (payload_data.get("entity_ids") or [])),
         str(payload_data.get("template_id") or "001"),
         str(payload_data.get("variant") or ""),
+        reporting_service.normalize_report_filters_signature(payload_data.get("filters")),
         tuple(export_formats),
         reporting_service.REPORT_EXPORT_RENDER_VERSION,
+        int(payload_data.get("project_id") or 0),
+        int(payload_data.get("base_trabajo_id") or 0),
+        int(payload_data.get("revision") or 0),
     )
 
 
@@ -359,7 +424,11 @@ def preview_report(
             payload.entity_ids,
             target_empresa_id,
             payload.template_id or "001",
-            payload.variant
+            payload.variant,
+            payload.filters,
+            project_id=payload.project_id,
+            base_trabajo_id=payload.base_trabajo_id,
+            revision=payload.revision,
         )
         payload_data = _payload_to_dict(payload)
         should_warm_exports = payload.report_type in {"presupuesto", "apu", "vae", "polinomica", "edo", "edt", "stakeholders", "cronograma_valorado"}
@@ -376,6 +445,8 @@ def preview_report(
                 target_empresa_id,
             )
         return preview
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -388,7 +459,6 @@ def export_report(
 ):
     try:
         target_empresa_id = _resolve_target_empresa_id(current_user, empresa_id)
-        license_service.ensure_commercial_exports_allowed(db, target_empresa_id)
         file_buffer, media_type, filename = _build_export_response_parts(payload, db, target_empresa_id)
 
         return StreamingResponse(
@@ -399,6 +469,8 @@ def export_report(
                 "X-GiProy-Report-Render-Version": reporting_service.REPORT_EXPORT_RENDER_VERSION,
             }
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -406,13 +478,24 @@ def export_report(
 def get_apu_report(
     apu_id: int,
     template_id: str = Query("001"),
+    project_id: Optional[int] = Query(None),
+    base_trabajo_id: Optional[int] = Query(None),
+    revision: Optional[int] = Query(None),
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
     """Genera un reporte profesional de APU usando plantillas Excel."""
     try:
         license_service.ensure_commercial_exports_allowed(db, current_user.empresa_id)
-        file_buffer = reporting_service.generate_apu_report(db, apu_id, current_user.empresa_id, template_id)
+        file_buffer = reporting_service.generate_apu_report(
+            db,
+            apu_id,
+            current_user.empresa_id,
+            template_id,
+            project_id=project_id,
+            base_trabajo_id=base_trabajo_id,
+            revision=revision,
+        )
         context, revision = _resolve_apu_download_meta(db, apu_id, current_user.empresa_id)
         filename = _build_report_filename("APU", context, revision, "xlsx")
         return StreamingResponse(

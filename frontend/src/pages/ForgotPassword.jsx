@@ -5,7 +5,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { LiquidButton } from '../components/ui/liquid-button';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import { publicAuthApi } from '../api/publicAuth';
 import LogoGiproyCompleto from '../assets/LogoGiproyCompleto.png';
 
 const MotionDiv = motion.div;
@@ -23,7 +23,7 @@ const ForgotPassword = () => {
         setMessage(null);
         setIsLoading(true);
         try {
-            await axios.post(`http://localhost:8000/api/v1/auth/password-recovery/${email}`);
+            await publicAuthApi.requestPasswordRecovery(email);
             setMessage("Si el correo está registrado, recibirás un enlace de recuperación en breve.");
         } catch (err) {
             setError(err.response?.data?.detail || "Ocurrió un error al procesar la solicitud.");

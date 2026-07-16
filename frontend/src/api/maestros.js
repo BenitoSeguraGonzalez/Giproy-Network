@@ -2,6 +2,10 @@ import axiosInstance from './axiosConfig';
 import { withoutTenant } from './tenant';
 
 export const maestrosApi = {
+    getPaises: async () => {
+        const response = await axiosInstance.get('/paises/', withoutTenant());
+        return response.data;
+    },
     getTiposProyecto: async () => {
         const response = await axiosInstance.get('/maestros/tipos-proyecto', withoutTenant());
         return response.data;

@@ -181,6 +181,21 @@ Viewer, árbol, propiedades, filtros, vistas y vínculos.
 
 Preparación de contratos, rutas y vínculos latentes que aún no se exponen en el producto clásico.
 
+### Carril documental BIM
+
+La documentacion operativa BIM tambien debe correr en paralelo al carril
+clasico.
+
+- Las TASKs BIM viven en `docs/tasks/bim` con IDs `BIM-TASK-*`.
+- Las TASKs historicas `TASK-0545` a `TASK-0559` quedan como planificacion
+  legacy, no como carril operativo nuevo.
+- Toda sesion BIM debe actualizar `docs/architecture/BIM_INDEX.md` cuando cree
+  nuevos documentos, TASKs, scripts, smokes o artefactos de gobierno.
+- Si una TASK BIM toca GiProy Clasico, debe enlazar una TASK de integracion
+  controlada separada en vez de mezclar cierres en la TASK BIM.
+- `CHANGELOG.md` y `HANDOFF.md` pueden registrar el cierre global de sesion,
+  pero la evidencia de detalle BIM debe quedar en la estructura paralela BIM.
+
 ## 11. Gates de no interferencia
 
 Antes de fusionar cualquier avance BIM en ramas funcionales principales debe comprobarse:
@@ -199,4 +214,3 @@ La estrategia paralela se considerará correctamente implantada cuando:
 - backend siga siendo una sola fuente de verdad
 - la integración final pueda activarse por puertas controladas
 - existan feature flags y rollback limpio
-

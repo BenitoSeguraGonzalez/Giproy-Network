@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mockup Proyectos Executive Compact</title>
+  <style>
+    :root {
+      --orange: #f39200;
+      --orange-soft: #fff4e3;
+      --blue: #136191;
+      --blue-soft: #eef7fc;
+      --green: #059669;
+      --ink: #171717;
+      --muted: #6b7280;
+      --quiet: #9ca3af;
+      --bg: #f2f4f7;
+      --line: #e6e8ec;
+      --surface: #fff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+    }
+    .page {
+      min-height: 100vh;
+      padding: 16px 20px;
+    }
+    .workspace {
+      display: grid;
+      gap: 12px;
+    }
+    .command {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--surface);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, .06);
+      overflow: hidden;
+    }
+    .hero {
+      min-height: 72px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      padding: 14px 18px;
+      border-bottom: 1px solid #edf0f3;
+    }
+    .title-row {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .module-chip {
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      border: 1px solid #fed7aa;
+      border-radius: 999px;
+      background: var(--orange-soft);
+      color: var(--orange);
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .title-block { min-width: 0; }
+    h1 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.05;
+      font-weight: 950;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .meta {
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .dot { width: 5px; height: 5px; border-radius: 999px; background: #d1d5db; }
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icon-btn, .primary-btn {
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #f8fafc;
+      color: #374151;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, .08);
+      font-weight: 900;
+    }
+    .icon-btn {
+      width: 40px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+    }
+    .primary-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 15px;
+      background: var(--orange);
+      border-color: #e18400;
+      color: white;
+      font-size: 10px;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .control {
+      min-height: 68px;
+      display: grid;
+      grid-template-columns: minmax(340px, 1.05fr) minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 18px;
+      background:
+        linear-gradient(90deg, rgba(19, 97, 145, .035), transparent 36%),
+        #fff;
+    }
+    .search-group {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+    }
+    .search {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #f9fafb;
+      color: #9ca3af;
+      font-size: 14px;
+      font-weight: 750;
+    }
+    .filter {
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      padding: 0 14px;
+      background: #fff;
+      color: #4b5563;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, .06);
+    }
+    .metrics {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(112px, 1fr));
+      gap: 8px;
+    }
+    .metric {
+      min-width: 0;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255,255,255,.86);
+    }
+    .metric-icon {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-size: 13px;
+      flex: 0 0 auto;
+    }
+    .metric:nth-child(2) .metric-icon { background: #ecfdf5; color: var(--green); }
+    .metric:nth-child(3) .metric-icon { background: var(--orange-soft); color: var(--orange); }
+    .metric:nth-child(4) .metric-icon { background: #fff1f2; color: #be5b42; }
+    .metric-copy { min-width: 0; }
+    .metric-label {
+      color: var(--quiet);
+      font-size: 8px;
+      font-weight: 950;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .metric-value {
+      margin-top: 1px;
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1;
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .view {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      border-radius: 16px;
+      background: #eef0f3;
+      box-shadow: inset 2px 2px 6px rgba(15, 23, 42, .12), inset -2px -2px 6px #fff;
+    }
+    .view button {
+      height: 34px;
+      min-width: 92px;
+      border: 0;
+      border-radius: 13px;
+      background: transparent;
+      color: #667085;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .view .active {
+      background: #fff;
+      color: var(--blue);
+      box-shadow: 0 5px 14px rgba(15, 23, 42, .14);
+    }
+    .table-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, .05);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th {
+      height: 42px;
+      padding: 0 14px;
+      background: #fbfcfd;
+      border-bottom: 1px solid var(--line);
+      color: #8b8f99;
+      text-align: left;
+      font-size: 9px;
+      font-weight: 950;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    td {
+      height: 72px;
+      padding: 0 14px;
+      border-bottom: 1px solid #f1f2f4;
+      vertical-align: middle;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    tr:last-child td { border-bottom: 0; }
+    .code { font-weight: 950; line-height: 1.2; }
+    .project-title {
+      color: var(--ink);
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sub {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .money { font-weight: 950; }
+    .delta { margin-top: 4px; color: var(--green); font-size: 12px; font-weight: 850; }
+    .row-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+    .row-actions button {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 950;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, .07);
+    }
+    @media (max-width: 1400px) {
+      .control { grid-template-columns: minmax(330px, .9fr) minmax(0, 1fr); }
+      .view { grid-column: 2; justify-self: end; }
+      .metrics { grid-template-columns: repeat(4, minmax(92px, 1fr)); }
+      .metric { padding: 0 8px; }
+      .metric-icon { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="workspace">
+      <section class="command">
+        <div class="hero">
+          <div class="title-row">
+            <span class="module-chip">▣ Gestión de proyectos</span>
+            <div class="title-block">
+              <h1>Portafolios de infraestructura</h1>
+              <div class="meta">
+                <span>3 proyectos</span><span class="dot"></span>
+                <span>3 revisiones</span><span class="dot"></span>
+                <span>Santiago Bermeo</span>
+              </div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="icon-btn" title="Volver">←</button>
+            <button class="icon-btn" title="Equipo">♙</button>
+            <button class="icon-btn" title="Papelera">⌫</button>
+            <button class="primary-btn"><span>＋</span> Nuevo</button>
+          </div>
+        </div>
+
+        <div class="control">
+          <div class="search-group">
+            <div class="search">⌕ Buscar proyecto, cliente, código...</div>
+            <button class="filter">Filtros</button>
+          </div>
+
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-icon">▥</div>
+              <div class="metric-copy"><div class="metric-label">Proyectos</div><div class="metric-value">3</div></div>
+            </div>
+            <div class="metric">
+              <div class="metric-icon">▤</div>
+              <div class="metric-copy"><div class="metric-label">Revisiones</div><div class="metric-value">3</div></div>
+            </div>
+            <div class="metric">
+              <div class="metric-icon">△</div>
+              <div class="metric-copy"><div class="metric-label">Abiertas</div><div class="metric-value">0</div></div>
+            </div>
+            <div class="metric">
+              <div class="metric-icon">▦</div>
+              <div class="metric-copy"><div class="metric-label">Presupuesto</div><div class="metric-value">93.543,44</div></div>
+            </div>
+          </div>
+
+          <div class="view">
+            <button>Calendario</button>
+            <button class="active">Lista</button>
+            <button>Kanban</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:12%">ID / Cód</th>
+              <th style="width:25%">Proyecto</th>
+              <th style="width:13%">Actualización</th>
+              <th style="width:11%">Cliente</th>
+              <th style="width:12%">Estado</th>
+              <th style="width:13%">Presupuesto</th>
+              <th style="width:7%">Plazo</th>
+              <th style="width:7%">Fecha fin</th>
+              <th style="width:9%; text-align:right;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="code">#SantiagoBermeo-<br>2026-001</td>
+              <td><div class="project-title">Proyecto Prueba Compartir 1</div><div class="sub">Sin descripción registrada · 1 versión</div></td>
+              <td><strong>Rev. 0</strong><div class="sub">07/07/26 11:20</div></td>
+              <td>Santiago Bermeo</td>
+              <td><span class="status">Planificación</span></td>
+              <td><div class="money">93.489,01 USD</div><div class="delta">▲ 2,59 (0.00%)</div></td>
+              <td><strong>180 días</strong></td>
+              <td><strong>28/11/26</strong></td>
+              <td><div class="row-actions"><button>⧉</button><button>▣</button><button>⌫</button></div></td>
+            </tr>
+            <tr>
+              <td class="code">#JesúsBenitoSegura<br>TRF11</td>
+              <td><div class="project-title">Test APUS Optimizado - Recibido 11</div><div class="sub">Test Apus Optimizado · 1 versión</div></td>
+              <td><strong>Rev. 0</strong><div class="sub">19/06/26 11:23</div></td>
+              <td>Santiago Bermeo</td>
+              <td><span class="status">Planificación</span></td>
+              <td><div class="money">28,69 USD</div><div class="delta">▲ 28,69</div></td>
+              <td><strong>Sin plazo</strong></td>
+              <td><strong>19/6/26</strong></td>
+              <td><div class="row-actions"><button>⧉</button><button>▣</button><button>⌫</button></div></td>
+            </tr>
+            <tr>
+              <td class="code">#JesúsBenitoSegura<br>TRF10</td>
+              <td><div class="project-title">Test APUS Optimizado - Recibido 10</div><div class="sub">Test Apus Optimizado · 1 versión</div></td>
+              <td><strong>Rev. 0</strong><div class="sub">19/06/26 11:20</div></td>
+              <td>Santiago Bermeo</td>
+              <td><span class="status">Planificación</span></td>
+              <td><div class="money">25,74 USD</div><div class="delta">▲ 25,74</div></td>
+              <td><strong>Sin plazo</strong></td>
+              <td><strong>19/6/26</strong></td>
+              <td><div class="row-actions"><button>⧉</button><button>▣</button><button>⌫</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

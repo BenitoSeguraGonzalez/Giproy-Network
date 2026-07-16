@@ -35,7 +35,7 @@ const Presupuestos = () => {
 
                 navigate(`/proyectos/${proyectoId}/presupuestos/${presupuestos[0].id}`, { replace: true });
             } catch (error) {
-                console.error('Error resolviendo presupuesto operativo:', error);
+                globalThis.reportClientError?.('Error resolviendo presupuesto operativo:', error);
                 if (!cancelled) {
                     appAlert('No se pudo abrir el presupuesto operativo del proyecto.');
                     navigate('/proyectos', { replace: true });

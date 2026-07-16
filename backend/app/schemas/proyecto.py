@@ -35,6 +35,12 @@ class ProyectoResponse(ProyectoBase):
     revision: int
     fecha_creacion: datetime
     ultima_modificacion: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
+    deleted_by_user_id: Optional[int] = None
+    recycle_expires_at: Optional[datetime] = None
+    deletion_reason: Optional[str] = None
+    trash_original_nombre: Optional[str] = None
+    trash_original_codigo: Optional[str] = None
     num_revisiones: Optional[int] = 1
     sole_presupuesto_total: Optional[float] = None
     sole_indirectos_porcentaje: Optional[float] = None

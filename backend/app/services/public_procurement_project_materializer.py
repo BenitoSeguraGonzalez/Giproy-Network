@@ -20,6 +20,7 @@ from app.models.recurso import Recurso
 from app.models.subcategoria_item import SubcategoriaItem
 from app.models.unidad import Unidad
 from app.repositories.base_trabajo import base_trabajo_repo
+from app.services.public_procurement_import_certifier import public_procurement_import_certifier
 from app.services.presupuesto import calculate_presupuesto_totals
 
 
@@ -161,6 +162,15 @@ class PublicProcurementProjectMaterializer:
             cpc_assignments = self._assign_project_apu_cpc(db, budget_rows, proyecto, empresa, apu_map, current_user_id)
             self._ensure_indirectos(db, presupuesto, empresa)
             calculate_presupuesto_totals(db, presupuesto)
+            certification = public_procurement_import_certifier.certify_materialized_project(
+                db,
+                empresa_id=empresa.id,
+                base_trabajo_id=base.id,
+                presupuesto_id=presupuesto.id,
+            )
+            if not certification.get("valid"):
+                raise ValueError(self._format_certification_error(certification))
+            self._store_certification_trace(proyecto, certification)
             db.commit()
         except Exception:
             db.rollback()
@@ -185,6 +195,7 @@ class PublicProcurementProjectMaterializer:
                 "empty_apus_count": int(materialization_scope.get("empty_apus_count") or 0),
                 "apu_cpc_assignments_count": cpc_assignments,
                 "blocking_incidents_accepted": bool(blocking_incidents and superadmin_incident_consent),
+                "certification_status": certification.get("status"),
                 "presupuesto_total": float(presupuesto.total or 0),
                 "presupuesto_subtotal": float(presupuesto.subtotal or 0),
             },
@@ -933,6 +944,25 @@ class PublicProcurementProjectMaterializer:
                 observaciones="Indirecto inicial para presupuesto importado.",
                 fijo=bool(item.get("fijo", True)),
             ))
+
+    def _store_certification_trace(self, proyecto: Proyecto, certification: dict[str, Any]) -> None:
+        config = dict(proyecto.plantillas_config or {})
+        import_trace = dict(config.get("public_procurement_import") or {})
+        import_trace["apu_resource_certification"] = {
+            "status": certification.get("status"),
+            "valid": bool(certification.get("valid")),
+            "issue_counts": dict(certification.get("issue_counts") or {}),
+            "summary": dict(certification.get("summary") or {}),
+        }
+        config["public_procurement_import"] = import_trace
+        proyecto.plantillas_config = config
+
+    def _format_certification_error(self, certification: dict[str, Any]) -> str:
+        issue_counts = dict(certification.get("issue_counts") or {})
+        if not issue_counts:
+            return "La importacion no cumple la certificacion APUs-recursos-presupuesto."
+        detail = ", ".join(f"{code}: {count}" for code, count in sorted(issue_counts.items()))
+        return f"La importacion no cumple la certificacion APUs-recursos-presupuesto ({detail})."
 
 
 public_procurement_project_materializer = PublicProcurementProjectMaterializer()

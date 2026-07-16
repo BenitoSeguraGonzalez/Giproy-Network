@@ -6,6 +6,7 @@ import math
 import struct
 import urllib.parse
 import zlib
+import json
 from copy import copy
 from collections import OrderedDict
 from decimal import Decimal, ROUND_HALF_UP
@@ -37,6 +38,8 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import Image as ReportLabImage, KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from app.api.endpoints.maestros import TIPOS_PROYECTO, CATEGORIAS
+from app.services.apu_explosion import collect_apu_exploded_resources
+from app.services.apu_resource_readiness import apu_resource_readiness_service
 
 try:
     from PIL import Image as PILImage, ImageDraw
@@ -46,7 +49,7 @@ except Exception:  # pragma: no cover - entorno sin Pillow
 
 class ReportingService:
     REPORT_AUTHOR = "GIPROY Network"
-    REPORT_EXPORT_RENDER_VERSION = "2026-05-14-edt-listado-document-blocks-v4"
+    REPORT_EXPORT_RENDER_VERSION = "2026-06-27-cronograma-gantt-draft-report-warnings-v1"
     PROJECT_TYPES_BY_ID = {int(item["id"]): item.get("descripcion") or "" for item in TIPOS_PROYECTO}
     PROJECT_CATEGORIES_BY_ID = {int(item["id"]): item.get("descripcion") or item.get("description") or "" for item in CATEGORIAS}
     INDIRECTOS_CATEGORY_LABELS = {
@@ -234,6 +237,40 @@ class ReportingService:
         output.seek(0)
         return output
 
+    def _draw_pdf_watermark(
+        self,
+        pdf_canvas: canvas.Canvas,
+        page_width: float,
+        page_height: float,
+        watermark_text: Optional[str] = None,
+    ) -> None:
+        text = str(watermark_text or "").strip().upper()
+        if not text:
+            return
+
+        pdf_canvas.saveState()
+        try:
+            pdf_canvas.setFillAlpha(0.12)
+        except Exception:
+            pass
+        pdf_canvas.setFillColor(colors.HexColor("#6B7280"))
+        font_size = min(max(page_width / 15, 22), 42)
+        pdf_canvas.setFont("Helvetica-Bold", font_size)
+        pdf_canvas.translate(page_width / 2, page_height / 2)
+        pdf_canvas.rotate(34)
+        pdf_canvas.drawCentredString(0, 0, text)
+        pdf_canvas.restoreState()
+
+        pdf_canvas.saveState()
+        try:
+            pdf_canvas.setFillAlpha(0.62)
+        except Exception:
+            pass
+        pdf_canvas.setFillColor(colors.HexColor("#6B7280"))
+        pdf_canvas.setFont("Helvetica-Bold", 6.5)
+        pdf_canvas.drawCentredString(page_width / 2, 6 * mm, text)
+        pdf_canvas.restoreState()
+
     def _clear_sheet_headers_and_footers(self, ws) -> None:
         for header_name in ("oddHeader", "oddFooter", "evenHeader", "evenFooter", "firstHeader", "firstFooter"):
             header = getattr(ws, header_name, None)
@@ -262,7 +299,12 @@ class ReportingService:
         else:
             ws.sheet_properties.pageSetUpPr.fitToPage = True
 
-    def _convert_excel_buffer_to_pdf(self, xlsx_buffer: io.BytesIO, timeout_seconds: int = 120) -> io.BytesIO:
+    def _convert_excel_buffer_to_pdf(
+        self,
+        xlsx_buffer: io.BytesIO,
+        timeout_seconds: int = 120,
+        watermark_text: Optional[str] = None,
+    ) -> io.BytesIO:
         try:
             workbook = openpyxl.load_workbook(io.BytesIO(xlsx_buffer.getvalue()), data_only=True)
         except Exception as exc:
@@ -276,7 +318,7 @@ class ReportingService:
 
         rendered_any_sheet = False
         for worksheet in workbook.worksheets:
-            rendered_any_sheet = self._render_workbook_sheet_to_pdf(pdf, worksheet) or rendered_any_sheet
+            rendered_any_sheet = self._render_workbook_sheet_to_pdf(pdf, worksheet, watermark_text) or rendered_any_sheet
 
         if not rendered_any_sheet:
             raise RuntimeError("El archivo Excel no contiene hojas imprimibles para convertir a PDF.")
@@ -572,7 +614,12 @@ class ReportingService:
 
         return compact_scale, compact_usable_height, compact_keep_groups, compact_page_ranges
 
-    def _render_workbook_sheet_to_pdf(self, pdf: canvas.Canvas, ws) -> bool:
+    def _render_workbook_sheet_to_pdf(
+        self,
+        pdf: canvas.Canvas,
+        ws,
+        watermark_text: Optional[str] = None,
+    ) -> bool:
         min_col, min_row, max_col, max_row = self._worksheet_print_bounds(ws)
         column_indexes = [index for index in range(min_col, max_col + 1) if self._worksheet_column_width_points(ws, index) > 0]
         row_indexes = [index for index in range(min_row, max_row + 1) if self._worksheet_row_height_points(ws, index) > 0]
@@ -806,6 +853,7 @@ class ReportingService:
                 except Exception:
                     continue
 
+            self._draw_pdf_watermark(pdf, page_width, page_height, watermark_text)
             pdf.showPage()
 
         return True
@@ -817,6 +865,7 @@ class ReportingService:
         template_id: str,
         use_omniclass: bool,
         apus_map: Dict[int, Any],
+        official_source_signature: Tuple[Any, ...] | None = None,
     ) -> Tuple[Any, ...]:
         presupuesto_stamp = getattr(presupuesto, "ultima_modificacion", None) or getattr(presupuesto, "fecha_creacion", None)
         apu_stamps = [
@@ -834,6 +883,33 @@ class ReportingService:
             presupuesto_stamp.isoformat() if presupuesto_stamp else "",
             len(apus_map),
             latest_apu_stamp.isoformat() if latest_apu_stamp else "",
+            "official_source",
+            *(official_source_signature or ()),
+        )
+
+    def _build_presupuesto_official_source_signature(
+        self,
+        db: Any,
+        presupuesto: Any,
+        empresa_id: int,
+    ) -> Tuple[Any, ...]:
+        try:
+            from app.services.project_functional_modification import project_functional_modification_service
+        except Exception:
+            return ()
+        _, official_source = project_functional_modification_service.resolve_project_apu_price_overrides(
+            db,
+            empresa_id=empresa_id,
+            proyecto_id=getattr(presupuesto, "proyecto_id", None),
+            base_trabajo_id=getattr(getattr(presupuesto, "proyecto", None), "base_trabajo_id", None),
+            revision=getattr(presupuesto, "revision", None),
+        )
+        if not isinstance(official_source, dict):
+            return ()
+        return (
+            official_source.get("source"),
+            official_source.get("origin"),
+            int(official_source.get("active_modification_id") or 0),
         )
 
     def _build_stakeholders_export_signature(
@@ -927,11 +1003,16 @@ class ReportingService:
         template_id: str = "001",
         variant: Optional[str] = None,
         export_format: str = "xlsx",
+        filters: Optional[Dict[str, Any]] = None,
+        project_id: Optional[int] = None,
+        base_trabajo_id: Optional[int] = None,
+        revision: Optional[int] = None,
     ) -> Tuple[Any, ...]:
         report_type = str(report_type or "").lower()
         export_format = str(export_format or "xlsx").lower()
         template_id = template_id or "001"
         entity_ids = [int(entity_id) for entity_id in (entity_ids or [])]
+        filters_signature = self.normalize_report_filters_signature(filters)
 
         if report_type == "apu":
             apus_map = self._get_apus_map(db, entity_ids, empresa_id)
@@ -953,6 +1034,12 @@ class ReportingService:
                 int(empresa_id),
                 tuple(entity_ids),
                 latest_stamp.isoformat() if latest_stamp else "",
+                "project_context",
+                int(project_id or 0),
+                int(base_trabajo_id or 0),
+                int(revision or 0),
+                "filters",
+                filters_signature,
             )
 
         if report_type in {"presupuesto", "vae", "polinomica"}:
@@ -984,6 +1071,10 @@ class ReportingService:
                 presupuesto_stamp.isoformat() if presupuesto_stamp else "",
                 apu_count,
                 latest_apu_stamp,
+                "official_source",
+                *self._build_presupuesto_official_source_signature(db, presupuesto, empresa_id),
+                "filters",
+                filters_signature,
             )
 
         if report_type == "edt":
@@ -1003,6 +1094,8 @@ class ReportingService:
                 int(empresa_id),
                 int(entity_ids[0]),
                 proyecto_stamp.isoformat() if proyecto_stamp else "",
+                "filters",
+                filters_signature,
             )
 
         if report_type == "stakeholders":
@@ -1016,6 +1109,23 @@ class ReportingService:
                 int(empresa_id),
                 int(entity_ids[0]) if entity_ids else 0,
                 self._build_stakeholders_export_signature(db, entity_ids[0], empresa_id) if entity_ids else (),
+                "filters",
+                filters_signature,
+            )
+
+        if report_type == "cronograma_valorado" and entity_ids:
+            return (
+                "export",
+                self.REPORT_EXPORT_RENDER_VERSION,
+                report_type,
+                export_format,
+                template_id,
+                variant or "",
+                int(empresa_id),
+                tuple(entity_ids),
+                self._gantt_draft_report_signature(db, entity_ids[0], empresa_id),
+                "filters",
+                filters_signature,
             )
 
         return (
@@ -1027,7 +1137,107 @@ class ReportingService:
             variant or "",
             int(empresa_id),
             tuple(entity_ids),
+            "filters",
+            filters_signature,
         )
+
+    def normalize_report_filters_signature(self, filters: Optional[Dict[str, Any]]) -> str:
+        if not filters:
+            return ""
+        try:
+            return json.dumps(filters, sort_keys=True, default=str, ensure_ascii=True, separators=(",", ":"))
+        except TypeError:
+            return str(sorted(filters.items()))
+
+    def _summarize_gantt_draft_for_reporting(
+        self,
+        db: Any,
+        presupuesto_id: int,
+        empresa_id: int,
+    ) -> Dict[str, Any]:
+        if db is None:
+            return {
+                "has_pending": False,
+                "pending_count": 0,
+                "invalidated_count": 0,
+                "adjustment_required_count": 0,
+                "total_count": 0,
+            }
+        try:
+            from app.models.cronograma_gantt_control import CronogramaGanttDraft
+        except Exception:
+            return {
+                "has_pending": False,
+                "pending_count": 0,
+                "invalidated_count": 0,
+                "adjustment_required_count": 0,
+                "total_count": 0,
+            }
+        draft = (
+            db.query(CronogramaGanttDraft)
+            .filter(
+                CronogramaGanttDraft.presupuesto_id == int(presupuesto_id),
+                CronogramaGanttDraft.empresa_id == int(empresa_id),
+                CronogramaGanttDraft.status == "draft",
+            )
+            .order_by(CronogramaGanttDraft.id.desc())
+            .first()
+        )
+        if draft is None:
+            return {
+                "has_pending": False,
+                "pending_count": 0,
+                "invalidated_count": 0,
+                "adjustment_required_count": 0,
+                "total_count": 0,
+            }
+        intentions = draft.intentions if isinstance(draft.intentions, list) else []
+        pending_count = sum(1 for item in intentions if isinstance(item, dict) and item.get("status") == "pending")
+        invalidated_count = sum(1 for item in intentions if isinstance(item, dict) and item.get("status") == "invalidated")
+        adjustment_required_count = sum(1 for item in intentions if isinstance(item, dict) and item.get("status") == "adjustment_required")
+        total_count = pending_count + invalidated_count + adjustment_required_count
+        return {
+            "has_pending": total_count > 0,
+            "draft_id": getattr(draft, "id", None),
+            "draft_version": int(getattr(draft, "version", 0) or 0),
+            "pending_count": pending_count,
+            "invalidated_count": invalidated_count,
+            "adjustment_required_count": adjustment_required_count,
+            "total_count": total_count,
+            "message": (
+                f"Existen {total_count} trabajo(s) pendientes en borrador Gantt. "
+                "No se incluyen en los calculos oficiales del reporte."
+            ) if total_count > 0 else "",
+        }
+
+    def _gantt_draft_report_signature(self, db: Any, presupuesto_id: int, empresa_id: int) -> Tuple[Any, ...]:
+        summary = self._summarize_gantt_draft_for_reporting(db, presupuesto_id, empresa_id)
+        return (
+            int(summary.get("draft_id") or 0),
+            int(summary.get("draft_version") or 0),
+            int(summary.get("pending_count") or 0),
+            int(summary.get("invalidated_count") or 0),
+            int(summary.get("adjustment_required_count") or 0),
+        )
+
+    def _attach_gantt_draft_report_warning(
+        self,
+        item: Dict[str, Any],
+        draft_summary: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        if not draft_summary.get("has_pending"):
+            return item
+        warnings = list(item.get("warnings") or [])
+        warnings.append({
+            "code": "gantt_draft_pending_not_reported",
+            "message": draft_summary.get("message") or "Existen trabajos pendientes en borrador Gantt no incluidos en este reporte.",
+            "pending_count": int(draft_summary.get("pending_count") or 0),
+            "invalidated_count": int(draft_summary.get("invalidated_count") or 0),
+            "adjustment_required_count": int(draft_summary.get("adjustment_required_count") or 0),
+        })
+        item["warnings"] = warnings
+        item["gantt_draft_summary"] = draft_summary
+        return item
 
     def get_cached_report_export(self, cache_key: Tuple[Any, ...]) -> Optional[bytes]:
         return self._get_cached_bytes(self._report_export_cache, cache_key)
@@ -3405,7 +3615,11 @@ class ReportingService:
         ]))
         return table
 
-    def _build_hierarchy_document_pdf(self, preview: Dict[str, Any]) -> io.BytesIO:
+    def _build_hierarchy_document_pdf(
+        self,
+        preview: Dict[str, Any],
+        watermark_text: Optional[str] = None,
+    ) -> io.BytesIO:
         report_type = str(preview.get("report_type") or "").lower()
         item = (preview.get("items") or [{}])[0]
         is_edt = report_type == "edt"
@@ -3648,12 +3862,20 @@ class ReportingService:
             footer = f"{acronym} · {project_code} · pág. {_doc.page}"
             pdf_canvas.drawRightString(A4[0] - 18 * mm, 10 * mm, footer)
             pdf_canvas.restoreState()
+            self._draw_pdf_watermark(pdf_canvas, A4[0], A4[1], watermark_text)
 
         doc.build(story, onFirstPage=apply_pdf_metadata, onLaterPages=apply_pdf_metadata)
         output.seek(0)
         return output
 
-    def _build_pdf_report(self, title: str, items: List[Dict[str, Any]], money_decimals: int = 2, calc_decimals: int = 4) -> io.BytesIO:
+    def _build_pdf_report(
+        self,
+        title: str,
+        items: List[Dict[str, Any]],
+        money_decimals: int = 2,
+        calc_decimals: int = 4,
+        watermark_text: Optional[str] = None,
+    ) -> io.BytesIO:
         output = io.BytesIO()
         doc = SimpleDocTemplate(
             output,
@@ -3671,6 +3893,7 @@ class ReportingService:
             canvas.setAuthor(self.REPORT_AUTHOR)
             canvas.setCreator(self.REPORT_AUTHOR)
             canvas.setTitle(title or "Reporte")
+            self._draw_pdf_watermark(canvas, A4[0], A4[1], watermark_text)
 
         styles = getSampleStyleSheet()
         eyebrow_style = ParagraphStyle(
@@ -5303,8 +5526,54 @@ class ReportingService:
             "lineas": lineas,
         }
 
-    def generate_apu_report(self, db: Any, apu_id: int, empresa_id: int, template_id: str = "001") -> io.BytesIO:
+    def _apply_official_apu_report_overlay(
+        self,
+        db: Any,
+        apu: Any,
+        empresa_id: int,
+        *,
+        project_id: Optional[int] = None,
+        base_trabajo_id: Optional[int] = None,
+        revision: Optional[int] = None,
+    ) -> Any:
+        if not project_id or not apu:
+            return apu
+        from app.services.project_functional_modification import project_functional_modification_service
+
+        overrides, _official_source = project_functional_modification_service.resolve_project_apu_price_overrides(
+            db,
+            empresa_id=empresa_id,
+            proyecto_id=project_id,
+            base_trabajo_id=base_trabajo_id or getattr(apu, "base_trabajo_id", None),
+            revision=revision if revision is not None else getattr(apu, "revision", None),
+        )
+        override = overrides.get(int(getattr(apu, "id", 0) or 0))
+        if override is None:
+            return apu
+        report_apu = copy(apu)
+        report_apu.precio_unitario_total = override
+        return report_apu
+
+    def generate_apu_report(
+        self,
+        db: Any,
+        apu_id: int,
+        empresa_id: int,
+        template_id: str = "001",
+        *,
+        project_id: Optional[int] = None,
+        base_trabajo_id: Optional[int] = None,
+        revision: Optional[int] = None,
+    ) -> io.BytesIO:
         apu = self._get_apu(db, apu_id, empresa_id)
+        apu = self._apply_official_apu_report_overlay(
+            db,
+            apu,
+            empresa_id,
+            project_id=project_id,
+            base_trabajo_id=base_trabajo_id,
+            revision=revision,
+        )
         format_config = self._get_empresa_format_config(db, empresa_id)
         use_omniclass = self._resolve_use_omniclass(format_config, template_id)
         template_data = self._build_apu_template_data(apu, format_config["money_decimals"])
@@ -5328,7 +5597,17 @@ class ReportingService:
         self._apply_omniclass_visibility(ws, use_omniclass)
         return self._save_workbook_buffer(wb)
 
-    def generate_apu_report_bundle(self, db: Any, apu_ids: List[int], empresa_id: int, template_id: str = "001") -> io.BytesIO:
+    def generate_apu_report_bundle(
+        self,
+        db: Any,
+        apu_ids: List[int],
+        empresa_id: int,
+        template_id: str = "001",
+        *,
+        project_id: Optional[int] = None,
+        base_trabajo_id: Optional[int] = None,
+        revision: Optional[int] = None,
+    ) -> io.BytesIO:
         if not apu_ids:
             raise ValueError("No se recibieron APUs para exportar.")
         format_config = self._get_empresa_format_config(db, empresa_id)
@@ -5349,6 +5628,14 @@ class ReportingService:
             apu = apus_map.get(apu_id)
             if not apu:
                 raise ValueError(f"APU no encontrado: {apu_id}")
+            apu = self._apply_official_apu_report_overlay(
+                db,
+                apu,
+                empresa_id,
+                project_id=project_id,
+                base_trabajo_id=base_trabajo_id,
+                revision=revision,
+            )
             template_data = self._build_apu_template_data(apu, format_config["money_decimals"])
             ws = wb.copy_worksheet(template_ws)
             ws.title = self._sanitize_sheet_title(apu.codigo, f"APU {idx}")
@@ -5389,6 +5676,7 @@ class ReportingService:
             template_id,
             use_omniclass,
             apus_map,
+            official_source_signature=self._build_presupuesto_official_source_signature(db, presupuesto, empresa_id),
         )
         cached_payload = self._get_cached_bytes(self._workbook_bytes_cache, cache_key)
         if cached_payload is not None:
@@ -5412,6 +5700,14 @@ class ReportingService:
             apu = apus_map.get(apu_id)
             if not apu:
                 raise ValueError(f"APU no encontrado: {apu_id}")
+            apu = self._apply_official_apu_report_overlay(
+                db,
+                apu,
+                empresa_id,
+                project_id=getattr(presupuesto, "proyecto_id", None),
+                base_trabajo_id=getattr(getattr(presupuesto, "proyecto", None), "base_trabajo_id", None),
+                revision=getattr(presupuesto, "revision", None),
+            )
             template_data = self._build_apu_template_data(apu, format_config["money_decimals"])
             ws = wb.copy_worksheet(seed_ws)
             ws.title = self._sanitize_sheet_title(apu.codigo, f"APU {idx}")
@@ -5442,7 +5738,19 @@ class ReportingService:
         output.seek(0)
         return output
 
-    def preview_report(self, db: Any, report_type: str, entity_ids: List[int], empresa_id: int, template_id: str = "001", variant: Optional[str] = None) -> Dict[str, Any]:
+    def preview_report(
+        self,
+        db: Any,
+        report_type: str,
+        entity_ids: List[int],
+        empresa_id: int,
+        template_id: str = "001",
+        variant: Optional[str] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        project_id: Optional[int] = None,
+        base_trabajo_id: Optional[int] = None,
+        revision: Optional[int] = None,
+    ) -> Dict[str, Any]:
         items = []
         title = "Reporte"
 
@@ -5455,6 +5763,14 @@ class ReportingService:
                 apu = apus_map.get(apu_id)
                 if not apu:
                     raise ValueError(f"APU no encontrado: {apu_id}")
+                apu = self._apply_official_apu_report_overlay(
+                    db,
+                    apu,
+                    empresa_id,
+                    project_id=project_id,
+                    base_trabajo_id=base_trabajo_id,
+                    revision=revision,
+                )
                 items.append(
                     self._build_apu_report_payload(
                         apu,
@@ -5480,6 +5796,14 @@ class ReportingService:
                     apu = apus_map.get(apu_id)
                     if not apu:
                         raise ValueError(f"APU no encontrado: {apu_id}")
+                    apu = self._apply_official_apu_report_overlay(
+                        db,
+                        apu,
+                        empresa_id,
+                        project_id=getattr(presupuesto, "proyecto_id", None),
+                        base_trabajo_id=getattr(getattr(presupuesto, "proyecto", None), "base_trabajo_id", None),
+                        revision=getattr(presupuesto, "revision", None),
+                    )
                     items.append(
                         self._build_apu_report_payload(
                             apu,
@@ -5490,6 +5814,7 @@ class ReportingService:
                     )
         elif report_type == "cronograma_valorado":
             report_variant = str(variant or "valorado").lower()
+            gantt_draft_summary = self._summarize_gantt_draft_for_reporting(db, entity_ids[0], empresa_id)
             if report_variant in {"cash_flow", "flujo_caja", "caja"}:
                 title = "Reporte de Flujo de Caja"
                 items.append(self._build_cronograma_cash_flow_preview(db, entity_ids[0], empresa_id))
@@ -5504,9 +5829,16 @@ class ReportingService:
                 items.append(self._build_cronograma_gantt_preview(db, entity_ids[0], empresa_id))
                 items.append(self._build_cronograma_valorado_preview(db, entity_ids[0], empresa_id))
                 items.append(self._build_cronograma_cash_flow_preview(db, entity_ids[0], empresa_id))
+            elif self._is_cronograma_resource_usage_variant(report_variant):
+                title = "Reporte de Uso de Recursos por Rango" if self._is_cronograma_resource_usage_range_variant(report_variant) else "Reporte de Uso de Recursos"
+                items.append(self._build_cronograma_resource_usage_payload(db, entity_ids[0], empresa_id, filters if self._is_cronograma_resource_usage_range_variant(report_variant) else None))
             else:
                 title = "Reporte de Cronograma Valorado"
                 items.append(self._build_cronograma_valorado_preview(db, entity_ids[0], empresa_id))
+            items = [
+                self._attach_gantt_draft_report_warning(item, gantt_draft_summary)
+                for item in items
+            ]
         elif report_type == "edt":
             report_variant = variant or "listado"
             title = f"Reporte EDT · {report_variant}"
@@ -5554,21 +5886,62 @@ class ReportingService:
             "report_type": report_type,
             "template_id": template_id,
             "variant": variant,
+            "filters": filters,
             "title": title,
             "selection_count": len(items),
             "items": items,
         }
 
-    def generate_preview_pdf(self, db: Any, report_type: str, entity_ids: List[int], empresa_id: int, template_id: str = "001", variant: Optional[str] = None) -> io.BytesIO:
-        preview = self.preview_report(db, report_type, entity_ids, empresa_id, template_id, variant)
+    def generate_preview_pdf(
+        self,
+        db: Any,
+        report_type: str,
+        entity_ids: List[int],
+        empresa_id: int,
+        template_id: str = "001",
+        variant: Optional[str] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        watermark_text: Optional[str] = None,
+        project_id: Optional[int] = None,
+        base_trabajo_id: Optional[int] = None,
+        revision: Optional[int] = None,
+    ) -> io.BytesIO:
+        if report_type == "cronograma_valorado" and self._is_cronograma_resource_usage_variant(variant):
+            resource_filters = filters if self._is_cronograma_resource_usage_range_variant(variant) else None
+            gantt_draft_summary = self._summarize_gantt_draft_for_reporting(db, entity_ids[0], empresa_id)
+            resource_payload = self._attach_gantt_draft_report_warning(
+                self._build_cronograma_resource_usage_payload(db, entity_ids[0], empresa_id, resource_filters),
+                gantt_draft_summary,
+            )
+            return self._build_cronograma_resource_usage_executive_pdf(
+                db,
+                entity_ids[0],
+                empresa_id,
+                resource_filters,
+                watermark_text,
+                payload_override=resource_payload,
+            )
+        preview = self.preview_report(
+            db,
+            report_type,
+            entity_ids,
+            empresa_id,
+            template_id,
+            variant,
+            filters,
+            project_id=project_id,
+            base_trabajo_id=base_trabajo_id,
+            revision=revision,
+        )
         if report_type in {"edo", "edt"}:
-            return self._build_hierarchy_document_pdf(preview)
+            return self._build_hierarchy_document_pdf(preview, watermark_text)
         format_config = self._get_empresa_format_config(db, empresa_id)
         return self._build_pdf_report(
             preview.get("title") or "Reporte",
             preview.get("items") or [],
             format_config["money_decimals"],
             format_config["calc_decimals"],
+            watermark_text,
         )
 
     def generate_edo_report(self, db: Any, proyecto_id: int, empresa_id: int) -> io.BytesIO:
@@ -5837,6 +6210,410 @@ class ReportingService:
 
     def _format_cronograma_period_values(self, values: List[Any], decimals: int = 2, suffix: str = "") -> str:
         return " | ".join(f"{self._format_fixed(value, decimals)}{suffix}" for value in values)
+
+    def _is_cronograma_resource_usage_variant(self, variant: Optional[str]) -> bool:
+        return str(variant or "").strip().lower() in {
+            "resources",
+            "resource_usage",
+            "uso_recursos",
+            "uso_de_recursos",
+            "resources_range",
+            "resource_usage_range",
+            "uso_recursos_rango",
+        }
+
+    def _is_cronograma_resource_usage_range_variant(self, variant: Optional[str]) -> bool:
+        return str(variant or "").strip().lower() in {
+            "resources_range",
+            "resource_usage_range",
+            "uso_recursos_rango",
+        }
+
+    def _decimal_value(self, value: Any, default: str = "0") -> Decimal:
+        if value in (None, ""):
+            return Decimal(default)
+        try:
+            return Decimal(str(value))
+        except Exception:
+            return Decimal(default)
+
+    def _normalize_report_datetime(self, value: Any, end_of_day: bool = False) -> Optional[datetime]:
+        if value in (None, ""):
+            return None
+        parsed: Optional[datetime] = None
+        if isinstance(value, datetime):
+            parsed = value
+        elif isinstance(value, date):
+            parsed = datetime.combine(value, time.max if end_of_day else time.min)
+        elif isinstance(value, str):
+            raw_value = value.strip()
+            if not raw_value:
+                return None
+            if raw_value.endswith("Z"):
+                raw_value = f"{raw_value[:-1]}+00:00"
+            try:
+                parsed = datetime.fromisoformat(raw_value)
+            except ValueError:
+                try:
+                    parsed_date = date.fromisoformat(raw_value[:10])
+                    parsed = datetime.combine(parsed_date, time.max if end_of_day else time.min)
+                except ValueError:
+                    return None
+            if "T" not in raw_value and len(raw_value) <= 10:
+                parsed = datetime.combine(parsed.date(), time.max if end_of_day else time.min)
+        if parsed is None:
+            return None
+        if parsed.tzinfo is not None:
+            parsed = parsed.astimezone(timezone.utc).replace(tzinfo=None)
+        return parsed.replace(tzinfo=None)
+
+    def _format_report_date_filter(self, value: Optional[datetime]) -> Optional[str]:
+        return value.date().isoformat() if value else None
+
+    def _format_report_date_label(self, value: Optional[datetime]) -> str:
+        return value.strftime("%d/%m/%Y") if value else "-"
+
+    def _resolve_resource_usage_range_context(
+        self,
+        periods: List[Any],
+        filters: Optional[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        filters = filters or {}
+        period_bounds = [
+            (
+                self._normalize_report_datetime(getattr(period, "starts_at", None) if not isinstance(period, dict) else period.get("starts_at")),
+                self._normalize_report_datetime(getattr(period, "ends_at", None) if not isinstance(period, dict) else period.get("ends_at"), end_of_day=True),
+            )
+            for period in periods
+        ]
+        available_starts = [start for start, _ in period_bounds if start is not None]
+        available_ends = [end for _, end in period_bounds if end is not None]
+        default_start = min(available_starts) if available_starts else None
+        default_end = max(available_ends) if available_ends else None
+
+        start_value = filters.get("date_start") or filters.get("fecha_inicio") or filters.get("start_date")
+        end_value = filters.get("date_end") or filters.get("fecha_fin") or filters.get("end_date")
+        start_at = self._normalize_report_datetime(start_value) or default_start
+        end_at = self._normalize_report_datetime(end_value, end_of_day=True) or default_end
+
+        if start_at and end_at and start_at > end_at:
+            raise ValueError("La fecha de inicio del reporte de recursos no puede ser posterior a la fecha final.")
+
+        period_factors: List[Decimal] = []
+        selected_period_indexes: List[int] = []
+        range_active = bool(filters)
+        for index, (period_start, period_end) in enumerate(period_bounds):
+            factor = Decimal("1")
+            if range_active:
+                factor = Decimal("0")
+                if period_start is not None and period_end is not None and start_at is not None and end_at is not None:
+                    total_seconds = Decimal(str(max((period_end - period_start).total_seconds(), 0)))
+                    if total_seconds > 0:
+                        overlap_start = max(period_start, start_at)
+                        overlap_end = min(period_end, end_at)
+                        overlap_seconds = Decimal(str(max((overlap_end - overlap_start).total_seconds(), 0)))
+                        factor = min(Decimal("1"), max(Decimal("0"), overlap_seconds / total_seconds))
+            period_factors.append(factor)
+            if not range_active or factor > 0:
+                selected_period_indexes.append(index)
+
+        return {
+            "range_active": range_active,
+            "start_at": start_at,
+            "end_at": end_at,
+            "period_factors": period_factors,
+            "selected_period_indexes": selected_period_indexes,
+            "filters": {
+                "date_start": self._format_report_date_filter(start_at),
+                "date_end": self._format_report_date_filter(end_at),
+            },
+        }
+
+
+    def _get_apu_for_resource_usage(self, db: Any, apu_id: int, empresa_id: int) -> Any:
+        from app.models.apu import APU, APULinea
+        from app.models.recurso import Recurso
+
+        apu = (
+            db.query(APU)
+            .options(
+                selectinload(APU.subcategoria_item),
+                selectinload(APU.lineas)
+                .selectinload(APULinea.recurso)
+                .selectinload(Recurso.unidad),
+                selectinload(APU.lineas)
+                .selectinload(APULinea.recurso)
+                .selectinload(Recurso.subcategoria_item),
+                selectinload(APU.lineas).selectinload(APULinea.apu_hijo),
+            )
+            .filter(APU.id == apu_id, APU.empresa_id == empresa_id)
+            .first()
+        )
+        if not apu:
+            raise ValueError(f"APU no encontrado: {apu_id}")
+        return apu
+
+    def _resolve_resource_usage_category(self, recurso: Any, linea: Any = None) -> Tuple[int, str]:
+        category_id = None
+        subcategoria = getattr(recurso, "subcategoria_item", None) if recurso else None
+        if subcategoria is not None:
+            category_id = getattr(subcategoria, "subcategoria_codigo", None)
+        if category_id is None and recurso is not None:
+            try:
+                category_id = int(str(getattr(recurso, "codigo", "") or "").split("-")[0])
+            except (ValueError, IndexError):
+                category_id = None
+        if category_id is None and linea is not None:
+            category_id = self._resolve_apu_line_category(linea)
+        try:
+            category_id = int(category_id or 1)
+        except (TypeError, ValueError):
+            category_id = 1
+        labels = {
+            1: "1. Equipo/Herramientas",
+            2: "2. Materiales",
+            3: "3. Transporte",
+            4: "4. Mano de Obra",
+        }
+        return category_id, labels.get(category_id, f"{category_id}. Recursos")
+
+    def _resolve_resource_usage_subcategory(self, recurso: Any) -> str:
+        subcategoria = getattr(recurso, "subcategoria_item", None) if recurso else None
+        if not subcategoria:
+            return "-"
+        code = str(getattr(subcategoria, "codigo", "") or "").strip()
+        description = str(getattr(subcategoria, "descripcion", "") or "").strip()
+        if code and description:
+            return f"{code} - {description}"
+        return description or code or "-"
+
+    def _collect_cronograma_resource_usage_from_apu(
+        self,
+        db: Any,
+        apu: Any,
+        empresa_id: int,
+        factor: Decimal,
+        accumulator: Dict[int, Dict[str, Any]],
+        visited: Optional[set] = None,
+    ) -> None:
+        labels = {
+            1: "1. Equipo/Herramientas",
+            2: "2. Materiales",
+            3: "3. Transporte",
+            4: "4. Mano de Obra",
+        }
+        exploded = collect_apu_exploded_resources(
+            apu,
+            inherited_factor=factor,
+            accumulator={},
+            active_path=visited,
+            child_loader=(
+                (lambda child_id: self._get_apu_for_resource_usage(db, int(child_id), empresa_id))
+                if db is not None
+                else None
+            ),
+            category_labels=labels,
+        )
+        for item in exploded.values():
+            recurso_id = int(item.get("recurso_id") or 0)
+            if recurso_id <= 0:
+                continue
+            category_id = int(item.get("categoria_id") or 1)
+            entry = accumulator.setdefault(recurso_id, {
+                "recurso_id": recurso_id,
+                "categoria_id": category_id,
+                "categoria": str(item.get("categoria") or labels.get(category_id, f"{category_id}. Recursos")),
+                "subcategoria": str(item.get("subcategoria") or "-"),
+                "recurso": self._normalize_report_description(str(item.get("descripcion") or "")),
+                "codigo": str(item.get("codigo") or "").strip(),
+                "unidad": str(item.get("unidad") or "").strip(),
+                "precio_unitario": self._decimal_value(item.get("precio_unitario")),
+                "cantidad_base": Decimal("0"),
+            })
+            entry["cantidad_base"] += self._decimal_value(item.get("cantidad"))
+
+    def _build_cronograma_resource_usage_payload(
+        self,
+        db: Any,
+        presupuesto_id: int,
+        empresa_id: int,
+        filters: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        presupuesto, cronograma = self._get_cronograma_valorado_payload(db, presupuesto_id, empresa_id)
+        apu_resource_readiness_service.ensure_budget_ready(db, presupuesto, empresa_id)
+        periods = list(getattr(cronograma, "periods", []) or [])
+        period_count = len(periods)
+        range_context = self._resolve_resource_usage_range_context(periods, filters)
+        selected_period_indexes = list(range_context["selected_period_indexes"])
+        selected_periods = [periods[index] for index in selected_period_indexes]
+        selected_period_position = {
+            original_index: selected_index
+            for selected_index, original_index in enumerate(selected_period_indexes)
+        }
+        period_factors = list(range_context["period_factors"])
+        selected_period_count = len(selected_periods)
+        budget_lines_by_id = {
+            int(getattr(line, "id", 0)): line
+            for line in list(getattr(presupuesto, "detalle", []) or [])
+            if getattr(line, "id", None) is not None
+        }
+        apu_cache: Dict[int, Any] = {}
+        resources: Dict[int, Dict[str, Any]] = {}
+
+        for row in list(getattr(cronograma, "rows", []) or []):
+            source_line = budget_lines_by_id.get(int(getattr(row, "linea_id", 0) or 0))
+            apu = getattr(source_line, "apu", None) if source_line is not None else None
+            apu_id = getattr(row, "apu_id", None) or getattr(source_line, "apu_id", None)
+            if apu is None and apu_id:
+                apu_id_int = int(apu_id)
+                apu = apu_cache.get(apu_id_int)
+                if apu is None:
+                    apu = self._get_apu_for_resource_usage(db, apu_id_int, empresa_id)
+                    apu_cache[apu_id_int] = apu
+            if apu is None:
+                continue
+
+            row_resources: Dict[int, Dict[str, Any]] = {}
+            row_quantity = self._decimal_value(getattr(row, "cantidad", None) or getattr(source_line, "cantidad", None))
+            self._collect_cronograma_resource_usage_from_apu(db, apu, empresa_id, row_quantity, row_resources)
+
+            distribution = list(getattr(row, "distribution", []) or [])
+            if period_count:
+                distribution = (distribution + [0] * period_count)[:period_count]
+            for resource_id, row_resource in row_resources.items():
+                target = resources.setdefault(resource_id, {
+                    **{key: row_resource[key] for key in (
+                        "recurso_id",
+                        "categoria_id",
+                        "categoria",
+                        "subcategoria",
+                        "recurso",
+                        "codigo",
+                        "unidad",
+                        "precio_unitario",
+                    )},
+                    "period_quantities": [Decimal("0") for _ in range(selected_period_count)],
+                    "period_costs": [Decimal("0") for _ in range(selected_period_count)],
+                    "cantidad_total": Decimal("0"),
+                    "costo_total": Decimal("0"),
+                })
+                quantity_base = self._decimal_value(row_resource.get("cantidad_base"))
+                price = self._decimal_value(row_resource.get("precio_unitario"))
+                total_quantity = Decimal("0")
+                total_cost = Decimal("0")
+                if period_count:
+                    for index, pct in enumerate(distribution):
+                        period_quantity = (
+                            quantity_base
+                            * self._decimal_value(pct)
+                            / Decimal("100")
+                            * (period_factors[index] if index < len(period_factors) else Decimal("1"))
+                        )
+                        period_cost = period_quantity * price
+                        selected_index = selected_period_position.get(index)
+                        if selected_index is not None:
+                            target["period_quantities"][selected_index] += period_quantity
+                            target["period_costs"][selected_index] += period_cost
+                        total_quantity += period_quantity
+                        total_cost += period_cost
+                else:
+                    total_quantity = quantity_base
+                    total_cost = quantity_base * price
+                target["cantidad_total"] += total_quantity
+                target["costo_total"] += total_cost
+
+        lineas = [
+            {
+                **resource,
+                "precio_unitario": float(resource["precio_unitario"]),
+                "period_quantities": [float(value) for value in resource["period_quantities"]],
+                "period_costs": [float(value) for value in resource["period_costs"]],
+                "cantidad_total": float(resource["cantidad_total"]),
+                "costo_total": float(resource["costo_total"]),
+            }
+            for resource in resources.values()
+            if resource["cantidad_total"] > 0
+        ]
+        lineas.sort(key=lambda item: (
+            int(item.get("categoria_id") or 0),
+            str(item.get("subcategoria") or ""),
+            str(item.get("recurso") or ""),
+            str(item.get("codigo") or ""),
+        ))
+
+        period_columns = [
+            {"key": f"periodo_{index}_costo", "label": getattr(period, "label", f"P{index + 1}"), "kind": "money", "width_weight": 0.75}
+            for index, period in enumerate(selected_periods[:8])
+        ]
+        preview_lines = []
+        for line in lineas:
+            preview_line = {
+                "categoria": line["categoria"],
+                "subcategoria": line["subcategoria"],
+                "recurso": line["recurso"],
+                "codigo": line["codigo"],
+                "unidad": line["unidad"],
+                "cantidad_total": line["cantidad_total"],
+                "costo_total": line["costo_total"],
+            }
+            for index in range(min(len(selected_periods), 8)):
+                preview_line[f"periodo_{index}_costo"] = line["period_costs"][index]
+            preview_lines.append(preview_line)
+
+        period_note = ""
+        if len(selected_periods) > 8:
+            period_note = " · vista GiProy/PDF muestra los primeros 8 periodos; Excel contiene todos"
+        range_note = ""
+        if range_context["range_active"]:
+            range_note = (
+                f" · rango {self._format_report_date_label(range_context['start_at'])}"
+                f" - {self._format_report_date_label(range_context['end_at'])}"
+            )
+        report_label = "Uso de recursos por rango" if range_context["range_active"] else "Uso de recursos"
+
+        return {
+            "id": getattr(presupuesto, "id", None),
+            "preview_layout": "resource_usage",
+            "filters": range_context["filters"] if range_context["range_active"] else None,
+            "date_range": range_context["filters"],
+            "codigo": getattr(getattr(presupuesto, "proyecto", None), "codigo", None) or getattr(getattr(presupuesto, "proyecto", None), "codigo_root", None) or "",
+            "descripcion": self._resolve_project_title(getattr(presupuesto, "proyecto", None), getattr(presupuesto, "descripcion", None)),
+            "unidad": getattr(cronograma, "moneda", None) or "USD",
+            "metadata_hint": (
+                f"{report_label} · {getattr(cronograma, 'period_type', '')} · {len(selected_periods)} periodo(s)"
+                f"{range_note}"
+                f" · modo {getattr(cronograma, 'distribution_mode', '')}{period_note}"
+            ),
+            "summary_cards": [
+                {"label": "Recursos", "value": len(lineas), "kind": "integer"},
+                {"label": "Periodos", "value": len(selected_periods), "kind": "integer"},
+                *([
+                    {"label": "Inicio", "value": self._format_report_date_label(range_context["start_at"]), "kind": "raw"},
+                    {"label": "Fin", "value": self._format_report_date_label(range_context["end_at"]), "kind": "raw"},
+                ] if range_context["range_active"] else []),
+                {"label": "Costo directo", "value": sum(float(line["costo_total"]) for line in lineas), "kind": "money", "tone": "total"},
+            ],
+            "table_columns": [
+                {"key": "categoria", "label": "Categoria", "width_weight": 1.0},
+                {"key": "subcategoria", "label": "Subcategoria", "width_weight": 1.0},
+                {"key": "recurso", "label": "Recurso", "width_weight": 2.0},
+                {"key": "unidad", "label": "Unid.", "width_weight": 0.55},
+                {"key": "cantidad_total", "label": "Cant. total", "kind": "calc", "width_weight": 0.8},
+                {"key": "costo_total", "label": "Costo total", "kind": "money", "width_weight": 0.9},
+                *period_columns,
+            ],
+            "lineas": preview_lines,
+            "resource_usage_rows": lineas,
+            "periods": [
+                {
+                    "label": getattr(period, "label", f"P{index + 1}"),
+                    "starts_at": getattr(period, "starts_at", None),
+                    "ends_at": getattr(period, "ends_at", None),
+                    "overlap_factor": float(period_factors[selected_period_indexes[index]]) if index < len(selected_period_indexes) else 1.0,
+                }
+                for index, period in enumerate(selected_periods)
+            ],
+        }
 
     def _summarize_cronograma_manual_schedule_pending(self, cronograma: Any) -> Dict[str, Any]:
         rows = list(getattr(cronograma, "rows", []) or [])
@@ -6213,7 +6990,14 @@ class ReportingService:
             ws.cell(row=1, column=1).font = Font(bold=True, size=14)
             ws.cell(row=2, column=1, value=item.get("descripcion") or "")
             ws.cell(row=3, column=1, value=item.get("metadata_hint") or "")
+            warnings = item.get("warnings") if isinstance(item.get("warnings"), list) else []
             start_row = 5
+            if warnings:
+                for warning_index, warning in enumerate(warnings, start=1):
+                    message = warning.get("message") if isinstance(warning, dict) else str(warning or "")
+                    ws.cell(row=3 + warning_index, column=1, value=f"Advertencia: {message}")
+                    ws.cell(row=3 + warning_index, column=1).font = Font(bold=True, color="9A3412")
+                start_row = 5 + len(warnings)
             columns = item.get("table_columns") or []
             for column_index, column in enumerate(columns, start=1):
                 cell = ws.cell(row=start_row, column=column_index, value=column.get("label") or column.get("key"))
@@ -6235,13 +7019,554 @@ class ReportingService:
         wb.properties.title = title
         return self._save_workbook_buffer(wb)
 
-    def generate_cronograma_valorado_report(self, db: Any, presupuesto_id: int, empresa_id: int, template_id: str = "001", variant: Optional[str] = None) -> io.BytesIO:
+    def _build_cronograma_resource_usage_workbook(
+        self,
+        db: Any,
+        presupuesto_id: int,
+        empresa_id: int,
+        filters: Optional[Dict[str, Any]] = None,
+        payload_override: Optional[Dict[str, Any]] = None,
+    ) -> io.BytesIO:
+        format_config = self._get_empresa_format_config(db, empresa_id)
+        payload = payload_override or self._build_cronograma_resource_usage_payload(db, presupuesto_id, empresa_id, filters)
+        template_path = os.path.join(self.templates_dir, "001 - Uso de Recursos Cronograma.xlsx")
+        if os.path.exists(template_path):
+            wb = openpyxl.load_workbook(template_path)
+            ws = wb.active
+            for row in ws.iter_rows():
+                for cell in row:
+                    cell.value = None
+        else:
+            wb = openpyxl.Workbook()
+            ws = wb.active
+        is_range_report = bool(payload.get("filters"))
+        report_title = "Cronograma de Uso de Recursos por Rango" if is_range_report else "Cronograma de Uso de Recursos"
+        ws.title = "Recursos por rango" if is_range_report else "Uso de recursos"
+        wb.properties.title = report_title
+
+        rows = list(payload.get("resource_usage_rows") or [])
+        periods = list(payload.get("periods") or [])
+        money_decimals = format_config["money_decimals"]
+        calc_decimals = format_config["calc_decimals"]
+
+        title_fill = PatternFill("solid", fgColor="111827")
+        header_fill = PatternFill("solid", fgColor="F39200")
+        group_fill = PatternFill("solid", fgColor="E5E7EB")
+        subtotal_fill = PatternFill("solid", fgColor="F8FAFC")
+        thin_border = Border(bottom=Side(style="thin", color="D4D4D8"))
+
+        ws.cell(row=1, column=1, value=payload.get("descripcion") or report_title)
+        ws.cell(row=1, column=1).font = Font(bold=True, size=14, color="FFFFFF")
+        ws.cell(row=1, column=1).fill = title_fill
+        ws.cell(row=2, column=1, value=report_title)
+        ws.cell(row=2, column=1).font = Font(bold=True, color="F39200")
+        ws.cell(row=3, column=1, value=payload.get("metadata_hint") or "")
+        warnings = payload.get("warnings") if isinstance(payload.get("warnings"), list) else []
+        if warnings:
+            first_warning = warnings[0] if isinstance(warnings[0], dict) else {"message": str(warnings[0] or "")}
+            warning_message = first_warning.get("message") or "Existen trabajos pendientes no incluidos en este reporte."
+            ws.cell(row=4, column=1, value=f"Advertencia: {warning_message}")
+            ws.cell(row=4, column=1).font = Font(bold=True, color="9A3412")
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max(7, 5 + len(periods) * 2 + 2))
+
+        base_headers = ["Categoria", "Subcategoria", "Recurso", "Codigo", "Unidad"]
+        for index, label in enumerate(base_headers, start=1):
+            cell = ws.cell(row=5, column=index, value=label)
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+        current_col = 6
+        for index, period in enumerate(periods, start=1):
+            start_col = current_col
+            ws.cell(row=5, column=start_col, value=getattr(period, "label", None) or period.get("label") or f"Periodo {index}")
+            ws.merge_cells(start_row=5, start_column=start_col, end_row=5, end_column=start_col + 1)
+            for column in (start_col, start_col + 1):
+                cell = ws.cell(row=5, column=column)
+                cell.font = Font(bold=True, color="FFFFFF")
+                cell.fill = header_fill
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+            ws.cell(row=6, column=start_col, value="Cantidad")
+            ws.cell(row=6, column=start_col + 1, value="Costo Directo")
+            current_col += 2
+        total_quantity_col = current_col
+        total_cost_col = current_col + 1
+        ws.cell(row=5, column=total_quantity_col, value="Total General")
+        ws.merge_cells(start_row=5, start_column=total_quantity_col, end_row=5, end_column=total_cost_col)
+        ws.cell(row=6, column=total_quantity_col, value="Cantidad")
+        ws.cell(row=6, column=total_cost_col, value="Costo Directo")
+        for column in range(1, total_cost_col + 1):
+            for row_index in (5, 6):
+                cell = ws.cell(row=row_index, column=column)
+                cell.font = Font(bold=True, color="FFFFFF")
+                cell.fill = header_fill
+                cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                cell.border = thin_border
+
+        row_index = 7
+        grand_quantities = [0.0 for _ in periods]
+        grand_costs = [0.0 for _ in periods]
+        grand_quantity = 0.0
+        grand_cost = 0.0
+        current_category = None
+        current_subcategory = None
+
+        for resource in rows:
+            category = resource.get("categoria") or "-"
+            subcategory = resource.get("subcategoria") or "-"
+            if category != current_category:
+                current_category = category
+                current_subcategory = None
+                ws.cell(row=row_index, column=1, value=category)
+                ws.merge_cells(start_row=row_index, start_column=1, end_row=row_index, end_column=total_cost_col)
+                ws.cell(row=row_index, column=1).font = Font(bold=True)
+                ws.cell(row=row_index, column=1).fill = group_fill
+                row_index += 1
+            if subcategory != current_subcategory:
+                current_subcategory = subcategory
+                ws.cell(row=row_index, column=2, value=subcategory)
+                ws.merge_cells(start_row=row_index, start_column=2, end_row=row_index, end_column=total_cost_col)
+                ws.cell(row=row_index, column=2).font = Font(bold=True)
+                ws.cell(row=row_index, column=2).fill = subtotal_fill
+                row_index += 1
+
+            ws.cell(row=row_index, column=1, value=category)
+            ws.cell(row=row_index, column=2, value=subcategory)
+            ws.cell(row=row_index, column=3, value=resource.get("recurso") or "")
+            ws.cell(row=row_index, column=4, value=resource.get("codigo") or "")
+            ws.cell(row=row_index, column=5, value=resource.get("unidad") or "")
+            current_col = 6
+            period_quantities = list(resource.get("period_quantities") or [])
+            period_costs = list(resource.get("period_costs") or [])
+            for period_index in range(len(periods)):
+                quantity = float(period_quantities[period_index] if period_index < len(period_quantities) else 0)
+                cost = float(period_costs[period_index] if period_index < len(period_costs) else 0)
+                ws.cell(row=row_index, column=current_col, value=self._round_half_up(quantity, calc_decimals))
+                ws.cell(row=row_index, column=current_col + 1, value=self._round_half_up(cost, money_decimals))
+                grand_quantities[period_index] += quantity
+                grand_costs[period_index] += cost
+                current_col += 2
+            total_quantity = float(resource.get("cantidad_total") or 0)
+            total_cost = float(resource.get("costo_total") or 0)
+            ws.cell(row=row_index, column=total_quantity_col, value=self._round_half_up(total_quantity, calc_decimals))
+            ws.cell(row=row_index, column=total_cost_col, value=self._round_half_up(total_cost, money_decimals))
+            grand_quantity += total_quantity
+            grand_cost += total_cost
+            row_index += 1
+
+        ws.cell(row=row_index, column=1, value="Total General")
+        ws.merge_cells(start_row=row_index, start_column=1, end_row=row_index, end_column=5)
+        ws.cell(row=row_index, column=1).font = Font(bold=True, color="FFFFFF")
+        ws.cell(row=row_index, column=1).fill = title_fill
+        current_col = 6
+        for period_index in range(len(periods)):
+            ws.cell(row=row_index, column=current_col, value=self._round_half_up(grand_quantities[period_index], calc_decimals))
+            ws.cell(row=row_index, column=current_col + 1, value=self._round_half_up(grand_costs[period_index], money_decimals))
+            current_col += 2
+        ws.cell(row=row_index, column=total_quantity_col, value=self._round_half_up(grand_quantity, calc_decimals))
+        ws.cell(row=row_index, column=total_cost_col, value=self._round_half_up(grand_cost, money_decimals))
+        for column in range(1, total_cost_col + 1):
+            cell = ws.cell(row=row_index, column=column)
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.fill = title_fill
+
+        money_format = f'#,##0.{"0" * money_decimals}'
+        calc_format = f'#,##0.{"0" * calc_decimals}'
+        for row in ws.iter_rows(min_row=7, max_row=row_index, min_col=6, max_col=total_cost_col):
+            for cell in row:
+                cell.number_format = money_format if (cell.column - 6) % 2 == 1 else calc_format
+                cell.alignment = Alignment(horizontal="right")
+        for column in range(1, total_cost_col + 1):
+            ws.column_dimensions[get_column_letter(column)].width = 16
+        ws.column_dimensions["A"].width = 24
+        ws.column_dimensions["B"].width = 28
+        ws.column_dimensions["C"].width = 48
+        ws.column_dimensions["D"].width = 18
+        ws.column_dimensions["E"].width = 12
+        ws.freeze_panes = "F7"
+        ws.auto_filter.ref = f"A6:{get_column_letter(total_cost_col)}{row_index}"
+        return self._save_workbook_buffer(wb)
+
+    def _build_cronograma_resource_usage_executive_pdf(
+        self,
+        db: Any,
+        presupuesto_id: int,
+        empresa_id: int,
+        filters: Optional[Dict[str, Any]] = None,
+        watermark_text: Optional[str] = None,
+        payload_override: Optional[Dict[str, Any]] = None,
+    ) -> io.BytesIO:
+        format_config = self._get_empresa_format_config(db, empresa_id)
+        money_decimals = format_config["money_decimals"]
+        calc_decimals = format_config["calc_decimals"]
+        payload = payload_override or self._build_cronograma_resource_usage_payload(db, presupuesto_id, empresa_id, filters)
+        rows = list(payload.get("resource_usage_rows") or [])
+        periods = list(payload.get("periods") or [])
+        is_range_report = bool(payload.get("filters"))
+        report_title = "Reporte de Uso de Recursos por Rango" if is_range_report else "Reporte de Uso de Recursos"
+
+        output = io.BytesIO()
+        doc = SimpleDocTemplate(
+            output,
+            pagesize=A4,
+            leftMargin=11 * mm,
+            rightMargin=11 * mm,
+            topMargin=11 * mm,
+            bottomMargin=11 * mm,
+            title=report_title,
+        )
+        doc.author = self.REPORT_AUTHOR
+        doc.creator = self.REPORT_AUTHOR
+
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            "ResourceUsageTitle",
+            parent=styles["Heading1"],
+            fontName="Helvetica-Bold",
+            fontSize=17,
+            leading=20,
+            textColor=colors.HexColor("#111827"),
+            spaceAfter=4,
+        )
+        section_style = ParagraphStyle(
+            "ResourceUsageSection",
+            parent=styles["Heading2"],
+            fontName="Helvetica-Bold",
+            fontSize=11,
+            leading=14,
+            textColor=colors.HexColor("#111827"),
+            spaceBefore=8,
+            spaceAfter=5,
+        )
+        text_style = ParagraphStyle(
+            "ResourceUsageText",
+            parent=styles["Normal"],
+            fontName="Helvetica",
+            fontSize=8,
+            leading=10,
+            textColor=colors.HexColor("#374151"),
+        )
+        small_style = ParagraphStyle(
+            "ResourceUsageSmall",
+            parent=text_style,
+            fontSize=7,
+            leading=9,
+            textColor=colors.HexColor("#6B7280"),
+        )
+        label_style = ParagraphStyle(
+            "ResourceUsageLabel",
+            parent=small_style,
+            fontName="Helvetica-Bold",
+            textColor=colors.HexColor("#6B7280"),
+        )
+        strong_style = ParagraphStyle(
+            "ResourceUsageStrong",
+            parent=text_style,
+            fontName="Helvetica-Bold",
+            textColor=colors.HexColor("#111827"),
+        )
+        category_style = ParagraphStyle(
+            "ResourceUsageCategory",
+            parent=text_style,
+            fontName="Helvetica-Bold",
+            fontSize=9,
+            leading=11,
+            textColor=colors.HexColor("#111827"),
+        )
+        subcategory_style = ParagraphStyle(
+            "ResourceUsageSubcategory",
+            parent=text_style,
+            fontName="Helvetica-Bold",
+            fontSize=8,
+            leading=10,
+            textColor=colors.HexColor("#136191"),
+        )
+
+        def pdf_text(value: Any) -> str:
+            raw = "" if value is None else str(value)
+            return (
+                raw.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace('"', "&quot;")
+            )
+
+        def money(value: Any) -> str:
+            return f"${self._round_half_up(value or 0, money_decimals):,.{money_decimals}f}"
+
+        def calc(value: Any, decimals: Optional[int] = None) -> str:
+            return self._format_fixed(value or 0, calc_decimals if decimals is None else decimals)
+
+        def apply_pdf_metadata(canvas, _doc):
+            canvas.setAuthor(self.REPORT_AUTHOR)
+            canvas.setCreator(self.REPORT_AUTHOR)
+            canvas.setTitle("Reporte de Uso de Recursos")
+            self._draw_pdf_watermark(canvas, A4[0], A4[1], watermark_text)
+
+        total_cost = sum(float(row.get("costo_total") or 0) for row in rows)
+        total_quantity = sum(float(row.get("cantidad_total") or 0) for row in rows)
+        category_map: "OrderedDict[str, Dict[str, Any]]" = OrderedDict()
+        for row in rows:
+            category = str(row.get("categoria") or "Recursos")
+            current = category_map.setdefault(category, {
+                "rows": [],
+                "cost": 0.0,
+                "quantity": 0.0,
+                "subcategories": OrderedDict(),
+            })
+            current["rows"].append(row)
+            current["cost"] += float(row.get("costo_total") or 0)
+            current["quantity"] += float(row.get("cantidad_total") or 0)
+            subcategory = str(row.get("subcategoria") or "-")
+            subcurrent = current["subcategories"].setdefault(subcategory, {
+                "rows": [],
+                "cost": 0.0,
+                "quantity": 0.0,
+            })
+            subcurrent["rows"].append(row)
+            subcurrent["cost"] += float(row.get("costo_total") or 0)
+            subcurrent["quantity"] += float(row.get("cantidad_total") or 0)
+
+        categories = sorted(category_map.items(), key=lambda item: str(item[0]))
+        top_resources = sorted(rows, key=lambda row: float(row.get("costo_total") or 0), reverse=True)[:12]
+        top_10_cost = sum(float(row.get("costo_total") or 0) for row in top_resources[:10])
+        dominant_category = max(categories, key=lambda item: item[1]["cost"], default=("-", {"cost": 0.0}))
+        period_summaries = []
+        for period_index, period in enumerate(periods):
+            cost = sum(float(row.get("period_costs", [])[period_index] or 0) for row in rows if period_index < len(row.get("period_costs", [])))
+            quantity = sum(float(row.get("period_quantities", [])[period_index] or 0) for row in rows if period_index < len(row.get("period_quantities", [])))
+            period_summaries.append({
+                "label": period.get("label") if isinstance(period, dict) else getattr(period, "label", f"P{period_index + 1}"),
+                "cost": cost,
+                "quantity": quantity,
+            })
+        peak_period = max(period_summaries, key=lambda item: item["cost"], default={"label": "-", "cost": 0.0, "quantity": 0.0})
+        max_period_cost = max([point["cost"] for point in period_summaries] or [1.0])
+
+        story = []
+        story.append(Paragraph(report_title, title_style))
+        story.append(Paragraph(pdf_text(payload.get("descripcion") or "-"), strong_style))
+        story.append(Paragraph(pdf_text(payload.get("metadata_hint") or ""), small_style))
+        warnings = payload.get("warnings") if isinstance(payload.get("warnings"), list) else []
+        for warning in warnings:
+            warning_message = warning.get("message") if isinstance(warning, dict) else str(warning or "")
+            if warning_message:
+                story.append(Paragraph(f"Advertencia: {pdf_text(warning_message)}", small_style))
+        story.append(Spacer(1, 4 * mm))
+
+        kpi_data = [
+            [
+                Paragraph("RECURSOS UNICOS", label_style),
+                Paragraph("PERIODOS", label_style),
+                Paragraph("COSTO DIRECTO", label_style),
+                Paragraph("PERIODO PICO", label_style),
+                Paragraph("CATEGORIA DOMINANTE", label_style),
+            ],
+            [
+                Paragraph(str(len(rows)), strong_style),
+                Paragraph(str(len(periods)), strong_style),
+                Paragraph(money(total_cost), strong_style),
+                Paragraph(f"{pdf_text(peak_period['label'])}<br/>{money(peak_period['cost'])}", strong_style),
+                Paragraph(f"{pdf_text(dominant_category[0])}<br/>{calc((dominant_category[1]['cost'] / total_cost * 100) if total_cost else 0, 2)}%", strong_style),
+            ],
+        ]
+        kpi_table = Table(kpi_data, colWidths=[doc.width / 5] * 5)
+        kpi_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F8FAFC")),
+            ("BACKGROUND", (2, 0), (2, -1), colors.HexColor("#FFF7ED")),
+            ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#E4E4E7")),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 6),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ]))
+        story.append(kpi_table)
+        story.append(Spacer(1, 5 * mm))
+
+        executive_notes = [
+            f"El reporte consolida {len(rows)} recursos finales despues de explotar los APUs anidados.",
+            f"La categoria de mayor peso es {dominant_category[0]}, con {money(dominant_category[1]['cost'])}.",
+            f"El periodo de mayor demanda es {peak_period['label']}, con {money(peak_period['cost'])}.",
+            f"Los 10 recursos gobernantes concentran {calc((top_10_cost / total_cost * 100) if total_cost else 0, 2)}% del costo directo de recursos.",
+        ]
+        story.append(Paragraph("Lectura ejecutiva", section_style))
+        story.append(Paragraph("<br/>".join(f"- {pdf_text(note)}" for note in executive_notes), text_style))
+
+        story.append(Paragraph("Distribucion por categoria", section_style))
+        category_rows = [[
+            Paragraph("Categoria", label_style),
+            Paragraph("Recursos", label_style),
+            Paragraph("Cantidad", label_style),
+            Paragraph("Costo directo", label_style),
+            Paragraph("Peso", label_style),
+        ]]
+        for category, data in categories:
+            category_rows.append([
+                Paragraph(pdf_text(category), text_style),
+                Paragraph(str(len(data["rows"])), text_style),
+                Paragraph(calc(data["quantity"]), text_style),
+                Paragraph(money(data["cost"]), text_style),
+                Paragraph(f"{calc((data['cost'] / total_cost * 100) if total_cost else 0, 2)}%", text_style),
+            ])
+        category_table = Table(category_rows, colWidths=[doc.width * 0.34, doc.width * 0.13, doc.width * 0.17, doc.width * 0.2, doc.width * 0.16])
+        category_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#111827")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#FFFFFF")),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8FAFC")]),
+            ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#E4E4E7")),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 5),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ]))
+        story.append(category_table)
+
+        story.append(Paragraph("Demanda por periodos", section_style))
+        period_rows = []
+        for period in period_summaries:
+            bar_width = int(((period["cost"] / max_period_cost) if max_period_cost else 0) * 28)
+            bar = "|" * max(bar_width, 1)
+            period_rows.append([
+                Paragraph(pdf_text(period["label"]), strong_style),
+                Paragraph(f'<font color="#136191">{bar}</font>', text_style),
+                Paragraph(money(period["cost"]), text_style),
+                Paragraph(f"{calc((period['cost'] / total_cost * 100) if total_cost else 0, 2)}%", text_style),
+            ])
+        period_table = Table(period_rows, colWidths=[doc.width * 0.14, doc.width * 0.48, doc.width * 0.22, doc.width * 0.16])
+        period_table.setStyle(TableStyle([
+            ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#E4E4E7")),
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#FFFFFF")),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 5),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+            ("TOPPADDING", (0, 0), (-1, -1), 3),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ]))
+        story.append(period_table)
+
+        story.append(Paragraph("Recursos gobernantes", section_style))
+        top_rows = [[
+            Paragraph("#", label_style),
+            Paragraph("Recurso", label_style),
+            Paragraph("Categoria", label_style),
+            Paragraph("Cantidad", label_style),
+            Paragraph("Costo", label_style),
+            Paragraph("Peso", label_style),
+        ]]
+        for index, row in enumerate(top_resources, start=1):
+            top_rows.append([
+                Paragraph(str(index), text_style),
+                Paragraph(f"{pdf_text(row.get('recurso') or '-')}<br/><font color='#6B7280'>{pdf_text(row.get('codigo') or '')} · {pdf_text(row.get('unidad') or '')}</font>", text_style),
+                Paragraph(pdf_text(row.get("categoria") or "-"), text_style),
+                Paragraph(calc(row.get("cantidad_total")), text_style),
+                Paragraph(money(row.get("costo_total")), text_style),
+                Paragraph(f"{calc((float(row.get('costo_total') or 0) / total_cost * 100) if total_cost else 0, 2)}%", text_style),
+            ])
+        top_table = Table(top_rows, colWidths=[doc.width * 0.06, doc.width * 0.36, doc.width * 0.2, doc.width * 0.13, doc.width * 0.15, doc.width * 0.1])
+        top_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F4F4F5")),
+            ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#E4E4E7")),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FAFAFA")]),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 5),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ]))
+        story.append(top_table)
+
+        story.append(PageBreak())
+        story.append(Paragraph("Anexo ejecutivo de recursos", title_style))
+        story.append(Paragraph(
+            "Listado categorizado y subcategorizado de recursos finales. Los periodos se presentan como lectura compacta por recurso; la matriz operativa completa se conserva en Excel.",
+            text_style,
+        ))
+
+        for category, data in categories:
+            story.append(Spacer(1, 3 * mm))
+            story.append(Paragraph(
+                f"{pdf_text(category)} · {len(data['rows'])} recurso(s) · {money(data['cost'])}",
+                category_style,
+            ))
+            sorted_subcategories = sorted(data["subcategories"].items(), key=lambda item: str(item[0]))
+            for subcategory, subdata in sorted_subcategories:
+                story.append(Paragraph(
+                    f"{pdf_text(subcategory)} · {len(subdata['rows'])} recurso(s) · {money(subdata['cost'])}",
+                    subcategory_style,
+                ))
+                for row in sorted(subdata["rows"], key=lambda item: str(item.get("recurso") or "")):
+                    period_parts = []
+                    quantities = list(row.get("period_quantities") or [])
+                    costs = list(row.get("period_costs") or [])
+                    for period_index, period in enumerate(periods):
+                        quantity = float(quantities[period_index] if period_index < len(quantities) else 0)
+                        cost = float(costs[period_index] if period_index < len(costs) else 0)
+                        label = period.get("label") if isinstance(period, dict) else getattr(period, "label", f"P{period_index + 1}")
+                        period_parts.append(f"<b>{pdf_text(label)}:</b> {calc(quantity)} / {money(cost)}")
+                    period_text = " · ".join(period_parts) if period_parts else "Sin demanda periodica"
+                    resource_block = Table(
+                        [[
+                            Paragraph(
+                                f"<b>{pdf_text(row.get('recurso') or '-')}</b><br/>"
+                                f"<font color='#6B7280'>{pdf_text(row.get('codigo') or '')} · Unidad: {pdf_text(row.get('unidad') or '-')} · "
+                                f"Cantidad total: {calc(row.get('cantidad_total'))} · Costo total: {money(row.get('costo_total'))}</font><br/>"
+                                f"<font color='#374151'>{period_text}</font>",
+                                text_style,
+                            )
+                        ]],
+                        colWidths=[doc.width],
+                    )
+                    resource_block.setStyle(TableStyle([
+                        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#FFFFFF")),
+                        ("BOX", (0, 0), (-1, -1), 0.25, colors.HexColor("#E4E4E7")),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                        ("TOPPADDING", (0, 0), (-1, -1), 5),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                    ]))
+                    story.append(resource_block)
+                    story.append(Spacer(1, 1.2 * mm))
+
+        doc.build(story, onFirstPage=apply_pdf_metadata, onLaterPages=apply_pdf_metadata)
+        output.seek(0)
+        return output
+
+    def generate_cronograma_valorado_report(
+        self,
+        db: Any,
+        presupuesto_id: int,
+        empresa_id: int,
+        template_id: str = "001",
+        variant: Optional[str] = None,
+        filters: Optional[Dict[str, Any]] = None,
+    ) -> io.BytesIO:
         report_variant = str(variant or "valorado").lower()
+        gantt_draft_summary = self._summarize_gantt_draft_for_reporting(db, presupuesto_id, empresa_id)
+        if self._is_cronograma_resource_usage_variant(report_variant):
+            resource_filters = filters if self._is_cronograma_resource_usage_range_variant(report_variant) else None
+            resource_payload = self._attach_gantt_draft_report_warning(
+                self._build_cronograma_resource_usage_payload(db, presupuesto_id, empresa_id, resource_filters),
+                gantt_draft_summary,
+            )
+            return self._build_cronograma_resource_usage_workbook(
+                db,
+                presupuesto_id,
+                empresa_id,
+                resource_filters,
+                payload_override=resource_payload,
+            )
         if report_variant in {"cash_flow", "flujo_caja", "caja"}:
             format_config = self._get_empresa_format_config(db, empresa_id)
             return self._build_simple_report_workbook(
                 "Flujo de Caja",
-                [self._build_cronograma_cash_flow_preview(db, presupuesto_id, empresa_id)],
+                [
+                    self._attach_gantt_draft_report_warning(
+                        self._build_cronograma_cash_flow_preview(db, presupuesto_id, empresa_id),
+                        gantt_draft_summary,
+                    )
+                ],
                 format_config["money_decimals"],
                 format_config["calc_decimals"],
             )
@@ -6249,7 +7574,12 @@ class ReportingService:
             format_config = self._get_empresa_format_config(db, empresa_id)
             return self._build_simple_report_workbook(
                 "Pareto Temporal",
-                [self._build_cronograma_pareto_preview(db, presupuesto_id, empresa_id)],
+                [
+                    self._attach_gantt_draft_report_warning(
+                        self._build_cronograma_pareto_preview(db, presupuesto_id, empresa_id),
+                        gantt_draft_summary,
+                    )
+                ],
                 format_config["money_decimals"],
                 format_config["calc_decimals"],
             )
@@ -6257,7 +7587,12 @@ class ReportingService:
             format_config = self._get_empresa_format_config(db, empresa_id)
             return self._build_simple_report_workbook(
                 "Cronograma Gantt",
-                [self._build_cronograma_gantt_preview(db, presupuesto_id, empresa_id)],
+                [
+                    self._attach_gantt_draft_report_warning(
+                        self._build_cronograma_gantt_preview(db, presupuesto_id, empresa_id),
+                        gantt_draft_summary,
+                    )
+                ],
                 format_config["money_decimals"],
                 format_config["calc_decimals"],
             )
@@ -6266,9 +7601,18 @@ class ReportingService:
             return self._build_simple_report_workbook(
                 "Cronograma Integrado",
                 [
-                    self._build_cronograma_gantt_preview(db, presupuesto_id, empresa_id),
-                    self._build_cronograma_valorado_preview(db, presupuesto_id, empresa_id),
-                    self._build_cronograma_cash_flow_preview(db, presupuesto_id, empresa_id),
+                    self._attach_gantt_draft_report_warning(
+                        self._build_cronograma_gantt_preview(db, presupuesto_id, empresa_id),
+                        gantt_draft_summary,
+                    ),
+                    self._attach_gantt_draft_report_warning(
+                        self._build_cronograma_valorado_preview(db, presupuesto_id, empresa_id),
+                        gantt_draft_summary,
+                    ),
+                    self._attach_gantt_draft_report_warning(
+                        self._build_cronograma_cash_flow_preview(db, presupuesto_id, empresa_id),
+                        gantt_draft_summary,
+                    ),
                 ],
                 format_config["money_decimals"],
                 format_config["calc_decimals"],

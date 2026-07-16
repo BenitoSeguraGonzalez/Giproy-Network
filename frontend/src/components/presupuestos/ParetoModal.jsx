@@ -113,7 +113,7 @@ const ParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem }) => {
                 setData(response);
                 setSelectedItemId(response.items[0]?.id ?? null);
             } catch (fetchError) {
-                console.error('Error cargando vista Pareto:', fetchError);
+                globalThis.reportClientError?.('Error cargando vista Pareto:', fetchError);
                 setError('No fue posible cargar el analisis Pareto de este presupuesto.');
             } finally {
                 setLoading(false);

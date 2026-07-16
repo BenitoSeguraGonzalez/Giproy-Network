@@ -2,7 +2,6 @@ import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowUpRight, Check, ChevronDown, CreditCard, Eye, FileSpreadsheet, Image as ImageIcon, MapPin, Package, PencilLine, Plus, Power, ShoppingBag, Tags, Trash2, UploadCloud, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import api from '../api/axiosConfig';
 import { maestrosApi } from '../api/maestros';
 import marketplaceApi from '../api/marketplace';
 import {
@@ -1453,8 +1452,8 @@ const MarketplaceAdminDashboard = () => {
         if (!portalModalOpen) return;
         const loadPaises = async () => {
             try {
-                const response = await api.get('/paises/');
-                setPaises(Array.isArray(response.data) ? response.data : []);
+                const data = await maestrosApi.getPaises();
+                setPaises(Array.isArray(data) ? data : []);
             } catch {
                 setPaises([]);
             }

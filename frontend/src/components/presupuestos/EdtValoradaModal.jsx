@@ -269,7 +269,7 @@ const EdtValoradaModal = ({ isOpen, onClose, onNavigateToNode }) => {
                 setTree(data);
                 setExpandedNodes(collectExpandableIds(data));
             } catch (error) {
-                console.error('Error cargando EDT valorada:', error);
+                globalThis.reportClientError?.('Error cargando EDT valorada:', error);
                 setTree([]);
             } finally {
                 setLoading(false);
@@ -347,7 +347,7 @@ const EdtValoradaModal = ({ isOpen, onClose, onNavigateToNode }) => {
             setReportPreview(response.data);
             setShowReportPreview(true);
         } catch (error) {
-            console.error(`Error al generar reporte EDT ${type}:`, error);
+            globalThis.reportClientError?.(`Error al generar reporte EDT ${type}:`, error);
             appAlert(`Error al generar el reporte EDT ${type}.`);
         } finally {
             setGeneratingReport(null);
@@ -371,7 +371,7 @@ const EdtValoradaModal = ({ isOpen, onClose, onNavigateToNode }) => {
                 extension: 'xlsx',
             }));
         } catch (error) {
-            console.error("Error al exportar EDT:", error);
+            globalThis.reportClientError?.("Error al exportar EDT:", error);
             appAlert(await extractBlobErrorMessage(error, "Error al exportar el reporte EDT."));
         } finally {
             setGeneratingReport(null);
@@ -395,7 +395,7 @@ const EdtValoradaModal = ({ isOpen, onClose, onNavigateToNode }) => {
                 extension: 'pdf',
             }), 'application/pdf');
         } catch (error) {
-            console.error("Error al exportar EDT PDF:", error);
+            globalThis.reportClientError?.("Error al exportar EDT PDF:", error);
             appAlert(await extractBlobErrorMessage(error, "Error al exportar el reporte EDT en PDF."));
         } finally {
             setGeneratingReport(null);
@@ -419,7 +419,7 @@ const EdtValoradaModal = ({ isOpen, onClose, onNavigateToNode }) => {
                 extension: 'pdf',
             }), 'application/pdf');
         } catch (error) {
-            console.error("Error al exportar EDT PDF desde Excel:", error);
+            globalThis.reportClientError?.("Error al exportar EDT PDF desde Excel:", error);
             appAlert(await extractBlobErrorMessage(error, "Error al exportar el reporte EDT como PDF desde Excel."));
         } finally {
             setGeneratingReport(null);
