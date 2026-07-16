@@ -1,5 +1,20 @@
 # HANDOFF
 
+## 2026-07-16 - Cuadrillas y partes de horas BIM
+
+- `BIM-TASK-0153` cierra E08 con directorio de cuadrillas sin identidades
+  personales y partes diarios ligados a actividad y frente BIM.
+- La revision aditiva `de2037a1b2c3` es tenant-aware y reversible; no toca
+  personal, contratos, nomina ni contabilidad clasicos.
+- Campo incorpora la tab `Cuadrillas` con vistas `Partes` y `Directorio`;
+  build, 20 smokes BIM, PostgreSQL, Playwright 1920x900/2560x1300 y baseline
+  pasan.
+- Paridad: 65,00% (34 completas, 10 parciales, 16 ausentes). Programa: 27/61
+  slices, 44,26% realizado y 55,74% pendiente.
+- Siguiente slice: `BIM-TASK-0154`, iniciar F01 con estimacion BIM gobernada
+  desde snapshots QTO aprobados, sin escribir Presupuestos clasicos.
+- Esta ola no se ha desplegado.
+
 ## 2026-07-16 - Materiales y equipos de Campo
 
 - `BIM-TASK-0152` cierra E07 con recepcion, consumo y retorno sobre recursos

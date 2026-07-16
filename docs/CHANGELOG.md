@@ -1,3 +1,11 @@
+### 2026-07-16 - Cuadrillas y partes de horas BIM (BIM-TASK-0153)
+
+- Campo BIM V2 incorpora directorio operativo de cuadrillas y partes diarios
+  por actividad y frente, con horas regulares, extra y produccion instalada.
+- La persistencia PostgreSQL `de2037a1b2c3` es tenant-aware y reversible, sin
+  identidades personales ni escrituras en personal o nomina clasicos.
+- E08 pasa a completa; paridad 65,00% y programa 44,26% completado.
+
 ### 2026-07-16 - Materiales y equipos de Campo BIM (BIM-TASK-0152)
 
 - Campo BIM V2 incorpora recepcion, consumo, retorno y saldo por recurso BIM.

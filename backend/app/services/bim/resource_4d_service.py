@@ -5,7 +5,7 @@ from fastapi import HTTPException
 
 from app.models.bim_4d import Bim4dActivitySnapshot
 from app.models.bim_4d_planning import Bim4dWorkArea
-from app.models.bim_4d_resources import Bim4dFieldResourceMovement, Bim4dResource, Bim4dResourceAssignment
+from app.models.bim_4d_resources import Bim4dCrew, Bim4dFieldResourceMovement, Bim4dResource, Bim4dResourceAssignment, Bim4dTimecard
 
 
 def _resource_dict(resource):
@@ -135,3 +135,112 @@ def create_field_resource_movement(db, *, project_id, company_id, user_id, paylo
     movement = Bim4dFieldResourceMovement(empresa_id=company_id, proyecto_id=project_id, created_by=user_id, **payload.model_dump())
     db.add(movement); db.commit(); db.refresh(movement)
     return _movement_dict(movement, next_balance)
+
+
+def _crew_dict(crew):
+    return {
+        "id": crew.id, "project_id": crew.proyecto_id, "company_id": crew.empresa_id,
+        "code": crew.code, "name": crew.name, "trade": crew.trade,
+        "member_count": crew.member_count, "active": crew.active, "note": crew.note,
+        "created_by": crew.created_by, "created_at": crew.created_at,
+    }
+
+
+def _crew(db, crew_id, project_id, company_id):
+    value = db.query(Bim4dCrew).filter(
+        Bim4dCrew.id == crew_id,
+        Bim4dCrew.proyecto_id == project_id,
+        Bim4dCrew.empresa_id == company_id,
+    ).first()
+    if not value:
+        raise HTTPException(status_code=404, detail="Cuadrilla BIM fuera del proyecto activo.")
+    return value
+
+
+def create_crew(db, *, project_id, company_id, user_id, payload):
+    duplicate = db.query(Bim4dCrew).filter(
+        Bim4dCrew.proyecto_id == project_id,
+        Bim4dCrew.empresa_id == company_id,
+        Bim4dCrew.code == payload.code,
+    ).first()
+    if duplicate:
+        raise HTTPException(status_code=409, detail="El codigo de cuadrilla BIM ya existe.")
+    value = Bim4dCrew(
+        empresa_id=company_id, proyecto_id=project_id, created_by=user_id,
+        **payload.model_dump(),
+    )
+    db.add(value); db.commit(); db.refresh(value)
+    return _crew_dict(value)
+
+
+def list_crews(db, *, project_id, company_id, active_only=False):
+    query = db.query(Bim4dCrew).filter(
+        Bim4dCrew.proyecto_id == project_id,
+        Bim4dCrew.empresa_id == company_id,
+    )
+    if active_only:
+        query = query.filter(Bim4dCrew.active.is_(True))
+    return [_crew_dict(value) for value in query.order_by(Bim4dCrew.code).all()]
+
+
+def _timecard_dict(timecard, crew):
+    return {
+        "id": timecard.id, "project_id": timecard.proyecto_id,
+        "company_id": timecard.empresa_id, "crew_id": timecard.crew_id,
+        "crew_code": crew.code, "crew_name": crew.name,
+        "activity_snapshot_id": timecard.activity_snapshot_id,
+        "work_area_id": timecard.work_area_id, "work_date": timecard.work_date,
+        "regular_hours": timecard.regular_hours, "overtime_hours": timecard.overtime_hours,
+        "total_hours": round(timecard.regular_hours + timecard.overtime_hours, 2),
+        "installed_quantity": timecard.installed_quantity,
+        "installed_unit": timecard.installed_unit, "note": timecard.note,
+        "created_by": timecard.created_by, "created_at": timecard.created_at,
+    }
+
+
+def create_timecard(db, *, project_id, company_id, user_id, payload):
+    crew = _crew(db, payload.crew_id, project_id, company_id)
+    if not crew.active:
+        raise HTTPException(status_code=409, detail="La cuadrilla BIM esta inactiva.")
+    activity = db.query(Bim4dActivitySnapshot).filter(
+        Bim4dActivitySnapshot.id == payload.activity_snapshot_id,
+        Bim4dActivitySnapshot.proyecto_id == project_id,
+        Bim4dActivitySnapshot.empresa_id == company_id,
+    ).first()
+    if not activity:
+        raise HTTPException(status_code=404, detail="Actividad BIM 4D fuera del proyecto activo.")
+    if payload.work_area_id is not None:
+        area = db.query(Bim4dWorkArea).filter(
+            Bim4dWorkArea.id == payload.work_area_id,
+            Bim4dWorkArea.proyecto_id == project_id,
+            Bim4dWorkArea.empresa_id == company_id,
+        ).first()
+        if not area:
+            raise HTTPException(status_code=404, detail="Frente BIM fuera del proyecto activo.")
+    duplicate = db.query(Bim4dTimecard).filter(
+        Bim4dTimecard.crew_id == payload.crew_id,
+        Bim4dTimecard.activity_snapshot_id == payload.activity_snapshot_id,
+        Bim4dTimecard.work_date == payload.work_date,
+    ).first()
+    if duplicate:
+        raise HTTPException(status_code=409, detail="Ya existe un parte para la cuadrilla, actividad y fecha.")
+    value = Bim4dTimecard(
+        empresa_id=company_id, proyecto_id=project_id, created_by=user_id,
+        **payload.model_dump(),
+    )
+    db.add(value); db.commit(); db.refresh(value)
+    return _timecard_dict(value, crew)
+
+
+def list_timecards(db, *, project_id, company_id, crew_id=None):
+    query = db.query(Bim4dTimecard, Bim4dCrew).join(
+        Bim4dCrew, Bim4dCrew.id == Bim4dTimecard.crew_id,
+    ).filter(
+        Bim4dTimecard.proyecto_id == project_id,
+        Bim4dTimecard.empresa_id == company_id,
+    )
+    if crew_id is not None:
+        _crew(db, crew_id, project_id, company_id)
+        query = query.filter(Bim4dTimecard.crew_id == crew_id)
+    values = query.order_by(Bim4dTimecard.work_date.desc(), Bim4dTimecard.id.desc()).all()
+    return [_timecard_dict(timecard, crew) for timecard, crew in values]

@@ -291,6 +291,10 @@ export const bimModelsApi = {
     decide4dUnplannedEvent: async (projectId, eventId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/4d/unplanned-events/${eventId}/decision`, payload, withTenantConfig({}, empresaId))).data,
     list4dFieldResourceMovements: async (projectId, resourceId = null, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/4d/field-resource-movements`, withTenantConfig({ params: resourceId ? { resource_id: resourceId } : {} }, empresaId))).data,
     create4dFieldResourceMovement: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/4d/field-resource-movements`, payload, withTenantConfig({}, empresaId))).data,
+    list4dCrews: async (projectId, activeOnly = false, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/4d/crews`, withTenantConfig({ params: activeOnly ? { active_only: true } : {} }, empresaId))).data,
+    create4dCrew: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/4d/crews`, payload, withTenantConfig({}, empresaId))).data,
+    list4dTimecards: async (projectId, crewId = null, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/4d/timecards`, withTenantConfig({ params: crewId ? { crew_id: crewId } : {} }, empresaId))).data,
+    create4dTimecard: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/4d/timecards`, payload, withTenantConfig({}, empresaId))).data,
     get4dSafetyExposure: async (projectId, riskId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/4d/safety-risks/${riskId}/exposure`, withTenantConfig({}, empresaId))).data,
     create4dResource: async (projectId, payload, empresaId = null) => {
         const response = await axiosInstance.post(`/bim/projects/${projectId}/4d/resources`, payload, withTenantConfig({}, empresaId));

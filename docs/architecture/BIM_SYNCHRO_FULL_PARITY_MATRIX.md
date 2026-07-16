@@ -97,7 +97,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | E05 | Diarios, comentarios y evidencia | Completa | `BIM-TASK-0104/0149`: detalle diario, metricas y evidencia trazable en Campo desktop |
 | E06 | Informes diarios y semanales | Completa | `BIM-TASK-0110` |
 | E07 | Materiales, equipos y recursos de campo | Completa | `BIM-TASK-0044/0115/0152`: recursos, equipos y ciclo de recepcion/consumo/retorno trazable |
-| E08 | Partes de horas y directorio de cuadrillas | Ausente | no existe timecard BIM integral |
+| E08 | Partes de horas y directorio de cuadrillas | Completa | `BIM-TASK-0153`: directorio BIM sin identidades personales y partes diarios por actividad/frente |
 
 ### F. SYNCHRO Cost
 

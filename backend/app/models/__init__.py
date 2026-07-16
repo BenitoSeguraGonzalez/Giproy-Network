@@ -112,7 +112,7 @@ from .bim_4d import (
 from .bim_4d_planning import Bim4dConstructibleComponent, Bim4dScenario, Bim4dWorkArea
 from .bim_4d_productivity import Bim4dProductivityProposal
 from .bim_4d_field import Bim4dFieldEvidence, Bim4dFieldReport
-from .bim_4d_resources import Bim4dFieldResourceMovement, Bim4dResource, Bim4dResourceAssignment
+from .bim_4d_resources import Bim4dCrew, Bim4dFieldResourceMovement, Bim4dResource, Bim4dResourceAssignment, Bim4dTimecard
 from .bim_4d_leveling import Bim4dResourceLevelingScenario
 from .bim_4d_partition import Bim4dPartitionArtifact, Bim4dPartitionCsgArtifact, Bim4dPartitionSpec
 from .bim_4d_equipment import Bim4dEquipment, Bim4dEquipmentMotionPlan

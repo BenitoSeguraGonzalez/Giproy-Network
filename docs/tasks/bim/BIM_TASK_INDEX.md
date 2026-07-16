@@ -231,6 +231,7 @@ iniciada.
 | `BIM-TASK-0150` | Cerrada localmente: inspecciones, checklists y punch lists gobernados en Campo |
 | `BIM-TASK-0151` | Cerrada localmente: eventos no planificados con impacto real de plazo y coste gobernado |
 | `BIM-TASK-0152` | Cerrada localmente: recepcion, consumo y retorno de materiales y equipos en Campo |
+| `BIM-TASK-0153` | Cerrada localmente: directorio de cuadrillas y partes diarios de horas BIM |
 
 ## Orden de ejecucion
 

@@ -770,6 +770,20 @@ intercambio end-to-end.
   ausentes. Programa: 25/61 slices, 40,98% realizado y 59,02% pendiente. Sin
   deploy.
 
+## Cuadrillas y partes de horas BIM - 2026-07-16
+
+- `BIM-TASK-0153` completa E08 con directorio de cuadrillas BIM y partes
+  diarios ligados a actividad, frente y jornada.
+- `bim_4d_crews` no almacena identidades personales; `bim_4d_timecards`
+  registra horas regulares/extra y produccion instalada dentro del tenant.
+- La migracion aditiva `de2037a1b2c3`, endpoints y UI viven solo en BIM; no
+  hay dependencia ni escritura en personal, nomina o contabilidad clasicos.
+- PostgreSQL reversible, build, 20 smokes BIM, Playwright
+  1920x900/2560x1300, anti-BIM y baseline pasan.
+- E08 queda completa. Paridad: `65,00%`, con 34 completas, 10 parciales y 16
+  ausentes. Programa: 27/61 slices, 44,26% realizado y 55,74% pendiente. Sin
+  deploy.
+
 ## Materiales y equipos de Campo - 2026-07-16
 
 - `BIM-TASK-0152` completa E07 con un libro BIM de recepcion, consumo y retorno

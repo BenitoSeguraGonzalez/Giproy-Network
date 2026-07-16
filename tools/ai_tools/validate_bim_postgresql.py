@@ -45,6 +45,8 @@ BIM_TABLES = {
     "bim_4d_safety_punch_items",
     "bim_4d_unplanned_events",
     "bim_4d_field_resource_movements",
+    "bim_4d_crews",
+    "bim_4d_timecards",
     "bim_schedule_import_revisions",
     "bim_qto_snapshots",
     "bim_4d_resource_leveling_scenarios",
@@ -103,10 +105,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2036a1b2c3"
+        head for head in script.get_heads() if head != "de2037a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2036a1b2c3")
+    command.upgrade(config, "de2037a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -293,6 +295,14 @@ def validate(database_name: str) -> None:
         ).scalar_one()
         if movement_occurred_type != "timestamp with time zone":
             raise RuntimeError("Los movimientos de recursos de Campo no usan TIMESTAMPTZ.")
+        timecard_date_type = connection.execute(
+            text(
+                "select data_type from information_schema.columns "
+                "where table_name='bim_4d_timecards' and column_name='work_date'"
+            )
+        ).scalar_one()
+        if timecard_date_type != "date":
+            raise RuntimeError("Los partes BIM no usan DATE para la jornada.")
 
     command.downgrade(config, "de2010a1b2c3")
     with engine.connect() as connection:
@@ -306,16 +316,16 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2036a1b2c3")
+    command.upgrade(config, "de2037a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2036a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2037a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
         "document_acl=BOOLEAN site_georeference=TIMESTAMPTZ cde_reviews=TIMESTAMPTZ "
         "issue_attachments=BYTEA/TIMESTAMPTZ field_inspections=JSON/TIMESTAMPTZ "
-        "unplanned_events=TIMESTAMPTZ field_resources=TIMESTAMPTZ"
+        "unplanned_events=TIMESTAMPTZ field_resources=TIMESTAMPTZ crews_timecards=DATE"
     )
 
 

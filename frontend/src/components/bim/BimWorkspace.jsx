@@ -41,6 +41,7 @@ import BimEquipmentMotionPanel from './BimEquipmentMotionPanel';
 import BimSafetyRiskPanel from './BimSafetyRiskPanel';
 import BimUnplannedEventsPanel from './BimUnplannedEventsPanel';
 import BimFieldResourcesPanel from './BimFieldResourcesPanel';
+import BimCrewsTimecardsPanel from './BimCrewsTimecardsPanel';
 import BimViewStateToolbar from './BimViewStateToolbar';
 import BimWorkspaceV2 from './BimWorkspaceV2';
 import { createActivityPlanningSelection, createElementPlanningSelection, findActivitiesByGuid } from './bimPlanningSelection';
@@ -673,6 +674,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             ],
             field: [
                 { id: 'diary', label: 'Diario', content: <BimFieldDiaryPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
+                { id: 'crews', label: 'Cuadrillas', content: <BimCrewsTimecardsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'materials', label: 'Materiales', content: <BimFieldResourcesPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'documents', label: 'Documentos', content: <BimFieldDocumentsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'issues', label: 'Incidencias', content: <BimFieldIssuesPanel projectId={project?.id} versionId={activeVersionId} empresaId={access?.resolved_company_id} viewerState={viewerStateSnapshot} onOpenIssue={handleOpenIssue} /> },

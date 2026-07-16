@@ -196,8 +196,8 @@ from app.schemas.bim_4d_productivity import Bim4dProductivityDecision, Bim4dProd
 from app.services.bim.productivity_4d_service import create_productivity_proposal, decide_productivity_proposal, list_productivity_proposals
 from app.schemas.bim_4d_field import Bim4dFieldEvidenceResponse, Bim4dFieldReportCreate, Bim4dFieldReportResponse
 from app.services.bim.field_4d_service import add_field_evidence, create_field_report, get_field_evidence, list_field_reports
-from app.schemas.bim_4d_resources import Bim4dFieldResourceMovementCreate, Bim4dFieldResourceMovementResponse, Bim4dResourceAssignmentCreate, Bim4dResourceAssignmentResponse, Bim4dResourceCreate, Bim4dResourceHistogramResponse, Bim4dResourceResponse
-from app.services.bim.resource_4d_service import build_histogram, create_assignment, create_field_resource_movement, create_resource, list_field_resource_movements, list_resources
+from app.schemas.bim_4d_resources import Bim4dCrewCreate, Bim4dCrewResponse, Bim4dFieldResourceMovementCreate, Bim4dFieldResourceMovementResponse, Bim4dResourceAssignmentCreate, Bim4dResourceAssignmentResponse, Bim4dResourceCreate, Bim4dResourceHistogramResponse, Bim4dResourceResponse, Bim4dTimecardCreate, Bim4dTimecardResponse
+from app.services.bim.resource_4d_service import build_histogram, create_assignment, create_crew, create_field_resource_movement, create_resource, create_timecard, list_crews, list_field_resource_movements, list_resources, list_timecards
 from app.schemas.bim_4d_leveling import Bim4dLevelingCreate, Bim4dLevelingDecision, Bim4dLevelingResponse
 from app.services.bim.resource_leveling_service import create_leveling_scenario, decide_leveling_scenario, list_leveling_scenarios
 from app.services.bim.report_4d_service import build_report, report_csv
@@ -1487,6 +1487,30 @@ def list_project_bim_4d_field_resource_movements(project_id: int, resource_id: O
 def create_project_bim_4d_field_resource_movement(project_id: int, payload: Bim4dFieldResourceMovementCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.schedule.link")
     return create_field_resource_movement(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.get("/projects/{project_id}/4d/crews", response_model=list[Bim4dCrewResponse])
+def list_project_bim_4d_crews(project_id: int, active_only: bool = False, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.schedule.view")
+    return list_crews(db, project_id=project.id, company_id=project.empresa_id, active_only=active_only)
+
+
+@router.post("/projects/{project_id}/4d/crews", response_model=Bim4dCrewResponse)
+def create_project_bim_4d_crew(project_id: int, payload: Bim4dCrewCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.schedule.link")
+    return create_crew(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.get("/projects/{project_id}/4d/timecards", response_model=list[Bim4dTimecardResponse])
+def list_project_bim_4d_timecards(project_id: int, crew_id: Optional[int] = None, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.schedule.view")
+    return list_timecards(db, project_id=project.id, company_id=project.empresa_id, crew_id=crew_id)
+
+
+@router.post("/projects/{project_id}/4d/timecards", response_model=Bim4dTimecardResponse)
+def create_project_bim_4d_timecard(project_id: int, payload: Bim4dTimecardCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.schedule.link")
+    return create_timecard(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
 
 
 @router.post("/projects/{project_id}/4d/resource-assignments", response_model=Bim4dResourceAssignmentResponse)
