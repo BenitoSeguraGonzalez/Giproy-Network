@@ -27,6 +27,7 @@ import BimCostForecastPanel from './BimCostForecastPanel';
 import BimAsBuiltAcceptancePanel from './BimAsBuiltAcceptancePanel';
 import BimPunchClosurePanel from './BimPunchClosurePanel';
 import BimHandoverDossierPanel from './BimHandoverDossierPanel';
+import BimOperationsTransitionPanel from './BimOperationsTransitionPanel';
 import BimCommissioningRegistryPanel from './BimCommissioningRegistryPanel';
 import BimScheduleLinkPanel from './BimScheduleLinkPanel';
 import BimScheduleInterchangePanel from './BimScheduleInterchangePanel';
@@ -705,6 +706,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 { id: 'commissioning', label: 'Commissioning', content: <BimCommissioningRegistryPanel projectId={project?.id} empresaId={access?.resolved_company_id} versionId={activeVersionId} element={selectedElement} /> },
                 { id: 'punch-closure', label: 'Cierre punch', content: <BimPunchClosurePanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'handover-dossier', label: 'Dossier digital', content: <BimHandoverDossierPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
+                { id: 'operations-transition', label: 'Transición O&M', content: <BimOperationsTransitionPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
             ],
         };
         const bottomTools = [

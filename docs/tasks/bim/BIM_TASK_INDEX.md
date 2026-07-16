@@ -245,6 +245,7 @@ iniciada.
 | `BIM-TASK-0164` | Cerrada localmente: cierre gobernado de punch list de entrega |
 | `BIM-TASK-0165` | Cerrada localmente: ensamblado gobernado del dossier digital |
 | `BIM-TASK-0166` | Cerrada localmente: aceptación gobernada del dossier digital |
+| `BIM-TASK-0167` | Cerrada localmente: baseline de transición BIM a Operaciones |
 
 ## Orden de ejecucion
 

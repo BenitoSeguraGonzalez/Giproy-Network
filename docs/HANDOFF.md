@@ -1,5 +1,17 @@
 # HANDOFF
 
+## 2026-07-16 - Baseline de transición BIM a Operaciones
+
+- `BIM-TASK-0167` inicia G05 con un baseline SHA-256 de activos y sistemas
+  derivado del dossier digital aceptado.
+- `de2051a1b2c3` conserva receptor, responsable, fecha y criterios sin tocar
+  mantenimiento, inventario ni datos clásicos.
+- 3 tests, PostgreSQL, build, 32 smokes, Playwright, anti-BIM y baseline pasan.
+- Paridad: 80,00% (45 completas, 6 parciales, 9 ausentes). Programa: 41/61,
+  67,21% realizado y 32,79% pendiente. Sin deploy.
+- Siguiente slice: `BIM-TASK-0168`, completar G05 con activación y revalidación
+  gobernada del baseline operativo.
+
 ## 2026-07-16 - Aceptación gobernada del dossier digital BIM
 
 - `BIM-TASK-0166` completa G04 con revalidación exacta del manifiesto y

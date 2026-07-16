@@ -959,3 +959,13 @@ intercambio end-to-end.
   Clásico con BIM apagado.
 - Paridad: `79,17%`, 45 completas, 5 parciales y 10 ausentes. Programa: 40/61,
   65,57% realizado y 34,43% pendiente. Sin deploy.
+
+## Baseline de transición BIM a Operaciones - 2026-07-16
+
+- `BIM-TASK-0167` inicia G05 desde el dossier aceptado y congela organización,
+  responsable, fecha, criterios y baseline SHA-256 de activos/sistemas.
+- `bim_operations_transitions` es tenant-aware, versionada y restrictiva con
+  su dossier fuente; no crea integración prematura con módulos clásicos.
+- Entrega incorpora `Transición O&M` bajo la misma flag BIM.
+- Paridad: `80,00%`, 45 completas, 6 parciales y 9 ausentes. Programa: 41/61,
+  67,21% realizado y 32,79% pendiente. Sin deploy.

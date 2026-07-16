@@ -60,6 +60,7 @@ BIM_TABLES = {
     "bim_commissioning_tests",
     "bim_punch_closures",
     "bim_handover_dossiers",
+    "bim_operations_transitions",
     "bim_schedule_import_revisions",
     "bim_qto_snapshots",
     "bim_4d_resource_leveling_scenarios",
@@ -118,10 +119,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2050a1b2c3"
+        head for head in script.get_heads() if head != "de2051a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2050a1b2c3")
+    command.upgrade(config, "de2051a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -187,6 +188,9 @@ def validate(database_name: str) -> None:
         )).scalar_one()
         if "UNIQUE INDEX" not in dossier_current_index or "status" not in dossier_current_index or "accepted" not in dossier_current_index:
             raise RuntimeError("Indice parcial de dossier digital vigente invalido.")
+        operations_types = dict(connection.execute(text("select column_name, data_type from information_schema.columns where table_name='bim_operations_transitions' and column_name in ('effective_date','readiness_criteria_json','asset_baseline_json','submitted_at','decided_at')")).all())
+        if operations_types != {"effective_date": "date", "readiness_criteria_json": "json", "asset_baseline_json": "json", "submitted_at": "timestamp with time zone", "decided_at": "timestamp with time zone"}:
+            raise RuntimeError("La transición a Operaciones no usa DATE/JSON/TIMESTAMPTZ.")
         reported_at_type = connection.execute(
             text(
                 "select data_type from information_schema.columns "
@@ -478,10 +482,10 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2050a1b2c3")
+    command.upgrade(config, "de2051a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2050a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2051a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
@@ -492,7 +496,7 @@ def validate(database_name: str) -> None:
         "cost_sov=NUMERIC/partial_index cost_changes=NUMERIC/TIMESTAMPTZ "
         "actual_cost=NUMERIC/TIMESTAMPTZ/currency forecast=NUMERIC "
         "as_built=TIMESTAMPTZ/partial_index commissioning=JSON/TIMESTAMPTZ/RESTRICT "
-        "punch_closure=JSON/TIMESTAMPTZ/partial_index handover_dossier=JSON/TIMESTAMPTZ/RESTRICT/partial_index"
+        "punch_closure=JSON/TIMESTAMPTZ/partial_index handover_dossier=JSON/TIMESTAMPTZ/RESTRICT/partial_index operations_transition=DATE/JSON/TIMESTAMPTZ"
     )
 
 

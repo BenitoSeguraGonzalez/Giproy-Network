@@ -15877,3 +15877,9 @@ Cambios realizados
 - `de2050a1b2c3` limita a uno el dossier aceptado vigente sin borrar historial
   ni modificar fuentes BIM o datos clásicos.
 - G04 queda completa; paridad 79,17% y programa 65,57% completado.
+### 2026-07-16 - Transición BIM a Operaciones (BIM-TASK-0167)
+
+- Entrega BIM V2 incorpora una transferencia versionada desde dossier aceptado
+  hacia un baseline operativo de sistemas y activos con SHA-256.
+- `de2051a1b2c3` es aislada y reversible, sin acoplar módulos clásicos.
+- G05 pasa a parcial; paridad 80,00% y programa 67,21% completado.

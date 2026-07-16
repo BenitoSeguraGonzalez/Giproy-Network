@@ -1,0 +1,3 @@
+import React from 'react'; import { createRoot } from 'react-dom/client'; import '../../index.css'; import Panel from '../../components/bim/BimOperationsTransitionPanel';
+let items=[]; const api={listOperationsTransitions:async()=>items,createOperationsTransition:async(_p,payload)=>{const value={id:1,...payload,handover_dossier_id:8,asset_baseline:{schema:'giproy_bim_operations_baseline_v1'},baseline_checksum_sha256:'e'.repeat(64),total_systems:1,total_assets:2,status:'submitted',lock_version:1};items=[value];return value;}};
+createRoot(document.getElementById('root')).render(<main className="h-screen bg-zinc-100 p-6"><div className="h-[calc(100vh-48px)]"><Panel projectId={7} empresaId={1} api={api}/></div></main>);
