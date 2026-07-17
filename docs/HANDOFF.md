@@ -1,5 +1,17 @@
 # HANDOFF
 
+## 2026-07-17 - Matriz operacional de alertas BIM
+
+- `BIM-TASK-0169` completa H04 con niveles próximo, vencido y escalado para
+  RFI, submittals y revisiones CDE.
+- `de2053a1b2c3` persiste alertas deduplicadas, tenant-aware, resolubles y con
+  acuse exclusivo del destinatario.
+- 6 tests, PostgreSQL, build, 32 smokes, Playwright, anti-BIM y baseline pasan.
+- Paridad: 81,67% (47 completas, 4 parciales, 9 ausentes). Programa: 43/61,
+  70,49% realizado y 29,51% pendiente. Sin deploy.
+- Siguiente slice: `BIM-TASK-0170`, ensayo de backup y recuperación del
+  dominio BIM para completar H07 sin reabrir infraestructura productiva.
+
 ## 2026-07-17 - Activación gobernada de transición BIM a Operaciones
 
 - `BIM-TASK-0168` completa G05 mediante revalidación exacta del dossier y

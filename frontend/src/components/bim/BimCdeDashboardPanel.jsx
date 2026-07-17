@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Bell, ClipboardList, FileStack, MessageSquareText, RefreshCw, Users } from 'lucide-react';
+import { Bell, Check, ClipboardList, FileStack, MessageSquareText, RefreshCw, Users } from 'lucide-react';
 
 import { bimModelsApi } from '../../api/bimModels';
 
@@ -10,6 +10,12 @@ const STATUS_LABELS = {
 };
 
 const ITEM_LABELS = { rfi: 'RFI', submittal: 'Submittal', review: 'Revisión' };
+const ALERT_LABELS = { due_soon: 'Próximo', overdue: 'Vencido', escalated: 'Escalado' };
+const ALERT_STYLES = {
+    warning: 'border-amber-200 bg-amber-50 text-amber-800',
+    high: 'border-rose-200 bg-rose-50 text-rose-800',
+    critical: 'border-red-300 bg-red-50 text-red-900',
+};
 
 const formatDate = (value) => value
     ? new Intl.DateTimeFormat('es-EC', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value))
@@ -38,22 +44,38 @@ const Metric = ({ icon: Icon, label, value, detail, alert }) => (
     </div>
 );
 
-const BimCdeDashboardPanel = ({ projectId, empresaId, api = bimModelsApi }) => {
+const BimCdeDashboardPanel = ({ projectId, empresaId, canReconcile = false, api = bimModelsApi }) => {
     const [dashboard, setDashboard] = useState(null);
+    const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
 
-    const load = useCallback(async () => {
+    const load = useCallback(async (reconcile = false) => {
         if (!projectId) return;
         try {
             setLoading(true); setMessage('');
-            setDashboard(await api.getCdeDashboard(projectId, empresaId));
+            if (reconcile && canReconcile) await api.reconcileOperationalNotifications(projectId, empresaId);
+            const [summary, alerts] = await Promise.all([
+                api.getCdeDashboard(projectId, empresaId),
+                api.listOperationalNotifications(projectId, empresaId),
+            ]);
+            setDashboard(summary); setNotifications(alerts);
         } catch (error) {
             setMessage(error?.response?.data?.detail || 'No se pudo cargar el resumen CDE.');
         } finally { setLoading(false); }
-    }, [api, empresaId, projectId]);
+    }, [api, canReconcile, empresaId, projectId]);
 
-    useEffect(() => { load(); }, [load]);
+    useEffect(() => { load(false); }, [load]);
+    const acknowledge = async (notification) => {
+        try {
+            setMessage('');
+            const updated = await api.acknowledgeOperationalNotification(projectId, notification.id, empresaId);
+            setNotifications((current) => current.map((item) => item.id === updated.id ? updated : item));
+            if (!notification.acknowledged_at) setDashboard((current) => current ? { ...current, totals: { ...current.totals, unread_notifications: Math.max(0, (current.totals.unread_notifications || 0) - 1) } } : current);
+        } catch (error) {
+            setMessage(error?.response?.data?.detail || 'No se pudo acusar la alerta BIM.');
+        }
+    };
 
     const totals = dashboard?.totals || {};
     const scopeLabel = dashboard?.scope === 'project' ? 'Proyecto completo' : 'Mi ámbito autorizado';
@@ -63,7 +85,7 @@ const BimCdeDashboardPanel = ({ projectId, empresaId, api = bimModelsApi }) => {
         <section className="relative h-full min-h-0 overflow-hidden rounded-lg border border-zinc-200 bg-white" data-bim-cde-dashboard>
             <header className="flex h-11 items-center justify-between border-b border-zinc-200 px-3">
                 <div className="flex min-w-0 items-center gap-2"><ClipboardList className="h-4 w-4 shrink-0 text-[#F39200]" aria-hidden="true" /><div className="min-w-0"><h3 className="truncate text-xs font-semibold text-zinc-900">Resumen CDE</h3><p className="text-[9px] text-zinc-500">{scopeLabel}</p></div></div>
-                <button type="button" onClick={load} disabled={loading} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 text-zinc-600 hover:border-[#F39200] hover:text-[#F39200] disabled:opacity-40" aria-label="Actualizar resumen CDE" title="Actualizar resumen CDE"><RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /></button>
+                <button type="button" onClick={() => load(canReconcile)} disabled={loading} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 text-zinc-600 hover:border-[#F39200] hover:text-[#F39200] disabled:opacity-40" aria-label="Actualizar resumen CDE" title={canReconcile ? 'Reconciliar alertas y actualizar' : 'Actualizar resumen CDE'}><RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /></button>
             </header>
 
             {dashboard ? <div className="grid h-[calc(100%-44px)] min-h-0 grid-rows-[88px_112px_minmax(0,1fr)]">
@@ -79,7 +101,7 @@ const BimCdeDashboardPanel = ({ projectId, empresaId, api = bimModelsApi }) => {
                     <StatusLine label="Submittals" values={dashboard.submittal_statuses} />
                     <StatusLine label="Revisiones" values={dashboard.review_statuses} />
                 </div>
-                <div className="grid min-h-0 grid-cols-[38%_62%] divide-x divide-zinc-200">
+                <div className="grid min-h-0 grid-cols-[30%_44%_26%] divide-x divide-zinc-200">
                     <div className="min-h-0 overflow-auto">
                         <div className="sticky top-0 grid h-8 grid-cols-[minmax(0,1fr)_44px_64px_58px_52px] items-center border-b border-zinc-200 bg-white px-3 text-[9px] font-semibold uppercase text-zinc-400"><span>Responsable</span><span>RFI</span><span>Submittal</span><span>Rev.</span><span>Venc.</span></div>
                         <div data-bim-cde-workload>{dashboard.responsible_workload.length ? dashboard.responsible_workload.map((item) => (
@@ -93,6 +115,19 @@ const BimCdeDashboardPanel = ({ projectId, empresaId, api = bimModelsApi }) => {
                                 <span className="text-[9px] font-semibold uppercase text-zinc-500">{ITEM_LABELS[item.item_type] || item.item_type}</span><span className="font-semibold text-zinc-800">{item.number}</span><span className="truncate text-zinc-700" title={item.title}>{item.title}</span><span className="truncate text-zinc-500" title={item.responsible_name || ''}>{item.responsible_name || 'Sin asignar'}</span><span className={item.overdue ? 'font-semibold text-rose-600' : 'text-zinc-500'}>{formatDate(item.due_at)}</span>
                             </div>
                         )) : <p className="p-4 text-xs text-zinc-500">No hay acciones pendientes en el ámbito autorizado.</p>}</div>
+                    </div>
+                    <div className="min-h-0 overflow-auto" data-bim-operational-notifications>
+                        <div className="sticky top-0 flex h-8 items-center justify-between border-b border-zinc-200 bg-white px-3 text-[9px] font-semibold uppercase text-zinc-400"><span>Alertas BIM</span><span>{notifications.filter((item) => !item.acknowledged_at).length} pendientes</span></div>
+                        {notifications.length ? notifications.map((item) => (
+                            <div key={item.id} className="border-b border-zinc-100 px-3 py-2">
+                                <div className="flex items-center justify-between gap-2">
+                                    <span className={`border px-1.5 py-0.5 text-[9px] font-semibold uppercase ${ALERT_STYLES[item.severity] || ALERT_STYLES.warning}`}>{ALERT_LABELS[item.event_type] || item.event_type}</span>
+                                    {!item.acknowledged_at ? <button type="button" onClick={() => acknowledge(item)} className="inline-flex h-6 items-center gap-1 px-1 text-[9px] font-semibold text-zinc-600 hover:text-emerald-700" aria-label={`Acusar alerta ${item.source_number}`} title="Acusar alerta"><Check className="h-3 w-3" />Acusar</button> : <span className="text-[9px] font-semibold text-emerald-700">Acusada</span>}
+                                </div>
+                                <p className="mt-1 truncate text-[11px] font-semibold text-zinc-800" title={item.title}>{item.source_number} · {item.title}</p>
+                                <p className="mt-0.5 text-[9px] text-zinc-500">{ITEM_LABELS[item.source_type] || item.source_type} · vence {formatDate(item.due_at)} · nivel {item.escalation_level}</p>
+                            </div>
+                        )) : <p className="p-4 text-xs text-zinc-500">Sin alertas operacionales activas.</p>}
                     </div>
                 </div>
             </div> : <div className="grid h-[calc(100%-44px)] place-items-center"><p className="text-xs text-zinc-500">{loading ? 'Cargando resumen CDE...' : message || 'Sin información CDE disponible.'}</p></div>}

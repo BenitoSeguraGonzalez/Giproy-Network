@@ -655,7 +655,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 { id: 'quantities', label: 'Cantidades', content: <BimQuantityProposalPanel projectId={project?.id} empresaId={access?.resolved_company_id} versionId={activeVersionId} element={selectedElement} /> },
             ],
             coordination: [
-                { id: 'cde-dashboard', label: 'Resumen', content: <BimCdeDashboardPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
+                { id: 'cde-dashboard', label: 'Resumen', content: <BimCdeDashboardPanel projectId={project?.id} empresaId={access?.resolved_company_id} canReconcile={canCreateCompanyScope} /> },
                 { id: 'documents', label: 'Documentos', content: <BimCdeDocumentsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'rfis', label: 'RFI', content: <BimCdeRfiPanel projectId={project?.id} empresaId={access?.resolved_company_id} selectedElement={selectedElement} /> },
                 { id: 'submittals', label: 'Submittals', content: <BimCdeSubmittalsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },

@@ -435,6 +435,18 @@ export const bimModelsApi = {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/cde/dashboard`, withTenantConfig({}, empresaId));
         return response.data;
     },
+    listOperationalNotifications: async (projectId, empresaId = null) => {
+        const response = await axiosInstance.get(`/bim/projects/${projectId}/cde/operational-notifications`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    reconcileOperationalNotifications: async (projectId, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/cde/operational-notifications/reconcile`, null, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    acknowledgeOperationalNotification: async (projectId, notificationId, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/cde/operational-notifications/${notificationId}/ack`, null, withTenantConfig({}, empresaId));
+        return response.data;
+    },
     uploadCdeDocument: async (projectId, payload, empresaId = null) => {
         const formData = new FormData();
         formData.append('document_code', payload.document_code);

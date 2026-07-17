@@ -979,3 +979,14 @@ intercambio end-to-end.
 - La decisión permanece aislada de mantenimiento, inventario e IoT clásicos.
 - Paridad: `80,83%`, 46 completas, 5 parciales y 9 ausentes. Programa: 42/61,
   68,85% realizado y 31,15% pendiente. Sin deploy.
+
+## Matriz operacional de alertas BIM - 2026-07-17
+
+- `BIM-TASK-0169` completa H04 con reconciliación idempotente de RFI,
+  submittals y revisiones CDE.
+- Los niveles próximo, vencido y escalado se deduplican por fuente,
+  destinatario, vencimiento y nivel; las alertas obsoletas se resuelven.
+- El acuse es tenant-aware y exclusivo del destinatario, sin usar tablas o
+  canales clásicos.
+- Paridad: `81,67%`, 47 completas, 4 parciales y 9 ausentes. Programa: 43/61,
+  70,49% realizado y 29,51% pendiente. Sin deploy.

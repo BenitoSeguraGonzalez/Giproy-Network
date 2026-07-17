@@ -23,8 +23,21 @@ const dashboard = {
     ],
 };
 
-const api = { getCdeDashboard: async () => dashboard };
+let notifications = [
+    { id: 1, source_type: 'review', source_number: 'REV-0017', title: 'Revisar emisión P03 de fachada norte', event_type: 'escalated', severity: 'critical', escalation_level: 2, due_at: '2026-07-15T12:00:00Z', acknowledged_at: null },
+    { id: 2, source_type: 'rfi', source_number: 'RFI-0042', title: 'Interferencia entre bandeja y viga', event_type: 'overdue', severity: 'high', escalation_level: 1, due_at: '2026-07-16T12:00:00Z', acknowledged_at: null },
+    { id: 3, source_type: 'submittal', source_number: 'SUB-0021', title: 'Planos de taller de estructura metálica', event_type: 'due_soon', severity: 'warning', escalation_level: 0, due_at: '2026-07-18T12:00:00Z', acknowledged_at: '2026-07-17T10:00:00Z' },
+];
+const api = {
+    getCdeDashboard: async () => dashboard,
+    listOperationalNotifications: async () => notifications,
+    reconcileOperationalNotifications: async () => ({ generated: 0, active: notifications.length, resolved: 0 }),
+    acknowledgeOperationalNotification: async (_projectId, id) => {
+        notifications = notifications.map((item) => item.id === id ? { ...item, acknowledged_at: '2026-07-17T12:00:00Z' } : item);
+        return notifications.find((item) => item.id === id);
+    },
+};
 
 createRoot(document.getElementById('root')).render(
-    <main className="h-screen overflow-hidden bg-[#F2F4F7] p-6"><div className="mx-auto h-[720px] w-[1480px]"><BimCdeDashboardPanel projectId={7} empresaId={1} api={api} /></div></main>,
+    <main className="h-screen overflow-hidden bg-[#F2F4F7] p-6"><div className="mx-auto h-[calc(100vh-48px)] w-full max-w-[2200px]"><BimCdeDashboardPanel projectId={7} empresaId={1} canReconcile api={api} /></div></main>,
 );

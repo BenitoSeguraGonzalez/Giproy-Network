@@ -15890,3 +15890,11 @@ Cambios realizados
 - `de2052a1b2c3` limita a una la transición aceptada vigente sin integrar
   mantenimiento, inventario o IoT clásicos.
 - G05 queda completa; paridad 80,83% y programa 68,85% completado.
+
+### 2026-07-17 - Matriz operacional de alertas BIM (BIM-TASK-0169)
+
+- RFI, submittals y revisiones CDE generan alertas in-app próximas, vencidas o
+  escaladas mediante reconciliación idempotente.
+- `de2053a1b2c3` mantiene deduplicación, tenant, historial resuelto y acuse por
+  destinatario sin usar notificaciones clásicas.
+- H04 queda completa; paridad 81,67% y programa 70,49% completado.

@@ -355,6 +355,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0166](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0166.md) - Aceptación gobernada del dossier digital
 - [BIM-TASK-0167](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0167.md) - Baseline de transición BIM a Operaciones
 - [BIM-TASK-0168](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0168.md) - Activación gobernada de transición BIM a Operaciones
+- [BIM-TASK-0169](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0169.md) - Matriz operacional de alertas BIM
 
 ---
 

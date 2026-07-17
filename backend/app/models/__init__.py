@@ -131,6 +131,7 @@ from .bim_commissioning import BimCommissioningAsset, BimCommissioningSystem, Bi
 from .bim_punch_closure import BimPunchClosure
 from .bim_handover_dossier import BimHandoverDossier
 from .bim_operations_transition import BimOperationsTransition
+from .bim_operational_notification import BimOperationalNotification
 from .bim_cde import BimCdeDocument, BimCdeDocumentRevision
 from .bim_cde_rfi import BimCdeRfi, BimCdeRfiEvent
 from .bim_cde_submittal import BimCdeSubmittal, BimCdeSubmittalEvent, BimCdeSubmittalRevision

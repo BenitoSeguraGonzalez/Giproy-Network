@@ -146,6 +146,8 @@ from app.services.bim.cde_review_service import (
 )
 from app.schemas.bim_cde_dashboard import BimCdeDashboardResponse
 from app.services.bim.cde_dashboard_service import get_cde_dashboard
+from app.schemas.bim_operational_notification import BimOperationalNotificationReconcileResponse, BimOperationalNotificationResponse
+from app.services.bim.operational_notification_service import acknowledge_operational_notification, list_operational_notifications, reconcile_operational_notifications
 from app.schemas.bim_security import BimCapabilityResponse, BimGrantRequest
 from app.services.bim.capability_service import require_bim_capability, resolve_bim_capabilities, save_bim_grant
 from app.services.audit_event import record_audit_event
@@ -558,6 +560,27 @@ def get_project_bim_cde_dashboard(project_id: int, empresa_id: Optional[int] = N
         requester_role=current_user.rol,
         can_override=can_override,
     )
+
+
+@router.get("/projects/{project_id}/cde/operational-notifications", response_model=list[BimOperationalNotificationResponse])
+def list_project_bim_operational_notifications(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user)
+    return list_operational_notifications(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id)
+
+
+@router.post("/projects/{project_id}/cde/operational-notifications/reconcile", response_model=BimOperationalNotificationReconcileResponse)
+def reconcile_project_bim_operational_notifications(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.coordinate")
+    return reconcile_operational_notifications(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/cde/operational-notifications/{notification_id}/ack", response_model=BimOperationalNotificationResponse)
+def acknowledge_project_bim_operational_notification(project_id: int, notification_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user)
+    return acknowledge_operational_notification(db, notification_id=notification_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id)
 
 
 @router.get("/projects/{project_id}/cde/rfi-assignees", response_model=list[BimCdeRfiAssigneeResponse])

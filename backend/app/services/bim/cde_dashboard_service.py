@@ -10,6 +10,7 @@ from app.models.bim_cde import BimCdeDocumentRevision
 from app.models.bim_cde_review import BimCdeReview, BimCdeReviewNotification
 from app.models.bim_cde_rfi import BimCdeRfi
 from app.models.bim_cde_submittal import BimCdeSubmittal
+from app.models.bim_operational_notification import BimOperationalNotification
 from app.models.usuario import Usuario
 from app.services.bim.cde_document_service import list_documents
 
@@ -174,6 +175,13 @@ def get_cde_dashboard(
         BimCdeReviewNotification.empresa_id == company_id,
         BimCdeReviewNotification.usuario_id == user_id,
         BimCdeReviewNotification.read_at.is_(None),
+    ).count()
+    unread_notifications += db.query(BimOperationalNotification).filter(
+        BimOperationalNotification.proyecto_id == project_id,
+        BimOperationalNotification.empresa_id == company_id,
+        BimOperationalNotification.usuario_id == user_id,
+        BimOperationalNotification.acknowledged_at.is_(None),
+        BimOperationalNotification.resolved_at.is_(None),
     ).count()
 
     return {
