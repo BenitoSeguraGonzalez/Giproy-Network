@@ -104,8 +104,8 @@ from app.schemas.bim_punch_closure import BimPunchClosureCreate, BimPunchClosure
 from app.services.bim.punch_closure_service import create_punch_closure, decide_punch_closure, list_punch_closures
 from app.schemas.bim_handover_dossier import BimHandoverDossierCreate, BimHandoverDossierDecision, BimHandoverDossierResponse
 from app.services.bim.handover_dossier_service import create_handover_dossier, decide_handover_dossier, list_handover_dossiers
-from app.schemas.bim_operations_transition import BimOperationsTransitionCreate, BimOperationsTransitionResponse
-from app.services.bim.operations_transition_service import create_operations_transition, list_operations_transitions
+from app.schemas.bim_operations_transition import BimOperationsTransitionCreate, BimOperationsTransitionDecision, BimOperationsTransitionResponse
+from app.services.bim.operations_transition_service import create_operations_transition, decide_operations_transition, list_operations_transitions
 from app.services.bim.qto_service import (
     create_qto_snapshot,
     decide_qto_snapshot,
@@ -1135,6 +1135,12 @@ def list_project_bim_operations_transitions(project_id: int, empresa_id: Optiona
 def create_project_bim_operations_transition(project_id: int, payload: BimOperationsTransitionCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.review")
     return create_operations_transition(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/operations-transitions/{transition_id}/decision", response_model=BimOperationsTransitionResponse)
+def decide_project_bim_operations_transition(project_id: int, transition_id: int, payload: BimOperationsTransitionDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.coordinate")
+    return decide_operations_transition(db, transition_id=transition_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
 
 
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)

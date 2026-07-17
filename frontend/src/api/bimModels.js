@@ -161,6 +161,7 @@ export const bimModelsApi = {
     decideHandoverDossier: async (projectId, dossierId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/handover-dossiers/${dossierId}/decision`, payload, withTenantConfig({}, empresaId))).data,
     listOperationsTransitions: async (projectId, empresaId = null) => (await axiosInstance.get(`/bim/projects/${projectId}/operations-transitions`, withTenantConfig({}, empresaId))).data,
     createOperationsTransition: async (projectId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/operations-transitions`, payload, withTenantConfig({}, empresaId))).data,
+    decideOperationsTransition: async (projectId, transitionId, payload, empresaId = null) => (await axiosInstance.post(`/bim/projects/${projectId}/operations-transitions/${transitionId}/decision`, payload, withTenantConfig({}, empresaId))).data,
     getCapabilities: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/capabilities`, withTenantConfig({}, empresaId));
         return response.data;

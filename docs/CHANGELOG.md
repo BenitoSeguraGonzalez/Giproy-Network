@@ -15883,3 +15883,10 @@ Cambios realizados
   hacia un baseline operativo de sistemas y activos con SHA-256.
 - `de2051a1b2c3` es aislada y reversible, sin acoplar módulos clásicos.
 - G05 pasa a parcial; paridad 80,00% y programa 67,21% completado.
+### 2026-07-17 - Activación de transición BIM a Operaciones (BIM-TASK-0168)
+
+- La activación reconstruye el baseline operativo desde el dossier aceptado y
+  bloquea cualquier diferencia de fuente o checksum.
+- `de2052a1b2c3` limita a una la transición aceptada vigente sin integrar
+  mantenimiento, inventario o IoT clásicos.
+- G05 queda completa; paridad 80,83% y programa 68,85% completado.

@@ -67,7 +67,7 @@
     {"id": "G02", "group": "handover", "status": "complete", "evidence": ["BIM-TASK-0162", "BIM-TASK-0163", "Governed asset/system registry, test protocols, results and technical acceptance"]},
     {"id": "G03", "group": "handover", "status": "complete", "evidence": ["BIM-TASK-0083", "BIM-TASK-0116", "BIM-TASK-0150", "BIM-TASK-0164", "Checksum-bound punch closure against accepted as-built"]},
     {"id": "G04", "group": "handover", "status": "complete", "evidence": ["BIM-TASK-0165", "BIM-TASK-0166", "Checksum-bound digital dossier with governed acceptance and source revalidation"]},
-    {"id": "G05", "group": "handover", "status": "partial", "evidence": ["BIM-TASK-0167", "Checksum-bound operations asset baseline; governed activation pending"]},
+    {"id": "G05", "group": "handover", "status": "complete", "evidence": ["BIM-TASK-0167", "BIM-TASK-0168", "Checksum-bound operations baseline with governed activation and source revalidation"]},
     {"id": "H01", "group": "enterprise", "status": "complete", "evidence": ["Tenant-aware BIM tests", "BIM rollout gates"]},
     {"id": "H02", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0089"]},
     {"id": "H03", "group": "enterprise", "status": "absent", "evidence": ["Cloud CDE collaboration pending"]},

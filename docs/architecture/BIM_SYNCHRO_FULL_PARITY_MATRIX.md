@@ -119,7 +119,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | G02 | Commissioning | Completa | `BIM-TASK-0162/0163`: registro trazable, protocolos/resultados y aceptacion tecnica gobernada |
 | G03 | Punch list de terminacion | Completa | `BIM-TASK-0083/0116/0150/0164`: hallazgos operativos y cierre de entrega ligado al as-built |
 | G04 | Dossier digital de entrega | Completa | BIM-TASK-0165/0166: manifiesto SHA-256, revalidación y aceptación gobernada |
-| G05 | Transicion a operacion/gemelo digital | Parcial | BIM-TASK-0167 congela baseline operativo; falta activación gobernada |
+| G05 | Transicion a operacion/gemelo digital | Completa | BIM-TASK-0167/0168: baseline SHA-256, revalidación y activación gobernada |
 
 ### H. Plataforma empresarial
 

@@ -246,6 +246,7 @@ iniciada.
 | `BIM-TASK-0165` | Cerrada localmente: ensamblado gobernado del dossier digital |
 | `BIM-TASK-0166` | Cerrada localmente: aceptación gobernada del dossier digital |
 | `BIM-TASK-0167` | Cerrada localmente: baseline de transición BIM a Operaciones |
+| `BIM-TASK-0168` | Cerrada localmente: activación gobernada de transición a Operaciones |
 
 ## Orden de ejecucion
 

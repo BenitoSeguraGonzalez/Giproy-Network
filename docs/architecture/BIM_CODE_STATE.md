@@ -969,3 +969,13 @@ intercambio end-to-end.
 - Entrega incorpora `Transición O&M` bajo la misma flag BIM.
 - Paridad: `80,00%`, 45 completas, 6 parciales y 9 ausentes. Programa: 41/61,
   67,21% realizado y 32,79% pendiente. Sin deploy.
+
+## Activación gobernada de transición BIM a Operaciones - 2026-07-17
+
+- `BIM-TASK-0168` completa G05 revalidando dossier, baseline y SHA-256 bajo
+  locks antes de activar la transferencia al gemelo operativo.
+- Un índice parcial permite una única transición aceptada vigente y conserva
+  el historial anterior como `superseded`.
+- La decisión permanece aislada de mantenimiento, inventario e IoT clásicos.
+- Paridad: `80,83%`, 46 completas, 5 parciales y 9 ausentes. Programa: 42/61,
+  68,85% realizado y 31,15% pendiente. Sin deploy.

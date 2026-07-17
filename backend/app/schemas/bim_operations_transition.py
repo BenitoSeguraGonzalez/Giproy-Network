@@ -13,6 +13,12 @@ class BimOperationsTransitionCreate(BaseModel):
     transition_notes: str = Field(min_length=5, max_length=4000)
 
 
+class BimOperationsTransitionDecision(BaseModel):
+    decision: Literal["accepted", "rejected"]
+    reason: str = Field(min_length=5, max_length=2000)
+    expected_lock_version: int = Field(ge=1)
+
+
 class BimOperationsTransitionResponse(BaseModel):
     contract_version: str = "giproy_bim_operations_transition_v1"
     id: int

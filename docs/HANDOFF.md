@@ -1,5 +1,17 @@
 # HANDOFF
 
+## 2026-07-17 - Activación gobernada de transición BIM a Operaciones
+
+- `BIM-TASK-0168` completa G05 mediante revalidación exacta del dossier y
+  baseline operativo antes de la decisión.
+- `de2052a1b2c3` garantiza una única transición aceptada vigente y conserva el
+  historial como `superseded`.
+- 4 tests, PostgreSQL, build, 32 smokes, Playwright, anti-BIM y baseline pasan.
+- Paridad: 80,83% (46 completas, 5 parciales, 9 ausentes). Programa: 42/61,
+  68,85% realizado y 31,15% pendiente. Sin deploy.
+- Siguiente slice: `BIM-TASK-0169`, iniciar D01 con superficie de Campo PWA
+  aislada y sin alterar la política desktop del workspace principal.
+
 ## 2026-07-16 - Baseline de transición BIM a Operaciones
 
 - `BIM-TASK-0167` inicia G05 con un baseline SHA-256 de activos y sistemas

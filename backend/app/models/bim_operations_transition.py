@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint, Column, Date, DateTime, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, Column, Date, DateTime, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint, text
 from sqlalchemy.sql import func
 
 from app.core.database import Base
@@ -8,6 +8,7 @@ class BimOperationsTransition(Base):
     __tablename__ = "bim_operations_transitions"
     __table_args__ = (
         UniqueConstraint("empresa_id", "proyecto_id", "revision", name="uq_bim_operations_transition_revision"),
+        Index("uq_bim_operations_transition_current", "empresa_id", "proyecto_id", unique=True, postgresql_where=text("status = 'accepted'"), sqlite_where=text("status = 'accepted'")),
         CheckConstraint("status IN ('submitted','accepted','rejected','superseded')", name="ck_bim_operations_transition_status"),
     )
 
