@@ -248,6 +248,7 @@ iniciada.
 | `BIM-TASK-0167` | Cerrada localmente: baseline de transición BIM a Operaciones |
 | `BIM-TASK-0168` | Cerrada localmente: activación gobernada de transición a Operaciones |
 | `BIM-TASK-0169` | Cerrada localmente: matriz operacional de alertas BIM y escalamiento |
+| `BIM-TASK-0170` | Cerrada localmente: ensayo DR checksum-exacto del dominio BIM |
 
 ## Orden de ejecucion
 

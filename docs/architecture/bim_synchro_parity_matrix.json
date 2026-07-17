@@ -74,7 +74,7 @@
     {"id": "H04", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0145", "BIM-TASK-0169", "Tenant-aware operational notification and escalation matrix for RFI, submittals and CDE reviews"]},
     {"id": "H05", "group": "enterprise", "status": "absent", "evidence": ["BIM map services pending"]},
     {"id": "H06", "group": "enterprise", "status": "absent", "evidence": ["Approved ERP progress/time contract pending"]},
-    {"id": "H07", "group": "enterprise", "status": "partial", "evidence": ["Beta rollback and backups", "BIM DR drill pending"]},
+    {"id": "H07", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0090", "BIM-TASK-0170", "Checksum-exact PostgreSQL BIM domain backup/restore drill with classic fingerprint isolation"]},
     {"id": "H08", "group": "enterprise", "status": "partial", "evidence": ["IFC/BCF/IDS foundations", "ISO 19650 and formal certification pending"]}
   ]
 }

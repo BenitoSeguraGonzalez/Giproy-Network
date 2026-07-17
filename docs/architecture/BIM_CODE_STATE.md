@@ -990,3 +990,13 @@ intercambio end-to-end.
   canales clásicos.
 - Paridad: `81,67%`, 47 completas, 4 parciales y 9 ausentes. Programa: 43/61,
   70,49% realizado y 29,51% pendiente. Sin deploy.
+
+## Ensayo DR del dominio BIM - 2026-07-17
+
+- `BIM-TASK-0170` completa H07 con dump/restore PostgreSQL limitado a `bim_*`.
+- El validador compara conteos y SHA-256 de 79 tablas y exige fingerprint
+  clásico inalterado.
+- El ensayo usa dos bases `_test`, artefacto temporal y limpieza automática;
+  no toca backup clásico ni infraestructura productiva.
+- Paridad: `82,50%`, 48 completas, 3 parciales y 9 ausentes. Programa: 44/61,
+  72,13% realizado y 27,87% pendiente. Sin deploy.

@@ -1,5 +1,18 @@
 # HANDOFF
 
+## 2026-07-17 - Ensayo DR del dominio BIM
+
+- `BIM-TASK-0170` completa H07 con backup/restore real de las 79 tablas
+  `bim_*`, conteos y checksum SHA-256 exactos.
+- El contexto clásico permanece idéntico y las bases `_test` se eliminan.
+- Ensayo: 2 filas, checksum
+  `86c98a641c0172299c1da899494030689ad26a371ed2caa6e43678178c33816f`,
+  17,165 segundos locales.
+- Paridad: 82,50% (48 completas, 3 parciales, 9 ausentes). Programa: 44/61,
+  72,13% realizado y 27,87% pendiente. Sin deploy.
+- Siguiente slice: `BIM-TASK-0171`, servicios de mapas BIM H05 sobre el
+  georreferenciado existente, sin depender de Proyectos clásico.
+
 ## 2026-07-17 - Matriz operacional de alertas BIM
 
 - `BIM-TASK-0169` completa H04 con niveles próximo, vencido y escalado para

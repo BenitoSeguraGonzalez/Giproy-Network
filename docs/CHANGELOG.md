@@ -15898,3 +15898,11 @@ Cambios realizados
 - `de2053a1b2c3` mantiene deduplicación, tenant, historial resuelto y acuse por
   destinatario sin usar notificaciones clásicas.
 - H04 queda completa; paridad 81,67% y programa 70,49% completado.
+
+### 2026-07-17 - Ensayo DR del dominio BIM (BIM-TASK-0170)
+
+- Se incorpora backup/restore PostgreSQL reproducible de todas las tablas
+  `bim_*` con verificación SHA-256 por tabla.
+- El ensayo exige fingerprint clásico inalterado, bases `_test`, nombres
+  seguros y limpieza automática.
+- H07 queda completa; paridad 82,50% y programa 72,13% completado.
