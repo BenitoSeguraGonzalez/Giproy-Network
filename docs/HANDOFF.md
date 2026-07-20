@@ -1,5 +1,12 @@
 # HANDOFF
 
+## 2026-07-20 - Rafaga CDE HTTPS beta
+
+- `BIM-TASK-0182` certifica 205 eventos sobre HTTPS y paginas `100/100/5`.
+- Heartbeat p95 `295,96 ms` frente al umbral de `1000 ms`.
+- Cleanup final 0 usuarios, 0 presencias, 0 eventos; beta HTTP 200.
+- Paridad: 89,17%. Programa: 56/61, 91,80% realizado y 8,20% pendiente.
+
 ## 2026-07-20 - Despliegue beta y certificacion remota CDE
 
 - `BIM-TASK-0181` despliega la ola 0173-0180 con backup de DB, fuentes e

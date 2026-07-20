@@ -50,7 +50,12 @@ class FakeCdeBackend:
             def events(self, project_id, after_id):
                 with backend.lock:
                     rows = [dict(row) for row in backend.event_rows if row["id"] > after_id]
-                    return {"cursor": rows[-1]["id"] if rows else after_id, "events": rows}
+                    page = rows[:100]
+                    return {
+                        "cursor": page[-1]["id"] if page else after_id,
+                        "events": page,
+                        "has_more": len(rows) > len(page),
+                    }
 
             def metrics(self, project_id):
                 active = self.presences(project_id)
@@ -133,3 +138,21 @@ def test_http_client_declares_certification_user_agent():
         "user_agent": "GiProy-BIM-CDE-Certification/1.0",
         "timeout": 7,
     }
+
+
+def test_remote_burst_probe_drains_205_events_in_bounded_pages():
+    backend = FakeCdeBackend()
+    ticks = iter(index / 1000 for index in range(1000))
+
+    report = MODULE.run_burst_probe(
+        backend.client(),
+        project_id=7,
+        event_count=205,
+        session_prefix="burst-test",
+        clock_fn=lambda: next(ticks),
+    )
+
+    assert report.event_count == 205
+    assert report.page_sizes == (100, 100, 5)
+    assert report.heartbeat_p95_ms == pytest.approx(1)
+    assert backend.presence_rows == {}

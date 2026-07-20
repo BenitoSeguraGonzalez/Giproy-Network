@@ -260,6 +260,7 @@ iniciada.
 | `BIM-TASK-0179` | Cerrada localmente: escala del feed CDE certificada con 100.000 eventos |
 | `BIM-TASK-0180` | Cerrada localmente: drenaje multipagina y cursor resiliente del feed CDE |
 | `BIM-TASK-0181` | Cerrada en beta: despliegue reversible y certificacion remota H03 |
+| `BIM-TASK-0182` | Cerrada en beta: rafaga CDE 205 y drenaje HTTPS 100/100/5 |
 
 ## Orden de ejecucion
 

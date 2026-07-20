@@ -1126,3 +1126,14 @@ intercambio end-to-end.
   completa; Gate E humano y Gate K permanecen abiertos.
 - Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 55/61,
   90,16% realizado y 9,84% pendiente.
+
+## Rafaga CDE certificada sobre HTTPS beta - 2026-07-20
+
+- `BIM-TASK-0182` emite 205 cambios CDE autenticados contra beta y drena el
+  feed desplegado en paginas `100/100/5` con cursor monotono.
+- La latencia p95 de heartbeat es `295,96 ms`, por debajo del umbral
+  conservador de `1000 ms`.
+- El cleanup deja cero usuarios, presencias y eventos temporales y la beta
+  permanece HTTP 200. H03 continua completa; Gate E y Gate K siguen abiertos.
+- Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 56/61,
+  91,80% realizado y 8,20% pendiente.

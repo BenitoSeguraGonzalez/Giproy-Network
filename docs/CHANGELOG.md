@@ -1,3 +1,9 @@
+### 2026-07-20 - Rafaga CDE HTTPS beta (BIM-TASK-0182)
+
+- Beta procesa 205 cambios autenticados y drena el feed en `100/100/5`.
+- Heartbeat p95 `295,96 ms`; cleanup 0/0/0 y beta HTTP 200.
+- Paridad 89,17%; programa 56/61, 91,80% realizado y 8,20% pendiente.
+
 ### 2026-07-20 - Despliegue beta y certificacion remota CDE (BIM-TASK-0181)
 
 - Se despliega reversiblemente la ola 0173-0180; Alembic queda en `de2057`.

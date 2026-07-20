@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import statistics
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -29,6 +30,14 @@ class ProbeReport:
     delta_events: int
     latest_cursor: int
     metrics_active: int
+
+
+@dataclass(frozen=True)
+class BurstProbeReport:
+    event_count: int
+    page_sizes: tuple[int, ...]
+    latest_cursor: int
+    heartbeat_p95_ms: float
 
 
 class RejectRedirects(HTTPRedirectHandler):
@@ -176,6 +185,70 @@ def run_probe(
                 client.leave(project_id, session_key)
             except RuntimeError:
                 pass
+
+
+def run_burst_probe(
+    client: CdeClient,
+    *,
+    project_id: int,
+    event_count: int = 205,
+    max_heartbeat_p95_ms: float = 1000,
+    session_prefix: str | None = None,
+    clock_fn=time.perf_counter,
+) -> BurstProbeReport:
+    if event_count <= 0:
+        raise ValueError("event_count debe ser positivo.")
+    prefix = session_prefix or uuid4().hex
+    session_key = f"remote-burst-{prefix}"
+    try:
+        client.heartbeat(project_id, session_key, "coordination", {"tool": "remote_burst", "sequence": -1})
+        baseline = client.metrics(project_id).get("collaboration", {})
+        cursor = int(baseline.get("latest_cursor") or 0)
+        durations_ms = []
+        for sequence in range(event_count):
+            started_at = clock_fn()
+            client.heartbeat(
+                project_id,
+                session_key,
+                "coordination",
+                {"tool": "remote_burst", "sequence": sequence},
+            )
+            durations_ms.append((clock_fn() - started_at) * 1000)
+
+        page_sizes = []
+        collected = 0
+        while True:
+            page = client.events(project_id, cursor)
+            next_cursor = int(page.get("cursor") or cursor)
+            events = page.get("events") or []
+            if events and next_cursor <= cursor:
+                raise RuntimeError("El cursor remoto no avanzo durante el drenaje de rafaga.")
+            page_sizes.append(len(events))
+            collected += len(events)
+            cursor = next_cursor
+            if not page.get("has_more"):
+                break
+            if len(page_sizes) > 10:
+                raise RuntimeError("El drenaje remoto excedio el limite seguro de paginas.")
+
+        if collected != event_count:
+            raise RuntimeError(f"La rafaga remota esperaba {event_count} eventos y recupero {collected}.")
+        p95_ms = statistics.quantiles(durations_ms, n=100, method="inclusive")[94]
+        if p95_ms > max_heartbeat_p95_ms:
+            raise RuntimeError(
+                f"La latencia p95 de heartbeat ({p95_ms:.2f} ms) excede {max_heartbeat_p95_ms:.2f} ms."
+            )
+        return BurstProbeReport(
+            event_count=collected,
+            page_sizes=tuple(page_sizes),
+            latest_cursor=cursor,
+            heartbeat_p95_ms=p95_ms,
+        )
+    finally:
+        try:
+            client.leave(project_id, session_key)
+        except RuntimeError:
+            pass
 
 
 def main() -> None:
