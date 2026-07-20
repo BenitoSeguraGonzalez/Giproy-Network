@@ -262,6 +262,7 @@ iniciada.
 | `BIM-TASK-0181` | Cerrada en beta: despliegue reversible y certificacion remota H03 |
 | `BIM-TASK-0182` | Cerrada en beta: rafaga CDE 205 y drenaje HTTPS 100/100/5 |
 | `BIM-TASK-0183` | Cerrada en beta: restore pre-ola y huella clasica verificados |
+| `BIM-TASK-0184` | Cerrada tecnicamente: expediente ISO 19650/openBIM verificable |
 
 ## Orden de ejecucion
 

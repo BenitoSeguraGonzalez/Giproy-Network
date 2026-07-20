@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0.0",
+  "as_of": "2026-07-20",
+  "claim_level": "verified_internal_not_formally_certified",
+  "scope": "GiProy BIM beta allowlist companies 1 and 3",
+  "official_sources": [
+    "https://www.iso.org/standard/68078.html",
+    "https://www.iso.org/standard/68080.html",
+    "https://www.iso.org/standard/75109.html",
+    "https://www.iso.org/standard/78246.html",
+    "https://www.iso.org/standard/74206.html",
+    "https://www.iso.org/standard/82705.html",
+    "https://www.buildingsmart.org/standards/bsi-standards/industry-foundation-classes/",
+    "https://www.buildingsmart.org/standards/bsi-standards/information-delivery-specification-ids/",
+    "https://www.buildingsmart.org/compliance/software-certification/"
+  ],
+  "controls": [
+    {
+      "id": "ISO19650-1",
+      "status": "verified_internal",
+      "scope_note": "Registro, organizacion, versionado y disponibilidad de contenedores de informacion BIM.",
+      "evidence": [
+        "docs/tasks/bim/BIM-TASK-0140.md",
+        "docs/tasks/bim/BIM-TASK-0145.md",
+        "backend/app/tests/test_bim_cde_documents.py",
+        "backend/app/tests/test_bim_cde_reviews.py"
+      ]
+    },
+    {
+      "id": "ISO19650-2",
+      "status": "verified_internal",
+      "scope_note": "Procesos gobernados de entrega, revision, RFI, submittal y aprobacion durante proyecto.",
+      "evidence": [
+        "docs/tasks/bim/BIM-TASK-0141.md",
+        "docs/tasks/bim/BIM-TASK-0144.md",
+        "backend/app/tests/test_bim_cde_rfis.py",
+        "backend/app/tests/test_bim_cde_submittals.py"
+      ]
+    },
+    {
+      "id": "ISO19650-3",
+      "status": "verified_internal",
+      "scope_note": "Baseline gobernada y activacion checksum-bound para transicion a operaciones.",
+      "evidence": [
+        "docs/tasks/bim/BIM-TASK-0167.md",
+        "docs/tasks/bim/BIM-TASK-0168.md",
+        "backend/app/tests/test_bim_operations_transition.py"
+      ]
+    },
+    {
+      "id": "ISO19650-4",
+      "status": "verified_internal",
+      "scope_note": "Intercambios versionados con checksum, validacion IDS y decisiones de aceptacion auditables.",
+      "evidence": [
+        "docs/tasks/bim/BIM-TASK-0082.md",
+        "docs/tasks/bim/BIM-TASK-0172.md",
+        "backend/app/tests/test_bim_ids.py",
+        "backend/app/tests/test_bim_erp_exchange.py"
+      ]
+    },
+    {
+      "id": "ISO19650-5",
+      "status": "verified_internal",
+      "scope_note": "Aislamiento tenant, capacidades BIM, auditoria sensible, secretos cifrados y rollback.",
+      "evidence": [
+        "docs/tasks/bim/BIM-TASK-0087.md",
+        "docs/tasks/bim/BIM-TASK-0089.md",
+        "docs/tasks/bim/BIM-TASK-0173.md",
+        "docs/tasks/bim/BIM-TASK-0183.md",
+        "backend/app/tests/test_bim_capabilities.py"
+      ]
+    },
+    {
+      "id": "ISO19650-6",
+      "status": "verified_internal",
+      "scope_note": "Riesgos 4D, controles, inspecciones, evidencia y punch items de salud y seguridad.",
+      "evidence": [
+        "docs/tasks/bim/BIM-TASK-0150.md",
+        "backend/app/tests/test_bim_4d_safety.py",
+        "backend/app/tests/test_bim_punch_closure.py"
+      ]
+    },
+    {
+      "id": "IFC",
+      "status": "scope_gap",
+      "scope_note": "Importacion interna verificada para IFC2X3 e IFC4; IFC4.3 y certificacion oficial import/export permanecen fuera del alcance certificado.",
+      "evidence": [
+        "docs/tasks/bim/BIM-TASK-0071.md",
+        "docs/tasks/bim/BIM-TASK-0073.md",
+        "backend/app/tests/test_bim_real_dataset_registry.py",
+        "backend/app/tests/test_bim_ifc_quality.py"
+      ]
+    },
+    {
+      "id": "IDS-1.0",
+      "status": "verified_internal",
+      "scope_note": "Perfiles IDS 1.0, resultados por GUID, excepciones auditadas y exportacion.",
+      "evidence": [
+        "docs/tasks/bim/BIM-TASK-0082.md",
+        "backend/app/tests/fixtures/bim/ids/wall-fire-rating.ids",
+        "backend/app/tests/test_bim_ids.py"
+      ]
+    },
+    {
+      "id": "BCF-2.1",
+      "status": "verified_internal",
+      "scope_note": "Importacion/exportacion BCF-XML 2.1 y workflow de incidencias; certificacion BCF no existe actualmente en buildingSMART.",
+      "evidence": [
+        "docs/tasks/bim/BIM-TASK-0083.md",
+        "backend/app/tests/test_bim_issues_bcf.py"
+      ]
+    },
+    {
+      "id": "FORMAL-CERTIFICATION",
+      "status": "external_pending",
+      "scope_note": "La certificacion IFC por version y producto requiere el proceso externo buildingSMART; ISO organizacional requiere auditoria competente.",
+      "evidence": [
+        "docs/architecture/BIM_SYNCHRO_FULL_PARITY_MATRIX.md",
+        "docs/tasks/bim/BIM-TASK-0127.md"
+      ]
+    }
+  ],
+  "release_gates": {
+    "classic_bim_off_baseline": "verified",
+    "rollback_verified": "verified",
+    "gate_e_human_pilot": "pending_human",
+    "gate_k_certification": "pending_external"
+  }
+}

@@ -1,5 +1,13 @@
 # HANDOFF
 
+## 2026-07-20 - Expediente conformidad internacional
+
+- `BIM-TASK-0184` mapea ISO 19650-1..6, IFC, IDS 1.0 y BCF 2.1 a evidencia
+  ejecutable y fuentes oficiales.
+- 40 pruebas fuente y 3 del validador pasan; claims formales quedan bloqueados.
+- H08 sigue parcial por IFC4.3/certificacion IFC y auditoria ISO externas.
+- Paridad: 89,17%. Programa: 58/61, 95,08% realizado y 4,92% pendiente.
+
 ## 2026-07-20 - Ensayo rollback beta pre-ola
 
 - `BIM-TASK-0183` restaura el dump completo en una base PostgreSQL temporal.

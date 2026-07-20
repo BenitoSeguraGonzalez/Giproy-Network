@@ -1148,3 +1148,15 @@ intercambio end-to-end.
   evidencia desplegada de rollback para esta ola.
 - Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 57/61,
   93,44% realizado y 6,56% pendiente.
+
+## Expediente verificable de conformidad internacional - 2026-07-20
+
+- `BIM-TASK-0184` agrega un contrato machine-readable para ISO 19650-1 a -6,
+  IFC, IDS 1.0, BCF 2.1 y certificacion formal.
+- Ocho controles tienen evidencia interna; IFC conserva brecha IFC4.3/oficial
+  y la certificacion permanece externa. El validador impide cerrar esos limites
+  o Gate K por documentacion interna.
+- Las 40 pruebas fuente y 3 pruebas del validador pasan. H08 sigue parcial y
+  Gate E humano permanece abierto.
+- Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 58/61,
+  95,08% realizado y 4,92% pendiente.

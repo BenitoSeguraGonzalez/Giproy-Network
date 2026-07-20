@@ -132,7 +132,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | H05 | Mapas y servicios de ubicacion | Completa | `BIM-TASK-0171`: catalogos XYZ/WMS revisados, tenant-aware y operativos sobre georreferencia BIM |
 | H06 | Integracion ERP de progreso y horas | Completa | `BIM-TASK-0172`: paquetes pull deterministas, versionados, publicados y checksum-exactos |
 | H07 | Seguridad, backup y recuperacion BIM | Completa | `BIM-TASK-0090/0170/0183`: restore local checksum-exacto y restauracion beta pre-ola con fingerprint clasico intacto |
-| H08 | Conformidad internacional demostrada | Parcial | IFC/BCF/IDS parciales; falta cierre ISO 19650 y certificacion formal |
+| H08 | Conformidad internacional demostrada | Parcial | `BIM-TASK-0184`: evidencia interna ISO 19650-1..6, IFC2X3/IFC4, IDS 1.0 y BCF 2.1; faltan IFC4.3, certificacion IFC por version/producto y auditoria ISO externa |
 
 ## 4. Resultado inicial
 

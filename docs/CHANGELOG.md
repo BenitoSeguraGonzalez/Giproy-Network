@@ -1,3 +1,9 @@
+### 2026-07-20 - Expediente conformidad internacional (BIM-TASK-0184)
+
+- Contrato verificable para ISO 19650-1..6, IFC, IDS 1.0 y BCF 2.1.
+- 8 controles internos verificados, 1 brecha IFC y 1 certificacion externa.
+- H08 sigue parcial. Programa 58/61: 95,08% realizado y 4,92% pendiente.
+
 ### 2026-07-20 - Ensayo rollback beta pre-ola (BIM-TASK-0183)
 
 - El dump predeploy se restaura completo en una base temporal con error-stop.
