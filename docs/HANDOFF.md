@@ -1,5 +1,13 @@
 # HANDOFF
 
+## 2026-07-20 - Agregador Gate K
+
+- `BIM-TASK-0186` implementa la decision final sin cerrar evidencia en falso.
+- Gate K esta `blocked`: certificaciones IFC/ISO, paridad 100%, Gate E, tres
+  firmas distintas y decision final siguen pendientes.
+- Las pruebas positiva y negativa pasan; no se expande la allowlist.
+- Paridad: 89,17%. Programa: 60/61, 98,36% realizado y 1,64% pendiente.
+
 ## 2026-07-20 - Protocolo operativo Gate E
 
 - `BIM-TASK-0185` exige 10 jornadas, evidencia diaria, 2 revisiones, 2

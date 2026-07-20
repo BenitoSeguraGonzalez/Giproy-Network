@@ -1171,3 +1171,14 @@ intercambio end-to-end.
   Esto no inicia el piloto ni cierra Gate E.
 - Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 59/61,
   96,72% realizado y 3,28% pendiente.
+
+## Agregador verificable Gate K - 2026-07-20
+
+- `BIM-TASK-0186` agrega paridad, Gate E, conformidad, checks tecnicos,
+  certificaciones y tres firmas humanas en una sola decision reproducible.
+- El estado actual es `blocked` con seis bloqueos; `--require-approved` falla.
+  Fixtures completos prueban la ruta futura y fixtures falsos no la eluden.
+- El gate no modifica allowlist, licencia, DB ni despliegue. Queda un unico
+  slice humano/externo antes de cualquier rollout general.
+- Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 60/61,
+  98,36% realizado y 1,64% pendiente.

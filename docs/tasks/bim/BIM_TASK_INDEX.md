@@ -264,6 +264,7 @@ iniciada.
 | `BIM-TASK-0183` | Cerrada en beta: restore pre-ola y huella clasica verificados |
 | `BIM-TASK-0184` | Cerrada tecnicamente: expediente ISO 19650/openBIM verificable |
 | `BIM-TASK-0185` | Cerrada tecnicamente: protocolo Gate E sin evidencia fabricada |
+| `BIM-TASK-0186` | Cerrada tecnicamente: agregador Gate K bloqueado por evidencia real |
 
 ## Orden de ejecucion
 

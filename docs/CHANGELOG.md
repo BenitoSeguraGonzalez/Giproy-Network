@@ -1,3 +1,9 @@
+### 2026-07-20 - Agregador Gate K (BIM-TASK-0186)
+
+- Gate K agrega paridad, Gate E, conformidad, checks, certificados y firmas.
+- Estado valido pero bloqueado por 6 condiciones reales; aprobacion falsa falla.
+- Programa 60/61: 98,36% realizado y 1,64% humano/externo pendiente.
+
 ### 2026-07-20 - Protocolo operativo Gate E (BIM-TASK-0185)
 
 - Ledger verificable para 10 jornadas, 2 revisiones y 2 participantes reales.
