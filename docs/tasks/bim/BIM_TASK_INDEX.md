@@ -249,6 +249,7 @@ iniciada.
 | `BIM-TASK-0168` | Cerrada localmente: activación gobernada de transición a Operaciones |
 | `BIM-TASK-0169` | Cerrada localmente: matriz operacional de alertas BIM y escalamiento |
 | `BIM-TASK-0170` | Cerrada localmente: ensayo DR checksum-exacto del dominio BIM |
+| `BIM-TASK-0171` | Cerrada localmente: servicios cartograficos XYZ/WMS BIM |
 
 ## Orden de ejecucion
 

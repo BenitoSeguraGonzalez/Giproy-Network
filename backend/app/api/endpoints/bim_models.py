@@ -128,7 +128,9 @@ from app.services.bim.cde_submittal_service import create_submittal, create_subm
 from app.schemas.bim_cde_acl import BimCdeDocumentAclResponse, BimCdeDocumentAclSave
 from app.services.bim.cde_acl_service import list_document_acl, save_document_acl
 from app.schemas.bim_site_georeference import BimSiteGeoreferenceResponse, BimSiteGeoreferenceSave
+from app.schemas.bim_map_catalog import BimMapCatalogResponse, BimMapCatalogSave
 from app.services.bim.site_georeference_service import get_active_site_georeference, save_site_georeference
+from app.services.bim.map_catalog_service import get_active_map_catalog, save_map_catalog
 from app.schemas.bim_cde_review import (
     BimCdeReviewCommentCreate,
     BimCdeReviewCreate,
@@ -423,6 +425,44 @@ def save_project_bim_site_georeference(
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
     require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
     return save_site_georeference(
+        db,
+        project_id=project.id,
+        company_id=project.empresa_id,
+        project_root_code=project.codigo_root,
+        project_revision=project.revision or 0,
+        user_id=current_user.id,
+        payload=payload,
+    )
+
+
+@router.get("/projects/{project_id}/map-catalog", response_model=BimMapCatalogResponse | None)
+def get_project_bim_map_catalog(
+    project_id: int,
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
+    if not access.enabled:
+        raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
+    return get_active_map_catalog(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.put("/projects/{project_id}/map-catalog", response_model=BimMapCatalogResponse)
+def save_project_bim_map_catalog(
+    project_id: int,
+    payload: BimMapCatalogSave,
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
+    if not access.enabled:
+        raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
+    return save_map_catalog(
         db,
         project_id=project.id,
         company_id=project.empresa_id,

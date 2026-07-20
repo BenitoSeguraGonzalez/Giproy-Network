@@ -41,6 +41,18 @@ export const bimModelsApi = {
         );
         return response.data;
     },
+    getMapCatalog: async (projectId, empresaId = null) => {
+        const response = await axiosInstance.get(`/bim/projects/${projectId}/map-catalog`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    saveMapCatalog: async (projectId, payload, empresaId = null) => {
+        const response = await axiosInstance.put(
+            `/bim/projects/${projectId}/map-catalog`,
+            payload,
+            withTenantConfig({}, empresaId),
+        );
+        return response.data;
+    },
     listIdsProfiles: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/ids/profiles`, withTenantConfig({}, empresaId));
         return response.data;

@@ -1,5 +1,18 @@
 # HANDOFF
 
+## 2026-07-20 - Servicios cartograficos BIM
+
+- `BIM-TASK-0171` completa H05 con catalogos XYZ/WMS revisados por
+  empresa/proyecto y controles reales sobre Leaflet.
+- `de2054a1b2c3` persiste capas base y overlays sin PostGIS ni dependencias
+  desde GiProy Clasico.
+- 6 tests, PostgreSQL reversible, build, 32 smokes, Playwright, anti-BIM y
+  baseline enterprise pasan.
+- Paridad: 84,17% (49 completas, 3 parciales, 8 ausentes). Programa: 45/61,
+  73,77% realizado y 26,23% pendiente. Sin deploy.
+- Siguiente slice: `BIM-TASK-0172`, contrato aislado H06 de intercambio de
+  progreso y horas con ERP, sin escribir Cronograma ni personal clasicos.
+
 ## 2026-07-17 - Ensayo DR del dominio BIM
 
 - `BIM-TASK-0170` completa H07 con backup/restore real de las 79 tablas

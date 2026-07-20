@@ -15906,3 +15906,10 @@ Cambios realizados
 - El ensayo exige fingerprint clásico inalterado, bases `_test`, nombres
   seguros y limpieza automática.
 - H07 queda completa; paridad 82,50% y programa 72,13% completado.
+### 2026-07-20 - Servicios cartograficos BIM (BIM-TASK-0171)
+
+- Se agregan catalogos XYZ/WMS revisados por tenant y proyecto sobre la
+  georreferencia BIM existente.
+- Ubicacion BIM permite seleccionar base, overlays y opacidad, y registrar
+  nuevos servicios sin alterar mapas ni contratos clasicos.
+- H05 pasa a completa; paridad 84,17% y programa 73,77%. Sin deploy.

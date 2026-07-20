@@ -137,6 +137,7 @@ from .bim_cde_rfi import BimCdeRfi, BimCdeRfiEvent
 from .bim_cde_submittal import BimCdeSubmittal, BimCdeSubmittalEvent, BimCdeSubmittalRevision
 from .bim_cde_acl import BimCdeDocumentAcl
 from .bim_site_georeference import BimSiteGeoreference
+from .bim_map_catalog import BimMapCatalog
 from .bim_cde_review import BimCdeReview, BimCdeReviewComment, BimCdeReviewNotification
 from .bim_view_state import BimViewState
 from .bim_element import BimElement

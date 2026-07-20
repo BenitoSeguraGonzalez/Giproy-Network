@@ -1000,3 +1000,14 @@ intercambio end-to-end.
   no toca backup clásico ni infraestructura productiva.
 - Paridad: `82,50%`, 48 completas, 3 parciales y 9 ausentes. Programa: 44/61,
   72,13% realizado y 27,87% pendiente. Sin deploy.
+
+## Servicios cartograficos BIM - 2026-07-20
+
+- `BIM-TASK-0171` completa H05 con catalogos XYZ/WMS revisados, tenant-aware y
+  ligados a la revision independiente de cada proyecto.
+- Leaflet consume capas base y overlays reales con visibilidad y opacidad; el
+  contrato bloquea URLs no HTTP(S), XYZ incompleto y WMS sin nombre de capa.
+- `de2054a1b2c3` es aditiva y reversible; no requiere PostGIS ni toca mapas o
+  contratos clasicos.
+- Paridad: `84,17%`, 49 completas, 3 parciales y 8 ausentes. Programa: 45/61,
+  73,77% realizado y 26,23% pendiente. Sin deploy.
