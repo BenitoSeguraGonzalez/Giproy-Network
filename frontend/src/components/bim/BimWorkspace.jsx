@@ -35,6 +35,7 @@ import BimScheduleLinkPanel from './BimScheduleLinkPanel';
 import BimScheduleInterchangePanel from './BimScheduleInterchangePanel';
 import BimCdeDocumentsPanel from './BimCdeDocumentsPanel';
 import BimCdeDashboardPanel from './BimCdeDashboardPanel';
+import BimCdeCollaborationPanel from './BimCdeCollaborationPanel';
 import BimCdeRfiPanel from './BimCdeRfiPanel';
 import BimCdeSubmittalsPanel from './BimCdeSubmittalsPanel';
 import BimSiteGeoreferencePanel from './BimSiteGeoreferencePanel';
@@ -658,6 +659,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             ],
             coordination: [
                 { id: 'cde-dashboard', label: 'Resumen', content: <BimCdeDashboardPanel projectId={project?.id} empresaId={access?.resolved_company_id} canReconcile={canCreateCompanyScope} /> },
+                { id: 'collaboration', label: 'Actividad', content: <BimCdeCollaborationPanel projectId={project?.id} empresaId={access?.resolved_company_id} selectedElement={selectedElement} /> },
                 { id: 'documents', label: 'Documentos', content: <BimCdeDocumentsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'rfis', label: 'RFI', content: <BimCdeRfiPanel projectId={project?.id} empresaId={access?.resolved_company_id} selectedElement={selectedElement} /> },
                 { id: 'submittals', label: 'Submittals', content: <BimCdeSubmittalsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },

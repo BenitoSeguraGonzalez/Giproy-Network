@@ -1,5 +1,15 @@
 # HANDOFF
 
+## 2026-07-20 - Colaboracion CDE multiusuario incremental
+
+- `BIM-TASK-0174` añade presencia por sesion, expiracion y feed CDE por cursor.
+- Revisiones CDE emiten eventos dentro de su transaccion y la UX vive en
+  Coordinacion > Actividad, bajo las puertas BIM vigentes.
+- `de2057a1b2c3` agrega dos tablas BIM aditivas y reversibles.
+- Build, 35 smokes BIM, PostgreSQL reversible, DR, anti-BIM y baseline pasan.
+- Paridad: 88,33%. Programa: 48/61, 78,69% realizado y 21,31% pendiente.
+- H03 sigue parcial hasta probar usuarios concurrentes y reconexion desplegada.
+
 ## 2026-07-20 - Gateway de integracion empresarial BIM
 
 - `BIM-TASK-0173` completa B06 con suscripciones HTTPS, secretos cifrados,

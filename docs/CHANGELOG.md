@@ -1,3 +1,12 @@
+### 2026-07-20 - Colaboracion CDE multiusuario incremental (BIM-TASK-0174)
+
+- H03 incorpora presencia activa tenant-aware y feed CDE incremental por cursor.
+- Las revisiones publican actividad en su misma transaccion y Coordinacion suma
+  la pestaña `Actividad`, sin afectar GiProy Clasico con BIM apagado.
+- `de2057a1b2c3` es aditiva, reversible y usa JSON/TIMESTAMPTZ.
+- H03 permanece parcial hasta certificar concurrencia y reconexion en servidor.
+- Build, 35 smokes BIM, PostgreSQL reversible, DR, anti-BIM y baseline pasan.
+
 ### 2026-07-20 - Gateway de integracion empresarial BIM (BIM-TASK-0173)
 
 - B06 incorpora suscripciones HTTPS con secreto cifrado, firma HMAC-SHA256,

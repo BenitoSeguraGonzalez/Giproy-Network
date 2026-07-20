@@ -66,6 +66,8 @@ BIM_TABLES = {
     "bim_erp_exchange_packages",
     "bim_integration_subscriptions",
     "bim_integration_deliveries",
+    "bim_cde_collaboration_presences",
+    "bim_cde_collaboration_events",
     "bim_schedule_import_revisions",
     "bim_qto_snapshots",
     "bim_4d_resource_leveling_scenarios",
@@ -124,10 +126,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2056a1b2c3"
+        head for head in script.get_heads() if head != "de2057a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2056a1b2c3")
+    command.upgrade(config, "de2057a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -525,6 +527,26 @@ def validate(database_name: str) -> None:
             "delivered_at": "timestamp with time zone",
         }:
             raise RuntimeError("El outbox del gateway BIM no usa JSON/TIMESTAMPTZ.")
+        collaboration_presence_types = dict(connection.execute(text(
+            "select column_name, data_type from information_schema.columns where table_name='bim_cde_collaboration_presences' and column_name in ('context_json','last_seen_at','created_at','updated_at')"
+        )).all())
+        if collaboration_presence_types != {
+            "context_json": "json",
+            "last_seen_at": "timestamp with time zone",
+            "created_at": "timestamp with time zone",
+            "updated_at": "timestamp with time zone",
+        }:
+            raise RuntimeError("La presencia colaborativa CDE no usa JSON/TIMESTAMPTZ.")
+        collaboration_event_types = dict(connection.execute(text(
+            "select column_name, data_type from information_schema.columns where table_name='bim_cde_collaboration_events' and column_name in ('payload_json','created_at')"
+        )).all())
+        collaboration_cursor_index = connection.execute(text(
+            "select indexdef from pg_indexes where tablename='bim_cde_collaboration_events' and indexname='ix_bim_cde_collaboration_events_project_cursor'"
+        )).scalar_one()
+        if collaboration_event_types != {"payload_json": "json", "created_at": "timestamp with time zone"}:
+            raise RuntimeError("El feed colaborativo CDE no usa JSON/TIMESTAMPTZ.")
+        if not all(column in collaboration_cursor_index for column in ("empresa_id", "proyecto_id", "id")):
+            raise RuntimeError("El feed colaborativo CDE no tiene cursor tenant/proyecto indexado.")
         forecast_type = connection.execute(text("select data_type from information_schema.columns where table_name='bim_cost_forecasts' and column_name='forecast_at_completion'" )).scalar_one()
         if forecast_type != "numeric": raise RuntimeError("El forecast BIM no usa NUMERIC.")
 
@@ -540,10 +562,10 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2056a1b2c3")
+    command.upgrade(config, "de2057a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2056a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2057a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
@@ -554,7 +576,7 @@ def validate(database_name: str) -> None:
         "cost_sov=NUMERIC/partial_index cost_changes=NUMERIC/TIMESTAMPTZ "
         "actual_cost=NUMERIC/TIMESTAMPTZ/currency forecast=NUMERIC "
         "as_built=TIMESTAMPTZ/partial_index commissioning=JSON/TIMESTAMPTZ/RESTRICT "
-        "punch_closure=JSON/TIMESTAMPTZ/partial_index handover_dossier=JSON/TIMESTAMPTZ/RESTRICT/partial_index operations_transition=DATE/JSON/TIMESTAMPTZ/partial_index operational_notifications=TIMESTAMPTZ/dedupe map_catalog=JSON/TIMESTAMPTZ erp_exchange=JSON/TIMESTAMPTZ/checksum integration_gateway=encrypted/JSON/TIMESTAMPTZ/outbox"
+        "punch_closure=JSON/TIMESTAMPTZ/partial_index handover_dossier=JSON/TIMESTAMPTZ/RESTRICT/partial_index operations_transition=DATE/JSON/TIMESTAMPTZ/partial_index operational_notifications=TIMESTAMPTZ/dedupe map_catalog=JSON/TIMESTAMPTZ erp_exchange=JSON/TIMESTAMPTZ/checksum integration_gateway=encrypted/JSON/TIMESTAMPTZ/outbox cde_collaboration=presence/cursor/JSON/TIMESTAMPTZ"
     )
 
 

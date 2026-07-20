@@ -252,6 +252,7 @@ iniciada.
 | `BIM-TASK-0171` | Cerrada localmente: servicios cartograficos XYZ/WMS BIM |
 | `BIM-TASK-0172` | Cerrada localmente: paquetes gobernados de avance y horas BIM para ERP |
 | `BIM-TASK-0173` | Cerrada localmente: gateway HTTPS firmado y outbox BIM recuperable |
+| `BIM-TASK-0174` | Cerrada localmente: presencia y feed incremental de colaboracion CDE |
 
 ## Orden de ejecucion
 

@@ -360,6 +360,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0171](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0171.md) - Servicios cartograficos XYZ/WMS BIM
 - [BIM-TASK-0172](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0172.md) - Intercambio gobernado BIM hacia ERP
 - [BIM-TASK-0173](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0173.md) - Gateway de integracion empresarial BIM
+- [BIM-TASK-0174](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0174.md) - Colaboracion CDE multiusuario incremental
 
 ---
 

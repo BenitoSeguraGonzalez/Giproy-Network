@@ -483,6 +483,21 @@ export const bimModelsApi = {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/cde/dashboard`, withTenantConfig({}, empresaId));
         return response.data;
     },
+    heartbeatCdePresence: async (projectId, payload, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/cde/collaboration/presence/heartbeat`, payload, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    leaveCdePresence: async (projectId, payload, empresaId = null) => {
+        await axiosInstance.post(`/bim/projects/${projectId}/cde/collaboration/presence/leave`, payload, withTenantConfig({}, empresaId));
+    },
+    listCdePresences: async (projectId, empresaId = null) => {
+        const response = await axiosInstance.get(`/bim/projects/${projectId}/cde/collaboration/presences`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    listCdeCollaborationEvents: async (projectId, afterId = 0, empresaId = null) => {
+        const response = await axiosInstance.get(`/bim/projects/${projectId}/cde/collaboration/events`, withTenantConfig({ params: { after_id: afterId, limit: 100 } }, empresaId));
+        return response.data;
+    },
     listOperationalNotifications: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/cde/operational-notifications`, withTenantConfig({}, empresaId));
         return response.data;

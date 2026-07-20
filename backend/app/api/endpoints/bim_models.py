@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional
 from urllib.parse import urlsplit
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse, Response
 from sqlalchemy.orm import Session
 
@@ -153,6 +153,18 @@ from app.services.bim.cde_review_service import (
 )
 from app.schemas.bim_cde_dashboard import BimCdeDashboardResponse
 from app.services.bim.cde_dashboard_service import get_cde_dashboard
+from app.schemas.bim_cde_collaboration import (
+    BimCdeCollaborationFeedResponse,
+    BimCdePresenceHeartbeat,
+    BimCdePresenceLeave,
+    BimCdePresenceResponse,
+)
+from app.services.bim.cde_collaboration_service import (
+    heartbeat_presence,
+    leave_presence,
+    list_active_presences,
+    list_collaboration_events,
+)
 from app.schemas.bim_operational_notification import BimOperationalNotificationReconcileResponse, BimOperationalNotificationResponse
 from app.services.bim.operational_notification_service import acknowledge_operational_notification, list_operational_notifications, reconcile_operational_notifications
 from app.schemas.bim_security import BimCapabilityResponse, BimGrantRequest
@@ -660,6 +672,35 @@ def _require_bim_access(db, project, current_user, capability="bim.view"):
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
     require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability=capability)
+
+
+@router.post("/projects/{project_id}/cde/collaboration/presence/heartbeat", response_model=BimCdePresenceResponse)
+def heartbeat_project_bim_cde_presence(project_id: int, payload: BimCdePresenceHeartbeat, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.view")
+    return heartbeat_presence(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/cde/collaboration/presence/leave", status_code=status.HTTP_204_NO_CONTENT)
+def leave_project_bim_cde_presence(project_id: int, payload: BimCdePresenceLeave, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.view")
+    leave_presence(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, session_key=payload.session_key)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/projects/{project_id}/cde/collaboration/presences", response_model=list[BimCdePresenceResponse])
+def list_project_bim_cde_presences(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.view")
+    return list_active_presences(db, project_id=project.id, company_id=project.empresa_id, current_user_id=current_user.id)
+
+
+@router.get("/projects/{project_id}/cde/collaboration/events", response_model=BimCdeCollaborationFeedResponse)
+def list_project_bim_cde_collaboration_events(project_id: int, after_id: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=200), empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.view")
+    return list_collaboration_events(db, project_id=project.id, company_id=project.empresa_id, after_id=after_id, limit=limit)
 
 
 @router.get("/projects/{project_id}/cde/dashboard", response_model=BimCdeDashboardResponse)

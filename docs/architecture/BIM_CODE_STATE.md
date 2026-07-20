@@ -1033,3 +1033,17 @@ intercambio end-to-end.
   evento solo nace de fuentes `bim_*` y no escribe el dominio clasico.
 - Paridad: `87,50%`, 51 completas, 3 parciales y 6 ausentes. Programa: 47/61,
   77,05% realizado y 22,95% pendiente. Sin deploy.
+
+## Colaboracion CDE multiusuario incremental - 2026-07-20
+
+- `BIM-TASK-0174` agrega presencia activa por sesion y feed incremental por
+  cursor, ambos aislados por empresa/proyecto.
+- Las revisiones CDE emiten eventos de creacion, comentario y transicion en la
+  misma transaccion; heartbeat repetido sin cambio no genera ruido.
+- Coordinacion incorpora `Actividad`, con polling recuperable, expiracion de
+  presencia y salida limpia, solo bajo las puertas BIM existentes.
+- H03 pasa a parcial: falta certificar concurrencia y reconexion en servidor.
+- Build, 35 smokes BIM, PostgreSQL reversible, DR de 85 tablas, anti-BIM y
+  baseline enterprise pasan.
+- Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 48/61,
+  78,69% realizado y 21,31% pendiente. Sin deploy.

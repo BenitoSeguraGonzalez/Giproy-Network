@@ -10,6 +10,7 @@ from app.models.bim_element import BimElement
 from app.models.bim_model import BimModel
 from app.models.bim_model_version import BimModelVersion
 from app.models.usuario import Usuario
+from app.services.bim.cde_collaboration_service import record_collaboration_event
 
 
 def _get_review(db: Session, *, review_id: int, project_id: int, company_id: int) -> BimCdeReview:
@@ -127,6 +128,17 @@ def create_review(db: Session, *, project_id: int, company_id: int, user_id: int
     db.add(comment); db.flush()
     if payload.assigned_to != user_id:
         _notify(db, review, user_id=payload.assigned_to, event_type="assigned", key="created")
+    record_collaboration_event(
+        db,
+        project_id=project_id,
+        company_id=company_id,
+        actor_id=user_id,
+        event_type="review.created",
+        summary=f"Creo {review.review_number}: {review.title}",
+        entity_type="cde_review",
+        entity_id=review.id,
+        payload={"review_number": review.review_number, "status": review.status},
+    )
     db.commit(); db.refresh(review)
     return _serialize(db, review)
 
@@ -150,6 +162,17 @@ def add_review_comment(db: Session, *, review_id: int, project_id: int, company_
     target = review.assigned_to if user_id == review.created_by else review.created_by
     _notify(db, review, user_id=target, event_type="commented", key=f"comment:{comment.id}")
     review.lock_version += 1
+    record_collaboration_event(
+        db,
+        project_id=project_id,
+        company_id=company_id,
+        actor_id=user_id,
+        event_type="review.commented",
+        summary=f"Comento {review.review_number}: {review.title}",
+        entity_type="cde_review",
+        entity_id=review.id,
+        payload={"review_number": review.review_number, "comment_id": comment.id},
+    )
     db.commit(); db.refresh(review)
     return _serialize(db, review)
 
@@ -178,6 +201,17 @@ def transition_review(db: Session, *, review_id: int, project_id: int, company_i
         review.status = "closed"; review.closed_by = user_id; review.closed_at = now
         _notify(db, review, user_id=review.assigned_to, event_type="closed", key=f"closed:{review.lock_version}")
     review.lock_version += 1
+    record_collaboration_event(
+        db,
+        project_id=project_id,
+        company_id=company_id,
+        actor_id=user_id,
+        event_type=f"review.{payload.action}",
+        summary=f"Actualizo {review.review_number} a {review.status}.",
+        entity_type="cde_review",
+        entity_id=review.id,
+        payload={"review_number": review.review_number, "status": review.status},
+    )
     db.commit(); db.refresh(review)
     return _serialize(db, review)
 
