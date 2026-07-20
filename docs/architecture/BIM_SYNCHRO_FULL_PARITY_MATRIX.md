@@ -127,7 +127,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 |---|---|---|---|
 | H01 | Multiempresa y aislamiento tenant | Completa | pruebas tenant-aware y puertas BIM |
 | H02 | Auditoria sensible | Completa | correlation id y auditoria BIM |
-| H03 | Colaboracion cloud/CDE | Parcial | `BIM-TASK-0174/0175/0176`: presencia, feed incremental, concurrencia/reconexion PostgreSQL y metricas sanitizadas; falta evidencia en servidor y red real |
+| H03 | Colaboracion cloud/CDE | Parcial | `BIM-TASK-0174` a `0177`: presencia/feed, concurrencia PostgreSQL, metricas y recuperacion cliente aislada por scope; falta evidencia en servidor y red real |
 | H04 | Notificaciones y escalamiento | Completa | `BIM-TASK-0145/0169`: matriz operacional tenant-aware, deduplicada, escalada y con acuse |
 | H05 | Mapas y servicios de ubicacion | Completa | `BIM-TASK-0171`: catalogos XYZ/WMS revisados, tenant-aware y operativos sobre georreferencia BIM |
 | H06 | Integracion ERP de progreso y horas | Completa | `BIM-TASK-0172`: paquetes pull deterministas, versionados, publicados y checksum-exactos |

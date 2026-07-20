@@ -1,3 +1,10 @@
+### 2026-07-20 - Recuperacion cliente CDE (BIM-TASK-0177)
+
+- Actividad CDE recupera heartbeat/feed al volver online o visible.
+- Cambiar empresa/proyecto limpia cursor y datos y descarta respuestas tardias.
+- Build y 35 smokes BIM pasan en 1920x900 y 2560x1300.
+- Paridad 88,33%; programa 51/61, 83,61% realizado y 16,39% pendiente.
+
 ### 2026-07-20 - Observabilidad colaborativa CDE (BIM-TASK-0176)
 
 - Las metricas administrativas BIM incorporan presencia activa/expirada,

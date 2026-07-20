@@ -255,6 +255,7 @@ iniciada.
 | `BIM-TASK-0174` | Cerrada localmente: presencia y feed incremental de colaboracion CDE |
 | `BIM-TASK-0175` | Cerrada localmente: resiliencia concurrente y reconexion CDE certificadas en PostgreSQL |
 | `BIM-TASK-0176` | Cerrada localmente: metricas sanitizadas de salud colaborativa CDE |
+| `BIM-TASK-0177` | Cerrada localmente: recuperacion de red y aislamiento de scope CDE |
 
 ## Orden de ejecucion
 

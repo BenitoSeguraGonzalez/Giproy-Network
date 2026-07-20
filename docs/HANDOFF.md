@@ -1,5 +1,13 @@
 # HANDOFF
 
+## 2026-07-20 - Recuperacion de red y aislamiento CDE
+
+- `BIM-TASK-0177` recupera actividad al volver online/visible, evita polls
+  solapados y descarta respuestas tardias de otro empresa/proyecto.
+- Build, 35 smokes BIM y capturas 1920x900/2560x1300 pasan sin overflow.
+- H03 sigue parcial hasta repetir desconexion/reconexion en servidor real.
+- Paridad: 88,33%. Programa: 51/61, 83,61% realizado y 16,39% pendiente.
+
 ## 2026-07-20 - Observabilidad operativa de colaboracion CDE
 
 - `BIM-TASK-0176` añade al endpoint administrativo BIM metricas sanitizadas de

@@ -41,11 +41,15 @@ const BimCdeCollaborationPanel = ({ projectId, empresaId, selectedElement = null
     const sessionKey = useRef(createSessionKey());
     const cursor = useRef(0);
     const context = useRef({ tool: 'activity' });
+    const scopeKey = `${empresaId ?? ''}:${projectId ?? ''}`;
+    const activeScope = useRef(scopeKey);
+    const refreshInFlightScope = useRef('');
     const [presences, setPresences] = useState([]);
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
 
+    activeScope.current = scopeKey;
     context.current = selectedElement?.global_id
         ? { tool: 'activity', global_id: selectedElement.global_id }
         : { tool: 'activity' };
@@ -60,7 +64,9 @@ const BimCdeCollaborationPanel = ({ projectId, empresaId, selectedElement = null
     }, [api, empresaId, projectId]);
 
     const refresh = useCallback(async ({ heartbeatFirst = false } = {}) => {
-        if (!projectId) return;
+        if (!projectId || refreshInFlightScope.current === scopeKey) return;
+        const requestScope = scopeKey;
+        refreshInFlightScope.current = requestScope;
         try {
             setLoading(true);
             if (heartbeatFirst) await heartbeat();
@@ -68,22 +74,40 @@ const BimCdeCollaborationPanel = ({ projectId, empresaId, selectedElement = null
                 api.listCdePresences(projectId, empresaId),
                 api.listCdeCollaborationEvents(projectId, cursor.current, empresaId),
             ]);
+            if (activeScope.current !== requestScope) return;
             setPresences(activeRows);
             setEvents((current) => mergeEvents(current, feed.events || []));
             cursor.current = Math.max(cursor.current, feed.cursor || 0);
             setMessage('');
         } catch (error) {
-            setMessage(error?.response?.data?.detail || 'No se pudo actualizar la colaboración CDE.');
+            if (activeScope.current === requestScope) {
+                setMessage(error?.response?.data?.detail || 'No se pudo actualizar la colaboración CDE.');
+            }
         } finally {
-            setLoading(false);
+            if (refreshInFlightScope.current === requestScope) refreshInFlightScope.current = '';
+            if (activeScope.current === requestScope) setLoading(false);
         }
-    }, [api, empresaId, heartbeat, projectId]);
+    }, [api, empresaId, heartbeat, projectId, scopeKey]);
 
     useEffect(() => {
         if (!projectId) return undefined;
         let disposed = false;
+        cursor.current = 0;
+        setPresences([]);
+        setEvents([]);
+        setMessage('');
         const run = async () => { if (!disposed) await refresh({ heartbeatFirst: true }); };
+        const recover = () => { if (!disposed) refresh({ heartbeatFirst: true }); };
+        const handleVisibility = () => {
+            if (globalThis.document?.visibilityState === 'visible') recover();
+        };
+        const handleOffline = () => {
+            if (!disposed) setMessage('Sin conexión. La actividad se recuperará al volver en línea.');
+        };
         run();
+        globalThis.addEventListener?.('online', recover);
+        globalThis.addEventListener?.('offline', handleOffline);
+        globalThis.document?.addEventListener('visibilitychange', handleVisibility);
         const pollTimer = globalThis.setInterval(() => {
             if (!disposed && globalThis.document?.visibilityState !== 'hidden') refresh();
         }, POLL_INTERVAL_MS);
@@ -94,9 +118,12 @@ const BimCdeCollaborationPanel = ({ projectId, empresaId, selectedElement = null
             disposed = true;
             globalThis.clearInterval(pollTimer);
             globalThis.clearInterval(heartbeatTimer);
+            globalThis.removeEventListener?.('online', recover);
+            globalThis.removeEventListener?.('offline', handleOffline);
+            globalThis.document?.removeEventListener('visibilitychange', handleVisibility);
             api.leaveCdePresence(projectId, { session_key: sessionKey.current }, empresaId).catch(() => {});
         };
-    }, [api, empresaId, heartbeat, projectId, refresh]);
+    }, [api, empresaId, heartbeat, projectId, refresh, scopeKey]);
 
     return (
         <section className="relative h-full min-h-0 overflow-hidden rounded-lg border border-zinc-200 bg-white" data-bim-cde-collaboration>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import '../../index.css';
@@ -16,12 +16,27 @@ const events = [
     { id: 43, event_type: 'review.commented', entity_type: 'cde_review', entity_id: 17, actor_id: 9, actor_name: 'Carlos Estructuras', summary: 'Comentó REV-0017: Fachada norte', payload: { review_number: 'REV-0017', comment_id: 24 }, created_at: now },
 ];
 const api = {
-    heartbeatCdePresence: async () => presences[0],
+    heartbeatCdePresence: async () => {
+        globalThis.__bimCdeHeartbeatCount = (globalThis.__bimCdeHeartbeatCount || 0) + 1;
+        return presences[0];
+    },
     leaveCdePresence: async () => undefined,
-    listCdePresences: async () => presences,
-    listCdeCollaborationEvents: async (_projectId, afterId) => ({ contract_version: 'giproy_bim_cde_collaboration_feed_v1', project_id: 7, company_id: 1, cursor: 43, events: afterId ? [] : events }),
+    listCdePresences: async (projectId) => projectId === 8
+        ? [{ ...presences[0], id: 8, user_name: 'Proyecto ocho' }]
+        : presences,
+    listCdeCollaborationEvents: async (projectId, afterId) => projectId === 8
+        ? { contract_version: 'giproy_bim_cde_collaboration_feed_v1', project_id: 8, company_id: 1, cursor: 1, events: afterId ? [] : [{ ...events[0], id: 1, actor_name: 'Proyecto ocho' }] }
+        : { contract_version: 'giproy_bim_cde_collaboration_feed_v1', project_id: 7, company_id: 1, cursor: 43, events: afterId ? [] : events },
 };
 
-createRoot(document.getElementById('root')).render(
-    <main className="h-screen overflow-hidden bg-[#F2F4F7] p-6"><div className="mx-auto h-[calc(100vh-48px)] w-full max-w-[2200px]"><BimCdeCollaborationPanel projectId={7} empresaId={1} selectedElement={{ global_id: '2O2Fr$t4X7Zf8NOew3FLOH' }} api={api} /></div></main>,
-);
+const Harness = () => {
+    const [projectId, setProjectId] = useState(7);
+    return (
+        <main className="h-screen overflow-hidden bg-[#F2F4F7] p-6">
+            <button type="button" className="sr-only" data-bim-switch-project onClick={() => setProjectId(8)}>Cambiar proyecto de prueba</button>
+            <div className="mx-auto h-[calc(100vh-48px)] w-full max-w-[2200px]"><BimCdeCollaborationPanel projectId={projectId} empresaId={1} selectedElement={{ global_id: '2O2Fr$t4X7Zf8NOew3FLOH' }} api={api} /></div>
+        </main>
+    );
+};
+
+createRoot(document.getElementById('root')).render(<Harness />);

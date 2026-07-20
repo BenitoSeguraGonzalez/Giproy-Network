@@ -1069,3 +1069,14 @@ intercambio end-to-end.
   y usuarios reales.
 - Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 50/61,
   81,97% realizado y 18,03% pendiente. Sin deploy.
+
+## Recuperacion de red y aislamiento de scope CDE - 2026-07-20
+
+- `BIM-TASK-0177` recupera heartbeat/feed al volver online o visible y bloquea
+  polls solapados del mismo proyecto.
+- Empresa/proyecto reinician cursor y estado; respuestas tardias de otro scope
+  se descartan para impedir mezcla visual entre proyectos.
+- Build, smoke focal desktop/alta resolucion y 35 smokes BIM pasan; la captura
+  no presenta overflow ni solapamientos.
+- Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 51/61,
+  83,61% realizado y 16,39% pendiente. Sin deploy.

@@ -23,6 +23,12 @@ try {
         assert.match(await panel.innerText(), /María Coordinación BIM[\s\S]*Carlos Estructuras[\s\S]*Lucía Arquitectura/);
         assert.match(await panel.innerText(), /REV-0017/);
         await page.getByRole('button', { name: 'Actualizar actividad CDE' }).click();
+        const heartbeatBeforeRecovery = await page.evaluate(() => globalThis.__bimCdeHeartbeatCount || 0);
+        await page.evaluate(() => globalThis.dispatchEvent(new Event('online')));
+        await page.waitForFunction((previous) => (globalThis.__bimCdeHeartbeatCount || 0) > previous, heartbeatBeforeRecovery);
+        await page.locator('[data-bim-switch-project]').evaluate((button) => button.click());
+        await page.getByText('Proyecto ocho', { exact: true }).first().waitFor();
+        assert.doesNotMatch(await panel.innerText(), /María Coordinación BIM|REV-0017/, 'El cambio de proyecto limpia presencia y feed previos');
         assert.equal(await panel.evaluate((node) => node.scrollWidth > node.clientWidth), false, 'Colaboración sin overflow horizontal');
         assert.deepEqual(errors, [], `Sin errores de consola: ${errors.join(' | ')}`);
         await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-cde-collaboration-${viewport.width}x${viewport.height}.png`, fullPage: true });
