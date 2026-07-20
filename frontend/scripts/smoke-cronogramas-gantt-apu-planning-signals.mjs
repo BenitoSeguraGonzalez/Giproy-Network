@@ -98,11 +98,19 @@ for (const marker of [
     'openApuPlanningSignals',
     'scheduleCloseApuPlanningSignals',
     'toggleApuPlanningSignalsPinned',
+    'openApuPlanningSignalsForRow',
+    'toggleApuPlanningSignalsForRow',
+    'Abrir y fijar semáforos APU de esta actividad',
     'aria-expanded={apuPlanningSignalsOpen}',
     "event.key !== 'Escape'",
 ]) {
     assert.ok(componentSource.includes(marker), `Missing planning signals interaction marker: ${marker}`);
 }
 
-console.log('smoke-cronogramas-gantt-apu-planning-signals: OK');
+assert.equal(
+    componentSource.split('aria-label="Abrir y fijar semáforos APU de esta actividad"').length - 1,
+    2,
+    'Expected a row-level planning signals trigger in both Gantt row layouts',
+);
 
+console.log('smoke-cronogramas-gantt-apu-planning-signals: OK');

@@ -1,3 +1,28 @@
+### 2026-07-20 - Intercambio gobernado BIM hacia ERP (BIM-TASK-0172)
+
+- H06 incorpora paquetes versionados y deterministas de avance y horas BIM,
+  con checksum, fecha de corte, publicacion gobernada y bloqueo optimista.
+- `de2055a1b2c3` permanece aislada por tenant/proyecto y no escribe
+  Cronogramas, APUs, personal ni contabilidad clasicos.
+- 3 tests PostgreSQL y `py_compile` pasan; la certificacion integral y beta se
+  registra en el cierre de despliegue.
+
+### 2026-07-20 - Resincronización del editor light APU Gantt (TASK-2029)
+
+- Cancelar el editor light descarta también su copia local y una reapertura de
+  la misma actividad monta una sesión limpia.
+- Restaurar datos iniciales invalida el input activo y resincroniza tabla,
+  cantidades, líneas fuente y política con el borrador restaurado.
+- Build, smoke Cronogramas, semáforos APU y anti-BIM pasan.
+
+### 2026-07-20 - Semáforos APU por actividad en Gantt clásico (TASK-2028)
+
+- Cada actividad calculable vinculada a un APU expone junto a `Settings` un
+  acceso `Gauge` al panel de planificación existente.
+- Hover/foco abren temporalmente y clic fija o desacopla el mismo panel del rail
+  general, sin duplicar cálculos, persistencia ni contratos.
+- Build, smoke focal de semáforos, frontera API de Cronogramas y anti-BIM pasan.
+
 ### 2026-07-16 - Estimacion BIM gobernada (BIM-TASK-0154)
 
 - Produccion BIM V2 incorpora estimaciones versionadas desde QTO aprobado,

@@ -23,6 +23,7 @@ import {
     ClipboardPaste,
     Sigma,
     Check,
+    CheckCircle2,
     TimerReset,
     Copy,
     ChevronDown,
@@ -56,6 +57,7 @@ import ProjectSegmentedSwitch from './ProjectSegmentedSwitch';
 import CommonReportPreviewModal from '../reporting/CommonReportPreviewModal';
 import ReportGenerationModal from '../reporting/ReportGenerationModal';
 import ClassicPrintOptionsModal from '../reporting/ClassicPrintOptionsModal';
+import { AppModalBody, AppModalFooter, AppModalHeader, AppModalShell } from '../ui/app-modal';
 import AnimatedDateInput from '../ui/AnimatedDateInput';
 import MotionScrollbar from '../ui/MotionScrollbar';
 import { normalizeDescriptionCapitalization, normalizeSubcategoryDisplay } from '../../utils/descriptionCapitalization';
@@ -69,6 +71,7 @@ import {
 } from '../../utils/cronogramaNumbers';
 import { ControlRail, ControlRailDivider, ControlRailIconButton, ControlRailSection } from '../ui/ControlRail';
 import GridColumnManager, { useGridColumnSettings } from './GridColumnManager';
+import CodeColorizer from '../../utils/codeColorizer';
 import {
     downloadClassicCurvePdf,
     downloadClassicGanttPresentationPdf,
@@ -96,6 +99,7 @@ const DISTRIBUTION_OPTIONS = [
 const SCHEDULE_TABS = [
     { id: 'gantt', label: 'Cronograma Gantt' },
     { id: 'valorado', label: 'Cronograma Valorado' },
+    { id: 'recursos', label: 'Recursos' },
 ];
 
 const CRONOGRAMA_SOFT_ACTION_BUTTON =
@@ -281,11 +285,11 @@ const mergeCronogramaTrabajoDeltaResponse = (previous, delta) => {
 
 const resolveValoradoPeriodLabel = (periodOrLabel, index = 0) => {
     const rawValue = typeof periodOrLabel === 'object'
-        ? String(periodOrLabel?.label || periodOrLabel?.id || `T${index + 1}`).trim()
-        : String(periodOrLabel || `T${index + 1}`).trim();
-    if (!rawValue) return `T${index + 1}`;
-    if (/^P\d+$/i.test(rawValue)) return `T${rawValue.slice(1)}`;
-    return rawValue.replace(/^P(?=\d)/i, 'T');
+        ? String(periodOrLabel?.label || periodOrLabel?.id || `P${index + 1}`).trim()
+        : String(periodOrLabel || `P${index + 1}`).trim();
+    if (!rawValue) return `P${index + 1}`;
+    if (/^T\d+$/i.test(rawValue)) return `P${rawValue.slice(1)}`;
+    return rawValue.replace(/^T(?=\d)/i, 'P');
 };
 
 const formatValoradoPeriodRangeLabel = (period) => {
@@ -580,7 +584,7 @@ const buildValoradoPreviewPeriods = (detail, periodType, startHour = DEFAULT_WOR
         const clampedEnd = bucketEnd > endAt ? new Date(endAt) : bucketEnd;
         periods.push({
             id: `P${index}`,
-            label: `T${index}`,
+            label: `P${index}`,
             starts_at: new Date(cursor).toISOString(),
             ends_at: clampedEnd.toISOString(),
         });
@@ -3879,6 +3883,13 @@ const CronogramaTrabajo = ({
             dias_laborables_mes: trabajo?.config?.dias_laborables_mes ?? 22,
             dias_mes: diasMes,
             recursos_asumidos_base: trabajo?.config?.recursos_asumidos_base ?? 1,
+            apu_resource_modifications_v1: (
+                trabajo?.config?.apu_resource_modifications_v1
+                && typeof trabajo.config.apu_resource_modifications_v1 === 'object'
+                && !Array.isArray(trabajo.config.apu_resource_modifications_v1)
+                    ? trabajo.config.apu_resource_modifications_v1
+                    : {}
+            ),
         });
     }, [trabajo?.config]);
 
@@ -3914,10 +3925,10 @@ const CronogramaTrabajo = ({
                 tone: 'success',
             });
         } catch (error) {
-            console.error('Error guardando configuración de cronograma de trabajo:', error);
+            globalThis.reportClientError?.('Error guardando configuración de cronograma de trabajo:', error);
             await appAlert({
                 title: 'No se pudo guardar',
-                message: error.response?.data?.detail || 'No fue posible guardar la configuración del cronograma de trabajo.',
+                message: resolveApiErrorMessage(error, 'No fue posible guardar la configuración del cronograma de trabajo.'),
                 tone: 'danger',
             });
         } finally {
@@ -3946,11 +3957,11 @@ const CronogramaTrabajo = ({
                 return next;
             });
         } catch (error) {
-            console.error('Error guardando línea de cronograma de trabajo:', error);
+            globalThis.reportClientError?.('Error guardando línea de cronograma de trabajo:', error);
             if (!error?.__cronogramaHandled) {
                 await appAlert({
                     title: 'No se pudo guardar la línea',
-                    message: error.response?.data?.detail || 'No fue posible guardar la línea del cronograma de trabajo.',
+                    message: resolveApiErrorMessage(error, 'No fue posible guardar la línea del cronograma de trabajo.'),
                     tone: 'danger',
                 });
             }
@@ -4005,10 +4016,10 @@ const CronogramaTrabajo = ({
                 tone: 'success',
             });
         } catch (error) {
-            console.error('Error importando XML de Microsoft Project:', error);
+            globalThis.reportClientError?.('Error importando XML de Microsoft Project:', error);
             await appAlert({
                 title: 'No se pudo importar',
-                message: error.response?.data?.detail || 'No fue posible importar el XML de Microsoft Project.',
+                message: resolveApiErrorMessage(error, 'No fue posible importar el XML de Microsoft Project.'),
                 tone: 'danger',
             });
         } finally {
@@ -4343,8 +4354,725 @@ const withAsyncTimeout = (promise, timeoutMs, timeoutMessage) => new Promise((re
         .catch((error) => {
             clearTimeout(timer);
             reject(error);
-        });
+    });
 });
+
+const CronogramaRecursosReadOnly = ({
+    recursos,
+    recursosState,
+    recursosStateDraft,
+    recursosStateDirty,
+    recursosStateSaving,
+    stateError,
+    loading,
+    error,
+    currency,
+    decMoneda,
+    decCalculos,
+    onRefresh,
+    onLimitChange,
+    onSaveState,
+    onResetStateDraft,
+    onPersistLevelingProposal,
+    onApproveLevelingProposal,
+    onRequestLevelingApplication,
+    onCancelLevelingApplication,
+    onApplyLevelingApplication,
+    onRollbackLevelingApplication,
+    onClearLevelingProposal,
+}) => {
+    const CATEGORIAS_RECURSOS = useMemo(() => [
+        { id: 1, nombre: 'Equipos y Herramientas', icon: '🔧', color: 'text-blue-600' },
+        { id: 2, nombre: 'Materiales', icon: '📦', color: 'text-green-600' },
+        { id: 3, nombre: 'Transporte', icon: '🚚', color: 'text-yellow-600' },
+        { id: 4, nombre: 'Mano de Obra', icon: '👥', color: 'text-purple-600' },
+    ], []);
+
+    const [recursosSearch, setRecursosSearch] = useState('');
+    const [selectedCat, setSelectedCat] = useState(1);
+    const [selectedSubcatId, setSelectedSubcatId] = useState(null);
+    const [searchSubcategories, setSearchSubcategories] = useState('');
+
+    const allRows = recursos?.recursos || [];
+
+    const categoryCounts = useMemo(() => {
+        const counts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        allRows.forEach(row => {
+            const catId = Number(row.categoria_id);
+            if (counts[catId] !== undefined) {
+                counts[catId] += 1;
+            }
+        });
+        return counts;
+    }, [allRows]);
+
+    const subcategoriesOfActiveCat = useMemo(() => {
+        const subMap = new Map();
+        allRows.forEach(row => {
+            if (Number(row.categoria_id) === Number(selectedCat)) {
+                const name = row.subcategoria || 'Sin subcategoria';
+                if (!subMap.has(name)) {
+                    subMap.set(name, { name, count: 0 });
+                }
+                subMap.get(name).count += 1;
+            }
+        });
+        return [...subMap.values()].sort((a, b) => a.name.localeCompare(b.name));
+    }, [allRows, selectedCat]);
+
+    const filteredSubcategories = useMemo(() => {
+        if (!searchSubcategories.trim()) return subcategoriesOfActiveCat;
+        const query = searchSubcategories.toLowerCase();
+        return subcategoriesOfActiveCat.filter(sub =>
+            sub.name.toLowerCase().includes(query)
+        );
+    }, [subcategoriesOfActiveCat, searchSubcategories]);
+
+    const rows = useMemo(() => {
+        if (!recursosSearch.trim()) return allRows;
+        const lowerSearch = recursosSearch.toLowerCase();
+        return allRows.filter((row) =>
+            (row.categoria && row.categoria.toLowerCase().includes(lowerSearch)) ||
+            (row.subcategoria && row.subcategoria.toLowerCase().includes(lowerSearch)) ||
+            (row.descripcion && row.descripcion.toLowerCase().includes(lowerSearch)) ||
+            (row.codigo && row.codigo.toLowerCase().includes(lowerSearch))
+        );
+    }, [allRows, recursosSearch]);
+    const periodos = recursos?.periodos || [];
+    const summary = recursos?.summary || {};
+    const peakPeriod = [...periodos].sort((a, b) => Number(b.costo || 0) - Number(a.costo || 0))[0] || null;
+    const adjustmentKeys = Object.keys(recursosState?.adjustments || {});
+    const manualLimits = recursosStateDraft?.manual_limits || {};
+    const persistedLevelingProposal = recursosStateDraft?.leveling_proposal || null;
+    const approvedLevelingProposal = persistedLevelingProposal?.status === 'approved' ? persistedLevelingProposal : null;
+    const levelingApplicationIntent = recursosStateDraft?.leveling_application_intent || null;
+    const levelingApplicationResult = recursosStateDraft?.leveling_application_result || null;
+    const applicationPreview = useMemo(() => {
+        if (!approvedLevelingProposal) return null;
+        const moves = approvedLevelingProposal.moves || [];
+        const unresolved = approvedLevelingProposal.unresolved || [];
+        const summary = approvedLevelingProposal.summary || {};
+        const affectedResources = new Set(moves.map((move) => move.resource_id)).size || Number(summary.affected_resources || 0);
+        return {
+            movesCount: moves.length,
+            unresolvedCount: unresolved.length,
+            affectedResources,
+            resolvedQuantity: Number(summary.resolved_quantity || 0),
+            unresolvedQuantity: Number(summary.unresolved_quantity || 0),
+            overloadedQuantity: Number(summary.overloaded_quantity || 0),
+            hasPendingCapacity: unresolved.length > 0 || Number(summary.unresolved_quantity || 0) > 0,
+            generatedAt: approvedLevelingProposal.generated_at,
+            approvedAt: approvedLevelingProposal.approved_at,
+        };
+    }, [approvedLevelingProposal]);
+    const getManualLimitValue = (resourceId, periodId) => {
+        const value = manualLimits?.[String(resourceId)]?.[String(periodId)];
+        return value === null || value === undefined ? '' : String(value);
+    };
+    const getPeriodCapacityStatus = (resourceId, periodId, demand) => {
+        const rawLimit = manualLimits?.[String(resourceId)]?.[String(periodId)];
+        if (rawLimit === null || rawLimit === undefined || rawLimit === '') {
+            return { hasLimit: false, limit: null, excess: 0, overloaded: false };
+        }
+        const limit = Number(rawLimit);
+        if (!Number.isFinite(limit)) {
+            return { hasLimit: false, limit: null, excess: 0, overloaded: false };
+        }
+        const quantity = Number(demand || 0);
+        const excess = Math.max(0, quantity - limit);
+        return {
+            hasLimit: true,
+            limit,
+            excess,
+            overloaded: excess > 0,
+        };
+    };
+    const overloadSummary = useMemo(() => {
+        const overloadedResources = new Set();
+        let overloadedPeriods = 0;
+        let maxExcess = 0;
+        rows.forEach((row) => {
+            (row.periodos || []).forEach((periodo) => {
+                const status = getPeriodCapacityStatus(row.recurso_id, periodo.periodo_id, periodo.cantidad);
+                if (!status.overloaded) return;
+                overloadedPeriods += 1;
+                overloadedResources.add(row.recurso_id);
+                maxExcess = Math.max(maxExcess, status.excess);
+            });
+        });
+        return {
+            resources: overloadedResources.size,
+            periods: overloadedPeriods,
+            maxExcess,
+        };
+    }, [manualLimits, rows]);
+    const levelingSimulation = useMemo(() => {
+        const moves = [];
+        const unresolved = [];
+        const affectedResources = new Set();
+        let resolvedQuantity = 0;
+        let unresolvedQuantity = 0;
+        let overloadedQuantity = 0;
+
+        rows.forEach((row) => {
+            const rowPeriods = row.periodos || [];
+            const availableByPeriod = rowPeriods.map((periodo) => {
+                const status = getPeriodCapacityStatus(row.recurso_id, periodo.periodo_id, periodo.cantidad);
+                if (!status.hasLimit || status.overloaded) return 0;
+                return Math.max(0, Number(status.limit || 0) - Number(periodo.cantidad || 0));
+            });
+
+            rowPeriods.forEach((periodo, sourceIndex) => {
+                const status = getPeriodCapacityStatus(row.recurso_id, periodo.periodo_id, periodo.cantidad);
+                if (!status.overloaded) return;
+
+                affectedResources.add(row.recurso_id);
+                overloadedQuantity += status.excess;
+                let remaining = status.excess;
+
+                for (let targetIndex = sourceIndex + 1; targetIndex < rowPeriods.length && remaining > 0; targetIndex += 1) {
+                    const available = availableByPeriod[targetIndex] || 0;
+                    if (available <= 0) continue;
+
+                    const quantity = Math.min(remaining, available);
+                    availableByPeriod[targetIndex] -= quantity;
+                    remaining -= quantity;
+                    resolvedQuantity += quantity;
+                    moves.push({
+                        resourceId: row.recurso_id,
+                        recurso: row.recurso || 'Recurso sin descripcion',
+                        sourcePeriod: periodo.label,
+                        targetPeriod: rowPeriods[targetIndex]?.label || '-',
+                        quantity,
+                    });
+                }
+
+                if (remaining > 0) {
+                    unresolvedQuantity += remaining;
+                    unresolved.push({
+                        resourceId: row.recurso_id,
+                        recurso: row.recurso || 'Recurso sin descripcion',
+                        period: periodo.label,
+                        quantity: remaining,
+                    });
+                }
+            });
+        });
+
+        return {
+            moves,
+            unresolved,
+            affectedResources: affectedResources.size,
+            resolvedQuantity,
+            unresolvedQuantity,
+            overloadedQuantity,
+        };
+    }, [manualLimits, rows]);
+    const categoryGroups = useMemo(() => {
+        const grouped = new Map();
+        rows.forEach((row) => {
+            // Filter by active category
+            if (Number(row.categoria_id) !== Number(selectedCat)) return;
+            // Filter by selected subcategory name
+            if (selectedSubcatId && row.subcategoria !== selectedSubcatId) return;
+
+            const categoryKey = `${row.categoria_id || 0}|${row.categoria || 'Sin categoria'}`;
+            if (!grouped.has(categoryKey)) {
+                grouped.set(categoryKey, {
+                    id: row.categoria_id || 0,
+                    label: row.categoria || 'Sin categoria',
+                    totalCost: 0,
+                    totalQuantity: 0,
+                    subcategories: new Map(),
+                });
+            }
+            const category = grouped.get(categoryKey);
+            category.totalCost += Number(row.costo_total || 0);
+            category.totalQuantity += Number(row.cantidad_total || 0);
+            const subcategoryKey = row.subcategoria || '-';
+            if (!category.subcategories.has(subcategoryKey)) {
+                category.subcategories.set(subcategoryKey, {
+                    label: subcategoryKey,
+                    totalCost: 0,
+                    totalQuantity: 0,
+                    rows: [],
+                });
+            }
+            const subcategory = category.subcategories.get(subcategoryKey);
+            subcategory.totalCost += Number(row.costo_total || 0);
+            subcategory.totalQuantity += Number(row.cantidad_total || 0);
+            subcategory.rows.push(row);
+        });
+        return [...grouped.values()].map((category) => ({
+            ...category,
+            subcategories: [...category.subcategories.values()].sort((a, b) => a.label.localeCompare(b.label)),
+        }));
+    }, [rows, selectedCat, selectedSubcatId]);
+    const periodGridStyle = useMemo(() => ({
+        gridTemplateColumns: `repeat(${Math.max(periodos.length, 1)}, minmax(8rem, 1fr))`,
+    }), [periodos.length]);
+
+    if (loading) {
+        return (
+            <div className="flex min-h-[360px] items-center justify-center rounded-[1.4rem] border border-zinc-200 bg-white">
+                <div className="flex items-center gap-3 text-sm font-black uppercase tracking-[0.18em] text-zinc-500">
+                    <Loader2 className="h-5 w-5 animate-spin text-[#136191]" />
+                    Cargando recursos
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="rounded-[1.1rem] border border-amber-200 bg-amber-50 px-4 py-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-700">Recursos</p>
+                <p className="mt-1 text-sm font-semibold leading-relaxed text-amber-900">{error}</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+            <div className="flex min-w-0 flex-nowrap items-center gap-2.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mb-3 pb-1">
+                <div className="flex min-w-0 flex-1 shrink-0 flex-nowrap items-center gap-2.5">
+                    <ControlRail className="h-[60px] min-w-[280px] flex-[0.7_1_18rem] px-2 py-1.5">
+                    <ControlRailSection className="h-full min-w-max flex-1 items-center gap-3 pl-3 pr-3">
+                        <div className="flex flex-col items-start justify-center min-w-max">
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-[11px] font-black uppercase tracking-[0.14em] text-sky-400">
+                                    Matriz Operacional
+                                </h3>
+                                <span className="text-[10px] font-black uppercase tracking-[0.14em] text-zinc-400">
+                                    V{formatNumber(recursosState?.version || 1, 0)} - {formatNumber(adjustmentKeys.length, 0)} AJUSTE(S)
+                                </span>
+                            </div>
+                            <p className="mt-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-white/60">
+                                {formatNumber(categoryGroups.length, 0)} CATEGORIAS  {String(recursos?.period_type || 'PERIODOS').toUpperCase()}  {String(recursos?.distribution_mode || 'DISTRIBUCION').toUpperCase()}  {String(recursos?.mode || 'READ_ONLY').toUpperCase()}
+                            </p>
+                        </div>
+                    </ControlRailSection>
+                </ControlRail>
+                <ControlRail className="h-[60px] min-w-[420px] flex-[2_1_28rem] px-2 py-1.5">
+                    <ControlRailSection className="h-full min-w-0 flex-1 items-center gap-2 pl-2 pr-2">
+                        <div className="flex flex-col items-center justify-center min-w-[60px]">
+                            <p className="text-[7px] font-black uppercase tracking-[0.12em] text-white/40">Métricas</p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="text-[10px] font-bold text-white/90" title="Recursos">{formatNumber(summary.recursos || rows.length, 0)}<span className="text-[8px] text-white/40 ml-0.5">R</span></span>
+                                <span className="text-white/20 text-[10px]">|</span>
+                                <span className="text-[10px] font-bold text-white/90" title="Periodos">{formatNumber(summary.periodos || periodos.length, 0)}<span className="text-[8px] text-white/40 ml-0.5">P</span></span>
+                            </div>
+                        </div>
+                        <ControlRailDivider className="h-7" />
+
+                        <div className="flex flex-col items-center justify-center min-w-[130px]">
+                            <p className="text-[7px] font-black uppercase tracking-[0.12em] text-white/40">Costo Directo / Pico</p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="text-[10px] font-bold text-emerald-400">{formatCurrency(summary.costo_total || 0, currency, decMoneda)}</span>
+                                <span className="text-white/20 text-[10px]">|</span>
+                                <span className="text-[10px] font-bold text-white/80" title={peakPeriod?.label || '-'}>{formatCurrency(peakPeriod?.costo || 0, currency, decMoneda)}</span>
+                            </div>
+                        </div>
+                        <ControlRailDivider className="h-7" />
+
+                        <div className="flex flex-col items-center justify-center min-w-[80px]">
+                            <p className="text-[7px] font-black uppercase tracking-[0.12em] text-white/40">Sobrecargas</p>
+                            <div className="flex items-center mt-0.5">
+                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black tracking-widest ${overloadSummary.periods > 0 ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-white/5 text-white/50 border border-white/10'}`}>
+                                    {formatNumber(overloadSummary.periods, 0)} <span className="ml-1 text-[7px] opacity-70">PER</span>
+                                </span>
+                            </div>
+                        </div>
+                        <ControlRailDivider className="h-7" />
+
+                        <div className="flex flex-col items-center justify-center min-w-[80px]">
+                            <p className="text-[7px] font-black uppercase tracking-[0.12em] text-white/40">Simulación</p>
+                            <div className="flex items-center mt-0.5">
+                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black tracking-widest ${levelingSimulation.moves.length > 0 ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'bg-white/5 text-white/50 border border-white/10'}`}>
+                                    {formatNumber(levelingSimulation.moves.length, 0)} <span className="ml-1 text-[7px] opacity-70">MOV</span>
+                                </span>
+                            </div>
+                        </div>
+                    </ControlRailSection>
+                </ControlRail>
+                </div>
+
+                <div className="flex min-w-0 flex-[0.5_1_10rem] shrink-0 items-center justify-end gap-1.5">
+                    <ControlRail className="h-[60px] min-w-0 flex-1 gap-1.5 px-2 py-1.5">
+                        <ControlRailSection className="h-full min-w-[130px] flex-1 gap-2 pl-2 pr-1.5">
+                            <div className="flex items-center gap-2 w-full mt-1.5">
+                                <ClearSearchField
+                                    value={recursosSearch}
+                                    onValueChange={setRecursosSearch}
+                                    placeholder="Buscar recurso..."
+                                    containerClassName="min-w-0 flex-1 rounded-[0.9rem] border border-white/16 bg-white shadow-[inset_2px_2px_6px_rgba(15,23,42,0.12),inset_-2px_-2px_6px_rgba(255,255,255,0.75)]"
+                                    inputClassName="w-full bg-transparent py-1.5 pl-9 pr-8 text-[11px] font-bold text-zinc-800 outline-none placeholder:text-zinc-400"
+                                    searchIconClassName="h-3 w-3 text-zinc-500 group-focus-within:text-[#F39200]"
+                                    clearButtonClassName="text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+                                />
+                            </div>
+                        </ControlRailSection>
+                        <ControlRailDivider className="h-7" />
+                        <ControlRailSection className="h-full min-w-0 flex-none items-center justify-end gap-1.5 pl-2 pr-2">
+                        {recursosStateDirty ? (
+                            <button
+                                type="button"
+                                onClick={onSaveState}
+                                disabled={recursosStateSaving}
+                                className="inline-flex h-8 items-center justify-center rounded-[0.8rem] bg-[#0B5C7A] px-3 text-[9px] font-black uppercase tracking-[0.14em] text-white shadow-[0_10px_24px_rgba(11,92,122,0.18)] transition hover:bg-[#084862] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {recursosStateSaving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1.5 h-3.5 w-3.5" />}
+                                Guardar
+                            </button>
+                        ) : null}
+                        {persistedLevelingProposal ? (
+                            <>
+                                {persistedLevelingProposal?.status !== 'approved' ? (
+                                    <button
+                                        type="button"
+                                        onClick={onApproveLevelingProposal}
+                                        disabled={recursosStateSaving}
+                                        className="inline-flex h-8 items-center justify-center rounded-[0.8rem] bg-emerald-700 px-3 text-[9px] font-black uppercase tracking-[0.14em] text-white shadow-[0_10px_24px_rgba(4,120,87,0.18)] transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                        {recursosStateSaving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />}
+                                        Aprobar propuesta
+                                    </button>
+                                ) : null}
+                                <button
+                                    type="button"
+                                    onClick={onClearLevelingProposal}
+                                    disabled={recursosStateSaving}
+                                    className="inline-flex h-8 items-center justify-center rounded-[0.8rem] border border-white/8 bg-[#15181d] px-3 text-[9px] font-black uppercase tracking-[0.14em] text-red-400 transition hover:border-red-400/20"
+                                >
+                                    <X className="mr-1.5 h-3.5 w-3.5" />
+                                    Descartar propuesta
+                                </button>
+                            </>
+                        ) : null}
+                        <ControlRailDivider className="h-6 mx-1" />
+                        <button
+                            type="button"
+                            onClick={onRefresh}
+                            disabled={recursosStateSaving}
+                            className="inline-flex h-8 items-center justify-center rounded-[0.8rem] border border-white/8 bg-[#15181d] px-3 text-[9px] font-black uppercase tracking-[0.14em] text-white/80 transition hover:border-white/14 hover:bg-[#1b1f25] hover:text-white"
+                        >
+                            <TimerReset className="mr-1.5 h-3.5 w-3.5" />
+                            Actualizar
+                        </button>
+                    </ControlRailSection>
+                </ControlRail>
+                </div>
+            </div>
+            {stateError ? (
+                <div className="mb-3 rounded-[0.9rem] border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">
+                    {stateError}
+                </div>
+            ) : null}
+
+            <div className="bg-white border border-zinc-200 rounded-[1rem] p-1.5 flex flex-col gap-1.5 flex-shrink-0 shadow-[0_4px_14px_rgba(0,0,0,0.02)]">
+                <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-2">
+                    <div className="flex gap-2 items-center overflow-x-auto flex-1 justify-start">
+                        {CATEGORIAS_RECURSOS.map(cat => {
+                            const count = categoryCounts[cat.id] || 0;
+                            return (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => { setSelectedCat(cat.id); setSelectedSubcatId(null); }}
+                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${selectedCat === cat.id ? 'bg-zinc-900 text-white border-zinc-900 shadow-md' : 'bg-white hover:bg-zinc-50 text-zinc-500 border-zinc-200 shadow-sm'}`}
+                                >
+                                    <span className={`text-base ${selectedCat === cat.id ? '' : 'grayscale opacity-50'} ${cat.color} transition-all`}>{cat.icon}</span>
+                                    <div className="flex flex-col items-start leading-none">
+                                        <span>{cat.nombre}</span>
+                                        <span className="text-[7px] mt-0.5 text-zinc-400">{count} recursos</span>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex flex-nowrap items-center gap-2 overflow-x-auto justify-end pr-1">
+                        {(levelingSimulation.moves.length > 0 || levelingSimulation.unresolved.length > 0) ? (
+                            <>
+                                {levelingSimulation.moves.slice(0, 2).map((move, index) => (
+                                    <div key={`m-${index}`} className="flex items-center gap-1.5 rounded-full border border-sky-100 bg-sky-50 px-2 py-1 whitespace-nowrap">
+                                        <p className="max-w-[120px] truncate text-[10px] font-black text-zinc-950">{move.recurso}</p>
+                                        <p className="text-[9px] font-black uppercase tracking-[0.12em] text-sky-700">
+                                            {move.sourcePeriod} {'->'} {move.targetPeriod} ({formatNumber(move.quantity, decCalculos)})
+                                        </p>
+                                    </div>
+                                ))}
+                                {levelingSimulation.unresolved.slice(0, 2).map((item, index) => (
+                                    <div key={`u-${index}`} className="flex items-center gap-1.5 rounded-full border border-red-100 bg-red-50 px-2 py-1 whitespace-nowrap">
+                                        <p className="max-w-[120px] truncate text-[10px] font-black text-zinc-950">{item.recurso}</p>
+                                        <p className="text-[9px] font-black uppercase tracking-[0.12em] text-red-700">
+                                            {item.period} · PEND {formatNumber(item.quantity, decCalculos)}
+                                        </p>
+                                    </div>
+                                ))}
+                                <span className="rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-sky-700 whitespace-nowrap">
+                                    Total: {formatNumber(levelingSimulation.affectedResources, 0)} rec
+                                </span>
+                            </>
+                        ) : applicationPreview ? (
+                            <>
+                                <div className="flex items-center gap-2 rounded-full border border-zinc-100 bg-zinc-50 px-2.5 py-1 whitespace-nowrap">
+                                    <p className="text-[8px] font-black uppercase tracking-[0.16em] text-zinc-400">Mov:</p>
+                                    <p className="text-[9px] font-black text-zinc-950">{formatNumber(applicationPreview.movesCount, 0)}</p>
+                                    <p className="text-[8px] font-black uppercase tracking-[0.16em] text-zinc-400 ml-1">Rec:</p>
+                                    <p className="text-[9px] font-black text-zinc-950">{formatNumber(applicationPreview.affectedResources, 0)}</p>
+                                </div>
+                                <span className={`rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] whitespace-nowrap ${applicationPreview.hasPendingCapacity ? 'border-amber-100 bg-amber-50 text-amber-700' : 'border-emerald-100 bg-emerald-50 text-emerald-700'}`}>
+                                    {applicationPreview.hasPendingCapacity ? 'Con pendientes' : 'Lista revisión'}
+                                </span>
+                                {levelingApplicationIntent && (
+                                    <span className="rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-sky-700 whitespace-nowrap">
+                                        {levelingApplicationResult ? 'Aplicada' : 'Intención'}
+                                    </span>
+                                )}
+                                {levelingApplicationResult ? (
+                                    <button
+                                        type="button"
+                                        onClick={onRollbackLevelingApplication}
+                                        disabled={recursosStateSaving}
+                                        className={`${CRONOGRAMA_SOFT_ACTION_BUTTON} h-8 rounded-[0.8rem] px-3 text-[9px] font-black uppercase tracking-[0.14em] text-red-600 whitespace-nowrap`}
+                                    >
+                                        <TimerReset className="mr-1.5 h-3.5 w-3.5" />
+                                        Revertir
+                                    </button>
+                                ) : levelingApplicationIntent ? (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={onApplyLevelingApplication}
+                                            disabled={recursosStateSaving}
+                                            className="inline-flex h-8 shrink-0 items-center justify-center rounded-[0.8rem] bg-emerald-700 px-3 text-[9px] font-black uppercase tracking-[0.14em] text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap"
+                                        >
+                                            {recursosStateSaving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />}
+                                            Aplicar
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={onCancelLevelingApplication}
+                                            disabled={recursosStateSaving}
+                                            className={`${CRONOGRAMA_SOFT_ACTION_BUTTON} h-8 rounded-[0.8rem] px-3 text-[9px] font-black uppercase tracking-[0.14em] text-red-600 whitespace-nowrap`}
+                                        >
+                                            <X className="mr-1.5 h-3.5 w-3.5" />
+                                            Cancelar
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={onRequestLevelingApplication}
+                                        disabled={recursosStateSaving}
+                                        className="inline-flex h-8 shrink-0 items-center justify-center rounded-[0.8rem] bg-[#0B5C7A] px-3 text-[9px] font-black uppercase tracking-[0.14em] text-white shadow-sm transition hover:bg-[#084862] disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap"
+                                    >
+                                        {recursosStateSaving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />}
+                                        Preparar aplicación
+                                    </button>
+                                )}
+                            </>
+                        ) : null}
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex flex-1 overflow-hidden min-h-0 gap-3">
+                <div className="w-72 bg-white border border-zinc-200 rounded-[1rem] flex flex-col h-full flex-shrink-0 shadow-[0_10px_30px_rgba(15,23,42,0.03)]">
+                    <div className="p-4 border-b border-zinc-100 bg-zinc-50/50 flex items-center justify-between">
+                        <h3 className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Subcategorías</h3>
+                    </div>
+                    <div className="px-3 pt-3">
+                        <ClearSearchField
+                            value={searchSubcategories || ''}
+                            onValueChange={setSearchSubcategories}
+                            placeholder="Filtrar subcategorías..."
+                            searchIconClassName="h-3.5 w-3.5"
+                            inputClassName="w-full pl-10 pr-10 h-10 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-xl text-[11px] font-bold text-zinc-700 focus:outline-none focus:border-[#F39200] focus:ring-1 focus:ring-[#F39200] transition-all"
+                        />
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">
+                        {subcategoriesOfActiveCat.length === 0 ? (
+                            <div className="text-center py-10 px-4 bg-zinc-50 rounded-xl border border-dashed border-zinc-200">
+                                <p className="text-[9px] font-bold text-zinc-400 uppercase leading-tight italic">Sin subcategorías</p>
+                            </div>
+                        ) : filteredSubcategories.length === 0 ? (
+                            <div className="text-center py-10 px-4 bg-zinc-50 rounded-xl border border-dashed border-zinc-100">
+                                <p className="text-[9px] font-bold text-zinc-400 uppercase italic">Sin coincidencias</p>
+                            </div>
+                        ) : (
+                            filteredSubcategories.map(sub => (
+                                <button
+                                    key={sub.name}
+                                    onClick={() => setSelectedSubcatId(selectedSubcatId === sub.name ? null : sub.name)}
+                                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all border ${selectedSubcatId === sub.name ? 'bg-zinc-900 text-white border-zinc-900 shadow-md' : 'bg-white hover:bg-zinc-50 text-zinc-700 border-zinc-200'}`}
+                                >
+                                    <div className="text-left min-w-0 flex-1">
+                                        <p className="text-[11px] font-black uppercase tracking-tight leading-snug truncate">
+                                            {normalizeSubcategoryDisplay(sub.name)}
+                                        </p>
+                                        <p className={`mt-1 text-[9px] font-bold uppercase tracking-[0.14em] ${selectedSubcatId === sub.name ? 'text-white/70' : 'text-zinc-400'}`}>
+                                            {sub.count} recursos
+                                        </p>
+                                    </div>
+                                    <ChevronRight className={`w-3.5 h-3.5 shrink-0 transition-transform ${selectedSubcatId === sub.name ? 'rotate-90 text-white' : 'text-zinc-400'}`} />
+                                </button>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                <section className="custom-scrollbar min-h-0 flex-1 overflow-auto rounded-[1rem] border border-zinc-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.04)]">
+                    {categoryGroups.length === 0 ? (
+                        <div className="m-4 rounded-[1rem] border border-zinc-100 bg-zinc-50 px-4 py-6 text-sm font-semibold text-zinc-500">
+                            {selectedSubcatId
+                                ? "No hay recursos consolidados en la subcategoría seleccionada."
+                                : "No hay recursos consolidados para la categoría seleccionada."}
+                        </div>
+                    ) : categoryGroups.map((category) => (
+                        <div key={`${category.id}-${category.label}`} className="border-b border-zinc-200 px-4 py-4 last:border-b-0">
+                            <div className="space-y-3">
+                                {category.subcategories.map((subcategory) => (
+                                    <div key={`${category.id}-${subcategory.label}`} className="overflow-hidden rounded-[0.85rem] border border-zinc-200 bg-zinc-50">
+                                        <div className="flex flex-col gap-1 border-b border-zinc-200 bg-white px-3 py-2 md:flex-row md:items-center md:justify-between">
+                                            <div>
+                                                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">Subcategoria</p>
+                                                <h5 className="text-sm font-black text-zinc-900">{subcategory.label}</h5>
+                                            </div>
+                                            <p className="text-xs font-black text-zinc-600">{formatCurrency(subcategory.totalCost, currency, decMoneda)}</p>
+                                        </div>
+                                        <div className="overflow-x-auto">
+                                            <div className="min-w-[62rem]">
+                                                <div className="grid border-b border-zinc-200 bg-zinc-100 pl-[18rem]" style={periodGridStyle}>
+                                                    {periodos.map((periodo) => (
+                                                        <div key={`${category.id}-${subcategory.label}-${periodo.periodo_id}-head`} className="border-l border-zinc-200 px-2 py-1.5">
+                                                            <p className="truncate text-[9px] font-black uppercase tracking-[0.12em] text-zinc-500">{periodo.label}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <div className="divide-y divide-zinc-200">
+                                                    {subcategory.rows.map((row) => (
+                                                        <div key={row.recurso_id} className="grid bg-white hover:bg-zinc-50/40 transition-colors" style={{ gridTemplateColumns: '16rem minmax(44rem, 1fr)' }}>
+                                                            <div className="border-r border-zinc-200 px-3 py-2 flex flex-col justify-between">
+                                                                <div>
+                                                                    <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                                                                        <CodeColorizer code={row.codigo} className="text-[8px] bg-white px-1.5 py-0.5 rounded border border-zinc-100 shadow-sm" />
+                                                                        <span className="text-[8px] font-black uppercase text-zinc-400">Und: {row.unidad || '-'}</span>
+                                                                    </div>
+                                                                    <h6 className="line-clamp-2 text-[11px] font-black tracking-tight leading-snug text-zinc-800">
+                                                                        {normalizeDescriptionCapitalization(row.recurso || 'Recurso sin descripcion')}
+                                                                    </h6>
+                                                                </div>
+                                                                <div className="mt-1 pt-1.5 border-t border-zinc-100/80 flex items-center justify-between">
+                                                                    <span className="text-[8px] font-bold text-zinc-500">
+                                                                        Cant: <span className="font-black text-zinc-700">{formatNumber(row.cantidad_total || 0, decCalculos)}</span>
+                                                                    </span>
+                                                                    <span className="text-[9px] font-black text-emerald-600">
+                                                                        {formatCurrency(row.costo_total || 0, currency, decMoneda)}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="grid" style={periodGridStyle}>
+                                                            {(row.periodos || []).map((periodo) => {
+                                                                const capacityStatus = getPeriodCapacityStatus(row.recurso_id, periodo.periodo_id, periodo.cantidad);
+                                                                return (
+                                                                <div key={`${row.recurso_id}-${periodo.periodo_id}`} className={`border-l border-zinc-200 px-1.5 py-1.5 ${capacityStatus.overloaded ? 'bg-red-50' : Number(periodo.cantidad || 0) > 0 ? 'bg-white' : 'bg-zinc-50/80'}`}>
+                                                                    <div className="flex items-center justify-between gap-1">
+                                                                        <span className={`truncate text-[8px] font-black uppercase tracking-[0.12em] ${capacityStatus.overloaded ? 'text-red-600' : 'text-zinc-400'}`}>Cant.</span>
+                                                                        <span className={`text-[9px] font-black ${capacityStatus.overloaded ? 'text-red-700' : 'text-zinc-900'}`}>{formatNumber(periodo.cantidad || 0, decCalculos)}</span>
+                                                                    </div>
+                                                                    <div className="mt-0.5 flex items-center justify-between gap-1">
+                                                                        <p className="text-[10px] font-black text-emerald-700">{formatCurrency(periodo.costo || 0, currency, decMoneda)}</p>
+                                                                        {capacityStatus.overloaded ? (
+                                                                            <p className="text-[9px] font-black text-red-700 truncate">
+                                                                                Exceso {formatNumber(capacityStatus.excess, decCalculos)}
+                                                                            </p>
+                                                                        ) : null}
+                                                                    </div>
+                                                                    <div className="mt-1 flex items-center gap-1.5">
+                                                                        <AppHint
+                                                                            maxWidth={380}
+                                                                            content={
+                                                                                <div className="flex flex-col gap-2 p-1 text-[11px] leading-relaxed">
+                                                                                    <p>
+                                                                                        <strong>&quot;Cap.&quot;</strong> significa Capacidad (o Límite de Capacidad / Capacidad Máxima) asignada a ese recurso en ese período específico.
+                                                                                    </p>
+                                                                                    <p className="opacity-90">Funciona de la siguiente manera dentro del sistema:</p>
+                                                                                    <ul className="list-disc pl-4 flex flex-col gap-1.5 opacity-90">
+                                                                                        <li>
+                                                                                            <strong className="opacity-100">Límite Operativo:</strong> Representa la cantidad máxima de ese recurso que tienes disponible o permitida para trabajar en dicho período (por ejemplo, el número máximo de horas de una cuadrilla o volumen de materiales).
+                                                                                        </li>
+                                                                                        <li>
+                                                                                            <strong className="opacity-100">Detección de Sobrecarga:</strong> Si la cantidad requerida por la planificación (&quot;Cant.&quot;) supera el valor ingresado en &quot;Cap.&quot;, el sistema marcará la celda en rojo, indicando un Exceso (sobrecarga).
+                                                                                        </li>
+                                                                                        <li>
+                                                                                            <strong className="opacity-100">Motor de Nivelación:</strong> Este límite es el parámetro que utiliza el motor automático para calcular la Simulación de Nivelación. Cuando hay un exceso, la nivelación intenta desplazar la carga de trabajo a períodos futuros que tengan capacidad disponible (donde la cantidad esté por debajo del límite de capacidad).
+                                                                                        </li>
+                                                                                    </ul>
+                                                                                </div>
+                                                                            }
+                                                                        >
+                                                                            <span className="text-[8px] font-black uppercase tracking-[0.12em] text-zinc-400 cursor-help border-b border-dotted border-zinc-400 hover:text-sky-600 hover:border-sky-600 transition-colors">
+                                                                                Cap.
+                                                                            </span>
+                                                                        </AppHint>
+                                                                        <input
+                                                                            type="number"
+                                                                            min="0"
+                                                                            step="0.0001"
+                                                                            value={getManualLimitValue(row.recurso_id, periodo.periodo_id)}
+                                                                            onChange={(event) => onLimitChange(row.recurso_id, periodo.periodo_id, event.target.value)}
+                                                                            disabled={recursosStateSaving}
+                                                                            title="Ingresa la capacidad máxima disponible"
+                                                                            className="h-5 min-w-0 flex-1 rounded-[0.4rem] border border-zinc-200 bg-white px-1.5 text-[9px] font-black text-zinc-800 outline-none transition focus:border-sky-300 disabled:cursor-not-allowed disabled:opacity-60"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </section>
+            </div>
+        </div>
+    );
+};
+
+const resolveApiErrorMessage = (error, fallback) => {
+    const detail = error?.response?.data?.detail;
+    if (typeof detail === 'string' && detail.trim()) return detail;
+    if (detail && typeof detail === 'object') {
+        if (detail.code === 'apu_resources_incomplete') {
+            const totalIssues = Number(detail.total_issues || detail.issues?.length || 0);
+            const issuePreview = Array.isArray(detail.issues)
+                ? detail.issues.slice(0, 3).map((issue) => {
+                    const code = issue.codigo_item || issue.apu_codigo || issue.linea_presupuesto_id || 'linea';
+                    const description = issue.descripcion || issue.apu_descripcion || issue.reason || 'APU sin recursos';
+                    return `${code}: ${description}`;
+                }).filter(Boolean)
+                : [];
+            const suffix = totalIssues > issuePreview.length
+                ? ` y ${totalIssues - issuePreview.length} mas`
+                : '';
+            const baseMessage = detail.message || 'El presupuesto contiene APUs sin recursos completos.';
+            return issuePreview.length > 0
+                ? `${baseMessage} Revise ${issuePreview.join('; ')}${suffix}.`
+                : baseMessage;
+        }
+        if (typeof detail.message === 'string' && detail.message.trim()) return detail.message;
+        if (typeof detail.detail === 'string' && detail.detail.trim()) return detail.detail;
+    }
+    return error?.message || fallback;
+};
 
 const Cronogramas = ({ project, initialProjectDetail = null }) => {
     const { user, selectedEmpresa } = useContext(AuthContext);
@@ -4366,9 +5094,24 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
     const [cronogramaLoading, setCronogramaLoading] = useState(false);
     const [cronograma, setCronograma] = useState(null);
     const [cronogramaValoradoError, setCronogramaValoradoError] = useState('');
+    const [cronogramaRecursos, setCronogramaRecursos] = useState(null);
+    const [cronogramaRecursosState, setCronogramaRecursosState] = useState(null);
+    const [cronogramaRecursosStateDraft, setCronogramaRecursosStateDraft] = useState({});
+    const [cronogramaRecursosStateDirty, setCronogramaRecursosStateDirty] = useState(false);
+    const [cronogramaRecursosStateSaving, setCronogramaRecursosStateSaving] = useState(false);
+    const [cronogramaRecursosLoading, setCronogramaRecursosLoading] = useState(false);
+    const [cronogramaRecursosError, setCronogramaRecursosError] = useState('');
+    const [cronogramaRecursosStateError, setCronogramaRecursosStateError] = useState('');
     const [cronogramaTrabajoLoading, setCronogramaTrabajoLoading] = useState(false);
     const [cronogramaTrabajo, setCronogramaTrabajo] = useState(null);
     const [cronogramaTrabajoError, setCronogramaTrabajoError] = useState('');
+    const ganttFullMetadataLineIdsRef = useRef(new Set());
+    const [ganttDraft, setGanttDraft] = useState(null);
+    const [ganttDraftLoading, setGanttDraftLoading] = useState(false);
+    const [ganttDraftError, setGanttDraftError] = useState('');
+    const [ganttEditLock, setGanttEditLock] = useState(null);
+    const [ganttEditLockLoading, setGanttEditLockLoading] = useState(false);
+    const [ganttEditLockError, setGanttEditLockError] = useState('');
     const applyCronogramaTrabajoUpdate = useCallback((updated) => {
         setCronogramaTrabajo((previous) => reuseStableCronogramaTrabajoResponse(previous, updated));
     }, []);
@@ -4396,11 +5139,15 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
     const [generatingReport, setGeneratingReport] = useState(false);
     const [ganttReportMenuOpen, setGanttReportMenuOpen] = useState(false);
     const [valoradoReportMenuOpen, setValoradoReportMenuOpen] = useState(false);
+    const [recursosReportMenuOpen, setRecursosReportMenuOpen] = useState(false);
+    const [resourceRangeModalOpen, setResourceRangeModalOpen] = useState(false);
+    const [resourceRangeDraft, setResourceRangeDraft] = useState({ date_start: '', date_end: '' });
     const [classicPrintTarget, setClassicPrintTarget] = useState(null);
     const [ganttPrintSnapshot, setGanttPrintSnapshot] = useState(null);
     const [valoradoReportTab, setValoradoReportTab] = useState('porcentajes');
     const ganttReportMenuRef = useRef(null);
     const valoradoReportMenuRef = useRef(null);
+    const recursosReportMenuRef = useRef(null);
     const periodTypeButtonRef = useRef(null);
     const distributionModeButtonRef = useRef(null);
     const [periodTypeMenuOpen, setPeriodTypeMenuOpen] = useState(false);
@@ -4410,6 +5157,28 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
     const distributionSum = useMemo(
         () => sumCronogramaDistribution(configState.globalDistribution || [], 2),
         [configState.globalDistribution],
+    );
+    const ganttDraftPendingCount = useMemo(() => (
+        Array.isArray(ganttDraft?.intentions)
+            ? ganttDraft.intentions.filter((item) => item?.status === 'pending').length
+            : 0
+    ), [ganttDraft?.intentions]);
+    const ganttDraftInvalidatedCount = useMemo(() => (
+        Array.isArray(ganttDraft?.intentions)
+            ? ganttDraft.intentions.filter((item) => item?.status === 'invalidated').length
+            : 0
+    ), [ganttDraft?.intentions]);
+    const ganttDraftAdjustmentRequiredCount = useMemo(() => (
+        Array.isArray(ganttDraft?.intentions)
+            ? ganttDraft.intentions.filter((item) => item?.status === 'adjustment_required').length
+            : 0
+    ), [ganttDraft?.intentions]);
+    const currentUserId = user?.id ?? user?.usuario_id ?? null;
+    const ganttLockReleaseRequested = Boolean(ganttEditLock?.requested_release_by_user_id);
+    const ganttLockOwnedByCurrentUser = Boolean(
+        ganttEditLock?.status === 'active'
+        && currentUserId !== null
+        && String(ganttEditLock?.locked_by_user_id ?? '') === String(currentUserId)
     );
 
     const displayRows = useMemo(
@@ -4520,16 +5289,18 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
     }, [hasGanttBudgetContext, project]);
 
     useEffect(() => {
-        if (!ganttReportMenuOpen && !valoradoReportMenuOpen) return undefined;
+        if (!ganttReportMenuOpen && !valoradoReportMenuOpen && !recursosReportMenuOpen) return undefined;
         const handlePointerDownOutside = (event) => {
             if (ganttReportMenuRef.current?.contains(event.target)) return;
             if (valoradoReportMenuRef.current?.contains(event.target)) return;
+            if (recursosReportMenuRef.current?.contains(event.target)) return;
             setGanttReportMenuOpen(false);
             setValoradoReportMenuOpen(false);
+            setRecursosReportMenuOpen(false);
         };
         document.addEventListener('pointerdown', handlePointerDownOutside, true);
         return () => document.removeEventListener('pointerdown', handlePointerDownOutside, true);
-    }, [ganttReportMenuOpen, valoradoReportMenuOpen]);
+    }, [ganttReportMenuOpen, recursosReportMenuOpen, valoradoReportMenuOpen]);
 
     const buildDropdownPosition = useCallback((anchor) => {
         if (!anchor) return null;
@@ -4585,30 +5356,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
 
     useEffect(() => {
         setGanttReportMenuOpen(false);
+        setValoradoReportMenuOpen(false);
+        setRecursosReportMenuOpen(false);
     }, [scheduleTab]);
 
-    const handleScheduleTabChange = useCallback(async (nextTab) => {
-        const normalizedNextTab = String(nextTab || '').trim();
-        if (!normalizedNextTab || normalizedNextTab === scheduleTab) return;
-
-        if (scheduleTab === 'gantt' && normalizedNextTab !== 'gantt' && ganttDirtyState.hasChanges) {
-            const confirmed = await appConfirm({
-                title: 'Cambios de Gantt sin guardar',
-                message: `Hay ${ganttDirtyState.pendingRows || 0} tarea(s) con cambios pendientes en el Gantt. Si cambias de sección ahora, esos cambios locales se perderán. ¿Desea salir igualmente?`,
-                confirmLabel: 'Salir sin guardar',
-                tone: 'warning',
-            });
-            if (!confirmed) return;
-            setGanttDirtyState({
-                hasChanges: false,
-                pendingRows: 0,
-                pendingPersistedRows: 0,
-                pendingDraftRows: 0,
-            });
-        }
-
-        setScheduleTab(normalizedNextTab);
-    }, [ganttDirtyState.hasChanges, ganttDirtyState.pendingRows, scheduleTab]);
 
     const resolveCronogramaReportVariant = useCallback(() => {
         if (scheduleTab === 'gantt') return 'gantt';
@@ -4622,6 +5373,8 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
         if (variant === 'cash_flow') return 'Flujo de Caja';
         if (variant === 'integrado') return 'Cronograma Integrado';
         if (variant === 'pareto') return 'Pareto Temporal';
+        if (variant === 'resources_range' || variant === 'resource_usage_range' || variant === 'uso_recursos_rango') return 'Uso de Recursos por Rango';
+        if (variant === 'resources' || variant === 'resource_usage' || variant === 'uso_recursos' || variant === 'uso_de_recursos') return 'Uso de Recursos';
         return 'Cronograma Valorado';
     }, []);
 
@@ -4641,6 +5394,29 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
         nombre: project?.nombre || selectedBudget?.descripcion || 'Cronograma',
         revision: selectedBudget?.revision ?? project?.revision ?? 0,
     }), [project, selectedBudget?.descripcion, selectedBudget?.revision]);
+
+    const resolveResourceReportDefaultRange = useCallback(() => {
+        const periods = Array.isArray(cronograma?.periods) ? cronograma.periods : [];
+        const firstPeriod = periods[0] || null;
+        const lastPeriod = periods.length ? periods[periods.length - 1] : null;
+        return {
+            date_start: formatNativeDateInputValue(firstPeriod?.starts_at || detail?.fecha_inicio || cronogramaTrabajo?.fecha_inicio || project?.fecha_inicio),
+            date_end: formatNativeDateInputValue(lastPeriod?.ends_at || detail?.fecha_finalizacion || cronogramaTrabajo?.fecha_fin || project?.fecha_fin_estimada),
+        };
+    }, [
+        cronograma?.periods,
+        cronogramaTrabajo?.fecha_fin,
+        cronogramaTrabajo?.fecha_inicio,
+        detail?.fecha_finalizacion,
+        detail?.fecha_inicio,
+        project?.fecha_fin_estimada,
+        project?.fecha_inicio,
+    ]);
+
+    const openResourceRangeReportModal = useCallback(() => {
+        setResourceRangeDraft(resolveResourceReportDefaultRange());
+        setResourceRangeModalOpen(true);
+    }, [resolveResourceReportDefaultRange]);
 
     const buildCurvePrintCronograma = useCallback(() => {
         const periods = cronograma?.periods || [];
@@ -4678,7 +5454,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 orientation,
             });
         } catch (error) {
-            console.error('Error preparando lámina de cronogramas:', error);
+            globalThis.reportClientError?.('Error preparando lámina de cronogramas:', error);
             appAlert({
                 title: 'No se pudo generar el PDF',
                 message: error?.message || 'No fue posible generar la lámina técnica del cronograma.',
@@ -4724,10 +5500,280 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
             setCronogramaTrabajoError('');
             return null;
         }
-        const nextTrabajo = await cronogramasApi.getTrabajo(resolvedBudgetId, empId);
+        const nextTrabajo = await cronogramasApi.getTrabajo(resolvedBudgetId, empId, { compact: true, metadataMode: 'summary' });
         setCronogramaTrabajo(nextTrabajo);
         setCronogramaTrabajoError('');
+        ganttFullMetadataLineIdsRef.current = new Set();
         return nextTrabajo;
+    }, [empId, resolvedBudgetId]);
+
+    const handleLoadTrabajoLineMetadata = useCallback(async (lineId) => {
+        const normalizedLineId = String(lineId || '').trim();
+        if (!resolvedBudgetId || !normalizedLineId) return null;
+        if (ganttFullMetadataLineIdsRef.current.has(normalizedLineId)) {
+            const existingRow = (cronogramaTrabajo?.rows || []).find((row) => (
+                String(row?.presupuesto_linea_id ?? row?.linea_id ?? '') === normalizedLineId
+            ));
+            return existingRow ? { metadata: existingRow.metadata || {} } : null;
+        }
+        const payload = await cronogramasApi.getTrabajoLineMetadata(resolvedBudgetId, normalizedLineId, empId);
+        const metadata = payload?.metadata && typeof payload.metadata === 'object' ? payload.metadata : {};
+        setCronogramaTrabajo((previous) => {
+            if (!previous || !Array.isArray(previous.rows)) return previous;
+            return {
+                ...previous,
+                rows: previous.rows.map((row) => {
+                    const rowId = String(row?.presupuesto_linea_id ?? row?.linea_id ?? '');
+                    if (rowId !== normalizedLineId) return row;
+                    return {
+                        ...row,
+                        metadata: {
+                            ...(row.metadata || {}),
+                            ...metadata,
+                            metadata_lazy: false,
+                        },
+                    };
+                }),
+            };
+        });
+        ganttFullMetadataLineIdsRef.current.add(normalizedLineId);
+        return payload;
+    }, [cronogramaTrabajo?.rows, empId, resolvedBudgetId]);
+
+    const reloadGanttDraft = useCallback(async () => {
+        if (!resolvedBudgetId) {
+            setGanttDraft(null);
+            setGanttDraftError('');
+            return null;
+        }
+        const nextDraft = await cronogramasApi.getTrabajoGanttDraft(resolvedBudgetId, empId);
+        setGanttDraft(nextDraft);
+        setGanttDraftError('');
+        return nextDraft;
+    }, [empId, resolvedBudgetId]);
+
+    const handleSaveGanttDraftIntention = useCallback(async (payload) => {
+        if (!resolvedBudgetId) return null;
+        setTrabajoSaving(true);
+        setGanttDraftError('');
+        try {
+            const updatedDraft = await cronogramasApi.saveTrabajoGanttDraftIntention(resolvedBudgetId, payload, empId);
+            setGanttDraft(updatedDraft);
+            return updatedDraft;
+        } catch (saveError) {
+            const message = resolveApiErrorMessage(saveError, 'No fue posible guardar el borrador del Gantt.');
+            setGanttDraftError(message);
+            throw saveError;
+        } finally {
+            setTrabajoSaving(false);
+        }
+    }, [empId, resolvedBudgetId]);
+
+    const handlePreflightGanttDraftApply = useCallback(async () => {
+        if (!resolvedBudgetId) return { ok: true, status: 'none', version: 0, issues: [] };
+        setGanttDraftError('');
+        try {
+            return await cronogramasApi.preflightTrabajoGanttDraftApply(
+                resolvedBudgetId,
+                { expected_version: ganttDraft?.version ?? null },
+                empId,
+            );
+        } catch (preflightError) {
+            const message = resolveApiErrorMessage(preflightError, 'No fue posible validar el borrador Gantt antes de aplicar.');
+            setGanttDraftError(message);
+            throw preflightError;
+        }
+    }, [empId, ganttDraft?.version, resolvedBudgetId]);
+
+    const handleApplyGanttDraft = useCallback(async (payload = {}) => {
+        if (!resolvedBudgetId) return null;
+        setGanttDraftError('');
+        try {
+            const appliedDraft = await cronogramasApi.applyTrabajoGanttDraft(
+                resolvedBudgetId,
+                {
+                    expected_version: ganttDraft?.version ?? null,
+                    ...payload,
+                },
+                empId,
+            );
+            setGanttDraft(appliedDraft?.status === 'applied' ? null : appliedDraft);
+            return appliedDraft;
+        } catch (applyError) {
+            const message = resolveApiErrorMessage(applyError, 'El cronograma se confirmo, pero no fue posible cerrar el borrador Gantt.');
+            setGanttDraftError(message);
+            throw applyError;
+        }
+    }, [empId, ganttDraft?.version, resolvedBudgetId]);
+
+    const handleDiscardInvalidatedGanttDraft = useCallback(async () => {
+        if (!resolvedBudgetId || !ganttDraftInvalidatedCount) return null;
+        const confirmed = await appConfirm({
+            title: 'Descartar lineas invalidadas',
+            message: `Se descartaran ${ganttDraftInvalidatedCount} intencion(es) del borrador Gantt que ya no son compatibles con Presupuesto. Las demas intenciones pendientes se conservaran.`,
+            confirmLabel: 'Descartar invalidadas',
+            cancelLabel: 'Cancelar',
+            tone: 'warning',
+        });
+        if (!confirmed) return null;
+        setTrabajoSaving(true);
+        setGanttDraftError('');
+        try {
+            const updatedDraft = await cronogramasApi.discardInvalidatedTrabajoGanttDraft(
+                resolvedBudgetId,
+                { expected_version: ganttDraft?.version ?? null },
+                empId,
+            );
+            setGanttDraft(updatedDraft);
+            await appAlert({
+                title: 'Borrador Gantt actualizado',
+                message: 'Se descartaron las lineas invalidadas y se conservaron las intenciones compatibles.',
+                tone: 'success',
+            });
+            return updatedDraft;
+        } catch (discardError) {
+            const message = resolveApiErrorMessage(discardError, 'No fue posible descartar las lineas invalidadas del borrador Gantt.');
+            setGanttDraftError(message);
+            throw discardError;
+        } finally {
+            setTrabajoSaving(false);
+        }
+    }, [empId, ganttDraft?.version, ganttDraftInvalidatedCount, resolvedBudgetId]);
+
+    const handlePrepareInvalidatedGanttDraftAdjustment = useCallback(async () => {
+        if (!resolvedBudgetId || !ganttDraftInvalidatedCount) return null;
+        const confirmed = await appConfirm({
+            title: 'Reajustar lineas invalidadas',
+            message: `Se conservara solo la intencion operativa compatible de ${ganttDraftInvalidatedCount} linea(s). Los valores derivados anteriores se eliminaran y deberas reabrir el editor light para recalcular desde la base vigente antes de aplicar globalmente.`,
+            confirmLabel: 'Preparar reajuste',
+            cancelLabel: 'Cancelar',
+            tone: 'warning',
+        });
+        if (!confirmed) return null;
+        setTrabajoSaving(true);
+        setGanttDraftError('');
+        try {
+            const updatedDraft = await cronogramasApi.prepareInvalidatedTrabajoGanttDraftAdjustment(
+                resolvedBudgetId,
+                { expected_version: ganttDraft?.version ?? null },
+                empId,
+            );
+            setGanttDraft(updatedDraft);
+            await appAlert({
+                title: 'Reajuste preparado',
+                message: 'Las lineas invalidadas quedaron pendientes de reabrir y aceptar desde el editor light con la base vigente.',
+                tone: 'success',
+            });
+            return updatedDraft;
+        } catch (adjustError) {
+            const message = resolveApiErrorMessage(adjustError, 'No fue posible preparar el reajuste de las lineas invalidadas del borrador Gantt.');
+            setGanttDraftError(message);
+            throw adjustError;
+        } finally {
+            setTrabajoSaving(false);
+        }
+    }, [empId, ganttDraft?.version, ganttDraftInvalidatedCount, resolvedBudgetId]);
+
+    const handleAcquireGanttEditLock = useCallback(async () => {
+        if (!resolvedBudgetId) return null;
+        setGanttEditLockLoading(true);
+        setGanttEditLockError('');
+        try {
+            const nextLock = await cronogramasApi.acquireTrabajoGanttLock(resolvedBudgetId, {}, empId);
+            setGanttEditLock(nextLock);
+            return nextLock;
+        } catch (lockError) {
+            const message = resolveApiErrorMessage(lockError, 'No fue posible tomar el bloqueo de edición del Gantt.');
+            setGanttEditLockError(message);
+            throw lockError;
+        } finally {
+            setGanttEditLockLoading(false);
+        }
+    }, [empId, resolvedBudgetId]);
+
+    const handleRequestGanttLockRelease = useCallback(async (payload = {}) => {
+        if (!resolvedBudgetId) return null;
+        if (!payload?.skipConfirm) {
+            const confirmed = await appConfirm({
+                title: 'Solicitar liberacion de Gantt',
+                message: 'Otro usuario tiene abierto el modo de trabajo del Gantt. Puedes solicitar que lo libere; mientras tanto, la vista permanece en solo lectura.',
+                confirmLabel: 'Solicitar liberacion',
+                cancelLabel: 'Solo ver',
+                tone: 'warning',
+            });
+            if (!confirmed) return null;
+        }
+        setGanttEditLockLoading(true);
+        try {
+            const requestedLock = await cronogramasApi.requestTrabajoGanttLockRelease(
+                resolvedBudgetId,
+                { message: payload?.message || 'Solicitud de liberacion desde Gantt.' },
+                empId,
+            );
+            setGanttEditLock(requestedLock);
+            const ownerName = requestedLock?.locked_by_name || 'el usuario actual';
+            setGanttEditLockError(`Solicitud de liberacion enviada a ${ownerName}.`);
+            await appAlert({
+                title: 'Solicitud enviada',
+                message: `Se registro la solicitud para que ${ownerName} libere el Gantt.`,
+                tone: 'success',
+            });
+            return requestedLock;
+        } catch (requestError) {
+            const message = resolveApiErrorMessage(requestError, 'No fue posible solicitar la liberacion del Gantt.');
+            setGanttEditLockError(message);
+            throw requestError;
+        } finally {
+            setGanttEditLockLoading(false);
+        }
+    }, [empId, resolvedBudgetId]);
+
+    const handleHeartbeatGanttEditLock = useCallback(async () => {
+        if (!resolvedBudgetId) return null;
+        const nextLock = await cronogramasApi.heartbeatTrabajoGanttLock(resolvedBudgetId, {}, empId);
+        setGanttEditLock(nextLock);
+        setGanttEditLockError('');
+        return nextLock;
+    }, [empId, resolvedBudgetId]);
+
+    const handleReleaseGanttEditLock = useCallback(async () => {
+        if (!resolvedBudgetId) return null;
+        const releasedLock = await cronogramasApi.releaseTrabajoGanttLock(resolvedBudgetId, empId);
+        setGanttEditLock(releasedLock);
+        setGanttEditLockError('');
+        return releasedLock;
+    }, [empId, resolvedBudgetId]);
+
+    const reloadCronogramaRecursos = useCallback(async () => {
+        if (!resolvedBudgetId) {
+            setCronogramaRecursos(null);
+            setCronogramaRecursosState(null);
+            setCronogramaRecursosStateDraft({});
+            setCronogramaRecursosStateDirty(false);
+            setCronogramaRecursosError('');
+            setCronogramaRecursosStateError('');
+            return null;
+        }
+        const nextRecursos = await cronogramasApi.getRecursos(resolvedBudgetId, empId);
+        setCronogramaRecursos(nextRecursos);
+        setCronogramaRecursosError('');
+        return nextRecursos;
+    }, [empId, resolvedBudgetId]);
+
+    const reloadCronogramaRecursosState = useCallback(async () => {
+        if (!resolvedBudgetId) {
+            setCronogramaRecursosState(null);
+            setCronogramaRecursosStateDraft({});
+            setCronogramaRecursosStateDirty(false);
+            setCronogramaRecursosStateError('');
+            return null;
+        }
+        const nextState = await cronogramasApi.getRecursosState(resolvedBudgetId, empId);
+        setCronogramaRecursosState(nextState);
+        setCronogramaRecursosStateDraft(nextState?.adjustments || {});
+        setCronogramaRecursosStateDirty(false);
+        setCronogramaRecursosStateError('');
+        return nextState;
     }, [empId, resolvedBudgetId]);
 
     const previewReloadCronogramaSources = useCallback(async () => {
@@ -4741,7 +5787,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
         const [budgetData, valoradoData, trabajoData] = await Promise.all([
             presupuestosApi.getById(resolvedBudgetId, empId),
             cronogramasApi.getValorado(resolvedBudgetId, empId),
-            cronogramasApi.getTrabajo(resolvedBudgetId, empId),
+            cronogramasApi.getTrabajo(resolvedBudgetId, empId, { compact: true, metadataMode: 'summary' }),
         ]);
         return {
             budgetDetail: budgetData ? { ...budgetData, edt_tree: edtTree } : null,
@@ -4754,7 +5800,8 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
         reloadCronogramaBudgetDetail(),
         reloadCronogramaValorado(),
         reloadCronogramaTrabajo(),
-    ]), [reloadCronogramaBudgetDetail, reloadCronogramaTrabajo, reloadCronogramaValorado]);
+        reloadGanttDraft(),
+    ]), [reloadCronogramaBudgetDetail, reloadCronogramaTrabajo, reloadCronogramaValorado, reloadGanttDraft]);
 
     const executeFactoryResetCronogramas = useCallback(async () => {
         if (!resolvedBudgetId || !selectedBudget) return null;
@@ -4774,6 +5821,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 setCronogramaTrabajo(updated.trabajo);
                 setCronogramaTrabajoError('');
             }
+            setCronogramaRecursos(null);
+            setCronogramaRecursosState(null);
+            setCronogramaRecursosError('');
+            setCronogramaRecursosStateError('');
             await appAlert({
                 title: 'Cronogramas reseteados',
                 message: 'El Valorado, el Gantt y el calendario operativo del proyecto volvieron al estado base y ya se reconstruyeron con las políticas vigentes.',
@@ -4781,10 +5832,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
             });
             return updated;
         } catch (error) {
-            console.error('Error reseteando integralmente los cronogramas:', error);
+            globalThis.reportClientError?.('Error reseteando integralmente los cronogramas:', error);
             await appAlert({
                 title: 'No se pudo resetear',
-                message: error.response?.data?.detail || 'No fue posible restaurar los cronogramas al estado inicial.',
+                message: resolveApiErrorMessage(error, 'No fue posible restaurar los cronogramas al estado inicial.'),
                 tone: 'danger',
             });
             throw error;
@@ -4803,17 +5854,17 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 const detailPromise = initialProjectDetail
                     ? Promise.resolve(initialProjectDetail)
                     : proyectoDetalleApi.getByRoot(rootCode, empId).catch((detailError) => {
-                        console.error('Error loading project detail for cronogramas:', detailError);
+                        globalThis.reportClientError?.('Error loading project detail for cronogramas:', detailError);
                         return rootCode ? { codigo_root: rootCode } : null;
                     });
                 const edtPromise = edtApi.getTree(project.id, empId).catch((edtError) => {
-                    console.error('Error loading EDT tree for cronogramas:', edtError);
+                    globalThis.reportClientError?.('Error loading EDT tree for cronogramas:', edtError);
                     return [];
                 });
                 const budgetPromise = presupuestosApi
                     .getAll({ proyecto_id: project.id, empresa_id: empId })
                     .catch((budgetError) => {
-                        console.error('Error loading budget list for cronogramas:', budgetError);
+                        globalThis.reportClientError?.('Error loading budget list for cronogramas:', budgetError);
                         return [];
                     });
 
@@ -4844,8 +5895,8 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 setBudgets(ordered);
                 setSelectedBudgetId(ordered[0] ? String(ordered[0].id) : '');
             } catch (loadError) {
-                console.error('Error cargando cronogramas:', loadError);
-                if (active) setError(loadError.response?.data?.detail || 'No fue posible cargar la base del cronograma.');
+                globalThis.reportClientError?.('Error cargando cronogramas:', loadError);
+                if (active) setError(resolveApiErrorMessage(loadError, 'No fue posible cargar la base del cronograma.'));
             } finally {
                 if (active) setLoading(false);
             }
@@ -4866,7 +5917,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 await reloadCronogramaBudgetDetail();
                 if (!active) return;
             } catch (loadError) {
-                console.error('Error cargando detalle de presupuesto para cronograma:', loadError);
+                globalThis.reportClientError?.('Error cargando detalle de presupuesto para cronograma:', loadError);
                 if (active) setSelectedBudgetDetail(null);
             }
         };
@@ -4897,7 +5948,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                     setSelectedBudgetId((current) => current || String(ordered[0]?.id || ''));
                 }
             } catch (fallbackBudgetError) {
-                console.error('Error resolviendo presupuesto operativo fallback para Gantt:', fallbackBudgetError);
+                globalThis.reportClientError?.('Error resolviendo presupuesto operativo fallback para Gantt:', fallbackBudgetError);
             } finally {
                 if (active) {
                     setGanttBudgetResolving(false);
@@ -4922,9 +5973,9 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 await reloadCronogramaValorado();
                 if (!active) return;
             } catch (loadError) {
-                console.error('Error cargando cronograma valorado:', loadError);
+                globalThis.reportClientError?.('Error cargando cronograma valorado:', loadError);
                 if (active) {
-                    setCronogramaValoradoError(loadError.response?.data?.detail || 'No fue posible cargar el cronograma valorado.');
+                    setCronogramaValoradoError(resolveApiErrorMessage(loadError, 'No fue posible cargar el cronograma valorado.'));
                     setCronograma(null);
                 }
             } finally {
@@ -4942,33 +5993,681 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
             if (!resolvedBudgetId) {
                 setCronogramaTrabajo(null);
                 setCronogramaTrabajoError('');
+                setGanttDraft(null);
+                setGanttDraftError('');
                 setCronogramaTrabajoLoading(false);
+                setGanttDraftLoading(false);
                 return;
             }
             setCronogramaTrabajoLoading(true);
+            setGanttDraftLoading(true);
             setCronogramaTrabajoError('');
+            setGanttDraftError('');
             try {
                 await withAsyncTimeout(
-                    reloadCronogramaTrabajo(),
+                    Promise.all([
+                        reloadCronogramaTrabajo(),
+                        reloadGanttDraft(),
+                    ]),
                     30000,
                     'La carga del cronograma operativo del Gantt tardó demasiado.',
                 );
                 if (!active) return;
             } catch (loadError) {
-                console.error('Error cargando motor operativo Gantt:', loadError);
-                const detailMessage = loadError.response?.data?.detail || 'No fue posible cargar el cronograma operativo del Gantt.';
+                globalThis.reportClientError?.('Error cargando motor operativo Gantt:', loadError);
+                const detailMessage = resolveApiErrorMessage(loadError, 'No fue posible cargar el cronograma operativo del Gantt.');
                 if (active) {
                     setCronogramaTrabajo(null);
                     setCronogramaTrabajoError(detailMessage);
+                    setGanttDraft(null);
+                    setGanttDraftError(resolveApiErrorMessage(loadError, 'No fue posible cargar el borrador del Gantt.'));
                 }
             } finally {
                 if (active) setCronogramaTrabajoLoading(false);
+                if (active) setGanttDraftLoading(false);
             }
         };
 
         loadCronogramaTrabajo();
         return () => { active = false; };
-    }, [reloadCronogramaTrabajo, resolvedBudgetId]);
+    }, [reloadCronogramaTrabajo, reloadGanttDraft, resolvedBudgetId]);
+
+    useEffect(() => {
+        let active = true;
+        const loadCronogramaRecursos = async () => {
+            if (scheduleTab !== 'recursos') return;
+            if (!resolvedBudgetId) {
+                setCronogramaRecursos(null);
+                setCronogramaRecursosState(null);
+                setCronogramaRecursosStateDraft({});
+                setCronogramaRecursosStateDirty(false);
+                setCronogramaRecursosError('');
+                setCronogramaRecursosStateError('');
+                setCronogramaRecursosLoading(false);
+                return;
+            }
+            setCronogramaRecursosLoading(true);
+            setCronogramaRecursosError('');
+            setCronogramaRecursosStateError('');
+            try {
+                const [resourceResult, stateResult] = await Promise.allSettled([
+                    reloadCronogramaRecursos(),
+                    reloadCronogramaRecursosState(),
+                ]);
+                if (!active) return;
+                if (resourceResult.status === 'rejected') {
+                    throw resourceResult.reason;
+                }
+                if (stateResult.status === 'rejected') {
+                    setCronogramaRecursosState(null);
+                    setCronogramaRecursosStateDraft({});
+                    setCronogramaRecursosStateDirty(false);
+                    setCronogramaRecursosStateError(resolveApiErrorMessage(stateResult.reason, 'No fue posible cargar el estado colaborativo de recursos.'));
+                }
+                if (!active) return;
+            } catch (loadError) {
+                globalThis.reportClientError?.('Error cargando recursos de cronograma:', loadError);
+                if (active) {
+                    setCronogramaRecursos(null);
+                    setCronogramaRecursosError(resolveApiErrorMessage(loadError, 'No fue posible cargar los recursos del cronograma.'));
+                }
+            } finally {
+                if (active) setCronogramaRecursosLoading(false);
+            }
+        };
+
+        loadCronogramaRecursos();
+        return () => { active = false; };
+    }, [reloadCronogramaRecursos, reloadCronogramaRecursosState, resolvedBudgetId, scheduleTab]);
+
+    const handleRefreshCronogramaRecursos = useCallback(async () => {
+        setCronogramaRecursosLoading(true);
+        setCronogramaRecursosStateError('');
+        try {
+            const [resourceResult, stateResult] = await Promise.allSettled([
+                reloadCronogramaRecursos(),
+                reloadCronogramaRecursosState(),
+            ]);
+            if (resourceResult.status === 'rejected') {
+                throw resourceResult.reason;
+            }
+            if (stateResult.status === 'rejected') {
+                setCronogramaRecursosState(null);
+                setCronogramaRecursosStateDraft({});
+                setCronogramaRecursosStateDirty(false);
+                setCronogramaRecursosStateError(resolveApiErrorMessage(stateResult.reason, 'No fue posible actualizar el estado colaborativo de recursos.'));
+            }
+        } catch (refreshError) {
+            globalThis.reportClientError?.('Error actualizando recursos de cronograma:', refreshError);
+            setCronogramaRecursosError(resolveApiErrorMessage(refreshError, 'No fue posible actualizar los recursos del cronograma.'));
+        } finally {
+            setCronogramaRecursosLoading(false);
+        }
+    }, [reloadCronogramaRecursos, reloadCronogramaRecursosState]);
+
+    const handleCronogramaRecursosLimitChange = useCallback((resourceId, periodId, rawValue) => {
+        const resourceKey = String(resourceId);
+        const periodKey = String(periodId);
+        const normalizedValue = String(rawValue ?? '').trim();
+        setCronogramaRecursosStateDraft((current) => {
+            const next = {
+                ...(current || {}),
+                manual_limits: {
+                    ...((current || {}).manual_limits || {}),
+                },
+            };
+            const resourceLimits = {
+                ...(next.manual_limits[resourceKey] || {}),
+            };
+            if (normalizedValue === '') {
+                delete resourceLimits[periodKey];
+            } else {
+                const numericValue = Number(normalizedValue);
+                if (!Number.isFinite(numericValue) || numericValue < 0) {
+                    return current || {};
+                }
+                resourceLimits[periodKey] = numericValue;
+            }
+            if (Object.keys(resourceLimits).length === 0) {
+                delete next.manual_limits[resourceKey];
+            } else {
+                next.manual_limits[resourceKey] = resourceLimits;
+            }
+            if (Object.keys(next.manual_limits).length === 0) {
+                delete next.manual_limits;
+            }
+            return next;
+        });
+        setCronogramaRecursosStateDirty(true);
+    }, []);
+
+    const handleResetCronogramaRecursosStateDraft = useCallback(() => {
+        setCronogramaRecursosStateDraft(cronogramaRecursosState?.adjustments || {});
+        setCronogramaRecursosStateDirty(false);
+        setCronogramaRecursosStateError('');
+    }, [cronogramaRecursosState?.adjustments]);
+
+    const handleSaveCronogramaRecursosState = useCallback(async () => {
+        if (!resolvedBudgetId || !cronogramaRecursosState) return;
+        setCronogramaRecursosStateSaving(true);
+        setCronogramaRecursosStateError('');
+        try {
+            // Compute the leveling simulation on the fly to save it along with capacities
+            const manualLimits = cronogramaRecursosStateDraft?.manual_limits || {};
+            const allRows = cronogramaRecursos?.recursos || [];
+
+            const getPeriodCapacityStatus = (resourceId, periodId, demand) => {
+                const rawLimit = manualLimits?.[String(resourceId)]?.[String(periodId)];
+                if (rawLimit === null || rawLimit === undefined || rawLimit === '') {
+                    return { hasLimit: false, limit: null, excess: 0, overloaded: false };
+                }
+                const limit = Number(rawLimit);
+                if (!Number.isFinite(limit)) {
+                    return { hasLimit: false, limit: null, excess: 0, overloaded: false };
+                }
+                const quantity = Number(demand || 0);
+                const excess = Math.max(0, quantity - limit);
+                return {
+                    hasLimit: true,
+                    limit,
+                    excess,
+                    overloaded: excess > 0,
+                };
+            };
+
+            const moves = [];
+            const unresolved = [];
+            const affectedResources = new Set();
+            let resolvedQuantity = 0;
+            let unresolvedQuantity = 0;
+            let overloadedQuantity = 0;
+
+            allRows.forEach((row) => {
+                const rowPeriods = row.periodos || [];
+                const availableByPeriod = rowPeriods.map((periodo) => {
+                    const status = getPeriodCapacityStatus(row.recurso_id, periodo.periodo_id, periodo.cantidad);
+                    if (!status.hasLimit || status.overloaded) return 0;
+                    return Math.max(0, Number(status.limit || 0) - Number(periodo.cantidad || 0));
+                });
+
+                rowPeriods.forEach((periodo, sourceIndex) => {
+                    const status = getPeriodCapacityStatus(row.recurso_id, periodo.periodo_id, periodo.cantidad);
+                    if (!status.overloaded) return;
+
+                    affectedResources.add(row.recurso_id);
+                    overloadedQuantity += status.excess;
+                    let remaining = status.excess;
+
+                    for (let targetIndex = sourceIndex + 1; targetIndex < rowPeriods.length && remaining > 0; targetIndex += 1) {
+                        const available = availableByPeriod[targetIndex] || 0;
+                        if (available <= 0) continue;
+
+                        const quantity = Math.min(remaining, available);
+                        availableByPeriod[targetIndex] -= quantity;
+                        remaining -= quantity;
+                        resolvedQuantity += quantity;
+                        moves.push({
+                            resourceId: row.recurso_id,
+                            recurso: row.recurso || 'Recurso sin descripcion',
+                            sourcePeriod: periodo.label,
+                            targetPeriod: rowPeriods[targetIndex]?.label || '-',
+                            quantity,
+                        });
+                    }
+
+                    if (remaining > 0) {
+                        unresolvedQuantity += remaining;
+                        unresolved.push({
+                            resourceId: row.recurso_id,
+                            recurso: row.recurso || 'Recurso sin descripcion',
+                            period: periodo.label,
+                            quantity: remaining,
+                        });
+                    }
+                });
+            });
+
+            const nextAdjustments = {
+                ...(cronogramaRecursosStateDraft || {}),
+            };
+
+            if (moves.length > 0 || unresolved.length > 0) {
+                nextAdjustments.leveling_proposal = {
+                    status: 'proposed',
+                    generated_at: new Date().toISOString(),
+                    applied: false,
+                    summary: {
+                        moves: moves.length,
+                        unresolved: unresolved.length,
+                        affected_resources: affectedResources.size,
+                        resolved_quantity: resolvedQuantity,
+                        unresolved_quantity: unresolvedQuantity,
+                        overloaded_quantity: overloadedQuantity,
+                    },
+                    moves: moves.map((move) => ({
+                        resource_id: move.resourceId,
+                        recurso: move.recurso,
+                        source_period: move.sourcePeriod,
+                        target_period: move.targetPeriod,
+                        quantity: move.quantity,
+                    })),
+                    unresolved: unresolved.map((item) => ({
+                        resource_id: item.resourceId,
+                        recurso: item.recurso,
+                        period: item.period,
+                        quantity: item.quantity,
+                    })),
+                };
+            } else {
+                delete nextAdjustments.leveling_proposal;
+            }
+
+            const updatedState = await cronogramasApi.updateRecursosState(
+                resolvedBudgetId,
+                {
+                    version: cronogramaRecursosState.version,
+                    adjustments: nextAdjustments,
+                },
+                empId,
+            );
+            setCronogramaRecursosState(updatedState);
+            setCronogramaRecursosStateDraft(updatedState?.adjustments || {});
+            setCronogramaRecursosStateDirty(false);
+            await appAlert({
+                title: 'Estado de recursos guardado',
+                message: 'Las capacidades manuales y la propuesta de nivelación quedaron persistidas.',
+                tone: 'success',
+            });
+        } catch (saveError) {
+            globalThis.reportClientError?.('Error guardando estado de recursos:', saveError);
+            const message = resolveApiErrorMessage(saveError, 'No fue posible guardar el estado colaborativo de recursos.');
+            setCronogramaRecursosStateError(message);
+            if (saveError.response?.status === 409) {
+                await reloadCronogramaRecursosState().catch(() => null);
+            }
+            await appAlert({
+                title: 'No se pudo guardar',
+                message,
+                tone: 'danger',
+            });
+        } finally {
+            setCronogramaRecursosStateSaving(false);
+        }
+    }, [cronogramaRecursosState, cronogramaRecursosStateDraft, empId, reloadCronogramaRecursosState, resolvedBudgetId, cronogramaRecursos]);
+
+    const handlePersistCronogramaRecursosLevelingProposal = useCallback(async (simulation) => {
+        if (!resolvedBudgetId || !cronogramaRecursosState) return;
+        setCronogramaRecursosStateSaving(true);
+        setCronogramaRecursosStateError('');
+        try {
+            const levelingProposal = {
+                status: 'proposed',
+                generated_at: new Date().toISOString(),
+                applied: false,
+                summary: {
+                    moves: simulation?.moves?.length || 0,
+                    unresolved: simulation?.unresolved?.length || 0,
+                    affected_resources: simulation?.affectedResources || 0,
+                    resolved_quantity: simulation?.resolvedQuantity || 0,
+                    unresolved_quantity: simulation?.unresolvedQuantity || 0,
+                    overloaded_quantity: simulation?.overloadedQuantity || 0,
+                },
+                moves: (simulation?.moves || []).map((move) => ({
+                    resource_id: move.resourceId,
+                    recurso: move.recurso,
+                    source_period: move.sourcePeriod,
+                    target_period: move.targetPeriod,
+                    quantity: move.quantity,
+                })),
+                unresolved: (simulation?.unresolved || []).map((item) => ({
+                    resource_id: item.resourceId,
+                    recurso: item.recurso,
+                    period: item.period,
+                    quantity: item.quantity,
+                })),
+            };
+            const nextAdjustments = {
+                ...(cronogramaRecursosStateDraft || {}),
+                leveling_proposal: levelingProposal,
+            };
+            const updatedState = await cronogramasApi.updateRecursosState(
+                resolvedBudgetId,
+                {
+                    version: cronogramaRecursosState.version,
+                    adjustments: nextAdjustments,
+                },
+                empId,
+            );
+            setCronogramaRecursosState(updatedState);
+            setCronogramaRecursosStateDraft(updatedState?.adjustments || {});
+            setCronogramaRecursosStateDirty(false);
+            await appAlert({
+                title: 'Propuesta guardada',
+                message: 'La propuesta de nivelacion quedo persistida para la revision seleccionada. No se modifico el Gantt.',
+                tone: 'success',
+            });
+        } catch (saveError) {
+            globalThis.reportClientError?.('Error guardando propuesta de nivelacion:', saveError);
+            const message = resolveApiErrorMessage(saveError, 'No fue posible guardar la propuesta colaborativa de recursos.');
+            setCronogramaRecursosStateError(message);
+            if (saveError.response?.status === 409) {
+                await reloadCronogramaRecursosState().catch(() => null);
+            }
+            await appAlert({
+                title: 'No se pudo guardar',
+                message,
+                tone: 'danger',
+            });
+        } finally {
+            setCronogramaRecursosStateSaving(false);
+        }
+    }, [cronogramaRecursosState, cronogramaRecursosStateDraft, empId, reloadCronogramaRecursosState, resolvedBudgetId]);
+
+    const handleApproveCronogramaRecursosLevelingProposal = useCallback(async () => {
+        if (!resolvedBudgetId || !cronogramaRecursosState) return;
+        const currentProposal = cronogramaRecursosStateDraft?.leveling_proposal;
+        if (!currentProposal) return;
+        setCronogramaRecursosStateSaving(true);
+        setCronogramaRecursosStateError('');
+        try {
+            const nextAdjustments = {
+                ...(cronogramaRecursosStateDraft || {}),
+                leveling_proposal: {
+                    ...currentProposal,
+                    status: 'approved',
+                    approved_at: new Date().toISOString(),
+                    applied: false,
+                },
+            };
+            const updatedState = await cronogramasApi.updateRecursosState(
+                resolvedBudgetId,
+                {
+                    version: cronogramaRecursosState.version,
+                    adjustments: nextAdjustments,
+                },
+                empId,
+            );
+            setCronogramaRecursosState(updatedState);
+            setCronogramaRecursosStateDraft(updatedState?.adjustments || {});
+            setCronogramaRecursosStateDirty(false);
+            await appAlert({
+                title: 'Propuesta aprobada',
+                message: 'La propuesta quedo aprobada para revision colaborativa. Aun no se aplico al Gantt.',
+                tone: 'success',
+            });
+        } catch (approveError) {
+            globalThis.reportClientError?.('Error aprobando propuesta de nivelacion:', approveError);
+            const message = resolveApiErrorMessage(approveError, 'No fue posible aprobar la propuesta colaborativa de recursos.');
+            setCronogramaRecursosStateError(message);
+            if (approveError.response?.status === 409) {
+                await reloadCronogramaRecursosState().catch(() => null);
+            }
+            await appAlert({
+                title: 'No se pudo aprobar',
+                message,
+                tone: 'danger',
+            });
+        } finally {
+            setCronogramaRecursosStateSaving(false);
+        }
+    }, [cronogramaRecursosState, cronogramaRecursosStateDraft, empId, reloadCronogramaRecursosState, resolvedBudgetId]);
+
+    const handleClearCronogramaRecursosLevelingProposal = useCallback(async () => {
+        if (!resolvedBudgetId || !cronogramaRecursosState) return;
+        setCronogramaRecursosStateSaving(true);
+        setCronogramaRecursosStateError('');
+        try {
+            const nextAdjustments = {
+                ...(cronogramaRecursosStateDraft || {}),
+            };
+            delete nextAdjustments.leveling_proposal;
+            const updatedState = await cronogramasApi.updateRecursosState(
+                resolvedBudgetId,
+                {
+                    version: cronogramaRecursosState.version,
+                    adjustments: nextAdjustments,
+                },
+                empId,
+            );
+            setCronogramaRecursosState(updatedState);
+            setCronogramaRecursosStateDraft(updatedState?.adjustments || {});
+            setCronogramaRecursosStateDirty(false);
+        } catch (clearError) {
+            globalThis.reportClientError?.('Error quitando propuesta de nivelacion:', clearError);
+            const message = resolveApiErrorMessage(clearError, 'No fue posible quitar la propuesta colaborativa de recursos.');
+            setCronogramaRecursosStateError(message);
+            if (clearError.response?.status === 409) {
+                await reloadCronogramaRecursosState().catch(() => null);
+            }
+        } finally {
+            setCronogramaRecursosStateSaving(false);
+        }
+    }, [cronogramaRecursosState, cronogramaRecursosStateDraft, empId, reloadCronogramaRecursosState, resolvedBudgetId]);
+
+    const handleRequestCronogramaRecursosLevelingApplication = useCallback(async () => {
+        if (!resolvedBudgetId || !cronogramaRecursosState) return;
+        const currentProposal = cronogramaRecursosStateDraft?.leveling_proposal;
+        if (!currentProposal || currentProposal.status !== 'approved') return;
+        const confirmed = await appConfirm({
+            title: 'Preparar aplicacion',
+            message: 'Se registrara una intencion colaborativa para aplicar la propuesta aprobada. Este paso no modifica Gantt, Valorado ni Flujo.',
+            confirmLabel: 'Preparar aplicacion',
+            cancelLabel: 'Cancelar',
+            tone: 'warning',
+        });
+        if (!confirmed) return;
+        setCronogramaRecursosStateSaving(true);
+        setCronogramaRecursosStateError('');
+        try {
+            const nextAdjustments = {
+                ...(cronogramaRecursosStateDraft || {}),
+                leveling_application_intent: {
+                    status: 'ready_to_apply',
+                    requested_at: new Date().toISOString(),
+                    applied: false,
+                    source_proposal_approved_at: currentProposal.approved_at || null,
+                    source_moves: currentProposal?.moves?.length || 0,
+                    source_unresolved: currentProposal?.unresolved?.length || 0,
+                    safety: 'not_applied_to_gantt_valorado_flujo',
+                },
+            };
+            const updatedState = await cronogramasApi.updateRecursosState(
+                resolvedBudgetId,
+                {
+                    version: cronogramaRecursosState.version,
+                    adjustments: nextAdjustments,
+                },
+                empId,
+            );
+            setCronogramaRecursosState(updatedState);
+            setCronogramaRecursosStateDraft(updatedState?.adjustments || {});
+            setCronogramaRecursosStateDirty(false);
+            await appAlert({
+                title: 'Intencion registrada',
+                message: 'La aplicacion quedo preparada para el siguiente paso controlado. No se modifico el Gantt.',
+                tone: 'success',
+            });
+        } catch (intentError) {
+            globalThis.reportClientError?.('Error preparando aplicacion de nivelacion:', intentError);
+            const message = resolveApiErrorMessage(intentError, 'No fue posible preparar la aplicacion colaborativa de recursos.');
+            setCronogramaRecursosStateError(message);
+            if (intentError.response?.status === 409) {
+                await reloadCronogramaRecursosState().catch(() => null);
+            }
+            await appAlert({
+                title: 'No se pudo preparar',
+                message,
+                tone: 'danger',
+            });
+        } finally {
+            setCronogramaRecursosStateSaving(false);
+        }
+    }, [cronogramaRecursosState, cronogramaRecursosStateDraft, empId, reloadCronogramaRecursosState, resolvedBudgetId]);
+
+    const handleCancelCronogramaRecursosLevelingApplication = useCallback(async () => {
+        if (!resolvedBudgetId || !cronogramaRecursosState) return;
+        setCronogramaRecursosStateSaving(true);
+        setCronogramaRecursosStateError('');
+        try {
+            const nextAdjustments = {
+                ...(cronogramaRecursosStateDraft || {}),
+            };
+            delete nextAdjustments.leveling_application_intent;
+            const updatedState = await cronogramasApi.updateRecursosState(
+                resolvedBudgetId,
+                {
+                    version: cronogramaRecursosState.version,
+                    adjustments: nextAdjustments,
+                },
+                empId,
+            );
+            setCronogramaRecursosState(updatedState);
+            setCronogramaRecursosStateDraft(updatedState?.adjustments || {});
+            setCronogramaRecursosStateDirty(false);
+        } catch (cancelError) {
+            globalThis.reportClientError?.('Error cancelando aplicacion de nivelacion:', cancelError);
+            const message = resolveApiErrorMessage(cancelError, 'No fue posible cancelar la intencion colaborativa de aplicacion.');
+            setCronogramaRecursosStateError(message);
+            if (cancelError.response?.status === 409) {
+                await reloadCronogramaRecursosState().catch(() => null);
+            }
+        } finally {
+            setCronogramaRecursosStateSaving(false);
+        }
+    }, [cronogramaRecursosState, cronogramaRecursosStateDraft, empId, reloadCronogramaRecursosState, resolvedBudgetId]);
+
+    const handleApplyCronogramaRecursosLevelingApplication = useCallback(async () => {
+        if (!resolvedBudgetId || !cronogramaRecursosState) return;
+        const currentProposal = cronogramaRecursosStateDraft?.leveling_proposal;
+        const currentIntent = cronogramaRecursosStateDraft?.leveling_application_intent;
+        if (!currentProposal || currentProposal.status !== 'approved' || !currentIntent) return;
+        const confirmed = await appConfirm({
+            title: 'Aplicar en Recursos',
+            message: 'Se marcara la propuesta como aplicada solo en la capa Recursos y se guardara un snapshot de rollback. No se modificaran Gantt, Valorado ni Flujo.',
+            confirmLabel: 'Aplicar en Recursos',
+            cancelLabel: 'Cancelar',
+            tone: 'warning',
+        });
+        if (!confirmed) return;
+        setCronogramaRecursosStateSaving(true);
+        setCronogramaRecursosStateError('');
+        const appliedAt = new Date().toISOString();
+        try {
+            const nextAdjustments = {
+                ...(cronogramaRecursosStateDraft || {}),
+                leveling_proposal: {
+                    ...currentProposal,
+                    applied: true,
+                    applied_at: appliedAt,
+                    applied_scope: 'resources_state_only',
+                },
+                leveling_application_intent: {
+                    ...currentIntent,
+                    status: 'applied',
+                    applied: true,
+                    applied_at: appliedAt,
+                },
+                leveling_application_result: {
+                    status: 'applied_to_resources',
+                    applied_at: appliedAt,
+                    applied_scope: 'resources_state_only',
+                    summary: currentProposal.summary || {},
+                    moves: currentProposal.moves || [],
+                    unresolved: currentProposal.unresolved || [],
+                    rollback_snapshot: {
+                        leveling_proposal: currentProposal,
+                        leveling_application_intent: currentIntent,
+                    },
+                    safety: 'not_applied_to_gantt_valorado_flujo',
+                },
+            };
+            const updatedState = await cronogramasApi.updateRecursosState(
+                resolvedBudgetId,
+                {
+                    version: cronogramaRecursosState.version,
+                    adjustments: nextAdjustments,
+                },
+                empId,
+            );
+            setCronogramaRecursosState(updatedState);
+            setCronogramaRecursosStateDraft(updatedState?.adjustments || {});
+            setCronogramaRecursosStateDirty(false);
+            await appAlert({
+                title: 'Aplicacion registrada',
+                message: 'La propuesta quedo aplicada solo en la capa Recursos. El Gantt no fue modificado.',
+                tone: 'success',
+            });
+        } catch (applyError) {
+            globalThis.reportClientError?.('Error aplicando propuesta en Recursos:', applyError);
+            const message = resolveApiErrorMessage(applyError, 'No fue posible aplicar la propuesta en la capa Recursos.');
+            setCronogramaRecursosStateError(message);
+            if (applyError.response?.status === 409) {
+                await reloadCronogramaRecursosState().catch(() => null);
+            }
+            await appAlert({
+                title: 'No se pudo aplicar',
+                message,
+                tone: 'danger',
+            });
+        } finally {
+            setCronogramaRecursosStateSaving(false);
+        }
+    }, [cronogramaRecursosState, cronogramaRecursosStateDraft, empId, reloadCronogramaRecursosState, resolvedBudgetId]);
+
+    const handleRollbackCronogramaRecursosLevelingApplication = useCallback(async () => {
+        if (!resolvedBudgetId || !cronogramaRecursosState) return;
+        const currentResult = cronogramaRecursosStateDraft?.leveling_application_result;
+        const rollbackSnapshot = currentResult?.rollback_snapshot;
+        if (!rollbackSnapshot) return;
+        const confirmed = await appConfirm({
+            title: 'Revertir aplicacion',
+            message: 'Se restaurara la propuesta y la intencion al estado previo a la aplicacion en Recursos. No se modificaran Gantt, Valorado ni Flujo.',
+            confirmLabel: 'Revertir',
+            cancelLabel: 'Cancelar',
+            tone: 'warning',
+        });
+        if (!confirmed) return;
+        setCronogramaRecursosStateSaving(true);
+        setCronogramaRecursosStateError('');
+        try {
+            const nextAdjustments = {
+                ...(cronogramaRecursosStateDraft || {}),
+                leveling_proposal: rollbackSnapshot.leveling_proposal,
+                leveling_application_intent: rollbackSnapshot.leveling_application_intent,
+            };
+            delete nextAdjustments.leveling_application_result;
+            const updatedState = await cronogramasApi.updateRecursosState(
+                resolvedBudgetId,
+                {
+                    version: cronogramaRecursosState.version,
+                    adjustments: nextAdjustments,
+                },
+                empId,
+            );
+            setCronogramaRecursosState(updatedState);
+            setCronogramaRecursosStateDraft(updatedState?.adjustments || {});
+            setCronogramaRecursosStateDirty(false);
+            await appAlert({
+                title: 'Aplicacion revertida',
+                message: 'Se restauro el estado previo dentro de Recursos. El Gantt no fue modificado.',
+                tone: 'success',
+            });
+        } catch (rollbackError) {
+            globalThis.reportClientError?.('Error revirtiendo aplicacion en Recursos:', rollbackError);
+            const message = resolveApiErrorMessage(rollbackError, 'No fue posible revertir la aplicacion en Recursos.');
+            setCronogramaRecursosStateError(message);
+            if (rollbackError.response?.status === 409) {
+                await reloadCronogramaRecursosState().catch(() => null);
+            }
+            await appAlert({
+                title: 'No se pudo revertir',
+                message,
+                tone: 'danger',
+            });
+        } finally {
+            setCronogramaRecursosStateSaving(false);
+        }
+    }, [cronogramaRecursosState, cronogramaRecursosStateDraft, empId, reloadCronogramaRecursosState, resolvedBudgetId]);
 
     const handleConfigChange = (field, value) => {
         setConfigState((current) => {
@@ -5043,7 +6742,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
             setCronograma(updatedCronograma);
             await appAlert({ title: 'Completado', message: 'Distribución pegada correctamente.', tone: 'success' });
         } catch (error) {
-            console.error('Error al pegar distribución:', error);
+            globalThis.reportClientError?.('Error al pegar distribución:', error);
             await appAlert({ title: 'Error', message: 'No se pudo pegar la distribución en todas las líneas.', tone: 'danger' });
         } finally {
             setCronogramaLoading(false);
@@ -5147,10 +6846,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 tone: 'success',
             });
         } catch (saveError) {
-            console.error('Error guardando configuración del cronograma:', saveError);
+            globalThis.reportClientError?.('Error guardando configuración del cronograma:', saveError);
             await appAlert({
                 title: 'No se pudo guardar',
-                message: saveError.response?.data?.detail || 'No fue posible guardar la configuración del cronograma.',
+                message: resolveApiErrorMessage(saveError, 'No fue posible guardar la configuración del cronograma.'),
                 tone: 'danger',
             });
         } finally {
@@ -5195,10 +6894,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 tone: 'success',
             });
         } catch (error) {
-            console.error('Error recalculando cronograma valorado desde Gantt:', error);
+            globalThis.reportClientError?.('Error recalculando cronograma valorado desde Gantt:', error);
             await appAlert({
                 title: 'No se pudo recalcular',
-                message: error.response?.data?.detail || 'No fue posible recalcular el Cronograma Valorado desde Gantt.',
+                message: resolveApiErrorMessage(error, 'No fue posible recalcular el Cronograma Valorado desde Gantt.'),
                 tone: 'danger',
             });
         } finally {
@@ -5252,7 +6951,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 resolvedDecMoneda,
             );
         } catch (summaryError) {
-            console.error('Error calculando resumen de transición manual tras sincronizar valorado desde Gantt:', summaryError);
+            globalThis.reportClientError?.('Error calculando resumen de transición manual tras sincronizar valorado desde Gantt:', summaryError);
         }
         setCronograma(updated);
         setConfigState({
@@ -5282,10 +6981,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
         deferredValoradoSyncTimerRef.current = window.setTimeout(() => {
             deferredValoradoSyncTimerRef.current = null;
             void syncValoradoFromGanttSilently({ silent: true, source }).catch(async (syncError) => {
-                console.error('Error sincronizando cronograma valorado diferido tras guardar Gantt:', syncError);
+                globalThis.reportClientError?.('Error sincronizando cronograma valorado diferido tras guardar Gantt:', syncError);
                 await appAlert({
                     title: 'Gantt guardado con sincronización pendiente',
-                    message: `${syncError?.response?.data?.detail || syncError?.message || 'La secuencia quedó guardada correctamente en el Gantt, pero no fue posible actualizar automáticamente el Cronograma Valorado derivado.'} Puedes reintentar desde "Recalcular desde Gantt".`,
+                    message: `${resolveApiErrorMessage(syncError, 'La secuencia quedó guardada correctamente en el Gantt, pero no fue posible actualizar automáticamente el Cronograma Valorado derivado.')} Puedes reintentar desde "Recalcular desde Gantt".`,
                     tone: 'warning',
                 });
             });
@@ -5344,10 +7043,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 tone: 'success',
             });
         } catch (error) {
-            console.error('Error limpiando overrides del cronograma valorado:', error);
+            globalThis.reportClientError?.('Error limpiando overrides del cronograma valorado:', error);
             await appAlert({
                 title: 'No se pudieron limpiar',
-                message: error.response?.data?.detail || 'No fue posible limpiar los overrides manuales del Cronograma Valorado.',
+                message: resolveApiErrorMessage(error, 'No fue posible limpiar los overrides manuales del Cronograma Valorado.'),
                 tone: 'danger',
             });
         } finally {
@@ -5372,10 +7071,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 tone: 'success',
             });
         } catch (error) {
-            console.error('Error recalculando flujo de caja:', error);
+            globalThis.reportClientError?.('Error recalculando flujo de caja:', error);
             await appAlert({
                 title: 'No se pudo recalcular Caja',
-                message: error.response?.data?.detail || 'No fue posible actualizar el Flujo de Caja.',
+                message: resolveApiErrorMessage(error, 'No fue posible actualizar el Flujo de Caja.'),
                 tone: 'danger',
             });
         } finally {
@@ -5446,15 +7145,15 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                     }
                 } catch (rollbackError) {
                     rollbackFailed = true;
-                    console.error('Error revirtiendo propuesta financiera por partidas:', rollbackError);
+                    globalThis.reportClientError?.('Error revirtiendo propuesta financiera por partidas:', rollbackError);
                 }
             }
             setCronograma(previousCronograma);
-            console.error('Error aplicando propuesta financiera por partidas:', error);
+            globalThis.reportClientError?.('Error aplicando propuesta financiera por partidas:', error);
             await appAlert({
                 title: 'No se pudo aplicar',
                 message: [
-                    error.response?.data?.detail || 'No fue posible aplicar la propuesta financiera por partidas.',
+                    resolveApiErrorMessage(error, 'No fue posible aplicar la propuesta financiera por partidas.'),
                     rollbackFailed
                         ? 'Algunas líneas ya guardadas no pudieron revertirse automáticamente. Revisa el Cronograma Valorado y usa Limpiar overrides si es necesario.'
                         : 'Las líneas guardadas antes del fallo se revirtieron al estado anterior.',
@@ -5589,10 +7288,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
             }
         } catch (lineError) {
             setCronograma(previousCronograma);
-            console.error('Error actualizando celda del cronograma:', lineError);
+            globalThis.reportClientError?.('Error actualizando celda del cronograma:', lineError);
             await appAlert({
                 title: 'No se pudo guardar el cambio',
-                message: lineError.response?.data?.detail || lineError.message || 'No fue posible guardar el valor de la celda.',
+                message: resolveApiErrorMessage(lineError, 'No fue posible guardar el valor de la celda.'),
                 tone: 'danger',
             });
         }
@@ -5619,10 +7318,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 globalDistribution: balanceCronogramaDistribution(updated.global_distribution || [], { decimals: 2 }),
             });
         } catch (lineError) {
-            console.error('Error restaurando línea del cronograma:', lineError);
+            globalThis.reportClientError?.('Error restaurando línea del cronograma:', lineError);
             await appAlert({
                 title: 'No se pudo restaurar la línea',
-                message: lineError.response?.data?.detail || 'No fue posible quitar el ajuste manual de la línea.',
+                message: resolveApiErrorMessage(lineError, 'No fue posible quitar el ajuste manual de la línea.'),
                 tone: 'danger',
             });
         } finally {
@@ -5799,10 +7498,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 try {
                     await syncValoradoFromGanttSilently({ silent: true, source: 'gantt_line_save' });
                 } catch (syncError) {
-                    console.error('Error sincronizando cronograma valorado tras guardar Gantt:', syncError);
+                    globalThis.reportClientError?.('Error sincronizando cronograma valorado tras guardar Gantt:', syncError);
                     await appAlert({
                         title: 'Gantt guardado con sincronización pendiente',
-                        message: `${syncError?.response?.data?.detail || syncError?.message || 'La línea se guardó correctamente en el Gantt, pero no fue posible actualizar automáticamente el Cronograma Valorado derivado.'} Puedes reintentar desde "Recalcular desde Gantt".`,
+                        message: `${resolveApiErrorMessage(syncError, 'La línea se guardó correctamente en el Gantt, pero no fue posible actualizar automáticamente el Cronograma Valorado derivado.')} Puedes reintentar desde "Recalcular desde Gantt".`,
                         tone: 'warning',
                     });
                 }
@@ -5812,7 +7511,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
             error.__cronogramaHandled = true;
             await appAlert({
                 title: 'No se pudo guardar la secuencia',
-                message: error.response?.data?.detail || error.message || 'No fue posible guardar la línea del Gantt.',
+                message: resolveApiErrorMessage(error, 'No fue posible guardar la línea del Gantt.'),
                 tone: 'danger',
             });
             throw error;
@@ -5852,10 +7551,10 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 try {
                     await syncValoradoFromGanttSilently({ silent: true, source: 'gantt_drag_batch_save' });
                 } catch (syncError) {
-                    console.error('Error sincronizando cronograma valorado tras persistir lote Gantt:', syncError);
+                    globalThis.reportClientError?.('Error sincronizando cronograma valorado tras persistir lote Gantt:', syncError);
                     await appAlert({
                         title: 'Gantt guardado con sincronización pendiente',
-                        message: `${syncError?.response?.data?.detail || syncError?.message || 'El movimiento quedó guardado correctamente en el Gantt, pero no fue posible actualizar automáticamente el Cronograma Valorado derivado.'} Puedes reintentar desde "Recalcular desde Gantt".`,
+                        message: `${resolveApiErrorMessage(syncError, 'El movimiento quedó guardado correctamente en el Gantt, pero no fue posible actualizar automáticamente el Cronograma Valorado derivado.')} Puedes reintentar desde "Recalcular desde Gantt".`,
                         tone: 'warning',
                     });
                 }
@@ -5865,7 +7564,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
             error.__cronogramaHandled = true;
             await appAlert({
                 title: 'No se pudo guardar el movimiento',
-                message: error.response?.data?.detail || error.message || 'No fue posible persistir los cambios del Gantt.',
+                message: resolveApiErrorMessage(error, 'No fue posible persistir los cambios del Gantt.'),
                 tone: 'danger',
             });
             throw error;
@@ -5874,7 +7573,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
         }
     };
 
-    const handleOpenCronogramaValoradoReport = useCallback(async (variantOverride = null) => {
+    const handleOpenCronogramaValoradoReport = useCallback(async (variantOverride = null, filtersOverride = null) => {
         if (!resolvedBudgetId) {
             await appAlert({
                 title: 'Reporte no disponible',
@@ -5885,17 +7584,21 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
         }
         try {
             setLoadingReportPreview(true);
-            const response = await reportingApi.previewReport({
+            const previewPayload = {
                 report_type: 'cronograma_valorado',
                 entity_ids: [Number(resolvedBudgetId)],
                 template_id: '001',
                 variant: variantOverride || resolveCronogramaReportVariant(),
                 empresa_id: empId,
-            }, empId);
+            };
+            if (filtersOverride) {
+                previewPayload.filters = filtersOverride;
+            }
+            const response = await reportingApi.previewReport(previewPayload, empId);
             setReportPreview(response.data);
             setShowReportPreview(true);
         } catch (error) {
-            console.error('Error generando reporte de cronograma valorado:', error);
+            globalThis.reportClientError?.('Error generando reporte de cronograma valorado:', error);
             setReportPreview(null);
             setShowReportPreview(false);
             await appAlert({
@@ -5907,6 +7610,24 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
             setLoadingReportPreview(false);
         }
     }, [empId, resolveCronogramaReportVariant, resolvedBudgetId]);
+
+    const handleSubmitResourceRangeReport = useCallback(async () => {
+        const dateStart = resourceRangeDraft.date_start || resolveResourceReportDefaultRange().date_start;
+        const dateEnd = resourceRangeDraft.date_end || resolveResourceReportDefaultRange().date_end;
+        if (dateStart && dateEnd && parseDate(dateStart) > parseDate(dateEnd)) {
+            await appAlert({
+                title: 'Rango no válido',
+                message: 'La fecha de inicio no puede ser posterior a la fecha final.',
+                tone: 'warning',
+            });
+            return;
+        }
+        setResourceRangeModalOpen(false);
+        await handleOpenCronogramaValoradoReport('resources_range', {
+            date_start: dateStart,
+            date_end: dateEnd,
+        });
+    }, [handleOpenCronogramaValoradoReport, resolveResourceReportDefaultRange, resourceRangeDraft.date_end, resourceRangeDraft.date_start]);
 
     const handleOpenParetoTemporalReport = useCallback(async () => {
         if (!resolvedBudgetId) {
@@ -5929,7 +7650,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
             setReportPreview(response.data);
             setShowReportPreview(true);
         } catch (error) {
-            console.error('Error generando reporte de Pareto temporal:', error);
+            globalThis.reportClientError?.('Error generando reporte de Pareto temporal:', error);
             setReportPreview(null);
             setShowReportPreview(false);
             await appAlert({
@@ -5952,6 +7673,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 template_id: reportPreview?.template_id || '001',
                 format,
                 variant: reportPreview?.variant || resolveCronogramaReportVariant(),
+                filters: reportPreview?.filters || undefined,
                 empresa_id: empId,
             }, empId);
             const exportVariant = reportPreview?.variant || resolveCronogramaReportVariant();
@@ -5961,7 +7683,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 format === 'xlsx' ? undefined : 'application/pdf'
             );
         } catch (error) {
-            console.error('Error exportando cronograma valorado:', error);
+            globalThis.reportClientError?.('Error exportando cronograma valorado:', error);
             await appAlert({
                 title: 'Error de reporte',
                 message: await extractBlobErrorMessage(error, 'No fue posible exportar el reporte de cronograma valorado.'),
@@ -5970,7 +7692,45 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
         } finally {
             setGeneratingReport(false);
         }
-    }, [buildCronogramaValoradoReportFilename, empId, reportPreview?.template_id, reportPreview?.variant, resolveCronogramaReportVariant, resolvedBudgetId]);
+    }, [buildCronogramaValoradoReportFilename, empId, reportPreview?.filters, reportPreview?.template_id, reportPreview?.variant, resolveCronogramaReportVariant, resolvedBudgetId]);
+
+    const handleScheduleTabChange = useCallback(async (nextTab) => {
+        const normalizedNextTab = String(nextTab || '').trim();
+        if (!normalizedNextTab || normalizedNextTab === scheduleTab) return;
+
+        if (scheduleTab === 'gantt' && normalizedNextTab !== 'gantt' && ganttDirtyState.hasChanges) {
+            const confirmed = await appConfirm({
+                title: 'Cambios de Gantt sin guardar',
+                message: `Hay ${ganttDirtyState.pendingRows || 0} tarea(s) con cambios pendientes en el Gantt. Si cambias de sección ahora, esos cambios locales se perderán. ¿Desea salir igualmente?`,
+                confirmLabel: 'Salir sin guardar',
+                tone: 'warning',
+            });
+            if (!confirmed) return;
+            setGanttDirtyState({
+                hasChanges: false,
+                pendingRows: 0,
+                pendingPersistedRows: 0,
+                pendingDraftRows: 0,
+            });
+        }
+
+        if (scheduleTab === 'recursos' && normalizedNextTab !== 'recursos' && cronogramaRecursosStateDirty) {
+            const shouldSave = await appConfirm({
+                title: 'Cambios sin guardar en Recursos',
+                message: '¿Deseas guardar los límites de capacidad modificados antes de salir de la sección?',
+                confirmLabel: 'Guardar y salir',
+                cancelLabel: 'Descartar y salir',
+                tone: 'warning',
+            });
+            if (shouldSave) {
+                await handleSaveCronogramaRecursosState();
+            } else {
+                handleResetCronogramaRecursosStateDraft();
+            }
+        }
+
+        setScheduleTab(normalizedNextTab);
+    }, [ganttDirtyState.hasChanges, ganttDirtyState.pendingRows, scheduleTab, cronogramaRecursosStateDirty, handleSaveCronogramaRecursosState, handleResetCronogramaRecursosStateDraft]);
 
     const handleExportTrabajoMsProject = async (format = 'xml') => {
         if (!resolvedBudgetId) return;
@@ -5994,7 +7754,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 tone: 'success',
             });
         } catch (error) {
-            console.error('Error exportando cronograma Gantt a Microsoft Project:', error);
+            globalThis.reportClientError?.('Error exportando cronograma Gantt a Microsoft Project:', error);
             await appAlert({
                 title: 'No se pudo exportar',
                 message: await extractBlobErrorMessage(error, 'No fue posible generar el archivo de Microsoft Project.'),
@@ -6092,6 +7852,16 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                                         Reporte integrado
                                     </ProjectReportMenuItem>
                                     <ProjectReportMenuItem
+                                        onClick={async () => {
+                                            setGanttReportMenuOpen(false);
+                                            await handleOpenCronogramaValoradoReport('resources');
+                                        }}
+                                        disabled={loadingReportPreview || generatingReport}
+                                        icon={FileText}
+                                    >
+                                        Uso de Recursos
+                                    </ProjectReportMenuItem>
+                                    <ProjectReportMenuItem
                                         onClick={() => {
                                             setGanttReportMenuOpen(false);
                                             setClassicPrintTarget('gantt');
@@ -6115,7 +7885,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                                 </ProjectReportMenu>
                             ) : null}
                         </div>
-                    ) : (
+                    ) : scheduleTab === 'valorado' ? (
                         <div ref={valoradoReportMenuRef} className="relative">
                             <ProjectSectionReportButton
                                 sectionLabel={resolveCronogramaReportLabel()}
@@ -6159,6 +7929,16 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                                         Reporte integrado
                                     </ProjectReportMenuItem>
                                     <ProjectReportMenuItem
+                                        onClick={async () => {
+                                            setValoradoReportMenuOpen(false);
+                                            await handleOpenCronogramaValoradoReport('resources');
+                                        }}
+                                        disabled={loadingReportPreview || generatingReport}
+                                        icon={FileText}
+                                    >
+                                        Uso de Recursos
+                                    </ProjectReportMenuItem>
+                                    <ProjectReportMenuItem
                                         onClick={() => {
                                             setValoradoReportMenuOpen(false);
                                             setClassicPrintTarget('curve');
@@ -6172,9 +7952,114 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                                 </ProjectReportMenu>
                             ) : null}
                         </div>
-                    )}
+                    ) : scheduleTab === 'recursos' ? (
+                        <div ref={recursosReportMenuRef} className="relative">
+                            <ProjectSectionReportButton
+                                sectionLabel="Uso de Recursos"
+                                title="Reportes de Recursos"
+                                onClick={() => {
+                                    setGanttReportMenuOpen(false);
+                                    setValoradoReportMenuOpen(false);
+                                    setRecursosReportMenuOpen((current) => !current);
+                                }}
+                                disabled={!resolvedBudgetId || loadingReportPreview || generatingReport || cronogramaRecursosLoading}
+                                className={recursosReportMenuOpen ? PROJECT_REPORT_BUTTON_ACTIVE_CLASS : ''}
+                            />
+                            {recursosReportMenuOpen ? (
+                                <ProjectReportMenu widthClassName="w-[18rem]">
+                                    <ProjectReportMenuItem
+                                        onClick={async () => {
+                                            setRecursosReportMenuOpen(false);
+                                            await handleOpenCronogramaValoradoReport('resources');
+                                        }}
+                                        disabled={loadingReportPreview || generatingReport}
+                                        icon={FileText}
+                                    >
+                                        Uso de Recursos completo
+                                    </ProjectReportMenuItem>
+                                    <ProjectReportMenuItem
+                                        onClick={() => {
+                                            setRecursosReportMenuOpen(false);
+                                            openResourceRangeReportModal();
+                                        }}
+                                        disabled={loadingReportPreview || generatingReport}
+                                        icon={CalendarRange}
+                                        accent="blue"
+                                    >
+                                        Uso de Recursos por rango
+                                    </ProjectReportMenuItem>
+                                </ProjectReportMenu>
+                            ) : null}
+                        </div>
+                    ) : null}
                 </div>
             </div>
+            {scheduleTab === 'gantt' && (ganttDraftPendingCount > 0 || ganttDraftInvalidatedCount > 0 || ganttDraftAdjustmentRequiredCount > 0 || ganttDraftError || ganttEditLockError || ganttLockReleaseRequested) ? (
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                    {ganttDraftPendingCount > 0 ? (
+                        <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-sky-700">
+                            Borrador Gantt: {ganttDraftPendingCount} pendiente(s)
+                        </span>
+                    ) : null}
+                    {ganttDraftInvalidatedCount > 0 ? (
+                        <>
+                            <button
+                                type="button"
+                                onClick={() => void handlePrepareInvalidatedGanttDraftAdjustment()}
+                                disabled={trabajoSaving}
+                                className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 disabled:pointer-events-none disabled:opacity-60"
+                                title="Preparar reajuste desde la base vigente"
+                            >
+                                {ganttDraftInvalidatedCount} invalidada(s) · reajustar
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => void handleDiscardInvalidatedGanttDraft()}
+                                disabled={trabajoSaving}
+                                className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-amber-700 transition hover:border-amber-300 hover:bg-amber-100 disabled:pointer-events-none disabled:opacity-60"
+                                title="Descartar lineas invalidadas del borrador Gantt"
+                            >
+                                {ganttDraftInvalidatedCount} invalidada(s) · descartar
+                            </button>
+                        </>
+                    ) : null}
+                    {ganttDraftAdjustmentRequiredCount > 0 ? (
+                        <span
+                            className="inline-flex items-center rounded-full border border-sky-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-sky-700"
+                            title="Reabre esas lineas en el editor light y acepta para recalcularlas desde la base vigente"
+                        >
+                            {ganttDraftAdjustmentRequiredCount} por reajustar · abrir editor
+                        </span>
+                    ) : null}
+                    {ganttDraftError ? (
+                        <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">
+                            {ganttDraftError}
+                        </span>
+                    ) : null}
+                    {ganttEditLockError ? (
+                        <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">
+                            {ganttEditLockError}
+                        </span>
+                    ) : null}
+                    {ganttLockReleaseRequested ? (
+                        ganttLockOwnedByCurrentUser ? (
+                            <button
+                                type="button"
+                                onClick={() => void handleReleaseGanttEditLock()}
+                                disabled={ganttEditLockLoading}
+                                className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 disabled:pointer-events-none disabled:opacity-60"
+                                title="Liberar el Gantt para otro usuario"
+                            >
+                                Solicitud de cierre: {ganttEditLock?.requested_release_by_name || 'otro usuario'} · liberar
+                            </button>
+                        ) : (
+                            <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-sky-700">
+                                Solicitud de cierre enviada
+                            </span>
+                        )
+                    ) : null}
+                </div>
+            ) : null}
             {scheduleTab === 'gantt' ? (
                 ganttBootstrapping ? (
                     <div className="flex h-full min-h-[440px] items-center justify-center rounded-[1.4rem] border border-zinc-200 bg-white">
@@ -6213,6 +8098,12 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                             trabajoError={cronogramaTrabajoError}
                             trabajoLoading={cronogramaTrabajoLoading}
                             trabajoSaving={trabajoSaving}
+                            ganttDraft={ganttDraft}
+                            ganttDraftLoading={ganttDraftLoading}
+                            ganttDraftError={ganttDraftError}
+                            ganttEditLock={ganttEditLock}
+                            ganttEditLockLoading={ganttEditLockLoading}
+                            ganttEditLockError={ganttEditLockError}
                             selectedBudget={selectedBudget}
                             selectedBudgetDetail={selectedBudgetDetail}
                             valorado={cronograma}
@@ -6225,6 +8116,14 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                             onRemoveTrabajoHolidayDay={handleRemoveTrabajoHolidayDay}
                             onSaveTrabajoLine={handleSaveTrabajoLine}
                             onSaveTrabajoDraftBatch={handleSaveTrabajoDraftBatch}
+                            onLoadTrabajoLineMetadata={handleLoadTrabajoLineMetadata}
+                            onSaveGanttDraftIntention={handleSaveGanttDraftIntention}
+                            onPreflightGanttDraftApply={handlePreflightGanttDraftApply}
+                            onMarkGanttDraftApplied={handleApplyGanttDraft}
+                            onAcquireGanttEditLock={handleAcquireGanttEditLock}
+                            onRequestGanttLockRelease={handleRequestGanttLockRelease}
+                            onHeartbeatGanttEditLock={handleHeartbeatGanttEditLock}
+                            onReleaseGanttEditLock={handleReleaseGanttEditLock}
                             onReloadFromBudget={handleReloadCronogramaSources}
                             onPreviewReloadFromBudget={previewReloadCronogramaSources}
                             onSyncValoradoFromGantt={syncValoradoFromGanttSilently}
@@ -6239,6 +8138,31 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                         />
                     </React.Suspense>
                 )
+            ) : scheduleTab === 'recursos' ? (
+                <CronogramaRecursosReadOnly
+                    recursos={cronogramaRecursos}
+                    recursosState={cronogramaRecursosState}
+                    recursosStateDraft={cronogramaRecursosStateDraft}
+                    recursosStateDirty={cronogramaRecursosStateDirty}
+                    recursosStateSaving={cronogramaRecursosStateSaving}
+                    stateError={cronogramaRecursosStateError}
+                    loading={cronogramaRecursosLoading}
+                    error={cronogramaRecursosError}
+                    currency={cronograma?.moneda || 'USD'}
+                    decMoneda={cronograma?.dec_moneda ?? 2}
+                    decCalculos={cronograma?.dec_calculos ?? 4}
+                    onRefresh={handleRefreshCronogramaRecursos}
+                    onLimitChange={handleCronogramaRecursosLimitChange}
+                    onSaveState={handleSaveCronogramaRecursosState}
+                    onResetStateDraft={handleResetCronogramaRecursosStateDraft}
+                    onPersistLevelingProposal={handlePersistCronogramaRecursosLevelingProposal}
+                    onApproveLevelingProposal={handleApproveCronogramaRecursosLevelingProposal}
+                    onRequestLevelingApplication={handleRequestCronogramaRecursosLevelingApplication}
+                    onCancelLevelingApplication={handleCancelCronogramaRecursosLevelingApplication}
+                    onApplyLevelingApplication={handleApplyCronogramaRecursosLevelingApplication}
+                    onRollbackLevelingApplication={handleRollbackCronogramaRecursosLevelingApplication}
+                    onClearLevelingProposal={handleClearCronogramaRecursosLevelingProposal}
+                />
             ) : (
                 <div className="flex min-h-0 flex-1 flex-col gap-3">
                     {cronogramaValoradoError ? (
@@ -6280,6 +8204,58 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                 </div>
             )}
             </div>
+            <AppModalShell
+                isOpen={resourceRangeModalOpen}
+                onClose={() => setResourceRangeModalOpen(false)}
+                size="md"
+                zIndex="z-[410]"
+            >
+                <AppModalHeader
+                    title="Uso de Recursos por Rango"
+                    subtitle="Reporte de recursos necesarios entre dos fechas"
+                    icon={CalendarRange}
+                    onClose={() => setResourceRangeModalOpen(false)}
+                />
+                <AppModalBody className="space-y-5 bg-[#f7f7f5]">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <label className="space-y-2">
+                            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Fecha inicio</span>
+                            <AnimatedDateInput
+                                type="date"
+                                value={resourceRangeDraft.date_start}
+                                onChange={(event) => setResourceRangeDraft((current) => ({ ...current, date_start: event.target.value }))}
+                                className="w-full rounded-[0.9rem] border border-zinc-200 bg-white px-3 py-2.5 text-sm font-bold text-zinc-800 outline-none focus:border-[#F39200]"
+                            />
+                        </label>
+                        <label className="space-y-2">
+                            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Fecha final</span>
+                            <AnimatedDateInput
+                                type="date"
+                                value={resourceRangeDraft.date_end}
+                                onChange={(event) => setResourceRangeDraft((current) => ({ ...current, date_end: event.target.value }))}
+                                className="w-full rounded-[0.9rem] border border-zinc-200 bg-white px-3 py-2.5 text-sm font-bold text-zinc-800 outline-none focus:border-[#F39200]"
+                            />
+                        </label>
+                    </div>
+                </AppModalBody>
+                <AppModalFooter variant="flat" className="justify-end gap-2 bg-[#f7f7f5]">
+                    <button
+                        type="button"
+                        onClick={() => setResourceRangeModalOpen(false)}
+                        className="rounded-[0.85rem] border border-zinc-200 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-zinc-600 transition hover:text-zinc-900"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleSubmitResourceRangeReport}
+                        disabled={loadingReportPreview || generatingReport}
+                        className="rounded-[0.85rem] bg-[#136191] px-4 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-sm transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-60"
+                    >
+                        Generar
+                    </button>
+                </AppModalFooter>
+            </AppModalShell>
             <CommonReportPreviewModal
                 isOpen={showReportPreview}
                 onClose={() => setShowReportPreview(false)}

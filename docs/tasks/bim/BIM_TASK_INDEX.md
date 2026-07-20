@@ -250,6 +250,7 @@ iniciada.
 | `BIM-TASK-0169` | Cerrada localmente: matriz operacional de alertas BIM y escalamiento |
 | `BIM-TASK-0170` | Cerrada localmente: ensayo DR checksum-exacto del dominio BIM |
 | `BIM-TASK-0171` | Cerrada localmente: servicios cartograficos XYZ/WMS BIM |
+| `BIM-TASK-0172` | Cerrada localmente: paquetes gobernados de avance y horas BIM para ERP |
 
 ## Orden de ejecucion
 

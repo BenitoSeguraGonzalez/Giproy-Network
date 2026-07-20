@@ -129,8 +129,10 @@ from app.schemas.bim_cde_acl import BimCdeDocumentAclResponse, BimCdeDocumentAcl
 from app.services.bim.cde_acl_service import list_document_acl, save_document_acl
 from app.schemas.bim_site_georeference import BimSiteGeoreferenceResponse, BimSiteGeoreferenceSave
 from app.schemas.bim_map_catalog import BimMapCatalogResponse, BimMapCatalogSave
+from app.schemas.bim_erp_exchange import BimErpExchangeContent, BimErpExchangeCreate, BimErpExchangeResponse, BimErpExchangeTransition
 from app.services.bim.site_georeference_service import get_active_site_georeference, save_site_georeference
 from app.services.bim.map_catalog_service import get_active_map_catalog, save_map_catalog
+from app.services.bim.erp_exchange_service import create_erp_exchange_package, get_published_erp_exchange_content, list_erp_exchange_packages, transition_erp_exchange_package
 from app.schemas.bim_cde_review import (
     BimCdeReviewCommentCreate,
     BimCdeReviewCreate,
@@ -471,6 +473,34 @@ def save_project_bim_map_catalog(
         user_id=current_user.id,
         payload=payload,
     )
+
+
+@router.get("/projects/{project_id}/erp-exchange/packages", response_model=list[BimErpExchangeResponse])
+def list_project_bim_erp_exchange_packages(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.view")
+    return list_erp_exchange_packages(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/erp-exchange/packages", response_model=BimErpExchangeResponse, status_code=status.HTTP_201_CREATED)
+def create_project_bim_erp_exchange_package(project_id: int, payload: BimErpExchangeCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.coordinate")
+    return create_erp_exchange_package(db, project=project, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.post("/projects/{project_id}/erp-exchange/packages/{package_id}/transition", response_model=BimErpExchangeResponse)
+def transition_project_bim_erp_exchange_package(project_id: int, package_id: int, payload: BimErpExchangeTransition, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.coordinate")
+    return transition_erp_exchange_package(db, package_id=package_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+
+
+@router.get("/projects/{project_id}/erp-exchange/packages/{package_id}/content", response_model=BimErpExchangeContent)
+def get_project_bim_erp_exchange_content(project_id: int, package_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.view")
+    return get_published_erp_exchange_content(db, package_id=package_id, project_id=project.id, company_id=project.empresa_id)
 
 
 @router.get("/projects/{project_id}/cde/reviews", response_model=list[BimCdeReviewResponse])

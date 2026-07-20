@@ -306,6 +306,24 @@ assert.match(
     'CronogramaGantt debe ignorar sincronizaciones tardias despues de cancelar el editor light',
 );
 
+assert.match(
+    ganttSource,
+    /const \[resourceEditorSessionVersion, setResourceEditorSessionVersion\] = useState\(0\);[\s\S]*?setResourceEditorSessionVersion\(\(current\) => current \+ 1\);[\s\S]*?<GanttResourceEditorModal[\s\S]*?key=\{`\$\{resourceEditorRowId \|\| 'closed'\}:\$\{resourceEditorSessionVersion\}`\}/s,
+    'CronogramaGantt debe crear una instancia local limpia del editor light en cada apertura',
+);
+
+assert.match(
+    ganttSource,
+    /const \[resourceEditorResetVersion, setResourceEditorResetVersion\] = useState\(0\);[\s\S]*?handleResetResourceEditorDraft[\s\S]*?setResourceEditorResetVersion\(\(current\) => current \+ 1\);[\s\S]*?resetVersion=\{resourceEditorResetVersion\}/s,
+    'CronogramaGantt debe notificar explicitamente al modal cuando restaura los datos iniciales',
+);
+
+assert.match(
+    ganttSource,
+    /lastResourceEditorResetVersionRef\.current !== resetVersion[\s\S]*?activeResourceInputRef\.current = null;[\s\S]*?cancelledResourceInputRef\.current = null;[\s\S]*?resetVersion, visibleResourceLines/s,
+    'El editor light debe invalidar el input activo y reconstruir su tabla local al restaurar',
+);
+
 assert.equal(
     ganttSource.includes("const typeLabel = line?.recurso ? 'Recurso' : (line?.apu_hijo ? 'APU hijo' : 'Insumo');"),
     true,

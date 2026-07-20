@@ -1844,6 +1844,7 @@ const GanttResourceEditorModal = ({
     valorado,
     config,
     saving = false,
+    resetVersion = 0,
     onCancel,
     onReset,
     onAccept,
@@ -1862,6 +1863,7 @@ const GanttResourceEditorModal = ({
     const [resourceContributionModal, setResourceContributionModal] = useState(null);
     const activeResourceInputRef = useRef(null);
     const cancelledResourceInputRef = useRef(null);
+    const lastResourceEditorResetVersionRef = useRef(resetVersion);
     const shouldSkipCancelledResourceInput = (inputKey) => cancelledResourceInputRef.current === inputKey;
     const [governancePickerOpen, setGovernancePickerOpen] = useState(false);
     const [subcontractDurationInput, setSubcontractDurationInput] = useState('');
@@ -2127,6 +2129,11 @@ const GanttResourceEditorModal = ({
 
     useEffect(() => {
         if (!open) return;
+        if (lastResourceEditorResetVersionRef.current !== resetVersion) {
+            activeResourceInputRef.current = null;
+            cancelledResourceInputRef.current = null;
+            lastResourceEditorResetVersionRef.current = resetVersion;
+        }
         const nextDrafts = {};
         const nextInputValues = {};
         const nextQuantityDrafts = {};
@@ -2161,7 +2168,7 @@ const GanttResourceEditorModal = ({
         setResourceQuantityDrafts(nextQuantityDrafts);
         setResourceSourceLineDrafts(nextSourceLineDrafts);
         setResourceWorkPolicies(nextWorkPolicies);
-    }, [open, persistedApuWorkPolicy, persistedResourceDrafts, persistedResourceQuantityDrafts, persistedResourceSourceLineDrafts, visibleResourceLines]);
+    }, [open, persistedApuWorkPolicy, persistedResourceDrafts, persistedResourceQuantityDrafts, persistedResourceSourceLineDrafts, resetVersion, visibleResourceLines]);
 
     const activeResourceLines = useMemo(() => (
         visibleResourceLines.map((item) => {
@@ -8876,6 +8883,8 @@ const CronogramaGantt = ({
     const [hoveredDependencyKey, setHoveredDependencyKey] = useState(null);
     const [selectedDependencyEditorStyle, setSelectedDependencyEditorStyle] = useState(null);
     const [resourceEditorRowId, setResourceEditorRowId] = useState(null);
+    const [resourceEditorSessionVersion, setResourceEditorSessionVersion] = useState(0);
+    const [resourceEditorResetVersion, setResourceEditorResetVersion] = useState(0);
     const resourceEditorSessionRef = useRef({ active: false, lineId: null });
     const resourceEditorDraftSnapshotRef = useRef({ lineId: null, draft: null });
     const [editingStartRowId, setEditingStartRowId] = useState(null);
@@ -9985,6 +9994,7 @@ const CronogramaGantt = ({
             draft: drafts[lineId] ? JSON.parse(JSON.stringify(drafts[lineId])) : null,
         };
         resourceEditorSessionRef.current = { active: true, lineId };
+        setResourceEditorSessionVersion((current) => current + 1);
         setResourceEditorRowId(lineId);
     }, [drafts, ensureTrabajoLineFullMetadata, onAcquireGanttEditLock, onRequestGanttLockRelease]);
 
@@ -13865,6 +13875,7 @@ const CronogramaGantt = ({
             }
             return updatedDrafts;
         });
+        setResourceEditorResetVersion((current) => current + 1);
     };
 
     const onSaveGanttDraftIntention = useCallback((payload = {}) => payload, []);
@@ -16712,6 +16723,23 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         setSelectedSubbarKeys([]);
     }, []);
 
+    const openApuPlanningSignalsForRow = useCallback((row, event) => {
+        const lineId = String(row?.budget_line_id ?? row?.linea_id ?? '').trim();
+        if (!lineId || !row?.is_calculable || !row?.apu_id) return;
+        apuPlanningSignalsButtonRef.current = event?.currentTarget || apuPlanningSignalsButtonRef.current;
+        handleSelectTaskRow(lineId);
+        openApuPlanningSignals();
+    }, [handleSelectTaskRow, openApuPlanningSignals]);
+
+    const toggleApuPlanningSignalsForRow = useCallback((row, event) => {
+        event?.stopPropagation?.();
+        const lineId = String(row?.budget_line_id ?? row?.linea_id ?? '').trim();
+        if (!lineId || !row?.is_calculable || !row?.apu_id) return;
+        apuPlanningSignalsButtonRef.current = event?.currentTarget || apuPlanningSignalsButtonRef.current;
+        handleSelectTaskRow(lineId);
+        toggleApuPlanningSignalsPinned();
+    }, [handleSelectTaskRow, toggleApuPlanningSignalsPinned]);
+
     const handleToggleTaskContext = useCallback((lineId, subbarId = null) => {
         const normalizedId = String(lineId);
         setSelectedTaskId(normalizedId);
@@ -18940,10 +18968,19 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                         <ControlRailIconButton
                                             ref={apuPlanningSignalsButtonRef}
                                             data-testid="gantt-apu-planning-signals-button"
-                                            onClick={toggleApuPlanningSignalsPinned}
-                                            onPointerEnter={openApuPlanningSignals}
+                                            onClick={(event) => {
+                                                apuPlanningSignalsButtonRef.current = event.currentTarget;
+                                                toggleApuPlanningSignalsPinned();
+                                            }}
+                                            onPointerEnter={(event) => {
+                                                apuPlanningSignalsButtonRef.current = event.currentTarget;
+                                                openApuPlanningSignals();
+                                            }}
                                             onPointerLeave={scheduleCloseApuPlanningSignals}
-                                            onFocus={openApuPlanningSignals}
+                                            onFocus={(event) => {
+                                                apuPlanningSignalsButtonRef.current = event.currentTarget;
+                                                openApuPlanningSignals();
+                                            }}
                                             onBlur={scheduleCloseApuPlanningSignals}
                                             active={apuPlanningSignalsPinned}
                                             tooltip={suppressTopRailTooltips ? '' : (
@@ -20010,7 +20047,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                             void openResourceGovernanceEditor(row);
                                                         }
                                                     } : undefined}
-                                                    className={`truncate pr-7 text-[11px] tracking-tight ${row.is_calculable ? (isSubcontracted ? (isPendingSubcontract ? 'font-medium text-[#136191]' : 'font-medium text-zinc-800') : 'cursor-pointer font-medium text-zinc-800 hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20') : isManualMilestone ? 'font-semibold text-[#136191]' : 'font-semibold text-blue-900 uppercase'}`}
+                                                    className={`truncate pr-12 text-[11px] tracking-tight ${row.is_calculable ? (isSubcontracted ? (isPendingSubcontract ? 'font-medium text-[#136191]' : 'font-medium text-zinc-800') : 'cursor-pointer font-medium text-zinc-800 hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20') : isManualMilestone ? 'font-semibold text-[#136191]' : 'font-semibold text-blue-900 uppercase'}`}
                                                     title={row.is_calculable ? (isSubcontracted ? 'Partida subcontratada. La duración contractual se define manualmente desde el Gantt.' : 'Editar duración desde recursos y rendimientos') : undefined}
                                                 >
                                                     {isManualMilestone ? (
@@ -20069,14 +20106,31 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 </div>
                                             ) : null}
                                             {row.is_calculable && !isSubcontracted ? (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => void openResourceGovernanceEditor(row)}
-                                                    className="absolute right-0 top-0 inline-flex h-5 w-5 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-500 opacity-0 shadow-sm transition duration-150 hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20 group-hover:opacity-100"
-                                                    title="Editar duración desde recursos y rendimientos"
-                                                >
-                                                    <Settings className="h-2.5 w-2.5" />
-                                                </button>
+                                                <div className="absolute right-0 top-0 flex items-center gap-1 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(event) => toggleApuPlanningSignalsForRow(row, event)}
+                                                        onPointerEnter={(event) => openApuPlanningSignalsForRow(row, event)}
+                                                        onPointerLeave={scheduleCloseApuPlanningSignals}
+                                                        onFocus={(event) => openApuPlanningSignalsForRow(row, event)}
+                                                        onBlur={scheduleCloseApuPlanningSignals}
+                                                        className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#136191]/25 bg-white/95 text-[#136191] shadow-sm transition duration-150 hover:border-[#136191]/55 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/20"
+                                                        title="Semáforos de planificación del APU"
+                                                        aria-label="Abrir y fijar semáforos APU de esta actividad"
+                                                        aria-expanded={apuPlanningSignalsOpen && activeTaskLineId === lineId}
+                                                        aria-controls="gantt-apu-planning-signals-panel"
+                                                    >
+                                                        <Gauge className="h-2.5 w-2.5" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => void openResourceGovernanceEditor(row)}
+                                                        className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-500 shadow-sm transition duration-150 hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20"
+                                                        title="Editar duración desde recursos y rendimientos"
+                                                    >
+                                                        <Settings className="h-2.5 w-2.5" />
+                                                    </button>
+                                                </div>
                                             ) : null}
                                             {!row.is_calculable ? null : (
                                                 <div className="relative mt-1 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -22743,21 +22797,38 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                             void openResourceGovernanceEditor(row);
                                                         }
                                                     } : undefined}
-                                                    className={`truncate pr-7 text-[11px] tracking-tight ${row.is_calculable ? (isSubcontracted ? (isPendingSubcontract ? 'font-medium text-amber-800' : 'font-medium text-zinc-800') : 'cursor-pointer font-medium text-zinc-800 hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20') : 'font-semibold text-blue-900 uppercase'}`}
+                                                    className={`truncate pr-12 text-[11px] tracking-tight ${row.is_calculable ? (isSubcontracted ? (isPendingSubcontract ? 'font-medium text-amber-800' : 'font-medium text-zinc-800') : 'cursor-pointer font-medium text-zinc-800 hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20') : 'font-semibold text-blue-900 uppercase'}`}
                                                     title={row.is_calculable ? (isSubcontracted ? 'Partida subcontratada. La duración contractual se define manualmente desde el Gantt.' : 'Editar duración desde recursos y rendimientos') : undefined}
                                                 >
                                                     {formatCronogramaDescripcion(row)}
                                                 </div>
                                             </GanttHeaderTooltip>
                                             {row.is_calculable && !isSubcontracted ? (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => void openResourceGovernanceEditor(row)}
-                                                    className="absolute right-0 top-0 inline-flex h-5 w-5 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-500 opacity-0 shadow-sm transition duration-150 hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20 group-hover:opacity-100"
-                                                    title="Editar duración desde recursos y rendimientos"
-                                                >
-                                                    <Settings className="h-2.5 w-2.5" />
-                                                </button>
+                                                <div className="absolute right-0 top-0 flex items-center gap-1 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(event) => toggleApuPlanningSignalsForRow(row, event)}
+                                                        onPointerEnter={(event) => openApuPlanningSignalsForRow(row, event)}
+                                                        onPointerLeave={scheduleCloseApuPlanningSignals}
+                                                        onFocus={(event) => openApuPlanningSignalsForRow(row, event)}
+                                                        onBlur={scheduleCloseApuPlanningSignals}
+                                                        className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#136191]/25 bg-white/95 text-[#136191] shadow-sm transition duration-150 hover:border-[#136191]/55 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/20"
+                                                        title="Semáforos de planificación del APU"
+                                                        aria-label="Abrir y fijar semáforos APU de esta actividad"
+                                                        aria-expanded={apuPlanningSignalsOpen && activeTaskLineId === lineId}
+                                                        aria-controls="gantt-apu-planning-signals-panel"
+                                                    >
+                                                        <Gauge className="h-2.5 w-2.5" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => void openResourceGovernanceEditor(row)}
+                                                        className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-500 shadow-sm transition duration-150 hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20"
+                                                        title="Editar duración desde recursos y rendimientos"
+                                                    >
+                                                        <Settings className="h-2.5 w-2.5" />
+                                                    </button>
+                                                </div>
                                             ) : null}
                                             {!row.is_calculable ? null : (
                                                 <div className="relative mt-1.5 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -24359,6 +24430,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             ) : null}
             </section>
             <GanttResourceEditorModal
+                key={`${resourceEditorRowId || 'closed'}:${resourceEditorSessionVersion}`}
                 open={Boolean(resourceEditorRow)}
                 row={resourceEditorRow}
                 effectiveRow={resourceEditorEffectiveRow}
@@ -24368,6 +24440,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 valorado={valorado}
                 config={configDraft}
                 saving={savingId === String(resourceEditorRowId)}
+                resetVersion={resourceEditorResetVersion}
                 onCancel={handleCancelResourceEditor}
                 onReset={handleResetResourceEditorDraft}
                 onAccept={handleSaveResourceEditorDraft}

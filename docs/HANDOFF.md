@@ -1,5 +1,32 @@
 # HANDOFF
 
+## 2026-07-20 - Intercambio gobernado BIM hacia ERP
+
+- `BIM-TASK-0172` completa H06 con paquetes versionados de avance y horas BIM
+  para consumo ERP.
+- `de2055a1b2c3` agrega persistencia tenant-aware, checksum y lock optimista;
+  solo paquetes publicados exponen contenido.
+- No se escribe Cronogramas, APUs, personal ni contabilidad clasicos.
+- Paridad: 85,83%. Programa: 46/61, 75,41% realizado y 24,59% pendiente.
+
+## 2026-07-20 - Resincronización del editor light APU Gantt
+
+- `TASK-2029` corrige el estado local retenido al cancelar o restaurar el editor
+  light de APUs en Gantt clásico.
+- Cada apertura monta una sesión limpia y Restaurar fuerza resincronización de
+  rendimientos, cantidades, líneas fuente y política de trabajo.
+- Se conserva el preview vivo y la guarda transaccional de `TASK-1983`.
+- Build, smoke Cronogramas, semáforos APU y anti-BIM pasan. Sin deploy.
+
+## 2026-07-20 - Semáforos APU por actividad en Gantt clásico
+
+- `TASK-2028` agrega junto a la rueda de configuración de cada actividad APU un
+  acceso al mismo panel de semáforos disponible en el rail general.
+- El acceso funciona por hover/foco y clic fijado en ambos layouts del Gantt;
+  reutiliza modelo, portal y estados de TASK-2021.
+- No cambia backend, DB, API, Presupuesto, BIM ni guardas de TASK-1807.
+- Build, smoke focal, frontera API de Cronogramas y anti-BIM pasan. Sin deploy.
+
 ## 2026-07-20 - Servicios cartograficos BIM
 
 - `BIM-TASK-0171` completa H05 con catalogos XYZ/WMS revisados por
