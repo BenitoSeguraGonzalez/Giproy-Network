@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
+from urllib.parse import urlsplit
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse, Response
@@ -130,9 +131,11 @@ from app.services.bim.cde_acl_service import list_document_acl, save_document_ac
 from app.schemas.bim_site_georeference import BimSiteGeoreferenceResponse, BimSiteGeoreferenceSave
 from app.schemas.bim_map_catalog import BimMapCatalogResponse, BimMapCatalogSave
 from app.schemas.bim_erp_exchange import BimErpExchangeContent, BimErpExchangeCreate, BimErpExchangeResponse, BimErpExchangeTransition
+from app.schemas.bim_integration_gateway import BimIntegrationDeliveryResponse, BimIntegrationSubscriptionCreate, BimIntegrationSubscriptionResponse, BimIntegrationSubscriptionTransition
 from app.services.bim.site_georeference_service import get_active_site_georeference, save_site_georeference
 from app.services.bim.map_catalog_service import get_active_map_catalog, save_map_catalog
 from app.services.bim.erp_exchange_service import create_erp_exchange_package, get_published_erp_exchange_content, list_erp_exchange_packages, transition_erp_exchange_package
+from app.services.bim.integration_gateway_service import create_integration_subscription, dispatch_due_integration_deliveries, dispatch_integration_delivery, list_integration_deliveries, list_integration_subscriptions, transition_integration_subscription
 from app.schemas.bim_cde_review import (
     BimCdeReviewCommentCreate,
     BimCdeReviewCreate,
@@ -490,10 +493,13 @@ def create_project_bim_erp_exchange_package(project_id: int, payload: BimErpExch
 
 
 @router.post("/projects/{project_id}/erp-exchange/packages/{package_id}/transition", response_model=BimErpExchangeResponse)
-def transition_project_bim_erp_exchange_package(project_id: int, package_id: int, payload: BimErpExchangeTransition, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+def transition_project_bim_erp_exchange_package(project_id: int, package_id: int, payload: BimErpExchangeTransition, background_tasks: BackgroundTasks, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id)
     _require_bim_access(db, project, current_user, "bim.coordinate")
-    return transition_erp_exchange_package(db, package_id=package_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+    result = transition_erp_exchange_package(db, package_id=package_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+    if payload.action == "publish":
+        background_tasks.add_task(dispatch_due_integration_deliveries, project_id=project.id, company_id=project.empresa_id)
+    return result
 
 
 @router.get("/projects/{project_id}/erp-exchange/packages/{package_id}/content", response_model=BimErpExchangeContent)
@@ -501,6 +507,45 @@ def get_project_bim_erp_exchange_content(project_id: int, package_id: int, empre
     project = _resolve_project(db, project_id, current_user, empresa_id)
     _require_bim_access(db, project, current_user, "bim.view")
     return get_published_erp_exchange_content(db, package_id=package_id, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.get("/projects/{project_id}/integration/subscriptions", response_model=list[BimIntegrationSubscriptionResponse])
+def list_project_bim_integration_subscriptions(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.view")
+    return list_integration_subscriptions(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/integration/subscriptions", response_model=BimIntegrationSubscriptionResponse, status_code=status.HTTP_201_CREATED)
+def create_project_bim_integration_subscription(project_id: int, payload: BimIntegrationSubscriptionCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.coordinate")
+    result = create_integration_subscription(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+    record_audit_event(db, module="bim", event_type="bim_integration_subscription_created", message="Suscripcion de integracion BIM creada.", actor=current_user, empresa_id=project.empresa_id, entity_type="bim_integration_subscription", entity_id=result.id, payload={"event_types": result.event_types, "target_host": urlsplit(result.target_url).hostname})
+    return result
+
+
+@router.post("/projects/{project_id}/integration/subscriptions/{subscription_id}/transition", response_model=BimIntegrationSubscriptionResponse)
+def transition_project_bim_integration_subscription(project_id: int, subscription_id: int, payload: BimIntegrationSubscriptionTransition, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.coordinate")
+    result = transition_integration_subscription(db, subscription_id=subscription_id, project_id=project.id, company_id=project.empresa_id, payload=payload)
+    record_audit_event(db, module="bim", event_type="bim_integration_subscription_transitioned", message="Suscripcion de integracion BIM actualizada.", actor=current_user, empresa_id=project.empresa_id, entity_type="bim_integration_subscription", entity_id=result.id, payload={"status": result.status, "reason": payload.reason})
+    return result
+
+
+@router.get("/projects/{project_id}/integration/deliveries", response_model=list[BimIntegrationDeliveryResponse])
+def list_project_bim_integration_deliveries(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.view")
+    return list_integration_deliveries(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/integration/deliveries/{delivery_id}/retry", response_model=BimIntegrationDeliveryResponse)
+def retry_project_bim_integration_delivery(project_id: int, delivery_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.coordinate")
+    return dispatch_integration_delivery(db, delivery_id=delivery_id, project_id=project.id, company_id=project.empresa_id, force=True)
 
 
 @router.get("/projects/{project_id}/cde/reviews", response_model=list[BimCdeReviewResponse])

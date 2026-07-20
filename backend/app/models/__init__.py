@@ -139,6 +139,7 @@ from .bim_cde_acl import BimCdeDocumentAcl
 from .bim_site_georeference import BimSiteGeoreference
 from .bim_map_catalog import BimMapCatalog
 from .bim_erp_exchange import BimErpExchangePackage
+from .bim_integration_gateway import BimIntegrationDelivery, BimIntegrationSubscription
 from .bim_cde_review import BimCdeReview, BimCdeReviewComment, BimCdeReviewNotification
 from .bim_view_state import BimViewState
 from .bim_element import BimElement

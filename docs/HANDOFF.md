@@ -1,5 +1,14 @@
 # HANDOFF
 
+## 2026-07-20 - Gateway de integracion empresarial BIM
+
+- `BIM-TASK-0173` completa B06 con suscripciones HTTPS, secretos cifrados,
+  firmas HMAC-SHA256 y outbox recuperable sobre el paquete ERP H06.
+- `de2056a1b2c3` agrega dos tablas BIM tenant-aware, aditivas y reversibles.
+- Build, PostgreSQL reversible, 6 pruebas focales, 34 smokes BIM, anti-BIM y
+  baseline enterprise pasan. Sin cambios ni dependencias clasicas.
+- Paridad: 87,50%. Programa: 47/61, 77,05% realizado y 22,95% pendiente.
+
 ## 2026-07-20 - Intercambio gobernado BIM hacia ERP
 
 - `BIM-TASK-0172` completa H06 con paquetes versionados de avance y horas BIM

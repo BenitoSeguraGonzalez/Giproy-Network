@@ -1,3 +1,13 @@
+### 2026-07-20 - Gateway de integracion empresarial BIM (BIM-TASK-0173)
+
+- B06 incorpora suscripciones HTTPS con secreto cifrado, firma HMAC-SHA256,
+  bloqueo SSRF y outbox de entrega recuperable para eventos ERP BIM.
+- Produccion agrega la pestaña `Integraciones` para gobierno y reintentos, bajo
+  las puertas BIM existentes y sin tocar GiProy Clasico.
+- 6 tests focales, PostgreSQL reversible, build, 34 smokes BIM, anti-BIM y
+  baseline enterprise pasan.
+- El ensayo DR restaura 83 tablas BIM con checksum exacto y fingerprint clasico
+  intacto.
 ### 2026-07-20 - Intercambio gobernado BIM hacia ERP (BIM-TASK-0172)
 
 - H06 incorpora paquetes versionados y deterministas de avance y horas BIM,

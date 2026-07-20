@@ -29,6 +29,7 @@ import BimPunchClosurePanel from './BimPunchClosurePanel';
 import BimHandoverDossierPanel from './BimHandoverDossierPanel';
 import BimOperationsTransitionPanel from './BimOperationsTransitionPanel';
 import BimErpExchangePanel from './BimErpExchangePanel';
+import BimIntegrationGatewayPanel from './BimIntegrationGatewayPanel';
 import BimCommissioningRegistryPanel from './BimCommissioningRegistryPanel';
 import BimScheduleLinkPanel from './BimScheduleLinkPanel';
 import BimScheduleInterchangePanel from './BimScheduleInterchangePanel';
@@ -678,6 +679,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             production: [
                 { id: 'plan-actual', label: 'Plan vs. real', content: <BimPlanActualPanel projectId={project?.id} empresaId={access?.resolved_company_id} onOpenViewpoint={(viewpoint) => viewpoint && handleOpenIssue({ version_id: viewpoint.source_version_id, viewpoint })} /> },
                 { id: 'erp-exchange', label: 'ERP', content: <BimErpExchangePanel projectId={project?.id} empresaId={access?.resolved_company_id} canManage={canCreateCompanyScope} /> },
+                { id: 'integrations', label: 'Integraciones', content: <BimIntegrationGatewayPanel projectId={project?.id} empresaId={access?.resolved_company_id} canManage={canCreateCompanyScope} /> },
                 { id: 'estimate', label: 'Estimación', content: <BimCostEstimatePanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'contracts', label: 'Contratos', content: <BimCostContractsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
                 { id: 'payments', label: 'Pagos', content: <BimCostPaymentsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },

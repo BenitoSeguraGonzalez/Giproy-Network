@@ -69,6 +69,26 @@ export const bimModelsApi = {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/erp-exchange/packages/${packageId}/content`, withTenantConfig({}, empresaId));
         return response.data;
     },
+    listIntegrationSubscriptions: async (projectId, empresaId = null) => {
+        const response = await axiosInstance.get(`/bim/projects/${projectId}/integration/subscriptions`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    createIntegrationSubscription: async (projectId, payload, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/integration/subscriptions`, payload, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    transitionIntegrationSubscription: async (projectId, subscriptionId, payload, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/integration/subscriptions/${subscriptionId}/transition`, payload, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    listIntegrationDeliveries: async (projectId, empresaId = null) => {
+        const response = await axiosInstance.get(`/bim/projects/${projectId}/integration/deliveries`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    retryIntegrationDelivery: async (projectId, deliveryId, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/integration/deliveries/${deliveryId}/retry`, {}, withTenantConfig({}, empresaId));
+        return response.data;
+    },
     listIdsProfiles: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/ids/profiles`, withTenantConfig({}, empresaId));
         return response.data;

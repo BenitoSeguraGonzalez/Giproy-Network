@@ -58,7 +58,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | B03 | Importar/exportar Asta Powerproject | Ausente | requiere formato autorizado y corpus real |
 | B04 | Intercambio MS Project XML | Completa | `BIM-TASK-0131/0134/0139`: preview, export, revisiones, gobierno y UX BIM |
 | B05 | Interoperabilidad amplia CAD/BIM | Parcial | IFC 2x3/4 y Fragments; no cubre la amplitud propietaria publicada |
-| B06 | API, webhooks y conectores de terceros | Ausente | no existe gateway BIM de integracion empresarial |
+| B06 | API, webhooks y conectores de terceros | Completa | `BIM-TASK-0173`: API ERP, webhooks HMAC, outbox recuperable y controles SSRF |
 
 ### C. SYNCHRO Control / CDE
 

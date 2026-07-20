@@ -251,6 +251,7 @@ iniciada.
 | `BIM-TASK-0170` | Cerrada localmente: ensayo DR checksum-exacto del dominio BIM |
 | `BIM-TASK-0171` | Cerrada localmente: servicios cartograficos XYZ/WMS BIM |
 | `BIM-TASK-0172` | Cerrada localmente: paquetes gobernados de avance y horas BIM para ERP |
+| `BIM-TASK-0173` | Cerrada localmente: gateway HTTPS firmado y outbox BIM recuperable |
 
 ## Orden de ejecucion
 

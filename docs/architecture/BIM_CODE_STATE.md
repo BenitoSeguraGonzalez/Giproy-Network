@@ -1022,3 +1022,14 @@ intercambio end-to-end.
   del workspace BIM y sus puertas de licencia/allowlist.
 - Paridad: `85,83%`, 50 completas, 3 parciales y 7 ausentes. Programa: 46/61,
   75,41% realizado y 24,59% pendiente. Sin deploy.
+
+## Gateway de integracion empresarial BIM - 2026-07-20
+
+- `BIM-TASK-0173` completa B06 conectando la API ERP H06 con suscripciones HTTPS
+  HMAC-SHA256 y un outbox tenant-aware, idempotente y recuperable.
+- Los secretos se muestran una vez y permanecen cifrados; DNS y direcciones se
+  revalidan en cada entrega para bloquear SSRF y redirects.
+- La UX vive en Produccion > Integraciones bajo las puertas BIM existentes; el
+  evento solo nace de fuentes `bim_*` y no escribe el dominio clasico.
+- Paridad: `87,50%`, 51 completas, 3 parciales y 6 ausentes. Programa: 47/61,
+  77,05% realizado y 22,95% pendiente. Sin deploy.

@@ -9,6 +9,7 @@ from app.models.bim_4d import Bim4dActivitySnapshot, Bim4dProgressSnapshot
 from app.models.bim_4d_resources import Bim4dCrew, Bim4dTimecard
 from app.models.bim_erp_exchange import BimErpExchangePackage
 from app.schemas.bim_erp_exchange import BimErpExchangeContent, BimErpExchangeCreate, BimErpExchangeResponse, BimErpExchangeTransition
+from app.services.bim.integration_gateway_service import enqueue_integration_event
 
 
 def _utc(value: datetime) -> datetime:
@@ -123,6 +124,25 @@ def transition_erp_exchange_package(db: Session, *, package_id: int, project_id:
             BimErpExchangePackage.id != value.id,
         ).update({"status": "superseded", "lock_version": BimErpExchangePackage.lock_version + 1}, synchronize_session=False)
         value.status = "published"; value.published_by = user_id; value.published_at = datetime.now(timezone.utc)
+        enqueue_integration_event(
+            db,
+            project_id=project_id,
+            company_id=company_id,
+            event_type="erp.package.published",
+            event_key=f"erp.package.published:{value.id}:{value.lock_version + 1}",
+            data={
+                "package_id": value.id,
+                "revision": value.revision,
+                "project_revision": value.project_revision,
+                "cutoff_at": value.cutoff_at.isoformat(),
+                "checksum_sha256": value.checksum_sha256,
+                "activity_count": value.activity_count,
+                "timecard_count": value.timecard_count,
+                "regular_hours": value.regular_hours,
+                "overtime_hours": value.overtime_hours,
+                "content_path": f"/api/v1/bim/projects/{project_id}/erp-exchange/packages/{value.id}/content",
+            },
+        )
     else:
         if value.status != "published":
             raise HTTPException(status_code=409, detail="Solo un paquete publicado puede revocarse.")
