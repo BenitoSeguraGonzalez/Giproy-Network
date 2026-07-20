@@ -1047,3 +1047,14 @@ intercambio end-to-end.
   baseline enterprise pasan.
 - Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 48/61,
   78,69% realizado y 21,31% pendiente. Sin deploy.
+
+## Resiliencia concurrente de colaboracion CDE - 2026-07-20
+
+- `BIM-TASK-0175` endurece el heartbeat ante colisiones de unicidad mediante un
+  savepoint transaccional y recuperacion de la presencia ya creada.
+- Un validador PostgreSQL dedicado ejecuta 12 heartbeats concurrentes, dos
+  sesiones, expiracion, reconexion y lectura incremental por cursor.
+- El ensayo produce una sola presencia compartida y no duplica eventos de
+  union. H03 conserva estado parcial hasta repetirlo en el servidor con red real.
+- Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 49/61,
+  80,33% realizado y 19,67% pendiente. Sin deploy.

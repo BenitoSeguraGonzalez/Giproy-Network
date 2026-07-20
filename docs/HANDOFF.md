@@ -1,5 +1,14 @@
 # HANDOFF
 
+## 2026-07-20 - Resiliencia concurrente de colaboracion CDE
+
+- `BIM-TASK-0175` evita duplicados ante heartbeats concurrentes de una misma
+  sesion mediante savepoint y recuperacion de la fila ganadora.
+- PostgreSQL valida 12 workers, dos sesiones, expiracion, reconexion y cursor.
+- Tests focales: 7 correctos; migracion reversible `de2057` correcta.
+- H03 sigue parcial hasta repetir la evidencia desplegada con red real.
+- Paridad: 88,33%. Programa: 49/61, 80,33% realizado y 19,67% pendiente.
+
 ## 2026-07-20 - Colaboracion CDE multiusuario incremental
 
 - `BIM-TASK-0174` añade presencia por sesion, expiracion y feed CDE por cursor.

@@ -253,6 +253,7 @@ iniciada.
 | `BIM-TASK-0172` | Cerrada localmente: paquetes gobernados de avance y horas BIM para ERP |
 | `BIM-TASK-0173` | Cerrada localmente: gateway HTTPS firmado y outbox BIM recuperable |
 | `BIM-TASK-0174` | Cerrada localmente: presencia y feed incremental de colaboracion CDE |
+| `BIM-TASK-0175` | Cerrada localmente: resiliencia concurrente y reconexion CDE certificadas en PostgreSQL |
 
 ## Orden de ejecucion
 

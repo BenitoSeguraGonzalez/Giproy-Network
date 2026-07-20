@@ -1,4 +1,7 @@
+from datetime import datetime, timedelta, timezone
+
 from app.main import app
+from app.models.bim_cde_collaboration import BimCdeCollaborationPresence
 from app.schemas.bim_cde_collaboration import BimCdePresenceHeartbeat
 from app.services.bim.cde_collaboration_service import (
     heartbeat_presence,
@@ -64,3 +67,52 @@ def test_review_activity_is_emitted_in_same_cde_domain(db, sample_empresa):
     assert event["event_type"] == "review.created"
     assert event["entity_id"] == review["id"]
     assert event["actor_name"] == creator.nombre_completo
+
+
+def test_expired_presence_reconnects_without_duplicate_join(db, sample_empresa):
+    project, creator, _assignee, _outsider, _revision = _context(db, sample_empresa)
+    payload = BimCdePresenceHeartbeat(
+        session_key="session-reconnect",
+        workspace="coordination",
+        context={"tool": "reviews"},
+    )
+    heartbeat_presence(
+        db,
+        project_id=project.id,
+        company_id=sample_empresa.id,
+        user_id=creator.id,
+        payload=payload,
+    )
+    presence = db.query(BimCdeCollaborationPresence).filter_by(session_key="session-reconnect").one()
+    presence.last_seen_at = datetime.now(timezone.utc) - timedelta(minutes=2)
+    db.commit()
+
+    assert list_active_presences(
+        db,
+        project_id=project.id,
+        company_id=sample_empresa.id,
+        current_user_id=creator.id,
+    ) == []
+    heartbeat_presence(
+        db,
+        project_id=project.id,
+        company_id=sample_empresa.id,
+        user_id=creator.id,
+        payload=payload,
+    )
+
+    active = list_active_presences(
+        db,
+        project_id=project.id,
+        company_id=sample_empresa.id,
+        current_user_id=creator.id,
+    )
+    feed = list_collaboration_events(
+        db,
+        project_id=project.id,
+        company_id=sample_empresa.id,
+        after_id=0,
+        limit=20,
+    )
+    assert len(active) == 1
+    assert [event["event_type"] for event in feed["events"]].count("presence.joined") == 1

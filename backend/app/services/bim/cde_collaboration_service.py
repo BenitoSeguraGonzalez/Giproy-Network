@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.bim_cde_collaboration import BimCdeCollaborationEvent, BimCdeCollaborationPresence
@@ -80,19 +81,32 @@ def heartbeat_presence(db: Session, *, project_id: int, company_id: int, user_id
             context_json=context,
             last_seen_at=now,
         )
-        db.add(presence)
-        db.flush()
-        record_collaboration_event(
-            db,
-            project_id=project_id,
-            company_id=company_id,
-            actor_id=user_id,
-            event_type="presence.joined",
-            summary="Se conecto al espacio BIM.",
-            entity_type="presence",
-            entity_id=presence.id,
-            payload={"workspace": payload.workspace},
-        )
+        try:
+            with db.begin_nested():
+                db.add(presence)
+                db.flush()
+        except IntegrityError:
+            presence = db.query(BimCdeCollaborationPresence).filter(
+                BimCdeCollaborationPresence.proyecto_id == project_id,
+                BimCdeCollaborationPresence.empresa_id == company_id,
+                BimCdeCollaborationPresence.usuario_id == user_id,
+                BimCdeCollaborationPresence.session_key == payload.session_key,
+            ).one()
+            presence.workspace = payload.workspace
+            presence.context_json = context
+            presence.last_seen_at = now
+        else:
+            record_collaboration_event(
+                db,
+                project_id=project_id,
+                company_id=company_id,
+                actor_id=user_id,
+                event_type="presence.joined",
+                summary="Se conecto al espacio BIM.",
+                entity_type="presence",
+                entity_id=presence.id,
+                payload={"workspace": payload.workspace},
+            )
     else:
         context_changed = presence.workspace != payload.workspace or presence.context_json != context
         presence.workspace = payload.workspace

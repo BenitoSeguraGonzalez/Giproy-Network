@@ -1,3 +1,11 @@
+### 2026-07-20 - Resiliencia concurrente CDE (BIM-TASK-0175)
+
+- El heartbeat de presencia resuelve carreras de alta concurrencia sin duplicar
+  sesiones ni eventos de union.
+- Un ensayo PostgreSQL con 12 conexiones valida expiracion, reconexion y cursor.
+- H03 sigue parcial hasta repetir la evidencia sobre el servidor y red real.
+- Paridad 88,33%; programa 49/61, 80,33% realizado y 19,67% pendiente.
+
 ### 2026-07-20 - Colaboracion CDE multiusuario incremental (BIM-TASK-0174)
 
 - H03 incorpora presencia activa tenant-aware y feed CDE incremental por cursor.
