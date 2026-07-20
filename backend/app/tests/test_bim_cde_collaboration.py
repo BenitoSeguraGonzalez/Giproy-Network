@@ -8,6 +8,7 @@ from app.services.bim.cde_collaboration_service import (
     leave_presence,
     list_active_presences,
     list_collaboration_events,
+    record_collaboration_event,
 )
 from app.tests.test_bim_cde_reviews import _context, _create
 
@@ -116,3 +117,48 @@ def test_expired_presence_reconnects_without_duplicate_join(db, sample_empresa):
     )
     assert len(active) == 1
     assert [event["event_type"] for event in feed["events"]].count("presence.joined") == 1
+
+
+def test_collaboration_feed_signals_and_drains_burst_pages(db, sample_empresa):
+    project, creator, _assignee, _outsider, _revision = _context(db, sample_empresa)
+    record_collaboration_event(
+        db,
+        project_id=project.id,
+        company_id=sample_empresa.id,
+        actor_id=creator.id,
+        event_type="burst.baseline",
+        summary="Cursor previo a la rafaga",
+    )
+    db.commit()
+    baseline = list_collaboration_events(
+        db, project_id=project.id, company_id=sample_empresa.id, after_id=0, limit=100
+    )
+    for index in range(205):
+        record_collaboration_event(
+            db,
+            project_id=project.id,
+            company_id=sample_empresa.id,
+            actor_id=creator.id,
+            event_type="burst.test",
+            summary=f"Evento {index}",
+        )
+    db.commit()
+
+    first = list_collaboration_events(
+        db, project_id=project.id, company_id=sample_empresa.id, after_id=baseline["cursor"], limit=100
+    )
+    second = list_collaboration_events(
+        db, project_id=project.id, company_id=sample_empresa.id, after_id=first["cursor"], limit=100
+    )
+    third = list_collaboration_events(
+        db, project_id=project.id, company_id=sample_empresa.id, after_id=second["cursor"], limit=100
+    )
+    fourth = list_collaboration_events(
+        db, project_id=project.id, company_id=sample_empresa.id, after_id=third["cursor"], limit=100
+    )
+
+    assert len(first["events"]) == 100 and first["has_more"]
+    assert len(second["events"]) == 100 and second["has_more"]
+    assert len(third["events"]) == 5 and not third["has_more"]
+    assert fourth["events"] == [] and not fourth["has_more"]
+    assert first["cursor"] < second["cursor"] < third["cursor"] == fourth["cursor"]

@@ -258,6 +258,7 @@ iniciada.
 | `BIM-TASK-0177` | Cerrada localmente: recuperacion de red y aislamiento de scope CDE |
 | `BIM-TASK-0178` | Cerrada localmente: probe remoto H03 preparado sin persistir credenciales |
 | `BIM-TASK-0179` | Cerrada localmente: escala del feed CDE certificada con 100.000 eventos |
+| `BIM-TASK-0180` | Cerrada localmente: drenaje multipagina y cursor resiliente del feed CDE |
 
 ## Orden de ejecucion
 

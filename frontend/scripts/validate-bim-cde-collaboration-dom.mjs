@@ -19,10 +19,12 @@ try {
         const panel = page.locator('[data-bim-cde-collaboration]'); await panel.waitFor();
         await page.getByText('3', { exact: true }).first().waitFor();
         assert.equal(await page.locator('[data-bim-cde-presences] > div').count(), 4, 'Cabecera y tres presencias visibles');
+        await page.getByRole('button', { name: 'Actualizar actividad CDE' }).click();
+        await page.getByText('REV-0017', { exact: false }).first().waitFor();
         assert.equal(await page.locator('[data-bim-cde-collaboration-events] > div').count(), 4, 'Cabecera y tres eventos visibles');
+        assert.equal(await page.evaluate(() => (globalThis.__bimCdeFeedCalls || 0) >= 3), true, 'La rafaga CDE drena mas de una pagina');
         assert.match(await panel.innerText(), /María Coordinación BIM[\s\S]*Carlos Estructuras[\s\S]*Lucía Arquitectura/);
         assert.match(await panel.innerText(), /REV-0017/);
-        await page.getByRole('button', { name: 'Actualizar actividad CDE' }).click();
         const heartbeatBeforeRecovery = await page.evaluate(() => globalThis.__bimCdeHeartbeatCount || 0);
         await page.evaluate(() => globalThis.dispatchEvent(new Event('online')));
         await page.waitForFunction((previous) => (globalThis.__bimCdeHeartbeatCount || 0) > previous, heartbeatBeforeRecovery);

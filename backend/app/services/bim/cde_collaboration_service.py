@@ -186,9 +186,13 @@ def list_collaboration_events(db: Session, *, project_id: int, company_id: int, 
         BimCdeCollaborationEvent.empresa_id == company_id,
     )
     if after_id:
-        rows = query.filter(BimCdeCollaborationEvent.id > after_id).order_by(BimCdeCollaborationEvent.id.asc()).limit(limit).all()
+        rows = query.filter(BimCdeCollaborationEvent.id > after_id).order_by(BimCdeCollaborationEvent.id.asc()).limit(limit + 1).all()
+        has_more = len(rows) > limit
+        rows = rows[:limit]
     else:
-        rows = list(reversed(query.order_by(BimCdeCollaborationEvent.id.desc()).limit(limit).all()))
+        rows = query.order_by(BimCdeCollaborationEvent.id.desc()).limit(limit + 1).all()
+        has_more = False
+        rows = list(reversed(rows[:limit]))
     actor_ids = {row.actor_id for row in rows if row.actor_id}
     users = {item.id: item for item in db.query(Usuario).filter(Usuario.id.in_(actor_ids)).all()} if actor_ids else {}
     events = [{
@@ -207,5 +211,6 @@ def list_collaboration_events(db: Session, *, project_id: int, company_id: int, 
         "project_id": project_id,
         "company_id": company_id,
         "cursor": events[-1]["id"] if events else after_id,
+        "has_more": has_more,
         "events": events,
     }

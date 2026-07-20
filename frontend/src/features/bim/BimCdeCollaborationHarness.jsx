@@ -24,9 +24,14 @@ const api = {
     listCdePresences: async (projectId) => projectId === 8
         ? [{ ...presences[0], id: 8, user_name: 'Proyecto ocho' }]
         : presences,
-    listCdeCollaborationEvents: async (projectId, afterId) => projectId === 8
-        ? { contract_version: 'giproy_bim_cde_collaboration_feed_v1', project_id: 8, company_id: 1, cursor: 1, events: afterId ? [] : [{ ...events[0], id: 1, actor_name: 'Proyecto ocho' }] }
-        : { contract_version: 'giproy_bim_cde_collaboration_feed_v1', project_id: 7, company_id: 1, cursor: 43, events: afterId ? [] : events },
+    listCdeCollaborationEvents: async (projectId, afterId) => {
+        globalThis.__bimCdeFeedCalls = (globalThis.__bimCdeFeedCalls || 0) + 1;
+        if (projectId === 8) return { contract_version: 'giproy_bim_cde_collaboration_feed_v1', project_id: 8, company_id: 1, cursor: 1, has_more: false, events: afterId ? [] : [{ ...events[0], id: 1, actor_name: 'Proyecto ocho' }] };
+        if (!afterId) return { contract_version: 'giproy_bim_cde_collaboration_feed_v1', project_id: 7, company_id: 1, cursor: 41, has_more: false, events: events.slice(0, 1) };
+        if (afterId === 41) return { contract_version: 'giproy_bim_cde_collaboration_feed_v1', project_id: 7, company_id: 1, cursor: 42, has_more: true, events: events.slice(1, 2) };
+        if (afterId === 42) return { contract_version: 'giproy_bim_cde_collaboration_feed_v1', project_id: 7, company_id: 1, cursor: 43, has_more: false, events: events.slice(2) };
+        return { contract_version: 'giproy_bim_cde_collaboration_feed_v1', project_id: 7, company_id: 1, cursor: afterId, has_more: false, events: [] };
+    },
 };
 
 const Harness = () => {

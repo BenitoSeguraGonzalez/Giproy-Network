@@ -1,3 +1,9 @@
+### 2026-07-20 - Drenaje resiliente CDE (BIM-TASK-0180)
+
+- El feed agrega `has_more` y el cliente drena hasta cinco paginas por ciclo.
+- Rafaga 205: paginas 100/100/5; Playwright desktop y cursor monotono verdes.
+- Paridad 88,33%; programa 54/61, 88,52% realizado y 11,48% pendiente.
+
 ### 2026-07-20 - Escala feed CDE (BIM-TASK-0179)
 
 - Se certifican 100.000 eventos y 60 lecturas incrementales sobre PostgreSQL.

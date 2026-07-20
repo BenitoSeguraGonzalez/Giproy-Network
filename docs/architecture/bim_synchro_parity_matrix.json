@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "as_of": "2026-07-20",
-  "task": "BIM-TASK-0179",
+  "task": "BIM-TASK-0180",
   "source_document": "docs/architecture/BIM_SYNCHRO_FULL_PARITY_MATRIX.md",
   "status_weights": {
     "complete": 1.0,
@@ -70,7 +70,7 @@
     {"id": "G05", "group": "handover", "status": "complete", "evidence": ["BIM-TASK-0167", "BIM-TASK-0168", "Checksum-bound operations baseline with governed activation and source revalidation"]},
     {"id": "H01", "group": "enterprise", "status": "complete", "evidence": ["Tenant-aware BIM tests", "BIM rollout gates"]},
     {"id": "H02", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0089"]},
-    {"id": "H03", "group": "enterprise", "status": "partial", "evidence": ["BIM-TASK-0174", "BIM-TASK-0175", "BIM-TASK-0176", "BIM-TASK-0177", "BIM-TASK-0178", "BIM-TASK-0179", "Tenant-aware active presence and cursor-based CDE review activity feed", "Twelve-worker PostgreSQL concurrency, expiry and reconnection validation", "Sanitized active/expired presence, cursor, event and lag metrics", "Client online/visibility recovery with stale-scope response rejection", "Secret-free two-user remote certification probe", "One-hundred-thousand-event PostgreSQL cursor scale certification", "Deployed concurrent-user and real-network evidence pending"]},
+    {"id": "H03", "group": "enterprise", "status": "partial", "evidence": ["BIM-TASK-0174", "BIM-TASK-0175", "BIM-TASK-0176", "BIM-TASK-0177", "BIM-TASK-0178", "BIM-TASK-0179", "BIM-TASK-0180", "Tenant-aware active presence and cursor-based CDE review activity feed", "Twelve-worker PostgreSQL concurrency, expiry and reconnection validation", "Sanitized active/expired presence, cursor, event and lag metrics", "Client online/visibility recovery with stale-scope response rejection", "Secret-free two-user remote certification probe", "One-hundred-thousand-event PostgreSQL cursor scale certification", "Bounded multipage burst draining with monotonic cursor guard", "Deployed concurrent-user and real-network evidence pending"]},
     {"id": "H04", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0145", "BIM-TASK-0169", "Tenant-aware operational notification and escalation matrix for RFI, submittals and CDE reviews"]},
     {"id": "H05", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0171", "Tenant-aware revisioned XYZ/WMS map catalog integrated with BIM georeference"]},
     {"id": "H06", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0172", "Governed checksum-exact progress and time package contract for ERP pull consumption"]},

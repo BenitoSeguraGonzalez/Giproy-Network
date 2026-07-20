@@ -1102,3 +1102,13 @@ intercambio end-to-end.
   latencia y concurrencia sobre la red beta para completar H03.
 - Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 53/61,
   86,89% realizado y 13,11% pendiente. Sin deploy.
+
+## Drenaje resiliente del feed CDE - 2026-07-20
+
+- `BIM-TASK-0180` agrega `has_more` aditivo y drenaje cliente de hasta cinco
+  paginas por ciclo, con cursor monotono y proteccion contra loops.
+- Una rafaga focal de 205 eventos se consume en paginas `100/100/5`.
+- El harness pasa en 1920x900 y 2560x1300 sin overflow, errores de consola ni
+  mezcla de scope; falta evidencia desplegada para completar H03.
+- Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 54/61,
+  88,52% realizado y 11,48% pendiente. Sin deploy.

@@ -5,6 +5,7 @@ import { bimModelsApi } from '../../api/bimModels';
 
 const POLL_INTERVAL_MS = 5000;
 const HEARTBEAT_INTERVAL_MS = 15000;
+const MAX_FEED_PAGES_PER_REFRESH = 5;
 
 const EVENT_LABELS = {
     'presence.joined': 'Entró al espacio BIM',
@@ -70,9 +71,27 @@ const BimCdeCollaborationPanel = ({ projectId, empresaId, selectedElement = null
         try {
             setLoading(true);
             if (heartbeatFirst) await heartbeat();
+            const loadFeedPages = async () => {
+                let afterId = cursor.current;
+                let pageCount = 0;
+                let incomingEvents = [];
+                let hasMore = false;
+                do {
+                    const feed = await api.listCdeCollaborationEvents(projectId, afterId, empresaId);
+                    incomingEvents = incomingEvents.concat(feed.events || []);
+                    const nextCursor = Math.max(afterId, feed.cursor || 0);
+                    hasMore = Boolean(feed.has_more);
+                    if (hasMore && nextCursor <= afterId) {
+                        throw new Error('El feed CDE indico mas eventos sin avanzar el cursor.');
+                    }
+                    afterId = nextCursor;
+                    pageCount += 1;
+                } while (hasMore && pageCount < MAX_FEED_PAGES_PER_REFRESH);
+                return { cursor: afterId, events: incomingEvents };
+            };
             const [activeRows, feed] = await Promise.all([
                 api.listCdePresences(projectId, empresaId),
-                api.listCdeCollaborationEvents(projectId, cursor.current, empresaId),
+                loadFeedPages(),
             ]);
             if (activeScope.current !== requestScope) return;
             setPresences(activeRows);

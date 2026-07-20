@@ -42,4 +42,5 @@ class BimCdeCollaborationFeedResponse(BaseModel):
     project_id: int
     company_id: int
     cursor: int
+    has_more: bool = False
     events: list[BimCdeCollaborationEventResponse]

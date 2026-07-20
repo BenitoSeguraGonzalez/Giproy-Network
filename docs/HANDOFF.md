@@ -1,5 +1,12 @@
 # HANDOFF
 
+## 2026-07-20 - Drenaje resiliente del feed CDE
+
+- `BIM-TASK-0180` incorpora `has_more` aditivo y hasta cinco paginas por ciclo.
+- Una rafaga de 205 eventos se drena `100/100/5` sin cursor estancado.
+- Playwright pasa en 1920x900 y 2560x1300; H03 espera evidencia beta real.
+- Paridad: 88,33%. Programa: 54/61, 88,52% realizado y 11,48% pendiente.
+
 ## 2026-07-20 - Escala del feed colaborativo CDE
 
 - `BIM-TASK-0179` valida 100.000 eventos, pagina 100 e indice compuesto.
