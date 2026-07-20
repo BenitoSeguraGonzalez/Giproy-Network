@@ -1,3 +1,9 @@
+### 2026-07-20 - Escala feed CDE (BIM-TASK-0179)
+
+- Se certifican 100.000 eventos y 60 lecturas incrementales sobre PostgreSQL.
+- p95 local `1,939 ms`, indice compuesto y aislamiento tenant/proyecto verdes.
+- Paridad 88,33%; programa 53/61, 86,89% realizado y 13,11% pendiente.
+
 ### 2026-07-20 - Probe remoto CDE (BIM-TASK-0178)
 
 - Se prepara certificacion beta con dos sesiones, cursor, expiracion,

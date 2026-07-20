@@ -1091,3 +1091,14 @@ intercambio end-to-end.
   con dos usuarios autorizados en beta.
 - Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 52/61,
   85,25% realizado y 14,75% pendiente. Sin deploy.
+
+## Escala del feed colaborativo CDE - 2026-07-20
+
+- `BIM-TASK-0179` certifica el feed incremental con 100.000 eventos en
+  PostgreSQL dedicado, 60 lecturas y pagina acotada a 100.
+- `EXPLAIN ANALYZE` confirma el indice compuesto; un evento intercalado de otra
+  empresa demuestra aislamiento tenant/proyecto.
+- p95 local: `1,939 ms` frente al umbral conservador de `150 ms`; falta repetir
+  latencia y concurrencia sobre la red beta para completar H03.
+- Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 53/61,
+  86,89% realizado y 13,11% pendiente. Sin deploy.

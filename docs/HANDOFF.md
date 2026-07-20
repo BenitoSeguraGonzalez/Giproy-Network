@@ -1,5 +1,13 @@
 # HANDOFF
 
+## 2026-07-20 - Escala del feed colaborativo CDE
+
+- `BIM-TASK-0179` valida 100.000 eventos, pagina 100 e indice compuesto.
+- Sesenta lecturas dan p95 local `1,939 ms`; un senuelo intercalado de otra
+  empresa confirma aislamiento tenant/proyecto y el cleanup queda limpio.
+- H03 permanece parcial hasta repetir la evidencia en beta y red real.
+- Paridad: 88,33%. Programa: 53/61, 86,89% realizado y 13,11% pendiente.
+
 ## 2026-07-20 - Probe remoto de colaboracion CDE
 
 - `BIM-TASK-0178` prepara el ensayo beta de dos sesiones sin persistir tokens.
