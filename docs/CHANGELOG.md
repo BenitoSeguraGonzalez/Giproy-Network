@@ -1,3 +1,10 @@
+### 2026-07-20 - Observabilidad colaborativa CDE (BIM-TASK-0176)
+
+- Las metricas administrativas BIM incorporan presencia activa/expirada,
+  volumen y tipos de eventos, cursor y lag por empresa/proyecto.
+- No se exponen usuarios, contexto, payloads, resumen ni contenido documental.
+- Paridad 88,33%; programa 50/61, 81,97% realizado y 18,03% pendiente.
+
 ### 2026-07-20 - Resiliencia concurrente CDE (BIM-TASK-0175)
 
 - El heartbeat de presencia resuelve carreras de alta concurrencia sin duplicar

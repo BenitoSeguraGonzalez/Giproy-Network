@@ -1,5 +1,13 @@
 # HANDOFF
 
+## 2026-07-20 - Observabilidad operativa de colaboracion CDE
+
+- `BIM-TASK-0176` añade al endpoint administrativo BIM metricas sanitizadas de
+  presencia, eventos, cursor y lag por empresa/proyecto.
+- No cambia rutas ni persistencia y no expone contenido sensible.
+- Tests focales: 6 correctos. H03 sigue parcial hasta telemetria desplegada.
+- Paridad: 88,33%. Programa: 50/61, 81,97% realizado y 18,03% pendiente.
+
 ## 2026-07-20 - Resiliencia concurrente de colaboracion CDE
 
 - `BIM-TASK-0175` evita duplicados ante heartbeats concurrentes de una misma

@@ -362,6 +362,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0173](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0173.md) - Gateway de integracion empresarial BIM
 - [BIM-TASK-0174](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0174.md) - Colaboracion CDE multiusuario incremental
 - [BIM-TASK-0175](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0175.md) - Resiliencia concurrente de colaboracion CDE
+- [BIM-TASK-0176](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0176.md) - Observabilidad operativa de colaboracion CDE
 
 ---
 

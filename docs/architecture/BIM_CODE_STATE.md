@@ -1058,3 +1058,14 @@ intercambio end-to-end.
   union. H03 conserva estado parcial hasta repetirlo en el servidor con red real.
 - Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 49/61,
   80,33% realizado y 19,67% pendiente. Sin deploy.
+
+## Observabilidad operativa de colaboracion CDE - 2026-07-20
+
+- `BIM-TASK-0176` amplía las metricas administrativas BIM con sesiones CDE
+  totales, activas y expiradas, volumen/tipos de eventos, cursor y lag.
+- Las agregaciones permanecen tenant-aware y no exponen usuarios, contexto,
+  payload, resumen ni contenido documental.
+- H03 conserva estado parcial hasta recoger la telemetria en servidor bajo red
+  y usuarios reales.
+- Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 50/61,
+  81,97% realizado y 18,03% pendiente. Sin deploy.
