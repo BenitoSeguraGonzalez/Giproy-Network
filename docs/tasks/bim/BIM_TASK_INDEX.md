@@ -256,6 +256,7 @@ iniciada.
 | `BIM-TASK-0175` | Cerrada localmente: resiliencia concurrente y reconexion CDE certificadas en PostgreSQL |
 | `BIM-TASK-0176` | Cerrada localmente: metricas sanitizadas de salud colaborativa CDE |
 | `BIM-TASK-0177` | Cerrada localmente: recuperacion de red y aislamiento de scope CDE |
+| `BIM-TASK-0178` | Cerrada localmente: probe remoto H03 preparado sin persistir credenciales |
 
 ## Orden de ejecucion
 

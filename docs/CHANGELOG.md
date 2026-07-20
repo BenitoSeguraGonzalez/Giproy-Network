@@ -1,3 +1,10 @@
+### 2026-07-20 - Probe remoto CDE (BIM-TASK-0178)
+
+- Se prepara certificacion beta con dos sesiones, cursor, expiracion,
+  reconexion, metricas y cleanup, sin persistir ni imprimir tokens.
+- El probe restringe empresas a la allowlist piloto `1,3`.
+- Paridad 88,33%; programa 52/61, 85,25% realizado y 14,75% pendiente.
+
 ### 2026-07-20 - Recuperacion cliente CDE (BIM-TASK-0177)
 
 - Actividad CDE recupera heartbeat/feed al volver online o visible.

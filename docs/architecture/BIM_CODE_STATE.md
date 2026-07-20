@@ -1080,3 +1080,14 @@ intercambio end-to-end.
   no presenta overflow ni solapamientos.
 - Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 51/61,
   83,61% realizado y 16,39% pendiente. Sin deploy.
+
+## Probe remoto de colaboracion CDE - 2026-07-20
+
+- `BIM-TASK-0178` prepara un ensayo remoto con dos tokens efimeros, presencia
+  concurrente, cursor, expiracion, reconexion, metricas y cleanup garantizado.
+- La herramienta restringe empresas a `1,3`, no imprime credenciales y fue
+  validada contra un servidor CDE simulado con reloj controlado.
+- H03 permanece parcial: falta desplegar la ola y obtener `BIM_CDE_REMOTE_OK`
+  con dos usuarios autorizados en beta.
+- Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 52/61,
+  85,25% realizado y 14,75% pendiente. Sin deploy.

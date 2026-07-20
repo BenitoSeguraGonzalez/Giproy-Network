@@ -364,6 +364,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0175](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0175.md) - Resiliencia concurrente de colaboracion CDE
 - [BIM-TASK-0176](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0176.md) - Observabilidad operativa de colaboracion CDE
 - [BIM-TASK-0177](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0177.md) - Recuperacion de red y aislamiento de scope CDE
+- [BIM-TASK-0178](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0178.md) - Probe remoto de colaboracion CDE
 
 ---
 

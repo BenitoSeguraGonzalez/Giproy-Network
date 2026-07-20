@@ -1,5 +1,13 @@
 # HANDOFF
 
+## 2026-07-20 - Probe remoto de colaboracion CDE
+
+- `BIM-TASK-0178` prepara el ensayo beta de dos sesiones sin persistir tokens.
+- Cubre cursor, expiracion, reconexion, metricas y salida limpia; la prueba
+  simulada pasa y la ejecucion real espera el despliegue de la ola.
+- H03 permanece parcial hasta obtener `BIM_CDE_REMOTE_OK` en beta.
+- Paridad: 88,33%. Programa: 52/61, 85,25% realizado y 14,75% pendiente.
+
 ## 2026-07-20 - Recuperacion de red y aislamiento CDE
 
 - `BIM-TASK-0177` recupera actividad al volver online/visible, evita polls
