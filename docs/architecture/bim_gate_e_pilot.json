@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0.0",
+  "as_of": "2026-07-20",
+  "environment": "beta",
+  "base_url": "https://giproy.excomconsultores.com",
+  "authorized_company_ids": [1, 3],
+  "status": "authorized_not_started",
+  "minimum_business_days": 10,
+  "minimum_real_reviews": 2,
+  "participants": {
+    "bim_coordinator_user_id": null,
+    "business_user_id": null
+  },
+  "period": {
+    "start_date": null,
+    "end_date": null,
+    "business_days": []
+  },
+  "required_flows": {
+    "ifc_import": {"status": "pending", "evidence": []},
+    "version_publication": {"status": "pending", "evidence": []},
+    "model_comparison": {"status": "pending", "evidence": []},
+    "issue_workflow": {"status": "pending", "evidence": []},
+    "ids_validation": {"status": "pending", "evidence": []},
+    "cde_review": {"status": "pending", "evidence": []},
+    "issue_reopening": {"status": "pending", "evidence": []},
+    "rollback_rehearsal": {"status": "pending", "evidence": []}
+  },
+  "real_reviews": [],
+  "daily_evidence": [],
+  "critical_incidents": [],
+  "decision": {
+    "status": "pending",
+    "approved_by_user_id": null,
+    "decided_at": null,
+    "evidence": []
+  },
+  "technical_prerequisites": {
+    "allowlist_1_3": "verified",
+    "classic_bim_off": "verified",
+    "beta_https": "verified",
+    "remote_collaboration": "verified",
+    "rollback_restore": "verified",
+    "conformance_pack": "verified_internal"
+  }
+}

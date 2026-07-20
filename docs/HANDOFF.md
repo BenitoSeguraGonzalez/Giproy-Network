@@ -1,5 +1,13 @@
 # HANDOFF
 
+## 2026-07-20 - Protocolo operativo Gate E
+
+- `BIM-TASK-0185` exige 10 jornadas, evidencia diaria, 2 revisiones, 2
+  participantes distintos, 8 flujos y decision humana.
+- Ledger valido en `authorized_not_started`; `--require-approved` bloquea.
+- Beta: allowlist `1,3` y Enterprise activa para ambas empresas.
+- Paridad: 89,17%. Programa: 59/61, 96,72% realizado y 3,28% pendiente.
+
 ## 2026-07-20 - Expediente conformidad internacional
 
 - `BIM-TASK-0184` mapea ISO 19650-1..6, IFC, IDS 1.0 y BCF 2.1 a evidencia

@@ -1160,3 +1160,14 @@ intercambio end-to-end.
   Gate E humano permanece abierto.
 - Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 58/61,
   95,08% realizado y 4,92% pendiente.
+
+## Protocolo operativo y ledger Gate E - 2026-07-20
+
+- `BIM-TASK-0185` formaliza dos participantes distintos, diez jornadas con
+  evidencia diaria, dos revisiones reales, ocho flujos y decision humana.
+- El ledger permanece `authorized_not_started`; `--require-approved` falla de
+  forma deliberada y las pruebas rechazan aprobaciones incompletas.
+- Beta confirma allowlist `1,3` y licencia Enterprise activa en ambas empresas.
+  Esto no inicia el piloto ni cierra Gate E.
+- Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 59/61,
+  96,72% realizado y 3,28% pendiente.
