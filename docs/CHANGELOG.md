@@ -1,3 +1,11 @@
+### 2026-07-20 - Despliegue beta y certificacion remota CDE (BIM-TASK-0181)
+
+- Se despliega reversiblemente la ola 0173-0180; Alembic queda en `de2057`.
+- El probe HTTPS certifica dos sesiones, expiracion, reconexion, cursor y
+  metricas; el cleanup deja cero identidades y datos temporales.
+- H03 pasa a completa. Paridad 89,17%; programa 55/61, 90,16% realizado y
+  9,84% pendiente. Gate E humano y Gate K siguen abiertos.
+
 ### 2026-07-20 - Drenaje resiliente CDE (BIM-TASK-0180)
 
 - El feed agrega `has_more` y el cliente drena hasta cinco paginas por ciclo.

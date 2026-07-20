@@ -259,6 +259,7 @@ iniciada.
 | `BIM-TASK-0178` | Cerrada localmente: probe remoto H03 preparado sin persistir credenciales |
 | `BIM-TASK-0179` | Cerrada localmente: escala del feed CDE certificada con 100.000 eventos |
 | `BIM-TASK-0180` | Cerrada localmente: drenaje multipagina y cursor resiliente del feed CDE |
+| `BIM-TASK-0181` | Cerrada en beta: despliegue reversible y certificacion remota H03 |
 
 ## Orden de ejecucion
 

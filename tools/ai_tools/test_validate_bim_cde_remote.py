@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 from threading import Lock
@@ -98,3 +99,37 @@ def test_remote_probe_covers_expiry_reconnection_cursor_metrics_and_cleanup():
 def test_http_client_rejects_insecure_or_credentialed_base_urls(base_url):
     with pytest.raises(ValueError):
         MODULE.HttpCdeClient(base_url=base_url, token="test-token", company_id=1, timeout=1)
+
+
+def test_http_client_declares_certification_user_agent():
+    captured = {}
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self):
+            return json.dumps([]).encode("utf-8")
+
+    class Opener:
+        def open(self, request, timeout):
+            captured["user_agent"] = request.get_header("User-agent")
+            captured["timeout"] = timeout
+            return Response()
+
+    client = MODULE.HttpCdeClient(
+        base_url="https://giproy.example.test",
+        token="test-token",
+        company_id=1,
+        timeout=7,
+    )
+    client.opener = Opener()
+
+    assert client.presences(22) == []
+    assert captured == {
+        "user_agent": "GiProy-BIM-CDE-Certification/1.0",
+        "timeout": 7,
+    }

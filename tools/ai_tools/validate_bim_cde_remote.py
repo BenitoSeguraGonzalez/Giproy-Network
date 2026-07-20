@@ -60,6 +60,7 @@ class HttpCdeClient:
             headers={
                 "Authorization": f"Bearer {self.token}",
                 "Accept": "application/json",
+                "User-Agent": "GiProy-BIM-CDE-Certification/1.0",
                 **({"Content-Type": "application/json"} if body is not None else {}),
             },
         )

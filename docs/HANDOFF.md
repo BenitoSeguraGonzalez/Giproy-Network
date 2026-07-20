@@ -1,5 +1,15 @@
 # HANDOFF
 
+## 2026-07-20 - Despliegue beta y certificacion remota CDE
+
+- `BIM-TASK-0181` despliega la ola 0173-0180 con backup de DB, fuentes e
+  imagenes y conserva la allowlist `1,3`.
+- Beta queda saludable en `de2057`; home HTTP 200 y rutas protegidas HTTP 401.
+- Dos sesiones HTTPS pasan concurrencia, cursor, expiracion, reconexion y
+  metricas; cleanup final 0/0/0. H03 queda completa.
+- Paridad: 89,17%. Programa: 55/61, 90,16% realizado y 9,84% pendiente.
+- Siguiente limite no simulable: Gate E humano; Gate K tambien sigue abierto.
+
 ## 2026-07-20 - Drenaje resiliente del feed CDE
 
 - `BIM-TASK-0180` incorpora `has_more` aditivo y hasta cinco paginas por ciclo.

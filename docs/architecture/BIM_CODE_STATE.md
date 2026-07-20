@@ -1112,3 +1112,17 @@ intercambio end-to-end.
   mezcla de scope; falta evidencia desplegada para completar H03.
 - Paridad: `88,33%`, 51 completas, 4 parciales y 5 ausentes. Programa: 54/61,
   88,52% realizado y 11,48% pendiente. Sin deploy.
+
+## Despliegue beta y certificacion remota CDE - 2026-07-20
+
+- `BIM-TASK-0181` despliega de forma reversible la ola `0173` a `0180` en la
+  beta autorizada, manteniendo feature flag, licencia y allowlist `1,3`.
+- Alembic queda en `de2057a1b2c3 (head)` y el indice del feed CDE se verifica
+  sobre `(empresa_id, proyecto_id, id)`.
+- El probe HTTPS con dos sesiones certifica concurrencia, cursor, expiracion,
+  reconexion y telemetria: `initial=2`, `expired=1`, `reconnected=2`,
+  `delta=1`, `metrics_active=2`.
+- El cleanup deja cero usuarios, presencias y eventos temporales. H03 pasa a
+  completa; Gate E humano y Gate K permanecen abiertos.
+- Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 55/61,
+  90,16% realizado y 9,84% pendiente.
