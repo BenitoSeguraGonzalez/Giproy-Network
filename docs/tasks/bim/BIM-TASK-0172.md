@@ -19,13 +19,16 @@ clasicos.
 - Flujo gobernado `draft -> published/revoked`; solo el contenido publicado es
   consumible y una nueva publicacion sustituye la anterior.
 - API BIM autenticada para listar, crear, transicionar y consultar paquetes.
+- Panel ERP compacto en Produccion para generar, publicar, revocar y descargar
+  el contrato, protegido por las mismas puertas BIM del workspace.
 
 ## Validacion
 
 - `py_compile`: correcto.
 - 3 tests focales PostgreSQL: correctos.
-- Build, smokes BIM/clasicos, anti-BIM y baseline enterprise se registran en el
-  cierre de despliegue de esta sesion.
+- Build Vite y smoke DOM en `1920x900` y `2560x1300`: correctos.
+- PostgreSQL reversible, 33 smokes BIM, anti-BIM y baseline enterprise:
+  correctos.
 
 ## No interferencia clasica
 

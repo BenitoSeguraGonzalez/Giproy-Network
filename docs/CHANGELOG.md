@@ -4,8 +4,10 @@
   con checksum, fecha de corte, publicacion gobernada y bloqueo optimista.
 - `de2055a1b2c3` permanece aislada por tenant/proyecto y no escribe
   Cronogramas, APUs, personal ni contabilidad clasicos.
-- 3 tests PostgreSQL y `py_compile` pasan; la certificacion integral y beta se
-  registra en el cierre de despliegue.
+- El panel de Produccion genera, publica, revoca y descarga el contrato bajo
+  las puertas BIM existentes.
+- 3 tests focales, `py_compile`, PostgreSQL reversible, build, 33 smokes BIM,
+  anti-BIM y baseline enterprise pasan.
 
 ### 2026-07-20 - Resincronización del editor light APU Gantt (TASK-2029)
 

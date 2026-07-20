@@ -53,6 +53,22 @@ export const bimModelsApi = {
         );
         return response.data;
     },
+    listErpExchangePackages: async (projectId, empresaId = null) => {
+        const response = await axiosInstance.get(`/bim/projects/${projectId}/erp-exchange/packages`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    createErpExchangePackage: async (projectId, payload, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/erp-exchange/packages`, payload, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    transitionErpExchangePackage: async (projectId, packageId, payload, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/erp-exchange/packages/${packageId}/transition`, payload, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    getErpExchangeContent: async (projectId, packageId, empresaId = null) => {
+        const response = await axiosInstance.get(`/bim/projects/${projectId}/erp-exchange/packages/${packageId}/content`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
     listIdsProfiles: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/ids/profiles`, withTenantConfig({}, empresaId));
         return response.data;

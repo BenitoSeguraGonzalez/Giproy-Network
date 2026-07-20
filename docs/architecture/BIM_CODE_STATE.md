@@ -1011,3 +1011,14 @@ intercambio end-to-end.
   contratos clasicos.
 - Paridad: `84,17%`, 49 completas, 3 parciales y 8 ausentes. Programa: 45/61,
   73,77% realizado y 26,23% pendiente. Sin deploy.
+
+## Intercambio gobernado BIM hacia ERP - 2026-07-20
+
+- `BIM-TASK-0172` completa H06 con paquetes pull versionados de avance y horas
+  BIM, fecha de corte, checksum, bloqueo optimista y publicacion gobernada.
+- El contenido publicado se descarga desde Produccion y solo consolida fuentes
+  `bim_*`; no escribe Cronogramas, APUs, personal ni contabilidad clasicos.
+- `de2055a1b2c3` es aditiva, tenant-aware y reversible; la UX permanece dentro
+  del workspace BIM y sus puertas de licencia/allowlist.
+- Paridad: `85,83%`, 50 completas, 3 parciales y 7 ausentes. Programa: 46/61,
+  75,41% realizado y 24,59% pendiente. Sin deploy.

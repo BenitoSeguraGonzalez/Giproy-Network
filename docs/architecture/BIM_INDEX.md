@@ -358,6 +358,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0169](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0169.md) - Matriz operacional de alertas BIM
 - [BIM-TASK-0170](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0170.md) - Ensayo DR del dominio BIM
 - [BIM-TASK-0171](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0171.md) - Servicios cartograficos XYZ/WMS BIM
+- [BIM-TASK-0172](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0172.md) - Intercambio gobernado BIM hacia ERP
 
 ---
 

@@ -130,7 +130,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | H03 | Colaboracion cloud/CDE | Ausente | beta web no equivale a CDE colaborativo completo |
 | H04 | Notificaciones y escalamiento | Completa | `BIM-TASK-0145/0169`: matriz operacional tenant-aware, deduplicada, escalada y con acuse |
 | H05 | Mapas y servicios de ubicacion | Completa | `BIM-TASK-0171`: catalogos XYZ/WMS revisados, tenant-aware y operativos sobre georreferencia BIM |
-| H06 | Integracion ERP de progreso y horas | Ausente | GiProy comparte backend, pero falta contrato aprobado |
+| H06 | Integracion ERP de progreso y horas | Completa | `BIM-TASK-0172`: paquetes pull deterministas, versionados, publicados y checksum-exactos |
 | H07 | Seguridad, backup y recuperacion BIM | Completa | `BIM-TASK-0090/0170`: rollback y ensayo PostgreSQL checksum-exacto del dominio BIM |
 | H08 | Conformidad internacional demostrada | Parcial | IFC/BCF/IDS parciales; falta cierre ISO 19650 y certificacion formal |
 

@@ -63,6 +63,7 @@ BIM_TABLES = {
     "bim_operations_transitions",
     "bim_operational_notifications",
     "bim_map_catalogs",
+    "bim_erp_exchange_packages",
     "bim_schedule_import_revisions",
     "bim_qto_snapshots",
     "bim_4d_resource_leveling_scenarios",
@@ -121,10 +122,10 @@ def validate(database_name: str) -> None:
     config = _config(target_url_text)
     script = ScriptDirectory.from_config(config)
     baseline_heads = [
-        head for head in script.get_heads() if head != "de2054a1b2c3"
+        head for head in script.get_heads() if head != "de2055a1b2c3"
     ] + ["de2010a1b2c3"]
     command.stamp(config, baseline_heads)
-    command.upgrade(config, "de2054a1b2c3")
+    command.upgrade(config, "de2055a1b2c3")
 
     with engine.connect() as connection:
         current_database = connection.execute(text("select current_database()" )).scalar_one()
@@ -492,6 +493,16 @@ def validate(database_name: str) -> None:
         ).all())
         if map_catalog_types != {"created_at": "timestamp with time zone", "layers_json": "json"}:
             raise RuntimeError("El catalogo cartografico BIM no usa JSON/TIMESTAMPTZ.")
+        erp_exchange_types = dict(connection.execute(
+            text("select column_name, data_type from information_schema.columns where table_name='bim_erp_exchange_packages' and column_name in ('payload_json','cutoff_at','created_at','published_at')")
+        ).all())
+        if erp_exchange_types != {
+            "payload_json": "json",
+            "cutoff_at": "timestamp with time zone",
+            "created_at": "timestamp with time zone",
+            "published_at": "timestamp with time zone",
+        }:
+            raise RuntimeError("El intercambio ERP BIM no usa JSON/TIMESTAMPTZ.")
         forecast_type = connection.execute(text("select data_type from information_schema.columns where table_name='bim_cost_forecasts' and column_name='forecast_at_completion'" )).scalar_one()
         if forecast_type != "numeric": raise RuntimeError("El forecast BIM no usa NUMERIC.")
 
@@ -507,10 +518,10 @@ def validate(database_name: str) -> None:
         if remaining:
             raise RuntimeError(f"Downgrade incompleto: {', '.join(sorted(remaining))}.")
 
-    command.upgrade(config, "de2054a1b2c3")
+    command.upgrade(config, "de2055a1b2c3")
     print(
         f"BIM_POSTGRESQL_OK database={database_name} "
-        "upgrade=de2054a1b2c3 downgrade=de2010a1b2c3 "
+        "upgrade=de2055a1b2c3 downgrade=de2010a1b2c3 "
         "timezone=TIMESTAMPTZ revision_scope=project_revision "
         "unique_active=partial_index cde_current=partial_index "
         "rfi_workflow=TIMESTAMPTZ submittal_workflow=TIMESTAMPTZ "
@@ -521,7 +532,7 @@ def validate(database_name: str) -> None:
         "cost_sov=NUMERIC/partial_index cost_changes=NUMERIC/TIMESTAMPTZ "
         "actual_cost=NUMERIC/TIMESTAMPTZ/currency forecast=NUMERIC "
         "as_built=TIMESTAMPTZ/partial_index commissioning=JSON/TIMESTAMPTZ/RESTRICT "
-        "punch_closure=JSON/TIMESTAMPTZ/partial_index handover_dossier=JSON/TIMESTAMPTZ/RESTRICT/partial_index operations_transition=DATE/JSON/TIMESTAMPTZ/partial_index operational_notifications=TIMESTAMPTZ/dedupe map_catalog=JSON/TIMESTAMPTZ"
+        "punch_closure=JSON/TIMESTAMPTZ/partial_index handover_dossier=JSON/TIMESTAMPTZ/RESTRICT/partial_index operations_transition=DATE/JSON/TIMESTAMPTZ/partial_index operational_notifications=TIMESTAMPTZ/dedupe map_catalog=JSON/TIMESTAMPTZ erp_exchange=JSON/TIMESTAMPTZ/checksum"
     )
 
 
