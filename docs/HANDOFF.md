@@ -1,5 +1,13 @@
 # HANDOFF
 
+## 2026-07-20 - Ensayo rollback beta pre-ola
+
+- `BIM-TASK-0183` restaura el dump completo en una base PostgreSQL temporal.
+- Huella clasica activa/restaurada identica; 81 tablas BIM/de2055 en backup y
+  85/de2057 activas confirman la frontera aditiva esperada.
+- Base temporal eliminada, beta HTTP 200 y 13 GB libres.
+- Paridad: 89,17%. Programa: 57/61, 93,44% realizado y 6,56% pendiente.
+
 ## 2026-07-20 - Rafaga CDE HTTPS beta
 
 - `BIM-TASK-0182` certifica 205 eventos sobre HTTPS y paginas `100/100/5`.

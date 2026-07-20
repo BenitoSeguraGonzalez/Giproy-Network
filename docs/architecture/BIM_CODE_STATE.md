@@ -1137,3 +1137,14 @@ intercambio end-to-end.
   permanece HTTP 200. H03 continua completa; Gate E y Gate K siguen abiertos.
 - Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 56/61,
   91,80% realizado y 8,20% pendiente.
+
+## Ensayo de rollback beta desde backup pre-ola - 2026-07-20
+
+- `BIM-TASK-0183` restaura el dump predeploy completo en una base temporal con
+  `ON_ERROR_STOP=1`, sin desconectar ni modificar la beta activa.
+- La huella de esquema clasico coincide exactamente (`7cb85c...`) y la
+  diferencia BIM es la esperada: 81 tablas/de2055 frente a 85/de2057.
+- La base temporal queda eliminada, beta continua HTTP 200 y H07 incorpora
+  evidencia desplegada de rollback para esta ola.
+- Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 57/61,
+  93,44% realizado y 6,56% pendiente.

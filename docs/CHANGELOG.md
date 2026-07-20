@@ -1,3 +1,9 @@
+### 2026-07-20 - Ensayo rollback beta pre-ola (BIM-TASK-0183)
+
+- El dump predeploy se restaura completo en una base temporal con error-stop.
+- Huella clasica identica; frontera BIM 81/de2055 frente a 85/de2057 esperada.
+- Base temporal eliminada y beta HTTP 200. Programa 57/61: 93,44% realizado.
+
 ### 2026-07-20 - Rafaga CDE HTTPS beta (BIM-TASK-0182)
 
 - Beta procesa 205 cambios autenticados y drena el feed en `100/100/5`.

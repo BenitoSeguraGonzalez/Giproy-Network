@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "as_of": "2026-07-20",
-  "task": "BIM-TASK-0182",
+  "task": "BIM-TASK-0183",
   "source_document": "docs/architecture/BIM_SYNCHRO_FULL_PARITY_MATRIX.md",
   "status_weights": {
     "complete": 1.0,
@@ -74,7 +74,7 @@
     {"id": "H04", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0145", "BIM-TASK-0169", "Tenant-aware operational notification and escalation matrix for RFI, submittals and CDE reviews"]},
     {"id": "H05", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0171", "Tenant-aware revisioned XYZ/WMS map catalog integrated with BIM georeference"]},
     {"id": "H06", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0172", "Governed checksum-exact progress and time package contract for ERP pull consumption"]},
-    {"id": "H07", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0090", "BIM-TASK-0170", "Checksum-exact PostgreSQL BIM domain backup/restore drill with classic fingerprint isolation"]},
+    {"id": "H07", "group": "enterprise", "status": "complete", "evidence": ["BIM-TASK-0090", "BIM-TASK-0170", "BIM-TASK-0183", "Checksum-exact PostgreSQL BIM domain backup/restore drill with classic fingerprint isolation", "Full pre-wave beta dump restored in isolated database with matching classic schema fingerprint and verified cleanup"]},
     {"id": "H08", "group": "enterprise", "status": "partial", "evidence": ["IFC/BCF/IDS foundations", "ISO 19650 and formal certification pending"]}
   ]
 }

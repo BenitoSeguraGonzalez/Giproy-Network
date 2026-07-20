@@ -369,6 +369,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0180](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0180.md) - Drenaje resiliente del feed CDE
 - [BIM-TASK-0181](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0181.md) - Despliegue beta y certificacion remota CDE
 - [BIM-TASK-0182](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0182.md) - Rafaga CDE certificada sobre HTTPS beta
+- [BIM-TASK-0183](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0183.md) - Ensayo de rollback beta desde backup pre-ola
 
 ---
 
