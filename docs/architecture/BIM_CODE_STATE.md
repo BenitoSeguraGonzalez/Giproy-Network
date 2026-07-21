@@ -1193,5 +1193,7 @@ intercambio end-to-end.
   schemas futuros desconocidos conservan warning.
 - `IfcImporter` procesa los seis datasets y convierte el IFC4.3 oficial en
   17.320 bytes Fragments, manteniendo IFC2X3 e IFC4 verdes.
+- Backend beta `fc32aa...` healthy; probe remoto confirma IFC4X3_ADD2 soportado,
+  home 200, CDE anonimo 401 y allowlist `1,3` intacta.
 - Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
   98,36%; Gate E, certificaciones y Gate K siguen pendientes.
