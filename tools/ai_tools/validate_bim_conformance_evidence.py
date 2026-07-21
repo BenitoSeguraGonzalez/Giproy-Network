@@ -82,8 +82,8 @@ def validate_pack(pack: dict, root: Path = ROOT) -> dict:
     by_id = {item.get("id"): item for item in controls}
     if by_id.get("FORMAL-CERTIFICATION", {}).get("status") != "external_pending":
         errors.append("formal certification must remain external_pending")
-    if by_id.get("IFC", {}).get("status") != "scope_gap":
-        errors.append("IFC must retain the declared IFC4.3/certification scope gap")
+    if by_id.get("IFC", {}).get("status") != "verified_internal":
+        errors.append("IFC must retain verified internal IFC2X3/IFC4/IFC4X3 evidence")
     if pack.get("release_gates") != EXPECTED_GATES:
         errors.append("release gates must preserve human and external blockers")
 

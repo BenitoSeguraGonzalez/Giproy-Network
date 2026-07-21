@@ -82,13 +82,16 @@
     },
     {
       "id": "IFC",
-      "status": "scope_gap",
-      "scope_note": "Importacion interna verificada para IFC2X3 e IFC4; IFC4.3 y certificacion oficial import/export permanecen fuera del alcance certificado.",
+      "status": "verified_internal",
+      "scope_note": "Importacion interna verificada para IFC2X3, IFC4 e IFC4X3_ADD2; la certificacion oficial por version y producto permanece externa.",
       "evidence": [
         "docs/tasks/bim/BIM-TASK-0071.md",
         "docs/tasks/bim/BIM-TASK-0073.md",
+        "docs/tasks/bim/BIM-TASK-0187.md",
         "backend/app/tests/test_bim_real_dataset_registry.py",
-        "backend/app/tests/test_bim_ifc_quality.py"
+        "backend/app/tests/test_bim_ifc_quality.py",
+        "backend/app/tests/test_bim_import_jobs.py",
+        "backend/app/tests/fixtures/bim/real/buildingsmart-pcert-ifc4x3/Building-Architecture.ifc"
       ]
     },
     {

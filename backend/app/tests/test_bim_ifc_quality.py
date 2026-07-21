@@ -43,7 +43,7 @@ def test_invalid_ifc_separates_step_and_schema_errors():
     assert {finding["domain"] for finding in analysis.findings} >= {"step", "schema", "semantic"}
 
 
-def test_partially_supported_schema_is_warning_not_certification():
+def test_ifc4x3_add2_is_supported_without_claiming_certification():
     source = """ISO-10303-21;
 HEADER;
 FILE_SCHEMA(('IFC4X3_ADD2'));
@@ -58,9 +58,29 @@ END-ISO-10303-21;
     analysis = analyze_ifc_quality(source)
 
     assert analysis.step_status == "valid"
+    assert analysis.schema_status == "supported"
+    assert analysis.overall_status == "passed"
+    assert analysis.error_count == 0
+    assert not any(finding["code"] == "schema.partially_supported" for finding in analysis.findings)
+    assert analysis.summary["certification_claimed"] is False
+
+
+def test_unknown_future_schema_remains_partially_supported():
+    source = """ISO-10303-21;
+HEADER;
+FILE_SCHEMA(('IFC5'));
+ENDSEC;
+DATA;
+#1=IFCPROJECT('PROJECT-1',$,'Proyecto',$,$,$,$,$,$);
+#2=IFCBUILDINGSTOREY('STOREY-1',$,'Nivel 1',$,$,$,$,$,$);
+#3=IFCWALL('WALL-1',$,'Muro',$,$,$,$,$);
+ENDSEC;
+END-ISO-10303-21;
+"""
+    analysis = analyze_ifc_quality(source)
+
     assert analysis.schema_status == "partially_supported"
     assert analysis.overall_status == "warnings"
-    assert analysis.error_count == 0
     assert any(finding["code"] == "schema.partially_supported" for finding in analysis.findings)
     assert analysis.summary["certification_claimed"] is False
 
@@ -115,4 +135,3 @@ END-ISO-10303-21;
     assert first.id == second.id
     assert db.query(BimIfcQualityReport).filter(BimIfcQualityReport.proyecto_id == project.id).count() == 1
     assert second.empresa_id == sample_empresa.id
-

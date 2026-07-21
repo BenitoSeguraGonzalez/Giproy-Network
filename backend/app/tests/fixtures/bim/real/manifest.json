@@ -27,6 +27,30 @@
       }
     },
     {
+      "id": "bsi-pcert-ifc4x3-architecture",
+      "label": "buildingSMART PCERT IFC4.3 Architecture",
+      "relative_path": "buildingsmart-pcert-ifc4x3/Building-Architecture.ifc",
+      "scale": "small",
+      "discipline": "architecture",
+      "schema": "IFC4X3_ADD2",
+      "mvd": "PCERT sample scene",
+      "source": {
+        "publisher": "buildingSMART International",
+        "url": "https://github.com/buildingSMART/Sample-Test-Files/blob/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Building-Architecture.ifc",
+        "license_spdx": "CC-BY-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "buildingSMART International, Sample & Test Files, IFC4.3 Building-Architecture.ifc"
+      },
+      "expected": {
+        "bytes": 220789,
+        "sha256": "a42962f9e2068040ac96636b1e7f6117150b6c0e3371f81088721b22796e463f",
+        "entity_count": 383,
+        "storey_count": 1,
+        "element_count": 12,
+        "required_ifc_classes": ["IFCWALL", "IFCSLAB", "IFCELEMENTQUANTITY"]
+      }
+    },
+    {
       "id": "bsi-pcert-ifc4-structural",
       "label": "buildingSMART PCERT Structural",
       "relative_path": "buildingsmart-pcert/Building-Structural.ifc",
@@ -130,15 +154,16 @@
       "scale": "large",
       "member_dataset_ids": [
         "bsi-pcert-ifc4-architecture",
+        "bsi-pcert-ifc4x3-architecture",
         "bsi-pcert-ifc4-structural",
         "bsi-pcert-ifc4-hvac",
         "bsi-duplex-ifc2x3-architecture",
         "bsi-duplex-ifc2x3-mep"
       ],
       "expected": {
-        "member_count": 5,
-        "total_bytes": 20954197,
-        "total_elements": 1103
+        "member_count": 6,
+        "total_bytes": 21174986,
+        "total_elements": 1115
       }
     }
   ]

@@ -1182,3 +1182,16 @@ intercambio end-to-end.
   slice humano/externo antes de cualquier rollout general.
 - Paridad: `89,17%`, 52 completas, 3 parciales y 5 ausentes. Programa: 60/61,
   98,36% realizado y 1,64% pendiente.
+
+## Soporte interno IFC4.3 con corpus oficial - 2026-07-20
+
+- `BIM-TASK-0187` incorpora `IFC4X3_ADD2` al baseline interno junto a IFC2X3
+  e IFC4, sin reclamar certificacion.
+- El corpus PCERT oficial buildingSMART bajo CC BY 4.0 queda fijado por
+  checksum y valida 383 entidades, un storey y 12 elementos.
+- El job completo persiste la version y el reporte `schema_status=supported`;
+  schemas futuros desconocidos conservan warning.
+- `IfcImporter` procesa los seis datasets y convierte el IFC4.3 oficial en
+  17.320 bytes Fragments, manteniendo IFC2X3 e IFC4 verdes.
+- Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
+  98,36%; Gate E, certificaciones y Gate K siguen pendientes.

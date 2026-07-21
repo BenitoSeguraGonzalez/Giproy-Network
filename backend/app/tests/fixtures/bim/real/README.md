@@ -9,6 +9,8 @@ The files are published by buildingSMART International under CC BY 4.0.
 Source URLs, checksums and required attribution are recorded per file in
 `manifest.json`.
 
+The corpus covers IFC2X3, IFC4 and the official IFC4X3_ADD2 PCERT scene.
+
 The Duplex attribution required by its source is:
 
 `BSI (2020), Duplex Apartment Test Files, buildingSMART International`.

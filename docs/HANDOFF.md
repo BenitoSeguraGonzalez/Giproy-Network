@@ -1,5 +1,13 @@
 # HANDOFF
 
+## 2026-07-20 - Soporte interno IFC4.3
+
+- `BIM-TASK-0187` valida `IFC4X3_ADD2` con corpus oficial y job completo.
+- Fragments procesa seis datasets; IFC4.3 produce 17.320 bytes no vacios.
+- IFC queda `verified_internal`; `certification_claimed=false` se conserva.
+- H08 sigue parcial por certificacion IFC e ISO externas, no por IFC4.3.
+- Tecnico: 61/61, 100%. Liberacion: 60/61, 98,36%.
+
 ## 2026-07-20 - Agregador Gate K
 
 - `BIM-TASK-0186` implementa la decision final sin cerrar evidencia en falso.

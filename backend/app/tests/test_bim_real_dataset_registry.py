@@ -31,10 +31,10 @@ def test_bim_real_dataset_manifest_has_approved_scales_and_disciplines():
 def test_bim_real_dataset_manifest_matches_files_parser_and_federation():
     validations = validate_bim_dataset_manifest(MANIFEST_PATH)
 
-    assert len(validations) == 5
-    assert sum(item.bytes for item in validations) == 20954197
-    assert sum(item.element_count for item in validations) == 1103
-    assert {item.schema for item in validations} == {"IFC2X3", "IFC4"}
+    assert len(validations) == 6
+    assert sum(item.bytes for item in validations) == 21174986
+    assert sum(item.element_count for item in validations) == 1115
+    assert {item.schema for item in validations} == {"IFC2X3", "IFC4", "IFC4X3_ADD2"}
 
 
 def test_bim_real_dataset_manifest_rejects_checksum_drift(tmp_path):

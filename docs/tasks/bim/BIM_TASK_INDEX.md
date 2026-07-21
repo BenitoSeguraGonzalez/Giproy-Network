@@ -265,6 +265,7 @@ iniciada.
 | `BIM-TASK-0184` | Cerrada tecnicamente: expediente ISO 19650/openBIM verificable |
 | `BIM-TASK-0185` | Cerrada tecnicamente: protocolo Gate E sin evidencia fabricada |
 | `BIM-TASK-0186` | Cerrada tecnicamente: agregador Gate K bloqueado por evidencia real |
+| `BIM-TASK-0187` | Cerrada localmente: IFC4X3_ADD2 con corpus oficial y job completo |
 
 ## Orden de ejecucion
 

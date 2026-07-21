@@ -24,6 +24,14 @@ DATA;
 ENDSEC;
 END-ISO-10303-21;
 """
+IFC4X3_FIXTURE = (
+    Path(__file__).resolve().parent
+    / "fixtures"
+    / "bim"
+    / "real"
+    / "buildingsmart-pcert-ifc4x3"
+    / "Building-Architecture.ifc"
+)
 
 
 def _project(db, company_id: int, name: str = "Proyecto BIM jobs") -> Proyecto:
@@ -81,6 +89,28 @@ def test_bim_import_job_processes_to_inactive_review_version(db, sample_empresa,
     report = db.query(BimIfcQualityReport).filter(BimIfcQualityReport.bim_model_version_id == version.id).one()
     assert report.contract_version == "giproy_bim_ifc_quality_v1"
     assert report.overall_status in {"passed", "warnings"}
+
+
+def test_bim_import_job_processes_official_ifc4x3_add2_fixture(db, sample_empresa, tmp_path):
+    project = _project(db, sample_empresa.id, name="Proyecto BIM IFC4.3")
+    job = _create_job(
+        db,
+        tmp_path,
+        project,
+        content=IFC4X3_FIXTURE.read_bytes(),
+        version="ifc4x3-add2",
+    )
+
+    processed = _process_bim_import_job(db, job_id=job.id)
+
+    assert processed.status == "succeeded"
+    assert processed.result_json["created_elements"] == 12
+    report = db.query(BimIfcQualityReport).filter(
+        BimIfcQualityReport.bim_model_version_id == processed.bim_model_version_id
+    ).one()
+    assert report.schema_identifier == "IFC4X3_ADD2"
+    assert report.schema_status == "supported"
+    assert report.summary_json["certification_claimed"] is False
 
 
 def test_failed_bim_import_job_preserves_previous_active_version(db, sample_empresa, tmp_path):

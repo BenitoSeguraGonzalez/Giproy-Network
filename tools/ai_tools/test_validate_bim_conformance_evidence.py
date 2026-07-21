@@ -19,7 +19,7 @@ def test_repository_conformance_pack_is_valid():
     assert result == {
         "errors": [],
         "total": 10,
-        "counts": {"verified_internal": 8, "scope_gap": 1, "external_pending": 1},
+        "counts": {"verified_internal": 9, "external_pending": 1},
     }
 
 

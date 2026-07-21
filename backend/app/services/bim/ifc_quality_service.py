@@ -15,7 +15,7 @@ from app.schemas.bim_model import BimIfcQualityReportResponse
 
 
 IFC_QUALITY_CONTRACT = "giproy_bim_ifc_quality_v1"
-SUPPORTED_SCHEMAS = {"IFC2X3", "IFC4"}
+SUPPORTED_SCHEMAS = {"IFC2X3", "IFC4", "IFC4X3_ADD2"}
 SCHEMA_PATTERN = re.compile(r"FILE_SCHEMA\s*\(\s*\(\s*['\"]([^'\"]+)", re.IGNORECASE)
 ENTITY_PATTERN = re.compile(r"#(\d+)\s*=\s*(IFC[A-Z0-9_]+)\s*\(\s*'([^']*)'", re.IGNORECASE)
 PHYSICAL_CLASSES = {
@@ -71,7 +71,7 @@ def analyze_ifc_quality(ifc_text: str, *, source_checksum_sha256: str | None = N
             "schema",
             "warning",
             "schema.partially_supported",
-            f"El schema {schema_identifier} no pertenece al baseline IFC2X3/IFC4 validado por GiProy.",
+            f"El schema {schema_identifier} no pertenece al baseline IFC2X3/IFC4/IFC4X3_ADD2 validado por GiProy.",
         )
         schema_status = "partially_supported"
     else:

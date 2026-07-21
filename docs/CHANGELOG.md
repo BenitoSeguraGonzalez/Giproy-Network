@@ -1,3 +1,9 @@
+### 2026-07-20 - Soporte interno IFC4.3 (BIM-TASK-0187)
+
+- IFC4X3_ADD2 soportado con corpus PCERT oficial buildingSMART CC BY 4.0.
+- Job completo, calidad IFC y Fragments verificados sin reclamar certificacion.
+- Implementacion tecnica 61/61; liberacion general permanece en 60/61.
+
 ### 2026-07-20 - Agregador Gate K (BIM-TASK-0186)
 
 - Gate K agrega paridad, Gate E, conformidad, checks, certificados y firmas.

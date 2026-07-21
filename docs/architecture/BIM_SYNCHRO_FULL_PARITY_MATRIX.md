@@ -57,7 +57,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | B02 | Importar/exportar Primavera P6 XER/XML | Parcial | `BIM-TASK-0132`: P6 XML interno; XER y round-trip Oracle pendientes |
 | B03 | Importar/exportar Asta Powerproject | Ausente | requiere formato autorizado y corpus real |
 | B04 | Intercambio MS Project XML | Completa | `BIM-TASK-0131/0134/0139`: preview, export, revisiones, gobierno y UX BIM |
-| B05 | Interoperabilidad amplia CAD/BIM | Parcial | IFC 2x3/4 y Fragments; no cubre la amplitud propietaria publicada |
+| B05 | Interoperabilidad amplia CAD/BIM | Parcial | `BIM-TASK-0187`: IFC2X3/IFC4/IFC4X3_ADD2 y Fragments; no cubre la amplitud propietaria publicada |
 | B06 | API, webhooks y conectores de terceros | Completa | `BIM-TASK-0173`: API ERP, webhooks HMAC, outbox recuperable y controles SSRF |
 
 ### C. SYNCHRO Control / CDE
@@ -132,7 +132,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | H05 | Mapas y servicios de ubicacion | Completa | `BIM-TASK-0171`: catalogos XYZ/WMS revisados, tenant-aware y operativos sobre georreferencia BIM |
 | H06 | Integracion ERP de progreso y horas | Completa | `BIM-TASK-0172`: paquetes pull deterministas, versionados, publicados y checksum-exactos |
 | H07 | Seguridad, backup y recuperacion BIM | Completa | `BIM-TASK-0090/0170/0183`: restore local checksum-exacto y restauracion beta pre-ola con fingerprint clasico intacto |
-| H08 | Conformidad internacional demostrada | Parcial | `BIM-TASK-0184`: evidencia interna ISO 19650-1..6, IFC2X3/IFC4, IDS 1.0 y BCF 2.1; faltan IFC4.3, certificacion IFC por version/producto y auditoria ISO externa |
+| H08 | Conformidad internacional demostrada | Parcial | `BIM-TASK-0184`/`0187`: evidencia interna ISO 19650-1..6, IFC2X3/IFC4/IFC4X3_ADD2, IDS 1.0 y BCF 2.1; faltan certificacion IFC por version/producto y auditoria ISO externa |
 
 ## 4. Resultado inicial
 
