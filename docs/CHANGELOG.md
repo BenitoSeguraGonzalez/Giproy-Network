@@ -1,3 +1,10 @@
+### 2026-07-21 - Reconstruccion del remoto interno Gitea (TASK-2034)
+
+- Gitea se reconstruye en `192.168.18.106` sobre PostgreSQL dedicado y vuelve a
+  operar mediante Traefik y Git SSH en el puerto `2222`.
+- `Giproy-Netword/main` queda sincronizado con GitHub en `827388d`; los
+  metadatos del servidor historico no estaban disponibles para recuperacion.
+
 ### 2026-07-21 - Modal de calendario laboral adaptado a escritorio (TASK-2033)
 
 - El modal clasico del calendario laboral mantiene cabecera y cierre visibles
