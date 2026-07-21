@@ -135,6 +135,13 @@
   baseline enterprise pasan. Sin cambios ni dependencias clasicas.
 - Paridad: 87,50%. Programa: 47/61, 77,05% realizado y 22,95% pendiente.
 
+## 2026-07-20 - Panel arrastrable de semáforos APU
+
+- `TASK-2030` mantiene el panel de semáforos dentro del viewport y permite
+  moverlo desde la cabecera con Pointer Events.
+- Arrastrar lo fija automáticamente; scroll y refrescos no alteran la posición.
+- Build, smoke focal, frontera Cronogramas y anti-BIM pasan. Sin deploy.
+
 ## 2026-07-20 - Intercambio gobernado BIM hacia ERP
 
 - `BIM-TASK-0172` completa H06 con paquetes versionados de avance y horas BIM

@@ -49,7 +49,7 @@ import {
 import { resolveBackendCriticalPathMembership, resolveCriticalEdgeKeys } from './cronogramasGanttCriticalPath';
 import { buildDeferredZoomViewport, clampGanttZoom } from './cronogramasGanttZoom';
 import { buildVirtualRowMetrics, resolveTimelineVirtualWindow, resolveVerticalVirtualWindow } from './cronogramasGanttVirtualization';
-import { buildGanttApuPlanningSignals } from './cronogramasGanttApuPlanning';
+import { buildGanttApuPlanningSignals, clampFloatingPanelPosition } from './cronogramasGanttApuPlanning';
 import { clampMoveDayDeltaToBounds, isTaskBarDraggable, resolveSubbarClickSelection, resolveSubbarPointerSelection } from './cronogramasGanttInteraction';
 import { applyManualMilestoneDependencyLagUpdates, buildTaskMoveGuideModel, resolveGhostSubbarVisuals, resolveTaskMoveGuideAnchors } from './cronogramasGanttDragPreview';
 import { normalizeManualMilestonesConfig } from './cronogramasGanttManualMilestones';
@@ -1215,6 +1215,9 @@ const GanttApuPlanningSignalsPanel = ({
     currency = 'USD',
     moneyDecimals = 2,
     onTogglePinned,
+    onDragPointerDown,
+    onDragPointerMove,
+    onDragPointerEnd,
     onPointerEnter,
     onPointerLeave,
 }) => {
@@ -1266,7 +1269,15 @@ const GanttApuPlanningSignalsPanel = ({
             onPointerLeave={onPointerLeave}
             aria-label="Semáforos de planificación del APU seleccionado"
         >
-            <div className="flex items-start justify-between gap-3 border-b border-zinc-200 px-4 py-3">
+            <div
+                data-testid="gantt-apu-planning-signals-drag-handle"
+                className="flex cursor-move touch-none select-none items-start justify-between gap-3 border-b border-zinc-200 px-4 py-3"
+                onPointerDown={onDragPointerDown}
+                onPointerMove={onDragPointerMove}
+                onPointerUp={onDragPointerEnd}
+                onPointerCancel={onDragPointerEnd}
+                title="Arrastra para mover el panel"
+            >
                 <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                         <Gauge className="h-4 w-4 shrink-0 text-[#136191]" />
@@ -1289,6 +1300,7 @@ const GanttApuPlanningSignalsPanel = ({
                 </div>
                 <button
                     type="button"
+                    onPointerDown={(event) => event.stopPropagation()}
                     onClick={onTogglePinned}
                     className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[0.75rem] border px-2.5 text-[9px] font-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/35 ${
                         pinned
@@ -8845,10 +8857,13 @@ const CronogramaGantt = ({
     const toolsButtonRef = useRef(null);
     const toolsMenuRef = useRef(null);
     const apuPlanningSignalsButtonRef = useRef(null);
+    const apuPlanningSignalsPanelRef = useRef(null);
+    const apuPlanningSignalsDragRef = useRef(null);
     const apuPlanningSignalsCloseTimeoutRef = useRef(null);
     const [toolsMenuStyle, setToolsMenuStyle] = useState(null);
     const [historyPanelStyle, setHistoryPanelStyle] = useState(null);
     const [apuPlanningSignalsPanelStyle, setApuPlanningSignalsPanelStyle] = useState(null);
+    const [apuPlanningSignalsDragging, setApuPlanningSignalsDragging] = useState(false);
     const [configPanelStyle, setConfigPanelStyle] = useState(null);
     const [timeScaleMenuOpen, setTimeScaleMenuOpen] = useState(false);
     const [timeScaleMenuStyle, setTimeScaleMenuStyle] = useState(null);
@@ -9758,6 +9773,52 @@ const CronogramaGantt = ({
         setApuPlanningSignalsPinned((current) => !current);
     }, [clearApuPlanningSignalsClose]);
 
+    const startApuPlanningSignalsDrag = useCallback((event) => {
+        if (event.button !== 0 || event.target?.closest?.('button, a, input, select, textarea')) return;
+        const panel = apuPlanningSignalsPanelRef.current;
+        if (!panel) return;
+        const rect = panel.getBoundingClientRect();
+        event.preventDefault();
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+        clearApuPlanningSignalsClose();
+        setApuPlanningSignalsHovered(true);
+        setApuPlanningSignalsPinned(true);
+        apuPlanningSignalsDragRef.current = {
+            pointerId: event.pointerId,
+            originX: event.clientX,
+            originY: event.clientY,
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+        };
+        setApuPlanningSignalsDragging(true);
+    }, [clearApuPlanningSignalsClose]);
+
+    const moveApuPlanningSignals = useCallback((event) => {
+        const drag = apuPlanningSignalsDragRef.current;
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        const next = clampFloatingPanelPosition({
+            left: drag.left + event.clientX - drag.originX,
+            top: drag.top + event.clientY - drag.originY,
+            width: drag.width,
+            height: drag.height,
+        }, window.innerWidth, window.innerHeight);
+        setApuPlanningSignalsPanelStyle((current) => current ? {
+            ...current,
+            left: `${next.left}px`,
+            top: `${next.top}px`,
+        } : current);
+    }, []);
+
+    const finishApuPlanningSignalsDrag = useCallback((event) => {
+        const drag = apuPlanningSignalsDragRef.current;
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        event.currentTarget.releasePointerCapture?.(event.pointerId);
+        apuPlanningSignalsDragRef.current = null;
+        setApuPlanningSignalsDragging(false);
+    }, []);
+
     const openToolsMenu = useCallback(() => {
         if (toolsHoverTimeoutRef.current) {
             clearTimeout(toolsHoverTimeoutRef.current);
@@ -9812,7 +9873,7 @@ const CronogramaGantt = ({
 
     useLayoutEffect(() => {
         if (!toolsMenuOpen && !historyPanelOpen && !configPanelOpen && !timeScaleMenuOpen && !apuPlanningSignalsOpen) return;
-        const update = () => {
+        const update = (event) => {
             const trigger = toolsButtonRef.current;
             if (toolsMenuOpen) {
                 setToolsMenuStyle(buildPopoverPosition(trigger, 240, 0));
@@ -9839,6 +9900,23 @@ const CronogramaGantt = ({
                 }));
             }
             if (apuPlanningSignalsOpen) {
+                if (apuPlanningSignalsPinned && apuPlanningSignalsPanelRef.current) {
+                    if (event?.type !== 'resize') return;
+                    const rect = apuPlanningSignalsPanelRef.current?.getBoundingClientRect();
+                    if (!rect) return;
+                    const next = clampFloatingPanelPosition(
+                        rect,
+                        window.innerWidth,
+                        window.innerHeight,
+                    );
+                    setApuPlanningSignalsPanelStyle((current) => current ? {
+                        ...current,
+                        left: `${next.left}px`,
+                        top: `${next.top}px`,
+                        maxHeight: `${Math.max(240, window.innerHeight - 24)}px`,
+                    } : current);
+                    return;
+                }
                 const trigger = apuPlanningSignalsButtonRef.current;
                 const maxWidth = Math.min(440, window.innerWidth - 24);
                 setApuPlanningSignalsPanelStyle(buildPopoverPosition(trigger, maxWidth, 8, {
@@ -9855,7 +9933,7 @@ const CronogramaGantt = ({
             window.removeEventListener('scroll', update, true);
             window.removeEventListener('resize', update);
         };
-    }, [apuPlanningSignalsOpen, buildPopoverPosition, configPanelOpen, historyPanelOpen, timeScaleMenuOpen, toolsMenuOpen]);
+    }, [apuPlanningSignalsOpen, apuPlanningSignalsPinned, buildPopoverPosition, configPanelOpen, historyPanelOpen, timeScaleMenuOpen, toolsMenuOpen]);
 
     useEffect(() => () => {
         if (apuPlanningSignalsCloseTimeoutRef.current) {
@@ -18999,13 +19077,20 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                         </ControlRailIconButton>
                                         {apuPlanningSignalsOpen && apuPlanningSignalsPanelStyle
                                             ? createPortal(
-                                                <div style={apuPlanningSignalsPanelStyle}>
+                                                <div
+                                                    ref={apuPlanningSignalsPanelRef}
+                                                    style={apuPlanningSignalsPanelStyle}
+                                                    data-dragging={apuPlanningSignalsDragging ? 'true' : 'false'}
+                                                >
                                                     <GanttApuPlanningSignalsPanel
                                                         model={selectedTaskApuPlanningSignals}
                                                         pinned={apuPlanningSignalsPinned}
                                                         currency={valorado?.moneda || 'USD'}
                                                         moneyDecimals={valorado?.dec_moneda ?? 2}
                                                         onTogglePinned={toggleApuPlanningSignalsPinned}
+                                                        onDragPointerDown={startApuPlanningSignalsDrag}
+                                                        onDragPointerMove={moveApuPlanningSignals}
+                                                        onDragPointerEnd={finishApuPlanningSignalsDrag}
                                                         onPointerEnter={openApuPlanningSignals}
                                                         onPointerLeave={scheduleCloseApuPlanningSignals}
                                                     />

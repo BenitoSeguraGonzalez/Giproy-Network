@@ -199,4 +199,19 @@ export const buildGanttApuPlanningSignals = ({
         validations,
     };
 };
+export const clampFloatingPanelPosition = (
+    { left, top, width, height },
+    viewportWidth,
+    viewportHeight,
+    padding = 12,
+) => ({
+    left: Math.min(
+        Math.max(padding, Number(left || 0)),
+        Math.max(padding, Number(viewportWidth || 0) - Math.max(0, Number(width || 0)) - padding),
+    ),
+    top: Math.min(
+        Math.max(padding, Number(top || 0)),
+        Math.max(padding, Number(viewportHeight || 0) - Math.max(0, Number(height || 0)) - padding),
+    ),
+});
 

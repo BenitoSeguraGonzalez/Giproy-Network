@@ -3,7 +3,10 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
-import { buildGanttApuPlanningSignals } from '../src/components/projects/cronogramasGanttApuPlanning.js';
+import {
+    buildGanttApuPlanningSignals,
+    clampFloatingPanelPosition,
+} from '../src/components/projects/cronogramasGanttApuPlanning.js';
 
 const closeTo = (actual, expected, tolerance = 0.0001) => {
     assert.ok(
@@ -87,6 +90,23 @@ const unavailable = buildGanttApuPlanningSignals({ row: { is_calculable: false }
 assert.equal(unavailable.available, false);
 assert.equal(unavailable.overallStatus, 'unavailable');
 
+assert.deepEqual(
+    clampFloatingPanelPosition(
+        { left: -80, top: 760, width: 440, height: 360 },
+        1280,
+        800,
+    ),
+    { left: 12, top: 428 },
+);
+assert.deepEqual(
+    clampFloatingPanelPosition(
+        { left: 1180, top: -40, width: 440, height: 360 },
+        1280,
+        800,
+    ),
+    { left: 828, top: 12 },
+);
+
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const componentSource = await readFile(
     path.resolve(scriptDir, '../src/components/projects/CronogramaGantt.jsx'),
@@ -100,6 +120,15 @@ for (const marker of [
     'toggleApuPlanningSignalsPinned',
     'openApuPlanningSignalsForRow',
     'toggleApuPlanningSignalsForRow',
+    'clampFloatingPanelPosition',
+    'gantt-apu-planning-signals-drag-handle',
+    'startApuPlanningSignalsDrag',
+    'setPointerCapture?.(event.pointerId)',
+    'moveApuPlanningSignals',
+    'finishApuPlanningSignalsDrag',
+    'setApuPlanningSignalsPinned(true)',
+    "event?.type !== 'resize'",
+    "maxHeight: `${Math.max(240, window.innerHeight - 24)}px`",
     'Abrir y fijar semáforos APU de esta actividad',
     'aria-expanded={apuPlanningSignalsOpen}',
     "event.key !== 'Escape'",

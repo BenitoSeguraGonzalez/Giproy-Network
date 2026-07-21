@@ -102,6 +102,14 @@
 - H03 permanece parcial hasta certificar concurrencia y reconexion en servidor.
 - Build, 35 smokes BIM, PostgreSQL reversible, DR, anti-BIM y baseline pasan.
 
+### 2026-07-20 - Panel arrastrable de semáforos APU (TASK-2030)
+
+- El panel flotante queda limitado al viewport y ya no se pierde por la zona
+  inferior o lateral del navegador.
+- Su cabecera permite arrastrar y soltar; el arrastre fija el panel y conserva
+  la posición durante scroll o refrescos visuales.
+- Resize corrige únicamente lo necesario para mantenerlo visible.
+
 ### 2026-07-20 - Gateway de integracion empresarial BIM (BIM-TASK-0173)
 
 - B06 incorpora suscripciones HTTPS con secreto cifrado, firma HMAC-SHA256,
