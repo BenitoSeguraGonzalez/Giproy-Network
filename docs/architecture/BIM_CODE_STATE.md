@@ -1197,3 +1197,14 @@ intercambio end-to-end.
   home 200, CDE anonimo 401 y allowlist `1,3` intacta.
 - Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
   98,36%; Gate E, certificaciones y Gate K siguen pendientes.
+
+## Adaptador controlado Primavera P6 XER - 2026-07-20
+
+- `BIM-TASK-0188` agrega parser y exportador tabular XER sobre ocho tablas del
+  mapa oficial Oracle, con proyecto unico, limites y warnings de perdida.
+- El panel BIM ofrece MSPDI, P6 XML y P6 XER sin crear una superficie paralela.
+- Suite P6 XER/XML/capacidades: 14 pruebas y scheduling completo: 31; build, Playwright 1920x1080 y smoke
+  anti-BIM correctos.
+- B02 permanece parcial: falta round-trip contra una instancia Oracle P6 real.
+- Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
+  98,36%; Gate E, certificaciones, Oracle externo y Gate K siguen pendientes.

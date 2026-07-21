@@ -216,6 +216,7 @@ from app.schemas.bim_schedule_interop import (
     BimSchedulePreflightResponse,
 )
 from app.services.bim.mspdi_interop_service import export_mspdi_xml, parse_mspdi_xml
+from app.services.bim.p6_xer_interop_service import export_p6_xer, parse_p6_xer
 from app.services.bim.p6_xml_interop_service import export_p6_xml, parse_p6_xml
 from app.services.bim.schedule_interop_service import preflight_schedule_interchange
 from app.services.bim.schedule_interop_capability_service import get_schedule_interop_capabilities
@@ -1634,6 +1635,55 @@ def export_project_bim_p6_xml(
         content=content,
         media_type="application/xml",
         headers={"Content-Disposition": 'attachment; filename="giproy-bim-schedule-p6.xml"'},
+    )
+
+
+@router.post(
+    "/projects/{project_id}/4d/schedule-interchange/p6-xer/import-preview",
+    response_model=BimScheduleImportPreviewResponse,
+)
+async def preview_project_bim_p6_xer_import(
+    project_id: int,
+    file: UploadFile = File(...),
+    timezone_name: str = Form(...),
+    currency: str = Form("USD"),
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.schedule.link")
+    if not (file.filename or "").lower().endswith(".xer"):
+        raise HTTPException(status_code=400, detail="P6 XER requiere un archivo .xer.")
+    try:
+        return parse_p6_xer(
+            await file.read(),
+            source_filename=file.filename or "schedule-p6.xer",
+            timezone_name=timezone_name,
+            currency=currency.upper(),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/projects/{project_id}/4d/schedule-interchange/p6-xer/export")
+def export_project_bim_p6_xer(
+    project_id: int,
+    payload: BimScheduleInterchangeDocument,
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.schedule.link")
+    try:
+        content = export_p6_xer(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return Response(
+        content=content,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": 'attachment; filename="giproy-bim-schedule-p6.xer"'},
     )
 
 

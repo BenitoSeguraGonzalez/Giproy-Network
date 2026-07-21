@@ -1,0 +1,32 @@
+ERMHDR	24.12	2026-07-20	Project	GiProy QA	GiProy BIM	USD
+%T	PROJECT
+%F	proj_id	proj_short_name	last_recalc_date	plan_start_date	scd_end_date	clndr_id
+%R	1	P6-XER-QA	2026-07-13 08:00	2026-07-13 08:00	2026-07-18 17:00	10
+%T	CALENDAR
+%F	clndr_id	clndr_name	day_hr_cnt	week_hr_cnt	proj_id	clndr_data
+%R	10	Calendario P6 XER QA	8	40	1	DaysOfWeek()
+%T	PROJWBS
+%F	wbs_id	parent_wbs_id	proj_id	proj_node_flag	seq_num	wbs_short_name	wbs_name
+%R	100		1	Y	0	P6-XER-QA	P6 XER Interoperable
+%R	101	100	1	N	1	1	Construccion
+%R	102	101	1	N	2	1.1	Estructura
+%T	TASK
+%F	task_id	proj_id	wbs_id	clndr_id	task_code	task_name	task_type	status_code	target_start_date	target_end_date	act_start_date	act_end_date	phys_complete_pct	target_drtn_hr_cnt	cstr_type	cstr_date
+%R	1000	1	102	10	A1000	Inicio estructura	TT_StartMile	TK_Complete	2026-07-13 08:00	2026-07-13 08:00	2026-07-13 08:00	2026-07-13 08:00	100	0
+%R	1001	1	102	10	A1010	Ejecutar estructura	TT_Task	TK_Active	2026-07-14 08:00	2026-07-18 17:00	2026-07-14 08:00		25	40	CS_SNET	2026-07-14 08:00
+%T	TASKPRED
+%F	task_pred_id	task_id	pred_task_id	proj_id	pred_proj_id	pred_type	lag_hr_cnt
+%R	2000	1001	1000	1	1	PR_FS	8
+%T	RSRC
+%F	rsrc_id	rsrc_short_name	rsrc_name	rsrc_type
+%R	3000	MO-01	Cuadrilla estructura	RT_Labor
+%T	RSRCRATE
+%F	rsrc_rate_id	rsrc_id	max_qty_per_hr	cost_per_qty	start_date
+%R	3500	3000	2	25	2026-07-13 08:00
+%T	TASKRSRC
+%F	taskrsrc_id	task_id	proj_id	rsrc_id	target_qty_per_hr	target_qty	target_cost	act_reg_qty	act_reg_cost
+%R	4000	1001	1	3000	2	40	1000	8	200
+%T	UDFVALUE
+%F	udf_type_id	fk_id	proj_id	udf_text
+%R	5000	1001	1	Dato no representable
+%E

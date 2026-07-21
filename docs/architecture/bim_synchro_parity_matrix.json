@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "as_of": "2026-07-20",
-  "task": "BIM-TASK-0187",
+  "task": "BIM-TASK-0188",
   "source_document": "docs/architecture/BIM_SYNCHRO_FULL_PARITY_MATRIX.md",
   "status_weights": {
     "complete": 1.0,
@@ -27,7 +27,7 @@
     {"id": "A09", "group": "4d_modeler", "status": "complete", "evidence": ["BIM-TASK-0107", "BIM-TASK-0137", "BIM-TASK-0138"]},
     {"id": "A10", "group": "4d_modeler", "status": "complete", "evidence": ["BIM-TASK-0106", "BIM-TASK-0115", "BIM-TASK-0116"]},
     {"id": "B01", "group": "scheduling_interop", "status": "complete", "evidence": ["Classic schedule snapshots", "BIM-TASK-0093"]},
-    {"id": "B02", "group": "scheduling_interop", "status": "partial", "evidence": ["BIM-TASK-0132 P6 XML internal round-trip", "P6 XER and Oracle target round-trip pending"]},
+    {"id": "B02", "group": "scheduling_interop", "status": "partial", "evidence": ["BIM-TASK-0132 P6 XML internal round-trip", "BIM-TASK-0188 controlled P6 XER subset and internal round-trip", "Oracle P6 target round-trip pending"]},
     {"id": "B03", "group": "scheduling_interop", "status": "absent", "evidence": ["Asta Powerproject interchange pending"]},
     {"id": "B04", "group": "scheduling_interop", "status": "complete", "evidence": ["BIM-TASK-0131", "BIM-TASK-0134", "BIM-TASK-0139"]},
     {"id": "B05", "group": "scheduling_interop", "status": "partial", "evidence": ["BIM-TASK-0187", "IFC2X3/IFC4/IFC4X3_ADD2 and Fragments", "Proprietary breadth pending"]},

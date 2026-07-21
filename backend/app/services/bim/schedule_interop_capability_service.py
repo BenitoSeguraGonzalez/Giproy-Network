@@ -29,10 +29,10 @@ def get_schedule_interop_capabilities() -> BimScheduleInteropCapabilitiesRespons
                 {
                     "format": "p6_xer",
                     "status": "conditional",
-                    "import_preview": False,
-                    "export": False,
+                    "import_preview": True,
+                    "export": True,
                     "native_extension": ".xer",
-                    "reason": "Requiere corpus XER autorizado y contrato de equivalencia antes de implementar el parser.",
+                    "reason": "Subconjunto XER basado en el mapa oficial Oracle; la validacion round-trip contra una instancia P6 sigue siendo externa.",
                     "requires_authorized_corpus": True,
                 },
                 {

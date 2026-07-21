@@ -2,7 +2,7 @@
 
 Fecha de corte: 2026-07-13
 TASK: `BIM-TASK-0129`
-Estado: decision arquitectonica cerrada; implementacion pendiente.
+Estado: decision arquitectonica cerrada; adaptadores abiertos implementados y validacion externa pendiente.
 
 ## 1. Objetivo
 
@@ -69,9 +69,16 @@ Un formato solo pasa a `completo` cuando un corpus autorizado demuestra:
 1. `BIM-TASK-0130`: contrato canonico y preflight.
 2. `BIM-TASK-0131`: MSPDI XML import/export.
 3. `BIM-TASK-0132`: P6 XML import/export.
-4. `BIM-TASK-0133`: XER opcional con corpus autorizado.
+4. `BIM-TASK-0133/0188`: gate propietario y subconjunto XER basado en mapa oficial.
 5. `BIM-TASK-0134`: preview, aprobacion, rollback y round-trip comparativo.
 
 Los adaptadores `.mpp` y `.pp` no bloquean la paridad funcional si MSPDI/P6
 XML cubren el intercambio documentado. Si el negocio exige archivos nativos,
 se adquirira e integrara un SDK/licencia antes de abrir la TASK correspondiente.
+
+## 7. Estado XER vigente
+
+`BIM-TASK-0188` implementa preview/export de proyecto unico para las tablas
+oficiales `PROJECT`, `CALENDAR`, `PROJWBS`, `TASK`, `TASKPRED`, `RSRC`,
+`RSRCRATE` y `TASKRSRC`. La capacidad permanece condicionada: el round-trip
+interno no certifica reimportacion ni equivalencia CPM contra Oracle P6.

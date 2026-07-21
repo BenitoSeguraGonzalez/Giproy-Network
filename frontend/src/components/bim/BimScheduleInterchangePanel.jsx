@@ -6,6 +6,7 @@ import { bimModelsApi } from '../../api/bimModels';
 const FORMAT_OPTIONS = [
     { id: 'mspdi', label: 'MS Project XML', extension: '.xml' },
     { id: 'p6', label: 'Primavera P6 XML', extension: '.xml' },
+    { id: 'p6-xer', label: 'Primavera P6 XER', extension: '.xer' },
 ];
 
 const statusClass = {
@@ -43,7 +44,7 @@ export default function BimScheduleInterchangePanel({ projectId, empresaId, api 
             setBusy(true); setError(''); setPreview(null);
             setPreview(await api.previewScheduleInterchange(projectId, format, { file, timezone_name: timezone, currency }, empresaId));
         } catch (requestError) {
-            setError(requestError?.response?.data?.detail || 'No se pudo analizar el cronograma XML.');
+            setError(requestError?.response?.data?.detail || 'No se pudo analizar el archivo de planificacion.');
         } finally { setBusy(false); }
     };
 
@@ -86,7 +87,7 @@ export default function BimScheduleInterchangePanel({ projectId, empresaId, api 
             const url = URL.createObjectURL(blob);
             const anchor = document.createElement('a');
             anchor.href = url;
-            anchor.download = format === 'p6' ? 'giproy-bim-schedule-p6.xml' : 'giproy-bim-schedule.xml';
+            anchor.download = format === 'p6-xer' ? 'giproy-bim-schedule-p6.xer' : format === 'p6' ? 'giproy-bim-schedule-p6.xml' : 'giproy-bim-schedule.xml';
             anchor.click();
             URL.revokeObjectURL(url);
         } catch (requestError) {
@@ -96,6 +97,7 @@ export default function BimScheduleInterchangePanel({ projectId, empresaId, api 
 
     const counts = preview?.preflight?.counts || {};
     const issues = [...(preview?.preflight?.errors || []), ...(preview?.preflight?.warnings || [])];
+    const selectedFormat = FORMAT_OPTIONS.find((option) => option.id === format) || FORMAT_OPTIONS[0];
 
     return (
         <section className="border border-slate-200 bg-white" data-bim-schedule-interchange>
@@ -104,18 +106,18 @@ export default function BimScheduleInterchangePanel({ projectId, empresaId, api 
                 <h3 className="text-sm font-semibold text-slate-800">Intercambio de planificacion</h3>
             </header>
             <div className="space-y-3 p-3 text-xs">
-                <div className="grid grid-cols-2 border border-slate-200" aria-label="Formato de intercambio">
-                    {FORMAT_OPTIONS.map((option) => <button key={option.id} type="button" onClick={() => { setFormat(option.id); setPreview(null); }} className={`h-8 font-medium ${format === option.id ? 'bg-slate-800 text-white' : 'bg-white text-slate-600'}`}>{option.label}</button>)}
+                <div className="grid grid-cols-3 border border-slate-200" aria-label="Formato de intercambio">
+                    {FORMAT_OPTIONS.map((option) => <button key={option.id} type="button" onClick={() => { setFormat(option.id); setFile(null); setPreview(null); }} className={`h-8 font-medium ${format === option.id ? 'bg-slate-800 text-white' : 'bg-white text-slate-600'}`}>{option.label}</button>)}
                 </div>
                 <label className="flex h-9 cursor-pointer items-center gap-2 border border-dashed border-slate-300 px-2 text-slate-600">
-                    <Upload size={14} /><span className="min-w-0 flex-1 truncate">{file?.name || 'Seleccionar archivo XML'}</span>
-                    <input className="sr-only" type="file" accept=".xml,application/xml,text/xml" aria-label="Archivo de planificacion XML" onChange={(event) => { setFile(event.target.files?.[0] || null); setPreview(null); }} />
+                    <Upload size={14} /><span className="min-w-0 flex-1 truncate">{file?.name || `Seleccionar archivo ${selectedFormat.extension}`}</span>
+                    <input className="sr-only" type="file" accept={selectedFormat.extension} aria-label="Archivo de planificacion" onChange={(event) => { setFile(event.target.files?.[0] || null); setPreview(null); }} />
                 </label>
                 <div className="grid grid-cols-[minmax(0,1fr)_72px] gap-2">
                     <input className="min-w-0 border border-slate-300 px-2 py-1.5" aria-label="Zona horaria del cronograma" value={timezone} onChange={(event) => setTimezone(event.target.value)} />
                     <input className="min-w-0 border border-slate-300 px-2 py-1.5 uppercase" aria-label="Moneda del cronograma" maxLength={3} value={currency} onChange={(event) => setCurrency(event.target.value.toUpperCase())} />
                 </div>
-                <button type="button" onClick={runPreview} disabled={busy || !file || !timezone.trim() || currency.length !== 3} className="inline-flex h-8 w-full items-center justify-center gap-1 bg-orange-600 font-semibold text-white disabled:opacity-40"><Upload size={14} />Analizar XML</button>
+                <button type="button" onClick={runPreview} disabled={busy || !file || !timezone.trim() || currency.length !== 3} className="inline-flex h-8 w-full items-center justify-center gap-1 bg-orange-600 font-semibold text-white disabled:opacity-40"><Upload size={14} />Analizar archivo</button>
 
                 {preview ? <div className="space-y-2 border-t border-slate-200 pt-3" data-bim-schedule-preview={preview.preflight.valid ? 'valid' : 'invalid'}>
                     <div className="flex items-center justify-between"><strong className="text-slate-800">{preview.document.project_name}</strong><span className={`px-1.5 py-0.5 font-semibold ${preview.preflight.valid ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>{preview.preflight.valid ? 'VALIDO' : 'CON ERRORES'}</span></div>
@@ -123,7 +125,7 @@ export default function BimScheduleInterchangePanel({ projectId, empresaId, api 
                         <span><strong className="block text-sm">{counts.activities || 0}</strong>actividades</span><span><strong className="block text-sm">{counts.dependencies || 0}</strong>relaciones</span><span><strong className="block text-sm">{counts.resources || 0}</strong>recursos</span><span><strong className="block text-sm">{issues.length}</strong>avisos</span>
                     </div>
                     {issues.length ? <div className="max-h-24 space-y-1 overflow-y-auto border border-amber-200 bg-amber-50 p-2" data-bim-schedule-issues>{issues.map((issue, index) => <p key={`${issue.code}-${index}`} className="flex gap-1 text-[10px] text-amber-800"><AlertTriangle size={12} className="shrink-0" />{issue.message}</p>)}</div> : null}
-                    <div className="grid grid-cols-2 gap-1"><button type="button" onClick={saveRevision} disabled={busy || !preview.preflight.valid} className="inline-flex h-8 items-center justify-center gap-1 bg-slate-800 font-semibold text-white disabled:opacity-40"><FileClock size={13} />Guardar revision BIM</button><button type="button" onClick={exportPreview} disabled={busy || !preview.preflight.valid} className="inline-flex h-8 items-center justify-center gap-1 border border-slate-300 font-semibold text-slate-700 disabled:opacity-40"><Download size={13} />Exportar XML</button></div>
+                    <div className="grid grid-cols-2 gap-1"><button type="button" onClick={saveRevision} disabled={busy || !preview.preflight.valid} className="inline-flex h-8 items-center justify-center gap-1 bg-slate-800 font-semibold text-white disabled:opacity-40"><FileClock size={13} />Guardar revision BIM</button><button type="button" onClick={exportPreview} disabled={busy || !preview.preflight.valid} className="inline-flex h-8 items-center justify-center gap-1 border border-slate-300 font-semibold text-slate-700 disabled:opacity-40"><Download size={13} />Exportar {selectedFormat.extension}</button></div>
                 </div> : null}
 
                 {revisions.length ? <div className="space-y-2 border-t border-slate-200 pt-3" data-bim-schedule-revisions>

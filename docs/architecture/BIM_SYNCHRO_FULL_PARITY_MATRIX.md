@@ -54,7 +54,7 @@ La afirmacion `100%` solo sera valida cuando las 60 capacidades esten en
 | ID | Capacidad | Estado | Evidencia o brecha principal |
 |---|---|---|---|
 | B01 | Crear y editar cronograma CPM | Completa | Cronograma clasico como fuente y snapshot BIM |
-| B02 | Importar/exportar Primavera P6 XER/XML | Parcial | `BIM-TASK-0132`: P6 XML interno; XER y round-trip Oracle pendientes |
+| B02 | Importar/exportar Primavera P6 XER/XML | Parcial | `BIM-TASK-0132/0188`: P6 XML y subconjunto XER con round-trip interno; round-trip Oracle pendiente |
 | B03 | Importar/exportar Asta Powerproject | Ausente | requiere formato autorizado y corpus real |
 | B04 | Intercambio MS Project XML | Completa | `BIM-TASK-0131/0134/0139`: preview, export, revisiones, gobierno y UX BIM |
 | B05 | Interoperabilidad amplia CAD/BIM | Parcial | `BIM-TASK-0187`: IFC2X3/IFC4/IFC4X3_ADD2 y Fragments; no cubre la amplitud propietaria publicada |

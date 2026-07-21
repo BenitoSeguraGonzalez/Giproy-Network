@@ -1,5 +1,13 @@
 # HANDOFF
 
+## 2026-07-20 - Adaptador controlado Primavera P6 XER
+
+- `BIM-TASK-0188` implementa preview/export para ocho tablas oficiales XER.
+- El parser es acotado, reporta campos no representados y no persiste preview.
+- La UX BIM incorpora XER al panel existente; Playwright pasa a 1920x1080.
+- B02 permanece parcial hasta probar reimportacion/equivalencia en Oracle P6.
+- Tecnico: 61/61, 100%. Liberacion: 60/61, 98,36%.
+
 ## 2026-07-20 - Soporte interno IFC4.3
 
 - `BIM-TASK-0187` valida `IFC4X3_ADD2` con corpus oficial y job completo.
