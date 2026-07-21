@@ -142,4 +142,60 @@ assert.equal(
     'Expected a row-level planning signals trigger in both Gantt row layouts',
 );
 
+const unitCostSection = componentSource.slice(
+    componentSource.indexOf("label: 'Costo unitario'"),
+    componentSource.indexOf("label: 'Costo unitario'") + 900,
+);
+for (const marker of [
+    "['Costo directo'",
+    "['% indirecto'",
+    "['Costo indirecto'",
+    "['Precio plan'",
+]) {
+    assert.ok(unitCostSection.includes(marker), `Missing unit cost marker: ${marker}`);
+}
+assert.ok(
+    unitCostSection.indexOf("['Costo directo'") < unitCostSection.indexOf("['% indirecto'")
+        && unitCostSection.indexOf("['% indirecto'") < unitCostSection.indexOf("['Costo indirecto'")
+        && unitCostSection.indexOf("['Costo indirecto'") < unitCostSection.indexOf("['Precio plan'"),
+    'Expected the requested unit cost presentation order',
+);
+assert.ok(!unitCostSection.includes('Directo exacto'), 'Directo exacto must not be rendered');
+assert.ok(!componentSource.includes('>Validaciones<'), 'The redundant validations block must not be rendered');
+
+for (const marker of [
+    'lightEditorPlanningSignals',
+    'buildGanttApuPlanningSignals({',
+    'gantt-apu-light-operational-dashboard',
+    'gantt-apu-light-operational-metrics',
+    'grid-cols-6 grid-rows-2',
+]) {
+    assert.ok(componentSource.includes(marker), `Missing Light editor planning dashboard marker: ${marker}`);
+}
+
+const lightEditorCardsSection = componentSource.slice(
+    componentSource.indexOf('const lightEditorMetricCards = ['),
+    componentSource.indexOf('const lightEditorMetricCards = [') + 2200,
+);
+for (const label of [
+    'Ciclo gobernante',
+    'Factor plan',
+    'Producción teórica',
+    'Producción plan',
+    'Duración neta',
+    'Duración plan',
+    'Trabajo MO neto',
+    'Trabajo MO plan',
+    'Cuadrilla nominal',
+    'Cuadrilla equivalente',
+    'Carga de cuadrilla',
+    'Equipos plan',
+]) {
+    assert.ok(lightEditorCardsSection.includes(`['${label}'`), `Missing Light editor metric: ${label}`);
+}
+assert.ok(
+    !componentSource.includes('gantt-apu-light-operational-metrics\"\n                                                className=\"overflow'),
+    'The Light editor metrics must not introduce scrolling',
+);
+
 console.log('smoke-cronogramas-gantt-apu-planning-signals: OK');

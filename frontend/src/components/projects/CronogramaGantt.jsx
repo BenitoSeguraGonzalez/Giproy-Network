@@ -1187,25 +1187,21 @@ const APU_PLANNING_SIGNAL_PRESENTATION = {
         label: 'OK',
         Icon: CircleCheck,
         chipClassName: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-        iconClassName: 'text-emerald-600',
     },
     review: {
         label: 'Revisar',
         Icon: TriangleAlert,
         chipClassName: 'border-amber-200 bg-amber-50 text-amber-800',
-        iconClassName: 'text-amber-600',
     },
     error: {
         label: 'Inconsistente',
         Icon: CircleX,
         chipClassName: 'border-rose-200 bg-rose-50 text-rose-700',
-        iconClassName: 'text-rose-600',
     },
     unavailable: {
         label: 'Sin datos',
         Icon: AlertCircle,
         chipClassName: 'border-zinc-200 bg-zinc-100 text-zinc-600',
-        iconClassName: 'text-zinc-500',
     },
 };
 
@@ -1252,10 +1248,14 @@ const GanttApuPlanningSignalsPanel = ({
         {
             label: 'Costo unitario',
             values: [
-                ['Directo exacto', formatCurrency(metrics.exactDirectUnitCost, currency, moneyDecimals), ''],
-                ['Directo plan', formatCurrency(metrics.plannedDirectUnitCost, currency, moneyDecimals), ''],
+                ['Costo directo', formatCurrency(metrics.plannedDirectUnitCost, currency, moneyDecimals), ''],
+                ['% indirecto', formatNumber(metrics.indirectPercentage, 2), '%'],
+                ['Costo indirecto', formatCurrency(
+                    metrics.plannedUnitPrice - metrics.plannedDirectUnitCost,
+                    currency,
+                    moneyDecimals,
+                ), ''],
                 ['Precio plan', formatCurrency(metrics.plannedUnitPrice, currency, moneyDecimals), ''],
-                ['Indirectos', formatNumber(metrics.indirectPercentage, 2), '%'],
             ],
         },
     ] : [];
@@ -1345,33 +1345,6 @@ const GanttApuPlanningSignalsPanel = ({
                             ))}
                         </div>
 
-                        <div className="mt-3 border-t border-zinc-200 pt-3">
-                            <div className="mb-2 flex items-center justify-between gap-2">
-                                <span className="text-[10px] font-black text-zinc-800">Validaciones</span>
-                                <span className="text-[9px] font-semibold text-zinc-500">{model.validations.length} controles</span>
-                            </div>
-                            <div className="space-y-1.5">
-                                {model.validations.map((validation) => {
-                                    const presentation = APU_PLANNING_SIGNAL_PRESENTATION[validation.status]
-                                        || APU_PLANNING_SIGNAL_PRESENTATION.unavailable;
-                                    const ValidationIcon = presentation.Icon;
-                                    return (
-                                        <div key={validation.id} className="flex items-start gap-2 rounded-[0.75rem] bg-zinc-50 px-2.5 py-2">
-                                            <ValidationIcon className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${presentation.iconClassName}`} />
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className="text-[9px] font-black text-zinc-800">{validation.label}</span>
-                                                    <span className={`shrink-0 text-[8px] font-black ${presentation.iconClassName}`}>
-                                                        {presentation.label}
-                                                    </span>
-                                                </div>
-                                                <p className="mt-0.5 text-[8px] font-medium leading-relaxed text-zinc-500">{validation.detail}</p>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
                     </>
                 )}
             </div>
@@ -2500,6 +2473,43 @@ const GanttResourceEditorModal = ({
             : (dailyHours > 0 && workHours > 0 ? (workHours / dailyHours) : 0)
     ), [dailyHours, isSubcontracted, persistedDurationDays, workHours]);
 
+    const lightEditorPlanningSignals = useMemo(() => buildGanttApuPlanningSignals({
+        row,
+        effectiveRow,
+        durationModel: {
+            ...(resolveGanttDurationModel(row, effectiveRow) || {}),
+            jornada_horas: dailyHours,
+            governing_performance_hours_per_unit: governingPerformance,
+            governing_resource_name: dominantResource?.label || dominantGovernanceCategory || '',
+        },
+        costModel: resolveGanttCostModel(row, effectiveRow),
+        dailyHours,
+        indirectPercentage: resolvedIndirectPercent,
+    }), [
+        dailyHours,
+        dominantGovernanceCategory,
+        dominantResource?.label,
+        effectiveRow,
+        governingPerformance,
+        resolvedIndirectPercent,
+        row,
+    ]);
+    const lightEditorMetrics = lightEditorPlanningSignals.metrics || {};
+    const lightEditorMetricCards = [
+        ['Ciclo gobernante', formatNumber(lightEditorMetrics.governingCycle, 4), `h/${quantityUnitLabel}`],
+        ['Factor plan', formatNumber(lightEditorMetrics.planningFactor * 100, 2), '%'],
+        ['Producción teórica', formatNumber(lightEditorMetrics.theoreticalProduction, 4), `${quantityUnitLabel}/h`],
+        ['Producción plan', formatNumber(lightEditorMetrics.plannedProduction, 4), `${quantityUnitLabel}/h`],
+        ['Duración neta', formatNumber(lightEditorMetrics.netDurationHours, 4), 'h'],
+        ['Duración plan', formatNumber(lightEditorMetrics.plannedDurationDays, 4), 'd'],
+        ['Trabajo MO neto', formatNumber(lightEditorMetrics.laborNetHours, 4), 'HH'],
+        ['Trabajo MO plan', formatNumber(lightEditorMetrics.laborPlannedHours, 4), 'HH'],
+        ['Cuadrilla nominal', formatNumber(lightEditorMetrics.nominalCrew, 2), 'pers.'],
+        ['Cuadrilla equivalente', formatNumber(lightEditorMetrics.equivalentCrew, 2), 'pers.'],
+        ['Carga de cuadrilla', formatNumber(lightEditorMetrics.crewLoad * 100, 2), '%'],
+        ['Equipos plan', formatNumber(lightEditorMetrics.equipmentPlannedHours, 4), 'EH'],
+    ];
+
     useEffect(() => {
         if (!open || typeof onChangeDuration !== 'function') return;
         if (isSubcontracted) return;
@@ -2849,6 +2859,7 @@ const GanttResourceEditorModal = ({
                                     </div>
                                 </div>
                                 <div className="relative z-10 mt-1.5">
+                                    {isSubcontracted ? (
                                     <div className="grid gap-1.5 xl:grid-cols-[minmax(260px,1.4fr)_100px_116px_116px_100px]">
                                                 <button
                                             type="button"
@@ -2914,6 +2925,75 @@ const GanttResourceEditorModal = ({
                                             </div>
                                         )}
                                     </div>
+                                    </div>
+                                    ) : (
+                                        <div
+                                            data-testid="gantt-apu-light-operational-dashboard"
+                                            className="grid min-w-0 grid-cols-[minmax(210px,1.5fr)_minmax(0,4.5fr)] gap-1.5"
+                                        >
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (governanceManualCandidates.length < 2) return;
+                                                    setGovernancePickerOpen((current) => !current);
+                                                }}
+                                                className={`flex min-h-0 min-w-0 flex-col justify-center rounded-[0.65rem] border px-2.5 py-1.5 text-left transition ${
+                                                    governanceManualCandidates.length > 1
+                                                        ? 'border-sky-200 bg-sky-50 hover:border-[#F39200] hover:bg-[#fff7ed]'
+                                                        : 'border-sky-200 bg-sky-50'
+                                                }`}
+                                                title={governanceManualCandidates.length > 1 ? 'Seleccionar manualmente el recurso gobernante dentro de la categoría gobernante' : 'No hay candidatos manuales adicionales'}
+                                            >
+                                                <div className="flex min-w-0 items-center justify-between gap-2">
+                                                    <span className="text-[7px] font-black uppercase tracking-[0.12em] text-sky-700">Gobierna</span>
+                                                    {governanceManualCandidates.length > 1 ? (
+                                                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-200 bg-white px-1.5 py-0.5 text-[6.5px] font-black uppercase tracking-[0.08em] text-sky-700">
+                                                            {governanceManualCandidates.length} candidatos
+                                                            <ChevronDown className={`h-3 w-3 transition ${governancePickerOpen ? 'rotate-180' : ''}`} />
+                                                        </span>
+                                                    ) : null}
+                                                </div>
+                                                <p className="mt-1 truncate text-[10px] font-black leading-tight text-sky-900">
+                                                    {dominantResource?.label || dominantGovernanceCategory || 'Sin recurso gobernante'}
+                                                </p>
+                                                <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
+                                                    <span className="shrink-0 text-[6.5px] font-black uppercase tracking-[0.08em] text-sky-700">
+                                                        {dominantResource?.governanceKindLabel || 'Duración operativa'}
+                                                    </span>
+                                                    {governanceManualCandidates.length > 1 ? (
+                                                        <span className="truncate text-[6.5px] font-bold text-[#F39200]">
+                                                            Selección manual en {GOVERNING_RESOURCE_CATEGORY_LABELS[dominantCategoryId] || 'categoría activa'}
+                                                        </span>
+                                                    ) : null}
+                                                </div>
+                                            </button>
+
+                                            <div
+                                                data-testid="gantt-apu-light-operational-metrics"
+                                                className="grid min-w-0 grid-cols-6 grid-rows-2 gap-1.5"
+                                            >
+                                                {lightEditorMetricCards.map(([label, value, unit], index) => (
+                                                    <div
+                                                        key={label}
+                                                        className={`flex min-h-[38px] min-w-0 flex-col justify-center rounded-[0.55rem] border px-2 py-1 ${
+                                                            index < 6
+                                                                ? 'border-sky-100 bg-sky-50/45'
+                                                                : 'border-zinc-200 bg-zinc-50'
+                                                        }`}
+                                                    >
+                                                        <span className="truncate text-[6.5px] font-black uppercase tracking-[0.07em] text-zinc-500" title={label}>
+                                                            {label}
+                                                        </span>
+                                                        <span className="mt-0.5 truncate text-[10px] font-black tabular-nums leading-none text-zinc-900">
+                                                            {value} <span className="text-[6.5px] text-zinc-500">{unit}</span>
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {isSubcontracted ? (
+                                    <div className="mt-1.5 grid gap-1.5 grid-cols-[116px_116px_100px]">
                                     <label className={`flex min-h-[50px] flex-col justify-center rounded-[0.65rem] border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ${isSubcontracted ? 'border-violet-200 bg-violet-50' : 'border-emerald-200 bg-emerald-50'}`}>
                                         <p className={`text-[7px] font-black uppercase tracking-[0.1em] ${isSubcontracted ? 'text-violet-700' : 'text-emerald-700'}`}>{isSubcontracted ? 'Duración contractual' : 'Duración'}</p>
                                         {isSubcontracted ? (
@@ -3003,6 +3083,7 @@ const GanttResourceEditorModal = ({
                                         </p>
                                     </div>
                                     </div>
+                                    ) : null}
                                     {governancePickerOpen && governanceManualCandidates.length > 1 ? (
                                         <div className="absolute left-0 top-[calc(100%+0.5rem)] z-20 w-full max-w-[980px] rounded-[0.95rem] border border-sky-200 bg-sky-50/95 p-2.5 shadow-[0_18px_40px_rgba(15,23,42,0.18)] backdrop-blur-[2px]">
                                             <div className="flex items-center justify-between gap-2">
@@ -21283,11 +21364,17 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         : null}
                     {holidayCalendarModalOpen
                         ? createPortal(
-                            <div className="fixed inset-0 z-[265] flex items-center justify-center bg-slate-950/40 px-4 py-6 backdrop-blur-[2px]" data-gantt-no-pan="true">
-                                <div className="flex h-[calc(100vh-2.5rem)] max-h-[calc(100vh-2.5rem)] w-full max-w-[1120px] flex-col overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#14171d] shadow-[0_28px_62px_rgba(15,23,42,0.36)]">
+                            <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-950/40 p-8 backdrop-blur-[2px]" data-gantt-no-pan="true">
+                                <div
+                                    role="dialog"
+                                    aria-modal="true"
+                                    aria-labelledby="gantt-holiday-calendar-title"
+                                    data-testid="gantt-holiday-calendar-modal"
+                                    className="flex h-[min(55rem,calc(100dvh-4rem))] max-h-[calc(100dvh-4rem)] w-full max-w-[1120px] flex-col overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#14171d] shadow-[0_28px_62px_rgba(15,23,42,0.36)]"
+                                >
                                     <div className="shrink-0 flex items-start justify-between gap-4 border-b border-white/8 bg-[#14171d]/98 px-5 py-4 backdrop-blur-[6px]">
                                         <div className="min-w-0">
-                                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#F39200]">Calendario laboral del proyecto</p>
+                                            <p id="gantt-holiday-calendar-title" className="text-[10px] font-black uppercase tracking-[0.16em] text-[#F39200]">Calendario laboral del proyecto</p>
                                             <p className="mt-1 text-[12px] font-bold text-white/72">
                                                 {holidayCalendarDisplayRange?.start ? formatDate(holidayCalendarDisplayRange.start) : 'Sin inicio'}
                                                 {' - '}

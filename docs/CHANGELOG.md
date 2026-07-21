@@ -1,3 +1,26 @@
+### 2026-07-21 - Modal de calendario laboral adaptado a escritorio (TASK-2033)
+
+- El modal clasico del calendario laboral mantiene cabecera y cierre visibles
+  dentro de la resolucion minima de escritorio `1920 x 1080`.
+- Se limita su altura, se conserva el scroll en el contenido y se eleva sobre
+  la cabecera global sin cambiar logica, API, backend, datos ni BIM.
+
+### 2026-07-21 - Dashboard compacto del editor Light APU (TASK-2032)
+
+- El editor Light de APU en Gantt reutiliza los doce indicadores de capacidad
+  y recursos de Semaforos APU en una matriz compacta de `6 x 2`.
+- El gobernante y su selector permanecen visibles junto al switch de modo de
+  trabajo, sin scroll, carrusel ni ampliacion del area operativa.
+- Se conserva la edicion contractual de partidas subcontratadas y no cambian
+  API, backend, datos ni BIM.
+
+### 2026-07-21 - Simplificacion de costos en semaforos APU (TASK-2031)
+
+- El panel clasico `Cronogramas > Gantt > Semaforos APU` presenta ahora
+  `Costo directo`, `% indirecto`, `Costo indirecto` y `Precio plan`.
+- Se retiran `Directo exacto` y el bloque visual redundante de validaciones.
+- No cambia el motor de calculo, API, backend, datos ni BIM.
+
 ### 2026-07-20 - Adaptador controlado P6 XER (BIM-TASK-0188)
 
 - Preview/export XER de proyecto unico sobre tablas oficiales Oracle.
@@ -122,6 +145,7 @@
   baseline enterprise pasan.
 - El ensayo DR restaura 83 tablas BIM con checksum exacto y fingerprint clasico
   intacto.
+
 ### 2026-07-20 - Intercambio gobernado BIM hacia ERP (BIM-TASK-0172)
 
 - H06 incorpora paquetes versionados y deterministas de avance y horas BIM,
