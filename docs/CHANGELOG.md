@@ -4,6 +4,8 @@
   dentro de la resolucion minima de escritorio `1920 x 1080`.
 - Se limita su altura, se conserva el scroll en el contenido y se eleva sobre
   la cabecera global sin cambiar logica, API, backend, datos ni BIM.
+- TASK-2031 a TASK-2033 quedan desplegadas en beta con frontend
+  `sha256:76badc449cac...`; stack saludable, home `200` y BIM XER protegido `401`.
 
 ### 2026-07-21 - Dashboard compacto del editor Light APU (TASK-2032)
 
