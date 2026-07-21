@@ -266,7 +266,7 @@ iniciada.
 | `BIM-TASK-0185` | Cerrada tecnicamente: protocolo Gate E sin evidencia fabricada |
 | `BIM-TASK-0186` | Cerrada tecnicamente: agregador Gate K bloqueado por evidencia real |
 | `BIM-TASK-0187` | Cerrada en beta: IFC4X3_ADD2 con corpus oficial, Fragments y probe remoto |
-| `BIM-TASK-0188` | Cerrada localmente: adaptador controlado P6 XER con round-trip interno y UX BIM |
+| `BIM-TASK-0188` | Cerrada en beta: adaptador P6 XER, round-trip remoto, UX y rollback verificados |
 
 ## Orden de ejecucion
 

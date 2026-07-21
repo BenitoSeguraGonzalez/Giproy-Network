@@ -3,6 +3,8 @@
 - Preview/export XER de proyecto unico sobre tablas oficiales Oracle.
 - Panel BIM con selector XER, descarga estable y warnings de perdida explicitos.
 - Round-trip interno, 31 pruebas de scheduling y smokes desktop/anti-BIM correctos.
+- Beta desplegada con backend `d684094c...` y frontend `b0da1d35...`; probe
+  XER remoto, proteccion 401, home 200, licencias y allowlist verificados.
 - B02 sigue parcial hasta validar contra Oracle P6 real; score no cambia.
 
 ### 2026-07-20 - Soporte interno IFC4.3 (BIM-TASK-0187)

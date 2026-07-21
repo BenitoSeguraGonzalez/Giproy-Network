@@ -5,6 +5,8 @@
 - `BIM-TASK-0188` implementa preview/export para ocho tablas oficiales XER.
 - El parser es acotado, reporta campos no representados y no persiste preview.
 - La UX BIM incorpora XER al panel existente; Playwright pasa a 1920x1080.
+- Beta `d684094c...`/`b0da1d35...` saludable; round-trip remoto y rollback
+  verificados, sin migraciones ni cambios de datos.
 - B02 permanece parcial hasta probar reimportacion/equivalencia en Oracle P6.
 - Tecnico: 61/61, 100%. Liberacion: 60/61, 98,36%.
 
