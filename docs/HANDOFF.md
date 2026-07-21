@@ -140,7 +140,8 @@
 - `TASK-2030` mantiene el panel de semáforos dentro del viewport y permite
   moverlo desde la cabecera con Pointer Events.
 - Arrastrar lo fija automáticamente; scroll y refrescos no alteran la posición.
-- Build, smoke focal, frontera Cronogramas y anti-BIM pasan. Sin deploy.
+- Build, smoke focal, frontera Cronogramas y anti-BIM pasan.
+- Beta frontend `3208bb9e...` saludable; clásico y BIM verificados, con rollback.
 
 ## 2026-07-20 - Intercambio gobernado BIM hacia ERP
 

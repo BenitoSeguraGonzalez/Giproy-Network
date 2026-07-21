@@ -109,6 +109,8 @@
 - Su cabecera permite arrastrar y soltar; el arrastre fija el panel y conserva
   la posición durante scroll o refrescos visuales.
 - Resize corrige únicamente lo necesario para mantenerlo visible.
+- Beta desplegada en frontend `3208bb9e...`; salud, home 200, marcador clásico,
+  BIM XER y protección 401 verificados con rollback etiquetado.
 
 ### 2026-07-20 - Gateway de integracion empresarial BIM (BIM-TASK-0173)
 
