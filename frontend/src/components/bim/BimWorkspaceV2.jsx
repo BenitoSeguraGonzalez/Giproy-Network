@@ -19,6 +19,7 @@ import {
     X,
 } from 'lucide-react';
 import { isMinimumDesktopDisplaySupported } from '../../utils/displayResolution';
+import { getErrorMessage } from '../../utils/errorMessage';
 
 const BIM_V2_PREFERENCES_KEY = 'giproy_bim_workspace_v2_preferences';
 
@@ -132,6 +133,7 @@ const BimWorkspaceV2 = ({
     onResetContext,
     onRefresh,
 }) => {
+    const errorMessage = error ? getErrorMessage(error, 'No se pudo cargar el workspace BIM.') : '';
     const initialPreferences = useMemo(() => readPreferences(projectId), [projectId]);
     const [activeWorkspace, setActiveWorkspace] = useState(initialPreferences.activeWorkspace || 'viewer');
     const [explorerVisible, setExplorerVisible] = useState(initialPreferences.explorerVisible !== false);
@@ -452,7 +454,7 @@ const BimWorkspaceV2 = ({
                                     <div className="max-w-sm">
                                         {loading ? <RefreshCw className="mx-auto h-8 w-8 animate-spin text-[#F39200] motion-reduce:animate-none" aria-hidden="true" /> : <Box className="mx-auto h-8 w-8 text-zinc-400" aria-hidden="true" />}
                                         <h2 className="mt-4 text-sm font-semibold text-zinc-900">{loading ? 'Preparando modelo BIM' : 'Este proyecto aún no tiene un modelo BIM listo'}</h2>
-                                        <p className="mt-2 text-xs leading-5 text-zinc-500">{error || 'Importe un archivo IFC para iniciar el procesamiento del modelo y sus propiedades.'}</p>
+                                        <p className="mt-2 text-xs leading-5 text-zinc-500">{errorMessage || 'Importe un archivo IFC para iniciar el procesamiento del modelo y sus propiedades.'}</p>
                                         {canAdminister && !loading ? <button type="button" onClick={() => { setActiveWorkspace('admin'); selectTool('admin', 'imports'); }} className="mt-4 h-9 rounded-md bg-[#F39200] px-4 text-xs font-semibold text-white hover:bg-[#d87f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-200">Importar IFC</button> : null}
                                         {!canAdminister && !loading ? <p className="mt-4 text-xs font-semibold text-zinc-700">Solicite la carga al administrador BIM del proyecto.</p> : null}
                                     </div>

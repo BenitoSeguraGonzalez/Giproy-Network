@@ -1223,3 +1223,13 @@ intercambio end-to-end.
   rollback en `deploy/backups/display-resolution-20260722-141704`.
 - Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
   98,36%; los gates externos no cambian.
+
+## Error BIM serializable en la interfaz React - 2026-07-22
+
+- `BIM-TASK-0190` evita el crash React `#31` al normalizar el error de carga
+  antes de guardarlo y nuevamente antes de presentarlo en la shell BIM.
+- Las regresiones cubren errores JavaScript, Axios, FastAPI y objetos opacos.
+- Build, baseline enterprise y smoke anti-BIM pasan sin cambios de backend,
+  datos, permisos, licencias ni allowlist.
+- Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
+  98,36%; los gates externos no cambian.

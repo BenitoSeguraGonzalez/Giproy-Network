@@ -4,6 +4,7 @@ import { bimLinksApi } from '../../api/bimLinks';
 import { bimModelsApi } from '../../api/bimModels';
 import { bimViewStatesApi } from '../../api/bimViewStates';
 import { AuthContext } from '../../context/AuthContext';
+import { getErrorMessage } from '../../utils/errorMessage';
 
 const EMPTY_WORKSPACE = {
     ready: false,
@@ -63,7 +64,7 @@ export function useBimProjectWorkspace(projectId, enabled) {
                 if (!cancelled) {
                     setWorkspace(EMPTY_WORKSPACE);
                     setViewStates([]);
-                    setError(err);
+                    setError(getErrorMessage(err, 'No se pudo cargar el workspace BIM.'));
                 }
             } finally {
                 if (!cancelled) {

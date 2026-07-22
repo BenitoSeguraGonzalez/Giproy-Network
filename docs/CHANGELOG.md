@@ -1,3 +1,11 @@
+### 2026-07-22 - Error BIM serializable en React (BIM-TASK-0190)
+
+- La carga del workspace BIM convierte errores JavaScript, Axios y FastAPI en
+  mensajes antes de entregarlos a React.
+- La shell BIM incorpora una defensa adicional y deja de abortar con React #31
+  cuando una solicitud falla.
+- Build, baseline enterprise y smoke anti-BIM correctos.
+
 ### 2026-07-22 - Resolucion fisica compatible en BIM (TASK-2035 / BIM-TASK-0189)
 
 - El aviso general y el workspace BIM miden la resolucion fisica estimada en

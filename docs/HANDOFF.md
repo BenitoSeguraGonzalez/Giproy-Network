@@ -1,5 +1,13 @@
 # HANDOFF
 
+## 2026-07-22 - Error BIM serializable en React
+
+- `BIM-TASK-0190` corrige el crash React `#31` del workspace BIM.
+- El hook guarda texto y la shell normaliza defensivamente cualquier valor.
+- Build, baseline enterprise y smoke anti-BIM pasan.
+- Sin cambios de backend, DB, API, auth, tenant, licencias ni allowlist.
+- Tecnico: 61/61, 100%. Liberacion: 60/61, 98,36%.
+
 ## 2026-07-22 - Resolucion fisica compatible en BIM
 
 - `TASK-2035` / `BIM-TASK-0189` unifican el umbral desktop en una utilidad.

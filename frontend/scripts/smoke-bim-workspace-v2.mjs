@@ -4,6 +4,7 @@ import {
     isMinimumDesktopDisplaySupported,
     readPhysicalDisplayResolution,
 } from '../src/utils/displayResolution.js';
+import { getErrorMessage } from '../src/utils/errorMessage.js';
 
 const workspaceSource = readFileSync(new URL('../src/components/bim/BimWorkspace.jsx', import.meta.url), 'utf8');
 const shellSource = readFileSync(new URL('../src/components/bim/BimWorkspaceV2.jsx', import.meta.url), 'utf8');
@@ -15,6 +16,7 @@ for (const label of ['Visor', 'Coordinación', 'Planificación 4D', 'Producción
     assert.ok(shellSource.includes(`label: '${label}'`), `Debe existir el workspace ${label}`);
 }
 assert.match(shellSource, /isMinimumDesktopDisplaySupported/, 'Debe mantenerse la guarda de resolución física');
+assert.match(shellSource, /getErrorMessage/, 'El workspace no debe renderizar objetos Error directamente');
 assert.match(appLayoutSource, /readPhysicalDisplayResolution/, 'El layout general debe medir la resolución física');
 assert.doesNotMatch(appLayoutSource, /readBrowserWindowSize|window\.outerWidth/, 'El aviso general no debe depender del tamaño de la ventana');
 assert.match(shellSource, /selectedTool\?\.content\s*\|\|\s*inspector/, 'Solo debe montarse la herramienta contextual seleccionada');
@@ -49,5 +51,9 @@ assert.deepEqual(
     readPhysicalDisplayResolution(browserAt({ screenWidth: 2048, screenHeight: 1152, pixelRatio: 1.25 })),
     { width: 2560, height: 1440 },
 );
+assert.equal(getErrorMessage(new Error('Fallo de carga')), 'Fallo de carga');
+assert.equal(getErrorMessage({ response: { data: { detail: 'Proyecto BIM no disponible' } } }), 'Proyecto BIM no disponible');
+assert.equal(getErrorMessage({ response: { data: { detail: [{ msg: 'Campo requerido' }] } } }), 'Campo requerido');
+assert.equal(getErrorMessage({ unexpected: true }, 'Error BIM'), 'Error BIM');
 
 console.log('smoke-bim-workspace-v2: ok');
