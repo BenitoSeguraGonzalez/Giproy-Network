@@ -18,6 +18,7 @@ import {
     Settings,
     X,
 } from 'lucide-react';
+import { isMinimumDesktopDisplaySupported } from '../../utils/displayResolution';
 
 const BIM_V2_PREFERENCES_KEY = 'giproy_bim_workspace_v2_preferences';
 
@@ -56,10 +57,7 @@ const writePreferences = (projectId, preferences) => {
 };
 
 const useSupportedDesktop = () => {
-    const getSupported = () => {
-        if (typeof window === 'undefined') return true;
-        return window.screen.width >= 1920 && window.screen.height >= 1080;
-    };
+    const getSupported = () => isMinimumDesktopDisplaySupported();
     const [supported, setSupported] = useState(getSupported);
 
     useEffect(() => {

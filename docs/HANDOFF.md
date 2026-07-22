@@ -1,5 +1,14 @@
 # HANDOFF
 
+## 2026-07-22 - Resolucion fisica compatible en BIM
+
+- `TASK-2035` / `BIM-TASK-0189` unifican el umbral desktop en una utilidad.
+- La politica mide `screen * devicePixelRatio`, no el viewport del navegador.
+- 1920x1080 nativo y escalado 125% pasan; 1600x900 permanece bloqueado.
+- Build, Playwright BIM, baseline enterprise y smoke anti-BIM pasan.
+- Sin cambios de backend, DB, API, auth, tenant, licencias ni allowlist.
+- Tecnico: 61/61, 100%. Liberacion: 60/61, 98,36%.
+
 ## 2026-07-20 - Adaptador controlado Primavera P6 XER
 
 - `BIM-TASK-0188` implementa preview/export para ocho tablas oficiales XER.

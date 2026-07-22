@@ -1210,3 +1210,14 @@ intercambio end-to-end.
 - B02 permanece parcial: falta round-trip contra una instancia Oracle P6 real.
 - Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
   98,36%; Gate E, certificaciones, Oracle externo y Gate K siguen pendientes.
+
+## Resolucion fisica compatible en workspace BIM - 2026-07-22
+
+- `BIM-TASK-0189` corrige el falso bloqueo en pantallas compatibles con escalado
+  del sistema operativo usando una politica comun de resolucion fisica estimada.
+- Playwright valida 1920x1080 nativo, equivalencia 1536x864 a 125% y conserva
+  el rechazo de una pantalla fisica 1600x900.
+- Build y baseline enterprise pasan; feature flag, allowlist, licencias, API,
+  backend y datos permanecen sin cambios.
+- Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
+  98,36%; los gates externos no cambian.

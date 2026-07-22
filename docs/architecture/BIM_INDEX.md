@@ -375,6 +375,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0186](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0186.md) - Agregador verificable Gate K
 - [BIM-TASK-0187](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0187.md) - Soporte interno IFC4.3 con corpus oficial
 - [BIM-TASK-0188](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0188.md) - Adaptador controlado Primavera P6 XER
+- [BIM-TASK-0189](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0189.md) - Resolucion fisica compatible en workspace BIM
 - [BIM_CONFORMANCE_EVIDENCE.md](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_CONFORMANCE_EVIDENCE.md) - Evidencia ISO 19650/openBIM y limites de certificacion
 - [BIM_GATE_E_PILOT_PROTOCOL.md](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_GATE_E_PILOT_PROTOCOL.md) - Contrato de diez jornadas y dos revisiones reales
 - [BIM_GATE_K_RELEASE_PROTOCOL.md](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_GATE_K_RELEASE_PROTOCOL.md) - Condiciones acumulativas de liberacion general

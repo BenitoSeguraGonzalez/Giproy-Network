@@ -1,3 +1,11 @@
+### 2026-07-22 - Resolucion fisica compatible en BIM (TASK-2035 / BIM-TASK-0189)
+
+- El aviso general y el workspace BIM miden la resolucion fisica estimada en
+  lugar del tamaño de la ventana o de pixeles CSS sin ajustar.
+- Pantallas 1920x1080 con escalado 125% y pantallas superiores dejan de mostrar
+  el bloqueo incorrecto; una pantalla fisica 1600x900 continua no soportada.
+- Build, Playwright BIM, baseline enterprise y smoke anti-BIM correctos.
+
 ### 2026-07-21 - Reconstruccion del remoto interno Gitea (TASK-2034)
 
 - Gitea se reconstruye en `192.168.18.106` sobre PostgreSQL dedicado y vuelve a

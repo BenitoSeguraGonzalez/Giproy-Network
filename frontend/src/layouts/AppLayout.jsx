@@ -32,21 +32,13 @@ import { getMarketplaceOwnershipTone } from '../components/marketplace/Marketpla
 import { applyTrimmedPaste } from '../utils/pasteSanitizer';
 import { getLicenseBannerMessage, getLicenseBannerTone, getLicenseStatusLabel, getLicenseStatusTone } from '../utils/licenseStatusUi';
 import { getCompanyDisplayName } from '../utils/companyDisplayName';
+import {
+    MIN_DESKTOP_DISPLAY_HEIGHT,
+    MIN_DESKTOP_DISPLAY_WIDTH,
+    readPhysicalDisplayResolution,
+} from '../utils/displayResolution';
 import GiproyIconGradient from '../assets/GiproyIconGradient.svg';
 import GiproyWordmarkWhite from '../assets/GiproyWordmarkWhite.png';
-
-const MIN_RECOMMENDED_WIDTH = 1920;
-const MIN_RECOMMENDED_HEIGHT = 1080;
-
-const readBrowserWindowSize = () => {
-    if (typeof window === 'undefined') {
-        return { width: MIN_RECOMMENDED_WIDTH, height: MIN_RECOMMENDED_HEIGHT };
-    }
-    return {
-        width: Math.round(window.outerWidth || window.innerWidth || MIN_RECOMMENDED_WIDTH),
-        height: Math.round(window.outerHeight || window.innerHeight || MIN_RECOMMENDED_HEIGHT),
-    };
-};
 
 const AppLayout = ({ children }) => {
     const { user, logout, selectedEmpresa, setSelectedEmpresa, selectedBaseTrabajo, activeProject, licenseInfo } = useContext(AuthContext);
@@ -55,7 +47,7 @@ const AppLayout = ({ children }) => {
     const [empresas, setEmpresas] = useState([]);
     const [showCompanySelector, setShowCompanySelector] = useState(false);
     const [showResWarning, setShowResWarning] = useState(false);
-    const [browserWindowSize, setBrowserWindowSize] = useState(() => readBrowserWindowSize());
+    const [displayResolution, setDisplayResolution] = useState(() => readPhysicalDisplayResolution());
     const [announcementQueue, setAnnouncementQueue] = useState([]);
     const [licenseNotificationQueue, setLicenseNotificationQueue] = useState([]);
     const [transferSignal, setTransferSignal] = useState({ total: 0, nuevos: 0 });
@@ -117,15 +109,15 @@ const AppLayout = ({ children }) => {
     const loginSessionId = sessionStorage.getItem('giproy_login_session_id');
     useEffect(() => {
         const syncViewport = () => {
-            const nextWindowSize = readBrowserWindowSize();
+            const nextDisplayResolution = readPhysicalDisplayResolution();
             setViewport({
                 width: window.innerWidth,
                 height: window.innerHeight
             });
-            setBrowserWindowSize((current) => (
-                current.width === nextWindowSize.width && current.height === nextWindowSize.height
+            setDisplayResolution((current) => (
+                current.width === nextDisplayResolution.width && current.height === nextDisplayResolution.height
                     ? current
-                    : nextWindowSize
+                    : nextDisplayResolution
             ));
         };
 
@@ -143,7 +135,8 @@ const AppLayout = ({ children }) => {
 
     useEffect(() => {
         const isBelowMinimum =
-            browserWindowSize.width < MIN_RECOMMENDED_WIDTH || browserWindowSize.height < MIN_RECOMMENDED_HEIGHT;
+            displayResolution.width < MIN_DESKTOP_DISPLAY_WIDTH
+            || displayResolution.height < MIN_DESKTOP_DISPLAY_HEIGHT;
 
         if (!isBelowMinimum) {
             setShowResWarning(false);
@@ -151,7 +144,7 @@ const AppLayout = ({ children }) => {
         }
 
         setShowResWarning((prev) => (prev ? prev : true));
-    }, [browserWindowSize.width, browserWindowSize.height]);
+    }, [displayResolution.height, displayResolution.width]);
 
     const currentAnnouncement = announcementQueue[0] || null;
     const currentLicenseNotification = licenseNotificationQueue[0] || null;
@@ -403,7 +396,7 @@ const AppLayout = ({ children }) => {
                 <div className="bg-[#F39200] text-white px-6 py-2 flex items-center justify-between text-[10px] font-black uppercase tracking-widest animate-in fade-in slide-in-from-top duration-500 z-[100]">
                     <div className="flex items-center gap-3">
                         <AlertCircle className="w-4 h-4" />
-                        <span>El tamaño actual de la ventana del navegador es inferior al mínimo recomendado (1920x1080). Algunos elementos pueden no visualizarse correctamente.</span>
+                        <span>La resolución de la pantalla es inferior al mínimo recomendado (1920x1080). Algunos elementos pueden no visualizarse correctamente.</span>
                     </div>
                     <button onClick={() => setShowResWarning(false)} className="hover:scale-110 transition-transform">
                         <CloseIcon className="w-4 h-4" />

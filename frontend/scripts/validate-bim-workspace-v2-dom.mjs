@@ -83,6 +83,19 @@ try {
     await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-1920x1080.png`, fullPage: true });
     await context.close();
 
+    const scaledContext = await browser.newContext({
+        viewport: { width: 1536, height: 800 },
+        screen: { width: 1536, height: 864 },
+        deviceScaleFactor: 1.25,
+    });
+    const scaledPage = await scaledContext.newPage();
+    await scaledPage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
+    await scaledPage.waitForSelector('[data-bim-workspace-v2]');
+    assert.equal(await scaledPage.locator('[data-bim-unsupported-resolution]').count(), 0, '1920x1080 físico con escalado 125% debe montar BIM');
+    assert.equal(await scaledPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, 'El workspace escalado no genera overflow horizontal');
+    await scaledPage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-1920x1080-scaled-125.png`, fullPage: true });
+    await scaledContext.close();
+
     const unsupportedContext = await browser.newContext({ viewport: { width: 1366, height: 768 }, screen: { width: 1366, height: 768 } });
     const unsupportedPage = await unsupportedContext.newPage();
     await unsupportedPage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
