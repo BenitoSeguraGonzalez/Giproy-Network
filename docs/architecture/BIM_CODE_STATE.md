@@ -1219,5 +1219,7 @@ intercambio end-to-end.
   el rechazo de una pantalla fisica 1600x900.
 - Build y baseline enterprise pasan; feature flag, allowlist, licencias, API,
   backend y datos permanecen sin cambios.
+- Beta frontend `e7831839...` healthy; home `200`, ruta BIM anonima `401` y
+  rollback en `deploy/backups/display-resolution-20260722-141704`.
 - Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
   98,36%; los gates externos no cambian.

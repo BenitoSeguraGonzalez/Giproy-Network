@@ -7,6 +7,8 @@
 - 1920x1080 nativo y escalado 125% pasan; 1600x900 permanece bloqueado.
 - Build, Playwright BIM, baseline enterprise y smoke anti-BIM pasan.
 - Sin cambios de backend, DB, API, auth, tenant, licencias ni allowlist.
+- Beta frontend `e7831839...` healthy; backup
+  `deploy/backups/display-resolution-20260722-141704`, home `200` y BIM `401`.
 - Tecnico: 61/61, 100%. Liberacion: 60/61, 98,36%.
 
 ## 2026-07-20 - Adaptador controlado Primavera P6 XER

@@ -5,6 +5,8 @@
 - Pantallas 1920x1080 con escalado 125% y pantallas superiores dejan de mostrar
   el bloqueo incorrecto; una pantalla fisica 1600x900 continua no soportada.
 - Build, Playwright BIM, baseline enterprise y smoke anti-BIM correctos.
+- Beta desplegada con frontend `e7831839...`; stack healthy, home `200`, ruta
+  BIM anonima `401` y backend/DB sin recrear.
 
 ### 2026-07-21 - Reconstruccion del remoto interno Gitea (TASK-2034)
 
