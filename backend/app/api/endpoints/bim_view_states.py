@@ -17,6 +17,7 @@ from app.schemas.bim_view_state import (
     BimWorkspaceContextUpsertRequest,
 )
 from app.services.bim.feature_flags import resolve_bim_feature_access
+from app.services.bim.role_policy import is_bim_company_operator
 from app.services.bim.view_state_service import (
     delete_view_state_for_project,
     duplicate_view_state_for_project,
@@ -56,8 +57,8 @@ def _resolve_project(db: Session, project_id: int, current_user: Usuario, empres
 
 
 def _ensure_view_state_management_allowed(view_state, current_user: Usuario) -> None:
-    if view_state.scope == "company" and current_user.rol.lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede gestionar vistas BIM compartidas.")
+    if view_state.scope == "company" and not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede gestionar vistas BIM compartidas.")
 
 
 @router.get("/projects/{project_id}/view-states", response_model=list[BimViewStateResponse])
@@ -108,8 +109,8 @@ def create_bim_view_state(
     if not view_name:
         raise HTTPException(status_code=400, detail="El nombre de la vista BIM es obligatorio.")
     normalized_scope = _normalize_public_view_state_scope(payload.scope)
-    if normalized_scope == "company" and current_user.rol.lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede crear vistas BIM compartidas.")
+    if normalized_scope == "company" and not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede crear vistas BIM compartidas.")
     if payload.viewer_state and payload.viewer_state.source_version_id != payload.active_version_id:
         raise HTTPException(status_code=400, detail="La vista BIM reproducible no corresponde a la version activa declarada.")
 
@@ -216,8 +217,8 @@ def duplicate_bim_view_state(
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
 
     target_scope = _normalize_public_view_state_scope(payload.scope) if payload and payload.scope is not None else None
-    if target_scope == "company" and current_user.rol.lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede duplicar vistas BIM compartidas.")
+    if target_scope == "company" and not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede duplicar vistas BIM compartidas.")
 
     duplicated_state = duplicate_view_state_for_project(
         db,

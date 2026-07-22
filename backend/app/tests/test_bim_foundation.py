@@ -607,7 +607,7 @@ def test_bim_view_state_duplicate_blocks_company_scope_for_regular_user(db, samp
     )
 
     assert response.status_code == 403
-    assert response.json()["detail"] == "Solo superadministrador puede duplicar vistas BIM compartidas."
+    assert response.json()["detail"] == "Solo un administrador de empresa puede duplicar vistas BIM compartidas."
     assert db.query(BimViewState).filter(BimViewState.proyecto_id == project.id).count() == 1
 
 
@@ -620,7 +620,7 @@ def test_bim_view_state_rejects_unsupported_public_scope(db, sample_empresa, mon
         email="bim-view-state-scope@example.com",
         hashed_password="hash",
         nombre_completo="Usuario BIM Scope",
-        rol="superadministrador",
+        rol="administrador",
         empresa_id=sample_empresa.id,
     )
     project = Proyecto(nombre="Proyecto BIM scope", empresa_id=sample_empresa.id)
@@ -1392,7 +1392,7 @@ def test_bim_ifc_text_endpoint_rejects_regular_user(db, sample_empresa, monkeypa
     )
 
     assert response.status_code == 403
-    assert response.json()["detail"] == "Solo superadministrador puede importar IFC BIM."
+    assert response.json()["detail"] == "Solo un administrador de empresa puede importar IFC BIM."
     assert db.query(BimModel).filter(BimModel.proyecto_id == project.id).count() == 0
 
 
@@ -1403,10 +1403,10 @@ def test_bim_ifc_file_endpoint_stores_and_imports_local_artifact(db, sample_empr
     monkeypatch.setattr(settings, "BIM_LOCAL_STORAGE_DIR", tmp_path / "bim-storage")
 
     user = Usuario(
-        email="bim-ifc-file-superadmin@example.com",
+        email="bim-ifc-file-admin@example.com",
         hashed_password="hash",
         nombre_completo="BIM IFC File Admin",
-        rol="superadministrador",
+        rol="administrador",
         empresa_id=sample_empresa.id,
     )
     project = Proyecto(nombre="Proyecto BIM IFC file", empresa_id=sample_empresa.id)
@@ -1513,10 +1513,10 @@ def test_bim_viewer_artifact_endpoint_generates_indexed_artifact(db, sample_empr
     monkeypatch.setattr(settings, "BIM_LOCAL_STORAGE_DIR", tmp_path / "bim-storage")
 
     user = Usuario(
-        email="bim-artifact-superadmin@example.com",
+        email="bim-artifact-admin@example.com",
         hashed_password="hash",
         nombre_completo="BIM Artifact Admin",
-        rol="superadministrador",
+        rol="administrador",
         empresa_id=sample_empresa.id,
     )
     project = Proyecto(nombre="Proyecto BIM artifact", empresa_id=sample_empresa.id)
@@ -1616,7 +1616,7 @@ def test_bim_viewer_artifact_endpoint_rejects_regular_user(db, sample_empresa, m
     response = _bim_test_client(db, user).post(f"/bim/projects/{project.id}/versions/999/artifacts/viewer")
 
     assert response.status_code == 403
-    assert response.json()["detail"] == "Solo superadministrador puede generar artefactos BIM."
+    assert response.json()["detail"] == "Solo un administrador de empresa puede generar artefactos BIM."
 
 
 def test_bim_edt_link_creation_is_idempotent_and_listed(db, sample_empresa):

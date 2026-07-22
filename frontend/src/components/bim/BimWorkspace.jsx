@@ -117,7 +117,8 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
     const [viewerStateToApply, setViewerStateToApply] = useState(null);
     const [viewerStateApplyStatus, setViewerStateApplyStatus] = useState(null);
     const [federation, setFederation] = useState(null);
-    const canCreateCompanyScope = access?.resolved_role === 'superadministrador';
+    const canAdministerBim = ['administrador', 'superadministrador'].includes(access?.resolved_role);
+    const canCreateCompanyScope = canAdministerBim;
 
     useEffect(() => {
         if (!project?.id || !access?.enabled) {
@@ -452,7 +453,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         try {
             setDuplicatingViewStateId(viewState.id);
             const targetScope =
-                viewState.scope === 'company' && access?.resolved_role !== 'superadministrador' ? 'personal' : viewState.scope;
+                viewState.scope === 'company' && !canAdministerBim ? 'personal' : viewState.scope;
             const duplicatedState = await bimViewStatesApi.duplicateByProject(
                 project.id,
                 viewState.id,
@@ -737,7 +738,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         ];
         const adminTools = canCreateCompanyScope
             ? [
-                  { id: 'imports', label: 'Importaciones', content: <BimImportJobsPanel projectId={project?.id} empresaId={access?.resolved_company_id} onImportReady={refresh} /> },
+                  { id: 'imports', label: 'Cargar modelo IFC', content: <BimImportJobsPanel projectId={project?.id} empresaId={access?.resolved_company_id} onImportReady={refresh} /> },
                   { id: 'versions', label: 'Modelos y versiones', content: <BimVersionSelector models={workspace.models} activeVersionId={activeVersionId} onSelectVersion={handleSelectVersion} /> },
                   { id: 'federation', label: 'Federación', content: <BimFederationPanel projectId={project?.id} empresaId={access?.resolved_company_id} models={workspace.models} federation={federation} onFederationChange={setFederation} /> },
                   { id: 'location', label: 'Ubicación', content: <BimSiteGeoreferencePanel projectId={project?.id} empresaId={access?.resolved_company_id} activeVersionId={activeVersionId} onSelectVersion={handleSelectVersion} /> },
@@ -789,7 +790,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 versionLabel={activeVersionLabel}
                 viewerMode={viewerMode}
                 loading={loading}
-                canAdminister={access?.resolved_role === 'superadministrador'}
+                canAdminister={canAdministerBim}
                 explorer={(
                     <BimTreePanel
                         nodes={workspace.tree_nodes}

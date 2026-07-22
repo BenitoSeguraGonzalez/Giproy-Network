@@ -131,7 +131,10 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
             <div className="flex min-h-12 items-center justify-between gap-3 border-b border-zinc-200 px-4 py-2.5">
                 <div className="flex min-w-0 items-center gap-2">
                     <FileUp className="h-4 w-4 shrink-0 text-[#F39200]" />
-                    <h3 className="truncate text-sm font-black text-zinc-900">Importaciones IFC</h3>
+                    <div className="min-w-0">
+                        <h3 className="truncate text-sm font-black text-zinc-900">Cargar modelo IFC</h3>
+                        <p className="truncate text-[10px] text-zinc-500">Registra una versión del modelo en el proyecto activo y sigue su procesamiento.</p>
+                    </div>
                 </div>
                 <button
                     type="button"
@@ -147,15 +150,15 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
             <form onSubmit={handleSubmit} className="grid gap-2 p-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.25fr)_110px_minmax(0,1fr)_auto]">
                 <label className="grid gap-1 text-[10px] font-bold text-zinc-600">
                     Modelo
-                    <input value={modelName} onChange={(event) => setModelName(event.target.value)} className={FIELD_CLASS} maxLength={255} />
+                    <input value={modelName} onChange={(event) => setModelName(event.target.value)} className={FIELD_CLASS} maxLength={255} placeholder="Ej. Arquitectura" />
                 </label>
                 <label className="grid gap-1 text-[10px] font-bold text-zinc-600">
                     Versión
-                    <input value={versionLabel} onChange={(event) => setVersionLabel(event.target.value)} className={FIELD_CLASS} maxLength={50} />
+                    <input value={versionLabel} onChange={(event) => setVersionLabel(event.target.value)} className={FIELD_CLASS} maxLength={50} placeholder="Ej. R01" />
                 </label>
                 <label className="grid gap-1 text-[10px] font-bold text-zinc-600">
                     Disciplina
-                    <input value={discipline} onChange={(event) => setDiscipline(event.target.value)} className={FIELD_CLASS} maxLength={100} />
+                    <input value={discipline} onChange={(event) => setDiscipline(event.target.value)} className={FIELD_CLASS} maxLength={100} placeholder="Opcional" />
                 </label>
                 <div className="flex items-end gap-2 sm:col-span-2 xl:col-span-1">
                     <label className="inline-flex h-9 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-lg border border-dashed border-zinc-300 px-3 text-xs font-semibold text-zinc-600 hover:border-[#F39200] hover:text-[#F39200]" title="Seleccionar archivo IFC">
@@ -169,7 +172,7 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
                         className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg bg-[#F39200] px-3 text-xs font-black text-white transition-colors hover:bg-[#d87f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-200 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {submitting ? <LoaderCircle className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <FileUp className="h-4 w-4" />}
-                        Importar
+                        Cargar y procesar
                     </button>
                 </div>
             </form>

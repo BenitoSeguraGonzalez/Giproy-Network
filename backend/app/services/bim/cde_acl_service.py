@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.bim_cde import BimCdeDocument
 from app.models.bim_cde_acl import BimCdeDocumentAcl
 from app.models.usuario import Usuario
+from app.services.bim.role_policy import is_bim_company_operator
 
 
 PERMISSION_COLUMNS = {"view": "can_view", "download": "can_download", "revise": "can_revise", "manage": "can_manage"}
@@ -19,7 +20,7 @@ def get_acl_document(db: Session, *, document_id: int, project_id: int, company_
 def has_document_permission(db: Session, *, document: BimCdeDocument, user_id: int, role: str | None, permission: str) -> bool:
     if permission not in PERMISSION_COLUMNS:
         raise ValueError("Permiso documental BIM invalido.")
-    if (role or "").lower() == "superadministrador" or document.created_by == user_id:
+    if is_bim_company_operator(role) or document.created_by == user_id:
         return True
     acl_count = db.query(BimCdeDocumentAcl).filter(BimCdeDocumentAcl.document_id == document.id).count()
     if acl_count == 0:
@@ -34,7 +35,7 @@ def require_document_permission(db: Session, *, document: BimCdeDocument, user_i
 
 
 def _require_acl_manager(db: Session, *, document: BimCdeDocument, user_id: int, role: str | None) -> None:
-    if (role or "").lower() == "superadministrador" or document.created_by == user_id:
+    if is_bim_company_operator(role) or document.created_by == user_id:
         return
     grant = db.query(BimCdeDocumentAcl).filter(BimCdeDocumentAcl.document_id == document.id, BimCdeDocumentAcl.usuario_id == user_id, BimCdeDocumentAcl.active.is_(True), BimCdeDocumentAcl.can_manage.is_(True)).first()
     if grant is None:

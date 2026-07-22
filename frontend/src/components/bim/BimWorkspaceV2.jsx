@@ -1,6 +1,5 @@
 import React, { Component, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Activity,
     Box,
     CalendarRange,
     ChartNoAxesCombined,
@@ -16,6 +15,7 @@ import {
     RotateCcw,
     Search,
     Settings,
+    Upload,
     X,
 } from 'lucide-react';
 import { isMinimumDesktopDisplaySupported } from '../../utils/displayResolution';
@@ -220,15 +220,15 @@ const BimWorkspaceV2 = ({
 
     const isAdmin = activeWorkspace === 'admin';
     const isReports = activeWorkspace === 'reports';
-    const showExplorer = explorerVisible && !isAdmin && !isReports;
+    const showExplorer = ready && explorerVisible && !isAdmin && !isReports;
     const availableTools = workspaceTools?.[activeWorkspace] || [];
     const selectedToolId = activeToolByWorkspace[activeWorkspace] || availableTools[0]?.id;
     const selectedTool = availableTools.find((tool) => tool.id === selectedToolId) || availableTools[0];
     const selectedBottomTool = (bottomTools || []).find((tool) => tool.id === bottomTool) || bottomTools?.[0];
     const selectedAdminToolId = activeToolByWorkspace.admin || adminTools?.[0]?.id;
     const selectedAdminTool = (adminTools || []).find((tool) => tool.id === selectedAdminToolId) || adminTools?.[0];
-    const showInspector = inspectorVisible && !isAdmin && !isReports && Boolean(selectedTool || inspector);
-    const showBottomDrawer = ['planning', 'production'].includes(activeWorkspace) && Boolean(selectedBottomTool);
+    const showInspector = ready && inspectorVisible && !isAdmin && !isReports && Boolean(selectedTool || inspector);
+    const showBottomDrawer = ready && ['planning', 'production'].includes(activeWorkspace) && Boolean(selectedBottomTool);
     const gridTemplate = `${showExplorer ? `${leftWidth}px 4px ` : ''}minmax(0, 1fr)${showInspector ? ` 4px ${rightWidth}px` : ''}`;
     const normalizedSearch = searchTerm.trim().toLocaleLowerCase('es');
     const matchingSearchItems = normalizedSearch
@@ -312,20 +312,22 @@ const BimWorkspaceV2 = ({
                         ) : null}
                     </div>
                     {canAdminister ? (
-                        <button type="button" onClick={() => { setActiveWorkspace('admin'); selectTool('admin', 'imports'); }} className={iconButtonClass} title="Centro de actividad" aria-label="Abrir centro de actividad">
-                            <Activity className="h-4 w-4" aria-hidden="true" />
+                        <button type="button" onClick={() => { setActiveWorkspace('admin'); selectTool('admin', 'imports'); }} className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-[#F39200] px-3 text-xs font-semibold text-white transition-colors hover:bg-[#d87f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-200" title="Cargar y revisar modelos IFC">
+                            <Upload className="h-4 w-4" aria-hidden="true" />
+                            Cargar modelo IFC
                         </button>
                     ) : null}
                     {canAdminister ? (
                         <button
                             type="button"
                             onClick={() => setActiveWorkspace((current) => (current === 'admin' ? 'viewer' : 'admin'))}
-                            className={`${iconButtonClass} ${isAdmin ? 'border-[#F39200] text-[#F39200]' : ''}`}
+                            className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-md border bg-white px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-200 ${isAdmin ? 'border-[#F39200] text-[#F39200]' : 'border-zinc-200 text-zinc-600 hover:border-[#F39200] hover:text-[#F39200]'}`}
                             title="Administración BIM"
                             aria-label="Abrir administración BIM"
                             aria-pressed={isAdmin}
                         >
                             {isAdmin ? <X className="h-4 w-4" aria-hidden="true" /> : <Settings className="h-4 w-4" aria-hidden="true" />}
+                            {isAdmin ? 'Cerrar administración' : 'Administrar BIM'}
                         </button>
                     ) : null}
                 </div>
@@ -392,7 +394,7 @@ const BimWorkspaceV2 = ({
 
             {isAdmin ? (
                 <div className="flex h-10 shrink-0 items-center gap-1 border-b border-zinc-200 bg-white px-3" role="tablist" aria-label="Administración BIM">
-                    <span className="mr-3 text-xs font-semibold text-zinc-900">Administración BIM</span>
+                    <span className="mr-3 text-xs font-semibold text-zinc-900">Modelos y configuración BIM</span>
                     {(adminTools || []).map((tool) => (
                         <button
                             key={tool.id}
@@ -450,13 +452,16 @@ const BimWorkspaceV2 = ({
                         {showExplorer ? <div className="cursor-col-resize bg-zinc-200 hover:bg-[#F39200]" onPointerDown={(event) => setResizeSession({ type: 'left', pointer: event.clientX, value: leftWidth })} role="separator" aria-label="Redimensionar explorador" aria-orientation="vertical" /> : null}
                         <main className="flex min-h-0 min-w-0 flex-col overflow-hidden" data-bim-viewer-region>
                             {!ready ? (
-                                <div className="grid h-full min-h-0 place-items-center border border-zinc-200 bg-white p-8 text-center" data-bim-empty-state>
-                                    <div className="max-w-sm">
-                                        {loading ? <RefreshCw className="mx-auto h-8 w-8 animate-spin text-[#F39200] motion-reduce:animate-none" aria-hidden="true" /> : <Box className="mx-auto h-8 w-8 text-zinc-400" aria-hidden="true" />}
-                                        <h2 className="mt-4 text-sm font-semibold text-zinc-900">{loading ? 'Preparando modelo BIM' : 'Este proyecto aún no tiene un modelo BIM listo'}</h2>
-                                        <p className="mt-2 text-xs leading-5 text-zinc-500">{errorMessage || 'Importe un archivo IFC para iniciar el procesamiento del modelo y sus propiedades.'}</p>
-                                        {canAdminister && !loading ? <button type="button" onClick={() => { setActiveWorkspace('admin'); selectTool('admin', 'imports'); }} className="mt-4 h-9 rounded-md bg-[#F39200] px-4 text-xs font-semibold text-white hover:bg-[#d87f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-200">Importar IFC</button> : null}
-                                        {!canAdminister && !loading ? <p className="mt-4 text-xs font-semibold text-zinc-700">Solicite la carga al administrador BIM del proyecto.</p> : null}
+                                <div className="grid h-full min-h-0 place-items-center border border-zinc-200 bg-white p-8" data-bim-empty-state>
+                                    <div className="w-full max-w-2xl text-center">
+                                        <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-lg bg-orange-50 text-[#F39200]">
+                                            {loading ? <RefreshCw className="h-6 w-6 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Box className="h-6 w-6" aria-hidden="true" />}
+                                        </span>
+                                        <h2 className="mt-4 text-base font-semibold text-zinc-900">{loading ? 'Preparando el modelo BIM' : 'Carga el primer modelo BIM del proyecto'}</h2>
+                                        <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-zinc-600">{errorMessage || 'Selecciona un archivo IFC para procesar su geometría, propiedades y estructura espacial en este proyecto.'}</p>
+                                        {canAdminister && !loading ? <button type="button" onClick={() => { setActiveWorkspace('admin'); selectTool('admin', 'imports'); }} className="mt-5 inline-flex h-10 items-center gap-2 rounded-md bg-[#F39200] px-4 text-sm font-semibold text-white hover:bg-[#d87f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-200"><Upload className="h-4 w-4" aria-hidden="true" />Cargar modelo IFC</button> : null}
+                                        {!canAdminister && !loading ? <div className="mx-auto mt-5 max-w-lg border border-amber-200 bg-amber-50 px-4 py-3 text-left"><p className="text-xs font-semibold text-amber-900">Tu acceso BIM es de consulta o colaboración.</p><p className="mt-1 text-xs leading-5 text-amber-800">El administrador de tu empresa debe cargar el primer modelo IFC de este proyecto.</p></div> : null}
+                                        {!loading ? <div className="mt-8 grid grid-cols-3 divide-x divide-zinc-200 border-y border-zinc-200 py-4 text-left"><div className="px-4"><strong className="block text-xs text-zinc-800">1. Selecciona</strong><span className="mt-1 block text-[11px] leading-4 text-zinc-500">Archivo IFC, nombre, versión y disciplina.</span></div><div className="px-4"><strong className="block text-xs text-zinc-800">2. Procesa</strong><span className="mt-1 block text-[11px] leading-4 text-zinc-500">GiProy valida y prepara el modelo.</span></div><div className="px-4"><strong className="block text-xs text-zinc-800">3. Revisa</strong><span className="mt-1 block text-[11px] leading-4 text-zinc-500">El visor activa geometría y propiedades.</span></div></div> : null}
                                     </div>
                                 </div>
                             ) : (

@@ -12,6 +12,7 @@ Este índice debe usarse siempre como primera referencia al retomar el programa 
 
 - [Plan Maestro BIM](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_MASTER_PLAN.md)
 - [Estado Real del Codigo BIM](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_CODE_STATE.md)
+- [Gobierno de Roles BIM](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_ROLE_GOVERNANCE.md)
 - [Mapa Conceptual BIM](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_CONCEPT_MAP.md)
 - [Mapa de Inserción BIM](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_INSERTION_MAP.md)
 - [Plan de Validación BIM](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_VALIDATION_PLAN.md)

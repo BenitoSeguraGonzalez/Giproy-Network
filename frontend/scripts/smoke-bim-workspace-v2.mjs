@@ -11,6 +11,10 @@ const shellSource = readFileSync(new URL('../src/components/bim/BimWorkspaceV2.j
 const appLayoutSource = readFileSync(new URL('../src/layouts/AppLayout.jsx', import.meta.url), 'utf8');
 
 assert.match(workspaceSource, /return\s*\([\s\S]*<BimWorkspaceV2/, 'V2 debe ser el unico retorno del workspace BIM');
+assert.match(workspaceSource, /\['administrador',\s*'superadministrador'\]\.includes\(access\?\.resolved_role\)/, 'Administrador y superadministrador deben poder administrar BIM dentro del tenant autorizado');
+assert.match(workspaceSource, /canAdminister=\{canAdministerBim\}/, 'La administracion BIM visible debe usar la politica empresarial canonica');
+assert.match(shellSource, />\s*Cargar modelo IFC\s*</, 'La carga IFC debe ser una accion principal visible en el workspace');
+assert.match(shellSource, /showExplorer\s*=\s*ready[\s\S]*showInspector\s*=\s*ready/, 'El estado sin modelo no debe competir con paneles BIM vacios');
 assert.doesNotMatch(workspaceSource, /VITE_BIM_WORKSPACE_V2|BIM_WORKSPACE_V2_ENABLED|BimShellContextBar|Herramientas de carga BIM/, 'No debe sobrevivir una rama de workspace legado');
 for (const label of ['Visor', 'Coordinación', 'Planificación 4D', 'Producción', 'Campo', 'Entrega', 'Informes']) {
     assert.ok(shellSource.includes(`label: '${label}'`), `Debe existir el workspace ${label}`);

@@ -35,7 +35,7 @@ def _client(db, user):
     return TestClient(app)
 
 
-def _enabled_context(db, sample_empresa, *, role="superadministrador"):
+def _enabled_context(db, sample_empresa, *, role="administrador"):
     user = Usuario(
         email=f"bim-job-{role}@example.com",
         hashed_password="hash",
@@ -107,7 +107,7 @@ def test_bim_import_job_http_lifecycle_is_tenant_scoped(
     assert db.query(BimImportJob).filter(BimImportJob.id == job_id).one().empresa_id == sample_empresa.id
 
 
-def test_bim_import_job_http_rejects_non_superadmin(db, sample_empresa, monkeypatch, tmp_path):
+def test_bim_import_job_http_rejects_non_company_operator(db, sample_empresa, monkeypatch, tmp_path):
     monkeypatch.setattr(settings, "BIM_ENABLED", True)
     monkeypatch.setattr(settings, "BIM_ALLOWED_EMPRESA_IDS", "")
     monkeypatch.setattr(settings, "BIM_ALLOWED_USER_IDS", "")

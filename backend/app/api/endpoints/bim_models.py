@@ -31,6 +31,7 @@ from app.schemas.bim_model import (
 from app.services.bim.artifact_service import generate_viewer_artifact
 from app.services.bim.demo_bootstrap import bootstrap_demo_bim_project
 from app.services.bim.feature_flags import resolve_bim_feature_access
+from app.services.bim.role_policy import is_bim_company_operator
 from app.services.bim.import_service import (
     import_json_bim_batch,
     import_json_bim_package,
@@ -567,7 +568,7 @@ def list_project_bim_cde_reviews(project_id: int, empresa_id: Optional[int] = No
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
-    return list_reviews(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=current_user.rol.lower() == "superadministrador")
+    return list_reviews(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=is_bim_company_operator(current_user.rol))
 
 
 @router.post("/projects/{project_id}/cde/reviews", response_model=BimCdeReviewResponse, status_code=status.HTTP_201_CREATED)
@@ -587,7 +588,7 @@ def comment_project_bim_cde_review(project_id: int, review_id: int, payload: Bim
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
     require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
-    return add_review_comment(db, review_id=review_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=current_user.rol.lower() == "superadministrador", payload=payload)
+    return add_review_comment(db, review_id=review_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=is_bim_company_operator(current_user.rol), payload=payload)
 
 
 @router.post("/projects/{project_id}/cde/reviews/{review_id}/transition", response_model=BimCdeReviewResponse)
@@ -597,7 +598,7 @@ def transition_project_bim_cde_review(project_id: int, review_id: int, payload: 
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
     require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
-    return transition_review(db, review_id=review_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=current_user.rol.lower() == "superadministrador", payload=payload)
+    return transition_review(db, review_id=review_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=is_bim_company_operator(current_user.rol), payload=payload)
 
 
 @router.get("/projects/{project_id}/cde/review-notifications", response_model=list[BimCdeReviewNotificationResponse])
@@ -708,7 +709,7 @@ def list_project_bim_cde_collaboration_events(project_id: int, after_id: int = Q
 def get_project_bim_cde_dashboard(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id)
     _require_bim_access(db, project, current_user, "bim.review")
-    can_override = current_user.rol.lower() == "superadministrador"
+    can_override = is_bim_company_operator(current_user.rol)
     return get_cde_dashboard(
         db,
         project_id=project.id,
@@ -765,7 +766,7 @@ def create_project_bim_cde_rfi(project_id: int, payload: BimCdeRfiCreate, empres
 def transition_project_bim_cde_rfi(project_id: int, rfi_id: int, payload: BimCdeRfiTransition, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id)
     _require_bim_access(db, project, current_user, "bim.review")
-    return transition_rfi(db, rfi_id=rfi_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=current_user.rol.lower() == "superadministrador", payload=payload)
+    return transition_rfi(db, rfi_id=rfi_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=is_bim_company_operator(current_user.rol), payload=payload)
 
 
 @router.get("/projects/{project_id}/cde/submittals", response_model=list[BimCdeSubmittalResponse])
@@ -786,14 +787,14 @@ def create_project_bim_cde_submittal(project_id: int, payload: BimCdeSubmittalCr
 def create_project_bim_cde_submittal_revision(project_id: int, submittal_id: int, payload: BimCdeSubmittalRevisionCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id)
     _require_bim_access(db, project, current_user, "bim.review")
-    return create_submittal_revision(db, submittal_id=submittal_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=current_user.rol.lower() == "superadministrador", payload=payload)
+    return create_submittal_revision(db, submittal_id=submittal_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=is_bim_company_operator(current_user.rol), payload=payload)
 
 
 @router.post("/projects/{project_id}/cde/submittals/{submittal_id}/transition", response_model=BimCdeSubmittalResponse)
 def transition_project_bim_cde_submittal(project_id: int, submittal_id: int, payload: BimCdeSubmittalTransition, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id)
     _require_bim_access(db, project, current_user, "bim.review")
-    return transition_submittal(db, submittal_id=submittal_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=current_user.rol.lower() == "superadministrador", payload=payload)
+    return transition_submittal(db, submittal_id=submittal_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=is_bim_company_operator(current_user.rol), payload=payload)
 
 
 @router.get("/projects/{project_id}/cde/documents", response_model=list[BimCdeDocumentResponse])
@@ -2114,8 +2115,8 @@ def bootstrap_demo_workspace(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede bootstrapear el workspace BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede preparar el workspace BIM.")
 
     result = bootstrap_demo_bim_project(
         db,
@@ -2146,8 +2147,8 @@ def import_json_package(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede importar paquetes BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede importar paquetes BIM.")
 
     validation = validate_json_bim_batch([payload])
     _raise_if_json_validation_has_errors(validation)
@@ -2180,8 +2181,8 @@ def import_json_batch(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede importar paquetes BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede importar paquetes BIM.")
     if not payload.packages:
         raise HTTPException(status_code=400, detail="No se recibieron paquetes BIM para importar.")
 
@@ -2216,8 +2217,8 @@ def register_ifc_manifest(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede registrar manifiestos IFC BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede registrar manifiestos IFC BIM.")
 
     try:
         return register_ifc_bim_manifest(
@@ -2247,8 +2248,8 @@ def import_ifc_text(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede importar IFC BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede importar IFC BIM.")
 
     try:
         return import_ifc_text_bim_package(
@@ -2284,8 +2285,8 @@ async def import_ifc_file(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede importar IFC BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede importar IFC BIM.")
 
     try:
         return import_ifc_file_bim_package(
@@ -2332,8 +2333,8 @@ async def create_ifc_import_job(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede importar IFC BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede importar IFC BIM.")
 
     try:
         job = create_bim_import_job(
@@ -2375,8 +2376,8 @@ def list_ifc_import_jobs(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede consultar jobs IFC BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede consultar jobs IFC BIM.")
     try:
         jobs = list_bim_import_jobs(db, project_id=project.id, company_id=project.empresa_id)
     except RuntimeError as exc:
@@ -2404,8 +2405,8 @@ def get_ifc_import_job(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede consultar jobs IFC BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede consultar jobs IFC BIM.")
     try:
         job = get_bim_import_job(
             db,
@@ -2440,8 +2441,8 @@ def cancel_ifc_import_job(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede cancelar jobs IFC BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede cancelar jobs IFC BIM.")
     try:
         job = request_bim_import_job_cancellation(
             db,
@@ -2478,8 +2479,8 @@ def retry_ifc_import_job(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede reintentar jobs IFC BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede reintentar jobs IFC BIM.")
     try:
         job = retry_bim_import_job(
             db,
@@ -2513,8 +2514,8 @@ def generate_bim_viewer_artifact(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede generar artefactos BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede generar artefactos BIM.")
 
     try:
         return generate_viewer_artifact(
@@ -2547,8 +2548,8 @@ def generate_bim_ifc_quality_report(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede generar calidad IFC BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede generar calidad IFC BIM.")
     try:
         report = generate_ifc_quality_report(
             db,
@@ -2640,8 +2641,8 @@ async def register_bim_artifact(
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede registrar artifacts BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede registrar artefactos BIM.")
     try:
         artifact = store_artifact_bytes(
             db,
@@ -2699,8 +2700,8 @@ def rollback_bim_artifact(
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede hacer rollback de artifacts BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede revertir artefactos BIM.")
     try:
         artifact = rollback_artifact(db, artifact_id=artifact_id, project_id=project.id, company_id=project.empresa_id)
     except ValueError as exc:
@@ -2756,8 +2757,8 @@ def validate_json_batch(
     )
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
-    if (current_user.rol or "").lower() != "superadministrador":
-        raise HTTPException(status_code=403, detail="Solo superadministrador puede validar paquetes BIM.")
+    if not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede validar paquetes BIM.")
     if not payload.packages:
         raise HTTPException(status_code=400, detail="No se recibieron paquetes BIM para validar.")
 

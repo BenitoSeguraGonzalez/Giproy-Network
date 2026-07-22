@@ -1,5 +1,18 @@
 # Estado Real del Codigo BIM
 
+## Actualizacion 2026-07-22 - Gobierno de roles y carga IFC visible
+
+- `TASK-2038` / `BIM-TASK-0191` reconocen al administrador de empresa como
+  operador propietario del BIM de su tenant.
+- Administrador y superadministrador comparten administracion BIM tenant-scoped;
+  licencia, entitlement, flags, allowlist, empresa, proyecto y capabilities
+  siguen siendo puertas obligatorias.
+- `admin_bim` y `superadmin_only` permanecen como gobierno global exclusivo.
+- La shell muestra `Cargar modelo IFC` y `Administrar BIM` como acciones
+  explicitas; sin modelo, oculta paneles vacios y explica el flujo real.
+- Suite BIM `262 passed`, smoke BIM V2, build, anti-BIM y baseline enterprise
+  correctos. No hay migraciones ni despliegue.
+
 Fecha: 2026-07-13
 
 Modo: GIPROY BIM
