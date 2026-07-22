@@ -11,7 +11,7 @@
 - La shell muestra `Cargar modelo IFC` y `Administrar BIM` como acciones
   explicitas; sin modelo, oculta paneles vacios y explica el flujo real.
 - Suite BIM `262 passed`, smoke BIM V2, build, anti-BIM y baseline enterprise
-  correctos. No hay migraciones ni despliegue.
+  correctos. Desplegado en beta con commit `cdcba86`; no hubo migraciones.
 
 Fecha: 2026-07-13
 

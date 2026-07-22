@@ -2,7 +2,7 @@
 
 Fecha: 2026-07-22
 
-Estado: Cerrada localmente
+Estado: Cerrada en beta
 
 Modo: INTEGRACION CONTROLADA GIPROY CLASICO <-> GIPROY BIM
 
@@ -54,3 +54,12 @@ migraciones, cambios de esquema ni escrituras de datos.
 - `262 passed` en suite BIM backend.
 - Smoke BIM Workspace V2 completo: OK.
 - Build frontend, smoke anti-BIM y baseline enterprise: OK.
+
+## Despliegue beta
+
+- Commit: `cdcba86`.
+- Backend `sha256:72bd62de6a70619ec44b9b46530bf6ae8f80a5490371e4b4fd096fb3ed14ba4a`.
+- Frontend `sha256:92096214b306536444ffad2bc83f94ca9a8c9327c9e0d166f2d59919d8a24061`.
+- Stack healthy, home `200` y frontera BIM anonima `401`.
+- Sin migraciones ni cambios de PostgreSQL.
+- Rollback de fuentes e imagenes con sello `20260722-102609`.
