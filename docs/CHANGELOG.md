@@ -1,3 +1,11 @@
+### 2026-07-22 - Portafolio resiliente ante 502 transitorio (TASK-2037)
+
+- El listado clasico de proyectos reintenta fallos transitorios durante la
+  recuperacion del backend.
+- Un fallo agotado se diferencia visualmente de un tenant sin proyectos y
+  ofrece reintento manual, sin alterar datos ni permisos.
+- Se preservan contratos API, tenant, licencia, PostgreSQL y GiProy BIM.
+
 ### 2026-07-22 - Error BIM serializable en React (BIM-TASK-0190)
 
 - La carga del workspace BIM convierte errores JavaScript, Axios y FastAPI en

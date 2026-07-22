@@ -1,10 +1,13 @@
 import axiosInstance from './axiosConfig';
 import { withTenantConfig, withTenantParams } from './tenant';
+import { requestProjectListWithRetry } from './projectListRetry';
 
 export const proyectosApi = {
     // Obtener todos los proyectos del tenant
     getAll: async (params = {}) => {
-        const response = await axiosInstance.get('/proyectos/', { params: withTenantParams(params) });
+        const response = await requestProjectListWithRetry(() => (
+            axiosInstance.get('/proyectos/', { params: withTenantParams(params) })
+        ));
         return response.data;
     },
 

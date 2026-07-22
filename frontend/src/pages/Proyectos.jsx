@@ -789,6 +789,7 @@ const Proyectos = () => {
     const location = useLocation();
     const [proyectos, setProyectos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [projectLoadError, setProjectLoadError] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProject, setSelectedProject] = useState(null);
     const [activeTab, setActiveTab] = useState('datos');
@@ -1240,6 +1241,7 @@ const Proyectos = () => {
     const fetchProyectos = async () => {
         try {
             setLoading(true);
+            setProjectLoadError(false);
             const empId = selectedEmpresa?.id || user?.empresa_id;
             const params = {
                 ...(empId ? { empresa_id: empId } : {}),
@@ -1268,6 +1270,7 @@ const Proyectos = () => {
             );
             setProjectDetailsMap(Object.fromEntries(detailEntries));
         } catch (error) {
+            setProjectLoadError(true);
             globalThis.reportClientError?.("Error cargando proyectos:", error);
         } finally {
             setLoading(false);
@@ -3711,6 +3714,26 @@ const Proyectos = () => {
                                                 <div className="flex flex-col items-center gap-4">
                                                     <div className="h-10 w-10 animate-spin rounded-full border-4 border-zinc-200 border-t-[#136191]" />
                                                     <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Cargando portafolio...</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : projectLoadError ? (
+                                        <tr>
+                                            <td colSpan={9} className="px-8 py-20 text-center">
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <AlertTriangle className="h-10 w-10 text-amber-500" />
+                                                    <div className="space-y-1">
+                                                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-700">No se pudo actualizar el portafolio</p>
+                                                        <p className="text-xs font-medium text-zinc-500">El servicio no respondió temporalmente. Los proyectos no se han eliminado.</p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={fetchProyectos}
+                                                        className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-700 shadow-sm transition-colors hover:border-[#F39200] hover:text-[#B86D00]"
+                                                    >
+                                                        <RotateCcw className="h-4 w-4" />
+                                                        Reintentar
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
