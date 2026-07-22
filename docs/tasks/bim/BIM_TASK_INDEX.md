@@ -268,7 +268,7 @@ iniciada.
 | `BIM-TASK-0187` | Cerrada en beta: IFC4X3_ADD2 con corpus oficial, Fragments y probe remoto |
 | `BIM-TASK-0188` | Cerrada en beta: adaptador P6 XER, round-trip remoto, UX y rollback verificados |
 | `BIM-TASK-0189` | Cerrada en beta: resolucion fisica compatible, escalado 125% y rollback verificados |
-| `BIM-TASK-0190` | Cerrada localmente: errores BIM normalizados sin crash React #31 |
+| `BIM-TASK-0190` | Cerrada en beta: errores BIM normalizados sin crash React #31 y rollback verificado |
 
 ## Orden de ejecucion
 

@@ -6,6 +6,8 @@
 - El hook guarda texto y la shell normaliza defensivamente cualquier valor.
 - Build, baseline enterprise y smoke anti-BIM pasan.
 - Sin cambios de backend, DB, API, auth, tenant, licencias ni allowlist.
+- Beta frontend `23ffe21a...` healthy; backup
+  `deploy/backups/bim-error-react31-20260722-144513`, beta/local `200` y BIM `401`.
 - Tecnico: 61/61, 100%. Liberacion: 60/61, 98,36%.
 
 ## 2026-07-22 - Resolucion fisica compatible en BIM

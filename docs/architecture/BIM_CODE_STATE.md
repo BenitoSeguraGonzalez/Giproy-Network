@@ -1231,5 +1231,7 @@ intercambio end-to-end.
 - Las regresiones cubren errores JavaScript, Axios, FastAPI y objetos opacos.
 - Build, baseline enterprise y smoke anti-BIM pasan sin cambios de backend,
   datos, permisos, licencias ni allowlist.
+- Beta frontend `23ffe21a...` healthy; home beta/local y API local `200`, ruta
+  BIM anonima `401` y rollback en `deploy/backups/bim-error-react31-20260722-144513`.
 - Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
   98,36%; los gates externos no cambian.

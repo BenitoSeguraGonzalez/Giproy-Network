@@ -5,6 +5,8 @@
 - La shell BIM incorpora una defensa adicional y deja de abortar con React #31
   cuando una solicitud falla.
 - Build, baseline enterprise y smoke anti-BIM correctos.
+- Beta desplegada con frontend `23ffe21a...`; stack healthy, beta/local `200`,
+  ruta BIM anonima `401` y backend/DB sin recrear.
 
 ### 2026-07-22 - Resolucion fisica compatible en BIM (TASK-2035 / BIM-TASK-0189)
 
