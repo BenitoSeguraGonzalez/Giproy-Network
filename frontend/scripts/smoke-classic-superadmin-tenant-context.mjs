@@ -55,8 +55,8 @@ assert.match(
 
 assert.match(
     layoutSource,
-    /<div key=\{tenantContentKey\} data-tenant-content-key=\{tenantContentKey\} className="contents">[\s\S]*\{children\}[\s\S]*<\/div>/,
-    'AppLayout debe remontar el contenido protegido al cambiar la empresa operativa.',
+    /<div[\s\S]*key=\{tenantContentKey\}[\s\S]*data-tenant-content-key=\{tenantContentKey\}[\s\S]*data-app-page-viewport[\s\S]*h-full min-h-0 overflow-auto overscroll-contain[\s\S]*\{children\}[\s\S]*<\/div>/,
+    'AppLayout debe remontar el contenido protegido al cambiar empresa y conservarlo alcanzable.',
 );
 
 console.log('smoke-classic-superadmin-tenant-context: ok');

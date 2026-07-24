@@ -1103,7 +1103,7 @@ const ApuBudgetEditor = ({
                     </div>
 
                     {/* Lines Table */}
-                    <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                    <div className="flex-1 min-h-0 overflow-auto overscroll-contain custom-scrollbar [touch-action:pan-x_pan-y]">
                         <div className="min-w-[800px]">
                             <div className="sticky top-0 bg-zinc-100/80 backdrop-blur-sm border-b border-zinc-200 grid grid-cols-[40px_minmax(0,3fr)_100px_100px_120px_100px_120px_40px] gap-4 px-6 py-2.5 z-20">
                                 <div className="text-center text-[9px] font-black uppercase text-zinc-400">#</div>

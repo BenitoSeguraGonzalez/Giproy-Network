@@ -85,6 +85,28 @@ try {
         }
         assert.equal(await shell.getAttribute('data-adaptive-ui-enabled'), 'true');
         assert.equal(await page.locator('[data-adaptive-harness-content]').count(), 1, `${profile.name}: contenido clásico visible`);
+        const pageViewport = page.locator('[data-app-page-viewport]');
+        const verticalScrollState = await pageViewport.evaluate((node) => ({
+            clientHeight: node.clientHeight,
+            scrollHeight: node.scrollHeight,
+        }));
+        assert.ok(verticalScrollState.scrollHeight > verticalScrollState.clientHeight, `${profile.name}: el shell detecta contenido vertical excedente`);
+        await pageViewport.evaluate((node) => { node.scrollTop = node.scrollHeight; });
+        await page.waitForTimeout(50);
+        const lastContentIsReachable = await page.locator('[data-adaptive-harness-last-content]').evaluate((node) => {
+            const rect = node.getBoundingClientRect();
+            return rect.bottom <= window.innerHeight + 2 && rect.top >= 0;
+        });
+        assert.equal(lastContentIsReachable, true, `${profile.name}: el último contenido es alcanzable mediante scroll del shell`);
+        const tableViewport = page.locator('[data-adaptive-harness-table]');
+        const horizontalScrollState = await tableViewport.evaluate((node) => ({
+            clientWidth: node.clientWidth,
+            scrollWidth: node.scrollWidth,
+        }));
+        if (horizontalScrollState.scrollWidth > horizontalScrollState.clientWidth) {
+            await tableViewport.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
+            assert.ok(await tableViewport.evaluate((node) => node.scrollLeft > 0), `${profile.name}: la tabla ancha se puede recorrer lateralmente`);
+        }
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, `${profile.name}: sin overflow horizontal de página`);
         assert.equal(await page.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), true, `${profile.name}: sin overflow vertical de página`);
         assert.deepEqual(errors, [], `${profile.name}: sin errores`);

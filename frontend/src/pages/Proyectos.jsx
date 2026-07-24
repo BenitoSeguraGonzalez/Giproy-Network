@@ -5878,7 +5878,7 @@ const Proyectos = () => {
                 </div>
             </header>
 
-            <main className="flex-1 overflow-y-auto w-full custom-scrollbar">
+            <main className="flex-1 overflow-auto overscroll-contain w-full custom-scrollbar [touch-action:pan-x_pan-y]">
                 <div className="p-12">
                     <MotionDiv
                         initial={{ opacity: 0, y: 20 }}

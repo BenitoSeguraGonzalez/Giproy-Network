@@ -16156,3 +16156,15 @@ Cambios realizados
   en ambos ejes, conservando un ancho operativo de tabla de 1180 px.
 - No se escala la interfaz ni se cambia la composicion de escritorio.
 - Suite adaptativa, detector Impeccable y build de produccion: OK.
+
+### 2026-07-24 - Gate global de alcanzabilidad (TASK-2043)
+
+- `AppLayout` incorpora un viewport desplazable de respaldo para todas las
+  rutas protegidas, manteniendo el remount por empresa activa.
+- Un nuevo gate inventaria 38 rutas y 166 superficies y rechaza tablas anchas
+  sin viewport horizontal.
+- El harness deja de comprobar solo ausencia de overflow: fuerza contenido
+  excedente, llega al ultimo elemento y valida desplazamiento horizontal real.
+- Se corrigen tambien el editor de lineas APU y la landing legacy de Proyectos.
+- Suite adaptativa, Gantt Classic, BIM Workspace V2, build y baseline enterprise
+  con frontend: OK.

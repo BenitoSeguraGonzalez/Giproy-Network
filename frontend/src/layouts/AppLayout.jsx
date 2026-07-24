@@ -811,7 +811,12 @@ const AppLayout = ({ children }) => {
                         </div>
                     </div>
                 ) : (
-                    <div key={tenantContentKey} data-tenant-content-key={tenantContentKey} className="contents">
+                    <div
+                        key={tenantContentKey}
+                        data-tenant-content-key={tenantContentKey}
+                        data-app-page-viewport
+                        className="h-full min-h-0 overflow-auto overscroll-contain [touch-action:pan-x_pan-y]"
+                    >
                         {children}
                     </div>
                 )}

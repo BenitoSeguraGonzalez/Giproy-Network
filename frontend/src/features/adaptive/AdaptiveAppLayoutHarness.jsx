@@ -16,13 +16,13 @@ const authValue = {
     licenseInfo: null,
 };
 
-const contentRows = Array.from({ length: 12 }, (_, index) => index + 1);
+const contentRows = Array.from({ length: 36 }, (_, index) => index + 1);
 
 const AdaptiveAppLayoutHarness = () => (
     <MemoryRouter initialEntries={['/dashboard']}>
         <AuthContext.Provider value={authValue}>
             <AppLayout>
-                <main className="h-full overflow-auto bg-[#F2F4F7] p-4" data-adaptive-harness-content>
+                <main className="min-h-[1400px] bg-[#F2F4F7] p-4" data-adaptive-harness-content>
                     <section className="mx-auto max-w-[1800px] border border-zinc-200 bg-white p-4">
                         <header className="flex min-h-11 flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-3">
                             <div>
@@ -35,6 +35,9 @@ const AdaptiveAppLayoutHarness = () => (
                             <div className="min-w-[760px]">
                                 {contentRows.map((row) => <div key={row} className="grid min-h-11 grid-cols-[90px_minmax(260px,1fr)_160px_120px] items-center border-b border-zinc-100 text-xs"><strong>PR-{row}</strong><span>Registro operativo {row}</span><span>En revisión</span><span className="text-right">$ {row * 1250}</span></div>)}
                             </div>
+                        </div>
+                        <div className="mt-8 min-h-11 border-t border-zinc-200 pt-4 text-xs font-bold text-zinc-700" data-adaptive-harness-last-content>
+                            Último contenido operativo alcanzable
                         </div>
                     </section>
                 </main>
