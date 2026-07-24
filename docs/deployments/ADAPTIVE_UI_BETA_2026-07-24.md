@@ -6,6 +6,15 @@ Estado: BETA_DEPLOYED_PENDING_PHYSICAL_DEVICE_CERTIFICATION
 
 ## Version desplegada
 
+Actualizacion QI-005: la beta existente fue sustituida por `3.1.0-beta.5`
+desde el commit `7636fd0`, release del servidor
+`/home/benito/docker/apps/giproy-release-7636fd0`. El respaldo predeploy es
+`deploy/backups/giproy-beta-20260724-162651.sql.gz`. Frontend, backend y
+PostgreSQL quedaron `healthy`; portada y OpenAPI HTTPS responden 200,
+`/version.json` publica `3.1.0-beta.5`, el HTML usa `no-store` y los logs
+criticos posteriores registran 0 coincidencias. Esta version incorpora la
+prueba de gesto tactil real que reprodujo y corrige el bloqueo de Proyectos.
+
 Actualizacion TASK-2048: la beta existente fue sustituida por
 `3.1.0-beta.4` desde el commit `ab5c525`, release del servidor
 `/home/benito/docker/apps/giproy-release-ab5c525`. El respaldo predeploy es
