@@ -12,8 +12,9 @@ assert.match(monitorSource, /visibilitychange/, 'Las sesiones abiertas deben com
 assert.match(monitorSource, /window\.location\.replace/, 'Una release distinta debe recargar la SPA una sola vez');
 
 const port = 4245;
-const baseUrl = `http://127.0.0.1:${port}`;
-const vite = spawn(
+const externalBaseUrl = process.env.RELEASE_BASE_URL?.replace(/\/$/, '');
+const baseUrl = externalBaseUrl || `http://127.0.0.1:${port}`;
+const vite = externalBaseUrl ? null : spawn(
   process.platform === 'win32' ? 'cmd.exe' : 'npm',
   process.platform === 'win32'
     ? ['/c', 'npm', 'run', 'dev', '--', '--host', '127.0.0.1', '--port', String(port)]
@@ -21,11 +22,11 @@ const vite = spawn(
   { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },
 );
 let output = '';
-vite.stdout?.on('data', (chunk) => { output += chunk.toString(); });
-vite.stderr?.on('data', (chunk) => { output += chunk.toString(); });
+vite?.stdout?.on('data', (chunk) => { output += chunk.toString(); });
+vite?.stderr?.on('data', (chunk) => { output += chunk.toString(); });
 
 const cleanup = () => {
-  if (vite.killed) return;
+  if (!vite || vite.killed) return;
   if (process.platform === 'win32' && vite.pid) spawnSync('taskkill', ['/pid', String(vite.pid), '/T', '/F'], { stdio: 'ignore' });
   else vite.kill();
 };

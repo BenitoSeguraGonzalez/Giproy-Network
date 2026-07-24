@@ -6,9 +6,9 @@ Estado: BETA_DEPLOYED_PENDING_PHYSICAL_DEVICE_CERTIFICATION
 
 ## Version desplegada
 
-Version de aplicacion: `3.1.0-beta.1` (`TASK-2045`). Coincide en portada,
-registro y `/version.json`. Commit funcional `2f79a88`; imagen frontend
-`sha256:888cd3209c4af3ff0ff6d9dabe2bc9ede0830fffae2f1e52206822f2c0fbbe78`.
+Version de aplicacion: `3.1.0-beta.2` (`TASK-2046`). Coincide en login,
+cabecera persistente y `/version.json`. Commit funcional `ee42976`; imagen
+frontend `sha256:8f12b1fcd80fae8de2472265bd45c35d60db614feeffff33ae6996b05d877ec3`.
 
 - Rama: `feature/adaptive-ui-p12`.
 - Commit de aplicacion: `00907294b6a14d3f1259e96bda4bd0e307183be0`.
@@ -103,3 +103,7 @@ la release permanece en beta y no debe promoverse a produccion.
   assets con hash inmutables, ya esta desplegada y verificada por HTTPS.
 - `TASK-2045`: se elimina el literal `V3.0`, se publica la release visible
   `3.1.0-beta.1` y el flujo futuro bloquea despliegues sin incremento de version.
+- `TASK-2046`: se corrige la ubicacion del indicador, el recorte del footer en
+  viewports bajos y la ausencia de actualizacion automatica en sesiones abiertas.
+  La beta HTTPS supera el gate visual en escritorio y tablet; queda pendiente
+  la confirmacion fisica en Lenovo Tab P12.
