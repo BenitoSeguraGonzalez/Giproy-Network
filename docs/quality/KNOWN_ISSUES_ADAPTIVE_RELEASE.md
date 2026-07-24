@@ -84,6 +84,39 @@ La evidencia detallada de ESLint vive en `FRONTEND_ESLINT_BASELINE.md`.
   y deben resolverse mediante medicion de contraste antes de alterar la paleta
   aprobada de esos estados.
 
+La ejecucion unica posterior a la adecuacion BIM beta 6 anadio diez avisos
+`gray-on-color` ya presentes en estados seleccionados de Aceptacion as-built,
+Commissioning, Ordenes de cambio, Contratos, Pagos, SOV, Dossier y Punch, y un
+aviso `overused-font` sobre Inter en el sistema tipografico global. No son
+cortes, cambios de tamaño ni bloqueos tactiles. Se conservan en esta incidencia
+para medir contraste y evaluar tipografia como una decision de diseno separada,
+sin alterar silenciosamente la identidad visual durante la correccion
+adaptativa.
+
+## QI-008 - Workbenches BIM con columnas rigidas
+
+- Estado: CORREGIDO EN `3.1.0-beta.6`; pendiente de confirmacion fisica.
+- Severidad original: alta en tablet vertical y paneles BIM redimensionados.
+- Superficies afectadas: aceptacion as-built, commissioning, ordenes de cambio,
+  partes de cuadrilla, contratos, SOV, pagos, estimacion, forecast, cierre punch,
+  dossier de entrega, transicion a Operaciones y colaboracion CDE.
+- Causa raiz: la composicion declaraba columnas laterales fijas de 280 a 520 px
+  en funcion del viewport. El espacio real pertenece al panel BIM anidado, no a
+  la ventana, por lo que resolucion fisica y DPR no garantizaban espacio util.
+- Correccion: contrato comun basado en `container-type: inline-size`. Por debajo
+  de 64 rem, formulario y registro se apilan a ancho completo; por encima,
+  recuperan dos columnas con ancho lateral propio de cada herramienta. Los
+  registros anchos conservan desplazamiento bidireccional independiente.
+- Evidencia visual revisada: matriz posterior de 118/118 combinaciones PASS en
+  Lenovo P12 horizontal y vertical, con capturas completas en
+  `artifacts/visual-certification/2026-07-24T22-56-04-266Z`.
+- Evidencia DOM: trece validadores dedicados de las superficies modificadas y
+  el contrato `validate-bim-workspace-v2-dom.mjs` pasan. Este ultimo se actualizo
+  para exigir el perfil adaptable compacto a 1366x768, en lugar de una guarda
+  heredada que rechazaba la interfaz.
+- Criterio de cierre: confirmar la misma composicion en Lenovo fisica, Chrome y
+  Opera, tras desplegar exactamente beta 6.
+
 ## QI-004 - Advisories npm del frontend
 
 - Estado: ABIERTO Y DOCUMENTADO.

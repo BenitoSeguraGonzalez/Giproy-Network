@@ -96,14 +96,14 @@ try {
     await scaledPage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-1920x1080-scaled-125.png`, fullPage: true });
     await scaledContext.close();
 
-    const unsupportedContext = await browser.newContext({ viewport: { width: 1366, height: 768 }, screen: { width: 1366, height: 768 } });
-    const unsupportedPage = await unsupportedContext.newPage();
-    await unsupportedPage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
-    await unsupportedPage.waitForSelector('[data-bim-unsupported-resolution]');
-    assert.equal(await unsupportedPage.locator('[data-bim-workspace-v2]').count(), 0, 'El workspace no debe montarse bajo la resolución mínima');
-    assert.equal(await unsupportedPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, 'La guarda no genera overflow');
-    await unsupportedPage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-unsupported-1366x768.png`, fullPage: true });
-    await unsupportedContext.close();
+    const compactContext = await browser.newContext({ viewport: { width: 1366, height: 768 }, screen: { width: 1366, height: 768 } });
+    const compactPage = await compactContext.newPage();
+    await compactPage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
+    await compactPage.waitForSelector('[data-bim-workspace-v2][data-bim-adaptive-profile="compact"]');
+    assert.equal(await compactPage.locator('[data-bim-unsupported-resolution]').count(), 0, 'El perfil compacto debe montar BIM sin una guarda heredada de resolución física');
+    assert.equal(await compactPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, 'El workspace compacto no genera overflow de página');
+    await compactPage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-compact-1366x768.png`, fullPage: true });
+    await compactContext.close();
 
     const tabletLandscapeContext = await browser.newContext({
         viewport: { width: 1472, height: 820 },

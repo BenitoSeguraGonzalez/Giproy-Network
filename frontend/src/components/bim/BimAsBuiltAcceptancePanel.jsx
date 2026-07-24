@@ -59,12 +59,12 @@ export default function BimAsBuiltAcceptancePanel({ projectId, empresaId, models
     };
 
     return (
-        <section className="flex h-full min-h-0 flex-col overflow-hidden border border-zinc-200 bg-white" data-bim-as-built-acceptance>
+        <section className="bim-responsive-container flex h-full min-h-0 flex-col overflow-hidden border border-zinc-200 bg-white" data-bim-as-built-acceptance>
             <header className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-200 px-3">
                 <div className="flex min-w-0 items-center gap-2"><PackageCheck size={16} className="shrink-0 text-[#F39200]" /><div className="min-w-0"><h3 className="truncate text-xs font-semibold">Aceptación as-built</h3><p className="truncate text-[10px] text-zinc-500">Versión IFC inmutable · calidad y decisión auditables</p></div></div>
                 <button type="button" onClick={load} disabled={busy} aria-label="Actualizar entregas as-built" title="Actualizar" className="grid h-8 w-8 place-items-center border border-zinc-200 text-zinc-600 disabled:opacity-40"><RefreshCw size={14} className={busy ? 'animate-spin' : ''} /></button>
             </header>
-            <div className="grid min-h-0 flex-1 grid-cols-[360px_minmax(0,1fr)]">
+            <div className="bim-responsive-workbench flex-1" style={{ '--bim-workbench-sidebar': '360px' }}>
                 <form onSubmit={create} className="grid content-start gap-2 overflow-y-auto border-r border-zinc-200 p-3">
                     <select required aria-label="Versión as-built" value={form.version_id} onChange={(event) => setForm({ ...form, version_id: event.target.value })} className="h-9 min-w-0 border border-zinc-300 px-2 text-xs"><option value="">Versión BIM lista</option>{versions.map((version) => <option key={version.id} value={version.id}>{version.modelName} · {version.version_label || version.label}</option>)}</select>
                     <input required aria-label="Revisión de entrega as-built" value={form.revision} onChange={(event) => setForm({ ...form, revision: event.target.value })} className="h-9 border border-zinc-300 px-2 text-xs" />

@@ -48,9 +48,9 @@ export default function BimCostEstimatePanel({ projectId, empresaId, api = bimMo
         finally { setBusy(false); }
     };
 
-    return <section className="flex h-full min-h-0 flex-col overflow-hidden border border-zinc-200 bg-white" data-bim-cost-estimate>
+    return <section className="bim-responsive-container flex h-full min-h-0 flex-col overflow-hidden border border-zinc-200 bg-white" data-bim-cost-estimate>
         <header className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-200 px-3"><div className="flex items-center gap-2"><Calculator size={16} className="text-[#F39200]" /><div><h3 className="text-xs font-semibold">Estimación BIM gobernada</h3><p className="text-[10px] text-zinc-500">Precios BIM sobre QTO aprobado · sin escritura en Presupuestos</p></div></div><button type="button" onClick={load} aria-label="Actualizar estimaciones" title="Actualizar" className="grid h-8 w-8 place-items-center border border-zinc-200 text-zinc-600"><RefreshCw size={14} /></button></header>
-        <div className="grid min-h-0 flex-1 grid-cols-[430px_minmax(0,1fr)]">
+        <div className="bim-responsive-workbench flex-1" style={{ '--bim-workbench-sidebar': '430px' }}>
             <form onSubmit={createEstimate} className="space-y-2 overflow-y-auto border-r border-zinc-200 p-3">
                 <h4 className="text-xs font-semibold">Nueva revisión</h4>
                 <select required aria-label="QTO aprobado" value={qtoId} onChange={(event) => { setQtoId(event.target.value); setRates({}); }} className="h-9 w-full border border-zinc-300 px-2 text-xs"><option value="">Seleccionar QTO aprobado</option>{qtos.map((item) => <option key={item.id} value={item.id}>{item.revision} · {item.rows.length} líneas</option>)}</select>

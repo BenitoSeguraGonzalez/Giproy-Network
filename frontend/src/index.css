@@ -491,6 +491,15 @@ html, body {
   container-type: inline-size;
 }
 
+/* Legacy single-line workbenches participate in the same container contract.
+   Keeping the selectors here prevents viewport breakpoints from leaking into
+   nested BIM panes while those panels are progressively normalized. */
+[data-bim-cost-forecast],
+[data-bim-operations-transition],
+[data-bim-cde-collaboration] {
+  container-type: inline-size;
+}
+
 .bim-responsive-two-column,
 .bim-responsive-three-column {
   display: grid;
@@ -506,6 +515,125 @@ html, body {
 
 .bim-responsive-three-column > * {
   min-height: 16rem;
+}
+
+.bim-responsive-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: max-content;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.bim-responsive-workbench > * {
+  min-width: 0;
+}
+
+.bim-responsive-workbench > :first-child {
+  border-right-width: 0;
+  border-bottom: 1px solid rgb(228 228 231);
+}
+
+.bim-responsive-workbench > :not(:first-child) {
+  min-height: 24rem;
+}
+
+[data-bim-cost-forecast] > :nth-child(2),
+[data-bim-operations-transition] > :nth-child(2),
+[data-bim-cde-collaboration] > :nth-child(2) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: max-content;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+[data-bim-cost-forecast] > :nth-child(2) > *,
+[data-bim-operations-transition] > :nth-child(2) > *,
+[data-bim-cde-collaboration] > :nth-child(2) > * {
+  min-width: 0;
+}
+
+[data-bim-cost-forecast] > :nth-child(2) > :first-child,
+[data-bim-operations-transition] > :nth-child(2) > :first-child,
+[data-bim-cde-collaboration] > :nth-child(2) > :first-child {
+  border-right-width: 0;
+  border-bottom: 1px solid rgb(228 228 231);
+}
+
+[data-bim-cost-forecast] > :nth-child(2) > :not(:first-child),
+[data-bim-operations-transition] > :nth-child(2) > :not(:first-child),
+[data-bim-cde-collaboration] > :nth-child(2) > :not(:first-child) {
+  min-height: 24rem;
+}
+
+[data-bim-forecast-ledger] > :first-child,
+[data-bim-operations-transition-ledger],
+[data-bim-handover-dossier-ledger],
+[data-bim-punch-closure-ledger] {
+  overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+}
+
+/* 64rem keeps the 920 CSS-pixel Lenovo portrait canvas in the stacked mode,
+   while the 1472 CSS-pixel landscape canvas retains the split workbench. */
+@container (min-width: 64rem) {
+  .bim-responsive-workbench {
+    grid-template-columns: minmax(18rem, var(--bim-workbench-sidebar, 24rem)) minmax(0, 1fr);
+    grid-auto-rows: minmax(0, 1fr);
+    overflow: hidden;
+    touch-action: pan-x pan-y;
+  }
+
+  .bim-responsive-workbench > :first-child {
+    border-right-width: 1px;
+    border-bottom-width: 0;
+  }
+
+  .bim-responsive-workbench > :not(:first-child) {
+    min-height: 0;
+  }
+
+  [data-bim-cost-forecast] > :nth-child(2),
+  [data-bim-operations-transition] > :nth-child(2),
+  [data-bim-cde-collaboration] > :nth-child(2) {
+    grid-template-columns: minmax(18rem, var(--bim-workbench-sidebar, 24rem)) minmax(0, 1fr);
+    grid-auto-rows: minmax(0, 1fr);
+    overflow: hidden;
+    touch-action: pan-x pan-y;
+  }
+
+  [data-bim-cost-forecast] > :nth-child(2) {
+    --bim-workbench-sidebar: 360px;
+  }
+
+  [data-bim-operations-transition] > :nth-child(2) {
+    --bim-workbench-sidebar: 390px;
+  }
+
+  [data-bim-cde-collaboration] > :nth-child(2) {
+    --bim-workbench-sidebar: 280px;
+  }
+
+  [data-bim-cost-forecast] > :nth-child(2) > :first-child,
+  [data-bim-operations-transition] > :nth-child(2) > :first-child,
+  [data-bim-cde-collaboration] > :nth-child(2) > :first-child {
+    border-right-width: 1px;
+    border-bottom-width: 0;
+  }
+
+  [data-bim-cost-forecast] > :nth-child(2) > :not(:first-child),
+  [data-bim-operations-transition] > :nth-child(2) > :not(:first-child),
+  [data-bim-cde-collaboration] > :nth-child(2) > :not(:first-child) {
+    min-height: 0;
+  }
 }
 
 @container (min-width: 44rem) {

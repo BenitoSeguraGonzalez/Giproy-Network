@@ -70,7 +70,7 @@ export default function BimCrewsTimecardsPanel({ projectId, empresaId, api = bim
         finally { setBusy(false); }
     };
 
-    return <section className="flex h-full min-h-0 flex-col overflow-hidden border border-zinc-200 bg-white" data-bim-crews-timecards>
+    return <section className="bim-responsive-container flex h-full min-h-0 flex-col overflow-hidden border border-zinc-200 bg-white" data-bim-crews-timecards>
         <header className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-200 px-3">
             <div className="flex items-center gap-2"><UsersRound size={16} className="text-[#F39200]" /><div><h3 className="text-xs font-semibold text-zinc-900">Cuadrillas y partes de horas</h3><p className="text-[10px] text-zinc-500">Directorio operativo BIM, sin datos personales ni nómina</p></div></div>
             <div className="flex items-center gap-2">
@@ -81,7 +81,7 @@ export default function BimCrewsTimecardsPanel({ projectId, empresaId, api = bim
                 <button type="button" onClick={load} title="Actualizar" aria-label="Actualizar cuadrillas" className="grid h-8 w-8 place-items-center border border-zinc-200 text-zinc-600"><RefreshCw size={14} /></button>
             </div>
         </header>
-        <div className="grid min-h-0 flex-1 grid-cols-[390px_minmax(0,1fr)]">
+        <div className="bim-responsive-workbench flex-1" style={{ '--bim-workbench-sidebar': '390px' }}>
             <aside className="overflow-y-auto border-r border-zinc-200 p-3">
                 {mode === 'directory' ? <form className="space-y-2" onSubmit={submitCrew} data-bim-crew-form>
                     <h4 className="text-xs font-semibold text-zinc-900">Nueva cuadrilla BIM</h4>
