@@ -7,7 +7,7 @@ import { AuthContext } from '../../context/AuthContext';
 import AppLayout from '../../layouts/AppLayout';
 
 const authValue = {
-    user: { id: 91, nombre_completo: 'Usuario de validación', rol: 'usuario', empresa_id: 3 },
+    user: { id: 91, nombre_completo: 'Superadministrador de validación', rol: 'superadministrador', empresa_id: 3 },
     logout: () => {},
     selectedEmpresa: { id: 3, nombre: 'Empresa de validación' },
     setSelectedEmpresa: () => {},

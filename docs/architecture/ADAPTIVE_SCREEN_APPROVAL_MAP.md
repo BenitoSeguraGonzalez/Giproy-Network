@@ -49,7 +49,7 @@ CSS y no se aplicara zoom global para encoger la aplicacion.
 | ID | Superficie | Que se analizara y adecuara |
 |---|---|---|
 | G00.1 | Shell protegido — VERIFICADA LOCALMENTE | cabecera, marca, empresa, version, acciones, alto util y contenido principal |
-| G00.2 | Navegacion global | retorno, rutas, menus, foco, teclado, touch y cierre exterior |
+| G00.2 | Navegacion global — VERIFICADA LOCALMENTE | retorno, rutas, menus, foco, teclado, touch y cierre exterior |
 | G00.3 | Footer y version | presencia, posicion, no solapamiento y coincidencia con `version.json` |
 | G00.4 | Sistema tipografico | tamaño legible sin escalado global, truncado, wrapping y numeros tabulares |
 | G00.5 | Densidad y espaciado | escritorio HiDPI, tablet tactil, maximos de ancho y ritmo vertical |

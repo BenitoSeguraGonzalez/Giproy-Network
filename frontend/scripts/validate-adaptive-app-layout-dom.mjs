@@ -64,7 +64,15 @@ try {
         const errors = [];
         page.on('pageerror', (error) => errors.push(error.message));
         page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
-        await page.route('**/api/v1/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+        await page.route('**/api/v1/**', (route) => {
+            const body = new URL(route.request().url()).pathname.endsWith('/empresas/')
+                ? JSON.stringify([
+                    { id: 3, nombre: 'Empresa de validación' },
+                    { id: 4, nombre: 'Empresa con denominación operativa especialmente larga para validar navegación' },
+                ])
+                : '[]';
+            return route.fulfill({ status: 200, contentType: 'application/json', body });
+        });
         await page.goto(`${baseUrl}/adaptive-app-layout-harness.html`, { waitUntil: 'domcontentloaded' });
         const shell = page.locator(`[data-adaptive-profile="${profile.expected}"]`);
         try {
@@ -128,9 +136,31 @@ try {
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, `${profile.name}: sin overflow horizontal de página`);
         assert.equal(await page.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), true, `${profile.name}: sin overflow vertical de página`);
         assert.deepEqual(errors, [], `${profile.name}: sin errores`);
-        await page.getByRole('button', { name: 'Ajustar distribución visual' }).click();
+        const layoutTrigger = page.getByRole('button', { name: 'Ajustar distribución visual' });
+        await layoutTrigger.click();
+        const layoutMenu = page.locator('[data-adaptive-layout-menu]');
+        const layoutMenuRect = await layoutMenu.boundingBox();
+        assert.ok(layoutMenuRect, `${profile.name}: menu adaptativo visible`);
+        assert.ok(layoutMenuRect.x >= 0 && layoutMenuRect.x + layoutMenuRect.width <= profile.viewport.width + 1, `${profile.name}: menu adaptativo dentro del ancho`);
+        assert.ok(layoutMenuRect.y >= 0 && layoutMenuRect.y + layoutMenuRect.height <= profile.viewport.height + 1, `${profile.name}: menu adaptativo dentro del alto`);
         const wideOption = page.getByRole('radio', { name: 'Amplio' });
         assert.equal(await wideOption.isDisabled(), profile.expected !== 'wide', `${profile.name}: modo amplio seguro`);
+        await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-adaptive-navigation-${profile.name}.png`, fullPage: true });
+        await page.keyboard.press('Escape');
+        assert.equal(await layoutMenu.count(), 0, `${profile.name}: Escape cierra el menu adaptativo`);
+        assert.equal(await layoutTrigger.evaluate((node) => document.activeElement === node), true, `${profile.name}: el foco vuelve al disparador adaptativo`);
+        const companyTrigger = page.locator('button[aria-controls="app-company-selector"]');
+        await companyTrigger.click();
+        const companyMenu = page.locator('[data-app-company-selector]');
+        await companyMenu.waitFor({ state: 'visible' });
+        const companyMenuRect = await companyMenu.boundingBox();
+        assert.ok(companyMenuRect, `${profile.name}: selector de empresa visible`);
+        assert.ok(companyMenuRect.x >= 0 && companyMenuRect.x + companyMenuRect.width <= profile.viewport.width + 1, `${profile.name}: selector de empresa dentro del ancho`);
+        assert.ok(companyMenuRect.y >= 0 && companyMenuRect.y + companyMenuRect.height <= profile.viewport.height + 1, `${profile.name}: selector de empresa dentro del alto`);
+        assert.equal(await companyMenu.getByRole('button').count(), 2, `${profile.name}: selector con datos representativos`);
+        await page.keyboard.press('Escape');
+        await companyMenu.waitFor({ state: 'hidden' });
+        assert.equal(await companyTrigger.evaluate((node) => document.activeElement === node), true, `${profile.name}: el foco vuelve al selector de empresa`);
         await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-adaptive-shell-${profile.name}.png`, fullPage: true });
         await context.close();
     }

@@ -183,14 +183,25 @@ const AppLayout = ({ children }) => {
     useEffect(() => {
         if (!showCompanySelector) return undefined;
 
+        const closeCompanySelector = () => {
+            setShowCompanySelector(false);
+            companySelectorRef.current?.querySelector('button')?.focus();
+        };
         const handlePointerDown = (event) => {
             if (companySelectorRef.current && !companySelectorRef.current.contains(event.target)) {
-                setShowCompanySelector(false);
+                closeCompanySelector();
             }
         };
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') closeCompanySelector();
+        };
 
-        window.addEventListener('mousedown', handlePointerDown);
-        return () => window.removeEventListener('mousedown', handlePointerDown);
+        window.addEventListener('pointerdown', handlePointerDown);
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('pointerdown', handlePointerDown);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
     }, [showCompanySelector]);
 
     useEffect(() => {
@@ -599,10 +610,19 @@ const AppLayout = ({ children }) => {
                                                 onClick={() => setShowCompanySelector((current) => !current)}
                                                 className={`flex items-center gap-1 font-black bg-orange-100 text-[#F39200] rounded-full hover:bg-orange-200 transition-colors uppercase cursor-pointer ${isPortableWorkspace ? 'text-[7px] px-2 py-1' : 'text-[8px] px-2 py-0.5'}`}
                                                 title="Cambiar empresa de trabajo"
+                                                aria-expanded={showCompanySelector}
+                                                aria-controls="app-company-selector"
+                                                aria-haspopup="dialog"
                                             >
                                                 Empresa <ChevronRight className={`transition-transform ${showCompanySelector ? 'rotate-90' : ''} ${isPortableWorkspace ? 'w-2.5 h-2.5' : 'w-2 h-2'}`} />
                                             </button>
-                                            <div className={`absolute top-full left-0 mt-2 w-64 bg-white border border-zinc-100 shadow-2xl rounded-2xl p-4 transition-all z-[520] ${showCompanySelector ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
+                                            <div
+                                                id="app-company-selector"
+                                                data-app-company-selector
+                                                role="dialog"
+                                                aria-label="Cambiar empresa de trabajo"
+                                                className={`absolute left-0 top-full z-[520] mt-2 max-h-[min(26rem,calc(100dvh-8rem))] w-[min(18rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-2xl border border-zinc-100 bg-white p-4 shadow-2xl transition-all ${showCompanySelector ? 'visible opacity-100' : 'pointer-events-none invisible opacity-0'}`}
+                                            >
                                                 <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-3 border-b border-zinc-50 pb-2">Cambiar Empresa (Auditoría)</p>
                                                 <div className="space-y-1 max-h-60 overflow-y-auto">
                                                     {empresas.map(emp => (

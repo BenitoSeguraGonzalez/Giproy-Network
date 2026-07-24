@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, MonitorCog, RotateCcw } from 'lucide-react';
 
 const MODES = [
@@ -9,22 +9,54 @@ const MODES = [
 
 const AdaptiveLayoutControl = ({ layout }) => {
     const [open, setOpen] = useState(false);
+    const controlRef = useRef(null);
+    const triggerRef = useRef(null);
+
+    useEffect(() => {
+        if (!open) return undefined;
+        const closeAndRestoreFocus = () => {
+            setOpen(false);
+            triggerRef.current?.focus();
+        };
+        const handlePointerDown = (event) => {
+            if (!controlRef.current?.contains(event.target)) closeAndRestoreFocus();
+        };
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') closeAndRestoreFocus();
+        };
+        window.addEventListener('pointerdown', handlePointerDown);
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('pointerdown', handlePointerDown);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [open]);
+
     if (!layout?.enabled) return null;
 
     return (
-        <div className="relative shrink-0" data-adaptive-layout-control>
+        <div ref={controlRef} className="relative shrink-0" data-adaptive-layout-control>
             <button
+                ref={triggerRef}
                 type="button"
                 onClick={() => setOpen((value) => !value)}
                 className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-600 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]"
                 aria-label="Ajustar distribución visual"
                 aria-expanded={open}
+                aria-controls="adaptive-layout-menu"
+                aria-haspopup="dialog"
                 title={`Distribución ${layout.profile}`}
             >
                 <MonitorCog className="h-5 w-5" aria-hidden="true" />
             </button>
             {open ? (
-                <div className="absolute right-0 top-12 z-[540] w-72 rounded-xl border border-zinc-200 bg-white p-3 shadow-lg" role="dialog" aria-label="Distribución visual">
+                <div
+                    id="adaptive-layout-menu"
+                    className="absolute right-0 top-12 z-[540] max-h-[min(28rem,calc(100dvh-5rem))] w-[min(18rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-xl border border-zinc-200 bg-white p-3 shadow-lg"
+                    role="dialog"
+                    aria-label="Distribución visual"
+                    data-adaptive-layout-menu
+                >
                     <div className="flex items-start justify-between gap-3 border-b border-zinc-100 pb-3">
                         <div>
                             <p className="text-xs font-black uppercase tracking-tight text-zinc-900">Distribución visual</p>
