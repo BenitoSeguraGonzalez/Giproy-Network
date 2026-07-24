@@ -16194,3 +16194,10 @@ Cambios realizados
   para conservar el footer en tablet.
 - Las sesiones abiertas comprueban automaticamente si existe una release nueva
   y el gate visual valida visibilidad y alcance en escritorio/tablet.
+### 2026-07-24 - Cabecera estable en Lenovo Opera (TASK-2047)
+
+- La cabecera global deja de poder colapsar dentro del shell y la altura usa el
+  viewport dinamico del navegador movil.
+- El Dashboard reserva la escala de escritorio amplia para `2xl`, manteniendo
+  densidad de tablet sin transformar ni escalar globalmente los componentes.
+- El gate mide altura y posicion reales de la cabecera en todos los perfiles.

@@ -58,7 +58,7 @@ try {
     const version = page.locator('[data-app-version]');
     await version.waitFor();
     assert.equal(await version.isVisible(), true, `${profile.name}: version visible en login`);
-    assert.match(await version.innerText(), /v3\.1\.0-beta\.2/i, `${profile.name}: version de release correcta`);
+    assert.match(await version.innerText(), /v3\.1\.0-beta\.3/i, `${profile.name}: version de release correcta`);
 
     const footer = page.locator('[data-login-footer]');
     const reachability = await page.locator('[data-login-viewport]').evaluate((viewport) => {

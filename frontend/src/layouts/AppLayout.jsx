@@ -369,7 +369,7 @@ const AppLayout = ({ children }) => {
 
     return (
         <div
-            className="h-screen flex flex-col text-[#1A1A1A] font-sans selection:bg-[#F39200]/20 overflow-hidden"
+            className="h-dvh flex flex-col text-[#1A1A1A] font-sans selection:bg-[#F39200]/20 overflow-hidden"
             data-adaptive-ui-enabled={adaptiveLayout.enabled ? 'true' : 'false'}
             data-adaptive-profile={adaptiveLayout.profile}
             data-adaptive-detected-profile={adaptiveLayout.detectedProfile}
@@ -509,7 +509,7 @@ const AppLayout = ({ children }) => {
             )}
 
             {/* Encabezado / Navbar Industrial — Persistente en todas las páginas */}
-            <nav className={`${isPortableWorkspace ? 'h-16 px-4' : 'h-20 px-8'} bg-white border-b border-zinc-200 flex items-center justify-between sticky top-0 z-[500]`}>
+            <nav data-app-header className={`${isPortableWorkspace ? 'h-16 px-4' : 'h-20 px-8'} shrink-0 bg-white border-b border-zinc-200 flex items-center justify-between sticky top-0 z-[500]`}>
                 <div className={`flex items-center ${isPortableWorkspace ? 'gap-3' : 'gap-6'} min-w-0`}>
                     {/* Branding Principal (Fijo) */}
                     <div

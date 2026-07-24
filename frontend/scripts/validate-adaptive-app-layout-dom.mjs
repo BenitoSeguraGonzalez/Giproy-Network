@@ -84,6 +84,11 @@ try {
             throw new Error(`${profile.name}: perfil no montado; observed=${JSON.stringify(observed)}; errors=${errors.join(' | ')}; body=${body.slice(0, 1000)}`);
         }
         assert.equal(await shell.getAttribute('data-adaptive-ui-enabled'), 'true');
+        const appHeader = page.locator('[data-app-header]');
+        assert.equal(await appHeader.count(), 1, `${profile.name}: existe una unica cabecera global`);
+        const headerRect = await appHeader.boundingBox();
+        assert.ok(headerRect && headerRect.height >= 63, `${profile.name}: la cabecera no se colapsa (${headerRect?.height ?? 0}px)`);
+        assert.ok(headerRect.y >= -1 && headerRect.y + headerRect.height <= profile.viewport.height + 1, `${profile.name}: la cabecera permanece visible`);
         assert.equal(await page.locator('[data-adaptive-harness-content]').count(), 1, `${profile.name}: contenido clásico visible`);
         const pageViewport = page.locator('[data-app-page-viewport]');
         const verticalScrollState = await pageViewport.evaluate((node) => ({
