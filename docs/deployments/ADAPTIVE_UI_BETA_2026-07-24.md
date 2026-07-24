@@ -6,9 +6,9 @@ Estado: BETA_DEPLOYED_PENDING_PHYSICAL_DEVICE_CERTIFICATION
 
 ## Version desplegada
 
-Version de aplicacion prevista para el siguiente despliegue:
-`3.1.0-beta.1` (`TASK-2045`). Debe coincidir en portada, registro y
-`/version.json`; el estado se actualizara con commit e imagen tras publicarlo.
+Version de aplicacion: `3.1.0-beta.1` (`TASK-2045`). Coincide en portada,
+registro y `/version.json`. Commit funcional `2f79a88`; imagen frontend
+`sha256:888cd3209c4af3ff0ff6d9dabe2bc9ede0830fffae2f1e52206822f2c0fbbe78`.
 
 - Rama: `feature/adaptive-ui-p12`.
 - Commit de aplicacion: `00907294b6a14d3f1259e96bda4bd0e307183be0`.
@@ -99,5 +99,7 @@ la release permanece en beta y no debe promoverse a produccion.
   saludable. Pendiente continuar el recorrido fisico completo.
 - `TASK-2044`: la tablet no reflejo el segundo despliegue aunque el servidor ya
   entregaba el bundle nuevo. Se identifico falta de revalidacion explicita del
-  indice SPA y se preparo politica `no-store` para HTML/fallback e `immutable`
-  para assets con hash. Pendiente verificar headers tras desplegar.
+  indice SPA. La politica `no-store` para HTML, fallback y manifiesto, junto a
+  assets con hash inmutables, ya esta desplegada y verificada por HTTPS.
+- `TASK-2045`: se elimina el literal `V3.0`, se publica la release visible
+  `3.1.0-beta.1` y el flujo futuro bloquea despliegues sin incremento de version.
