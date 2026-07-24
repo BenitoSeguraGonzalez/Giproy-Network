@@ -3478,8 +3478,8 @@ const Proyectos = () => {
     );
 
     const renderHtmlPortfolioLanding = () => (
-        <div className="min-h-full bg-[#F2F4F7] text-[#2B241C]">
-            <div className="mx-auto flex w-full max-w-[1780px] flex-col gap-5 px-6 py-6 xl:px-10">
+        <div className="h-full min-h-0 overflow-y-auto overscroll-contain bg-[#F2F4F7] text-[#2B241C] [touch-action:pan-y]">
+            <div className="mx-auto flex min-h-full w-full max-w-[1780px] flex-col gap-5 px-6 py-6 xl:px-10">
                 <div className="rounded-[1.75rem] border border-zinc-200 bg-white px-6 py-4.5">
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                         <div className="min-w-0 space-y-2">
@@ -3674,13 +3674,13 @@ const Proyectos = () => {
                 </div>
 
                 {portfolioView === 'lista' && (
-                    <div className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
+                    <div className="min-w-0 overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
                         <div
                             ref={portfolioListViewportRef}
-                            className="relative max-h-[calc(100dvh-15rem)] overflow-x-hidden overflow-y-auto overscroll-contain"
+                            className="relative max-h-[calc(100dvh-15rem)] overflow-auto overscroll-contain [touch-action:pan-x_pan-y]"
                             style={expandedInlineProject ? { paddingBottom: '25rem' } : undefined}
                         >
-                            <table className="w-full table-fixed">
+                            <table className="w-full min-w-[1180px] table-fixed">
                                 <colgroup>
                                     <col style={{ width: '9%' }} />
                                     <col style={{ width: '25%' }} />

@@ -80,3 +80,10 @@ P12 horizontal/vertical. El cierre final requiere ejecutar
 `npm run certify:lenovo-tab-p12` con la tablet fisica conectada por ADB y hacer
 la inspeccion humana de Classic y BIM con datos representativos. Hasta entonces
 la release permanece en beta y no debe promoverse a produccion.
+
+## Incidencias de certificacion fisica
+
+- `TASK-2042`: el primer recorrido en Lenovo Tab P12 detecto recorte y bloqueo
+  de scroll en el listado de Proyectos de la empresa Santiago Bermeo. Se
+  implemento scroll interno vertical/bidireccional sin escalado global; queda
+  pendiente repetir la comprobacion tras desplegar el hotfix.

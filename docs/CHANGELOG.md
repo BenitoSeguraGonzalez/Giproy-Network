@@ -16147,3 +16147,12 @@ Cambios realizados
   frontend, backend, PostgreSQL, HTTPS y OpenAPI quedan saludables.
 - Se conserva backup de codigo, configuracion privada y PostgreSQL anterior al
   despliegue. Auditoria posterior confirma cero secretos en bundles o logs.
+
+### 2026-07-24 - Correccion de scroll tactil en Proyectos (TASK-2042)
+
+- La certificacion fisica en Lenovo Tab P12 detecta que el portafolio queda
+  recortado dentro del shell y que la tabla bloquea el desplazamiento lateral.
+- La raiz pasa a usar scroll vertical interno y el listado permite pan tactil
+  en ambos ejes, conservando un ancho operativo de tabla de 1180 px.
+- No se escala la interfaz ni se cambia la composicion de escritorio.
+- Suite adaptativa, detector Impeccable y build de produccion: OK.
