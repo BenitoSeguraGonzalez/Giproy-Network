@@ -177,13 +177,15 @@ const Dashboard = () => {
                         </div>
                     </section>
 
-                    <footer data-dashboard-footer className="flex flex-shrink-0 flex-col items-center justify-between gap-3 border-t border-zinc-200 pt-4 md:flex-row 2xl:gap-6 2xl:pt-8">
-                        <div className="flex items-center gap-6">
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">GIPROY NETWORK {APP_VERSION_LABEL} // 2026</p>
-                            <div className="w-1 h-1 bg-zinc-300 rounded-full" />
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Security Layer Active</p>
+                    <footer data-dashboard-footer className="flex flex-shrink-0 flex-col items-center justify-between gap-1 border-t border-zinc-200 pt-2 md:flex-row md:gap-3 2xl:pt-4">
+                        <div className="flex min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-1 md:justify-start 2xl:gap-x-6">
+                            <p data-dashboard-version className="text-center text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 md:text-left md:tracking-[0.3em]">
+                                GIPROY NETWORK {APP_VERSION_LABEL} // 2026
+                            </p>
+                            <div aria-hidden="true" className="hidden h-1 w-1 rounded-full bg-zinc-300 sm:block" />
+                            <p className="text-center text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 md:text-left md:tracking-[0.3em]">Security Layer Active</p>
                         </div>
-                        <div className="flex gap-4">
+                        <div aria-label="Navegacion entre modulos" className="flex items-center gap-1" role="group">
                             {modules.map((module) => {
                                 const isActive = module.id === activeModuleId;
                                 return (
@@ -191,15 +193,20 @@ const Dashboard = () => {
                                         key={`${module.id}-indicator`}
                                         type="button"
                                         onClick={() => handleIndicatorClick(module.id)}
-                                        className={`h-1 rounded-full transition-all duration-200 ${
-                                            isActive
-                                                ? 'w-12 bg-[#F39200]'
-                                                : 'w-10 bg-zinc-200 hover:bg-zinc-300'
-                                        }`}
+                                        className="group flex h-11 w-14 touch-manipulation items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] focus-visible:ring-offset-2"
                                         title={`Ir a ${module.title}`}
                                         aria-label={`Ir a ${module.title}`}
                                         aria-pressed={isActive}
-                                    />
+                                    >
+                                        <span
+                                            aria-hidden="true"
+                                            className={`h-1 rounded-full transition-all duration-200 ${
+                                                isActive
+                                                    ? 'w-12 bg-[#F39200]'
+                                                    : 'w-10 bg-zinc-200 group-hover:bg-zinc-300'
+                                            }`}
+                                        />
+                                    </button>
                                 );
                             })}
                         </div>

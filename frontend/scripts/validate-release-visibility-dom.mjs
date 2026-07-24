@@ -7,11 +7,16 @@ const appLayoutSource = readFileSync(new URL('../src/layouts/AppLayout.jsx', imp
 const dashboardSource = readFileSync(new URL('../src/pages/Dashboard.jsx', import.meta.url), 'utf8');
 const monitorSource = readFileSync(new URL('../src/utils/releaseVersionMonitor.js', import.meta.url), 'utf8');
 const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const packageLock = JSON.parse(readFileSync(new URL('../package-lock.json', import.meta.url), 'utf8'));
+const visualInventory = JSON.parse(readFileSync(new URL('../../docs/architecture/visual-surface-inventory.json', import.meta.url), 'utf8'));
 const expectedVersionPattern = new RegExp(`v${String(packageJson.version).replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')}`, 'i');
 assert.match(appLayoutSource, /data-app-version/, 'La cabecera protegida debe mostrar la version');
 assert.match(dashboardSource, /data-dashboard-footer/, 'El Dashboard debe conservar un footer identificable');
+assert.match(dashboardSource, /data-dashboard-version/, 'El Dashboard debe identificar su version visible');
 assert.match(monitorSource, /visibilitychange/, 'Las sesiones abiertas deben comprobar la release al recuperar foco');
 assert.match(monitorSource, /window\.location\.replace/, 'Una release distinta debe recargar la SPA una sola vez');
+assert.equal(packageLock.version, packageJson.version, 'package-lock y package.json deben publicar la misma version');
+assert.equal(packageLock.packages?.['']?.version, packageJson.version, 'El paquete raiz del lock debe publicar la misma version');
 
 const port = 4245;
 const externalBaseUrl = process.env.RELEASE_BASE_URL?.replace(/\/$/, '');
@@ -45,22 +50,30 @@ const waitForServer = async () => {
 let browser;
 try {
   await waitForServer();
+  const versionManifest = externalBaseUrl
+    ? await (await fetch(`${baseUrl}/version.json`, { cache: 'no-store' })).json()
+    : JSON.parse(readFileSync(new URL('../dist/version.json', import.meta.url), 'utf8'));
+  assert.equal(versionManifest.version, packageJson.version, 'version.json debe coincidir con la fuente canonica');
   browser = await chromium.launch({
     headless: true,
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
   });
 
-  for (const profile of [
-    { name: 'desktop', width: 1920, height: 1080 },
-    { name: 'tablet-short-viewport', width: 920, height: 600 },
-    { name: 'tablet-portrait', width: 920, height: 1472 },
-  ]) {
-    const page = await browser.newPage({ viewport: { width: profile.width, height: profile.height } });
+  for (const profile of visualInventory.profiles) {
+    const [width, height] = profile.viewport;
+    const context = await browser.newContext({
+      viewport: { width, height },
+      screen: { width, height },
+      deviceScaleFactor: profile.dpr,
+      hasTouch: profile.touch,
+      isMobile: profile.touch,
+    });
+    const page = await context.newPage();
     await page.goto(`${baseUrl}/login`, { waitUntil: 'domcontentloaded' });
     const version = page.locator('[data-app-version]');
     await version.waitFor();
-    assert.equal(await version.isVisible(), true, `${profile.name}: version visible en login`);
-    assert.match(await version.innerText(), expectedVersionPattern, `${profile.name}: version de release correcta`);
+    assert.equal(await version.isVisible(), true, `${profile.id}: version visible en login`);
+    assert.match(await version.innerText(), expectedVersionPattern, `${profile.id}: version de release correcta`);
 
     const footer = page.locator('[data-login-footer]');
     const reachability = await page.locator('[data-login-viewport]').evaluate((viewport) => {
@@ -74,12 +87,39 @@ try {
         viewportBottom: viewportRect.bottom,
       };
     });
-    assert.equal(await footer.isVisible(), true, `${profile.name}: footer del login alcanzable`);
-    assert.ok(reachability.footerBottom <= reachability.viewportBottom + 1, `${profile.name}: footer dentro del viewport tras scroll`);
+    assert.equal(await footer.isVisible(), true, `${profile.id}: footer del login alcanzable`);
+    assert.ok(reachability.footerBottom <= reachability.viewportBottom + 1, `${profile.id}: footer dentro del viewport tras scroll`);
+
+    await page.goto(`${baseUrl}/classic-dashboard-harness.html`, { waitUntil: 'domcontentloaded' });
+    const dashboardFooter = page.locator('[data-dashboard-footer]');
+    const dashboardVersion = page.locator('[data-dashboard-version]');
+    await dashboardFooter.waitFor();
+    const dashboardGeometry = await dashboardFooter.evaluate((node) => {
+      const rect = node.getBoundingClientRect();
+      const buttons = [...node.querySelectorAll('button')].map((button) => {
+        const buttonRect = button.getBoundingClientRect();
+        return { width: buttonRect.width, height: buttonRect.height };
+      });
+      return {
+        top: rect.top,
+        bottom: rect.bottom,
+        viewportHeight: window.innerHeight,
+        documentOverflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        buttons,
+      };
+    });
+    assert.equal(await dashboardFooter.isVisible(), true, `${profile.id}: footer del dashboard visible`);
+    assert.equal(await dashboardVersion.isVisible(), true, `${profile.id}: version del dashboard visible`);
+    assert.match(await dashboardVersion.innerText(), expectedVersionPattern, `${profile.id}: dashboard y release coinciden`);
+    assert.ok(dashboardGeometry.top >= -1 && dashboardGeometry.bottom <= dashboardGeometry.viewportHeight + 1, `${profile.id}: footer contenido en viewport`);
+    assert.ok(dashboardGeometry.documentOverflowX <= 2, `${profile.id}: dashboard sin overflow horizontal`);
+    assert.ok(dashboardGeometry.buttons.length >= 3, `${profile.id}: indicadores de modulos presentes`);
+    assert.ok(dashboardGeometry.buttons.every(({ width: buttonWidth, height: buttonHeight }) => buttonWidth >= 44 && buttonHeight >= 44), `${profile.id}: indicadores tactiles de al menos 44x44`);
     await page.close();
+    await context.close();
   }
 
-  console.log('validate-release-visibility-dom: ok (desktop y tablet)');
+  console.log(`validate-release-visibility-dom: ok (${visualInventory.profiles.length} perfiles desktop/tablet)`);
 } finally {
   await browser?.close();
   cleanup();

@@ -192,6 +192,91 @@ en G00.10; no se ignoran ni se alteran sin comprobar el sistema cromatico.
 - Confirmacion tactil en los navegadores de las tabletas fisicas.
 - Estado final futuro: CERTIFICADA FISICAMENTE.
 
+## G00.3 - Pie y version
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+### Superficie observada
+
+- Version del shell protegido.
+- Version y pie de la Consola de Operaciones.
+- Pie alcanzable del login.
+- Indicadores de navegacion del pie.
+- Manifiesto compilado `version.json`.
+- Fuente canonica y archivos de bloqueo de dependencias.
+
+### Problema observado
+
+El texto de version ya procedia de la fuente canonica, pero el contrato de
+prueba solo cubria tres viewports y no comprobaba conjuntamente el header
+protegido, el pie del dashboard, el manifiesto compilado ni la coherencia del
+lock. Ademas, los indicadores del pie eran barras de 4 px usadas directamente
+como botones: visibles con raton, pero inadecuadas como objetivos tactiles.
+
+Durante la validacion se detecto tambien que `/version.json` no existe en el
+servidor Vite de desarrollo porque el plugin lo emite en `generateBundle`.
+La prueba se corrigio en su raiz: localmente valida el artefacto real de
+`dist`, y contra un entorno publicado valida la URL HTTP sin cache.
+
+### Adecuacion aplicada
+
+- Los indicadores conservan su barra visual, pero disponen ahora de un objetivo
+  tactil real de 44 x 44 px o superior.
+- Se incorporo foco visible y `touch-manipulation`.
+- El grupo de indicadores tiene semantica de navegacion entre modulos.
+- Metadatos, version y estado pueden recomponerse sin desbordamiento.
+- La version visible del dashboard dispone de un marcador verificable propio.
+- La prueba valida `package.json`, `package-lock.json`, `dist/version.json`,
+  login, header protegido y dashboard en una misma version.
+- No se introdujo una version paralela ni un release alternativo.
+
+### Perfiles verificados
+
+- Windows FHD 100 %, 125 % y 150 %.
+- Windows 4K/DPR 2.
+- Tablet Full HD horizontal y vertical.
+- Tablet 2K horizontal y vertical.
+- Lenovo P12 3K horizontal y vertical.
+
+Resultado: **10/10 PASS**.
+
+### Verificaciones
+
+- Build Vite de produccion: PASS.
+- `validate-release-visibility-dom.mjs`: PASS en diez perfiles.
+- Fuente canonica, lock y manifiesto compilado: coinciden en `3.1.0-beta.6`.
+- Version visible en login, shell y dashboard: coincide.
+- Footer contenido en viewport: PASS.
+- Sin overflow horizontal del documento: PASS.
+- Objetivos tactiles de indicadores >= 44 x 44 px: PASS.
+- Matriz visual del dashboard: 10/10 PASS.
+
+### Evidencia
+
+- Antes:
+  `artifacts/visual-certification/g00-3-footer-before-2026-07-24`.
+- Despues:
+  `artifacts/visual-certification/g00-3-footer-after-2026-07-24`.
+- Ambos directorios contienen los diez perfiles.
+
+### Archivos tratados
+
+- `frontend/src/pages/Dashboard.jsx`.
+- `frontend/scripts/validate-release-visibility-dom.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
+### Detector visual
+
+La ejecucion unica de Impeccable sobre `Dashboard.jsx` devolvio cero hallazgos.
+
+### Pendiente de cierre
+
+- Confirmacion de la version y los objetivos tactiles en tablet fisica despues
+  del despliegue final.
+- Estado final futuro: CERTIFICADA FISICAMENTE.
+
 ## Siguiente unidad
 
-`G00.3 - Pie y version`: PENDIENTE.
+`G00.4 - Sistema tipografico`: PENDIENTE.
