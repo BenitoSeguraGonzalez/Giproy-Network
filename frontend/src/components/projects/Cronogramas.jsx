@@ -3321,7 +3321,7 @@ const CronogramaValorado = ({
                                             syncScroll(rightRef.current, leftRef.current);
                                             syncHorizontalScroll(rightRef.current, footerRightRef.current);
                                         }}
-                                        className="giproy-motion-scrollbar-hide h-full overflow-auto"
+                                        className="giproy-motion-scrollbar-hide h-full overflow-auto overscroll-contain [touch-action:pan-x_pan-y]"
                                     >
                                         <div className="min-w-max">
                                             {/* Cabecera Periodos */}

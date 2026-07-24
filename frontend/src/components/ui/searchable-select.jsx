@@ -56,14 +56,30 @@ const SearchableSelect = ({
         }
 
         const rect = containerRef.current.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        const availableWidth = Math.max(220, viewportWidth - rect.left - 16);
+        const visualViewport = window.visualViewport;
+        const viewportWidth = visualViewport?.width || window.innerWidth;
+        const viewportHeight = visualViewport?.height || window.innerHeight;
+        const viewportTop = visualViewport?.offsetTop || 0;
+        const viewportLeft = visualViewport?.offsetLeft || 0;
+        const gutter = 12;
+        const gap = 4;
+        const availableBelow = viewportTop + viewportHeight - rect.bottom - gutter;
+        const availableAbove = rect.top - viewportTop - gutter;
+        const openAbove = availableBelow < 240 && availableAbove > availableBelow;
+        const availableHeight = Math.max(120, Math.min(320, openAbove ? availableAbove : availableBelow));
+        const dropdownWidth = Math.max(220, Math.min(rect.width, viewportWidth - (gutter * 2)));
+        const left = Math.min(
+            Math.max(rect.left, viewportLeft + gutter),
+            Math.max(viewportLeft + gutter, viewportLeft + viewportWidth - dropdownWidth - gutter),
+        );
 
         setDropdownStyle({
             position: 'fixed',
-            top: rect.bottom + 4,
-            left: rect.left,
-            width: Math.min(rect.width, availableWidth),
+            top: openAbove ? 'auto' : rect.bottom + gap,
+            bottom: openAbove ? window.innerHeight - rect.top + gap : 'auto',
+            left,
+            width: dropdownWidth,
+            maxHeight: availableHeight,
         });
     }, []);
 
@@ -81,10 +97,14 @@ const SearchableSelect = ({
         const handleViewportUpdate = () => updateDropdownPosition();
         window.addEventListener('resize', handleViewportUpdate);
         window.addEventListener('scroll', handleViewportUpdate, true);
+        window.visualViewport?.addEventListener('resize', handleViewportUpdate);
+        window.visualViewport?.addEventListener('scroll', handleViewportUpdate);
 
         return () => {
             window.removeEventListener('resize', handleViewportUpdate);
             window.removeEventListener('scroll', handleViewportUpdate, true);
+            window.visualViewport?.removeEventListener('resize', handleViewportUpdate);
+            window.visualViewport?.removeEventListener('scroll', handleViewportUpdate);
         };
     }, [isOpen, updateDropdownPosition]);
 
@@ -136,7 +156,7 @@ const SearchableSelect = ({
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={popoverTransition}
             style={dropdownStyle || undefined}
-            className={`z-[1200] mt-1 origin-top overflow-hidden rounded-[1.15rem] border border-zinc-200 bg-white shadow-[0_18px_46px_rgba(15,23,42,0.14)] dark:border-zinc-700 dark:bg-zinc-800 ${dropdownClassName}`.trim()}
+            className={`z-[1200] flex origin-top flex-col overflow-hidden overscroll-contain rounded-[1.15rem] border border-zinc-200 bg-white shadow-[0_18px_46px_rgba(15,23,42,0.14)] [touch-action:pan-y] dark:border-zinc-700 dark:bg-zinc-800 ${dropdownClassName}`.trim()}
         >
             <div className="border-b border-zinc-100 p-2 dark:border-zinc-700">
                 <ClearSearchField
@@ -153,7 +173,7 @@ const SearchableSelect = ({
                 />
             </div>
 
-            <div className="custom-scrollbar max-h-60 overflow-y-auto p-1">
+            <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain p-1 [touch-action:pan-y]">
                 {loading ? (
                     <div className="px-4 py-6 text-center text-sm text-zinc-500">Cargando...</div>
                 ) : filteredOptions.length > 0 ? (

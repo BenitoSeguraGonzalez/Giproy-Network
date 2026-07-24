@@ -226,6 +226,86 @@ try {
                 }
                 return { horizontal: horizontalResult, vertical: verticalResult };
             }).catch(() => null);
+            const gestureReachability = profile.touch ? await (async () => {
+                const candidates = await page.evaluate(() => [...document.querySelectorAll('body *')]
+                    .map((node, index) => {
+                        const style = getComputedStyle(node);
+                        const rect = node.getBoundingClientRect();
+                        const verticalDelta = /auto|scroll/u.test(style.overflowY) ? node.scrollHeight - node.clientHeight : 0;
+                        const horizontalDelta = /auto|scroll/u.test(style.overflowX) ? node.scrollWidth - node.clientWidth : 0;
+                        if (Math.max(verticalDelta, horizontalDelta) < 96
+                            || rect.width < 40
+                            || rect.height < 40
+                            || rect.right <= 0
+                            || rect.bottom <= 0
+                            || rect.left >= window.innerWidth
+                            || rect.top >= window.innerHeight) return null;
+                        const id = `visual-gesture-${index}`;
+                        node.setAttribute('data-visual-gesture-id', id);
+                        node.scrollTop = 0;
+                        node.scrollLeft = 0;
+                        return {
+                            id,
+                            tag: node.tagName.toLowerCase(),
+                            marker: [...node.attributes].find(({ name }) => name.startsWith('data-'))?.name || '',
+                            className: typeof node.className === 'string' ? node.className.slice(0, 180) : '',
+                            x: Math.max(4, Math.min(window.innerWidth - 4, verticalDelta >= horizontalDelta ? rect.left + 8 : rect.left + (rect.width / 2))),
+                            y: Math.max(4, Math.min(window.innerHeight - 4, rect.top + (rect.height / 2))),
+                            verticalDelta,
+                            horizontalDelta,
+                        };
+                    })
+                    .filter(Boolean)
+                    .sort((left, right) => Math.max(right.verticalDelta, right.horizontalDelta) - Math.max(left.verticalDelta, left.horizontalDelta))
+                    .slice(0, 8));
+                const session = await context.newCDPSession(page);
+                const results = [];
+                for (const candidate of candidates) {
+                    const vertical = candidate.verticalDelta >= candidate.horizontalDelta;
+                    const currentPoint = await page.evaluate(({ id, vertical }) => {
+                        const node = document.querySelector(`[data-visual-gesture-id="${id}"]`);
+                        if (!node) return null;
+                        const rect = node.getBoundingClientRect();
+                        if (rect.right <= 0 || rect.bottom <= 0 || rect.left >= window.innerWidth || rect.top >= window.innerHeight) return null;
+                        return {
+                            x: Math.max(4, Math.min(window.innerWidth - 4, vertical ? rect.left + 8 : rect.left + (rect.width / 2))),
+                            y: Math.max(4, Math.min(window.innerHeight - 4, rect.top + (rect.height / 2))),
+                        };
+                    }, { id: candidate.id, vertical });
+                    if (!currentPoint) {
+                        results.push({ ...candidate, axis: vertical ? 'y' : 'x', movement: 0, reached: true, skipped: 'not visible after prior gesture' });
+                        continue;
+                    }
+                    const endX = vertical ? currentPoint.x : Math.max(8, currentPoint.x - Math.min(180, currentPoint.x - 8));
+                    const endY = vertical ? Math.max(8, currentPoint.y - Math.min(180, currentPoint.y - 8)) : currentPoint.y;
+                    await session.send('Input.dispatchTouchEvent', {
+                        type: 'touchStart',
+                        touchPoints: [{ x: currentPoint.x, y: currentPoint.y, radiusX: 2, radiusY: 2, force: 1, id: 1 }],
+                    });
+                    for (let step = 1; step <= 5; step += 1) {
+                        await session.send('Input.dispatchTouchEvent', {
+                            type: 'touchMove',
+                            touchPoints: [{
+                                x: currentPoint.x + ((endX - currentPoint.x) * step / 5),
+                                y: currentPoint.y + ((endY - currentPoint.y) * step / 5),
+                                radiusX: 2,
+                                radiusY: 2,
+                                force: 1,
+                                id: 1,
+                            }],
+                        });
+                    }
+                    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+                    await page.waitForTimeout(120);
+                    const movement = await page.evaluate(({ id, vertical }) => {
+                        const node = document.querySelector(`[data-visual-gesture-id="${id}"]`);
+                        return node ? (vertical ? node.scrollTop : node.scrollLeft) : 0;
+                    }, { id: candidate.id, vertical });
+                    results.push({ ...candidate, axis: vertical ? 'y' : 'x', movement, reached: movement > 1 });
+                }
+                await session.detach();
+                return results;
+            })().catch((error) => [{ reached: false, error: error.message }]) : [];
             let scrollEndScreenshot = null;
             if (scrollReachability?.horizontal) {
                 await page.waitForTimeout(50);
@@ -243,6 +323,9 @@ try {
                 ...(geometry?.fixedClipping.length ? [`${geometry.fixedClipping.length} clipped fixed elements`] : []),
                 ...(scrollReachability?.horizontal && !scrollReachability.horizontal.reached ? ['horizontal scroll end is unreachable'] : []),
                 ...(scrollReachability?.vertical && !scrollReachability.vertical.reached ? ['vertical scroll end is unreachable'] : []),
+                ...gestureReachability.filter(({ reached }) => !reached).map(({ id, axis, error }) => (
+                    error ? `touch gesture audit: ${error}` : `touch gesture did not move ${id} on ${axis}`
+                )),
             ];
             const result = {
                 profile: profile.id,
@@ -253,6 +336,7 @@ try {
                 elapsedMs: Date.now() - startedAt,
                 geometry,
                 scrollReachability,
+                gestureReachability,
                 failures,
                 status: failures.length ? 'FAIL' : 'PASS',
             };

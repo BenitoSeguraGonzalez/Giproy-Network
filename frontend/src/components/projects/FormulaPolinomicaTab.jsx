@@ -628,7 +628,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
             </aside>
 
             <div className="relative min-h-0 flex-1 overflow-hidden pb-14 pr-7">
-            <div ref={formulaResourcesScrollRef} className="giproy-motion-scrollbar-hide h-full overflow-auto">
+            <div ref={formulaResourcesScrollRef} className="giproy-motion-scrollbar-hide h-full overflow-auto overscroll-contain [touch-action:pan-x_pan-y]">
               <table className="w-full min-w-[860px] border-collapse text-left">
                 <thead className="sticky top-0 z-10 border-b border-[#ececec] bg-[#f7f7f5]">
                   <tr className="text-[10px] font-black uppercase tracking-widest leading-none text-gray-400">
@@ -725,7 +725,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
           </div>
 
           <div className="relative min-h-0 flex-1 overflow-hidden pb-14 pr-7">
-          <div ref={formulaResultsScrollRef} className="giproy-motion-scrollbar-hide h-full overflow-auto rounded-b-[0.9rem]">
+          <div ref={formulaResultsScrollRef} className="giproy-motion-scrollbar-hide h-full overflow-auto overscroll-contain rounded-b-[0.9rem] [touch-action:pan-x_pan-y]">
             {activeTab === 'INDICES' ? (
               <table className="w-full min-w-[760px] border-collapse text-left">
                 <thead className="sticky top-0 z-10 border-b border-[#ececec] bg-[#f7f7f5]">

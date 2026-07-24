@@ -44,7 +44,7 @@ export const AppModalShell = ({
 
     return (
         <div
-            className={`fixed inset-0 ${zIndex} flex items-start justify-center overflow-y-auto bg-[rgba(15,23,42,0.18)] p-3 backdrop-blur-[2px] sm:items-center md:p-4 ${overlayClassName}`}
+            className={`fixed inset-0 ${zIndex} flex items-start justify-center overflow-y-auto overscroll-contain bg-[rgba(15,23,42,0.18)] p-3 backdrop-blur-[2px] [touch-action:pan-y] sm:items-center md:p-4 ${overlayClassName}`}
             onClick={(e) => {
                 if (e.target === e.currentTarget && onClose) onClose();
             }}
@@ -54,7 +54,7 @@ export const AppModalShell = ({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.98, y: 10 }}
                 transition={{ duration: 0.18 }}
-                className={`max-h-[calc(100dvh-1.5rem)] w-full ${SIZE_MAP[size] || SIZE_MAP.lg} overflow-x-hidden overflow-y-auto rounded-[1.7rem] md:max-h-[calc(100dvh-2rem)] ${panelClassName}`}
+                className={`max-h-[calc(100dvh-1.5rem)] min-h-0 w-full ${SIZE_MAP[size] || SIZE_MAP.lg} overflow-x-hidden overflow-y-auto overscroll-contain rounded-[1.7rem] [touch-action:pan-y] md:max-h-[calc(100dvh-2rem)] ${panelClassName}`}
                 style={{
                     background: surfaceColor,
                     border: MODAL_BORDER,

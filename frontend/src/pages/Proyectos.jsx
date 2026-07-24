@@ -3371,7 +3371,7 @@ const Proyectos = () => {
     const renderCreateProjectModal = () => (
         <AnimatePresence>
             {showCreateModal && (
-                <AppModalShell isOpen={true} size="lg" zIndex="z-[100]" overlayClassName="overflow-y-auto" panelClassName="my-8">
+                <AppModalShell isOpen={true} size="lg" zIndex="z-[100]" overlayClassName="overflow-y-auto">
                     <AppModalHeader
                         title="Nuevo Proyecto"
                         subtitle="Sincronización técnica y administrativa"
@@ -3380,9 +3380,9 @@ const Proyectos = () => {
                         iconWrapClassName="border-orange-200 bg-orange-50"
                         onClose={() => setShowCreateModal(false)}
                     />
-                    <div className="p-10">
+                    <div className="p-4 sm:p-6 lg:p-10">
                         <form onSubmit={handleCreateProject} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="space-y-2 opacity-60">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Código de Proyecto (Auto)</Label>
                                     <div className="h-11 bg-zinc-100 border border-zinc-200 rounded-xl flex items-center px-4 text-xs font-bold text-zinc-500">
@@ -3419,7 +3419,7 @@ const Proyectos = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1 italic">Presupuesto Referencial</Label>
                                     <div className="relative">
@@ -3674,10 +3674,10 @@ const Proyectos = () => {
                 </div>
 
                 {portfolioView === 'lista' && (
-                    <div className="min-w-0 overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
+                    <div className="min-w-0 rounded-[2rem] border border-zinc-200 bg-white">
                         <div
                             ref={portfolioListViewportRef}
-                            className="relative max-h-[calc(100dvh-15rem)] overflow-auto overscroll-contain [touch-action:pan-x_pan-y]"
+                            className="relative overflow-x-auto overflow-y-visible overscroll-x-contain [touch-action:pan-x_pan-y]"
                             style={expandedInlineProject ? { paddingBottom: '25rem' } : undefined}
                         >
                             <table className="w-full min-w-[1180px] table-fixed">
@@ -4053,7 +4053,7 @@ const Proyectos = () => {
 
                 {portfolioView === 'kanban' && (
                     <div className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
-                        <div className="max-h-[calc(100dvh-21rem)] overflow-x-auto overflow-y-hidden overscroll-contain px-3 py-3">
+                        <div className="max-h-[calc(100dvh-21rem)] overflow-auto overscroll-contain px-3 py-3 [touch-action:pan-x_pan-y]">
                             <div className="grid min-w-[1360px] gap-3 xl:grid-cols-5">
                                 {PROJECTS_KANBAN_COLUMNS.map((column) => {
                                     const projectsInColumn = kanbanProjectsByColumn[column.id] || [];
@@ -6149,7 +6149,7 @@ const Proyectos = () => {
                                     setRevisionModalMode('open');
                                 }}
                             />
-                            <div className="p-8">
+                            <div className="p-4 sm:p-6 lg:p-8">
                                 {loadingRevisions ? (
                                     <div className="py-20 text-center flex flex-col items-center gap-4">
                                         <div className="w-10 h-10 border-4 border-zinc-100 border-t-[#F39200] rounded-full animate-spin" />
@@ -6183,7 +6183,7 @@ const Proyectos = () => {
                                             <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest mb-4">
                                                 {revisionModalMode === 'kanban-approval' ? 'O selecciona la revisión que queda aprobada:' : 'O selecciona del listado rápido:'}
                                             </p>
-                                            <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                                            <div className="custom-scrollbar max-h-[min(300px,45dvh)] space-y-2 overflow-y-auto overscroll-contain pr-1 [touch-action:pan-y]">
                                                 {projectRevisions.map((rev) => {
                                                     const budgetInfo = revisionBudgetMap[rev.id] || null;
                                                     const canDeleteRevision = ['administrador', 'superadministrador'].includes(normalizedRole) && Number(rev.revision || 0) > 0;
