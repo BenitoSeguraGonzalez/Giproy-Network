@@ -153,6 +153,7 @@ services:
       context: ../
       dockerfile: frontend/Dockerfile
       args:
+        VITE_APP_VERSION: ${GIPROY_APP_VERSION:?GIPROY_APP_VERSION is required}
         VITE_ADAPTIVE_UI_ENABLED: ${VITE_ADAPTIVE_UI_ENABLED:-false}
         VITE_ADAPTIVE_UI_MODULES: ${VITE_ADAPTIVE_UI_MODULES:-}
     image: giproy-beta-frontend:${GIPROY_IMAGE_TAG:-local}

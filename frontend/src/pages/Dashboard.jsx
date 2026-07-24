@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 const MotionDiv = motion.div;
 import { Card, CardContent } from '../components/ui/card';
+import { APP_VERSION_LABEL } from '../config/appVersion';
 
 const Dashboard = () => {
     const { user } = useContext(AuthContext);
@@ -178,7 +179,7 @@ const Dashboard = () => {
 
                     <footer className="flex flex-shrink-0 flex-col items-center justify-between gap-6 border-t border-zinc-200 pt-8 md:flex-row">
                         <div className="flex items-center gap-6">
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">GIPROY NETWORK v3.0 // 2026</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">GIPROY NETWORK {APP_VERSION_LABEL} // 2026</p>
                             <div className="w-1 h-1 bg-zinc-300 rounded-full" />
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Security Layer Active</p>
                         </div>

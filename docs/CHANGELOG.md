@@ -16170,3 +16170,19 @@ Cambios realizados
   con frontend: OK.
 - Commit `eacce57` desplegado en beta; frontend saludable, HTTPS 200 y contrato
   global verificado dentro del bundle servido.
+
+### 2026-07-24 - Revalidacion obligatoria del frontend (TASK-2044)
+
+- Se confirma que beta sirve el bundle nuevo, pero la SPA no declara una
+  politica explicita para impedir que tablet reutilice un `index.html` previo.
+- El indice y las rutas SPA pasan a `no-store/no-cache/must-revalidate`; los
+  assets con hash mantienen cache larga e inmutable.
+- El smoke de seguridad incorpora una guarda permanente para ambas politicas.
+### 2026-07-24 - Version de aplicacion trazable por despliegue (TASK-2045)
+
+- La version deja de estar escrita como `V3.0` en la interfaz y pasa a proceder
+  de una unica fuente SemVer, visible en portada y registro.
+- El build publica `/version.json`; Compose, preflight y deploy exigen una
+  version nueva y verifican que sea la realmente servida.
+- Los prompts de lanzamiento incorporan el versionado y la comprobacion como
+  pasos obligatorios; primera release adaptativa: `3.1.0-beta.1`.

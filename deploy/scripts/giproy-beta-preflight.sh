@@ -39,7 +39,18 @@ if [ -f "$ENV_FILE" ]; then
   source "$ENV_FILE"
   set +a
   : "${GIPROY_HOST:?GIPROY_HOST is required in .env}"
+  : "${GIPROY_APP_VERSION:?GIPROY_APP_VERSION is required in .env}"
+  if ! [[ "$GIPROY_APP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
+    echo "GIPROY_APP_VERSION must be a valid SemVer value: $GIPROY_APP_VERSION" >&2
+    exit 1
+  fi
+  PACKAGE_VERSION="$(sed -n 's/^[[:space:]]*\"version\":[[:space:]]*\"\([^\"]*\)\".*/\1/p' "$APP_ROOT/frontend/package.json" | head -n 1)"
+  if [ "$GIPROY_APP_VERSION" != "$PACKAGE_VERSION" ]; then
+    echo "Version mismatch: deploy=$GIPROY_APP_VERSION package=$PACKAGE_VERSION" >&2
+    exit 1
+  fi
   echo "GIPROY_HOST=$GIPROY_HOST"
+  echo "GIPROY_APP_VERSION=$GIPROY_APP_VERSION"
 fi
 
 echo

@@ -6,6 +6,10 @@ Estado: BETA_DEPLOYED_PENDING_PHYSICAL_DEVICE_CERTIFICATION
 
 ## Version desplegada
 
+Version de aplicacion prevista para el siguiente despliegue:
+`3.1.0-beta.1` (`TASK-2045`). Debe coincidir en portada, registro y
+`/version.json`; el estado se actualizara con commit e imagen tras publicarlo.
+
 - Rama: `feature/adaptive-ui-p12`.
 - Commit de aplicacion: `00907294b6a14d3f1259e96bda4bd0e307183be0`.
 - Release del servidor: `/home/benito/docker/apps/giproy-release-0090729`.
@@ -93,3 +97,7 @@ la release permanece en beta y no debe promoverse a produccion.
   horizontal. Commit `eacce57` desplegado; imagen frontend
   `sha256:fdfa1c020a80c53679e257b243a49d03593f7a26ca592ff9f987686cb0471309`
   saludable. Pendiente continuar el recorrido fisico completo.
+- `TASK-2044`: la tablet no reflejo el segundo despliegue aunque el servidor ya
+  entregaba el bundle nuevo. Se identifico falta de revalidacion explicita del
+  indice SPA y se preparo politica `no-store` para HTML/fallback e `immutable`
+  para assets con hash. Pendiente verificar headers tras desplegar.

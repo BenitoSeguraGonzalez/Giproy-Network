@@ -1,4 +1,5 @@
 import path from "path"
+import { readFileSync } from "fs"
 import { fileURLToPath } from "url"
 import { dirname } from "path"
 import { defineConfig } from "vite"
@@ -7,12 +8,32 @@ import tailwindcss from "@tailwindcss/vite"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+const packageVersion = JSON.parse(
+  readFileSync(path.resolve(__dirname, "package.json"), "utf8"),
+).version
+const appVersion = process.env.VITE_APP_VERSION || packageVersion
+
+const versionManifestPlugin = {
+  name: "giproy-version-manifest",
+  generateBundle() {
+    this.emitFile({
+      type: "asset",
+      fileName: "version.json",
+      source: JSON.stringify({ version: appVersion }),
+    })
+  },
+}
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    versionManifestPlugin,
   ],
+
+  define: {
+    __GIPROY_APP_VERSION__: JSON.stringify(appVersion),
+  },
 
   build: {
     rollupOptions: {

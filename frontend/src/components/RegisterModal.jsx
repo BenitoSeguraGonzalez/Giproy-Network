@@ -11,6 +11,7 @@ import LogoGiproyCompleto from '../assets/LogoGiproyCompleto.png';
 import { appAlert } from '../utils/appDialog';
 import { formatInternationalPhone, getInternationalPhoneValidationMessage, resolveCountryPhonePrefix } from '../utils/phoneFormatter';
 import { validarRucEcuador, requiereValidacionRucEcuador } from '../utils/rucValidator';
+import { APP_VERSION_LABEL } from '../config/appVersion';
 
 const MotionDiv = motion.div;
 
@@ -235,7 +236,7 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
                                 <div className="text-center mb-8 flex flex-col items-center">
                                     <img src={LogoGiproyCompleto} alt="GIPROY Logo" className="h-12 w-auto object-contain mb-4" />
                                     <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 leading-none italic">Registro de Cuenta</h2>
-                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mt-3 italic">GIPROY NETWORK SYSTEM V3.0</p>
+                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mt-3 italic">GIPROY NETWORK SYSTEM {APP_VERSION_LABEL}</p>
                                 </div>
 
                                 {error && (

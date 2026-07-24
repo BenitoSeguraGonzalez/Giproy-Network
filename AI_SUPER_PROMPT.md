@@ -23,12 +23,17 @@ Flujo de trabajo
 2 Detectar diferencias con el repositorio
 3 Crear TASK para cada modificación
 4 Documentar cambios en CHANGELOG
+5 Antes de desplegar, incrementar la version SemVer de `frontend/package.json`,
+  sincronizar `GIPROY_APP_VERSION` y seguir
+  `docs/architecture/APPLICATION_VERSIONING.md`
+6 Tras desplegar, verificar `/version.json` y la version visible en la portada
 
 Prohibiciones
 
 No modificar arquitectura sin TASK
 No generar código duplicado
 No eliminar código sin verificar dependencias
+No desplegar reutilizando una version ya activa, salvo rollback explicito
 
 Objetivo
 

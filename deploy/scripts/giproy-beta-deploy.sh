@@ -18,6 +18,22 @@ fi
 echo "== GiProy beta deploy =="
 ./deploy/scripts/giproy-beta-preflight.sh
 
+set -a
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+set +a
+
+if docker container inspect giproy-beta-frontend >/dev/null 2>&1; then
+  CURRENT_VERSION="$(docker exec giproy-beta-frontend sh -c 'cat /usr/share/nginx/html/version.json 2>/dev/null || true')"
+  if printf '%s' "$CURRENT_VERSION" | grep -Fq "\"version\":\"$GIPROY_APP_VERSION\"" \
+    && [ "${ALLOW_SAME_VERSION_REDEPLOY:-0}" != "1" ]; then
+    echo "Refusing deploy: version $GIPROY_APP_VERSION is already active." >&2
+    echo "Increment frontend/package.json and GIPROY_APP_VERSION first." >&2
+    echo "Use ALLOW_SAME_VERSION_REDEPLOY=1 only for an explicit recovery/rollback." >&2
+    exit 1
+  fi
+fi
+
 if [ "$RUN_BACKUP" = "1" ]; then
   ./deploy/scripts/giproy-beta-backup.sh
 fi
@@ -59,6 +75,13 @@ docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d backend frontend
 echo
 echo "-- Status --"
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" ps
+
+DEPLOYED_VERSION="$(docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T frontend wget -qO- http://127.0.0.1/version.json)"
+printf '%s' "$DEPLOYED_VERSION" | grep -Fq "\"version\":\"$GIPROY_APP_VERSION\"" || {
+  echo "Deployed version verification failed: $DEPLOYED_VERSION" >&2
+  exit 1
+}
+echo "Application version verified: $GIPROY_APP_VERSION"
 
 echo
 echo "Deploy command finished."
