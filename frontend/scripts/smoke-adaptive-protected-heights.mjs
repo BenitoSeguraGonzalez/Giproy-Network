@@ -48,11 +48,12 @@ const projectsSource = fs.readFileSync(path.join(root, 'src', 'pages', 'Proyecto
 if (!projectsSource.includes('h-[calc(100dvh-10rem)] max-h-full')) {
   throw new Error('Proyectos.jsx: el calendario no limita su altura al viewport dinamico y al modal');
 }
-if (!projectsSource.includes('h-full min-h-0 overflow-y-auto overscroll-contain')) {
-  throw new Error('Proyectos.jsx: el portafolio no ofrece scroll vertical dentro del shell protegido');
+if (!projectsSource.includes('h-full min-h-0 overflow-hidden bg-[#F2F4F7]')) {
+  throw new Error('Proyectos.jsx: el portafolio permite desplazar la pagina completa');
 }
-if (!projectsSource.includes('overflow-x-auto overflow-y-visible overscroll-x-contain [touch-action:pan-x_pan-y]')) {
-  throw new Error('Proyectos.jsx: la tabla no delega el gesto vertical a la pagina ni conserva el scroll horizontal');
+if (!projectsSource.includes('data-projects-list-viewport')
+  || !projectsSource.includes('h-full min-h-0 overflow-auto overscroll-contain [touch-action:pan-x_pan-y]')) {
+  throw new Error('Proyectos.jsx: el listado no es el propietario exclusivo del scroll tactil');
 }
 if (!projectsSource.includes('w-full min-w-[1180px] table-fixed')) {
   throw new Error('Proyectos.jsx: la tabla no conserva su ancho operativo en tablet');

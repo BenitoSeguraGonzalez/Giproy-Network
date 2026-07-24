@@ -3478,9 +3478,9 @@ const Proyectos = () => {
     );
 
     const renderHtmlPortfolioLanding = () => (
-        <div className="h-full min-h-0 overflow-y-auto overscroll-contain bg-[#F2F4F7] text-[#2B241C] [touch-action:pan-y]">
-            <div className="mx-auto flex min-h-full w-full max-w-[1780px] flex-col gap-5 px-6 py-6 xl:px-10">
-                <div className="rounded-[1.75rem] border border-zinc-200 bg-white px-6 py-4.5">
+        <div className="h-full min-h-0 overflow-hidden bg-[#F2F4F7] text-[#2B241C]">
+            <div className="mx-auto flex h-full min-h-0 w-full max-w-[1780px] flex-col gap-5 px-6 py-6 xl:px-10">
+                <div className="shrink-0 rounded-[1.75rem] border border-zinc-200 bg-white px-6 py-4.5" data-projects-fixed-header>
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                         <div className="min-w-0 space-y-2">
                             <div className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-[#F39200]">
@@ -3563,7 +3563,7 @@ const Proyectos = () => {
                     </div>
                 </div>
 
-                <div className="rounded-[1.55rem] border border-zinc-200 bg-white px-4 py-2.5">
+                <div className="shrink-0 rounded-[1.55rem] border border-zinc-200 bg-white px-4 py-2.5" data-projects-fixed-controls>
                     <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
                         <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center">
                             <div className="relative w-full xl:w-[340px]">
@@ -3674,10 +3674,11 @@ const Proyectos = () => {
                 </div>
 
                 {portfolioView === 'lista' && (
-                    <div className="min-w-0 rounded-[2rem] border border-zinc-200 bg-white">
+                    <div className="min-h-0 min-w-0 flex-1 overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
                         <div
                             ref={portfolioListViewportRef}
-                            className="relative overflow-x-auto overflow-y-visible overscroll-x-contain [touch-action:pan-x_pan-y]"
+                            data-projects-list-viewport
+                            className="relative h-full min-h-0 overflow-auto overscroll-contain [touch-action:pan-x_pan-y]"
                             style={expandedInlineProject ? { paddingBottom: '25rem' } : undefined}
                         >
                             <table className="w-full min-w-[1180px] table-fixed">
@@ -4052,8 +4053,8 @@ const Proyectos = () => {
                 )}
 
                 {portfolioView === 'kanban' && (
-                    <div className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
-                        <div className="max-h-[calc(100dvh-21rem)] overflow-auto overscroll-contain px-3 py-3 [touch-action:pan-x_pan-y]">
+                    <div className="min-h-0 flex-1 overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
+                        <div className="h-full min-h-0 overflow-auto overscroll-contain px-3 py-3 [touch-action:pan-x_pan-y]">
                             <div className="grid min-w-[1360px] gap-3 xl:grid-cols-5">
                                 {PROJECTS_KANBAN_COLUMNS.map((column) => {
                                     const projectsInColumn = kanbanProjectsByColumn[column.id] || [];

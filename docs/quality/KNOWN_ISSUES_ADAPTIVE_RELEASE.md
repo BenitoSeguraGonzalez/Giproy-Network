@@ -41,9 +41,9 @@ La evidencia detallada de ESLint vive en `FRONTEND_ESLINT_BASELINE.md`.
 - Criterio de cierre: desplegar la misma version sobre la beta actual y obtener
   PASS en Lenovo Tab P12 fisica, Chrome y Opera, horizontal y vertical.
 
-## QI-005 - El listado de Proyectos no respondia al gesto vertical
+## QI-005 - Propiedad incorrecta del scroll en Proyectos
 
-- Estado: CORREGIDO EN `3.1.0-beta.5`; pendiente de confirmacion fisica.
+- Estado: CORREGIDO EN `3.1.0-beta.6`; pendiente de confirmacion fisica.
 - Severidad: bloqueante; contenido visible pero inaccesible en Lenovo Tab P12.
 - Reproduccion original: abrir Proyectos para Santiago Bermeo y arrastrar
   verticalmente sobre la tabla. La prueba programatica alcanzaba el final, pero
@@ -51,16 +51,17 @@ La evidencia detallada de ESLint vive en `FRONTEND_ESLINT_BASELINE.md`.
 - Causa raiz: habia dos propietarios verticales anidados. La tabla declaraba
   desplazamiento tactil horizontal y consumia el gesto antes de que llegara al
   viewport vertical de la pagina.
-- Correccion: la pagina es el unico propietario del desplazamiento vertical; la
-  tabla conserva el desplazamiento horizontal y permite que el gesto vertical
-  encadene hacia su ancestro. Se reforzaron ademas los contratos compartidos de
-  modales, dialogos y selectores desplegables para `dvh`, `visualViewport`,
-  teclado virtual, overscroll y tacto.
+- Correccion beta 5 rechazada: trasladaba el desplazamiento al contenido
+  completo y movia tambien cabecera y controles. No cumple la interaccion
+  solicitada.
+- Correccion beta 6: el marco de pagina usa `overflow-hidden`; cabecera y
+  controles son regiones fijas, y el viewport del listado es el unico
+  propietario de los desplazamientos vertical y horizontal.
 - Regresion automatizada: el certificador emite gestos tactiles CDP reales y
   verifica movimiento efectivo, no solo asignaciones de `scrollTop`.
-- Evidencia: Proyectos PASS en Lenovo horizontal y vertical; matriz general
-  354/354 PASS (59 superficies por 6 perfiles) excluyendo dos harnesses con
-  validadores de fixture dedicados.
+- Evidencia: gesto iniciado sobre las filas desplaza el listado 528 px en
+  horizontal y 527 px en vertical, mientras la posicion de los controles cambia
+  exactamente 0 px en ambas orientaciones Lenovo.
 - Criterio de cierre: confirmacion en Lenovo fisica sobre la beta 5.
 
 ## QI-006 - Dos harnesses requieren infraestructura especializada

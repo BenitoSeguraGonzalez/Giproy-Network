@@ -188,6 +188,55 @@ try {
             const screenshotName = harness.source.replace(/\.html$/u, '.png');
             const screenshotPath = path.join(profileDirectory, screenshotName);
             await page.screenshot({ path: screenshotPath, fullPage: false, scale: 'css' }).catch((error) => runtimeErrors.push(`screenshot: ${error.message}`));
+            const projectsScrollContract = profile.touch && harness.source === 'classic-projects-harness.html'
+                ? await (async () => {
+                    const before = await page.evaluate(() => {
+                        const controls = document.querySelector('[data-projects-fixed-controls]');
+                        const viewport = document.querySelector('[data-projects-list-viewport]');
+                        if (!controls || !viewport) return null;
+                        const rect = viewport.getBoundingClientRect();
+                        viewport.scrollTop = 0;
+                        return {
+                            controlsTop: controls.getBoundingClientRect().top,
+                            viewportTop: rect.top,
+                            x: Math.max(8, Math.min(window.innerWidth - 8, rect.left + (rect.width / 2))),
+                            y: Math.max(8, Math.min(window.innerHeight - 8, rect.top + Math.min(rect.height / 2, 220))),
+                        };
+                    });
+                    if (!before) return { passed: false, reason: 'missing projects scroll markers' };
+                    const session = await context.newCDPSession(page);
+                    await session.send('Input.dispatchTouchEvent', {
+                        type: 'touchStart',
+                        touchPoints: [{ x: before.x, y: before.y, radiusX: 2, radiusY: 2, force: 1, id: 7 }],
+                    });
+                    for (let step = 1; step <= 6; step += 1) {
+                        await session.send('Input.dispatchTouchEvent', {
+                            type: 'touchMove',
+                            touchPoints: [{
+                                x: before.x,
+                                y: before.y - (Math.min(200, before.y - 8) * step / 6),
+                                radiusX: 2,
+                                radiusY: 2,
+                                force: 1,
+                                id: 7,
+                            }],
+                        });
+                    }
+                    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+                    await page.waitForTimeout(180);
+                    await session.detach();
+                    const after = await page.evaluate(() => ({
+                        controlsTop: document.querySelector('[data-projects-fixed-controls]')?.getBoundingClientRect().top,
+                        listScrollTop: document.querySelector('[data-projects-list-viewport]')?.scrollTop || 0,
+                    }));
+                    const fixedDelta = Math.abs(after.controlsTop - before.controlsTop);
+                    return {
+                        passed: after.listScrollTop > 1 && fixedDelta <= 1,
+                        listScrollTop: after.listScrollTop,
+                        fixedControlsDelta: fixedDelta,
+                    };
+                })().catch((error) => ({ passed: false, reason: error.message }))
+                : null;
             const scrollReachability = await page.evaluate(() => {
                 const candidates = [...document.querySelectorAll('body *')].map((node, index) => {
                     const style = getComputedStyle(node);
@@ -323,6 +372,9 @@ try {
                 ...(geometry?.fixedClipping.length ? [`${geometry.fixedClipping.length} clipped fixed elements`] : []),
                 ...(scrollReachability?.horizontal && !scrollReachability.horizontal.reached ? ['horizontal scroll end is unreachable'] : []),
                 ...(scrollReachability?.vertical && !scrollReachability.vertical.reached ? ['vertical scroll end is unreachable'] : []),
+                ...(projectsScrollContract && !projectsScrollContract.passed
+                    ? [`projects list ownership failed: ${projectsScrollContract.reason || JSON.stringify(projectsScrollContract)}`]
+                    : []),
                 ...gestureReachability.filter(({ reached }) => !reached).map(({ id, axis, error }) => (
                     error ? `touch gesture audit: ${error}` : `touch gesture did not move ${id} on ${axis}`
                 )),
@@ -336,6 +388,7 @@ try {
                 elapsedMs: Date.now() - startedAt,
                 geometry,
                 scrollReachability,
+                projectsScrollContract,
                 gestureReachability,
                 failures,
                 status: failures.length ? 'FAIL' : 'PASS',
