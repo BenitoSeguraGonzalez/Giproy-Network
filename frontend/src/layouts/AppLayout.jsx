@@ -62,6 +62,7 @@ const AppLayout = ({ children }) => {
     const companySelectorRef = useRef(null);
     const adaptiveLayout = useAdaptiveLayout({ moduleKey: 'shell' });
     const isPortableWorkspace = adaptiveLayout.enabled && adaptiveLayout.profile !== 'wide';
+    const isTabletPortrait = adaptiveLayout.enabled && adaptiveLayout.profile === 'tablet-portrait';
     const activeBaseOrigin = useMarketplaceOrigin('base_trabajo', selectedBaseTrabajo?.id);
     const activeBaseTone = getMarketplaceOwnershipTone(activeBaseOrigin);
     const activeLicenseName = String(
@@ -535,11 +536,17 @@ const AppLayout = ({ children }) => {
             )}
 
             {/* Encabezado / Navbar Industrial — Persistente en todas las páginas */}
-            <nav data-app-header className={`${isPortableWorkspace ? 'h-16 px-4' : 'h-20 px-8'} shrink-0 bg-white border-b border-zinc-200 flex items-center justify-between sticky top-0 z-[500]`}>
-                <div className={`flex items-center ${isPortableWorkspace ? 'gap-3' : 'gap-6'} min-w-0`}>
+            <nav
+                data-app-header
+                data-app-header-layout={isTabletPortrait ? 'stacked-context' : 'single-row'}
+                className={`${isTabletPortrait ? 'grid min-h-28 grid-cols-[minmax(0,1fr)_auto] grid-rows-[44px_44px] gap-x-3 gap-y-2 px-4 py-2' : isPortableWorkspace ? 'flex h-16 items-center justify-between px-4' : 'flex h-20 items-center justify-between px-8'} sticky top-0 z-[500] shrink-0 border-b border-zinc-200 bg-white`}
+            >
+                <div className={`${isTabletPortrait ? 'contents' : `flex min-w-0 items-center ${isPortableWorkspace ? 'gap-3' : 'gap-6'}`}`}>
                     {/* Branding Principal (Fijo) */}
-                    <div
-                        className={`${isPortableWorkspace ? 'h-11 min-w-[104px] px-3' : 'h-11 min-w-[120px] px-4'} bg-zinc-900 rounded-xl flex items-center justify-center gap-2 border-b-2 border-[#F39200] shadow-sm overflow-hidden cursor-pointer shrink-0`}
+                    <button
+                        type="button"
+                        data-app-header-brand
+                        className={`${isTabletPortrait ? 'col-start-1 row-start-1 w-fit' : ''} ${isPortableWorkspace ? 'h-11 min-w-[104px] px-3' : 'h-11 min-w-[120px] px-4'} flex shrink-0 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-xl border-b-2 border-[#F39200] bg-zinc-900 shadow-sm`}
                         onClick={() => navigate('/dashboard')}
                         title="Ir al Dashboard"
                     >
@@ -560,12 +567,15 @@ const AppLayout = ({ children }) => {
                         >
                             {APP_VERSION_LABEL}
                         </span>
-                    </div>
+                    </button>
 
                     {!isPortableWorkspace && <div className="h-8 w-px bg-zinc-200" />}
  
                     {/* Contenedor de Contextos con Separador Físico */}
-                    <div className={`flex items-center ${isPortableWorkspace ? 'gap-3 min-w-0' : 'gap-6'} ${isPortableWorkspace ? '' : 'hidden lg:flex'}`}>
+                    <div
+                        data-app-header-context
+                        className={`${isTabletPortrait ? 'col-span-2 row-start-2 min-w-0 overflow-x-auto overscroll-contain border-t border-zinc-100 pt-2 [scrollbar-width:none] [touch-action:pan-x]' : ''} flex items-center ${isPortableWorkspace ? 'min-w-0 gap-3' : 'hidden gap-6 lg:flex'}`}
+                    >
                         
                         {/* Bloque 1: Empresa - (TASK-0149: Logo Refinado) */}
                         <div className={`flex items-center gap-3 min-w-0 ${isPortableWorkspace ? '' : 'border-r border-zinc-200 pr-6'}`}>
@@ -691,7 +701,10 @@ const AppLayout = ({ children }) => {
                 </div>
 
 
-                <div className={`flex items-center ${isPortableWorkspace ? 'gap-2' : 'gap-6'} shrink-0`}>
+                <div
+                    data-app-header-actions
+                    className={`${isTabletPortrait ? 'col-start-2 row-start-1 justify-self-end' : ''} flex shrink-0 items-center ${isPortableWorkspace ? 'gap-2' : 'gap-6'}`}
+                >
                     <AdaptiveLayoutControl layout={adaptiveLayout} />
                     <div className={`flex items-center gap-3 ${isPortableWorkspace ? '' : 'pr-6 border-r border-zinc-200'}`}>
                         <div className={`text-right ${isPortableWorkspace ? 'hidden' : 'hidden md:block'}`}>

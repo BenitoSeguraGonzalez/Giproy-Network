@@ -44,6 +44,42 @@
       "touch": false
     },
     {
+      "id": "tablet-fhd-landscape",
+      "viewport": [
+        1280,
+        720
+      ],
+      "dpr": 1.5,
+      "touch": true
+    },
+    {
+      "id": "tablet-fhd-portrait",
+      "viewport": [
+        720,
+        1200
+      ],
+      "dpr": 1.5,
+      "touch": true
+    },
+    {
+      "id": "tablet-2k-landscape",
+      "viewport": [
+        1280,
+        800
+      ],
+      "dpr": 2,
+      "touch": true
+    },
+    {
+      "id": "tablet-2k-portrait",
+      "viewport": [
+        800,
+        1280
+      ],
+      "dpr": 2,
+      "touch": true
+    },
+    {
       "id": "lenovo-p12-landscape",
       "viewport": [
         1472,
@@ -84,6 +120,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -101,6 +141,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -118,6 +162,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -135,6 +183,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -152,6 +204,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -169,6 +225,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -186,6 +246,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -203,6 +267,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -220,6 +288,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -237,6 +309,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -254,6 +330,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -271,6 +351,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -288,6 +372,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -305,6 +393,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -322,6 +414,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -339,6 +435,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -356,6 +456,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -373,6 +477,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -390,6 +498,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -407,6 +519,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -424,6 +540,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -441,6 +561,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -458,6 +582,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -475,6 +603,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -492,6 +624,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -509,6 +645,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -526,6 +666,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -543,6 +687,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -560,6 +708,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -577,6 +729,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -594,6 +750,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -611,6 +771,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -628,6 +792,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -645,6 +813,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -662,6 +834,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -679,6 +855,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -696,6 +876,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -713,6 +897,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -730,6 +918,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -747,6 +939,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -764,6 +960,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -781,6 +981,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -798,6 +1002,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -817,6 +1025,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -834,6 +1046,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -851,6 +1067,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -868,6 +1088,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -883,6 +1107,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -900,6 +1128,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -917,6 +1149,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -934,6 +1170,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -951,6 +1191,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -968,6 +1212,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -985,6 +1233,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1000,6 +1252,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1015,6 +1271,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1032,6 +1292,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1049,6 +1313,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1064,6 +1332,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1081,6 +1353,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1096,6 +1372,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1121,6 +1401,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1143,6 +1427,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1160,6 +1448,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1175,6 +1467,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1195,6 +1491,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1212,6 +1512,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1227,6 +1531,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1244,6 +1552,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1259,6 +1571,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1276,6 +1592,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1293,6 +1613,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1308,6 +1632,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1323,6 +1651,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1338,6 +1670,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1353,6 +1689,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1368,6 +1708,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1383,6 +1727,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1398,6 +1746,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1413,6 +1765,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1428,6 +1784,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1443,6 +1803,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1463,6 +1827,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1478,6 +1846,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1496,6 +1868,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1511,6 +1887,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1526,6 +1906,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1541,6 +1925,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1558,6 +1946,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1577,6 +1969,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1592,6 +1988,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1607,6 +2007,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1622,6 +2026,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1637,6 +2045,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1654,6 +2066,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1669,6 +2085,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1684,6 +2104,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1706,6 +2130,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1726,6 +2154,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1745,6 +2177,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1764,6 +2200,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1783,6 +2223,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1802,6 +2246,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1821,6 +2269,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1840,6 +2292,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1859,6 +2315,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1878,6 +2338,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1897,6 +2361,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1916,6 +2384,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1935,6 +2407,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1954,6 +2430,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1973,6 +2453,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -1992,6 +2476,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2011,6 +2499,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2030,6 +2522,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2049,6 +2545,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2068,6 +2568,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2087,6 +2591,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2106,6 +2614,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2125,6 +2637,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2145,6 +2661,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2164,6 +2684,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2183,6 +2707,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2202,6 +2730,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2221,6 +2753,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2240,6 +2776,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2259,6 +2799,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2279,6 +2823,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2299,6 +2847,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2318,6 +2870,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2337,6 +2893,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2356,6 +2916,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2375,6 +2939,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2394,6 +2962,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2414,6 +2986,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2433,6 +3009,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2452,6 +3032,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2471,6 +3055,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2490,6 +3078,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2509,6 +3101,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2528,6 +3124,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2547,6 +3147,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2566,6 +3170,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2585,6 +3193,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2604,6 +3216,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2623,6 +3239,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2642,6 +3262,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2661,6 +3285,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2680,6 +3308,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2699,6 +3331,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2719,6 +3355,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2738,6 +3378,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2757,6 +3401,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2776,6 +3424,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2797,6 +3449,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2825,6 +3481,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2844,6 +3504,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]
@@ -2864,6 +3528,10 @@
         "desktop-fhd-125",
         "desktop-fhd-150",
         "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
         "lenovo-p12-landscape",
         "lenovo-p12-portrait"
       ]

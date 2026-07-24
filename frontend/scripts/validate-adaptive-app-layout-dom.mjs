@@ -35,6 +35,10 @@ const profiles = [
     { name: 'scaled', viewport: { width: 1536, height: 864 }, expected: 'compact' },
     { name: 'zoom-200-percent', viewport: { width: 960, height: 540 }, expected: 'constrained' },
     { name: 'large-hidpi-desktop', viewport: { width: 2560, height: 1440 }, expected: 'wide', deviceScaleFactor: 1.5 },
+    { name: 'tablet-fhd-landscape', viewport: { width: 1280, height: 720 }, expected: 'tablet-landscape', hasTouch: true, deviceScaleFactor: 1.5 },
+    { name: 'tablet-fhd-portrait', viewport: { width: 720, height: 1200 }, expected: 'tablet-portrait', hasTouch: true, deviceScaleFactor: 1.5 },
+    { name: 'tablet-2k-landscape', viewport: { width: 1280, height: 800 }, expected: 'tablet-landscape', hasTouch: true, deviceScaleFactor: 2 },
+    { name: 'tablet-2k-portrait', viewport: { width: 800, height: 1280 }, expected: 'tablet-portrait', hasTouch: true, deviceScaleFactor: 2 },
     { name: 'tablet-landscape', viewport: { width: 1472, height: 820 }, expected: 'tablet-landscape', hasTouch: true, deviceScaleFactor: 2 },
     { name: 'tablet-portrait', viewport: { width: 920, height: 1472 }, expected: 'tablet-portrait', hasTouch: true, deviceScaleFactor: 2 },
 ];
@@ -88,6 +92,16 @@ try {
         const headerRect = await appHeader.boundingBox();
         assert.ok(headerRect && headerRect.height >= 63, `${profile.name}: la cabecera no se colapsa (${headerRect?.height ?? 0}px)`);
         assert.ok(headerRect.y >= -1 && headerRect.y + headerRect.height <= profile.viewport.height + 1, `${profile.name}: la cabecera permanece visible`);
+        const expectedHeaderLayout = profile.expected === 'tablet-portrait' ? 'stacked-context' : 'single-row';
+        assert.equal(await appHeader.getAttribute('data-app-header-layout'), expectedHeaderLayout, `${profile.name}: composicion de cabecera apropiada`);
+        const brandRect = await page.locator('[data-app-header-brand]').boundingBox();
+        const actionsRect = await page.locator('[data-app-header-actions]').boundingBox();
+        const contextRect = await page.locator('[data-app-header-context]').boundingBox();
+        assert.ok(brandRect && actionsRect && contextRect, `${profile.name}: regiones de cabecera medibles`);
+        assert.ok(brandRect.x + brandRect.width <= actionsRect.x + 1, `${profile.name}: marca y acciones no se solapan`);
+        if (profile.expected === 'tablet-portrait') {
+            assert.ok(contextRect.y >= brandRect.y + brandRect.height, `${profile.name}: contexto ocupa una segunda fila real`);
+        }
         assert.equal(await page.locator('[data-adaptive-harness-content]').count(), 1, `${profile.name}: contenido clásico visible`);
         const pageViewport = page.locator('[data-app-page-viewport]');
         const verticalScrollState = await pageViewport.evaluate((node) => ({

@@ -13,6 +13,10 @@ const profiles = [
     { id: 'desktop-fhd-125', viewport: [1536, 864], dpr: 1.25, touch: false },
     { id: 'desktop-fhd-150', viewport: [1280, 720], dpr: 1.5, touch: false },
     { id: 'desktop-4k-200', viewport: [1920, 1080], dpr: 2, touch: false },
+    { id: 'tablet-fhd-landscape', viewport: [1280, 720], dpr: 1.5, touch: true },
+    { id: 'tablet-fhd-portrait', viewport: [720, 1200], dpr: 1.5, touch: true },
+    { id: 'tablet-2k-landscape', viewport: [1280, 800], dpr: 2, touch: true },
+    { id: 'tablet-2k-portrait', viewport: [800, 1280], dpr: 2, touch: true },
     { id: 'lenovo-p12-landscape', viewport: [1472, 820], dpr: 2, touch: true },
     { id: 'lenovo-p12-portrait', viewport: [920, 1372], dpr: 2, touch: true },
 ];
