@@ -6,7 +6,16 @@ Estado: BETA_DEPLOYED_PENDING_PHYSICAL_DEVICE_CERTIFICATION
 
 ## Version desplegada
 
-Version de aplicacion: `3.1.0-beta.2` (`TASK-2046`). Coincide en login,
+Actualizacion TASK-2048: la beta existente fue sustituida por
+`3.1.0-beta.4` desde el commit `ab5c525`, release del servidor
+`/home/benito/docker/apps/giproy-release-ab5c525`. El respaldo predeploy es
+`deploy/backups/giproy-beta-20260724-154716.sql.gz`. Frontend, backend y
+PostgreSQL quedaron `healthy`; portada y OpenAPI HTTPS responden 200,
+`/version.json` publica `3.1.0-beta.4`, el HTML usa `no-store`, el bundle
+contiene `giproy_adaptive_ui_mode` y los logs criticos posteriores registran 0
+coincidencias. La certificacion fisica Lenovo continua siendo vinculante.
+
+Version anterior documentada: `3.1.0-beta.2` (`TASK-2046`). Coincidio en login,
 cabecera persistente y `/version.json`. Commit funcional `ee42976`; imagen
 frontend `sha256:8f12b1fcd80fae8de2472265bd45c35d60db614feeffff33ae6996b05d877ec3`.
 

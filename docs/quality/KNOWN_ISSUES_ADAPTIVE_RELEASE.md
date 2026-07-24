@@ -40,3 +40,37 @@ La evidencia detallada de ESLint vive en `FRONTEND_ESLINT_BASELINE.md`.
   horizontal y 59/59 en vertical.
 - Criterio de cierre: desplegar la misma version sobre la beta actual y obtener
   PASS en Lenovo Tab P12 fisica, Chrome y Opera, horizontal y vertical.
+
+## QI-004 - Advisories npm del frontend
+
+- Estado: ABIERTO Y DOCUMENTADO.
+- Reproduccion: `cd frontend && npm audit --json`.
+- Evidencia: 13 paquetes afectados; 2 de severidad baja, 1 moderada, 10 alta
+  y 0 critica. El conteo corresponde a paquetes, no al numero de GHSA.
+- Contexto de runtime: el frontend publicado es contenido estatico Nginx; Vite,
+  Rollup, Babel y ESLint no se ejecutan en el contenedor final. Esto reduce la
+  exposicion, pero no elimina la obligacion de actualizar la cadena de build.
+
+| Paquete | Severidad | Directa | Advisories asociados |
+|---|---|---|---|
+| `@babel/core` | baja | no | GHSA-4x5r-pxfx-6jf8 |
+| `@redocly/openapi-core` | moderada | no | heredado de `js-yaml` |
+| `brace-expansion` | alta | no | GHSA-f886-m6hf-6m8v; GHSA-3jxr-9vmj-r5cp |
+| `esbuild` | baja | no | GHSA-g7r4-m6w7-qqqr |
+| `flatted` | alta | no | GHSA-25h7-pfq9-p65f; GHSA-rf6f-7fwh-wjgh |
+| `js-yaml` | alta | no | GHSA-h67p-54hq-rp68; GHSA-52cp-r559-cp3m |
+| `minimatch` | alta | no | GHSA-3ppc-4f35-3m26; GHSA-7r86-cg39-jmmj; GHSA-23c5-xmqv-rm74 |
+| `picomatch` | alta | no | GHSA-3v7f-55p6-f55p; GHSA-c2c7-rcm5-vvqj |
+| `postcss` | alta | si | GHSA-qx2v-qp2m-jg93; GHSA-6g55-p6wh-862q; GHSA-r28c-9q8g-f849 |
+| `react-router` | alta | no | GHSA-qwww-vcr4-c8h2 |
+| `react-router-dom` | alta | si | heredado de `react-router` |
+| `rollup` | alta | no | GHSA-mw96-cpmx-2vgc |
+| `vite` | alta | si | GHSA-4w7w-66w2-5vf9; GHSA-v2wj-q39q-566r; GHSA-p9ff-h696-f583; GHSA-v6wh-96g9-6wx3; GHSA-fx2h-pf6j-xcff |
+
+- Excepcion conocida: GHSA-qwww-vcr4-c8h2 afecta acciones RSC; GiProy es una
+  SPA sin superficie RSC. El smoke de seguridad verifica explicitamente esa
+  ausencia, pero el advisory permanece abierto hasta disponer de una version
+  corregida compatible.
+- Criterio de cierre: actualizar dependencias sin `--force`, ejecutar build,
+  matriz visual, smokes Classic/BIM y `npm audit`; documentar por separado
+  cualquier advisory que deba conservarse temporalmente.
