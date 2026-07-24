@@ -2,7 +2,7 @@
 
 Fecha: 2026-07-24
 
-Estado: Implementacion local completa; certificacion fisica pendiente
+Estado: Desplegado en beta; certificacion fisica pendiente
 
 Modo: INTEGRACION CONTROLADA GIPROY CLASICO <-> GIPROY BIM
 
@@ -53,4 +53,5 @@ documentacion. No hay cambios de datos ni migraciones.
 - [x] Harness de perfiles BIM
 - [x] Smoke BIM positivo y anti-BIM
 - [x] Certificacion automatizada local, build y baseline enterprise
+- [x] Despliegue beta reversible y comprobacion de salud
 - [ ] Certificacion fisica Tab P12 con modelo representativo

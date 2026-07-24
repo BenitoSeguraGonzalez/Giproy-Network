@@ -16143,3 +16143,7 @@ Cambios realizados
 - Docker/Compose transmiten las flags Vite, el build aislado en el servidor
   beta valida Nginx y bundles, y se actualizan Axios/form-data/React Router con
   una guarda de advisories aplicable a la arquitectura SPA.
+- Commit `0090729` desplegado en beta con todos los slices adaptativos activos;
+  frontend, backend, PostgreSQL, HTTPS y OpenAPI quedan saludables.
+- Se conserva backup de codigo, configuracion privada y PostgreSQL anterior al
+  despliegue. Auditoria posterior confirma cero secretos en bundles o logs.
