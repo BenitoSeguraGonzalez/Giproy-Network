@@ -41,6 +41,7 @@ import {
 } from '../utils/displayResolution';
 import GiproyIconGradient from '../assets/GiproyIconGradient.svg';
 import GiproyWordmarkWhite from '../assets/GiproyWordmarkWhite.png';
+import { APP_VERSION_LABEL } from '../config/appVersion';
 
 const AppLayout = ({ children }) => {
     const { user, logout, selectedEmpresa, setSelectedEmpresa, selectedBaseTrabajo, activeProject, licenseInfo } = useContext(AuthContext);
@@ -526,6 +527,13 @@ const AppLayout = ({ children }) => {
                             alt="GIPROY registrado"
                             className={`${isPortableWorkspace ? 'h-3.5' : 'h-4'} w-auto object-contain`}
                         />
+                        <span
+                            data-app-version
+                            className="whitespace-nowrap text-[8px] font-black tracking-tight text-white/75"
+                            aria-label={`Version ${APP_VERSION_LABEL}`}
+                        >
+                            {APP_VERSION_LABEL}
+                        </span>
                     </div>
 
                     {!isPortableWorkspace && <div className="h-8 w-px bg-zinc-200" />}

@@ -106,9 +106,9 @@ const Dashboard = () => {
 
     return (
         <div className="h-full min-h-0 overflow-hidden bg-[#F2F4F7]">
-            <main className="flex h-full flex-col overflow-hidden px-12 py-10">
+            <main className="flex h-full flex-col overflow-hidden px-4 py-4 sm:px-6 sm:py-6 xl:px-12 xl:py-10">
                 <div className="flex h-full min-h-0 w-full max-w-[1480px] flex-1 flex-col overflow-hidden self-center">
-                    <header className="mb-10 flex-shrink-0">
+                    <header className="mb-4 flex-shrink-0 xl:mb-10">
                         <MotionDiv
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -127,7 +127,7 @@ const Dashboard = () => {
                     </header>
 
                     <section ref={cardsViewportRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-2 custom-scrollbar">
-                        <div className="grid grid-cols-1 gap-8 pb-8 md:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-4 pb-4 md:grid-cols-3 xl:gap-8 xl:pb-8">
                             {modules.map((module, index) => (
                                 <div
                                     key={module.id}
@@ -148,7 +148,7 @@ const Dashboard = () => {
                                             onClick={() => navigate(module.path)}
                                             className="group h-full cursor-pointer overflow-hidden rounded-3xl border-none bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col"
                                         >
-                                            <CardContent className="flex h-full flex-col p-10">
+                                            <CardContent className="flex h-full flex-col p-6 xl:p-10">
                                                 <div className={`mb-8 flex h-16 w-16 items-center justify-center rounded-2xl border ${module.borderColor} ${module.color} shadow-sm transition-transform duration-300 group-hover:scale-110`}>
                                                     {module.icon}
                                                 </div>
@@ -177,7 +177,7 @@ const Dashboard = () => {
                         </div>
                     </section>
 
-                    <footer className="flex flex-shrink-0 flex-col items-center justify-between gap-6 border-t border-zinc-200 pt-8 md:flex-row">
+                    <footer data-dashboard-footer className="flex flex-shrink-0 flex-col items-center justify-between gap-3 border-t border-zinc-200 pt-4 md:flex-row xl:gap-6 xl:pt-8">
                         <div className="flex items-center gap-6">
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">GIPROY NETWORK {APP_VERSION_LABEL} // 2026</p>
                             <div className="w-1 h-1 bg-zinc-300 rounded-full" />

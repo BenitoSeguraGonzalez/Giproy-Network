@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "private": true,
-  "version": "3.1.0-beta.1",
+  "version": "3.1.0-beta.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -32,6 +32,7 @@
     "certify:lenovo:landscape": "node scripts/certify-lenovo-tab-p12-device.mjs landscape",
     "certify:lenovo:portrait": "node scripts/certify-lenovo-tab-p12-device.mjs portrait",
     "smoke:deployment-security": "node scripts/smoke-deployment-security-boundaries.mjs",
+    "smoke:release-visibility": "node scripts/validate-release-visibility-dom.mjs",
     "smoke:classic-proyectos": "node scripts/smoke-classic-proyectos-logging-boundary.mjs",
     "smoke:classic-tenant-context": "node scripts/smoke-classic-superadmin-tenant-context.mjs",
     "smoke:classic-pdf-layout": "node scripts/smoke-classic-hierarchy-pdf-layout.mjs",

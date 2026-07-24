@@ -16186,3 +16186,11 @@ Cambios realizados
   version nueva y verifican que sea la realmente servida.
 - Los prompts de lanzamiento incorporan el versionado y la comprobacion como
   pasos obligatorios; primera release adaptativa: `3.1.0-beta.1`.
+### 2026-07-24 - Version visible y footer alcanzable (TASK-2046)
+
+- La version se muestra en el login y en la cabecera persistente de todas las
+  rutas Classic/BIM, no depende de un footer concreto.
+- Login permite scroll en alturas reducidas y el Dashboard compacta su ritmo
+  para conservar el footer en tablet.
+- Las sesiones abiertas comprueban automaticamente si existe una release nueva
+  y el gate visual valida visibilidad y alcance en escritorio/tablet.

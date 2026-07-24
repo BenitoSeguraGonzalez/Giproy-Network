@@ -16,6 +16,7 @@ import { appAlert } from '../utils/appDialog';
 import { publicAuthApi } from '../api/publicAuth';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import { getCompanyDisplayName } from '../utils/companyDisplayName';
+import { APP_VERSION_LABEL } from '../config/appVersion';
 
 const Login = () => {
     const [step, setStep] = useState('email'); // 'email', 'selection', 'password'
@@ -291,7 +292,7 @@ const Login = () => {
     );
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center aurora-construction px-4 relative overflow-hidden">
+        <div data-login-viewport className="h-dvh w-full flex items-center justify-center aurora-construction px-4 py-6 relative overflow-x-hidden overflow-y-auto">
             {/* Detalle superior naranja */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#F39200] via-[#E94E1B] to-[#F39200]" />
 
@@ -319,6 +320,9 @@ const Login = () => {
                             <CardDescription className="text-zinc-500 font-bold uppercase tracking-[0.2em] text-[10px]">
                                 Sistema de Gestión • Construcción
                             </CardDescription>
+                            <p data-app-version className="pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
+                                GiProy Network {APP_VERSION_LABEL}
+                            </p>
                         </div>
                     </CardHeader>
 
@@ -358,7 +362,7 @@ const Login = () => {
                     </CardContent>
                 </Card>
 
-                <div className="mt-12 flex flex-col items-center gap-4">
+                <div data-login-footer className="mt-6 flex flex-col items-center gap-4 pb-2 sm:mt-10">
                     <p className="text-zinc-400 text-[9px] font-bold uppercase tracking-[0.3em] text-center leading-relaxed">
                         Authorized Environment<br />
                         © 2026 GIPROY NETWORK<br />
