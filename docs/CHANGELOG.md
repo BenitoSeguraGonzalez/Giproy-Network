@@ -16125,3 +16125,21 @@ Cambios realizados
 - Ubicacion BIM permite seleccionar base, overlays y opacidad, y registrar
   nuevos servicios sin alterar mapas ni contratos clasicos.
 - H05 pasa a completa; paridad 84,17% y programa 73,77%. Sin deploy.
+### 2026-07-24 - Adecuacion adaptativa global Classic y BIM (TASK-2039 a TASK-2041 / BIM-TASK-0192)
+
+- Se sustituye la resolucion fisica como criterio de layout por viewport CSS,
+  viewport visual, capacidades de entrada y perfiles adaptativos reversibles.
+- Shell, estructuras de proyecto, Formula, Presupuesto, APUs, Cronogramas,
+  Gantt, Settings, Community, Marketplace, Transferencias y BIM incorporan
+  adecuaciones de reflujo sin escalado grafico global.
+- Gantt conserva Tabla/Dividida/Gantt y protege la edicion tactil; BIM separa
+  tamano CSS del canvas y DPR, ofrece calidad Auto/Rendimiento/Alta y limita el
+  modo vertical a una superficie certificada.
+- Se agregan flags maestra/por modulo, rollback sin migraciones y matrices DOM
+  para Full HD, Windows escalado, zoom 200% y Lenovo Tab P12 simulada en ambas
+  orientaciones.
+- Build, suite adaptativa, Gantt, BIM V2 y baseline enterprise con frontend: OK.
+  La promocion queda pendiente de certificacion fisica en la Tab P12 real.
+- Docker/Compose transmiten las flags Vite, el build aislado en el servidor
+  beta valida Nginx y bundles, y se actualizan Axios/form-data/React Router con
+  una guarda de advisories aplicable a la arquitectura SPA.

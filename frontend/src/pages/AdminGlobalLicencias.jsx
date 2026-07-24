@@ -869,7 +869,7 @@ const AdminGlobalLicencias = () => {
 
     if (!isSuperadmin) {
         return (
-            <div className="h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] p-12">
+            <div className="h-full min-h-0 bg-[#F2F4F7] p-12">
                 <div className="max-w-4xl mx-auto">
                     <button onClick={() => navigate('/admin-global')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors">
                         <ArrowLeft className="w-4 h-4" /> Volver
@@ -884,7 +884,7 @@ const AdminGlobalLicencias = () => {
     }
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] flex flex-col bg-[#F2F4F7] overflow-hidden">
+        <div className="h-full min-h-0 flex flex-col bg-[#F2F4F7] overflow-hidden">
             <header className="shrink-0 bg-white border-b border-zinc-200 px-8 py-6 shadow-sm z-10">
                 <div className="max-w-[1500px] mx-auto">
                     <button onClick={() => navigate('/admin-global')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-[10px] tracking-widest mb-4 transition-colors">

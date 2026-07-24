@@ -3677,7 +3677,7 @@ const Proyectos = () => {
                     <div className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
                         <div
                             ref={portfolioListViewportRef}
-                            className="relative max-h-[calc(100vh-15rem)] overflow-x-hidden overflow-y-auto overscroll-contain"
+                            className="relative max-h-[calc(100dvh-15rem)] overflow-x-hidden overflow-y-auto overscroll-contain"
                             style={expandedInlineProject ? { paddingBottom: '25rem' } : undefined}
                         >
                             <table className="w-full table-fixed">
@@ -3957,7 +3957,7 @@ const Proyectos = () => {
                                     className="pointer-events-none absolute left-0 right-0 z-20 px-3"
                                     style={{ top: portfolioInlinePanelLayout.top }}
                                 >
-                                    <div className="pointer-events-auto max-h-[min(30rem,calc(100vh-25rem))] overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white p-5 shadow-[0_18px_35px_rgba(15,23,42,0.08)]">
+                                    <div className="pointer-events-auto max-h-[min(30rem,calc(100dvh-25rem))] overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white p-5 shadow-[0_18px_35px_rgba(15,23,42,0.08)]">
                                         <div className="mb-4 flex items-center justify-between gap-4">
                                             <div className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-500">
                                                 Historial de revisiones ({Math.max((inlineRevisionsByRoot[expandedProjectRoot] || []).length, Number(expandedInlineProject.num_revisiones || 1))} versiones)
@@ -3976,7 +3976,7 @@ const Proyectos = () => {
                                                 <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-[#136191]" />
                                             </div>
                                         ) : (
-                                            <div className="max-h-[calc(min(30rem,calc(100vh-25rem))-4.5rem)] space-y-3 overflow-auto pr-1">
+                                            <div className="max-h-[calc(min(30rem,calc(100dvh-25rem))-4.5rem)] space-y-3 overflow-auto pr-1">
                                                 {(inlineRevisionsByRoot[expandedProjectRoot] || []).map((revisionProject) => {
                                                     const revisionFamilyCount = Math.max(
                                                         (inlineRevisionsByRoot[expandedProjectRoot] || []).length,
@@ -4053,7 +4053,7 @@ const Proyectos = () => {
 
                 {portfolioView === 'kanban' && (
                     <div className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
-                        <div className="max-h-[calc(100vh-21rem)] overflow-x-auto overflow-y-hidden overscroll-contain px-3 py-3">
+                        <div className="max-h-[calc(100dvh-21rem)] overflow-x-auto overflow-y-hidden overscroll-contain px-3 py-3">
                             <div className="grid min-w-[1360px] gap-3 xl:grid-cols-5">
                                 {PROJECTS_KANBAN_COLUMNS.map((column) => {
                                     const projectsInColumn = kanbanProjectsByColumn[column.id] || [];
@@ -4270,7 +4270,7 @@ const Proyectos = () => {
                         iconWrapClassName="border-blue-200 bg-blue-50"
                         onClose={handleCloseCalendarModal}
                     />
-                    <div className="h-[calc(100vh-10rem)] overflow-hidden p-6">
+                    <div className="h-[calc(100dvh-10rem)] max-h-full overflow-hidden p-6">
                         <div className="flex h-full min-h-0 flex-col gap-4">
                             <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.4rem] border border-zinc-200 bg-white px-3 py-2.5">
                                 <div className="flex flex-wrap items-center gap-2">
@@ -4847,7 +4847,7 @@ const Proyectos = () => {
                         </button>
                     </div>
                 </div>
-                <AppModalBody className="h-[520px] max-h-[calc(100vh-13rem)] space-y-3 overflow-y-auto bg-[#f7f7f5] p-4">
+                <AppModalBody className="h-[520px] max-h-[calc(100dvh-13rem)] space-y-3 overflow-y-auto bg-[#f7f7f5] p-4">
 
                     <section className={PROJECTS_MODAL_SECTION_CLASS}>
                     <div className="grid gap-3 md:grid-cols-2">
@@ -5428,7 +5428,7 @@ const Proyectos = () => {
                     isOpen={showRecycleModal}
                     size="lg"
                     zIndex="z-[200]"
-                    panelClassName="rounded-[2.5rem] max-h-[calc(100vh-4rem)] flex flex-col"
+                    panelClassName="rounded-[2.5rem] max-h-[calc(100dvh-4rem)] flex flex-col"
                     onClose={() => setShowRecycleModal(false)}
                 >
                     <AppModalHeader

@@ -32,6 +32,8 @@ import { getMarketplaceOwnershipTone } from '../components/marketplace/Marketpla
 import { applyTrimmedPaste } from '../utils/pasteSanitizer';
 import { getLicenseBannerMessage, getLicenseBannerTone, getLicenseStatusLabel, getLicenseStatusTone } from '../utils/licenseStatusUi';
 import { getCompanyDisplayName } from '../utils/companyDisplayName';
+import useAdaptiveLayout from '../hooks/useAdaptiveLayout';
+import AdaptiveLayoutControl from '../components/ui/AdaptiveLayoutControl';
 import {
     MIN_DESKTOP_DISPLAY_HEIGHT,
     MIN_DESKTOP_DISPLAY_WIDTH,
@@ -52,16 +54,13 @@ const AppLayout = ({ children }) => {
     const [licenseNotificationQueue, setLicenseNotificationQueue] = useState([]);
     const [transferSignal, setTransferSignal] = useState({ total: 0, nuevos: 0 });
     const [activeMaintenance, setActiveMaintenance] = useState(null);
-    const [viewport, setViewport] = useState({
-        width: typeof window !== 'undefined' ? window.innerWidth : 1920,
-        height: typeof window !== 'undefined' ? window.innerHeight : 1080
-    });
     const isSuperadmin = user?.rol?.toLowerCase() === 'superadministrador';
     const roleKey = user?.rol?.toLowerCase();
     const canSeeTransferSignal = ['superadministrador', 'administrador'].includes(roleKey);
     const hasNewTransferSignal = transferSignal.nuevos > 0;
     const companySelectorRef = useRef(null);
-    const isPortableWorkspace = false;
+    const adaptiveLayout = useAdaptiveLayout({ moduleKey: 'shell' });
+    const isPortableWorkspace = adaptiveLayout.enabled && adaptiveLayout.profile !== 'wide';
     const activeBaseOrigin = useMarketplaceOrigin('base_trabajo', selectedBaseTrabajo?.id);
     const activeBaseTone = getMarketplaceOwnershipTone(activeBaseOrigin);
     const activeLicenseName = String(
@@ -110,10 +109,6 @@ const AppLayout = ({ children }) => {
     useEffect(() => {
         const syncViewport = () => {
             const nextDisplayResolution = readPhysicalDisplayResolution();
-            setViewport({
-                width: window.innerWidth,
-                height: window.innerHeight
-            });
             setDisplayResolution((current) => (
                 current.width === nextDisplayResolution.width && current.height === nextDisplayResolution.height
                     ? current
@@ -372,7 +367,15 @@ const AppLayout = ({ children }) => {
 
 
     return (
-        <div className="h-screen flex flex-col text-[#1A1A1A] font-sans selection:bg-[#F39200]/20 overflow-hidden" onPasteCapture={applyTrimmedPaste}>
+        <div
+            className="h-screen flex flex-col text-[#1A1A1A] font-sans selection:bg-[#F39200]/20 overflow-hidden"
+            data-adaptive-ui-enabled={adaptiveLayout.enabled ? 'true' : 'false'}
+            data-adaptive-profile={adaptiveLayout.profile}
+            data-adaptive-detected-profile={adaptiveLayout.detectedProfile}
+            data-adaptive-input={adaptiveLayout.touchCapable ? 'touch' : 'pointer'}
+            style={adaptiveLayout.enabled ? { height: `${Math.round(adaptiveLayout.environment.visualHeight)}px` } : undefined}
+            onPasteCapture={applyTrimmedPaste}
+        >
             {/* Banner de Licencia */}
             {licenseInfo && ((licenseInfo.license_status === 'expired' && licenseInfo.access_mode === 'readonly') || 
                 licenseInfo.next_license ||
@@ -392,7 +395,7 @@ const AppLayout = ({ children }) => {
             )}
 
             {/* Resolution Warning Banner */}
-            {showResWarning && !isPortableWorkspace && (
+            {showResWarning && !adaptiveLayout.enabled && !isPortableWorkspace && (
                 <div className="bg-[#F39200] text-white px-6 py-2 flex items-center justify-between text-[10px] font-black uppercase tracking-widest animate-in fade-in slide-in-from-top duration-500 z-[100]">
                     <div className="flex items-center gap-3">
                         <AlertCircle className="w-4 h-4" />
@@ -505,11 +508,11 @@ const AppLayout = ({ children }) => {
             )}
 
             {/* Encabezado / Navbar Industrial — Persistente en todas las páginas */}
-            <nav className={`${isPortableWorkspace ? 'h-14 px-4' : 'h-20 px-8'} bg-white border-b border-zinc-200 flex items-center justify-between sticky top-0 z-[500]`}>
+            <nav className={`${isPortableWorkspace ? 'h-16 px-4' : 'h-20 px-8'} bg-white border-b border-zinc-200 flex items-center justify-between sticky top-0 z-[500]`}>
                 <div className={`flex items-center ${isPortableWorkspace ? 'gap-3' : 'gap-6'} min-w-0`}>
                     {/* Branding Principal (Fijo) */}
                     <div
-                        className={`${isPortableWorkspace ? 'h-9 min-w-[96px] px-3' : 'h-11 min-w-[120px] px-4'} bg-zinc-900 rounded-xl flex items-center justify-center gap-2 border-b-2 border-[#F39200] shadow-sm overflow-hidden cursor-pointer shrink-0`}
+                        className={`${isPortableWorkspace ? 'h-11 min-w-[104px] px-3' : 'h-11 min-w-[120px] px-4'} bg-zinc-900 rounded-xl flex items-center justify-center gap-2 border-b-2 border-[#F39200] shadow-sm overflow-hidden cursor-pointer shrink-0`}
                         onClick={() => navigate('/dashboard')}
                         title="Ir al Dashboard"
                     >
@@ -538,11 +541,11 @@ const AppLayout = ({ children }) => {
                                 </div>
                             )}
                             <div className={`flex flex-col items-start min-w-0 ${isPortableWorkspace ? 'max-w-[280px]' : 'min-w-[200px]'}`}>
-                                <span className={`${isPortableWorkspace ? 'text-[6px]' : 'text-[7px]'} font-black uppercase text-zinc-400 tracking-widest leading-none mb-1`}>
+                                <span className={`${isPortableWorkspace ? 'text-[9px]' : 'text-[7px]'} font-black uppercase text-zinc-400 tracking-widest leading-none mb-1`}>
                                     Contexto Operativo
                                 </span>
                                 <div className="flex items-center gap-2 w-full mt-0.5">
-                                    <h2 className={`${isPortableWorkspace ? 'text-[10px]' : 'text-[11px]'} font-black uppercase tracking-tight text-zinc-800 truncate leading-none`} title={selectedEmpresaLabel}>
+                                    <h2 className={`${isPortableWorkspace ? 'text-[11px]' : 'text-[11px]'} font-black uppercase tracking-tight text-zinc-800 truncate leading-none`} title={selectedEmpresaLabel}>
                                         {selectedEmpresaLabel}
                                     </h2>
                                     {isSuperadmin && (
@@ -580,7 +583,7 @@ const AppLayout = ({ children }) => {
                                 <div className={`flex items-center gap-1.5 w-full ${isPortableWorkspace ? 'mt-0.5' : 'mt-1'}`}>
                                     <ShieldCheck className={`${isPortableWorkspace ? 'h-2.5 w-2.5' : 'h-3 w-3'} flex-shrink-0 text-[#F39200]`} />
                                     <span
-                                        className={`${isPortableWorkspace ? 'text-[7px]' : 'text-[8px]'} font-black uppercase tracking-[0.14em] text-[#F39200] truncate leading-none`}
+                                        className={`${isPortableWorkspace ? 'text-[9px]' : 'text-[8px]'} font-black uppercase tracking-[0.14em] text-[#F39200] truncate leading-none`}
                                         title={`Licencia activa: ${activeLicenseLabel} · ${activeLicenseStatusLabel}`}
                                     >
                                         Licencia activa: {activeLicenseLabel}
@@ -651,7 +654,7 @@ const AppLayout = ({ children }) => {
                             <div className={`flex flex-col items-start min-w-0 ${isPortableWorkspace ? 'max-w-[240px]' : 'min-w-[150px]'}`}>
                                 <div className="flex items-center gap-1.5 mb-1 w-full">
                                     <div className={`w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0 ${activeBaseTone.dot}`} />
-                                    <span className={`${isPortableWorkspace ? 'text-[6px]' : 'text-[7px]'} font-black uppercase tracking-widest leading-none truncate ${activeBaseTone.text}`}>
+                                    <span className={`${isPortableWorkspace ? 'text-[9px]' : 'text-[7px]'} font-black uppercase tracking-widest leading-none truncate ${activeBaseTone.text}`}>
                                         {selectedBaseTrabajo.tipo_nombre || (selectedBaseTrabajo.es_maestra ? 'Base Maestra' : 'Base de Proyecto')}
                                         {selectedBaseTrabajo.tipo === 'Base de Proyecto' && selectedBaseTrabajo.revision !== null && selectedBaseTrabajo.revision !== undefined && ` (REV ${selectedBaseTrabajo.revision})`}
                                     </span>
@@ -677,6 +680,7 @@ const AppLayout = ({ children }) => {
 
 
                 <div className={`flex items-center ${isPortableWorkspace ? 'gap-2' : 'gap-6'} shrink-0`}>
+                    <AdaptiveLayoutControl layout={adaptiveLayout} />
                     <div className={`flex items-center gap-3 ${isPortableWorkspace ? '' : 'pr-6 border-r border-zinc-200'}`}>
                         <div className={`text-right ${isPortableWorkspace ? 'hidden' : 'hidden md:block'}`}>
                             <p className="text-xs font-black uppercase tracking-tight text-[#1A1A1A]">{user?.nombre_completo}</p>
@@ -684,7 +688,7 @@ const AppLayout = ({ children }) => {
                                 {user?.rol?.toLowerCase() === 'usuario' ? 'Colaborador' : user?.rol}
                             </p>
                         </div>
-                        <div className={`${isPortableWorkspace ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-zinc-100 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden`}>
+                        <div className={`${isPortableWorkspace ? 'w-11 h-11' : 'w-10 h-10'} rounded-full bg-zinc-100 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden`}>
                             {user?.avatar_url ? (
                                 <img src={user.avatar_url} className="w-full h-full object-cover" alt="Avatar" />
                             ) : (
@@ -701,7 +705,7 @@ const AppLayout = ({ children }) => {
                                     navigate('/servicios/envios-transferencias?bandeja=entrada');
                                     window.dispatchEvent(new CustomEvent('giproy:transfer-signal-opened'));
                                 }}
-                                className={`${isPortableWorkspace ? 'h-9 w-9' : 'h-10 w-10'} group relative inline-flex items-center justify-center rounded-xl border bg-white shadow-sm transition-all hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 ${
+                                className={`${isPortableWorkspace ? 'h-11 w-11' : 'h-10 w-10'} group relative inline-flex items-center justify-center rounded-xl border bg-white shadow-sm transition-all hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 ${
                                     hasNewTransferSignal
                                         ? 'border-emerald-300 text-emerald-700 shadow-[0_0_0_4px_rgba(16,185,129,0.12),0_12px_28px_rgba(16,185,129,0.24)] ring-2 ring-emerald-300/70 animate-pulse'
                                         : 'border-zinc-200 text-zinc-600'
@@ -722,7 +726,7 @@ const AppLayout = ({ children }) => {
                             {isSuperadmin && (
                                 <button
                                     onClick={() => navigate('/admin-global')}
-                                    className={`${isPortableWorkspace ? 'px-2 py-2' : 'px-3 py-2.5'} rounded-xl hover:bg-orange-50 transition-colors text-zinc-500 hover:text-[#F39200] border border-transparent hover:border-orange-100`}
+                                    className={`${isPortableWorkspace ? 'h-11 w-11' : 'px-3 py-2.5'} inline-flex items-center justify-center rounded-xl hover:bg-orange-50 transition-colors text-zinc-500 hover:text-[#F39200] border border-transparent hover:border-orange-100`}
                                     title="Administración Global"
                                 >
                                     <LayoutDashboard className={`${isPortableWorkspace ? 'w-4 h-4' : 'w-5 h-5'}`} />
@@ -730,7 +734,7 @@ const AppLayout = ({ children }) => {
                             )}
                             <button
                                 onClick={() => navigate('/settings')}
-                                className={`${isPortableWorkspace ? 'p-2' : 'p-2.5'} rounded-xl hover:bg-zinc-100 transition-colors text-zinc-500 hover:text-[#1A1A1A]`}
+                                className={`${isPortableWorkspace ? 'h-11 w-11' : 'p-2.5'} inline-flex items-center justify-center rounded-xl hover:bg-zinc-100 transition-colors text-zinc-500 hover:text-[#1A1A1A]`}
                                 title="Ajustes"
                             >
                                 <SettingsIcon className={`${isPortableWorkspace ? 'w-4 h-4' : 'w-5 h-5'}`} />
@@ -740,7 +744,7 @@ const AppLayout = ({ children }) => {
 
                     <button
                         onClick={logout}
-                        className={`flex items-center gap-2 ${isPortableWorkspace ? 'px-2.5 py-2 text-[10px]' : 'px-4 py-2.5 text-[11px]'} bg-zinc-100 hover:bg-red-50 text-zinc-600 hover:text-red-600 font-black uppercase tracking-tighter rounded-xl transition-all border border-transparent hover:border-red-100 shadow-sm`}
+                        className={`flex items-center justify-center gap-2 ${isPortableWorkspace ? 'h-11 min-w-11 px-2.5 text-[10px]' : 'px-4 py-2.5 text-[11px]'} bg-zinc-100 hover:bg-red-50 text-zinc-600 hover:text-red-600 font-black uppercase tracking-tighter rounded-xl transition-all border border-transparent hover:border-red-100 shadow-sm`}
                     >
                         <LogOut className={`${isPortableWorkspace ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
                         <span className={`${isPortableWorkspace ? 'hidden' : 'hidden sm:inline'}`}>Salir</span>

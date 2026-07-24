@@ -253,7 +253,7 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
                                     <div className="relative">
                                         <div
                                             ref={formScrollRef}
-                                            className="giproy-motion-scrollbar-hide max-h-[52vh] overflow-y-auto pr-5"
+                                            className="giproy-motion-scrollbar-hide max-h-[52dvh] overflow-y-auto pr-5"
                                         >
                                             <PersonnelFormFields
                                                 formData={formData}

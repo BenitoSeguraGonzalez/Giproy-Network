@@ -707,7 +707,7 @@ const ProjectManager = () => {
                             </div>
                         </AppModalHeader>
 
-                        <div className="flex h-[75vh] divide-x divide-zinc-200 overflow-hidden bg-white">
+                        <div className="flex h-[75dvh] divide-x divide-zinc-200 overflow-hidden bg-white">
                             {/* Columna 1: Estructura EDT */}
                             {itemType === 'project' && (
                                 <div className="w-1/3 p-6 bg-zinc-50 flex flex-col h-full border-r border-zinc-200">

@@ -2775,7 +2775,7 @@ const Settings = () => {
     );
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] flex flex-col bg-[#F2F4F7] text-[#1A1A1A] overflow-hidden">
+        <div className="h-full min-h-0 flex flex-col bg-[#F2F4F7] text-[#1A1A1A] overflow-hidden">
             <header className="bg-white border-b border-zinc-200 px-8 py-4 sticky top-0 z-40 shadow-sm">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-6">
@@ -2889,7 +2889,7 @@ const Settings = () => {
                     panelClassName="bg-[#f7f7f5]"
                     overlayClassName="overflow-y-auto"
                 >
-                    <form onSubmit={activeTab === 'empresas' ? handleCreateEmpresa : handleCreateUsuario} className="flex max-h-[92vh] min-h-0 flex-col">
+                    <form onSubmit={activeTab === 'empresas' ? handleCreateEmpresa : handleCreateUsuario} className="flex max-h-[92dvh] min-h-0 flex-col">
                         <AppModalHeader
                             title={activeTab === 'empresas'
                                 ? (editMode ? 'Editar Empresa' : 'Registrar Empresa')

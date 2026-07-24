@@ -82,7 +82,7 @@ const AdminGlobalAuditoria = () => {
 
     if (!isSuperadmin) {
         return (
-            <div className="h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] p-12">
+            <div className="h-full min-h-0 bg-[#F2F4F7] p-12">
                 <div className="max-w-4xl mx-auto">
                     <button onClick={() => navigate('/admin-global')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors">
                         <ArrowLeft className="w-4 h-4" /> Volver
@@ -103,7 +103,7 @@ const AdminGlobalAuditoria = () => {
     const severities = ['info', 'warning', 'critical'];
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] flex flex-col bg-[#F2F4F7]">
+        <div className="h-full min-h-0 flex flex-col bg-[#F2F4F7]">
             <main className="flex-1 overflow-y-auto p-12 custom-scrollbar">
                 <div className="w-full max-w-[1500px] mx-auto">
                     <button onClick={() => navigate('/admin-global')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors">
@@ -271,7 +271,7 @@ const AdminGlobalAuditoria = () => {
                                             </label>
                                         </div>
                                     </div>
-                                    <div className="max-h-[44vh] overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50/50">
+                                    <div className="max-h-[44dvh] overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50/50">
                                         <div className="divide-y divide-zinc-200/60">
                                             {events.length === 0 ? (
                                                 <div className="px-5 py-6 text-sm font-semibold text-zinc-500">No hay eventos estructurados para los filtros aplicados.</div>

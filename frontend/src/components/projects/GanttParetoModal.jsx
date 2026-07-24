@@ -254,7 +254,7 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
 
     return (
         <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/35 p-4 backdrop-blur-sm">
-            <div className="flex h-[88vh] w-full max-w-[1420px] flex-col overflow-hidden rounded-[1.75rem] border border-zinc-300 bg-[#F3F4F6] shadow-2xl">
+            <div className="flex h-[88dvh] w-full max-w-[1420px] flex-col overflow-hidden rounded-[1.75rem] border border-zinc-300 bg-[#F3F4F6] shadow-2xl">
                 <div className="border-b border-zinc-200 bg-white px-6 py-4">
                     <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">

@@ -104,6 +104,39 @@ try {
     assert.equal(await unsupportedPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, 'La guarda no genera overflow');
     await unsupportedPage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-unsupported-1366x768.png`, fullPage: true });
     await unsupportedContext.close();
+
+    const tabletLandscapeContext = await browser.newContext({
+        viewport: { width: 1472, height: 820 },
+        screen: { width: 1472, height: 920 },
+        deviceScaleFactor: 2,
+        hasTouch: true,
+    });
+    await tabletLandscapeContext.addInitScript(() => localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
+    const tabletLandscapePage = await tabletLandscapeContext.newPage();
+    await tabletLandscapePage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
+    await tabletLandscapePage.waitForSelector('[data-bim-workspace-v2][data-bim-adaptive-profile="tablet-landscape"]');
+    assert.equal(await tabletLandscapePage.locator('[data-bim-unsupported-resolution]').count(), 0, 'La tablet horizontal compatible monta BIM');
+    assert.equal(await tabletLandscapePage.locator('[data-bim-workspace-v2] aside').count(), 1, 'Tablet horizontal monta un único panel lateral');
+    assert.equal(await tabletLandscapePage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, 'Tablet horizontal sin overflow de página');
+    await tabletLandscapePage.getByRole('button', { name: 'Mostrar u ocultar panel contextual' }).click();
+    assert.equal(await tabletLandscapePage.locator('[data-bim-workspace-v2] aside').count(), 1, 'El inspector sustituye al explorador sin comprimir el visor');
+    await tabletLandscapePage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-tablet-landscape.png`, fullPage: true });
+    await tabletLandscapeContext.close();
+
+    const tabletPortraitContext = await browser.newContext({
+        viewport: { width: 920, height: 1472 },
+        screen: { width: 920, height: 1472 },
+        deviceScaleFactor: 2,
+        hasTouch: true,
+    });
+    await tabletPortraitContext.addInitScript(() => localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
+    const tabletPortraitPage = await tabletPortraitContext.newPage();
+    await tabletPortraitPage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
+    await tabletPortraitPage.waitForSelector('[data-bim-unsupported-resolution]');
+    assert.match(await tabletPortraitPage.locator('[data-bim-unsupported-resolution]').textContent(), /Gira la tablet a horizontal/);
+    assert.equal(await tabletPortraitPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, 'La guarda tablet vertical no genera overflow');
+    await tabletPortraitPage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-tablet-portrait.png`, fullPage: true });
+    await tabletPortraitContext.close();
     console.log('validate-bim-workspace-v2-dom: ok');
 } finally {
     await browser?.close();

@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Box, Cpu, Layers3, RotateCcw } from 'lucide-react';
 import { adaptViewerArtifactToElements } from './bimViewerArtifactAdapter';
+import useBimRenderQuality from '../../hooks/useBimRenderQuality';
+import BimRenderQualityControl from './BimRenderQualityControl';
 
 const TYPE_COLORS = {
     ifcwall: 0xf39200,
@@ -104,6 +106,7 @@ const BimThreeViewer = ({
     const [raycastHit, setRaycastHit] = useState(null);
     const [raycastHover, setRaycastHover] = useState(null);
     const [focusedElement, setFocusedElement] = useState(null);
+    const renderQuality = useBimRenderQuality();
     const artifactElements = useMemo(() => adaptViewerArtifactToElements(viewerArtifact), [viewerArtifact]);
     const sourceElements = artifactElements.length > 0 ? artifactElements : elements;
     const preparedElements = useMemo(() => buildThreeElements(sourceElements), [sourceElements]);
@@ -202,7 +205,7 @@ const BimThreeViewer = ({
         cameraRef.current = camera;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setPixelRatio(renderQuality.pixelRatio);
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.domElement.setAttribute('data-bim-three-canvas', 'true');
         rendererRef.current = renderer;
@@ -356,7 +359,7 @@ const BimThreeViewer = ({
             cameraRef.current = null;
             controlsRef.current = null;
         };
-    }, [highlightedElementIdSet, linkedElementIdSet, ready, selectedElement?.id, visibleThreeElements]);
+    }, [highlightedElementIdSet, linkedElementIdSet, ready, renderQuality.pixelRatio, selectedElement?.id, visibleThreeElements]);
 
     return (
         <section
@@ -381,6 +384,7 @@ const BimThreeViewer = ({
             data-bim-three-ifc-filter-count={ifcClassFilters.length}
             data-bim-three-hidden-ifc-classes={hiddenIfcClasses.size}
             data-bim-three-visible-ifc-classes={visibleIfcClassCount}
+            data-bim-render-pixel-ratio={renderQuality.pixelRatio}
             className="flex min-h-[360px] flex-col overflow-hidden rounded-[1.25rem] border border-zinc-200 bg-white"
         >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 px-4 py-3">
@@ -434,6 +438,7 @@ const BimThreeViewer = ({
                     <Box className="h-3.5 w-3.5" />
                     Enfocar elemento
                 </button>
+                <BimRenderQualityControl {...renderQuality} />
                 <div className="flex basis-full flex-wrap items-center gap-2">
                     <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
                         IFC 3D

@@ -642,7 +642,7 @@ const Subcategorias = () => {
     const clearSelection = () => setSelectedItems([]);
 
     return (
-        <div className="h-[calc(100vh-5rem)] flex flex-col bg-[#F8FAFC] overflow-hidden">
+        <div className="h-full min-h-0 flex flex-col bg-[#F8FAFC] overflow-hidden">
             {/* Header Context */}
             <div className="bg-zinc-900 px-8 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -929,7 +929,7 @@ const Subcategorias = () => {
                 {/* Modal - Crear/Editar Item */}
                 <AnimatePresence>
                     {showModal && (
-                        <AppModalShell isOpen={showModal} onClose={closeModal} size="lg" zIndex="z-[1000]" panelClassName="max-h-[90vh] flex flex-col">
+                        <AppModalShell isOpen={showModal} onClose={closeModal} size="lg" zIndex="z-[1000]" panelClassName="max-h-[90dvh] flex flex-col">
                             <AppModalHeader
                                 title={editingItem ? 'Editar subcategoría' : 'Nueva subcategoría'}
                                 subtitle={SUBCATEGORIAS.find(s => s.codigo === selectedSubcategoria)?.nombre}
@@ -1061,7 +1061,7 @@ const Subcategorias = () => {
                 {/* Modal - Importar */}
                 <AnimatePresence>
                     {showImportModal && (
-                        <AppModalShell isOpen={showImportModal} onClose={closeImportModal} size="xl" zIndex="z-[1000]" panelClassName="max-h-[90vh] flex flex-col">
+                        <AppModalShell isOpen={showImportModal} onClose={closeImportModal} size="xl" zIndex="z-[1000]" panelClassName="max-h-[90dvh] flex flex-col">
                             <AppModalHeader
                                 title="Importar subcategorías"
                                 subtitle="Pegue datos desde Excel o portapapeles"

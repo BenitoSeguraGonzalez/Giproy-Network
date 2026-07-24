@@ -116,12 +116,22 @@ const browser = await chromium.launch({
 const viewports = [
   { name: 'desktop', width: 1440, height: 900 },
   { name: 'wide', width: 1920, height: 1080 },
+  { name: 'tablet-landscape', width: 1472, height: 820, touch: true },
+  { name: 'tablet-portrait', width: 920, height: 1472, touch: true },
 ];
 
 const results = [];
 
 for (const viewport of viewports) {
-  const page = await browser.newPage({ viewport });
+  const page = await browser.newPage({
+    viewport: { width: viewport.width, height: viewport.height },
+    hasTouch: Boolean(viewport.touch),
+    isMobile: Boolean(viewport.touch),
+    deviceScaleFactor: viewport.touch ? 2 : 1,
+  });
+  if (viewport.touch) {
+    await page.addInitScript(() => window.localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
+  }
   const consoleErrors = [];
   page.on('console', (message) => {
     if (message.type() === 'error') consoleErrors.push(message.text());

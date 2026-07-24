@@ -257,7 +257,7 @@ const AdminGlobalEmpresas = () => {
 
     if (!isSuperadmin) {
         return (
-            <div className="h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] p-12">
+            <div className="h-full min-h-0 bg-[#F2F4F7] p-12">
                 <button onClick={() => navigate('/admin-global')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors">
                     <ArrowLeft className="w-4 h-4" /> Volver
                 </button>
@@ -272,7 +272,7 @@ const AdminGlobalEmpresas = () => {
     }
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] overflow-y-auto p-8 xl:p-12 custom-scrollbar">
+        <div className="h-full min-h-0 bg-[#F2F4F7] overflow-y-auto p-8 xl:p-12 custom-scrollbar">
             <div className="mx-auto max-w-7xl">
                 <button onClick={() => navigate('/admin-global')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors">
                     <ArrowLeft className="w-4 h-4" /> Volver a Administración Global

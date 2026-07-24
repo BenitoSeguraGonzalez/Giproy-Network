@@ -2688,7 +2688,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
 
             {imageViewerOpen && formData.imagen_referencial_url && (
                 <div className="fixed inset-0 z-[135] flex items-center justify-center bg-zinc-900/45 px-4 py-6 backdrop-blur-[2px]">
-                    <div className="flex h-full max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-[1.7rem] border border-[#ececec] bg-[#f7f7f5] shadow-[12px_12px_30px_rgba(15,23,42,0.28),-10px_-10px_26px_rgba(255,255,255,0.2)]">
+                    <div className="flex h-full max-h-[92dvh] w-full max-w-7xl flex-col overflow-hidden rounded-[1.7rem] border border-[#ececec] bg-[#f7f7f5] shadow-[12px_12px_30px_rgba(15,23,42,0.28),-10px_-10px_26px_rgba(255,255,255,0.2)]">
                         <div className="flex items-center justify-between gap-4 border-b border-[#101318] bg-[#111318] px-6 py-5">
                             <div className="flex min-w-0 items-center gap-3">
                                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[#F39200]/25 bg-[#F39200]/10 text-[#F39200]">
@@ -2731,7 +2731,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
 
             {geoViewerOpen && (
                 <div className="fixed inset-0 z-[136] flex items-center justify-center bg-zinc-900/45 px-4 py-6 backdrop-blur-[2px]">
-                    <div className="flex h-full max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-[1.7rem] border border-[#ececec] bg-[#f7f7f5] shadow-[12px_12px_30px_rgba(15,23,42,0.28),-10px_-10px_26px_rgba(255,255,255,0.2)]">
+                    <div className="flex h-full max-h-[92dvh] w-full max-w-7xl flex-col overflow-hidden rounded-[1.7rem] border border-[#ececec] bg-[#f7f7f5] shadow-[12px_12px_30px_rgba(15,23,42,0.28),-10px_-10px_26px_rgba(255,255,255,0.2)]">
                         <div className="flex items-center justify-between gap-4 border-b border-[#101318] bg-[#111318] px-6 py-5">
                             <div className="flex min-w-0 items-center gap-3">
                                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[#136191]/25 bg-[#136191]/10 text-[#136191]">
@@ -2820,7 +2820,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
 
             {pdfPreviewDocument && (
                 <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/55 px-4 py-6">
-                    <div className="flex h-full max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white shadow-2xl">
+                    <div className="flex h-full max-h-[92dvh] w-full max-w-6xl flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white shadow-2xl">
                         <div className="flex items-center justify-between gap-3 border-b border-zinc-100 bg-[#f2f2f0] px-5 py-4">
                             <div className="min-w-0">
                                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">Visor interno PDF</p>

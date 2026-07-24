@@ -104,7 +104,20 @@ const browser = await chromium.launch({
   headless: true,
   executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
 });
-const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+const requestedViewport = process.env.FORMULA_VIEWPORT === 'tablet-landscape'
+  ? { width: 1472, height: 820 }
+  : process.env.FORMULA_VIEWPORT === 'tablet-portrait'
+    ? { width: 920, height: 1472 }
+    : { width: 1920, height: 1080 };
+const page = await browser.newPage({
+  viewport: requestedViewport,
+  isMobile: process.env.FORMULA_VIEWPORT?.startsWith('tablet') || false,
+  hasTouch: process.env.FORMULA_VIEWPORT?.startsWith('tablet') || false,
+  deviceScaleFactor: process.env.FORMULA_VIEWPORT?.startsWith('tablet') ? 2 : 1,
+});
+if (process.env.FORMULA_VIEWPORT?.startsWith('tablet')) {
+  await page.addInitScript(() => window.localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
+}
 
 await page.route('**/api/v1/presupuestos/**', async (route) => {
   await route.fulfill({ json: [{ id: 13, revision: undefined }] });
@@ -156,6 +169,16 @@ const result = await page.evaluate(() => {
 
   const harnessRect = harness?.getBoundingClientRect();
   const rootRect = root?.getBoundingClientRect();
+  const workbench = document.querySelector('section');
+  const undersizedAdaptiveTargets = [...document.querySelectorAll('[data-adaptive-touch-target="true"]')]
+    .filter((node) => {
+      const rect = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
+    })
+    .map((node) => node.getBoundingClientRect())
+    .filter((rect) => rect.width < 43.5 || rect.height < 43.5)
+    .length;
   const scrollableDetails = [...document.querySelectorAll('*')]
     .map((node) => {
       const style = getComputedStyle(node);
@@ -181,6 +204,9 @@ const result = await page.evaluate(() => {
     rootClass: root?.className || '',
     rootComputed: root ? { height: getComputedStyle(root).height, display: getComputedStyle(root).display, overflow: getComputedStyle(root).overflow } : null,
     sectionClass: document.querySelector('section')?.className || '',
+    workbenchClientHeight: workbench?.clientHeight || 0,
+    pageHasHorizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    undersizedAdaptiveTargets,
     rootFitsViewport: Boolean(rootRect && rootRect.top >= 0 && rootRect.left >= 0 && rootRect.bottom <= viewport.height && rootRect.right <= viewport.width),
     scrollables,
     scrollableDetails,
@@ -197,6 +223,9 @@ const failures = Object.entries({
   suggestedButtonVisible: result.suggestedButtonVisible,
   formulaFooterVisible: result.formulaFooterVisible,
   rootFitsViewport: result.rootFitsViewport,
+  workbenchHasUsableHeight: result.workbenchClientHeight >= 240,
+  noPageHorizontalOverflow: !result.pageHasHorizontalOverflow,
+  touchTargetsMeetMinimum: !process.env.FORMULA_VIEWPORT?.startsWith('tablet') || result.undersizedAdaptiveTargets === 0,
   hasInternalScrollables: result.scrollables >= 1,
 }).filter(([, ok]) => !ok);
 

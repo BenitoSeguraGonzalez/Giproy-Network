@@ -1418,7 +1418,7 @@ const Recursos = () => {
                         onClose={() => setShowBulkCpcModal(false)}
                         size="lg"
                         zIndex="z-[1000]"
-                        panelClassName="max-h-[86vh] flex flex-col"
+                        panelClassName="max-h-[86dvh] flex flex-col"
                     >
                         <AppModalHeader
                             title="Asignar CPC"
@@ -1496,7 +1496,7 @@ const Recursos = () => {
                         onClose={() => setShowImportModal(false)}
                         size="xl"
                         zIndex="z-[1000]"
-                        panelClassName="max-h-[90vh] flex flex-col"
+                        panelClassName="max-h-[90dvh] flex flex-col"
                     >
                         <AppModalHeader
                             title="Importación Masiva de Recursos"

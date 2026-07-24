@@ -58,6 +58,7 @@ import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
 import { buildNestedApuEditConfirmConfig } from '../utils/nestedApuEditing';
 import * as descriptionCapitalization from '../utils/descriptionCapitalization';
 import { findMatchingUnit, resolveApuLineUnitDescription, resolveUnitDescription, resolveUnitId } from '../utils/unitOptions';
+import useAdaptiveLayout from '../hooks/useAdaptiveLayout';
 
 // --- Constantes de Categorías ---
 const CATEGORIAS_BASE = [
@@ -377,6 +378,7 @@ const APUs = () => {
     const [dragOverCatEditor, setDragOverCatEditor] = useState(null); // Para el editor
     const [draggingEditorLineKey, setDraggingEditorLineKey] = useState(null);
     const [dragOverEditorLineKey, setDragOverEditorLineKey] = useState(null);
+    const adaptiveLayout = useAdaptiveLayout({ moduleKey: 'apus' });
     const [viewportSize, setViewportSize] = useState(() => ({
         width: typeof window !== 'undefined' ? window.innerWidth : APU_EDITOR_DESKTOP_MIN_WIDTH,
         height: typeof window !== 'undefined' ? window.innerHeight : APU_EDITOR_DESKTOP_MIN_HEIGHT
@@ -627,11 +629,13 @@ const APUs = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const isEditorBelowDesktopBaseline = (
+    const isLegacyEditorBelowDesktopBaseline = (
         viewportSize.width < APU_EDITOR_DESKTOP_MIN_WIDTH
         || viewportSize.height < APU_EDITOR_DESKTOP_MIN_HEIGHT
     );
-    const isEditorCompact = isEditorBelowDesktopBaseline;
+    const isEditorCompact = adaptiveLayout.enabled
+        ? adaptiveLayout.profile !== 'wide'
+        : isLegacyEditorBelowDesktopBaseline;
 
     useEffect(() => {
         if (!editingApu) {
@@ -3761,7 +3765,7 @@ const APUs = () => {
                         onClose={closeImportModal}
                         size="lg"
                         zIndex="z-[1000]"
-                        panelClassName="max-h-[90vh] flex flex-col"
+                        panelClassName="max-h-[90dvh] flex flex-col"
                     >
                             <div className="flex flex-col min-h-0">
                                 <AppModalHeader
@@ -3902,7 +3906,7 @@ const APUs = () => {
                         onClose={() => setShowBaseImportModal(false)}
                         size="xl"
                         zIndex="z-[1000]"
-                        panelClassName="max-h-[90vh] flex flex-col"
+                        panelClassName="max-h-[90dvh] flex flex-col"
                     >
                             {/* Header del Modal */}
                             <AppModalHeader
@@ -4148,7 +4152,7 @@ const APUs = () => {
             {/* Modal: Resolución de Conflictos */}
             <AnimatePresence>
                 {showConflictModal && (
-                    <AppModalShell size="2xl" zIndex="z-[1000]" overlayClassName="bg-black/55 backdrop-blur-md" panelClassName="max-h-[90vh] flex flex-col">
+                    <AppModalShell size="2xl" zIndex="z-[1000]" overlayClassName="bg-black/55 backdrop-blur-md" panelClassName="max-h-[90dvh] flex flex-col">
                             <AppModalHeader
                                 title="Conflictos de Importación"
                                 subtitle={`Se han detectado ${importConflicts.length} APUs que ya existen en esta base`}

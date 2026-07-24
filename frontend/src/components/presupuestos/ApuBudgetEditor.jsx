@@ -865,7 +865,7 @@ const ApuBudgetEditor = ({
     };
 
     if (loading) return (
-        <div className="h-[70vh] flex items-center justify-center">
+        <div className="h-[70dvh] flex items-center justify-center">
             <div className="w-10 h-10 border-4 border-zinc-200 border-t-[#F39200] rounded-full animate-spin" />
         </div>
     );

@@ -23,6 +23,7 @@ import { includesNormalized } from '../../utils/normalizeSearch';
 import ClearSearchField from '../ui/ClearSearchField';
 import MotionScrollbar from '../ui/MotionScrollbar';
 import { ControlRail, ControlRailDivider, ControlRailIconButton, ControlRailSection } from '../ui/ControlRail';
+import useAdaptiveLayout from '../../hooks/useAdaptiveLayout';
 
 const fallbackFormatMoneda = (value) => formatoMoneda(value, 2);
 const formatMoney = (value, formatCurrency = fallbackFormatMoneda) => formatCurrency(value);
@@ -1152,6 +1153,7 @@ const LineasPresupuestoTab = ({
     } = usePresupuestoActions();
     const { selectedEmpresa, user } = useContext(AuthContext);
     const useOmniClass = selectedEmpresa?.use_omniclass !== false;
+    const adaptiveLayout = useAdaptiveLayout({ moduleKey: 'presupuesto' });
     
     // -- Robust formatters with fallbacks --
     const formatters = useFormatters();
@@ -1227,7 +1229,9 @@ const LineasPresupuestoTab = ({
         setIsTanteoMode(false);
     }, [tanteoVisible, isTanteoMode]);
 
-    const isBudgetCompact = viewportWidth < 1280;
+    const isBudgetCompact = adaptiveLayout.enabled
+        ? adaptiveLayout.profile !== 'wide'
+        : viewportWidth < 1280;
 
     useEffect(() => {
         const fetchTree = async () => {

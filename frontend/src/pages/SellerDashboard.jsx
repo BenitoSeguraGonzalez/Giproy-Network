@@ -1933,7 +1933,7 @@ const SellerDashboard = () => {
                 isOpen={productEditorOpen}
                 onClose={() => setProductEditorOpen(false)}
                 size="3xl"
-                panelClassName="max-h-[94vh] flex flex-col"
+                panelClassName="max-h-[94dvh] flex flex-col"
             >
                 <AppModalHeader
                     {...INTERNAL_MODAL_HEADER_PROPS}
@@ -2170,7 +2170,7 @@ const SellerDashboard = () => {
                 isOpen={productsWorkbenchOpen}
                 onClose={() => setProductsWorkbenchOpen(false)}
                 size="2xl"
-                panelClassName="max-h-[92vh] flex flex-col"
+                panelClassName="max-h-[92dvh] flex flex-col"
             >
                 <AppModalHeader
                     {...INTERNAL_MODAL_HEADER_PROPS}
@@ -2210,7 +2210,7 @@ const SellerDashboard = () => {
                 isOpen={salesWorkbenchOpen}
                 onClose={() => setSalesWorkbenchOpen(false)}
                 size="2xl"
-                panelClassName="max-h-[92vh] flex flex-col"
+                panelClassName="max-h-[92dvh] flex flex-col"
             >
                 <AppModalHeader
                     {...INTERNAL_MODAL_HEADER_PROPS}
@@ -2248,7 +2248,7 @@ const SellerDashboard = () => {
                 isOpen={moderationWorkbenchOpen}
                 onClose={() => setModerationWorkbenchOpen(false)}
                 size="2xl"
-                panelClassName="max-h-[92vh] flex flex-col"
+                panelClassName="max-h-[92dvh] flex flex-col"
             >
                 <AppModalHeader
                     {...INTERNAL_MODAL_HEADER_PROPS}
@@ -2322,7 +2322,7 @@ const SellerDashboard = () => {
                 isOpen={categoriesWorkbenchOpen}
                 onClose={() => setCategoriesWorkbenchOpen(false)}
                 size="2xl"
-                panelClassName="max-h-[92vh] flex flex-col"
+                panelClassName="max-h-[92dvh] flex flex-col"
             >
                 <AppModalHeader
                     {...INTERNAL_MODAL_HEADER_PROPS}

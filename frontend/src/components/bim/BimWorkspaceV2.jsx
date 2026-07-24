@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { isMinimumDesktopDisplaySupported } from '../../utils/displayResolution';
 import { getErrorMessage } from '../../utils/errorMessage';
+import useAdaptiveLayout from '../../hooks/useAdaptiveLayout';
 
 const BIM_V2_PREFERENCES_KEY = 'giproy_bim_workspace_v2_preferences';
 
@@ -149,7 +150,10 @@ const BimWorkspaceV2 = ({
     const [searchTerm, setSearchTerm] = useState('');
     const [searchOpen, setSearchOpen] = useState(false);
     const searchInputRef = useRef(null);
-    const supportedDesktop = useSupportedDesktop();
+    const legacySupportedDesktop = useSupportedDesktop();
+    const adaptiveLayout = useAdaptiveLayout({ moduleKey: 'bim' });
+    const adaptiveWorkspaceRestricted = ['constrained', 'tablet-portrait'].includes(adaptiveLayout.profile);
+    const supportedDesktop = adaptiveLayout.enabled ? !adaptiveWorkspaceRestricted : legacySupportedDesktop;
 
     useEffect(() => {
         writePreferences(projectId, {
@@ -209,9 +213,13 @@ const BimWorkspaceV2 = ({
             <section className="grid h-full min-h-0 place-items-center overflow-hidden border border-zinc-200 bg-zinc-100" data-bim-unsupported-resolution>
                 <div className="max-w-md text-center">
                     <MonitorX className="mx-auto h-10 w-10 text-zinc-400" aria-hidden="true" />
-                    <h2 className="mt-4 text-base font-semibold text-zinc-900">Resolución no compatible</h2>
+                    <h2 className="mt-4 text-base font-semibold text-zinc-900">
+                        {adaptiveLayout.enabled ? 'Espacio de trabajo no compatible' : 'Resolución no compatible'}
+                    </h2>
                     <p className="mt-2 text-sm leading-6 text-zinc-600">
-                        El workspace BIM requiere una pantalla mínima de 1920 x 1080 para operar con seguridad.
+                        {adaptiveLayout.enabled
+                            ? 'El workspace BIM necesita más espacio útil. Gira la tablet a horizontal, cierra barras del navegador o usa una ventana más amplia.'
+                            : 'El workspace BIM requiere una pantalla mínima de 1920 x 1080 para operar con seguridad.'}
                     </p>
                 </div>
             </section>
@@ -220,6 +228,7 @@ const BimWorkspaceV2 = ({
 
     const isAdmin = activeWorkspace === 'admin';
     const isReports = activeWorkspace === 'reports';
+    const singleSidePanel = adaptiveLayout.enabled && ['compact', 'tablet-landscape'].includes(adaptiveLayout.profile);
     const showExplorer = ready && explorerVisible && !isAdmin && !isReports;
     const availableTools = workspaceTools?.[activeWorkspace] || [];
     const selectedToolId = activeToolByWorkspace[activeWorkspace] || availableTools[0]?.id;
@@ -227,7 +236,7 @@ const BimWorkspaceV2 = ({
     const selectedBottomTool = (bottomTools || []).find((tool) => tool.id === bottomTool) || bottomTools?.[0];
     const selectedAdminToolId = activeToolByWorkspace.admin || adminTools?.[0]?.id;
     const selectedAdminTool = (adminTools || []).find((tool) => tool.id === selectedAdminToolId) || adminTools?.[0];
-    const showInspector = ready && inspectorVisible && !isAdmin && !isReports && Boolean(selectedTool || inspector);
+    const showInspector = ready && inspectorVisible && (!singleSidePanel || !showExplorer) && !isAdmin && !isReports && Boolean(selectedTool || inspector);
     const showBottomDrawer = ready && ['planning', 'production'].includes(activeWorkspace) && Boolean(selectedBottomTool);
     const gridTemplate = `${showExplorer ? `${leftWidth}px 4px ` : ''}minmax(0, 1fr)${showInspector ? ` 4px ${rightWidth}px` : ''}`;
     const normalizedSearch = searchTerm.trim().toLocaleLowerCase('es');
@@ -260,6 +269,8 @@ const BimWorkspaceV2 = ({
             className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border border-zinc-200 bg-zinc-100 text-zinc-800"
             data-bim-workspace-v2
             data-bim-active-workspace={activeWorkspace}
+            data-bim-adaptive-profile={adaptiveLayout.enabled ? adaptiveLayout.profile : 'legacy'}
+            data-bim-single-side-panel={singleSidePanel ? 'true' : 'false'}
         >
             <header className="shrink-0 border-b border-zinc-200 bg-white">
                 <div className="flex h-12 min-w-0 items-center gap-4 px-3">
@@ -373,10 +384,10 @@ const BimWorkspaceV2 = ({
                                 Dividida
                             </button>
                         </div>
-                        <button type="button" onClick={() => setExplorerVisible((value) => !value)} disabled={isReports} className={iconButtonClass} title="Mostrar u ocultar explorador" aria-label="Mostrar u ocultar explorador" aria-pressed={explorerVisible}>
+                        <button type="button" onClick={() => { setExplorerVisible(!showExplorer); if (singleSidePanel && !showExplorer) setInspectorVisible(false); }} disabled={isReports} className={iconButtonClass} title="Mostrar u ocultar explorador" aria-label="Mostrar u ocultar explorador" aria-pressed={showExplorer}>
                             <PanelLeft className="h-4 w-4" aria-hidden="true" />
                         </button>
-                        <button type="button" onClick={() => setInspectorVisible((value) => !value)} className={iconButtonClass} title="Mostrar u ocultar panel contextual" aria-label="Mostrar u ocultar panel contextual" aria-pressed={inspectorVisible}>
+                        <button type="button" onClick={() => { setInspectorVisible(!showInspector); if (singleSidePanel && !showInspector) setExplorerVisible(false); }} className={iconButtonClass} title="Mostrar u ocultar panel contextual" aria-label="Mostrar u ocultar panel contextual" aria-pressed={showInspector}>
                             <PanelRight className="h-4 w-4" aria-hidden="true" />
                         </button>
                         <button type="button" onClick={onResetContext} className={iconButtonClass} title="Restablecer contexto" aria-label="Restablecer contexto">

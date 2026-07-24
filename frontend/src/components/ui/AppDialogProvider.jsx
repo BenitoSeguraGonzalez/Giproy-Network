@@ -289,7 +289,7 @@ export const AppDialogProvider = ({ children }) => {
                                 </button>
                             </div>
 
-                            <div className={`${panelPaddingBodyClass} max-h-[46vh] overflow-y-auto`}>
+                            <div className={`${panelPaddingBodyClass} max-h-[46dvh] overflow-y-auto`}>
                                 <div className={`${messageClass} whitespace-pre-line`} style={{ color: DIALOG_TEXT }}>
                                     {dialog.message}
                                 </div>

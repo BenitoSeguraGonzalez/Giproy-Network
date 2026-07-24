@@ -85,6 +85,7 @@ const IndirectosModal = ({ isOpen, onClose, onSaved, presupuestoId }) => {
     }, []);
 
     const isCompactViewport = resolvePortableWorkspace({
+        moduleKey: 'presupuesto',
         width: viewport.width,
         height: viewport.height,
         forced: user?.role === 'superadmin' && forcedPortableWorkspace,
@@ -336,7 +337,7 @@ const IndirectosModal = ({ isOpen, onClose, onSaved, presupuestoId }) => {
 
     return (
         <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm ${isCompactViewport ? 'p-2' : 'p-4'}`}>
-            <Card className={`w-full bg-[#F1F3F6] shadow-2xl overflow-hidden border border-zinc-300 ${isCompactViewport ? 'max-w-none h-[96vh] rounded-[1.35rem]' : 'max-w-[1040px] h-[78vh] rounded-[1.6rem]'}`}>
+            <Card className={`w-full bg-[#F1F3F6] shadow-2xl overflow-hidden border border-zinc-300 ${isCompactViewport ? 'max-w-none h-[96dvh] rounded-[1.35rem]' : 'max-w-[1040px] h-[78dvh] rounded-[1.6rem]'}`}>
                 <div className="h-full flex flex-col">
                     <div className={`bg-white border-b border-zinc-200 shrink-0 ${isCompactViewport ? 'px-4 py-3' : 'px-6 py-4'}`}>
                         <div className="flex items-start justify-between gap-4">

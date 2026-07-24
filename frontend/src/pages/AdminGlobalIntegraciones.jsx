@@ -66,7 +66,7 @@ const AdminGlobalIntegraciones = () => {
     if (!isSuperadmin) return <div className="p-12 text-sm font-bold text-zinc-600">Acceso restringido.</div>;
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] overflow-y-auto bg-[#F2F4F7] p-8 xl:p-12">
+        <div className="h-full min-h-0 overflow-y-auto bg-[#F2F4F7] p-8 xl:p-12">
             <div className="mx-auto max-w-6xl">
                 <button onClick={() => navigate('/admin-global')} className="mb-8 flex items-center gap-2 text-xs font-bold uppercase text-zinc-500 hover:text-[#F39200]">
                     <ArrowLeft className="h-4 w-4" /> Volver a Administración Global

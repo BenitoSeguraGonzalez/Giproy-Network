@@ -209,6 +209,7 @@ const DesagregacionTab = ({ project }) => {
     }, []);
 
     const isCompactViewport = resolvePortableWorkspace({
+        moduleKey: 'desagregacion',
         width: viewport.width,
         height: viewport.height,
         forced: user?.role === 'superadmin' && forcedPortableWorkspace,
