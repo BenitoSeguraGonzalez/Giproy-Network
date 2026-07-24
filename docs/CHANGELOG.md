@@ -16168,3 +16168,5 @@ Cambios realizados
 - Se corrigen tambien el editor de lineas APU y la landing legacy de Proyectos.
 - Suite adaptativa, Gantt Classic, BIM Workspace V2, build y baseline enterprise
   con frontend: OK.
+- Commit `eacce57` desplegado en beta; frontend saludable, HTTPS 200 y contrato
+  global verificado dentro del bundle servido.

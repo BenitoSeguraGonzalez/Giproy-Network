@@ -90,4 +90,6 @@ la release permanece en beta y no debe promoverse a produccion.
 - `TASK-2043`: la respuesta se eleva a contrato global. El shell ofrece
   alcanzabilidad de respaldo y el gate automatizado cubre 38 rutas protegidas y
   166 superficies JSX, con pruebas reales de final de contenido y scroll
-  horizontal. Pendiente desplegar y continuar el recorrido fisico completo.
+  horizontal. Commit `eacce57` desplegado; imagen frontend
+  `sha256:fdfa1c020a80c53679e257b243a49d03593f7a26ca592ff9f987686cb0471309`
+  saludable. Pendiente continuar el recorrido fisico completo.
