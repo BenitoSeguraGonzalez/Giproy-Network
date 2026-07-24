@@ -9,7 +9,7 @@ const vite = spawn(
     process.platform === 'win32'
         ? ['/c', 'npm', 'run', 'dev', '--', '--host', '127.0.0.1', '--port', String(port)]
         : ['run', 'dev', '--', '--host', '127.0.0.1', '--port', String(port)],
-    { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },
+    { cwd: process.cwd(), env: { ...process.env, VITE_ADAPTIVE_UI_ENABLED: 'true' }, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },
 );
 let output = '';
 vite.stdout?.on('data', (chunk) => { output += chunk.toString(); });
@@ -56,7 +56,6 @@ try {
             hasTouch: Boolean(profile.hasTouch),
             ...(profile.deviceScaleFactor ? { deviceScaleFactor: profile.deviceScaleFactor } : {}),
         });
-        await context.addInitScript(() => localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
         const page = await context.newPage();
         const errors = [];
         page.on('pageerror', (error) => errors.push(error.message));

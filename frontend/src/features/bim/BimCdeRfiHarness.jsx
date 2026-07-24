@@ -34,7 +34,7 @@ const BimCdeRfiHarness = () => {
             rfis.current = [saved]; return saved;
         },
     }), []);
-    return <main className="min-h-screen bg-[#F2F4F7] p-6"><div className="mx-auto w-[980px]"><BimCdeRfiPanel projectId={7} empresaId={1} selectedElement={{ global_id: '3GIPROY_TEST_GUID' }} api={api} /></div></main>;
+    return <main className="min-h-screen bg-[#F2F4F7] p-3 sm:p-6"><div className="mx-auto w-full max-w-[980px]"><BimCdeRfiPanel projectId={7} empresaId={1} selectedElement={{ global_id: '3GIPROY_TEST_GUID' }} api={api} /></div></main>;
 };
 
 createRoot(document.getElementById('root')).render(<BimCdeRfiHarness />);

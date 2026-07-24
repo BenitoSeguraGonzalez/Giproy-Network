@@ -31,7 +31,7 @@ const BimCdeSubmittalsHarness = () => {
             items.current = [saved]; return saved;
         },
     }), []);
-    return <main className="min-h-screen bg-[#F2F4F7] p-6"><div className="mx-auto w-[1080px]"><BimCdeSubmittalsPanel projectId={7} empresaId={1} api={api} /></div></main>;
+    return <main className="min-h-screen bg-[#F2F4F7] p-3 sm:p-6"><div className="mx-auto w-full max-w-[1080px]"><BimCdeSubmittalsPanel projectId={7} empresaId={1} api={api} /></div></main>;
 };
 
 createRoot(document.getElementById('root')).render(<BimCdeSubmittalsHarness />);

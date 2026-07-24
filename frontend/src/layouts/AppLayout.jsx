@@ -73,6 +73,32 @@ const AppLayout = ({ children }) => {
     const activeLicenseLabel = activeLicenseName || (selectedEmpresa ? 'Licencia no resuelta' : 'Sin empresa activa');
     const activeLicenseStatusLabel = licenseInfo ? getLicenseStatusLabel(licenseInfo) : 'Sin licencia';
     const activeLicenseStatusTone = licenseInfo ? getLicenseStatusTone(licenseInfo) : 'border-zinc-200 bg-zinc-50 text-zinc-500';
+    const storageUsedValue = Number(licenseInfo?.usados?.almacenamiento_gb);
+    const storageLimitValue = Number(licenseInfo?.limites?.almacenamiento_gb);
+    const hasStorageUsed = Number.isFinite(storageUsedValue);
+    const hasStorageLimit = Number.isFinite(storageLimitValue);
+    const storageUsedGb = hasStorageUsed ? storageUsedValue : 0;
+    const isUnlimitedStorage = hasStorageLimit && storageLimitValue === -1;
+    const storageUsageRatio = hasStorageLimit && storageLimitValue > 0
+        ? storageUsedGb / storageLimitValue
+        : 0;
+    const storageUsagePercent = isUnlimitedStorage
+        ? 100
+        : Math.min(100, Math.max(0, storageUsageRatio * 100));
+    const storageTone = !hasStorageLimit
+        ? 'text-zinc-400'
+        : storageUsageRatio >= 0.95
+            ? 'text-red-500 animate-pulse'
+            : storageUsageRatio >= 0.75
+                ? 'text-orange-400'
+                : 'text-emerald-500';
+    const storageBarTone = !hasStorageLimit
+        ? 'bg-zinc-300'
+        : storageUsageRatio >= 0.95
+            ? 'bg-red-500'
+            : storageUsageRatio >= 0.75
+                ? 'bg-orange-400'
+                : 'bg-emerald-500';
     const selectedEmpresaLabel = getCompanyDisplayName(selectedEmpresa, 'Global');
     const tenantContentKey = `empresa-operativa:${selectedEmpresa?.id ?? 'sin-empresa'}`;
     
@@ -88,7 +114,7 @@ const AppLayout = ({ children }) => {
     // Bloqueo 3: Módulo no permitido por plan
     const isModuleRestricted = (() => {
         if (!licenseInfo || !isOperationalRoute) return false;
-        const permitted = licenseInfo.limites.modulos_permitidos || ["*"];
+        const permitted = licenseInfo?.limites?.modulos_permitidos || ["*"];
         if (permitted.includes("*")) return false;
         
         // Mapeo simple de rutas a IDs de módulos
@@ -608,37 +634,15 @@ const AppLayout = ({ children }) => {
                             {!isPortableWorkspace && licenseInfo && (
                                 <div className="flex flex-col items-end gap-1 ml-2 pl-3 border-l border-zinc-100">
                                     <div className="flex items-center gap-2">
-                                        <HardDrive className={`w-3 h-3 ${
-                                            licenseInfo.limites.almacenamiento_gb === -1
-                                                ? 'text-emerald-500'
-                                                : (() => {
-                                                    const ratio = licenseInfo.limites.almacenamiento_gb > 0
-                                                        ? licenseInfo.usados.almacenamiento_gb / licenseInfo.limites.almacenamiento_gb
-                                                        : 0;
-                                                    if (ratio >= 0.95) return 'text-red-500 animate-pulse';
-                                                    if (ratio >= 0.75) return 'text-orange-400';
-                                                    return 'text-emerald-500';
-                                                })()
-                                        }`} />
+                                        <HardDrive className={`w-3 h-3 ${isUnlimitedStorage ? 'text-emerald-500' : storageTone}`} />
                                         <span className="text-[9px] font-black text-zinc-800 uppercase tracking-tight">
-                                            {licenseInfo.usados.almacenamiento_gb.toFixed(2)} / {licenseInfo.limites.almacenamiento_gb === -1 ? '∞' : licenseInfo.limites.almacenamiento_gb} GB
+                                            {hasStorageUsed ? storageUsedGb.toFixed(2) : '--'} / {isUnlimitedStorage ? '∞' : hasStorageLimit ? storageLimitValue : '--'} GB
                                         </span>
                                     </div>
                                     <div className="w-16 h-1 bg-zinc-100 rounded-full overflow-hidden border border-zinc-50">
                                         <div 
-                                            className={`h-full transition-all duration-1000 ${
-                                                licenseInfo.limites.almacenamiento_gb === -1
-                                                    ? 'bg-emerald-500'
-                                                    : (() => {
-                                                        const ratio = licenseInfo.limites.almacenamiento_gb > 0
-                                                            ? licenseInfo.usados.almacenamiento_gb / licenseInfo.limites.almacenamiento_gb
-                                                            : 0;
-                                                        if (ratio >= 0.95) return 'bg-red-500';
-                                                        if (ratio >= 0.75) return 'bg-orange-400';
-                                                        return 'bg-emerald-500';
-                                                    })()
-                                            }`}
-                                            style={{ width: `${licenseInfo.limites.almacenamiento_gb === -1 ? 100 : Math.min(100, (licenseInfo.limites.almacenamiento_gb > 0 ? (licenseInfo.usados.almacenamiento_gb / licenseInfo.limites.almacenamiento_gb * 100) : 0))}%` }}
+                                            className={`h-full transition-all duration-1000 ${isUnlimitedStorage ? 'bg-emerald-500' : storageBarTone}`}
+                                            style={{ width: `${storageUsagePercent}%` }}
                                         />
                                     </div>
                                 </div>

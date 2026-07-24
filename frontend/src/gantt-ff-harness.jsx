@@ -56,7 +56,7 @@ const Harness = () => {
             user: { id: 1, nombre: 'DOM QA' },
             selectedEmpresa: { id: fixture.empresa_id, nombre: fixture.empresa_nombre },
         }}>
-            <div style={{ width: '1920px', height: '1080px' }}>
+            <div style={{ width: '100%', minWidth: 0, minHeight: '100dvh' }}>
                 <CronogramaGantt
                     detail={fixture.detail}
                     project={fixture.project}

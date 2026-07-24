@@ -40,6 +40,11 @@ if [ -f "$ENV_FILE" ]; then
   set +a
   : "${GIPROY_HOST:?GIPROY_HOST is required in .env}"
   : "${GIPROY_APP_VERSION:?GIPROY_APP_VERSION is required in .env}"
+  : "${VITE_ADAPTIVE_UI_ENABLED:?VITE_ADAPTIVE_UI_ENABLED is required in .env}"
+  if [ "$VITE_ADAPTIVE_UI_ENABLED" != "true" ]; then
+    echo "VITE_ADAPTIVE_UI_ENABLED must be true for the adaptive beta: $VITE_ADAPTIVE_UI_ENABLED" >&2
+    exit 1
+  fi
   if ! [[ "$GIPROY_APP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
     echo "GIPROY_APP_VERSION must be a valid SemVer value: $GIPROY_APP_VERSION" >&2
     exit 1
@@ -51,6 +56,7 @@ if [ -f "$ENV_FILE" ]; then
   fi
   echo "GIPROY_HOST=$GIPROY_HOST"
   echo "GIPROY_APP_VERSION=$GIPROY_APP_VERSION"
+  echo "VITE_ADAPTIVE_UI_ENABLED=$VITE_ADAPTIVE_UI_ENABLED"
 fi
 
 echo

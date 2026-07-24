@@ -22,7 +22,7 @@ const vite = spawn(
   process.platform === 'win32'
     ? ['/c', 'npm', 'run', 'dev', '--', '--host', '127.0.0.1', '--port', '4199']
     : ['run', 'dev', '--', '--host', '127.0.0.1', '--port', '4199'],
-  { cwd: process.cwd(), stdio: 'ignore', windowsHide: true },
+  { cwd: process.cwd(), env: { ...process.env, VITE_ADAPTIVE_UI_ENABLED: 'true' }, stdio: 'ignore', windowsHide: true },
 );
 
 process.on('exit', () => {
@@ -116,7 +116,6 @@ const page = await browser.newPage({
   deviceScaleFactor: process.env.FORMULA_VIEWPORT?.startsWith('tablet') ? 2 : 1,
 });
 if (process.env.FORMULA_VIEWPORT?.startsWith('tablet')) {
-  await page.addInitScript(() => window.localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
 }
 
 await page.route('**/api/v1/presupuestos/**', async (route) => {

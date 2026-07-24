@@ -93,12 +93,12 @@ const BimCdeReviewPanel = ({ projectId, empresaId, selectedElement, viewerState,
     };
 
     return (
-        <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white" data-bim-cde-reviews>
+        <section className="bim-responsive-container overflow-hidden rounded-lg border border-zinc-200 bg-white" data-bim-cde-reviews>
             <header className="flex h-10 items-center justify-between border-b border-zinc-200 px-3">
                 <div className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-[#F39200]" aria-hidden="true" /><h3 className="text-xs font-semibold text-zinc-900">Revisiones CDE</h3></div>
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-zinc-500"><Bell className="h-3.5 w-3.5" />{unread.length} pendientes</span>
             </header>
-            <div className="grid grid-cols-[42%_58%] divide-x divide-zinc-200">
+            <div className="bim-responsive-two-column bim-responsive-cde-review divide-x divide-zinc-200">
                 <div className="space-y-3 p-3">
                     {unread.length ? <div className="space-y-1" data-bim-review-notifications>{unread.slice(0, 3).map((item) => <button key={item.id} type="button" onClick={() => readNotification(item)} className="flex w-full items-center justify-between rounded border border-amber-200 bg-amber-50 px-2 py-1.5 text-left text-[10px]"><span className="truncate">{item.review_number} · {item.event_type}</span><span className="font-semibold">Leer</span></button>)}</div> : null}
                     <div className="space-y-2 border-b border-zinc-200 pb-3">

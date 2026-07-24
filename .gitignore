@@ -47,6 +47,7 @@ temp/
 .runtime/
 .runtime_mpp_cache/
 logs/
+artifacts/
 *.log
 *.jsonl
 uploads/

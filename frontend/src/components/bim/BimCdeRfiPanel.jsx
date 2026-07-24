@@ -81,14 +81,14 @@ export default function BimCdeRfiPanel({ projectId, empresaId, selectedElement =
         } finally { setBusy(false); }
     };
 
-    return <section className="border border-slate-200 bg-white" data-bim-cde-rfi>
+    return <section className="bim-responsive-container border border-slate-200 bg-white" data-bim-cde-rfi>
         <header className="flex h-10 items-center gap-2 border-b border-slate-200 px-3">
             <CircleHelp size={16} className="text-orange-600" /><h3 className="text-sm font-semibold text-slate-800">Solicitudes de informacion</h3>
             <select className="ml-auto h-7 border border-slate-300 px-2 text-[11px]" aria-label="Filtrar RFI por estado" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
                 <option value="">Todos los estados</option>{Object.entries(STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
         </header>
-        <div className="grid min-h-[520px] grid-cols-[minmax(280px,0.8fr)_minmax(360px,1.2fr)] text-xs">
+        <div className="bim-responsive-two-column bim-responsive-cde-rfi min-h-[520px] text-xs">
             <div className="border-r border-slate-200 p-3">
                 <form className="grid grid-cols-2 gap-2" onSubmit={create}>
                     <input className="col-span-2 min-w-0 border border-slate-300 px-2 py-1.5" required minLength={3} aria-label="Asunto RFI" placeholder="Asunto" value={draft.subject} onChange={(event) => setDraft({ ...draft, subject: event.target.value })} />

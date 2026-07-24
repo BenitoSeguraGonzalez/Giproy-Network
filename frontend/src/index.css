@@ -484,3 +484,46 @@ html, body {
   background: #ef4444;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.14);
 }
+
+/* BIM panels live inside resizable workspace panes, so they respond to their
+   own available width rather than to the browser viewport. */
+.bim-responsive-container {
+  container-type: inline-size;
+}
+
+.bim-responsive-two-column,
+.bim-responsive-three-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  overflow-x: clip;
+  overflow-y: auto;
+}
+
+.bim-responsive-two-column > *,
+.bim-responsive-three-column > * {
+  min-width: 0;
+}
+
+.bim-responsive-three-column > * {
+  min-height: 16rem;
+}
+
+@container (min-width: 44rem) {
+  .bim-responsive-cde-review { grid-template-columns: 42% 58%; overflow: visible; }
+  .bim-responsive-cde-rfi { grid-template-columns: minmax(17.5rem, 0.8fr) minmax(22.5rem, 1.2fr); overflow: visible; }
+  .bim-responsive-cde-submittals { grid-template-columns: minmax(18.75rem, 0.85fr) minmax(23.75rem, 1.15fr); overflow: visible; }
+}
+
+@container (min-width: 70rem) {
+  .bim-responsive-integrations { grid-template-columns: minmax(30rem, 0.9fr) minmax(38.75rem, 1.1fr); overflow: hidden; }
+}
+
+@container (min-width: 78rem) {
+  .bim-responsive-safety { grid-template-columns: 18.75rem 25.625rem minmax(32.5rem, 1fr); overflow: hidden; }
+  .bim-responsive-safety > * { min-height: 0; }
+}
+
+@container (min-width: 80rem) {
+  .bim-responsive-events { grid-template-columns: 21.25rem 26.875rem minmax(30rem, 1fr); overflow: hidden; }
+  .bim-responsive-events > * { min-height: 0; }
+}

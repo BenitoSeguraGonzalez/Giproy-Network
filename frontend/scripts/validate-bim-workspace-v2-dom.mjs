@@ -9,7 +9,7 @@ const vite = spawn(
     process.platform === 'win32'
         ? ['/c', 'npm', 'run', 'dev', '--', '--host', '127.0.0.1', '--port', String(port)]
         : ['run', 'dev', '--', '--host', '127.0.0.1', '--port', String(port)],
-    { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },
+    { cwd: process.cwd(), env: { ...process.env, VITE_ADAPTIVE_UI_ENABLED: 'true' }, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },
 );
 let output = '';
 vite.stdout?.on('data', (chunk) => { output += chunk.toString(); });
@@ -111,7 +111,6 @@ try {
         deviceScaleFactor: 2,
         hasTouch: true,
     });
-    await tabletLandscapeContext.addInitScript(() => localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
     const tabletLandscapePage = await tabletLandscapeContext.newPage();
     await tabletLandscapePage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
     await tabletLandscapePage.waitForSelector('[data-bim-workspace-v2][data-bim-adaptive-profile="tablet-landscape"]');
@@ -129,7 +128,6 @@ try {
         deviceScaleFactor: 2,
         hasTouch: true,
     });
-    await tabletPortraitContext.addInitScript(() => localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
     const tabletPortraitPage = await tabletPortraitContext.newPage();
     await tabletPortraitPage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
     await tabletPortraitPage.waitForSelector('[data-bim-unsupported-resolution]');

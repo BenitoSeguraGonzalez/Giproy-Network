@@ -1,3 +1,16 @@
+### 2026-07-24 - Certificacion adaptativa exhaustiva Classic/BIM (TASK-2048)
+
+- La release `3.1.0-beta.4` habilita obligatoriamente la interfaz adaptativa en
+  beta y elimina la divergencia entre tests con `localStorage` y el build real.
+- Proyectos y Precios Unitarios conservan contenido completo y scroll alcanzable
+  en Lenovo Tab P12; los paneles BIM responden al ancho real de su contenedor.
+- La matriz certifica 236 combinaciones Windows HiDPI y 118 Android AVD, con
+  capturas iniciales/finales e inventario de 43 rutas, 54 archivos interactivos
+  y 61 harnesses.
+- El baseline ESLint registra individualmente 315 errores y 96 avisos abiertos;
+  los validadores Gantt con PostgreSQL y la Lenovo fisica siguen documentados
+  como pendientes vinculantes, no como aprobados.
+
 ### 2026-07-22 - Portafolio resiliente ante 502 transitorio (TASK-2037)
 
 - El listado clasico de proyectos reintenta fallos transitorios durante la

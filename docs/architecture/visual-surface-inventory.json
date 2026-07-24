@@ -1,0 +1,2872 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": [
+    "frontend/src/routes/AppRouter.jsx",
+    "frontend/src/**/*.{jsx,tsx}",
+    "frontend/*-harness.html",
+    "frontend/scripts/{validate,certify}-*.mjs"
+  ],
+  "profiles": [
+    {
+      "id": "desktop-fhd-100",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "touch": false
+    },
+    {
+      "id": "desktop-fhd-125",
+      "viewport": [
+        1536,
+        864
+      ],
+      "dpr": 1.25,
+      "touch": false
+    },
+    {
+      "id": "desktop-fhd-150",
+      "viewport": [
+        1280,
+        720
+      ],
+      "dpr": 1.5,
+      "touch": false
+    },
+    {
+      "id": "desktop-4k-200",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 2,
+      "touch": false
+    },
+    {
+      "id": "lenovo-p12-landscape",
+      "viewport": [
+        1472,
+        820
+      ],
+      "dpr": 2,
+      "touch": true
+    },
+    {
+      "id": "lenovo-p12-portrait",
+      "viewport": [
+        920,
+        1372
+      ],
+      "dpr": 2,
+      "touch": true
+    }
+  ],
+  "counts": {
+    "routes": 43,
+    "protectedRoutes": 38,
+    "publicRoutes": 5,
+    "interactiveSurfaceFiles": 54,
+    "harnesses": 61,
+    "harnessesWithoutValidator": 0
+  },
+  "routes": [
+    {
+      "id": "route:/login",
+      "kind": "route",
+      "mode": "classic",
+      "access": "public",
+      "path": "/login",
+      "component": "Login",
+      "source": "src/pages/Login.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/forgot-password",
+      "kind": "route",
+      "mode": "classic",
+      "access": "public",
+      "path": "/forgot-password",
+      "component": "ForgotPassword",
+      "source": "src/pages/ForgotPassword.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/reset-password",
+      "kind": "route",
+      "mode": "classic",
+      "access": "public",
+      "path": "/reset-password",
+      "component": "ResetPassword",
+      "source": "src/pages/ResetPassword.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/verify-registration",
+      "kind": "route",
+      "mode": "classic",
+      "access": "public",
+      "path": "/verify-registration",
+      "component": "VerifyRegistration",
+      "source": "src/pages/VerifyRegistration.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/ruc-review",
+      "kind": "route",
+      "mode": "classic",
+      "access": "public",
+      "path": "/ruc-review",
+      "component": "RucReviewStatus",
+      "source": "src/pages/RucReviewStatus.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/",
+      "component": "Dashboard",
+      "source": "src/pages/Dashboard.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/dashboard",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/dashboard",
+      "component": "Dashboard",
+      "source": "src/pages/Dashboard.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/proyectos",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/proyectos",
+      "component": "Proyectos",
+      "source": "src/pages/Proyectos.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/proyectos/gestor",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/proyectos/gestor",
+      "component": "ProjectManager",
+      "source": "src/pages/ProjectManager.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/precios-unitarios",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/precios-unitarios",
+      "component": "PreciosUnitarios",
+      "source": "src/pages/PreciosUnitarios.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/precios-unitarios/bases",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/precios-unitarios/bases",
+      "component": "BasesTrabajo",
+      "source": "src/pages/BasesTrabajo.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/precios-unitarios/subcategorias",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/precios-unitarios/subcategorias",
+      "component": "Subcategorias",
+      "source": "src/pages/Subcategorias.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/apus",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/apus",
+      "component": "APUs",
+      "source": "src/pages/APUs.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/recursos",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/recursos",
+      "component": "Recursos",
+      "source": "src/pages/Recursos.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/proyectos/:proyectoId/presupuestos",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/proyectos/:proyectoId/presupuestos",
+      "component": "Presupuestos",
+      "source": "src/pages/Presupuestos.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/proyectos/:proyectoId/presupuestos/:presupuestoId",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/proyectos/:proyectoId/presupuestos/:presupuestoId",
+      "component": "PresupuestoDetail",
+      "source": "src/components/presupuestos/PresupuestoDetail.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/servicios",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/servicios",
+      "component": "OtrosServicios",
+      "source": "src/pages/Placeholders.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/servicios/comunidad",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/servicios/comunidad",
+      "component": "Community",
+      "source": "src/pages/Community.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/servicios/envios-transferencias",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/servicios/envios-transferencias",
+      "component": "EnviosTransferencias",
+      "source": "src/pages/EnviosTransferencias.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/marketplace",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/marketplace",
+      "component": "Marketplace",
+      "source": "src/pages/Marketplace.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/product/:productId",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/product/:productId",
+      "component": "MarketplaceProductDetail",
+      "source": "src/pages/MarketplaceProductDetail.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/pedido/:orderId",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/pedido/:orderId",
+      "component": "MarketplaceOrderDetail",
+      "source": "src/pages/MarketplaceOrderDetail.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/marketplace/buyer",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/marketplace/buyer",
+      "component": "MarketplaceBuyerDashboard",
+      "source": "src/pages/MarketplaceBuyerDashboard.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/dashboard/buyer",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/dashboard/buyer",
+      "component": "MarketplaceBuyerDashboard",
+      "source": "src/pages/MarketplaceBuyerDashboard.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/dashboard/seller",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/dashboard/seller",
+      "component": "SellerDashboard",
+      "source": "src/pages/SellerDashboard.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/dashboard/admin",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/dashboard/admin",
+      "component": "MarketplaceAdminDashboard",
+      "source": "src/pages/MarketplaceAdminDashboard.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/settings",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/settings",
+      "component": "Settings",
+      "source": "src/pages/Settings.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global",
+      "component": "AdminGlobal",
+      "source": "src/pages/AdminGlobal.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/estado",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/estado",
+      "component": "AdminGlobalEstado",
+      "source": "src/pages/AdminGlobalEstado.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/sesiones",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/sesiones",
+      "component": "AdminGlobalSesiones",
+      "source": "src/pages/AdminGlobalSesiones.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/mantenimiento",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/mantenimiento",
+      "component": "AdminGlobalMantenimiento",
+      "source": "src/pages/AdminGlobalMantenimiento.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/bim",
+      "kind": "route",
+      "mode": "bim",
+      "access": "protected",
+      "path": "/admin-global/bim",
+      "component": "AdminGlobalBim",
+      "source": "src/pages/AdminGlobalBim.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/licencias",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/licencias",
+      "component": "AdminGlobalLicencias",
+      "source": "src/pages/AdminGlobalLicencias.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/email-corporativo",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/email-corporativo",
+      "component": "AdminGlobalEmail",
+      "source": "src/pages/AdminGlobalEmail.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/integraciones",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/integraciones",
+      "component": "AdminGlobalIntegraciones",
+      "source": "src/pages/AdminGlobalIntegraciones.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/superadministradores",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/superadministradores",
+      "component": "AdminGlobalSuperadministradores",
+      "source": "src/pages/AdminGlobalSuperadministradores.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/empresas",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/empresas",
+      "component": "AdminGlobalEmpresas",
+      "source": "src/pages/AdminGlobalEmpresas.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/comunicados",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/comunicados",
+      "component": "AdminGlobalComunicados",
+      "source": "src/pages/AdminGlobalComunicados.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/gobernanza",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/gobernanza",
+      "component": "AdminGlobalGobernanza",
+      "source": "src/pages/AdminGlobalGobernanza.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/auditoria",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/auditoria",
+      "component": "AdminGlobalAuditoria",
+      "source": "src/pages/AdminGlobalAuditoria.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/herramientas",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/herramientas",
+      "component": "AdminGlobalHerramientas",
+      "source": "src/pages/AdminGlobalHerramientas.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/modelos-importacion",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/modelos-importacion",
+      "component": "AdminGlobalImportModels",
+      "source": "src/pages/AdminGlobalImportModels.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "route:/admin-global/empresa-auditada",
+      "kind": "route",
+      "mode": "classic",
+      "access": "protected",
+      "path": "/admin-global/empresa-auditada",
+      "component": "AdminGlobalEmpresaAuditada",
+      "source": "src/pages/AdminGlobalEmpresaAuditada.jsx",
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    }
+  ],
+  "interactiveSurfaceFiles": [
+    {
+      "id": "component:src/components/TeamDashboardModal.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/TeamDashboardModal.jsx",
+      "namedSurfaces": [
+        "TeamDashboardModal"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimCanvasViewer.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimCanvasViewer.jsx",
+      "namedSurfaces": [
+        "BimCanvasViewer"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimCdeCollaborationPanel.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimCdeCollaborationPanel.jsx",
+      "namedSurfaces": [
+        "BimCdeCollaborationPanel"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimFieldDiaryPanel.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimFieldDiaryPanel.jsx",
+      "namedSurfaces": [
+        "BimFieldDiaryPanel"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimFragmentsViewport.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimFragmentsViewport.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimGanttPanel.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimGanttPanel.jsx",
+      "namedSurfaces": [
+        "BimGanttPanel"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimLinksPanel.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimLinksPanel.jsx",
+      "namedSurfaces": [
+        "BimLinksPanel"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimReportsPanel.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimReportsPanel.jsx",
+      "namedSurfaces": [
+        "BimReportsPanel"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimSiteGeoreferencePanel.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimSiteGeoreferencePanel.jsx",
+      "namedSurfaces": [
+        "BimSiteGeoreferencePanel"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimThreeViewer.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimThreeViewer.jsx",
+      "namedSurfaces": [
+        "BimThreeViewer"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimTreePanel.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimTreePanel.jsx",
+      "namedSurfaces": [
+        "BimTreePanel"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimVersionSelector.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimVersionSelector.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimViewStateToolbar.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimViewStateToolbar.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/bim/BimWorkfrontScenarioPanel.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/components/bim/BimWorkfrontScenarioPanel.jsx",
+      "namedSurfaces": [
+        "BimWorkfrontScenarioPanel"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/precios-unitarios/ResourceEditorModal.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/precios-unitarios/ResourceEditorModal.jsx",
+      "namedSurfaces": [
+        "ResourceEditorModal"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/presupuestos/ApuBudgetEditor.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/presupuestos/ApuBudgetEditor.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/presupuestos/ApuEditorModal.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/presupuestos/ApuEditorModal.jsx",
+      "namedSurfaces": [
+        "ApuEditorModal"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/presupuestos/LineasPresupuestoTab.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/presupuestos/LineasPresupuestoTab.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/presupuestos/PresupuestoDetail.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/presupuestos/PresupuestoDetail.jsx",
+      "namedSurfaces": [
+        "ApuEditorModal",
+        "BudgetMiniMapBranch",
+        "BudgetMiniMapWindow",
+        "CommonReportPreviewModal",
+        "IndirectosModal",
+        "MemoBudgetMiniMapBranch",
+        "NotasGeneralesModal",
+        "ParetoModal",
+        "ReportGenerationModal"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/projects/CronogramaGantt.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/projects/CronogramaGantt.jsx",
+      "namedSurfaces": [
+        "CronogramaGantt",
+        "GanttApuPlanningSignalsPanel",
+        "GanttDataGridHeaderCells",
+        "GanttGridHeaderCell",
+        "GanttParetoModal",
+        "GanttResourceEditorModal"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/projects/Cronogramas.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/projects/Cronogramas.jsx",
+      "namedSurfaces": [
+        "CronogramaGantt"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/projects/DesagregacionTab.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/projects/DesagregacionTab.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/projects/Edt.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/projects/Edt.jsx",
+      "namedSurfaces": [
+        "CuentaPaqueteModal",
+        "EdtModalHeader",
+        "MoveSelectionModal",
+        "StakeholderModal"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/projects/GanttParetoModal.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/projects/GanttParetoModal.jsx",
+      "namedSurfaces": [
+        "GanttParetoModal"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/projects/GridColumnManager.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/projects/GridColumnManager.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/projects/HierarchyGraphView.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/projects/HierarchyGraphView.jsx",
+      "namedSurfaces": [
+        "MiniMapBranch"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/projects/Stakeholders.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/projects/Stakeholders.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/reporting/CommonReportPreviewModal.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/reporting/CommonReportPreviewModal.jsx",
+      "namedSurfaces": [
+        "CommonReportPreviewModal"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/ui/dialog.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/ui/dialog.jsx",
+      "namedSurfaces": [
+        "DialogOverlay"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/components/ui/table.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/components/ui/table.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/context/PresupuestoContext.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/context/PresupuestoContext.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/features/bim/BimAsBuiltAcceptanceHarness.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/features/bim/BimAsBuiltAcceptanceHarness.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/features/bim/BimCommissioningRegistryHarness.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/features/bim/BimCommissioningRegistryHarness.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/features/bim/BimCostForecastHarness.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/features/bim/BimCostForecastHarness.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/features/bim/BimHandoverDossierHarness.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/features/bim/BimHandoverDossierHarness.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/features/bim/BimOperationsTransitionHarness.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/features/bim/BimOperationsTransitionHarness.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/features/bim/BimPunchClosureHarness.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/features/bim/BimPunchClosureHarness.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/features/bim/BimResourceLevelingHarness.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "bim",
+      "source": "src/features/bim/BimResourceLevelingHarness.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/gantt-ff-harness.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/gantt-ff-harness.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/APUs.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/APUs.jsx",
+      "namedSurfaces": [
+        "BulkDeleteConfirmModal",
+        "CommonReportPreviewModal",
+        "ReportGenerationModal",
+        "ResourceEditorModal"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/AdminGlobalEmail.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/AdminGlobalEmail.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/AdminGlobalLicencias.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/AdminGlobalLicencias.jsx",
+      "namedSurfaces": [
+        "LicenseHistoryModal",
+        "QuotaModal"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/AdminGlobalSesiones.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/AdminGlobalSesiones.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/BasesTrabajo.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/BasesTrabajo.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/Community.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/Community.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/Marketplace.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/Marketplace.jsx",
+      "namedSurfaces": [
+        "ProductDetailDialog"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/MarketplaceAdminDashboard.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/MarketplaceAdminDashboard.jsx",
+      "namedSurfaces": [
+        "AdminModalFooterButton",
+        "AdminModalSection",
+        "PortalRequirementSemaphoreGrid"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/MarketplaceProductDetail.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/MarketplaceProductDetail.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/ProjectManager.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/ProjectManager.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/Proyectos.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/Proyectos.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/Recursos.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/Recursos.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/SellerDashboard.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/SellerDashboard.jsx",
+      "namedSurfaces": [
+        "MarketplaceModalScrollBody"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/Settings.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/Settings.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/pages/Subcategorias.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/pages/Subcategorias.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    }
+  ],
+  "harnesses": [
+    {
+      "id": "harness:adaptive-app-layout-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/adaptive-app-layout-harness.html",
+      "source": "adaptive-app-layout-harness.html",
+      "validators": [
+        "certify-lenovo-tab-p12-device.mjs",
+        "certify-visual-surface-matrix.mjs",
+        "validate-adaptive-app-layout-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:adaptive-services-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/adaptive-services-harness.html",
+      "source": "adaptive-services-harness.html",
+      "validators": [
+        "certify-lenovo-tab-p12-device.mjs",
+        "certify-visual-surface-matrix.mjs",
+        "validate-adaptive-services-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-actual-cost-ledger-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-actual-cost-ledger-harness.html",
+      "source": "bim-actual-cost-ledger-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-actual-cost-ledger-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-as-built-acceptance-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-as-built-acceptance-harness.html",
+      "source": "bim-as-built-acceptance-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-as-built-acceptance-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cde-acl-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cde-acl-harness.html",
+      "source": "bim-cde-acl-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cde-acl-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cde-collaboration-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cde-collaboration-harness.html",
+      "source": "bim-cde-collaboration-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cde-collaboration-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cde-dashboard-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cde-dashboard-harness.html",
+      "source": "bim-cde-dashboard-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cde-dashboard-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cde-documents-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cde-documents-harness.html",
+      "source": "bim-cde-documents-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cde-documents-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cde-review-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cde-review-harness.html",
+      "source": "bim-cde-review-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cde-review-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cde-rfi-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cde-rfi-harness.html",
+      "source": "bim-cde-rfi-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cde-rfi-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cde-submittals-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cde-submittals-harness.html",
+      "source": "bim-cde-submittals-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cde-submittals-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-commissioning-registry-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-commissioning-registry-harness.html",
+      "source": "bim-commissioning-registry-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-commissioning-registry-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cost-change-orders-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cost-change-orders-harness.html",
+      "source": "bim-cost-change-orders-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cost-change-orders-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cost-contracts-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cost-contracts-harness.html",
+      "source": "bim-cost-contracts-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cost-contracts-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cost-estimate-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cost-estimate-harness.html",
+      "source": "bim-cost-estimate-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cost-estimate-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cost-forecast-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cost-forecast-harness.html",
+      "source": "bim-cost-forecast-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cost-forecast-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cost-payments-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cost-payments-harness.html",
+      "source": "bim-cost-payments-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cost-payments-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-cost-sov-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-cost-sov-harness.html",
+      "source": "bim-cost-sov-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-cost-sov-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-crews-timecards-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-crews-timecards-harness.html",
+      "source": "bim-crews-timecards-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-crews-timecards-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-csg-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-csg-harness.html",
+      "source": "bim-csg-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-csg-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-element-explorer-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-element-explorer-harness.html",
+      "source": "bim-element-explorer-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-element-explorer-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-equipment-motion-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-equipment-motion-harness.html",
+      "source": "bim-equipment-motion-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-equipment-motion-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-erp-exchange-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-erp-exchange-harness.html",
+      "source": "bim-erp-exchange-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-erp-exchange-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-federation-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-federation-harness.html",
+      "source": "bim-federation-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-federation-dom.mjs",
+        "validate-bim-performance-budget.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-field-diary-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-field-diary-harness.html",
+      "source": "bim-field-diary-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-field-diary-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-field-documents-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-field-documents-harness.html",
+      "source": "bim-field-documents-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-field-documents-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-field-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-field-harness.html",
+      "source": "bim-field-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-field-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-field-inspections-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-field-inspections-harness.html",
+      "source": "bim-field-inspections-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-field-inspections-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-field-issues-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-field-issues-harness.html",
+      "source": "bim-field-issues-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-field-issues-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-field-resources-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-field-resources-harness.html",
+      "source": "bim-field-resources-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-field-resources-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-fragments-csg-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-fragments-csg-harness.html",
+      "source": "bim-fragments-csg-harness.html",
+      "validators": [
+        "certify-android-primary-surfaces.mjs",
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-fragments-csg-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-fragments-product-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-fragments-product-harness.html",
+      "source": "bim-fragments-product-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-fragments-product-dom.mjs",
+        "validate-bim-review-tools-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-handover-dossier-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-handover-dossier-harness.html",
+      "source": "bim-handover-dossier-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-handover-dossier-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-ids-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-ids-harness.html",
+      "source": "bim-ids-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-ids-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-integration-gateway-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-integration-gateway-harness.html",
+      "source": "bim-integration-gateway-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-integration-gateway-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-issues-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-issues-harness.html",
+      "source": "bim-issues-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-issues-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-operations-transition-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-operations-transition-harness.html",
+      "source": "bim-operations-transition-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-operations-transition-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-partition-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-partition-harness.html",
+      "source": "bim-partition-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-partition-csg-product-dom.mjs",
+        "validate-bim-partition-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-plan-actual-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-plan-actual-harness.html",
+      "source": "bim-plan-actual-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-plan-actual-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-productivity-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-productivity-harness.html",
+      "source": "bim-productivity-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-productivity-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-punch-closure-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-punch-closure-harness.html",
+      "source": "bim-punch-closure-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-punch-closure-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-qto-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-qto-harness.html",
+      "source": "bim-qto-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-qto-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-resource-leveling-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-resource-leveling-harness.html",
+      "source": "bim-resource-leveling-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-resource-leveling-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-safety-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-safety-harness.html",
+      "source": "bim-safety-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-safety-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-schedule-4d-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-schedule-4d-harness.html",
+      "source": "bim-schedule-4d-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-schedule-4d-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-schedule-interchange-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-schedule-interchange-harness.html",
+      "source": "bim-schedule-interchange-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-schedule-interchange-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-shell-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-shell-harness.html",
+      "source": "bim-shell-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-shell-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-site-georeference-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-site-georeference-harness.html",
+      "source": "bim-site-georeference-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-site-georeference-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-timeline-4d-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-timeline-4d-harness.html",
+      "source": "bim-timeline-4d-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-timeline-4d-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-unplanned-events-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-unplanned-events-harness.html",
+      "source": "bim-unplanned-events-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-unplanned-events-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-view-state-replay-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-view-state-replay-harness.html",
+      "source": "bim-view-state-replay-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-view-state-replay-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-viewer-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-viewer-harness.html",
+      "source": "bim-viewer-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-viewer-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-workfront-scenario-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-workfront-scenario-harness.html",
+      "source": "bim-workfront-scenario-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-workfront-scenario-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:bim-workspace-v2-harness.html",
+      "kind": "harness",
+      "mode": "bim",
+      "path": "/bim-workspace-v2-harness.html",
+      "source": "bim-workspace-v2-harness.html",
+      "validators": [
+        "certify-lenovo-tab-p12-device.mjs",
+        "certify-visual-surface-matrix.mjs",
+        "validate-bim-workspace-v2-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-dashboard-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-dashboard-harness.html",
+      "source": "classic-dashboard-harness.html",
+      "validators": [
+        "certify-android-primary-surfaces.mjs",
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-precios-unitarios-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-precios-unitarios-harness.html",
+      "source": "classic-precios-unitarios-harness.html",
+      "validators": [
+        "certify-android-primary-surfaces.mjs",
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-projects-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-projects-harness.html",
+      "source": "classic-projects-harness.html",
+      "validators": [
+        "certify-android-primary-surfaces.mjs",
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:formula-responsive-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/formula-responsive-harness.html",
+      "source": "formula-responsive-harness.html",
+      "validators": [
+        "certify-lenovo-tab-p12-device.mjs",
+        "certify-visual-surface-matrix.mjs",
+        "validate-formula-responsive-dom.mjs",
+        "validate-formula-scrollbar-geometry.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-ff-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-ff-harness.html",
+      "source": "gantt-ff-harness.html",
+      "validators": [
+        "certify-android-primary-surfaces.mjs",
+        "certify-visual-surface-matrix.mjs",
+        "validate-gantt-ff-predecessor-dom.mjs",
+        "validate-gantt-layout-dom.mjs",
+        "validate-gantt-manual-milestone-default-time-dom.mjs",
+        "validate-gantt-manual-milestone-drag-preview-dom.mjs",
+        "validate-gantt-manual-milestone-drag-release-dom.mjs",
+        "validate-gantt-manual-milestone-route-dom.mjs",
+        "validate-gantt-santiago-critical-visual-dom.mjs",
+        "validate-gantt-santiago-full-dom.mjs",
+        "validate-gantt-scrollbar-geometry.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:settings-empresa-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/settings-empresa-harness.html",
+      "source": "settings-empresa-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs",
+        "validate-settings-empresa-visual-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:transferencias-responsive-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/transferencias-responsive-harness.html",
+      "source": "transferencias-responsive-harness.html",
+      "validators": [
+        "certify-lenovo-tab-p12-device.mjs",
+        "certify-visual-surface-matrix.mjs",
+        "validate-transferencias-responsive-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    }
+  ]
+}

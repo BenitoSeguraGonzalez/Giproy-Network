@@ -6,6 +6,8 @@ import { chromium } from 'playwright';
 const appLayoutSource = readFileSync(new URL('../src/layouts/AppLayout.jsx', import.meta.url), 'utf8');
 const dashboardSource = readFileSync(new URL('../src/pages/Dashboard.jsx', import.meta.url), 'utf8');
 const monitorSource = readFileSync(new URL('../src/utils/releaseVersionMonitor.js', import.meta.url), 'utf8');
+const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const expectedVersionPattern = new RegExp(`v${String(packageJson.version).replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')}`, 'i');
 assert.match(appLayoutSource, /data-app-version/, 'La cabecera protegida debe mostrar la version');
 assert.match(dashboardSource, /data-dashboard-footer/, 'El Dashboard debe conservar un footer identificable');
 assert.match(monitorSource, /visibilitychange/, 'Las sesiones abiertas deben comprobar la release al recuperar foco');
@@ -58,7 +60,7 @@ try {
     const version = page.locator('[data-app-version]');
     await version.waitFor();
     assert.equal(await version.isVisible(), true, `${profile.name}: version visible en login`);
-    assert.match(await version.innerText(), /v3\.1\.0-beta\.3/i, `${profile.name}: version de release correcta`);
+    assert.match(await version.innerText(), expectedVersionPattern, `${profile.name}: version de release correcta`);
 
     const footer = page.locator('[data-login-footer]');
     const reachability = await page.locator('[data-login-viewport]').evaluate((viewport) => {

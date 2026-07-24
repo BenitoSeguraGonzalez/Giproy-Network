@@ -29,7 +29,7 @@ try {
   if (!(await fetch(baseUrl).then((response) => response.ok).catch(() => false))) {
     vite = spawn(process.platform === 'win32' ? 'cmd.exe' : 'npm', process.platform === 'win32'
       ? ['/c', 'npm', 'run', 'dev', '--', '--host', '0.0.0.0', '--port', '5173']
-      : ['run', 'dev', '--', '--host', '0.0.0.0', '--port', '5173'], { cwd: process.cwd(), stdio: 'ignore', windowsHide: true });
+      : ['run', 'dev', '--', '--host', '0.0.0.0', '--port', '5173'], { cwd: process.cwd(), env: { ...process.env, VITE_ADAPTIVE_UI_ENABLED: 'true' }, stdio: 'ignore', windowsHide: true });
     ownsVite = true;
     for (let index = 0; index < 120; index += 1) {
       if (await fetch(baseUrl).then((response) => response.ok).catch(() => false)) break;
@@ -48,7 +48,6 @@ try {
   assert.ok(browser, 'Chrome Android no expuso el endpoint de depuracion remota');
   const context = browser.contexts()[0];
   const page = context.pages()[0] || await context.newPage();
-  await page.addInitScript(() => localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
   await page.route('**/api/v1/**', (route) => route.fulfill({ json: [] }));
   await page.route('**/api/v1/community/bootstrap**', (route) => route.fulfill({ json: { active_company_name: 'Certificacion Lenovo' } }));
   await page.route('**/api/v1/marketplace/products**', (route) => route.fulfill({ json: [{ id: 11, title: 'Base QA', name: 'Base QA', description: 'Certificacion', price: 49.9, product_type: 'base_maestra', is_active: true }] }));

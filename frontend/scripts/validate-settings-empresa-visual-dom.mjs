@@ -23,7 +23,7 @@ const vite = spawn(
   process.platform === 'win32'
     ? ['/c', 'npm', 'run', 'dev', '--', '--host', '127.0.0.1', '--port', String(port)]
     : ['run', 'dev', '--', '--host', '127.0.0.1', '--port', String(port)],
-  { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },
+  { cwd: process.cwd(), env: { ...process.env, VITE_ADAPTIVE_UI_ENABLED: 'true' }, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },
 );
 
 let viteOutput = '';
@@ -130,7 +130,6 @@ for (const viewport of viewports) {
     deviceScaleFactor: viewport.touch ? 2 : 1,
   });
   if (viewport.touch) {
-    await page.addInitScript(() => window.localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
   }
   const consoleErrors = [];
   page.on('console', (message) => {

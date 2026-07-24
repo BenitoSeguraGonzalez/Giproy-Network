@@ -29,7 +29,7 @@ const BimCdeReviewHarness = () => {
         },
         readCdeReviewNotification: async () => null,
     }), []);
-    return <main className="min-h-screen bg-[#F2F4F7] p-6"><div className="mx-auto w-[1040px]"><BimCdeReviewPanel projectId={7} empresaId={1} selectedElement={{ global_id: '3GUID-FACHADA' }} viewerState={{ camera: { position: [1, 2, 3] } }} api={api} /></div></main>;
+    return <main className="min-h-screen bg-[#F2F4F7] p-3 sm:p-6"><div className="mx-auto w-full max-w-[1040px]"><BimCdeReviewPanel projectId={7} empresaId={1} selectedElement={{ global_id: '3GUID-FACHADA' }} viewerState={{ camera: { position: [1, 2, 3] } }} api={api} /></div></main>;
 };
 
 createRoot(document.getElementById('root')).render(<BimCdeReviewHarness />);

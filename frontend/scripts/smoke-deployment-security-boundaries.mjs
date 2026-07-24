@@ -20,6 +20,8 @@ assert.match(nginxConfig, /location \^~ \/assets\/[\s\S]*max-age=31536000, immut
 assert.match(nginxConfig, /location = \/version\.json[\s\S]*no-store/, 'El manifiesto de version no debe almacenarse en cache');
 assert.match(viteConfig, /fileName: "version\.json"/, 'El build debe emitir un manifiesto de version');
 assert.match(composeConfig, /VITE_APP_VERSION: \$\{GIPROY_APP_VERSION:\?/, 'Compose debe exigir la version de release');
+assert.match(composeConfig, /VITE_ADAPTIVE_UI_ENABLED: \$\{VITE_ADAPTIVE_UI_ENABLED:\?/, 'Compose debe exigir una decision explicita para la interfaz adaptativa');
+assert.doesNotMatch(composeConfig, /VITE_ADAPTIVE_UI_ENABLED: \$\{VITE_ADAPTIVE_UI_ENABLED:-false\}/, 'Compose no puede desactivar silenciosamente la interfaz adaptativa');
 assert.match(deployScript, /Refusing deploy:[\s\S]*already active/, 'El deploy debe impedir reutilizar una version activa');
 
 const sourceFiles = globSync('src/**/*.{js,jsx}', { cwd: new URL('..', import.meta.url), exclude: ['**/node_modules/**'] });
