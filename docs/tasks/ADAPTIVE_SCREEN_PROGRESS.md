@@ -595,6 +595,88 @@ Resultado: **10/10 PASS**.
 
 La ejecucion unica de Impeccable devolvio cero hallazgos.
 
+## G00.8 - Overlays
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+### Superficie observada
+
+- `AppModalShell`, header, body y footer compartidos.
+- Modal con contenido extenso.
+- Overlay frente al shell protegido.
+- Foco inicial, ciclo de Tab, Escape y restitucion del foco.
+- Scroll interno en diez perfiles.
+
+### Problemas observados
+
+- El panel completo era el propietario del scroll: header y footer podian
+  desaparecer con contenido largo.
+- Faltaban `role="dialog"`, `aria-modal`, nombre accesible y trampa de foco.
+- Escape no pertenecia a la shell comun.
+- El z-index por defecto era 120 y la cabecera global usa 500. La captura real
+  demostro que el modal quedaba por debajo del header, aunque su geometria
+  estuviera dentro del viewport.
+
+### Adecuacion aplicada
+
+- Panel modal pasa a estructura flex vertical acotada por `100dvh`.
+- Solo `AppModalBody` posee el scroll vertical.
+- Header y footer son regiones persistentes y no encogibles.
+- Footer puede recomponer acciones en varias lineas.
+- Dialogo expone semantica y nombre accesible.
+- Foco inicial contenido, ciclo de Tab, Escape y retorno al disparador.
+- Boton de cierre recibe nombre accesible.
+- Overlay por defecto sube a `z-[1000]`, por encima del shell global.
+- El test compara de forma explicita ambos niveles de apilamiento.
+
+### Incidencias encontradas durante la prueba
+
+1. La primera medida se tomo durante la animacion de 180 ms y produjo un falso
+   desplazamiento de cinco pixeles. Se sincronizo con el fin de la animacion.
+2. El contenido inicial no excedia un monitor alto de 1440 px. Se amplio el
+   dataset del harness para probar scroll en todos los perfiles.
+3. La inspeccion visual descubrio el modal bajo la cabecera. Se corrigio el
+   z-index global y se genero una segunda matriz de capturas.
+
+### Perfiles verificados
+
+- Windows FHD 100 %, 125 % y 150 %.
+- Windows 4K/DPR 2.
+- Tablet Full HD horizontal y vertical.
+- Tablet 2K horizontal y vertical.
+- Lenovo P12 3K horizontal y vertical.
+
+Resultado: **10/10 PASS**.
+
+### Verificaciones
+
+- Modal contenido por el viewport: PASS.
+- Cuerpo con scroll propio: PASS.
+- Header y footer inmoviles al recorrer el cuerpo: PASS.
+- Overlay sobre cabecera global: PASS.
+- Escape y retorno de foco: PASS.
+- Build Vite de produccion: PASS.
+
+### Evidencia
+
+- Evidencia que descubrio el error de apilamiento:
+  `artifacts/visual-certification/g00-8-overlays-2026-07-24`.
+- Evidencia final corregida:
+  `artifacts/visual-certification/g00-8-overlays-final-2026-07-24`.
+
+### Archivos tratados
+
+- `frontend/src/components/ui/app-modal.jsx`.
+- `frontend/src/features/adaptive/AdaptiveAppLayoutHarness.jsx`.
+- `frontend/scripts/validate-adaptive-app-layout-dom.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
+### Detector visual
+
+La ejecucion unica de Impeccable devolvio cero hallazgos.
+
 ## Siguiente unidad
 
-`G00.8 - Overlays`: PENDIENTE.
+`G00.9 - Estados asincronos`: PENDIENTE.

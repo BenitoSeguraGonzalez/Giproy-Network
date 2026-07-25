@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -35,33 +36,82 @@ export const AppModalShell = ({
     isOpen = true,
     onClose,
     size = 'lg',
-    zIndex = 'z-[120]',
+    zIndex = 'z-[1000]',
     overlayClassName = '',
     panelClassName = '',
     surfaceColor = MODAL_SURFACE,
+    ariaLabel = 'Ventana de diálogo',
 }) => {
+    const panelRef = useRef(null);
+
+    useEffect(() => {
+        if (!isOpen) return undefined;
+        const previousFocus = document.activeElement;
+        const panel = panelRef.current;
+        const focusableSelector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        const focusable = () => [...(panel?.querySelectorAll(focusableSelector) || [])]
+            .filter((node) => node.getClientRects().length > 0);
+        (focusable()[0] || panel)?.focus({ preventScroll: true });
+
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape' && onClose) {
+                event.preventDefault();
+                onClose();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            const nodes = focusable();
+            if (!nodes.length) {
+                event.preventDefault();
+                panel?.focus();
+                return;
+            }
+            const first = nodes[0];
+            const last = nodes[nodes.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            previousFocus?.focus?.({ preventScroll: true });
+        };
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
     return (
         <div
+            data-app-modal-overlay
             className={`fixed inset-0 ${zIndex} flex items-start justify-center overflow-y-auto overscroll-contain bg-[rgba(15,23,42,0.18)] p-3 backdrop-blur-[2px] [touch-action:pan-y] sm:items-center md:p-4 ${overlayClassName}`}
             onClick={(e) => {
                 if (e.target === e.currentTarget && onClose) onClose();
             }}
         >
             <MotionDiv
+                ref={panelRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={ariaLabel}
+                tabIndex={-1}
+                data-app-modal-panel
                 initial={{ opacity: 0, scale: 0.96, y: 16 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.98, y: 10 }}
                 transition={{ duration: 0.18 }}
-                className={`max-h-[calc(100dvh-1.5rem)] min-h-0 w-full ${SIZE_MAP[size] || SIZE_MAP.lg} overflow-x-hidden overflow-y-auto overscroll-contain rounded-[1.7rem] [touch-action:pan-y] md:max-h-[calc(100dvh-2rem)] ${panelClassName}`}
+                className={`flex max-h-[calc(100dvh-1.5rem)] min-h-0 w-full ${SIZE_MAP[size] || SIZE_MAP.lg} flex-col overflow-hidden rounded-[1.7rem] md:max-h-[calc(100dvh-2rem)] ${panelClassName}`}
                 style={{
                     background: surfaceColor,
                     border: MODAL_BORDER,
                     boxShadow: MODAL_SHADOW_PANEL,
                     maxHeight: 'calc(100dvh - 1.5rem)',
                     overflowX: 'hidden',
-                    overflowY: 'auto',
+                    overflowY: 'hidden',
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -87,7 +137,7 @@ export const AppModalHeader = ({
     subtitleClassName = '',
 }) => (
     <div
-        className="flex items-start justify-between gap-3 px-4 py-3.5 md:px-5 md:py-4"
+        className="flex shrink-0 items-start justify-between gap-3 px-4 py-3.5 md:px-5 md:py-4"
         style={{ background: surfaceColor }}
     >
         <div className="flex items-start gap-3 min-w-0">
@@ -125,6 +175,7 @@ export const AppModalHeader = ({
                 <button
                     type="button"
                     onClick={onClose}
+                    aria-label="Cerrar diálogo"
                     className={closeButtonClassName || APP_MODAL_CLOSE_BUTTON_CLASS}
                     style={closeButtonClassName ? undefined : {
                         background: '#ededed',
@@ -139,7 +190,7 @@ export const AppModalHeader = ({
 
 export const AppModalBody = ({ children, className = '' }) => (
     <div
-        className={`px-4 py-3.5 md:px-5 md:py-4 ${className}`}
+        className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3.5 [touch-action:pan-y] md:px-5 md:py-4 ${className}`}
         style={{ color: MODAL_TEXT }}
     >
         {children}
@@ -148,7 +199,7 @@ export const AppModalBody = ({ children, className = '' }) => (
 
 export const AppModalFooter = ({ children, className = '', variant = 'inset', surfaceColor = MODAL_SURFACE }) => (
     <div
-        className={`flex items-center justify-end gap-2.5 px-4 py-3 md:px-5 md:py-3.5 ${className}`}
+        className={`flex shrink-0 flex-wrap items-center justify-end gap-2.5 px-4 py-3 md:px-5 md:py-3.5 ${className}`}
         style={{
             background: surfaceColor,
             boxShadow: variant === 'flat' ? 'none' : MODAL_SHADOW_INSET,

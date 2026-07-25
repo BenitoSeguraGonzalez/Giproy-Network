@@ -217,6 +217,45 @@ try {
             await page.setViewportSize(profile.viewport);
             await page.waitForTimeout(80);
         }
+        const modalTrigger = page.getByRole('button', { name: 'Abrir diálogo' });
+        await modalTrigger.click();
+        const modal = page.getByRole('dialog', { name: 'Edición operativa de validación' });
+        await modal.waitFor();
+        await page.waitForTimeout(220);
+        const stacking = await page.evaluate(() => ({
+            modal: Number.parseInt(getComputedStyle(document.querySelector('[data-app-modal-overlay]')).zIndex, 10),
+            header: Number.parseInt(getComputedStyle(document.querySelector('[data-app-header]')).zIndex, 10),
+        }));
+        assert.ok(stacking.modal > stacking.header, `${profile.name}: modal se representa por encima del shell global`);
+        const modalRect = await modal.boundingBox();
+        assert.ok(modalRect && modalRect.x >= 0 && modalRect.y >= 0, `${profile.name}: modal comienza dentro del viewport`);
+        assert.ok(modalRect.x + modalRect.width <= profile.viewport.width + 1 && modalRect.y + modalRect.height <= profile.viewport.height + 1, `${profile.name}: modal completo dentro del viewport`);
+        const modalBody = modal.locator('[data-adaptive-harness-modal-body]').locator('..');
+        const modalRegionsBefore = await modal.evaluate((node) => {
+            const children = [...node.children];
+            return {
+                headerTop: children[0]?.getBoundingClientRect().top,
+                footerBottom: children.at(-1)?.getBoundingClientRect().bottom,
+            };
+        });
+        assert.ok(await modalBody.evaluate((node) => node.scrollHeight > node.clientHeight), `${profile.name}: cuerpo modal tiene scroll propio`);
+        await modalBody.evaluate((node) => { node.scrollTop = node.scrollHeight; });
+        const modalRegionsAfter = await modal.evaluate((node) => {
+            const children = [...node.children];
+            return {
+                headerTop: children[0]?.getBoundingClientRect().top,
+                footerBottom: children.at(-1)?.getBoundingClientRect().bottom,
+            };
+        });
+        assert.ok(
+            Math.abs(modalRegionsAfter.headerTop - modalRegionsBefore.headerTop) <= 1
+                && Math.abs(modalRegionsAfter.footerBottom - modalRegionsBefore.footerBottom) <= 1,
+            `${profile.name}: header y footer del modal permanecen fijos`,
+        );
+        await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-adaptive-modal-${profile.name}.png`, fullPage: false });
+        await page.keyboard.press('Escape');
+        await modal.waitFor({ state: 'hidden' });
+        assert.equal(await modalTrigger.evaluate((node) => document.activeElement === node), true, `${profile.name}: Escape cierra modal y devuelve foco`);
         await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-adaptive-shell-${profile.name}.png`, fullPage: true });
         await context.close();
     }

@@ -1,10 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
+import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 
 import '../../index.css';
 import { AuthContext } from '../../context/AuthContext';
 import AppLayout from '../../layouts/AppLayout';
+import { AppModalBody, AppModalFooter, AppModalHeader, AppModalShell } from '../../components/ui/app-modal';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
@@ -22,8 +24,11 @@ const authValue = {
 
 const contentRows = Array.from({ length: 36 }, (_, index) => index + 1);
 
-const AdaptiveAppLayoutHarness = () => (
-    <MemoryRouter initialEntries={['/dashboard']}>
+const AdaptiveAppLayoutHarness = () => {
+    const [modalOpen, setModalOpen] = useState(false);
+
+    return (
+        <MemoryRouter initialEntries={['/dashboard']}>
         <AuthContext.Provider value={authValue}>
             <AppLayout>
                 <main className="min-h-[1400px] bg-[#F2F4F7] p-4" data-adaptive-harness-content>
@@ -33,7 +38,7 @@ const AdaptiveAppLayoutHarness = () => (
                                 <h1 className="text-lg font-black text-zinc-900">Superficie operativa clásica</h1>
                                 <p className="text-xs text-zinc-500">La composición cambia sin escalar componentes.</p>
                             </div>
-                            <button type="button" className="min-h-11 rounded-lg bg-[#F39200] px-4 text-sm font-bold text-white">Acción principal</button>
+                            <button type="button" onClick={() => setModalOpen(true)} className="min-h-11 rounded-lg bg-[#F39200] px-4 text-sm font-bold text-white">Abrir diálogo</button>
                         </header>
                         <Table
                             className="min-w-[760px] text-xs"
@@ -85,9 +90,26 @@ const AdaptiveAppLayoutHarness = () => (
                         </div>
                     </section>
                 </main>
+                <AppModalShell isOpen={modalOpen} onClose={() => setModalOpen(false)} ariaLabel="Edición operativa de validación">
+                    <AppModalHeader title="Edición operativa" subtitle="Cabecera persistente" onClose={() => setModalOpen(false)} />
+                    <AppModalBody>
+                        <div className="space-y-3" data-adaptive-harness-modal-body>
+                            {Array.from({ length: 36 }, (_, index) => (
+                                <p key={index} className="rounded-lg border border-zinc-200 bg-white p-3 text-sm">
+                                    Bloque de contenido desplazable {index + 1}
+                                </p>
+                            ))}
+                        </div>
+                    </AppModalBody>
+                    <AppModalFooter>
+                        <button type="button" onClick={() => setModalOpen(false)} className="min-h-[var(--app-control-target,2.5rem)] rounded-lg border border-zinc-300 px-4 text-sm font-bold">Cancelar</button>
+                        <button type="button" className="min-h-[var(--app-control-target,2.5rem)] rounded-lg bg-[#F39200] px-4 text-sm font-bold text-white">Guardar cambios</button>
+                    </AppModalFooter>
+                </AppModalShell>
             </AppLayout>
         </AuthContext.Provider>
-    </MemoryRouter>
-);
+        </MemoryRouter>
+    );
+};
 
 createRoot(document.getElementById('root')).render(<AdaptiveAppLayoutHarness />);
