@@ -1845,7 +1845,8 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                         <div className="relative col-span-12 min-h-0 lg:col-span-8">
                             <div
                                 ref={mainScrollRef}
-                                className="h-full min-h-0 space-y-4 overflow-y-auto pr-5 giproy-motion-scrollbar-hide lg:pr-6"
+                                data-project-edit-main-viewport
+                                className="h-full min-h-0 space-y-4 overflow-y-auto overscroll-contain pr-5 giproy-motion-scrollbar-hide [touch-action:pan-y] lg:pr-6"
                             >
                                 <section className={COLLAPSIBLE_SECTION_BASE}>
                                 <button type="button" onClick={() => toggleSection('identity')} className={COLLAPSIBLE_SECTION_HEADER_BUTTON}>
@@ -2484,7 +2485,8 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                         <div className="relative col-span-12 min-h-0 lg:col-span-4">
                             <div
                                 ref={sideScrollRef}
-                                className="h-full min-h-0 space-y-4 overflow-y-auto pr-5 giproy-motion-scrollbar-hide"
+                                data-project-edit-side-viewport
+                                className="h-full min-h-0 space-y-4 overflow-y-auto overscroll-contain pr-5 giproy-motion-scrollbar-hide [touch-action:pan-y]"
                             >
                                 <section className="sticky top-0 z-20 overflow-hidden rounded-[1.15rem] border border-[#101318] bg-white shadow-[6px_6px_16px_#e1e1e1,-6px_-6px_16px_#ffffff]">
                                 <div className={COLLAPSIBLE_SECTION_HEADER_BUTTON}>

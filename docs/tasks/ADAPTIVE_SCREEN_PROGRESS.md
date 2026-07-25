@@ -1339,6 +1339,69 @@ Resultado: **10/10 PASS**; build Vite: **PASS**; Impeccable:
 - `docs/architecture/visual-surface-inventory.json`.
 - `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
 
+## C03.3 - Proyectos: crear y editar
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+### Crear proyecto
+
+- El formulario estaba dentro de un shell con altura limitada, pero su cuerpo
+  no era desplazable. En alturas reducidas los campos finales y las acciones
+  podian quedar recortados.
+- El encabezado permanece estable y el cuerpo del formulario pasa a ser el
+  unico propietario del desplazamiento vertical.
+- En paisaje conserva dos columnas; en retrato adapta el formulario a una
+  columna sin escalar tipografia, campos ni botones.
+
+### Editar proyecto
+
+- Se certifica el estado real `Datos de Proyecto`, no solamente el portafolio.
+- En paisaje y escritorio HiDPI el formulario tecnico y la informacion
+  geografica se mantienen en paralelo.
+- En tablet vertical se apilan como dos areas funcionales, cada una con scroll
+  tactil propio. Se alcanzan identificacion, especificaciones, cronograma,
+  ubicacion, objetivos, documentos e imagen sin desplazar el shell completo.
+- Los dos viewports declaran `overscroll-contain`, gesto vertical y marcadores
+  de certificacion.
+
+### Incidencias de la prueba
+
+- El certificador intentaba desplazar la tabla oscurecida detras del modal de
+  alta. Se corrige la deteccion para probar solo superficies alcanzables en el
+  punto de contacto.
+- El dato simulado de proyecto no incluia `revision` y provocaba un error al
+  entrar directamente en edicion. Se completa el contrato del harness con
+  `revision: 0`; no se oculto el fallo de ejecucion.
+
+### Revision visual obligatoria
+
+- Alta: diez capturas iniciales y diez capturas de final abiertas y revisadas.
+- Edicion: diez capturas iniciales y diez capturas de final abiertas y
+  revisadas.
+- Resultado alta: **10/10 PASS**.
+- Resultado edicion: **10/10 PASS**.
+
+### Evidencia
+
+- `artifacts/visual-certification/2026-07-25T01-15-00-543Z`.
+- `artifacts/visual-certification/2026-07-25T01-18-18-729Z`.
+- `create-certified-contact-sheet.png`.
+- `create-certified-end-contact-sheet.png`.
+- `edit-certified-contact-sheet.png`.
+- `edit-certified-end-contact-sheet.png`.
+
+### Archivos tratados
+
+- `frontend/src/pages/Proyectos.jsx`.
+- `frontend/src/components/projects/DatosProyecto.jsx`.
+- `frontend/src/__classic_primary_pages_harness.jsx`.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `frontend/classic-projects-create-harness.html`.
+- `frontend/classic-projects-edit-harness.html`.
+- `docs/architecture/visual-surface-inventory.json`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
 ## Siguiente unidad
 
-`C03.3 - Crear y editar proyecto`: EN CURSO.
+`C03.4 - Acciones de proyecto`: EN CURSO.

@@ -104,11 +104,13 @@ try {
                     estado: index % 3 === 0 ? 'En ejecución' : 'Planificación',
                     presupuesto_estimado: 125000 + index * 31750,
                     num_revisiones: index % 4 === 0 ? 2 : 1,
+                    revision: 0,
                     moneda: 'USD',
                     updated_at: `2026-07-${String(24 - index).padStart(2, '0')}T12:00:00Z`,
                 }));
                 let body = [];
                 if (/\/proyectos\/?$/u.test(apiPath)) body = projects;
+                else if (/\/proyectos\/\d+\/?$/u.test(apiPath)) body = projects[0];
                 else if (apiPath.endsWith('/proyectos/marketplace-export/statuses')) body = { projects: {} };
                 else if (apiPath.includes('/proyecto-detalles/')) body = { plazo_estimado: 180, fecha_presentacion: '2026-09-30' };
                 else if (apiPath.includes('/bases-trabajo/')) body = [{ id: 19, nombre: 'Base tecnica Santiago Bermeo', tipo: 'Base Maestra' }];
@@ -118,10 +120,17 @@ try {
             const startedAt = Date.now();
             let navigationError = null;
             try {
-                await page.goto(`${baseUrl}${harness.path}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+                const harnessUrl = harness.source === 'classic-projects-edit-harness.html'
+                    ? `${baseUrl}${harness.path}?project_id=1&tab=datos`
+                    : `${baseUrl}${harness.path}`;
+                await page.goto(harnessUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
                 await page.waitForTimeout(750);
                 if (harness.source === 'classic-projects-kanban-harness.html') {
                     await page.getByRole('tab', { name: 'Kanban' }).click();
+                    await page.waitForTimeout(350);
+                }
+                if (harness.source === 'classic-projects-create-harness.html') {
+                    await page.getByRole('button', { name: 'Nuevo proyecto' }).click();
                     await page.waitForTimeout(350);
                 }
             } catch (error) {
@@ -310,6 +319,10 @@ try {
                             || rect.bottom <= 0
                             || rect.left >= window.innerWidth
                             || rect.top >= window.innerHeight) return null;
+                        const x = Math.max(4, Math.min(window.innerWidth - 4, verticalDelta >= horizontalDelta ? rect.left + 8 : rect.left + (rect.width / 2)));
+                        const y = Math.max(4, Math.min(window.innerHeight - 4, rect.top + (rect.height / 2)));
+                        const hitTarget = document.elementFromPoint(x, y);
+                        if (!hitTarget || !node.contains(hitTarget)) return null;
                         const id = `visual-gesture-${index}`;
                         node.setAttribute('data-visual-gesture-id', id);
                         node.scrollTop = 0;
@@ -319,8 +332,8 @@ try {
                             tag: node.tagName.toLowerCase(),
                             marker: [...node.attributes].find(({ name }) => name.startsWith('data-'))?.name || '',
                             className: typeof node.className === 'string' ? node.className.slice(0, 180) : '',
-                            x: Math.max(4, Math.min(window.innerWidth - 4, verticalDelta >= horizontalDelta ? rect.left + 8 : rect.left + (rect.width / 2))),
-                            y: Math.max(4, Math.min(window.innerHeight - 4, rect.top + (rect.height / 2))),
+                            x,
+                            y,
                             verticalDelta,
                             horizontalDelta,
                         };

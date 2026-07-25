@@ -34,7 +34,7 @@ const Page = pathname.includes('projects')
             : isAdminGlobal
                 ? AdminGlobal
             : Dashboard;
-const initialPath = pathname.includes('projects')
+const initialPathname = pathname.includes('projects')
     ? '/proyectos'
     : pathname.includes('precios-unitarios')
         ? '/precios-unitarios'
@@ -43,6 +43,7 @@ const initialPath = pathname.includes('projects')
             : isAdminGlobal
                 ? '/admin-global'
             : '/dashboard';
+const initialPath = `${initialPathname}${window.location.search}`;
 
 const authValue = {
     user,

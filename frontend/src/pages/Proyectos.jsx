@@ -3380,7 +3380,10 @@ const Proyectos = () => {
                         iconWrapClassName="border-orange-200 bg-orange-50"
                         onClose={() => setShowCreateModal(false)}
                     />
-                    <div className="p-4 sm:p-6 lg:p-10">
+                    <AppModalBody
+                        className="p-4 sm:p-6 lg:p-10"
+                        data-project-create-form-viewport
+                    >
                         <form onSubmit={handleCreateProject} className="space-y-4">
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="space-y-2 opacity-60">
@@ -3471,7 +3474,7 @@ const Proyectos = () => {
                                 </LiquidButton>
                             </div>
                         </form>
-                    </div>
+                    </AppModalBody>
                 </AppModalShell>
             )}
         </AnimatePresence>
