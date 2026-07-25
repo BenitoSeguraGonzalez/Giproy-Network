@@ -1731,4 +1731,78 @@ Fecha: 2026-07-24
 
 ## Siguiente unidad
 
-`C04.4 - EDT/WBS`: EN CURSO.
+`C04.4 - EDT/WBS`: **VERIFICADA VISUALMENTE**.
+
+## C04.4 - EDT/WBS
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+- La vista árbol dispone de un único viewport bidireccional propio. Cabecera,
+  filas, profundidad jerárquica, subvalores y acciones se desplazan de forma
+  sincronizada sin mover el shell ni la página del proyecto.
+- La tabla jerárquica conserva un ancho informativo mínimo de 800 px en tablet
+  retrato, evitando comprimir códigos, descripciones, métricas y controles hasta
+  hacerlos ilegibles.
+- En superficies táctiles las acciones de nodo permanecen visibles; ya no
+  dependen de un estado `hover` inexistente o inestable.
+- Acciones de expansión, reordenación, alta de cuenta, asignación, edición y
+  eliminación cumplen el objetivo táctil mínimo de 44 px.
+- La vista gráfica conserva navegación, profundidad, minimapa, búsqueda,
+  métricas y tarjetas legibles en retrato, paisaje y densidades altas.
+- Los diálogos de cuenta, participante y movimiento utilizan la capa modal
+  global, con encabezado y pie estables y cuerpo desplazable cuando la altura
+  efectiva disminuye por el escalado de Windows.
+- Se verificaron nueve raíces, tres niveles, participantes, nombres extensos,
+  desplazamiento a ambos extremos y estados de selección.
+- Resultado final: **50/50 PASS** entre árbol, gráfico y tres diálogos; hojas de
+  capturas abiertas e inspeccionadas, incluida evidencia inicial/final.
+
+### Evidencia C04.4
+
+- Árbol: `artifacts/visual-certification/2026-07-25T03-35-25-171Z`.
+- Gráfico: `artifacts/visual-certification/2026-07-25T03-36-40-601Z`.
+- Cuenta: `artifacts/visual-certification/2026-07-25T03-48-33-819Z`.
+- Participante: `artifacts/visual-certification/2026-07-25T03-46-54-534Z`.
+- Movimiento: `artifacts/visual-certification/2026-07-25T03-49-53-776Z`.
+- `classic-project-workspace-edt-tree-harness-contact-sheet.png`.
+- `classic-project-workspace-edt-tree-harness-scroll-end-contact-sheet.png`.
+- `classic-project-workspace-edt-graph-harness-contact-sheet.png`.
+- `classic-project-workspace-edt-graph-harness-scroll-end-contact-sheet.png`.
+- `classic-project-workspace-edt-account-harness-contact-sheet.png`.
+- `classic-project-workspace-edt-participant-harness-contact-sheet.png`.
+- `classic-project-workspace-edt-participant-harness-scroll-end-contact-sheet.png`.
+- `classic-project-workspace-edt-move-harness-contact-sheet.png`.
+
+### Incidencias de certificacion
+
+- La invocación inicial con el alias npm `certify:visual` no llegó a ejecutar
+  pruebas porque ese script no existe; se utilizó el certificador oficial
+  directamente.
+- `2026-07-25T03-31-03-395Z` quedó incompleta al usar un rol incorrecto para el
+  selector segmentado (`button` en lugar de `tab`). Se cerraron solo sus procesos
+  y `2026-07-25T03-33-50-420Z` aisló la causa en un perfil táctil.
+- `2026-07-25T03-39-02-799Z` se rechazó: el auto-scroll de Playwright colocaba
+  el botón de asignación bajo la cabecera sticky en dos perfiles de escritorio.
+- `2026-07-25T03-41-02-166Z` obtuvo PASS, pero las capturas mostraron el diálogo
+  ausente en dos perfiles; el click forzado no garantizaba la apertura. Se pasó
+  a activación DOM y aserción explícita del encabezado.
+- `2026-07-25T03-42-36-199Z` y `2026-07-25T03-44-54-911Z` también se rechazaron
+  visualmente: a 150% el header global cubría el encabezado del diálogo por una
+  capa `z-110`. Los tres diálogos EDT se alinearon con la capa modal global y
+  se repitieron las matrices afectadas.
+- El detector estético mantiene una advertencia sobre el borde lateral de cuatro
+  píxeles. Se conserva deliberadamente como codificación jerárquica de cuenta y
+  participante; no afecta adaptación, contraste ni interacción.
+- Solo las cinco ejecuciones enumeradas como evidencia se consideran válidas.
+
+### Archivos tratados
+
+- `frontend/src/components/projects/Edt.jsx`.
+- Harnesses de árbol, gráfico, cuenta, participante y movimiento.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `docs/architecture/visual-surface-inventory.json`.
+
+## Siguiente unidad
+
+`C04.5 - EDO/OBS`: EN CURSO.

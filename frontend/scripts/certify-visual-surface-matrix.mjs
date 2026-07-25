@@ -134,20 +134,71 @@ try {
                     direccion_detalle: `Avenida del proyecto ${index + 1}`,
                     proyecto_codigo_root: 'SB-001',
                 }));
+                const edtParticipant = (id, parentId, index) => ({
+                    id,
+                    codigo: `EDT-P-${String(index).padStart(2, '0')}`,
+                    nombre: '',
+                    definicion: '',
+                    parent_id: parentId,
+                    orden: index,
+                    nivel: 3,
+                    tipo_nodo: 'STAKEHOLDER',
+                    stakeholder_id: 700 + index,
+                    rol_id: 801,
+                    actividades_claves: 'Coordinación técnica, validación documental y seguimiento interdisciplinario del paquete de trabajo.',
+                    stakeholder: stakeholders[(index - 1) % stakeholders.length],
+                    rol: { id: 801, nombre: 'Responsable técnico' },
+                    hijos: [],
+                });
+                const edtTree = Array.from({ length: 9 }, (_, index) => {
+                    const rootId = 900 + index;
+                    const childId = 1000 + index;
+                    return {
+                        id: rootId,
+                        codigo: `EDT-${String(index + 1).padStart(2, '0')}`,
+                        nombre: `Cuenta de control constructiva Santiago Bermeo ${index + 1} con denominación extensa`,
+                        definicion: 'Alcance técnico completo, entregables verificables y criterios de aceptación de la cuenta de control.',
+                        parent_id: null,
+                        orden: index + 1,
+                        nivel: 1,
+                        tipo_nodo: 'CUENTA_PAQUETE',
+                        hijos: [{
+                            id: childId,
+                            codigo: `EDT-${index + 1}.1`,
+                            nombre: `Paquete especializado interdisciplinario ${index + 1}`,
+                            definicion: 'Paquete de segundo nivel para comprobar profundidad, sangría y navegación táctil.',
+                            parent_id: rootId,
+                            orden: 1,
+                            nivel: 2,
+                            tipo_nodo: 'CUENTA_PAQUETE',
+                            hijos: [
+                                edtParticipant(1100 + index, childId, index + 1),
+                                {
+                                    id: 1200 + index,
+                                    codigo: `EDT-${index + 1}.1.2`,
+                                    nombre: `Subpaquete profundo ${index + 1}`,
+                                    definicion: 'Tercer nivel de profundidad de la EDT.',
+                                    parent_id: childId,
+                                    orden: 2,
+                                    nivel: 3,
+                                    tipo_nodo: 'CUENTA_PAQUETE',
+                                    hijos: [edtParticipant(1300 + index, 1200 + index, index + 2)],
+                                },
+                            ],
+                        }],
+                    };
+                });
                 let body = [];
                 if (/\/usuarios\/?$/u.test(apiPath)) body = collaborators;
                 else if (/\/stakeholders\/project\/[^/]+\/?$/u.test(apiPath)) body = stakeholders;
+                else if (/\/roles\/?$/u.test(apiPath)) body = [
+                    { id: 801, nombre: 'Responsable técnico' },
+                    { id: 802, nombre: 'Coordinación de proyecto' },
+                    { id: 803, nombre: 'Supervisión especializada' },
+                ];
                 else if (apiPath.endsWith('/maestros/ecuador/provincias')) body = ['Pichincha', 'Guayas', 'Azuay'];
                 else if (apiPath.includes('/maestros/ecuador/cantones/')) body = ['Quito', 'Rumiñahui', 'Mejía'];
-                else if (/\/edt\/project\/\d+\/?$/u.test(apiPath)) {
-                    body = Array.from({ length: 8 }, (_, index) => ({
-                        id: 601 + index,
-                        codigo: `EDT-${String(index + 1).padStart(2, '0')}`,
-                        nombre: `Rama constructiva Santiago ${index + 1}`,
-                        parent_id: null,
-                        nivel: 1,
-                    }));
-                }
+                else if (/\/edt\/project\/\d+\/?$/u.test(apiPath)) body = edtTree;
                 else if (/\/proyectos\/\d+\/assigned-users\/?$/u.test(apiPath)) body = collaborators.slice(0, 6);
                 else if (/\/proyectos\/\d+\/permissions\/?$/u.test(apiPath)) {
                     body = { is_restricted: false, allowed_modules: ['todos'] };
@@ -227,8 +278,11 @@ try {
                     || harness.source === 'classic-project-workspace-stakeholders-harness.html'
                     || harness.source === 'classic-project-workspace-stakeholder-create-harness.html'
                     || harness.source === 'classic-project-workspace-stakeholder-edit-harness.html'
+                    || harness.source.startsWith('classic-project-workspace-edt-')
                     ? `${baseUrl}${harness.path}?project_id=1&tab=${
-                        harness.source.includes('stakeholder') ? 'stakeholders' : 'datos'
+                        harness.source.startsWith('classic-project-workspace-edt-')
+                            ? 'edt_wbs'
+                            : harness.source.includes('stakeholder') ? 'stakeholders' : 'datos'
                     }`
                     : `${baseUrl}${harness.path}`;
                 await page.goto(harnessUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -238,6 +292,30 @@ try {
                     || harness.source === 'classic-project-workspace-stakeholder-edit-harness.html') {
                     await page.getByTitle('Stakeholders').click();
                     await page.waitForTimeout(500);
+                }
+                if (harness.source.startsWith('classic-project-workspace-edt-')) {
+                    await page.getByTitle('EDT/WBS').click();
+                    await page.waitForTimeout(600);
+                    if (harness.source !== 'classic-project-workspace-edt-graph-harness.html') {
+                        await page.getByRole('tab', { name: 'Árbol', exact: true }).click();
+                        await page.waitForTimeout(450);
+                    }
+                    if (harness.source === 'classic-project-workspace-edt-account-harness.html') {
+                        await page.getByRole('button', { name: 'Nueva cuenta principal' }).click();
+                        await page.waitForTimeout(350);
+                    }
+                    if (harness.source === 'classic-project-workspace-edt-participant-harness.html') {
+                        await page.locator('#edt-node-900').click();
+                        await page.getByTitle('Asignar stakeholder').first().evaluate((button) => button.click());
+                        await page.getByRole('heading', { name: 'Asignar participante' }).waitFor({ state: 'visible' });
+                        await page.waitForTimeout(350);
+                    }
+                    if (harness.source === 'classic-project-workspace-edt-move-harness.html') {
+                        await page.locator('#edt-node-900').click();
+                        await page.getByLabel('Seleccionar nodo').first().click();
+                        await page.getByRole('button', { name: 'Mover selección EDT' }).click();
+                        await page.waitForTimeout(350);
+                    }
                 }
                 if (harness.source === 'classic-projects-kanban-harness.html') {
                     await page.getByRole('tab', { name: 'Kanban' }).click();
@@ -636,6 +714,15 @@ try {
                     await page.evaluate(() => {
                         const viewport = document.querySelector('[data-stakeholder-form-viewport]');
                         if (viewport) viewport.scrollTop = viewport.scrollHeight;
+                    });
+                }
+                if (harness.source === 'classic-project-workspace-edt-tree-harness.html') {
+                    await page.evaluate(() => {
+                        const viewport = document.querySelector('[data-edt-tree-viewport]');
+                        if (viewport) {
+                            viewport.scrollTop = viewport.scrollHeight;
+                            viewport.scrollLeft = viewport.scrollWidth;
+                        }
                     });
                 }
                 await page.waitForTimeout(50);
