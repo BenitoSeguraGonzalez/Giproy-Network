@@ -1991,3 +1991,180 @@ Fecha: 2026-07-25
 ## Siguiente unidad
 
 `C04.7 - Cronogramas`: EN CURSO.
+
+## C04.7 - Cronogramas
+
+Estado: **EN INVENTARIO Y ADECUACIÓN**
+Fecha de inicio: 2026-07-25
+
+### Mapa de superficies confirmado en código
+
+#### Shell y vistas principales
+
+1. Cabecera del módulo, selector Gantt/Valorado/Recursos y acciones de reporte.
+2. Gantt operativo: grilla de actividades + escala temporal.
+3. Cronograma valorado: tabla de porcentajes.
+4. Cronograma valorado: valores económicos.
+5. Cronograma valorado: flujo de caja.
+6. Cronograma valorado: Curva S.
+7. Uso de recursos en modo lectura/análisis.
+
+#### Configuración, menús y paneles del valorado/recursos
+
+8. Banda de configuración expandida/colapsada.
+9. Menú de tipo de periodo.
+10. Menú de modo de distribución.
+11. Configurador de columnas.
+12. Menú de reportes Gantt.
+13. Menú de reportes valorados.
+14. Menú de reportes de recursos.
+15. Diálogo de reporte de recursos por rango.
+16. Previsualización de reporte.
+17. Generación de reporte.
+18. Configuración de impresión clásica Gantt.
+19. Configuración de impresión clásica Curva S.
+
+#### Herramientas y estados internos Gantt
+
+20. Menú de herramientas.
+21. Menú/selector de escala temporal y zoom.
+22. Panel de configuración Gantt.
+23. Panel de historial/undo-redo.
+24. Menú de interoperabilidad MS Project.
+25. Calendario laboral y festivos.
+26. Pareto temporal.
+27. Menú contextual de actividad/segmento.
+28. Alta rápida de sucesora.
+29. División de segmento.
+30. Ajuste fino de inicio de segmento.
+31. Comparación/reconciliación.
+32. Señales de planificación APU.
+33. Selector de representación de duración.
+34. Editor operativo de recurso.
+35. Contribución de recurso.
+36. Selector de gobernanza y tipo de subcontrato.
+
+Este mapa es inicial pero vinculante: una superficie solo puede retirarse si se
+demuestra que no tiene importador, ruta ni disparador alcanzable. El harness
+`gantt-ff-harness.html` existente no basta como certificación global porque
+depende de un fixture externo ausente y no abre los estados anteriores.
+
+### C04.7.1 - Gantt operativo, escala/zoom y desplazamiento sincronizado
+
+Estado: **CERTIFICADA EN 10/10 PERFILES**
+
+Alcance tratado:
+
+- superficie principal dividida: grilla de actividades + timeline;
+- selector `Tabla / Dividida / Gantt`;
+- activación de edición táctil;
+- búsqueda y avance entre coincidencias;
+- navegación de ruta crítica;
+- escala temporal, bloqueo, zoom, ajuste al viewport y confirmación;
+- desplazamiento vertical y horizontal interno sincronizado;
+- estado inicial y estado al final del desplazamiento.
+
+Adecuación aplicada:
+
+- por debajo de `1600px` lógicos los controles operativos abandonan la fila
+  rígida compartida con el selector de vista y ocupan una banda completa;
+- por debajo de `1400px` lógicos el grupo de escala/zoom se convierte en una
+  tercera banda funcional, sin reducir el lienzo ni los controles;
+- por debajo de `900px` lógicos búsqueda y navegación crítica se presentan en
+  bandas independientes de ancho completo;
+- no se aplicó `zoom`, `transform: scale()` ni reducción global de tipografía;
+- la tabla y el timeline conservan sus propios viewports y el documento no se
+  convierte en el contenedor de desplazamiento.
+
+Diagnóstico y errores preservados:
+
+1. Ejecución inicial Lenovo horizontal
+   `2026-07-25T05-37-32-442Z`: **FAIL**, `125px` de overflow documental y tres
+   controles finales recortados. La captura demostró que la causa era la barra
+   superior rígida, no el lienzo Gantt.
+2. Primera corrección
+   `2026-07-25T05-40-31-429Z`: **PASS** Lenovo horizontal; se inspeccionaron
+   manualmente captura inicial y captura al final del scroll.
+3. Intento de matriz
+   `2026-07-25T05-41-23-602Z`: lote **NO VÁLIDO** por caída del servidor Vite
+   (`ERR_CONNECTION_RESET/REFUSED`). No se contabiliza como fallo visual.
+4. Matriz aislada por perfil: detectó fallos reales residuales en
+   escritorio 150 %, tabletas horizontales y retrato. Las capturas mostraron
+   que los grupos internos aún competían por la misma fila.
+5. Segunda corrección: escritorio 150 %, tablet FHD horizontal, tablet 2K
+   horizontal y Lenovo retrato pasaron; FHD/2K retrato conservaron `50px/15px`
+   de overflow.
+6. Tercera corrección: la captura FHD retrato confirmó que búsqueda y
+   navegación crítica crecían a unos `380px` cada una. Se separaron únicamente
+   por debajo de `900px`.
+
+Evidencia final representativa:
+
+- Lenovo P12 horizontal:
+  `artifacts/visual-certification/2026-07-25T05-43-05-248Z/`;
+- escritorio FHD a 150 %:
+  `artifacts/visual-certification/2026-07-25T05-43-58-572Z/`;
+- tablet FHD horizontal:
+  `artifacts/visual-certification/2026-07-25T05-44-02-970Z/`;
+- tablet 2K horizontal:
+  `artifacts/visual-certification/2026-07-25T05-44-13-247Z/`;
+- Lenovo P12 retrato:
+  `artifacts/visual-certification/2026-07-25T05-44-23-556Z/`;
+- tablet FHD retrato:
+  `artifacts/visual-certification/2026-07-25T05-45-15-492Z/`;
+- tablet 2K retrato:
+  `artifacts/visual-certification/2026-07-25T05-45-20-371Z/`.
+
+Resultado visual confirmado:
+
+- `10/10` perfiles sin overflow documental ni controles recortados;
+- en horizontal se conserva la vista dividida y los paneles se desplazan;
+- en retrato se prioriza la tabla y únicamente su viewport permite alcanzar
+  columnas no visibles;
+- barra operativa completa y estable tanto al inicio como al final del scroll.
+
+Pendiente dentro de C04.7: abrir, adecuar y certificar una a una las superficies
+3 a 36 del inventario anterior. Esta certificación no cierra Cronogramas.
+
+### C04.7.2 - Menú Herramientas del Gantt
+
+Estado: **CERTIFICADA EN 10/10 PERFILES**
+
+Superficie real abierta y revisada:
+
+- Undo de la versión anterior;
+- restauración del estado inicial;
+- acceso a Configuración;
+- acceso a Historial;
+- acción destructiva Factory reset.
+
+Decisión UX:
+
+- el menú mantiene un ancho contenido y se ancla al disparador;
+- en retrato se abre hacia el interior del viewport sin recortar acciones;
+- las acciones mantienen una altura mínima de `46px`;
+- las acciones no disponibles conservan legibilidad como estado deshabilitado;
+- Factory reset se diferencia semánticamente mediante tratamiento destructivo,
+  sin competir con Configuración e Historial.
+
+Contrato de prueba añadido:
+
+- `gantt-tools-harness.html` monta el componente real con fixture determinista;
+- Playwright abre `Herramientas del Gantt`, espera `Factory reset` y estaciona
+  el puntero fuera de superficies hover;
+- el primer contrato movía el puntero al centro y activaba accidentalmente el
+  tooltip de una actividad en retrato. La evidencia fue rechazada y el
+  contrato se corrigió antes de la matriz final.
+
+Evidencia final:
+
+- matriz completa entre
+  `artifacts/visual-certification/2026-07-25T05-47-53-691Z/` y
+  `artifacts/visual-certification/2026-07-25T05-48-41-915Z/`;
+- captura final Lenovo horizontal:
+  `artifacts/visual-certification/2026-07-25T05-48-36-132Z/`;
+- captura final Lenovo retrato:
+  `artifacts/visual-certification/2026-07-25T05-48-41-915Z/`.
+
+Resultado: `10/10` perfiles, sin overflow documental, clipping interactivo ni
+hover ajeno a la subpantalla.

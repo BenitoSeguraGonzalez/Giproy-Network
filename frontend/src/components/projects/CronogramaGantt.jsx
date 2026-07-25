@@ -18993,7 +18993,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                     />
                 </React.Suspense>
             ) : null}
-            <div className="flex min-w-0 flex-wrap items-center gap-2.5 overflow-visible">
+                <div className="flex min-w-0 flex-wrap items-center gap-2.5 overflow-visible">
                 <div className="flex h-11 items-center rounded-[0.9rem] border border-zinc-200 bg-white p-1" aria-label="Vista del Gantt">
                     {[
                         ['table', 'Tabla'],
@@ -19021,8 +19021,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         {touchEditEnabled ? 'Edición táctil activa' : 'Activar edición táctil'}
                     </button>
                 ) : null}
-                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2.5">
-                    <ControlRail className="h-[60px] min-w-[260px] flex-[0.84_1_16rem] px-2 py-1.5">
+                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2.5 max-[1599px]:basis-full">
+                    <ControlRail className="h-[60px] min-w-[260px] flex-[0.84_1_16rem] px-2 py-1.5 max-[899px]:w-full max-[899px]:flex-none">
                         <ControlRailSection className="h-full min-w-0 flex-1 gap-2 pl-2 pr-1.5">
                             <GridColumnManager
                                 columns={ganttBaseColumns}
@@ -19077,7 +19077,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         </ControlRailSection>
                     </ControlRail>
 
-                    <ControlRail className="h-[60px] min-w-[250px] flex-[0.68_1_14rem] px-2 py-1.5">
+                    <ControlRail className="h-[60px] min-w-[250px] flex-[0.68_1_14rem] px-2 py-1.5 max-[899px]:w-full max-[899px]:flex-none">
                         <ControlRailSection className="h-full min-w-0 flex-1 items-center gap-1.5 pl-2 pr-2">
                             <div className="flex shrink-0 flex-wrap items-center gap-1">
                                 {GANTT_CPM_NAVIGATOR_MODES.map((mode) => {
@@ -19134,7 +19134,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         </ControlRailSection>
                     </ControlRail>
 
-                    <div className="flex min-w-0 flex-[1.2_1_20rem] items-center justify-end gap-1.5">
+                    <div className="flex min-w-0 flex-[1.2_1_20rem] items-center justify-end gap-1.5 max-[1399px]:basis-full">
                         {true ? (
                             <>
                                 <ControlRail className="h-[60px] min-w-0 flex-1 gap-1.5 px-2 py-1.5">
