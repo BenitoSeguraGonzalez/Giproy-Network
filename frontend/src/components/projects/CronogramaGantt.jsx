@@ -19477,7 +19477,10 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 <button
                                                     type="button"
                                                     onClick={() => setHistoryPanelOpen(false)}
-                                                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.8rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:text-[#F39200]"
+                                                    className={`inline-flex shrink-0 items-center justify-center rounded-[0.8rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:text-[#F39200] ${
+                                                        adaptiveLayout.environment.coarse || adaptiveLayout.environment.touchPoints > 0 ? 'h-11 w-11' : 'h-8 w-8'
+                                                    }`}
+                                                    aria-label="Cerrar historial confirmado"
                                                 >
                                                     <X className="h-3.5 w-3.5" />
                                                 </button>
@@ -19532,7 +19535,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     <button
                                                         type="button"
                                                         onClick={handleCloseConfigPanel}
-                                                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.8rem] border border-white/10 bg-white/[0.04] text-white/58 transition hover:border-white/18 hover:bg-white/[0.08] hover:text-[#F39200]"
+                                                        className={`inline-flex shrink-0 items-center justify-center rounded-[0.8rem] border border-white/10 bg-white/[0.04] text-white/58 transition hover:border-white/18 hover:bg-white/[0.08] hover:text-[#F39200] ${
+                                                            adaptiveLayout.environment.coarse || adaptiveLayout.environment.touchPoints > 0 ? 'h-11 w-11' : 'h-8 w-8'
+                                                        }`}
                                                         aria-label="Cerrar configuración de Gantt"
                                                     >
                                                         <X className="h-4 w-4" />

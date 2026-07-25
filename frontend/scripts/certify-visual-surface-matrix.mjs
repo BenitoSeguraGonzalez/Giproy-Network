@@ -684,6 +684,19 @@ try {
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(350);
                 }
+                if (harness.source === 'gantt-config-harness.html'
+                    || harness.source === 'gantt-history-harness.html') {
+                    await page.getByRole('button', { name: 'Herramientas del Gantt' }).click();
+                    if (harness.source === 'gantt-config-harness.html') {
+                        await page.getByRole('button', { name: 'Configuración', exact: true }).click();
+                        await page.getByText('Configuración de Gantt', { exact: true }).waitFor({ state: 'visible' });
+                    } else {
+                        await page.getByRole('button', { name: 'Historial', exact: true }).click();
+                        await page.getByText('Historial confirmado', { exact: true }).waitFor({ state: 'visible' });
+                    }
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
                 if (harness.source === 'classic-projects-kanban-harness.html') {
                     await page.getByRole('tab', { name: 'Kanban' }).click();
                     await page.waitForTimeout(350);

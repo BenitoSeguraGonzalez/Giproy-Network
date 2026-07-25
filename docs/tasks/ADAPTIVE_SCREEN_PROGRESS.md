@@ -2168,3 +2168,59 @@ Evidencia final:
 
 Resultado: `10/10` perfiles, sin overflow documental, clipping interactivo ni
 hover ajeno a la subpantalla.
+
+### C04.7.3 - Panel Configuración de Gantt
+
+Estado: **CERTIFICADA EN 10/10 PERFILES**
+
+Contenido inspeccionado:
+
+- preferencias visuales;
+- fechas de inicio y objetivo;
+- días y horas laborables;
+- inicio de jornada;
+- resumen y acceso al calendario laboral.
+
+Adecuación/verificación:
+
+- panel anclado, con altura máxima y scroll vertical propio;
+- campos apilados en retrato sin reducir tipografía ni escalar el panel;
+- cierre aumentado de `32x32` a `44x44` en entornos coarse/touch;
+- acción primaria de calendario ocupa el ancho disponible;
+- el lienzo Gantt permanece inmóvil detrás del panel.
+
+Contrato: `gantt-config-harness.html`, abierto desde Herramientas mediante el
+flujo real. Evidencia final entre
+`2026-07-25T05-52-49-691Z` y `2026-07-25T05-53-42-092Z`.
+Capturas inspeccionadas manualmente: Lenovo horizontal
+`2026-07-25T05-53-35-928Z` y Lenovo retrato
+`2026-07-25T05-53-42-092Z`.
+
+Resultado: `10/10` perfiles.
+
+### C04.7.4 - Panel Historial confirmado
+
+Estado: **CERTIFICADA EN 10/10 PERFILES**
+
+Estados tratados:
+
+- historial poblado con dos confirmaciones;
+- versión, fecha/hora, número de partidas, duración, trazas CPM y origen
+  confirmado/restaurado;
+- estado vacío inspeccionado inicialmente y preservado como contrato válido.
+
+Correcciones de certificación:
+
+- el fixture inicial solo alcanzaba el estado vacío; se añadieron metadatos
+  deterministas de confirmación para revisar el contenido real;
+- cierre aumentado de `32x32` a `44x44` en coarse/touch;
+- el listado usa scroll propio cuando supera la altura disponible.
+
+Contrato: `gantt-history-harness.html`, abierto desde Herramientas mediante el
+flujo real. Evidencia final entre
+`2026-07-25T05-53-47-955Z` y `2026-07-25T05-54-39-601Z`.
+Capturas inspeccionadas manualmente: Lenovo horizontal
+`2026-07-25T05-54-33-432Z` y Lenovo retrato
+`2026-07-25T05-54-39-601Z`.
+
+Resultado: `10/10` perfiles.

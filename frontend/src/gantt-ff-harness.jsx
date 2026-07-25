@@ -46,6 +46,22 @@ const createSyntheticFixture = () => {
             resources: [
                 { id: 7000 + index, codigo: `REC-${index + 1}`, descripcion: `Recurso especializado ${index + 1}`, unidad: 'h', cantidad: 2.5 + index },
             ],
+            metadata: {
+                gantt_confirmed_history_v1: [
+                    {
+                        confirmed_at: '2026-07-24T16:30:00.000Z',
+                        source: 'gantt_approval',
+                        duration: 8 + (index % 5),
+                        cpm_reconciled: index < 12,
+                    },
+                    {
+                        confirmed_at: '2026-07-18T14:15:00.000Z',
+                        source: 'gantt_restore_confirmed',
+                        duration: 7 + (index % 5),
+                        cpm_reconciled: index < 8,
+                    },
+                ],
+            },
         };
     });
     const chapterRows = Array.from({ length: 6 }, (_, index) => ({
