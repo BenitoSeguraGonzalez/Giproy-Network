@@ -103,7 +103,7 @@
     "protectedRoutes": 38,
     "publicRoutes": 5,
     "interactiveSurfaceFiles": 55,
-    "harnesses": 115,
+    "harnesses": 116,
     "harnessesWithoutValidator": 0
   },
   "routes": [
@@ -4585,6 +4585,28 @@
         "certify-visual-surface-matrix.mjs",
         "validate-formula-responsive-dom.mjs",
         "validate-formula-scrollbar-geometry.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-calendar-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-calendar-harness.html",
+      "source": "gantt-calendar-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
       ],
       "profiles": [
         "desktop-fhd-100",

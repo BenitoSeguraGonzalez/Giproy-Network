@@ -21430,7 +21430,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                         <button
                                             type="button"
                                             onClick={() => setHolidayCalendarModalOpen(false)}
-                                            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.9rem] border border-white/10 bg-white/[0.04] text-white/58 transition hover:border-white/18 hover:bg-white/[0.08] hover:text-[#F39200]"
+                                            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.9rem] border border-white/10 bg-white/[0.04] text-white/58 transition hover:border-white/18 hover:bg-white/[0.08] hover:text-[#F39200]"
                                             aria-label="Cerrar calendario laboral del proyecto"
                                         >
                                             <X className="h-4 w-4" />
@@ -21484,8 +21484,11 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                         </div>
                                     </div>
                                     <div className="min-h-0 flex-1 overflow-hidden px-5 pb-4 pt-4">
-                                        <div className="grid h-full min-h-0 gap-3 xl:grid-cols-[minmax(0,1fr)_24rem]">
-                                            <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
+                                        <div
+                                            className="gantt-dark-scrollbar grid h-full min-h-0 grid-rows-[max-content_max-content] gap-3 overflow-y-auto xl:grid-cols-[minmax(0,1fr)_24rem] xl:grid-rows-none xl:overflow-hidden"
+                                            data-gantt-calendar-viewport="true"
+                                        >
+                                            <div className="flex h-auto min-h-0 flex-col gap-4 overflow-visible xl:h-full xl:overflow-hidden">
                                                 <div className="z-30 min-h-[7.25rem] shrink-0 rounded-[1rem] border border-white/10 bg-[#0f1218] p-3 shadow-[0_16px_32px_rgba(0,0,0,0.42),0_0_0_1px_rgba(255,255,255,0.04)]">
                                                     <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                                                         <div className="min-w-0">
@@ -21545,7 +21548,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                 type="button"
                                                                 onClick={handleJumpToSelectedHolidayDate}
                                                                 disabled={!selectedHolidayDay}
-                                                                className="inline-flex h-9 w-9 items-center justify-center rounded-[0.8rem] border border-emerald-300/20 bg-emerald-500/[0.08] text-emerald-100 transition hover:border-emerald-300/45 hover:bg-emerald-500/[0.14] disabled:cursor-not-allowed disabled:opacity-50"
+                                                                className="inline-flex h-11 w-11 items-center justify-center rounded-[0.8rem] border border-emerald-300/20 bg-emerald-500/[0.08] text-emerald-100 transition hover:border-emerald-300/45 hover:bg-emerald-500/[0.14] disabled:cursor-not-allowed disabled:opacity-50"
                                                                 title="Ir a esta fecha en el Gantt"
                                                                 aria-label="Ir a esta fecha en el Gantt"
                                                             >
@@ -21555,7 +21558,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                 type="button"
                                                                 onClick={handleReloadHolidayCalendar}
                                                                 disabled={configSaving || typeof onReloadTrabajoHolidayCalendar !== 'function'}
-                                                                className="inline-flex h-9 w-9 items-center justify-center rounded-[0.8rem] border border-sky-300/20 bg-sky-500/[0.08] text-sky-100 transition hover:border-sky-300/45 hover:bg-sky-500/[0.14] disabled:cursor-not-allowed disabled:opacity-50"
+                                                                className="inline-flex h-11 w-11 items-center justify-center rounded-[0.8rem] border border-sky-300/20 bg-sky-500/[0.08] text-sky-100 transition hover:border-sky-300/45 hover:bg-sky-500/[0.14] disabled:cursor-not-allowed disabled:opacity-50"
                                                                 title="Recargar festivos oficiales"
                                                                 aria-label="Recargar festivos oficiales"
                                                             >
@@ -21565,7 +21568,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                 type="button"
                                                                 onClick={handleResetHolidayCalendar}
                                                                 disabled={configSaving || typeof onResetTrabajoHolidayCalendar !== 'function'}
-                                                                className="inline-flex h-9 w-9 items-center justify-center rounded-[0.8rem] border border-amber-300/20 bg-amber-500/[0.08] text-amber-100 transition hover:border-amber-300/45 hover:bg-amber-500/[0.14] disabled:cursor-not-allowed disabled:opacity-50"
+                                                                className="inline-flex h-11 w-11 items-center justify-center rounded-[0.8rem] border border-amber-300/20 bg-amber-500/[0.08] text-amber-100 transition hover:border-amber-300/45 hover:bg-amber-500/[0.14] disabled:cursor-not-allowed disabled:opacity-50"
                                                                 title="Resetear calendario"
                                                                 aria-label="Resetear calendario"
                                                             >
@@ -21574,7 +21577,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="gantt-dark-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+                                                <div className="gantt-dark-scrollbar min-h-0 flex-none space-y-4 overflow-visible pr-1 xl:flex-1 xl:overflow-y-auto">
                                                 <div className="hidden gap-2 sm:grid-cols-2 xl:grid-cols-5">
                                                     <div className="rounded-[0.85rem] border border-emerald-400/18 bg-emerald-500/[0.08] px-3 py-3">
                                                         <p className="text-[8px] font-black uppercase tracking-[0.14em] text-emerald-200">Laborables</p>
@@ -21703,7 +21706,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 )}
                                                 </div>
                                             </div>
-                                            <div className="gantt-dark-scrollbar h-full min-h-0 space-y-3 overflow-y-auto pb-5 pr-1">
+                                            <div className="gantt-dark-scrollbar h-auto min-h-0 space-y-3 overflow-visible pb-5 pr-1 xl:h-full xl:overflow-y-auto">
                                                 <div className="rounded-[1rem] border border-cyan-400/18 bg-cyan-500/[0.07] p-3">
                                                     <div className="flex items-center justify-between gap-3">
                                                         <p className="text-[9px] font-black uppercase tracking-[0.16em] text-cyan-200">Parámetros base</p>

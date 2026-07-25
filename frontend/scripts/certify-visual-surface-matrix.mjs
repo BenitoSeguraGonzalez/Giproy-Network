@@ -685,11 +685,17 @@ try {
                     await page.waitForTimeout(350);
                 }
                 if (harness.source === 'gantt-config-harness.html'
-                    || harness.source === 'gantt-history-harness.html') {
+                    || harness.source === 'gantt-history-harness.html'
+                    || harness.source === 'gantt-calendar-harness.html') {
                     await page.getByRole('button', { name: 'Herramientas del Gantt' }).click();
-                    if (harness.source === 'gantt-config-harness.html') {
+                    if (harness.source === 'gantt-config-harness.html'
+                        || harness.source === 'gantt-calendar-harness.html') {
                         await page.getByRole('button', { name: 'Configuración', exact: true }).click();
                         await page.getByText('Configuración de Gantt', { exact: true }).waitFor({ state: 'visible' });
+                        if (harness.source === 'gantt-calendar-harness.html') {
+                            await page.getByRole('button', { name: 'Abrir calendario laboral', exact: true }).click();
+                            await page.getByRole('dialog', { name: 'Calendario laboral del proyecto' }).waitFor({ state: 'visible' });
+                        }
                     } else {
                         await page.getByRole('button', { name: 'Historial', exact: true }).click();
                         await page.getByText('Historial confirmado', { exact: true }).waitFor({ state: 'visible' });
@@ -1103,6 +1109,12 @@ try {
                 if (harness.source === 'classic-project-manager-team-dashboard-harness.html') {
                     await page.evaluate(() => {
                         const viewport = document.querySelector('[data-team-dashboard-viewport]');
+                        if (viewport) viewport.scrollTop = viewport.scrollHeight;
+                    });
+                }
+                if (harness.source === 'gantt-calendar-harness.html') {
+                    await page.evaluate(() => {
+                        const viewport = document.querySelector('[data-gantt-calendar-viewport="true"]');
                         if (viewport) viewport.scrollTop = viewport.scrollHeight;
                     });
                 }

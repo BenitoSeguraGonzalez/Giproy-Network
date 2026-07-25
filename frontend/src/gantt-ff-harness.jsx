@@ -148,11 +148,34 @@ const createSyntheticFixture = () => {
             rows,
             config: {
                 project_start_date: '2026-07-01',
+                fecha_inicio_proyecto: '2026-07-01',
+                fecha_fin_objetivo_proyecto: '2026-09-30',
                 workday_start: '08:00',
                 workday_end: '17:00',
                 workdays: [1, 2, 3, 4, 5],
                 calendar_mode: 'business',
                 zoom: 'week',
+            },
+            holiday_calendar: {
+                start_date: '2026-07-01',
+                end_date: '2026-09-30',
+                items: [
+                    {
+                        id: 801,
+                        observed_date: '2026-07-20',
+                        holiday_name: 'Festivo oficial regional',
+                        source: 'official',
+                        is_manual: false,
+                    },
+                    {
+                        id: 802,
+                        observed_date: '2026-08-14',
+                        holiday_name: 'Cierre técnico planificado',
+                        source: 'manual',
+                        is_manual: true,
+                        origin_type: 'manual_add',
+                    },
+                ],
             },
         },
         valorado: {

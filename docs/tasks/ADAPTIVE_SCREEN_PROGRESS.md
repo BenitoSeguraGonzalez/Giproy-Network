@@ -2198,6 +2198,59 @@ Capturas inspeccionadas manualmente: Lenovo horizontal
 
 Resultado: `10/10` perfiles.
 
+### C04.7.5 - Calendario laboral y festivos
+
+Estado: **CERTIFICADA EN 10/10 PERFILES**
+
+Flujo real: Herramientas -> Configuración -> Abrir calendario laboral.
+
+Contenido tratado:
+
+- rango operativo de 106 días;
+- estadísticas de laborables, no laborables, festivos oficiales y manuales;
+- leyenda, día seleccionado y navegación al Gantt;
+- meses julio, agosto y septiembre;
+- parámetros base;
+- creador de horarios;
+- alta y listado de festivos manuales.
+
+Errores detectados mediante captura y rechazados:
+
+1. El fixture usaba claves inglesas y el modal aparecía sin rango ni meses,
+   aunque el DOM daba PASS. Se corrigió con las claves persistidas reales,
+   rango objetivo y festivos deterministas.
+2. En retrato, el grid de altura fija comprimía sus filas automáticas y el
+   bloque `Parámetros base` se superponía al calendario. La primera propuesta
+   de flujo único seguía cruzando contenido y también fue rechazada.
+3. El certificador genérico desplazaba el Gantt subyacente por tener mayor
+   delta vertical. Se añadió un marcador explícito para certificar el extremo
+   del viewport del modal.
+
+Adecuación aplicada:
+
+- dos columnas y viewports independientes solo en `xl`;
+- una columna en tablet/retrato con filas `max-content` y un único scroll
+  vertical del modal;
+- cierre y acciones del día seleccionado a `44x44`;
+- cabecera y estadísticas permanecen fijas mientras el contenido operativo se
+  desplaza;
+- ningún scroll del documento ni del Gantt se usa para alcanzar el final del
+  calendario.
+
+Contrato: `gantt-calendar-harness.html` y
+`data-gantt-calendar-viewport="true"`.
+
+Evidencia final completa entre
+`2026-07-25T06-02-02-097Z` y `2026-07-25T06-02-54-568Z`.
+Capturas inspeccionadas:
+
+- Lenovo horizontal inicio:
+  `artifacts/visual-certification/2026-07-25T06-02-48-443Z/`;
+- Lenovo retrato inicio y extremo:
+  `artifacts/visual-certification/2026-07-25T06-02-54-568Z/`.
+
+Resultado: `10/10` perfiles sin overflow, clipping ni superposición.
+
 ### C04.7.4 - Panel Historial confirmado
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**
