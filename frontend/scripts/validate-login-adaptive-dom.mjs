@@ -59,6 +59,9 @@ try {
         const page = await context.newPage();
         const errors = [];
         let recoveryFails = false;
+        let verificationFails = false;
+        let rucReviewStatus = 'pending';
+        let rucReviewFails = false;
         page.on('pageerror', (error) => errors.push(error.message));
         await page.addInitScript(() => {
             try {
@@ -80,6 +83,24 @@ try {
                     status: recoveryFails ? 503 : 200,
                     contentType: 'application/json',
                     body: recoveryFails ? JSON.stringify({ detail: 'Servicio temporalmente no disponible.' }) : '{}',
+                });
+            }
+            if (url.pathname.endsWith('/register/verify')) {
+                return route.fulfill({
+                    status: verificationFails ? 410 : 200,
+                    contentType: 'application/json',
+                    body: verificationFails
+                        ? JSON.stringify({ detail: 'Token de validación expirado.' })
+                        : JSON.stringify({ message: 'Email validado correctamente.' }),
+                });
+            }
+            if (url.pathname.endsWith('/sri-ruc/public/manual-review/status')) {
+                return route.fulfill({
+                    status: rucReviewFails ? 503 : 200,
+                    contentType: 'application/json',
+                    body: rucReviewFails
+                        ? JSON.stringify({ detail: 'Consulta no disponible.' })
+                        : JSON.stringify({ status: rucReviewStatus, message: `Estado representativo: ${rucReviewStatus}.` }),
                 });
             }
             return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
@@ -176,6 +197,35 @@ try {
         assert.equal(await page.getByRole('button', { name: /cambiar contraseña/i }).isDisabled(), true, `${profile.id}: token ausente bloquea envio`);
         assert.equal(await page.getByRole('alert').count(), 1, `${profile.id}: token ausente se explica`);
         await page.screenshot({ path: path.join(artifactRoot, `${profile.id}-reset-password.png`), fullPage: false });
+
+        await page.goto(`${baseUrl}/verify-registration?token=valid-test-token`, { waitUntil: 'domcontentloaded' });
+        const verificationCard = page.locator('[data-verify-registration-card]');
+        await verificationCard.waitFor();
+        await page.locator('[data-async-state="success"]').waitFor();
+        const verificationRect = await verificationCard.boundingBox();
+        assert.ok(verificationRect && verificationRect.x >= 0 && verificationRect.x + verificationRect.width <= page.viewportSize().width, `${profile.id}: verificacion dentro del ancho`);
+        verificationFails = true;
+        await page.goto(`${baseUrl}/verify-registration?token=expired-test-token`, { waitUntil: 'domcontentloaded' });
+        await page.locator('[data-async-state="error"]').waitFor();
+        await page.goto(`${baseUrl}/verify-registration`, { waitUntil: 'domcontentloaded' });
+        await page.locator('[data-async-state="error"]').waitFor();
+        await page.screenshot({ path: path.join(artifactRoot, `${profile.id}-verify-registration.png`), fullPage: false });
+
+        for (const expectedStatus of ['pending', 'approved', 'rejected']) {
+            rucReviewStatus = expectedStatus;
+            await page.goto(`${baseUrl}/ruc-review?token=ruc-review-token`, { waitUntil: 'domcontentloaded' });
+            const expectedState = expectedStatus === 'approved' ? 'success' : expectedStatus === 'rejected' ? 'error' : 'pending';
+            await page.locator(`[data-async-state="${expectedState}"]`).waitFor();
+        }
+        const rucCard = page.locator('[data-ruc-review-card]');
+        const rucRect = await rucCard.boundingBox();
+        assert.ok(rucRect && rucRect.x >= 0 && rucRect.x + rucRect.width <= page.viewportSize().width, `${profile.id}: revision RUC dentro del ancho`);
+        rucReviewFails = true;
+        await page.goto(`${baseUrl}/ruc-review?token=ruc-review-token`, { waitUntil: 'domcontentloaded' });
+        await page.locator('[data-async-state="error"]').waitFor();
+        await page.goto(`${baseUrl}/ruc-review`, { waitUntil: 'domcontentloaded' });
+        await page.locator('[data-async-state="error"]').waitFor();
+        await page.screenshot({ path: path.join(artifactRoot, `${profile.id}-ruc-review.png`), fullPage: false });
         await context.close();
         console.log(`PASS ${profile.id} /login + /forgot-password`);
     }

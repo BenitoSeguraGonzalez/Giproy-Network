@@ -1,12 +1,24 @@
 import {
     AlertTriangle,
+    CheckCircle2,
     CloudOff,
+    Clock3,
     Inbox,
     LoaderCircle,
     ShieldAlert,
 } from 'lucide-react';
 
 const stateConfiguration = {
+    success: {
+        icon: CheckCircle2,
+        iconClassName: 'text-emerald-600',
+        title: 'Operación completada',
+    },
+    pending: {
+        icon: Clock3,
+        iconClassName: 'text-amber-700',
+        title: 'Operación pendiente',
+    },
     loading: {
         icon: LoaderCircle,
         iconClassName: 'animate-spin motion-reduce:animate-none text-[#D97706]',

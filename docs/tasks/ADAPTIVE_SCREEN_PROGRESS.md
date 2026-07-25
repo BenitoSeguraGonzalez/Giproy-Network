@@ -1021,6 +1021,44 @@ Resultado: **10/10 PASS**. Build Vite: **PASS**. Impeccable: **0 hallazgos**.
 - `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
 - `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
 
+## C01.4 - Verificacion `/verify-registration`
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+- Viewport público recompuesto con `100dvh` y scroll condicionado.
+- Estados carga, aprobado, expirado y token ausente migrados a `AsyncState`.
+- Mensajes del servidor se conservan y se anuncian semánticamente.
+- Acción de retorno solo aparece cuando finaliza la consulta.
+- Diez perfiles: **10/10 PASS**. Build: **PASS**.
+
+## C01.5 - Revision fiscal `/ruc-review`
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+- Se diferencian visual y semánticamente pendiente, aprobado y rechazado.
+- Error de consulta y token ausente poseen estado recuperable y retorno.
+- Se elimina el estado ambiguo que mostraba reloj también para rechazo.
+- Tarjeta y mensajes se recomponen sin overflow horizontal.
+- Diez perfiles, estados pending/approved/rejected/error/sin token:
+  **10/10 PASS**.
+
+### Evidencia C01.4-C01.5
+
+- `artifacts/visual-certification/c01-1-login-final-2026-07-24/*-verify-registration.png`.
+- `artifacts/visual-certification/c01-1-login-final-2026-07-24/*-ruc-review.png`.
+- Impeccable: cero hallazgos.
+
+### Archivos tratados
+
+- `frontend/src/pages/VerifyRegistration.jsx`.
+- `frontend/src/pages/RucReviewStatus.jsx`.
+- `frontend/src/components/ui/async-state.jsx`.
+- `frontend/scripts/validate-login-adaptive-dom.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
 ## Siguiente unidad
 
-`C01.4 - /verify-registration`: EN CURSO.
+`C02.1 - Consola de Operaciones`: EN CURSO.

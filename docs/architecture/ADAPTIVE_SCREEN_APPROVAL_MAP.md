@@ -69,8 +69,8 @@ global se presentara y aprobara antes de aplicarse a sus consumidores.
 | C01.1 | `/login` — VERIFICADA LOCALMENTE | credenciales, recordar sesion, error, bloqueo, carga y acceso a recuperacion |
 | C01.2 | `/forgot-password` — VERIFICADA LOCALMENTE | email, confirmacion, validacion y retorno |
 | C01.3 | `/reset-password` — VERIFICADA LOCALMENTE | token valido/invalido, nueva clave, confirmacion y expiracion |
-| C01.4 | `/verify-registration` | verificando, aprobado, rechazado, expirado y acceso |
-| C01.5 | `/ruc-review` | consulta, pendiente, aprobado, rechazado, observaciones y error |
+| C01.4 | `/verify-registration` — VERIFICADA LOCALMENTE | verificando, aprobado, rechazado, expirado y acceso |
+| C01.5 | `/ruc-review` — VERIFICADA LOCALMENTE | consulta, pendiente, aprobado, rechazado, observaciones y error |
 
 ## C02 - Consolas y hubs Classic
 

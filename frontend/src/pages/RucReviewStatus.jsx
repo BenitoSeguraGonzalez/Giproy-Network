@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Clock3, Loader2, ShieldCheck } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { publicAuthApi } from '../api/publicAuth';
 import LogoGiproyCompleto from '../assets/LogoGiproyCompleto.png';
+import AsyncState from '../components/ui/async-state';
 
 const RucReviewStatus = () => {
     const [params] = useSearchParams();
     const token = params.get('token');
     const [result, setResult] = useState(null);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!token) return setError('El enlace de estado no es válido.');
@@ -16,18 +17,22 @@ const RucReviewStatus = () => {
     }, [token]);
 
     return (
-        <main className="flex min-h-screen items-center justify-center bg-[#F2F4F7] p-6">
-            <section className="w-full max-w-lg rounded-3xl bg-white p-10 text-center shadow-xl">
-                <img src={LogoGiproyCompleto} alt="GiProy" className="mx-auto mb-8 h-12 w-auto" />
-                {!result && !error && <Loader2 className="mx-auto h-8 w-8 animate-spin text-[#F39200]" />}
-                {error && <p className="text-sm font-bold text-red-700">{error}</p>}
-                {result && (
-                    <>
-                        {result.status === 'approved' ? <ShieldCheck className="mx-auto h-12 w-12 text-emerald-600" /> : <Clock3 className="mx-auto h-12 w-12 text-amber-600" />}
-                        <h1 className="mt-5 text-2xl font-black uppercase text-zinc-900">{result.status === 'pending' ? 'En revisión manual' : result.status}</h1>
-                        <p className="mt-3 text-sm leading-relaxed text-zinc-600">{result.message}</p>
-                    </>
-                )}
+        <main data-ruc-review-viewport data-adaptive-ui-enabled="true" className="flex h-dvh items-start justify-center overflow-x-hidden overflow-y-auto bg-[#F2F4F7] p-4 sm:items-center sm:p-6">
+            <section data-ruc-review-card className="w-full max-w-lg rounded-2xl bg-white p-5 text-center shadow-xl sm:rounded-3xl sm:p-8">
+                <img src={LogoGiproyCompleto} alt="GiProy" className="mx-auto mb-5 h-10 w-auto sm:mb-7 sm:h-12" />
+                <AsyncState
+                    state={!result && !error ? 'loading' : error || result?.status === 'rejected' ? 'error' : result?.status === 'approved' ? 'success' : 'pending'}
+                    title={
+                        error ? 'No se pudo consultar la solicitud'
+                            : result?.status === 'approved' ? 'Solicitud aprobada'
+                                : result?.status === 'rejected' ? 'Solicitud rechazada'
+                                    : result ? 'En revisión manual' : 'Consultando solicitud'
+                    }
+                    description={error || result?.message || 'Estamos consultando el estado de la revisión.'}
+                    actionLabel={!result && !error ? undefined : 'Volver al login'}
+                    onAction={!result && !error ? undefined : () => navigate('/login')}
+                    className="border-0 p-0 shadow-none"
+                />
             </section>
         </main>
     );
