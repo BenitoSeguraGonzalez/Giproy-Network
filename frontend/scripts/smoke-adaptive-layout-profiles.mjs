@@ -22,7 +22,9 @@ const environment = (width, height, options = {}) => ({
 });
 
 assert.equal(classifyAdaptiveProfile(environment(1920, 1080)).profile, ADAPTIVE_UI_PROFILES.WIDE);
+assert.equal(classifyAdaptiveProfile(environment(1920, 1080)).density, 'comfortable');
 assert.equal(classifyAdaptiveProfile(environment(1536, 864)).profile, ADAPTIVE_UI_PROFILES.COMPACT);
+assert.equal(classifyAdaptiveProfile(environment(1536, 864)).density, 'compact');
 assert.equal(classifyAdaptiveProfile(environment(1707, 960)).profile, ADAPTIVE_UI_PROFILES.WIDE);
 assert.equal(classifyAdaptiveProfile(environment(2560, 1440)).profile, ADAPTIVE_UI_PROFILES.WIDE);
 assert.equal(
@@ -32,6 +34,10 @@ assert.equal(
 assert.equal(
     classifyAdaptiveProfile(environment(1472, 820, { coarsePointer: true, touchPoints: 10 })).profile,
     ADAPTIVE_UI_PROFILES.TABLET_LANDSCAPE,
+);
+assert.equal(
+    classifyAdaptiveProfile(environment(1472, 820, { coarsePointer: true, touchPoints: 10 })).density,
+    'touch',
 );
 assert.equal(
     classifyAdaptiveProfile(environment(920, 1472, { coarsePointer: true, touchPoints: 10 })).profile,

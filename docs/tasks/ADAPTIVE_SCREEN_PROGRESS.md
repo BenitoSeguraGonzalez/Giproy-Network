@@ -369,6 +369,84 @@ Cada pantalla corregira sus textos inferiores a 10 px segun su funcion:
 metadato, dato tabular, etiqueta, diagrama o adorno. Ninguna sustitucion global
 se considerara una solucion valida.
 
+## G00.5 - Densidad y espaciado
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+### Superficie observada
+
+- Clasificador de entorno adaptativo.
+- Shell protegido y Consola de Operaciones.
+- Separaciones exteriores, ritmo entre secciones y objetivos de control.
+- Windows con escalado y tablets tactiles con el mismo viewport CSS.
+
+### Problema observado
+
+La aplicacion distinguia perfiles de composicion, pero no publicaba un contrato
+de densidad separado. Como consecuencia, cada pantalla podia interpretar
+`compact` como texto pequeño o confundir DPR alto con espacio disponible.
+Ademas, el dashboard mantenia gutters ligados exclusivamente a breakpoints.
+
+### Adecuacion aplicada
+
+- Se crean tres densidades semanticas:
+  - `comfortable`: escritorio con espacio CSS amplio;
+  - `compact`: escritorio con espacio CSS limitado por ventana o escalado;
+  - `touch`: entrada tactil, independientemente del DPR.
+- El shell publica `data-adaptive-density`.
+- Se definen variables de gutter, ritmo y objetivo interactivo por densidad.
+- Dashboard consume gutters y separación vertical semanticos.
+- Touch conserva 44 px; compact no reduce tipografia ni escala componentes.
+- DPR deja de intervenir en la densidad; solo representa nitidez fisica.
+
+### Incidencia encontrada durante la prueba
+
+La primera asercion del DOM consultaba `touch` en un perfil local cuyo campo se
+llama `hasTouch`. La aplicacion clasificaba correctamente, pero el test esperaba
+`compact`. Se corrigio la prueba para usar el contrato real y se repitio toda
+la cadena. No se rebajo ni omitio la asercion.
+
+### Perfiles verificados
+
+- Windows FHD 100 %, 125 % y 150 %.
+- Windows 4K/DPR 2.
+- Tablet Full HD horizontal y vertical.
+- Tablet 2K horizontal y vertical.
+- Lenovo P12 3K horizontal y vertical.
+
+Resultado: **20/20 PASS** sobre shell y dashboard.
+
+### Verificaciones
+
+- Clasificador unitario: PASS.
+- Validador DOM del shell: PASS.
+- Build Vite de produccion: PASS.
+- Matriz visual de dos superficies por diez perfiles: PASS.
+- Sin overflow horizontal, clipping fijo ni escalado global.
+
+### Evidencia
+
+- `artifacts/visual-certification/g00-5-density-2026-07-24`.
+
+### Archivos tratados
+
+- `frontend/src/utils/adaptiveLayout.js`.
+- `frontend/src/layouts/AppLayout.jsx`.
+- `frontend/src/index.css`.
+- `frontend/src/pages/Dashboard.jsx`.
+- `frontend/scripts/smoke-adaptive-layout-profiles.mjs`.
+- `frontend/scripts/validate-adaptive-app-layout-dom.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
+### Detector visual
+
+La ejecucion unica de Impeccable no encontro errores bloqueantes. Registro los
+tres avisos ya conocidos de AppLayout y uno sobre la fuente Inter global. La
+fuente no se sustituye durante una adecuacion de densidad: hacerlo afectaria
+metricas de todas las pantallas sin su certificacion individual.
+
 ## Siguiente unidad
 
-`G00.5 - Densidad y espaciado`: PENDIENTE.
+`G00.6 - Tablas y listas`: PENDIENTE.

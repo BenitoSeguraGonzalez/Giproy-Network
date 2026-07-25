@@ -95,6 +95,11 @@ try {
             throw new Error(`${profile.name}: perfil no montado; observed=${JSON.stringify(observed)}; errors=${errors.join(' | ')}; body=${body.slice(0, 1000)}`);
         }
         assert.equal(await shell.getAttribute('data-adaptive-ui-enabled'), 'true');
+        assert.equal(
+            await shell.getAttribute('data-adaptive-density'),
+            profile.hasTouch ? 'touch' : profile.expected === 'wide' ? 'comfortable' : 'compact',
+            `${profile.name}: densidad gobernada por capacidad y espacio CSS`,
+        );
         const appHeader = page.locator('[data-app-header]');
         assert.equal(await appHeader.count(), 1, `${profile.name}: existe una unica cabecera global`);
         const headerRect = await appHeader.boundingBox();

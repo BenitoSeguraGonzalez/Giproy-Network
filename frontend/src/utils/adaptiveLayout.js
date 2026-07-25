@@ -131,6 +131,11 @@ export const classifyAdaptiveProfile = (
     return {
         profile,
         detectedProfile,
+        density: touchCapable
+            ? 'touch'
+            : profile === ADAPTIVE_UI_PROFILES.WIDE
+                ? 'comfortable'
+                : 'compact',
         requestedMode: normalizedMode,
         requestedModeApplied: normalizedMode === 'automatic' || profile !== detectedProfile,
         width: size.width,

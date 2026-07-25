@@ -106,9 +106,9 @@ const Dashboard = () => {
 
     return (
         <div className="h-full min-h-0 overflow-hidden bg-[#F2F4F7]">
-            <main className="flex h-full flex-col overflow-hidden px-4 py-4 sm:px-6 sm:py-6 2xl:px-12 2xl:py-10">
+            <main className="flex h-full flex-col overflow-hidden px-[var(--app-page-gutter-inline,1rem)] py-[var(--app-page-gutter-block,1rem)]">
                 <div className="flex h-full min-h-0 w-full max-w-[1480px] flex-1 flex-col overflow-hidden self-center">
-                    <header className="mb-4 flex-shrink-0 2xl:mb-10">
+                    <header className="mb-[var(--app-section-gap,1rem)] flex-shrink-0">
                         <MotionDiv
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}

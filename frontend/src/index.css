@@ -41,6 +41,27 @@ html, body {
   height: 100dvh;
 }
 
+[data-adaptive-density="comfortable"] {
+  --app-page-gutter-inline: 2rem;
+  --app-page-gutter-block: 1.5rem;
+  --app-section-gap: 1.5rem;
+  --app-control-target: 40px;
+}
+
+[data-adaptive-density="compact"] {
+  --app-page-gutter-inline: 1rem;
+  --app-page-gutter-block: 1rem;
+  --app-section-gap: 1rem;
+  --app-control-target: 40px;
+}
+
+[data-adaptive-density="touch"] {
+  --app-page-gutter-inline: 1rem;
+  --app-page-gutter-block: 1rem;
+  --app-section-gap: 1rem;
+  --app-control-target: 44px;
+}
+
 @media (pointer: coarse) {
   [data-adaptive-ui-enabled="true"] [data-adaptive-touch-target="true"] {
     min-width: 44px;

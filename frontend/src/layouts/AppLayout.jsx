@@ -412,6 +412,7 @@ const AppLayout = ({ children }) => {
             data-adaptive-profile={adaptiveLayout.profile}
             data-adaptive-detected-profile={adaptiveLayout.detectedProfile}
             data-adaptive-input={adaptiveLayout.touchCapable ? 'touch' : 'pointer'}
+            data-adaptive-density={adaptiveLayout.density}
             style={adaptiveLayout.enabled ? { height: `${Math.round(adaptiveLayout.environment.visualHeight)}px` } : undefined}
             onPasteCapture={applyTrimmedPaste}
         >
