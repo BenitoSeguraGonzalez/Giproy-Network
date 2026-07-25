@@ -53,7 +53,7 @@ CSS y no se aplicara zoom global para encoger la aplicacion.
 | G00.3 | Footer y version — VERIFICADA LOCALMENTE | presencia, posicion, no solapamiento y coincidencia con `version.json` |
 | G00.4 | Sistema tipografico — VERIFICADA LOCALMENTE | tamaño legible sin escalado global, truncado, wrapping y numeros tabulares |
 | G00.5 | Densidad y espaciado — VERIFICADA LOCALMENTE | escritorio HiDPI, tablet tactil, maximos de ancho y ritmo vertical |
-| G00.6 | Tablas y listas | cabecera fija cuando proceda, scroll interno correcto y acciones alcanzables |
+| G00.6 | Tablas y listas — VERIFICADA LOCALMENTE | cabecera fija cuando proceda, scroll interno correcto y acciones alcanzables |
 | G00.7 | Formularios | reflujo de columnas, etiquetas, errores, teclado virtual y accion primaria |
 | G00.8 | Overlays | modal, dialog, drawer, popover, selector, tooltip, confirmacion y alerta |
 | G00.9 | Estados asincronos | skeleton/carga, vacio, error, reintento, offline y permisos insuficientes |

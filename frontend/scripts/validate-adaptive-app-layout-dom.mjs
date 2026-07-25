@@ -155,10 +155,19 @@ try {
         const horizontalScrollState = await tableViewport.evaluate((node) => ({
             clientWidth: node.clientWidth,
             scrollWidth: node.scrollWidth,
+            clientHeight: node.clientHeight,
+            scrollHeight: node.scrollHeight,
+            tabIndex: node.tabIndex,
+            role: node.getAttribute('role'),
         }));
+        assert.equal(horizontalScrollState.role, 'region', `${profile.name}: tabla expone una region de scroll`);
+        assert.ok(horizontalScrollState.tabIndex >= 0, `${profile.name}: region de tabla alcanzable por teclado`);
+        assert.ok(horizontalScrollState.scrollHeight <= horizontalScrollState.clientHeight + 2, `${profile.name}: tabla no secuestra el scroll vertical`);
         if (horizontalScrollState.scrollWidth > horizontalScrollState.clientWidth) {
+            const pageScrollBeforeTable = await pageViewport.evaluate((node) => node.scrollTop);
             await tableViewport.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
             assert.ok(await tableViewport.evaluate((node) => node.scrollLeft > 0), `${profile.name}: la tabla ancha se puede recorrer lateralmente`);
+            assert.equal(await pageViewport.evaluate((node) => node.scrollTop), pageScrollBeforeTable, `${profile.name}: scroll lateral no mueve la pagina`);
         }
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, `${profile.name}: sin overflow horizontal de página`);
         assert.equal(await page.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), true, `${profile.name}: sin overflow vertical de página`);

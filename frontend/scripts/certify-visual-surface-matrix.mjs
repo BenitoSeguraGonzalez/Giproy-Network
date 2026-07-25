@@ -228,12 +228,29 @@ try {
                     const after = await page.evaluate(() => ({
                         controlsTop: document.querySelector('[data-projects-fixed-controls]')?.getBoundingClientRect().top,
                         listScrollTop: document.querySelector('[data-projects-list-viewport]')?.scrollTop || 0,
+                        horizontalReachable: (() => {
+                            const viewport = document.querySelector('[data-projects-list-viewport]');
+                            if (!viewport || viewport.scrollWidth <= viewport.clientWidth + 2) return true;
+                            viewport.scrollLeft = viewport.scrollWidth;
+                            return viewport.scrollLeft > 1;
+                        })(),
+                        stickyHeaderDelta: (() => {
+                            const viewport = document.querySelector('[data-projects-list-viewport]');
+                            const header = viewport?.querySelector('thead');
+                            if (!viewport || !header) return Number.POSITIVE_INFINITY;
+                            return Math.abs(header.getBoundingClientRect().top - viewport.getBoundingClientRect().top);
+                        })(),
                     }));
                     const fixedDelta = Math.abs(after.controlsTop - before.controlsTop);
                     return {
-                        passed: after.listScrollTop > 1 && fixedDelta <= 1,
+                        passed: after.listScrollTop > 1
+                            && fixedDelta <= 1
+                            && after.horizontalReachable
+                            && after.stickyHeaderDelta <= 2,
                         listScrollTop: after.listScrollTop,
                         fixedControlsDelta: fixedDelta,
+                        horizontalReachable: after.horizontalReachable,
+                        stickyHeaderDelta: after.stickyHeaderDelta,
                     };
                 })().catch((error) => ({ passed: false, reason: error.message }))
                 : null;

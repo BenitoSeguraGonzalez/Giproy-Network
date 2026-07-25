@@ -3678,6 +3678,9 @@ const Proyectos = () => {
                         <div
                             ref={portfolioListViewportRef}
                             data-projects-list-viewport
+                            role="region"
+                            aria-label="Listado desplazable de proyectos"
+                            tabIndex={0}
                             className="relative h-full min-h-0 overflow-auto overscroll-contain [touch-action:pan-x_pan-y]"
                             style={expandedInlineProject ? { paddingBottom: '25rem' } : undefined}
                         >
@@ -3693,7 +3696,7 @@ const Proyectos = () => {
                                     <col style={{ width: '8%' }} />
                                     <col style={{ width: '7%' }} />
                                 </colgroup>
-                                <thead>
+                                <thead className="sticky top-0 z-20">
                                     <tr className="border-b border-zinc-200 bg-zinc-50/80">
                                         <th className="px-3 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">ID / CÓD</th>
                                         <th className="py-4 pl-12 pr-3 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Proyecto</th>

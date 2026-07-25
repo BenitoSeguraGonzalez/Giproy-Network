@@ -447,6 +447,88 @@ tres avisos ya conocidos de AppLayout y uno sobre la fuente Inter global. La
 fuente no se sustituye durante una adecuacion de densidad: hacerlo afectaria
 metricas de todas las pantallas sin su certificacion individual.
 
+## G00.6 - Tablas y listas
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+### Superficie observada
+
+- Componente compartido `Table`.
+- Tabla ancha del harness operativo.
+- Listado real de proyectos con doce registros representativos.
+- Controles superiores, scroll vertical, scroll horizontal y cabecera.
+
+### Problema observado
+
+El componente comun exponia un `overflow-auto` anonimo, sin nombre accesible,
+foco de teclado ni declaracion del eje que le pertenece. En Proyectos, la lista
+ya tenia scroll propio tras la correccion anterior, pero su cabecera desaparecia
+al recorrer registros y la region no era alcanzable por teclado como unidad.
+
+### Adecuacion aplicada
+
+- `Table` declara por defecto propiedad del eje horizontal.
+- Permite solicitar ambos ejes de forma explicita con `scrollAxis="both"`.
+- La region de scroll tiene nombre accesible, foco visible y teclado.
+- Se pueden configurar clases y atributos del viewport sin envolver la tabla
+  con contenedores paralelos.
+- El harness utiliza el componente compartido con datos y números tabulares.
+- Proyectos identifica su lista como region desplazable.
+- La cabecera de columnas permanece fija dentro de la lista.
+- Los controles del portafolio permanecen fuera del scroll de registros.
+
+### Contrato verificado
+
+- Scroll vertical de una lista no mueve los controles.
+- Scroll horizontal no mueve el viewport de pagina.
+- Tabla horizontal no secuestra el eje vertical.
+- Inicio y final permanecen alcanzables.
+- Cabecera de Proyectos permanece alineada al borde superior de su viewport.
+- Las superficies anchas sin ancestro desplazable se consideran error.
+
+### Perfiles verificados
+
+- Windows FHD 100 %, 125 % y 150 %.
+- Windows 4K/DPR 2.
+- Tablet Full HD horizontal y vertical.
+- Tablet 2K horizontal y vertical.
+- Lenovo P12 3K horizontal y vertical.
+
+Resultado final: **20/20 PASS** sobre tabla compartida y Proyectos.
+
+### Verificaciones
+
+- Auditoria estatica: 38 rutas y 166 superficies JSX, PASS.
+- Validador DOM del shell y tabla: PASS.
+- Matriz Playwright con gesto tactil real en Proyectos: PASS.
+- Scroll vertical interno y controles inmoviles: PASS.
+- Scroll horizontal alcanzable: PASS.
+- Cabecera sticky dentro del listado: PASS.
+- Build Vite de produccion: PASS.
+
+### Evidencia
+
+- Primera matriz:
+  `artifacts/visual-certification/g00-6-table-list-2026-07-24`.
+- Matriz final con cabecera fija y contrato ampliado:
+  `artifacts/visual-certification/g00-6-table-list-final-2026-07-24`.
+
+### Archivos tratados
+
+- `frontend/src/components/ui/table.jsx`.
+- `frontend/src/features/adaptive/AdaptiveAppLayoutHarness.jsx`.
+- `frontend/src/pages/Proyectos.jsx`.
+- `frontend/scripts/validate-adaptive-app-layout-dom.mjs`.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
+### Detector visual
+
+Las ejecuciones unicas por objetivo de Impeccable devolvieron cero hallazgos
+para el componente compartido, el harness y Proyectos.
+
 ## Siguiente unidad
 
-`G00.6 - Tablas y listas`: PENDIENTE.
+`G00.7 - Formularios`: PENDIENTE.

@@ -2,8 +2,26 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-const Table = React.forwardRef(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto">
+const Table = React.forwardRef(({
+  className,
+  containerClassName,
+  containerProps = {},
+  scrollAxis = "horizontal",
+  scrollLabel = "Tabla de datos desplazable",
+  ...props
+}, ref) => (
+  <div
+    {...containerProps}
+    data-table-scroll-viewport
+    aria-label={containerProps["aria-label"] || scrollLabel}
+    role={containerProps.role || "region"}
+    tabIndex={containerProps.tabIndex ?? 0}
+    className={cn(
+      "relative w-full overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] focus-visible:ring-inset",
+      scrollAxis === "both" ? "overflow-auto" : "overflow-x-auto overflow-y-visible",
+      containerClassName,
+    )}
+  >
     <table
       ref={ref}
       className={cn("w-full caption-bottom text-sm", className)}
