@@ -1170,6 +1170,51 @@ pertenecen a estados mutuamente excluyentes y la combinacion no se renderiza.
 - `docs/quality/KNOWN_ISSUES_ADAPTIVE_RELEASE.md`.
 - `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
 
+## C02.3 - Otros Servicios `/servicios`
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+### Problemas observados y adecuacion
+
+- Las tarjetas activas eran `div` con clic; pasan a botones nativos con foco
+  visible y objetivo tactil.
+- Bolsa de Trabajo y Certificaciones carecen de ruta, pero mostraban hover,
+  elevacion y flecha como si fueran accionables. Ahora son articulos de estado,
+  sin falsa affordance, y muestran `En desarrollo`.
+- El retorno aumenta de 40 a 44 px, recibe nombre accesible y foco visible.
+- Se elimina el `h-screen` anidado dentro del shell protegido. La pantalla usa
+  el alto disponible y la region de catalogo es la unica propietaria del scroll
+  cuando exista exceso.
+- La composicion adopta dos columnas desde tablet vertical y tres en horizontal
+  o escritorio con capacidad suficiente.
+
+### Revision visual obligatoria
+
+- Se abrieron y revisaron las diez capturas finales.
+- Lenovo P12 vertical: cinco servicios completos, dos columnas, estados futuros
+  diferenciados y sin desplazamiento innecesario.
+- Full HD vertical: textos, estados y acciones permanecen legibles; no hay
+  solapamiento con la cabecera global.
+- Perfiles horizontales y Windows HiDPI: tres columnas proporcionadas, sin
+  crecimiento por resolucion fisica.
+
+Resultado: **10/10 PASS**; build Vite: **PASS**; Impeccable:
+**0 hallazgos**.
+
+### Evidencia
+
+- `artifacts/visual-certification/c02-3-servicios-certified-2026-07-24`.
+- `visual-review-contact-sheet.png`.
+
+### Archivos tratados
+
+- `frontend/src/pages/Placeholders.jsx`.
+- `frontend/src/__classic_primary_pages_harness.jsx`.
+- `frontend/classic-servicios-harness.html`.
+- `docs/architecture/visual-surface-inventory.json`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
 ## Siguiente unidad
 
-`C02.3 - Otros Servicios`: EN CURSO.
+`C02.4 - Administracion Global`: EN CURSO.

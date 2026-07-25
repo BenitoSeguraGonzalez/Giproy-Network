@@ -7,6 +7,7 @@ import AppLayout from './layouts/AppLayout';
 import Dashboard from './pages/Dashboard';
 import PreciosUnitarios from './pages/PreciosUnitarios';
 import Proyectos from './pages/Proyectos';
+import { OtrosServicios } from './pages/Placeholders';
 
 const company = { id: 7, nombre: 'Santiago Bermeo', alias: 'Santiago Bermeo', decimales_moneda: 2 };
 const base = { id: 19, nombre: 'Base técnica Santiago Bermeo', tipo_nombre: 'Base de Proyecto' };
@@ -21,8 +22,20 @@ const user = {
     empresa_id: 7,
     empresa: company,
 };
-const Page = pathname.includes('projects') ? Proyectos : pathname.includes('precios-unitarios') ? PreciosUnitarios : Dashboard;
-const initialPath = pathname.includes('projects') ? '/proyectos' : pathname.includes('precios-unitarios') ? '/precios-unitarios' : '/dashboard';
+const Page = pathname.includes('projects')
+    ? Proyectos
+    : pathname.includes('precios-unitarios')
+        ? PreciosUnitarios
+        : pathname.includes('servicios')
+            ? OtrosServicios
+            : Dashboard;
+const initialPath = pathname.includes('projects')
+    ? '/proyectos'
+    : pathname.includes('precios-unitarios')
+        ? '/precios-unitarios'
+        : pathname.includes('servicios')
+            ? '/servicios'
+            : '/dashboard';
 
 const authValue = {
     user,

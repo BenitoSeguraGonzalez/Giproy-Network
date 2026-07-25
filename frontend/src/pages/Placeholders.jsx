@@ -9,7 +9,7 @@ import {
     BadgeCheck,
     BriefcaseBusiness
 } from 'lucide-react';
-import { Card, CardContent } from '../components/ui/card';
+import { CardContent } from '../components/ui/card';
 import MotionScrollbar from '../components/ui/MotionScrollbar';
 
 const PlaceholderPage = ({ title }) => {
@@ -120,15 +120,24 @@ export const OtrosServicios = () => {
         }
         return servicePlaceholders.findIndex((item) => item.id === a.id) - servicePlaceholders.findIndex((item) => item.id === b.id);
     });
-    const renderServiceCard = (item, index) => {
+    const renderServiceCard = (item) => {
         const Icon = item.icon;
         const eyebrow = item.path ? 'Submódulo activo' : 'Próximamente';
         const cta = item.path ? 'Abrir submódulo' : 'Estado actual';
+        const Surface = item.path ? 'button' : 'article';
         return (
-            <Card
+            <Surface
                 key={item.id}
-                onClick={() => item.path && navigate(item.path)}
-                className={`group w-full overflow-hidden rounded-[1.35rem] border border-zinc-100 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-zinc-200 ${item.path ? 'cursor-pointer' : ''}`}
+                {...(item.path ? {
+                    type: 'button',
+                    onClick: () => navigate(item.path),
+                    'data-adaptive-touch-target': 'true'
+                } : {})}
+                className={`group w-full overflow-hidden rounded-[1.35rem] border border-zinc-100 bg-white text-left shadow-[0_12px_30px_rgba(15,23,42,0.04)] ${
+                    item.path
+                        ? 'cursor-pointer transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191] focus-visible:ring-offset-2'
+                        : ''
+                }`}
             >
                 <CardContent className="flex h-full min-h-[172px] flex-col p-4">
                     <div className="flex items-start gap-3">
@@ -153,25 +162,32 @@ export const OtrosServicios = () => {
                         <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">
                             {cta}
                         </span>
-                        <div className="flex h-9 w-9 items-center justify-center rounded-[0.9rem] border border-[#ececec] bg-[#ededed] text-zinc-500 shadow-[3px_3px_8px_#d5d5d5,-3px_-3px_8px_#ffffff] transition-[color,filter,box-shadow] duration-200 group-hover:text-[#136191] group-active:shadow-[inset_2px_2px_6px_#d0d0d0,inset_-2px_-2px_6px_#ffffff]">
-                            <ArrowUpRight className="h-4 w-4" />
-                        </div>
+                        {item.path ? (
+                            <div className="flex h-11 w-11 items-center justify-center rounded-[0.9rem] border border-[#ececec] bg-[#ededed] text-[#136191] shadow-[3px_3px_8px_#d5d5d5,-3px_-3px_8px_#ffffff] transition-[color,filter,box-shadow] duration-200 group-active:shadow-[inset_2px_2px_6px_#d0d0d0,inset_-2px_-2px_6px_#ffffff]">
+                                <ArrowUpRight className="h-4 w-4" />
+                            </div>
+                        ) : (
+                            <span className={`rounded-lg bg-zinc-50 px-2 py-1 text-[9px] font-black uppercase tracking-[0.14em] ${item.accent}`}>
+                                {item.status}
+                            </span>
+                        )}
                     </div>
                 </CardContent>
-            </Card>
+            </Surface>
         );
     };
 
     return (
-        <div className="h-screen overflow-hidden bg-[#F2F4F7]">
-            <div className="mx-auto flex h-screen max-w-[1380px] flex-col gap-5 overflow-hidden px-4 py-5 sm:px-5 md:px-8 md:py-6 xl:px-10">
-                <header className="sticky top-0 z-20 rounded-[2rem] border border-zinc-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(0,0,0,0.04)] md:px-6 xl:px-7">
+        <div className="h-full min-h-0 overflow-hidden bg-[#F2F4F7]">
+            <div className="mx-auto flex h-full min-h-0 max-w-[1380px] flex-col gap-4 overflow-hidden px-4 py-4 sm:px-5 md:px-8 md:py-6 xl:gap-5 xl:px-10">
+                <header className="z-20 flex-shrink-0 rounded-[2rem] border border-zinc-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(0,0,0,0.04)] md:px-6 xl:px-7">
                     <div className="flex min-w-0 items-center gap-4 xl:gap-6">
                         <button
                             type="button"
                             onClick={() => navigate('/')}
-                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
-                            title="Volver"
+                            aria-label="Volver a la consola de operaciones"
+                            data-adaptive-touch-target="true"
+                            className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-xl text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191] focus-visible:ring-offset-2"
                         >
                             <ArrowLeft className="h-5 w-5" />
                         </button>
@@ -192,13 +208,17 @@ export const OtrosServicios = () => {
                     </div>
                 </header>
 
-                <section className="relative min-h-0 flex-1">
+                <section className="relative min-h-0 flex-1" aria-label="Catálogo de otros servicios">
                             <div
                                 ref={servicesScrollRef}
-                                className="giproy-motion-scrollbar-hide h-full min-h-0 overflow-y-auto overscroll-contain pb-8 pr-7"
+                                className="giproy-motion-scrollbar-hide h-full min-h-0 overflow-y-auto overscroll-contain pb-8 pr-7 [touch-action:pan-y]"
+                                role="region"
+                                aria-label="Servicios disponibles"
+                                tabIndex={0}
+                                data-services-list-viewport
                             >
-                            <div className="grid content-start gap-3 md:grid-cols-2 xl:grid-cols-3">
-                                {orderedServicePlaceholders.map((item, index) => renderServiceCard(item, index))}
+                            <div className="grid content-start gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                {orderedServicePlaceholders.map((item) => renderServiceCard(item))}
                             </div>
                         </div>
                             <MotionScrollbar targetRef={servicesScrollRef} className="right-0" />
