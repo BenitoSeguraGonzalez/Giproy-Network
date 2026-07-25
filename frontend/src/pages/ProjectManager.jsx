@@ -35,7 +35,7 @@ import {
     TableHeader, 
     TableRow 
 } from "../components/ui/table";
-import { AppModalShell, AppModalHeader } from '../components/ui/app-modal';
+import { AppModalShell, AppModalHeader, AppModalBody, AppModalFooter } from '../components/ui/app-modal';
 import { appAlert, appConfirm } from '../utils/appDialog';
 import AnimatedSelect from '../components/ui/AnimatedSelect';
 
@@ -713,10 +713,14 @@ const ProjectManager = () => {
                             </div>
                         </AppModalHeader>
 
-                        <div className="flex h-[75dvh] divide-x divide-zinc-200 overflow-hidden bg-white">
+                        <AppModalBody className="!p-0 !overflow-hidden bg-white">
+                        <div className="flex h-full min-h-0 flex-col overflow-y-auto overscroll-contain [touch-action:pan-y] xl:flex-row xl:overflow-hidden">
                             {/* Columna 1: Estructura EDT */}
                             {itemType === 'project' && (
-                                <div className="w-1/3 p-6 bg-zinc-50 flex flex-col h-full border-r border-zinc-200">
+                                <section
+                                    data-assignment-scope-pane
+                                    className="flex max-h-[42dvh] w-full shrink-0 flex-col border-b border-zinc-200 bg-zinc-50 p-4 md:p-5 xl:max-h-none xl:h-full xl:w-1/3 xl:border-b-0 xl:border-r xl:p-6"
+                                >
                                     <div className="space-y-6">
                                         <div>
                                             <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
@@ -731,13 +735,13 @@ const ProjectManager = () => {
                                                     <div className="grid grid-cols-2 gap-2 p-1 bg-zinc-100 rounded-xl">
                                                         <button 
                                                             onClick={() => setAssignEsGlobal(false)}
-                                                            className={`py-2 rounded-lg text-[9px] font-black uppercase transition-all ${!assignEsGlobal ? 'bg-white text-[#1A1A1A] shadow-sm' : 'text-zinc-500'}`}
+                                                            className={`min-h-11 px-2 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${!assignEsGlobal ? 'bg-white text-[#1A1A1A] shadow-sm' : 'text-zinc-500'}`}
                                                         >
                                                             Esta Revisión
                                                         </button>
                                                         <button 
                                                             onClick={() => setAssignEsGlobal(true)}
-                                                            className={`py-2 rounded-lg text-[9px] font-black uppercase transition-all ${assignEsGlobal ? 'bg-[#F39200] text-white shadow-sm' : 'text-zinc-500'}`}
+                                                            className={`min-h-11 px-2 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${assignEsGlobal ? 'bg-[#F39200] text-white shadow-sm' : 'text-zinc-500'}`}
                                                         >
                                                             Global (Todo)
                                                         </button>
@@ -753,7 +757,7 @@ const ProjectManager = () => {
                                                             setAssignModulo(e.target.value);
                                                             fetchAssignments(targetItem, itemType, selectedEdtNode?.id, e.target.value);
                                                         }}
-                                                        className="w-full h-10 px-3 bg-white border border-zinc-200 rounded-xl text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:border-[#F39200]"
+                                                        className="w-full h-11 px-3 bg-white border border-zinc-200 rounded-xl text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:border-[#F39200]"
                                                     >
                                                         <option value="todos">Todos los Módulos</option>
                                                         <option value="datos_generales">Datos Generales</option>
@@ -777,7 +781,7 @@ const ProjectManager = () => {
                                             <p className="text-[9px] font-bold text-zinc-400 mt-1 uppercase tracking-widest">Filtro por Rama del Presupuesto</p>
                                         </div>
                                     </div>
-                                    <div className="flex-1 overflow-hidden mt-4">
+                                    <div className="mt-4 min-h-[12rem] flex-1 overflow-hidden">
                                         <EDTTreeSelector 
                                             nodes={edtNodes}
                                             selectedId={selectedEdtNode?.id}
@@ -788,13 +792,16 @@ const ProjectManager = () => {
                                             assignedStats={assignedStats}
                                         />
                                     </div>
-                                </div>
+                                </section>
                             )}
 
-                            <div className={`${itemType === 'project' ? 'w-2/3' : 'w-full'} flex divide-x divide-zinc-200`}>
+                            <div
+                                data-assignment-people-region
+                                className={`${itemType === 'project' ? 'xl:w-2/3' : 'xl:w-full'} flex min-h-[42rem] w-full shrink-0 flex-col md:min-h-[24rem] md:flex-row xl:min-h-0 xl:flex-1`}
+                            >
                                 {/* Columna Izquierda: Usuarios Disponibles */}
-                                <div className="flex-1 flex flex-col p-8 mr-[-1px]">
-                                    <div className="mb-6">
+                                <section data-assignment-available-pane className="flex min-h-[21rem] flex-1 flex-col border-b border-zinc-200 p-4 md:min-h-0 md:border-b-0 md:border-r md:p-5 xl:p-6">
+                                    <div className="mb-4">
                                         <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-4">Personal Disponible</h4>
                                         <div className="relative group">
                                             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-[#F39200] transition-colors" />
@@ -807,7 +814,7 @@ const ProjectManager = () => {
                                             />
                                         </div>
                                     </div>
-                                    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3">
+                                    <div data-assignment-available-viewport className="min-h-0 flex-1 overflow-y-auto overscroll-contain custom-scrollbar space-y-3 [touch-action:pan-y]">
                                         {usuarios
                                             .filter(u => !assignedUsers.some(au => au.id === u.id))
                                             .filter(u => includesNormalized(u.nombre_completo, modalSearch) || includesNormalized(u.email, modalSearch))
@@ -819,19 +826,20 @@ const ProjectManager = () => {
                                             .filter(u => !assignedUsers.some(au => au.id === u.id))
                                             .filter(u => includesNormalized(u.nombre_completo, modalSearch) || includesNormalized(u.email, modalSearch))
                                             .map(u => (
-                                                <div key={u.id} className="p-4 rounded-3xl bg-white border border-zinc-100 hover:border-[#F39200]/30 transition-all flex items-center justify-between group shadow-sm hover:shadow-md">
-                                                    <div className="flex items-center gap-3">
+                                                <div key={u.id} className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm transition-all hover:border-[#F39200]/30 hover:shadow-md">
+                                                    <div className="flex min-w-0 items-center gap-3">
                                                         <div className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-[12px] font-black text-zinc-400 group-hover:bg-orange-50 group-hover:text-[#F39200] transition-colors border border-transparent group-hover:border-orange-100">
                                                             {u.nombre_completo?.charAt(0)}
                                                         </div>
-                                                        <div>
-                                                            <p className="text-xs font-black uppercase tracking-tight text-zinc-800">{u.nombre_completo}</p>
+                                                        <div className="min-w-0">
+                                                            <p className="truncate text-xs font-black uppercase tracking-tight text-zinc-800">{u.nombre_completo}</p>
                                                             <p className="text-[9px] font-extrabold text-[#F39200] uppercase tracking-widest">Colaborador</p>
                                                         </div>
                                                     </div>
                                                     <button 
                                                         onClick={() => handleAssignUser(u.id)}
-                                                        className="w-10 h-10 rounded-xl bg-[#1A1A1A] text-white flex items-center justify-center hover:bg-[#F39200] transition-all shadow-lg active:scale-90"
+                                                        aria-label={`Asignar a ${u.nombre_completo}`}
+                                                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#1A1A1A] text-white shadow-lg transition-all hover:bg-[#F39200] active:scale-90"
                                                     >
                                                         <UserPlus className="w-5 h-5" />
                                                     </button>
@@ -839,11 +847,11 @@ const ProjectManager = () => {
                                             ))
                                         }
                                     </div>
-                                </div>
+                                </section>
 
                                 {/* Columna Derecha: Usuarios Asignados */}
-                                <div className="flex-1 flex flex-col p-8 bg-zinc-50/10">
-                                    <div className="mb-6">
+                                <section data-assignment-assigned-pane className="flex min-h-[21rem] flex-1 flex-col bg-zinc-50/30 p-4 md:min-h-0 md:p-5 xl:p-6">
+                                    <div className="mb-4">
                                         <div className="flex items-center justify-between mb-2">
                                             <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#F39200]">
                                                 {selectedEdtNode ? `Rama: ${selectedEdtNode.codigo}` : 'Personal Proyecto'}
@@ -855,7 +863,7 @@ const ProjectManager = () => {
                                         <div className="h-0.5 w-12 bg-[#F39200] rounded-full" />
                                     </div>
 
-                                    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3">
+                                    <div data-assignment-assigned-viewport className="min-h-0 flex-1 overflow-y-auto overscroll-contain custom-scrollbar space-y-3 [touch-action:pan-y]">
                                         {loadingAssignments ? (
                                             <div className="h-full flex items-center justify-center">
                                                 <div className="w-10 h-10 border-4 border-zinc-100 border-t-[#F39200] rounded-full animate-spin" />
@@ -868,37 +876,38 @@ const ProjectManager = () => {
                                                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Sin integrantes asignados</p>
                                             </div>
                                         ) : assignedUsers.map(u => (
-                                            <div key={u.id} className="p-4 rounded-3xl bg-[#1A1A1A] border border-transparent flex items-center justify-between shadow-xl group hover:scale-[1.02] transition-all">
-                                                <div className="flex items-center gap-4">
+                                            <div key={u.id} className="flex items-center justify-between gap-3 rounded-2xl border border-transparent bg-[#1A1A1A] p-3 shadow-xl transition-all">
+                                                <div className="flex min-w-0 items-center gap-3">
                                                     <div className="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center text-[12px] font-black text-[#F39200] border border-white/5">
                                                         {u.nombre_completo?.charAt(0)}
                                                     </div>
-                                                    <div>
-                                                        <p className="text-xs font-black uppercase tracking-tight text-white mb-0.5">{u.nombre_completo}</p>
-                                                        <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">{u.email}</p>
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-xs font-black uppercase tracking-tight text-white mb-0.5">{u.nombre_completo}</p>
+                                                        <p className="truncate text-[9px] font-bold text-zinc-500 uppercase tracking-widest">{u.email}</p>
                                                     </div>
                                                 </div>
                                                 <button 
                                                     onClick={() => handleUnassignUser(u.id)}
-                                                    className="w-10 h-10 rounded-xl bg-white/5 text-zinc-500 hover:bg-red-500/10 hover:text-red-500 transition-all flex items-center justify-center active:scale-95"
+                                                    aria-label={`Desasignar a ${u.nombre_completo}`}
+                                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/5 text-zinc-400 transition-all hover:bg-red-500/10 hover:text-red-400 active:scale-95"
                                                 >
                                                     <UserMinus className="w-5 h-5" />
                                                 </button>
                                             </div>
                                         ))}
                                     </div>
-                                </div>
+                                </section>
                             </div>
                         </div>
-
-                        <div className="p-8 border-t border-zinc-200 flex justify-end bg-white">
+                        </AppModalBody>
+                        <AppModalFooter variant="flat">
                             <LiquidButton
                                 onClick={() => setShowAssignModal(false)}
                                 className="!h-14 !px-12 bg-[#1A1A1A] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-2xl hover:bg-[#222] transition-all"
                             >
                                 Finalizar Gestión
                             </LiquidButton>
-                        </div>
+                        </AppModalFooter>
                     </AppModalShell>
                 )}
             </AnimatePresence>

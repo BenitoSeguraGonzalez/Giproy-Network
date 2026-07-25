@@ -1505,6 +1505,41 @@ Fecha: 2026-07-24
 - Harnesses de gestor Proyectos y Bases.
 - `docs/architecture/visual-surface-inventory.json`.
 
+## C03.7 - Modal de asignacion
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+- Se elimino la composicion rigida de tres columnas y altura fija.
+- En escritorio ancho se conservan EDT, disponibles y asignados simultaneos.
+- En tablet retrato la configuracion/EDT precede a una zona de personal en dos
+  paneles; cada lista conserva desplazamiento propio sin escalar componentes.
+- Cabecera y `Finalizar Gestion` permanecen fijos; el cuerpo es el unico
+  viewport general cuando la composicion necesita apilarse.
+- Selectores y acciones de asignar/desasignar cumplen 44 px y los nombres/correos
+  largos truncan dentro de su panel sin producir desbordamiento de documento.
+- Resultado: **10/10 PASS**; capturas iniciales y de final de scroll abiertas.
+
+### Evidencia C03.7
+
+- `artifacts/visual-certification/2026-07-25T02-18-33-693Z`.
+- `assign-initial-contact-sheet.png`.
+- `assign-scroll-end-contact-sheet.png`.
+
+### Archivos tratados
+
+- `frontend/src/pages/ProjectManager.jsx`.
+- `frontend/classic-project-manager-assign-harness.html`.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `docs/architecture/visual-surface-inventory.json`.
+
+### Incidencias documentadas
+
+- La implementacion anterior imponia `h-[75dvh]` y tres columnas incluso cuando
+  el ancho CSS efectivo de una tablet no permite ese reparto.
+- Los controles de alcance, modulo, asignar y desasignar quedaban por debajo del
+  minimo tactil de 44 px.
+
 ## Siguiente unidad
 
-`C03.7 - Modal de asignacion`: EN CURSO.
+`C03.8 - Dashboard de equipo`: EN CURSO.

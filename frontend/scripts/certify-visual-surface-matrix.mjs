@@ -108,8 +108,33 @@ try {
                     moneda: 'USD',
                     updated_at: `2026-07-${String(24 - index).padStart(2, '0')}T12:00:00Z`,
                 }));
+                const collaborators = Array.from({ length: 14 }, (_, index) => ({
+                    id: 501 + index,
+                    nombre_completo: `Colaborador Santiago ${String(index + 1).padStart(2, '0')}`,
+                    email: `colaborador${index + 1}@santiago.test`,
+                    rol: 'usuario',
+                }));
                 let body = [];
-                if (/\/proyectos\/?$/u.test(apiPath)) body = projects;
+                if (/\/usuarios\/?$/u.test(apiPath)) body = collaborators;
+                else if (/\/edt\/project\/\d+\/?$/u.test(apiPath)) {
+                    body = Array.from({ length: 8 }, (_, index) => ({
+                        id: 601 + index,
+                        codigo: `EDT-${String(index + 1).padStart(2, '0')}`,
+                        nombre: `Rama constructiva Santiago ${index + 1}`,
+                        parent_id: null,
+                        nivel: 1,
+                    }));
+                }
+                else if (/\/proyectos\/\d+\/assigned-users\/?$/u.test(apiPath)) body = collaborators.slice(0, 6);
+                else if (/\/proyectos\/\d+\/assignment-dashboard\/?$/u.test(apiPath)) {
+                    body = Array.from({ length: 8 }, (_, index) => ({
+                        edt_id: 601 + index,
+                        codigo: `EDT-${String(index + 1).padStart(2, '0')}`,
+                        nombre: `Rama constructiva Santiago ${index + 1}`,
+                        usuarios: collaborators.slice(0, (index % 5) + 1),
+                    }));
+                }
+                else if (/\/proyectos\/?$/u.test(apiPath)) body = projects;
                 else if (/\/proyectos\/[^/]+\/revisiones\/?$/u.test(apiPath)) {
                     body = Array.from({ length: 8 }, (_, revision) => ({
                         ...projects[0],
@@ -184,6 +209,10 @@ try {
                 if (harness.source === 'classic-project-manager-bases-harness.html') {
                     await page.getByRole('button', { name: 'Bases Maestras', exact: true }).click();
                     await page.waitForTimeout(300);
+                }
+                if (harness.source === 'classic-project-manager-assign-harness.html') {
+                    await page.getByRole('button', { name: 'Asignar personal' }).first().click();
+                    await page.waitForTimeout(500);
                 }
             } catch (error) {
                 navigationError = error.message;
@@ -469,6 +498,14 @@ try {
                         const revisionViewport = [...document.querySelectorAll('[touch-action], [class*="touch-action:pan-y"]')]
                             .find((node) => node.textContent?.includes('REV-007') && node.scrollHeight > node.clientHeight + 2);
                         if (revisionViewport) revisionViewport.scrollTop = revisionViewport.scrollHeight;
+                    });
+                }
+                if (harness.source === 'classic-project-manager-assign-harness.html') {
+                    await page.evaluate(() => {
+                        const available = document.querySelector('[data-assignment-available-viewport]');
+                        const assigned = document.querySelector('[data-assignment-assigned-viewport]');
+                        if (available) available.scrollTop = available.scrollHeight;
+                        if (assigned) assigned.scrollTop = assigned.scrollHeight;
                     });
                 }
                 await page.waitForTimeout(50);
