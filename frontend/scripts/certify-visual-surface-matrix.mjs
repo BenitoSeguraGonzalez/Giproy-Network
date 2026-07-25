@@ -118,8 +118,27 @@ try {
                     email: `colaborador${index + 1}@santiago.test`,
                     rol: 'usuario',
                 }));
+                const stakeholders = Array.from({ length: 14 }, (_, index) => ({
+                    id: 701 + index,
+                    codigo: `STK-${String(index + 1).padStart(3, '0')}`,
+                    nombre: index === 0 ? 'María Fernanda' : `Responsable ${index + 1}`,
+                    apellidos: index === 0 ? 'Santiago Bermeo de nombre institucional extenso' : 'Santiago Bermeo',
+                    email: `stakeholder${index + 1}@santiago.test`,
+                    movil: `+593 99 000 ${String(index + 1).padStart(4, '0')}`,
+                    profesion: index % 2 ? 'Ingeniería civil' : 'Dirección de proyectos',
+                    institucion: `Institución técnica regional Santiago ${index + 1}`,
+                    pais: 'Ecuador',
+                    provincia: 'Pichincha',
+                    canton: 'Quito',
+                    ciudad: 'Quito',
+                    direccion_detalle: `Avenida del proyecto ${index + 1}`,
+                    proyecto_codigo_root: 'SB-001',
+                }));
                 let body = [];
                 if (/\/usuarios\/?$/u.test(apiPath)) body = collaborators;
+                else if (/\/stakeholders\/project\/[^/]+\/?$/u.test(apiPath)) body = stakeholders;
+                else if (apiPath.endsWith('/maestros/ecuador/provincias')) body = ['Pichincha', 'Guayas', 'Azuay'];
+                else if (apiPath.includes('/maestros/ecuador/cantones/')) body = ['Quito', 'Rumiñahui', 'Mejía'];
                 else if (/\/edt\/project\/\d+\/?$/u.test(apiPath)) {
                     body = Array.from({ length: 8 }, (_, index) => ({
                         id: 601 + index,
@@ -205,10 +224,21 @@ try {
                     || harness.source === 'classic-project-workspace-header-harness.html'
                     || harness.source === 'classic-project-workspace-navigation-harness.html'
                     || harness.source === 'classic-project-workspace-data-harness.html'
-                    ? `${baseUrl}${harness.path}?project_id=1&tab=datos`
+                    || harness.source === 'classic-project-workspace-stakeholders-harness.html'
+                    || harness.source === 'classic-project-workspace-stakeholder-create-harness.html'
+                    || harness.source === 'classic-project-workspace-stakeholder-edit-harness.html'
+                    ? `${baseUrl}${harness.path}?project_id=1&tab=${
+                        harness.source.includes('stakeholder') ? 'stakeholders' : 'datos'
+                    }`
                     : `${baseUrl}${harness.path}`;
                 await page.goto(harnessUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
                 await page.waitForTimeout(750);
+                if (harness.source === 'classic-project-workspace-stakeholders-harness.html'
+                    || harness.source === 'classic-project-workspace-stakeholder-create-harness.html'
+                    || harness.source === 'classic-project-workspace-stakeholder-edit-harness.html') {
+                    await page.getByTitle('Stakeholders').click();
+                    await page.waitForTimeout(500);
+                }
                 if (harness.source === 'classic-projects-kanban-harness.html') {
                     await page.getByRole('tab', { name: 'Kanban' }).click();
                     await page.waitForTimeout(350);
@@ -268,6 +298,14 @@ try {
                         if (main) main.scrollTop = 0;
                         if (side) side.scrollTop = 0;
                     });
+                    await page.waitForTimeout(350);
+                }
+                if (harness.source === 'classic-project-workspace-stakeholder-create-harness.html') {
+                    await page.getByRole('button', { name: 'Nuevo stakeholder' }).click();
+                    await page.waitForTimeout(350);
+                }
+                if (harness.source === 'classic-project-workspace-stakeholder-edit-harness.html') {
+                    await page.getByTitle('Editar stakeholder').first().click();
                     await page.waitForTimeout(350);
                 }
             } catch (error) {
@@ -582,6 +620,22 @@ try {
                         const side = document.querySelector('[data-project-edit-side-viewport]');
                         if (main) main.scrollTop = main.scrollHeight;
                         if (side) side.scrollTop = side.scrollHeight;
+                    });
+                }
+                if (harness.source === 'classic-project-workspace-stakeholders-harness.html') {
+                    await page.evaluate(() => {
+                        const viewport = document.querySelector('[data-stakeholders-list-viewport]');
+                        if (viewport) {
+                            viewport.scrollTop = viewport.scrollHeight;
+                            viewport.scrollLeft = viewport.scrollWidth;
+                        }
+                    });
+                }
+                if (harness.source === 'classic-project-workspace-stakeholder-create-harness.html'
+                    || harness.source === 'classic-project-workspace-stakeholder-edit-harness.html') {
+                    await page.evaluate(() => {
+                        const viewport = document.querySelector('[data-stakeholder-form-viewport]');
+                        if (viewport) viewport.scrollTop = viewport.scrollHeight;
                     });
                 }
                 await page.waitForTimeout(50);

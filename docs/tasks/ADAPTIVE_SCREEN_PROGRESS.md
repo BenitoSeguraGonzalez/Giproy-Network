@@ -1670,4 +1670,65 @@ Fecha: 2026-07-24
 
 ## Siguiente unidad
 
-`C04.3 - Stakeholders`: EN CURSO.
+`C04.3 - Stakeholders`: **VERIFICADA VISUALMENTE**.
+
+## C04.3 - Stakeholders
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+- El listado dispone de un viewport propio con desplazamiento vertical y
+  horizontal táctil; la cabecera del workspace permanece estable y las acciones
+  de fila siguen disponibles al alcanzar el extremo derecho.
+- La tabla conserva su estructura informativa en lugar de comprimir nombres,
+  cargos, organizaciones, datos de contacto y acciones hasta volverlos ilegibles.
+- Alta y edición utilizan un diálogo adaptativo por encima del shell global:
+  encabezado y pie permanecen fijos, mientras únicamente el cuerpo del
+  formulario se desplaza.
+- En tablet retrato el formulario ocupa el ancho útil y mantiene campos,
+  selectores y agrupaciones legibles; en paisaje y escritorio recupera una
+  composición más compacta sin aplicar zoom global.
+- Botones de alta, cierre, acciones de fila, búsqueda y controles del formulario
+  cumplen el objetivo táctil mínimo de 44 px.
+- Se verificaron datos extensos, tabla completa, alta vacía, edición poblada,
+  ubicación y acciones finales en las cinco geometrías contractuales.
+- Resultado: **30/30 PASS** entre listado, alta y edición; seis hojas de
+  capturas inicial/final abiertas e inspeccionadas.
+
+### Evidencia C04.3
+
+- Listado: `artifacts/visual-certification/2026-07-25T03-10-37-099Z`.
+- Alta: `artifacts/visual-certification/2026-07-25T03-18-56-140Z`.
+- Edición: `artifacts/visual-certification/2026-07-25T03-20-20-520Z`.
+- `classic-project-workspace-stakeholders-harness-contact-sheet.png`.
+- `classic-project-workspace-stakeholders-harness-scroll-end-contact-sheet.png`.
+- `classic-project-workspace-stakeholder-create-harness-contact-sheet.png`.
+- `classic-project-workspace-stakeholder-create-harness-scroll-end-contact-sheet.png`.
+- `classic-project-workspace-stakeholder-edit-harness-contact-sheet.png`.
+- `classic-project-workspace-stakeholder-edit-harness-scroll-end-contact-sheet.png`.
+
+### Incidencias de certificacion
+
+- La primera ejecución conjunta quedó bloqueada y se descartó; se cerraron
+  únicamente los procesos Vite/npm de esa ejecución y se dividió la
+  certificación por superficie.
+- `2026-07-25T03-01-30-204Z` obtuvo PASS geométrico, pero se rechazó al abrir
+  las capturas: mostraba `Datos` en lugar de `Stakeholders`.
+- `2026-07-25T03-05-49-126Z` confirmó mediante captura y timeout del localizador
+  que el parámetro de pestaña no activaba de forma fiable la sección. El
+  certificador pasó a seleccionar explícitamente la entrada de navegación.
+- `2026-07-25T03-11-43-595Z` también pasó geometría, pero se rechazó visualmente:
+  en tablet Full HD retrato el header global cubría el encabezado del diálogo de
+  alta. Se corrigió la capa del diálogo y se repitieron desde cero alta y edición.
+- Solo las tres ejecuciones enumeradas como evidencia se consideran válidas.
+
+### Archivos tratados
+
+- `frontend/src/components/projects/Stakeholders.jsx`.
+- Harnesses de listado, alta y edición de stakeholders.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `docs/architecture/visual-surface-inventory.json`.
+
+## Siguiente unidad
+
+`C04.4 - EDT/WBS`: EN CURSO.

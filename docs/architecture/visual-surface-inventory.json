@@ -103,7 +103,7 @@
     "protectedRoutes": 38,
     "publicRoutes": 5,
     "interactiveSurfaceFiles": 55,
-    "harnesses": 82,
+    "harnesses": 85,
     "harnessesWithoutValidator": 0
   },
   "routes": [
@@ -3677,6 +3677,72 @@
       "mode": "classic",
       "path": "/classic-project-workspace-navigation-harness.html",
       "source": "classic-project-workspace-navigation-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-project-workspace-stakeholder-create-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-project-workspace-stakeholder-create-harness.html",
+      "source": "classic-project-workspace-stakeholder-create-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-project-workspace-stakeholder-edit-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-project-workspace-stakeholder-edit-harness.html",
+      "source": "classic-project-workspace-stakeholder-edit-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-project-workspace-stakeholders-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-project-workspace-stakeholders-harness.html",
+      "source": "classic-project-workspace-stakeholders-harness.html",
       "validators": [
         "certify-visual-surface-matrix.mjs"
       ],

@@ -52,7 +52,7 @@ const STAKEHOLDER_INPUT_CLASS =
     'h-11 rounded-xl border-zinc-200 bg-white font-medium text-zinc-800 focus:border-[#F39200]';
 
 const STAKEHOLDER_ROW_ACTION_BUTTON_BASE =
-    'inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#ececec] bg-[#ededed] shadow-[3px_3px_8px_#d5d5d5,-3px_-3px_8px_#ffffff] transition hover:brightness-[0.99] active:scale-[0.98] active:shadow-[inset_2px_2px_6px_#d0d0d0,inset_-2px_-2px_6px_#ffffff] disabled:cursor-not-allowed disabled:opacity-60';
+    'inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#ececec] bg-[#ededed] shadow-[3px_3px_8px_#d5d5d5,-3px_-3px_8px_#ffffff] transition hover:brightness-[0.99] active:scale-[0.98] active:shadow-[inset_2px_2px_6px_#d0d0d0,inset_-2px_-2px_6px_#ffffff] disabled:cursor-not-allowed disabled:opacity-60';
 
 const compactLocationLabel = (stakeholder) =>
     stakeholder?.ciudad || stakeholder?.canton || stakeholder?.provincia || stakeholder?.pais || 'Sin ubicación';
@@ -307,7 +307,7 @@ const Stakeholders = ({ project }) => {
             <div className={STAKEHOLDER_HEADER_SURFACE}>
                 <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
                     <div className="flex min-w-0 items-center gap-3">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.9rem] border border-purple-200/70 bg-purple-50 text-purple-500">
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.9rem] border border-purple-200/70 bg-purple-50 text-purple-500">
                             <Users className="h-4 w-4" />
                         </span>
                         <div className="min-w-0">
@@ -336,7 +336,7 @@ const Stakeholders = ({ project }) => {
                                 onClick={() => handleOpenModal()}
                                 title="Nuevo stakeholder"
                                 aria-label="Nuevo stakeholder"
-                                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/80 bg-[#f7f7f5] text-purple-500 shadow-[0_4px_12px_rgba(0,0,0,0.26),0_0_0_1px_rgba(255,255,255,0.42)] transition hover:bg-white hover:text-purple-600 active:scale-[0.98] active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.18),inset_-2px_-2px_6px_rgba(255,255,255,0.75)]"
+                                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-[#f7f7f5] text-purple-500 shadow-[0_4px_12px_rgba(0,0,0,0.26),0_0_0_1px_rgba(255,255,255,0.42)] transition hover:bg-white hover:text-purple-600 active:scale-[0.98] active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.18),inset_-2px_-2px_6px_rgba(255,255,255,0.75)]"
                             >
                                 <Plus className="h-[18px] w-[18px]" strokeWidth={2.2} />
                             </button>
@@ -346,12 +346,16 @@ const Stakeholders = ({ project }) => {
                                 placeholder="Buscar responsable..."
                                 containerClassName="w-full sm:max-w-md"
                                 searchIconClassName="left-4 text-zinc-400 group-focus-within:text-[#F39200]"
-                                inputClassName="w-full h-9 rounded-xl border border-zinc-200 bg-white pl-10 pr-9 text-sm font-semibold text-zinc-700 shadow-[inset_1px_1px_3px_rgba(186,190,204,0.35),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] placeholder:text-zinc-400 focus:border-[#F39200] focus:ring-[#F39200]"
+                                inputClassName="w-full h-11 rounded-xl border border-zinc-200 bg-white pl-10 pr-9 text-sm font-semibold text-zinc-700 shadow-[inset_1px_1px_3px_rgba(186,190,204,0.35),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] placeholder:text-zinc-400 focus:border-[#F39200] focus:ring-[#F39200]"
                             />
                         </div>
                     </div>
-                    <div className="flex-1 min-h-0 overflow-y-auto giproy-motion-scrollbar-hide">
-                        <table className="w-full text-left border-separate border-spacing-0">
+                    <div
+                        data-stakeholders-list-viewport
+                        className="flex-1 min-h-0 overflow-auto overscroll-contain giproy-motion-scrollbar-hide [touch-action:pan-x_pan-y]"
+                        aria-label="Listado desplazable de stakeholders"
+                    >
+                        <table className="min-w-[760px] w-full text-left border-separate border-spacing-0">
                             <thead className="sticky top-0 z-20 border-b border-[#101318] bg-[#111318] shadow-sm">
                                 <tr>
                                     <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white/60">Responsable</th>
@@ -451,9 +455,9 @@ const Stakeholders = ({ project }) => {
             {/* Modal Formulario Stakeholder */}
             <AnimatePresence>
                 {showFormModal && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-900/35 backdrop-blur-[2px] p-4">
+                    <div className="fixed inset-0 z-[1000] flex items-start justify-center overflow-y-auto overscroll-contain bg-zinc-900/35 p-3 backdrop-blur-[2px] [touch-action:pan-y] md:items-center md:p-4">
                         <MotionDiv initial={{ opacity: 0, scale: 0.96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: 8 }} transition={{ duration: 0.18 }} className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] border border-[#ececec] bg-[#f7f7f5] shadow-[12px_12px_30px_rgba(148,163,184,0.28),-10px_-10px_26px_rgba(255,255,255,0.82)]">
-                            <form onSubmit={handleSubmit} className="flex flex-col max-h-[90dvh]">
+                            <form onSubmit={handleSubmit} className="flex max-h-[calc(100dvh-1.5rem)] min-h-0 flex-col md:max-h-[calc(100dvh-2rem)]">
                                 <div className="flex items-center justify-between gap-4 border-b border-[#101318] bg-[#111318] px-5 py-4">
                                     <div className="flex min-w-0 items-center gap-3">
                                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-purple-300/20 bg-purple-400/10 text-purple-400">
@@ -467,13 +471,13 @@ const Stakeholders = ({ project }) => {
                                     <button
                                         type="button"
                                         onClick={() => setShowFormModal(false)}
-                                        className={`${APP_MODAL_CLOSE_BUTTON_CLASS} !h-10 !w-10`}
+                                        className={APP_MODAL_CLOSE_BUTTON_CLASS}
                                         title="Cerrar"
                                     >
                                         <X className="h-4 w-4" />
                                     </button>
                                 </div>
-                                <div className="space-y-4 overflow-y-auto p-5 custom-scrollbar">
+                                <div data-stakeholder-form-viewport className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 custom-scrollbar [touch-action:pan-y] md:p-5">
                                     <section className="rounded-[1.15rem] border border-[#ececec] bg-white p-4 shadow-[4px_4px_12px_#e1e1e1,-4px_-4px_12px_#ffffff]">
                                         <div className="mb-4 flex items-center gap-2">
                                             <Users className="h-4 w-4 text-purple-500" />
@@ -575,7 +579,7 @@ const Stakeholders = ({ project }) => {
                                     </div>
                                     </section>
                                 </div>
-                                <div className="flex items-center justify-end gap-3 border-t border-[#ececec] bg-[#f7f7f5] px-5 py-4">
+                                <div className="flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-[#ececec] bg-[#f7f7f5] px-4 py-3 md:px-5 md:py-4">
                                     <button type="button" onClick={() => setShowFormModal(false)} className="h-11 rounded-xl border border-zinc-200 bg-white px-5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700">Cancelar</button>
                                     <LiquidButton type="submit" disabled={isSaving} className="!h-11 !rounded-xl bg-purple-600 px-7 text-white shadow-[0_10px_22px_rgba(147,51,234,0.16)]">{isSaving ? 'Guardando...' : 'Guardar'}</LiquidButton>
                                 </div>
