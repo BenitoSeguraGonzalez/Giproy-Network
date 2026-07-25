@@ -1215,6 +1215,54 @@ Resultado: **10/10 PASS**; build Vite: **PASS**; Impeccable:
 - `docs/architecture/visual-surface-inventory.json`.
 - `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
 
+## C02.4 - Hub de Administracion Global `/admin-global`
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+### Problemas observados y adecuacion
+
+- El hub no tenia evidencia de sus dos permisos. Se incorporan harnesses de
+  superadministrador y acceso denegado para administrador.
+- Padding fijo de 48 px y rejilla desde `md` producian una columna excesivamente
+  grande en tablet Full HD vertical. Se aplican espacios fluidos y dos columnas
+  desde capacidad tablet.
+- Cada tarjeta dependia de un boton de flecha de 40 px. La tarjeta completa es
+  ahora un boton nativo, con foco visible y objetivo tactil.
+- Retorno y accion de estado alcanzan 44 px y poseen nombre accesible.
+- El hub y el estado denegado declaran una unica region vertical con
+  `overscroll-contain` y `pan-y`; la cabecera global queda fuera.
+- El acceso restringido usa semantica de alerta y padding adaptable.
+
+### Revision visual obligatoria
+
+- Se abrieron y revisaron veinte capturas iniciales: hub y acceso denegado en
+  los diez perfiles.
+- Se abrieron y revisaron las capturas de final de scroll del hub.
+- La ultima fila, Relacion con Ajustes y Estado del Sistema son alcanzables sin
+  mover el shell exterior.
+- Tablet vertical muestra dos tarjetas por fila; horizontal y Windows HiDPI
+  usan tres o cuatro segun capacidad real.
+
+Resultado: **20/20 PASS**; build Vite: **PASS**; Impeccable:
+**0 hallazgos**.
+
+### Evidencia
+
+- `artifacts/visual-certification/c02-4-admin-global-certified-2026-07-24`.
+- `visual-review-hub-contact-sheet.png`.
+- `visual-review-denied-contact-sheet.png`.
+- `visual-review-scroll-end-contact-sheet.png`.
+
+### Archivos tratados
+
+- `frontend/src/pages/AdminGlobal.jsx`.
+- `frontend/src/__classic_primary_pages_harness.jsx`.
+- `frontend/classic-admin-global-harness.html`.
+- `frontend/classic-admin-global-denied-harness.html`.
+- `docs/architecture/visual-surface-inventory.json`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
 ## Siguiente unidad
 
-`C02.4 - Administracion Global`: EN CURSO.
+`C03.1 - Selector y listado de proyectos`: EN CURSO.

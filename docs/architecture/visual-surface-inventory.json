@@ -103,7 +103,7 @@
     "protectedRoutes": 38,
     "publicRoutes": 5,
     "interactiveSurfaceFiles": 55,
-    "harnesses": 64,
+    "harnesses": 66,
     "harnessesWithoutValidator": 0
   },
   "routes": [
@@ -3368,6 +3368,50 @@
         "certify-lenovo-tab-p12-device.mjs",
         "certify-visual-surface-matrix.mjs",
         "validate-bim-workspace-v2-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-admin-global-denied-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-admin-global-denied-harness.html",
+      "source": "classic-admin-global-denied-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-admin-global-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-admin-global-harness.html",
+      "source": "classic-admin-global-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
       ],
       "profiles": [
         "desktop-fhd-100",

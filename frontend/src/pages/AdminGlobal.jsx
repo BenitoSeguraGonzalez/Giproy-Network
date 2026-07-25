@@ -32,16 +32,19 @@ const AdminGlobal = () => {
 
     if (!isSuperadmin) {
         return (
-            <div className="h-full min-h-0 bg-[#F2F4F7] p-12">
+            <div className="h-full min-h-0 overflow-y-auto overscroll-contain bg-[#F2F4F7] p-4 [touch-action:pan-y] sm:p-6 lg:p-8 xl:p-12">
                 <div className="max-w-4xl mx-auto">
                     <button
+                        type="button"
                         onClick={() => navigate('/dashboard')}
-                        className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors"
+                        aria-label="Volver a la consola de operaciones"
+                        data-adaptive-touch-target="true"
+                        className="mb-6 flex min-h-11 items-center gap-2 rounded-xl px-2 text-xs font-bold uppercase text-zinc-500 transition-colors hover:bg-white hover:text-[#B45309] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B45309] focus-visible:ring-offset-2 sm:mb-8"
                     >
                         <ArrowLeft className="w-4 h-4" /> Volver al Dashboard
                     </button>
 
-                    <div className="bg-white border border-red-100 rounded-[2rem] p-10 shadow-sm">
+                    <div className="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm sm:p-8 lg:p-10" role="alert">
                         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-red-400 mb-4">
                             Acceso restringido
                         </p>
@@ -214,16 +217,19 @@ const AdminGlobal = () => {
 
     return (
         <div className="h-full min-h-0 flex flex-col bg-[#F2F4F7]">
-            <main className="flex-1 overflow-y-auto p-12 custom-scrollbar">
+            <main className="custom-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 [touch-action:pan-y] sm:p-6 lg:p-8 xl:p-12" role="region" aria-label="Administración global" tabIndex={0} data-admin-global-viewport>
                 <div className="w-full max-w-[1500px] mx-auto">
                     <button
+                        type="button"
                         onClick={() => navigate('/dashboard')}
-                        className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors"
+                        aria-label="Volver a la consola de operaciones"
+                        data-adaptive-touch-target="true"
+                        className="mb-6 flex min-h-11 items-center gap-2 rounded-xl px-2 text-xs font-bold uppercase text-zinc-500 transition-colors hover:bg-white hover:text-[#B45309] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B45309] focus-visible:ring-offset-2 sm:mb-8"
                     >
                         <ArrowLeft className="w-4 h-4" /> Volver al Dashboard
                     </button>
 
-                    <header className="mb-12">
+                    <header className="mb-8 xl:mb-12">
                         <MotionDiv
                             initial={{ opacity: 0, y: 18 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -246,7 +252,7 @@ const AdminGlobal = () => {
                         </MotionDiv>
                     </header>
 
-                    <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                    <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6 2xl:grid-cols-4" aria-label="Submódulos administrativos">
                         {sections.map((section, index) => (
                             <MotionDiv
                                 key={section.id}
@@ -254,7 +260,12 @@ const AdminGlobal = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.35, delay: index * 0.06 }}
                             >
-                                <Card className="h-full border-none rounded-[2rem] shadow-[0_10px_35px_rgba(0,0,0,0.05)] overflow-hidden bg-white">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate(section.href)}
+                                    data-adaptive-touch-target="true"
+                                    className="group h-full w-full overflow-hidden rounded-[2rem] bg-white text-left shadow-[0_10px_35px_rgba(0,0,0,0.05)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B45309] focus-visible:ring-offset-2"
+                                >
                                     <CardContent className="p-8 flex flex-col h-full">
                                         <div className={`w-14 h-14 rounded-[1.25rem] border flex items-center justify-center ${section.color} ${section.borderColor}`}>
                                             {section.icon}
@@ -277,13 +288,9 @@ const AdminGlobal = () => {
                                                 {section.href ? 'Abrir submódulo' : 'Submódulo previsto'}
                                             </span>
                                             {section.href ? (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => navigate(section.href)}
-                                                    className="w-10 h-10 rounded-xl border border-zinc-200 bg-zinc-50 flex items-center justify-center text-zinc-400 hover:border-orange-200 hover:text-[#F39200] transition-colors"
-                                                >
+                                                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 text-[#B45309] transition-colors group-hover:border-orange-200">
                                                     <ArrowUpRight className="w-4 h-4" />
-                                                </button>
+                                                </div>
                                             ) : (
                                                 <div className="w-10 h-10 rounded-xl border border-zinc-200 bg-zinc-50 flex items-center justify-center text-zinc-400">
                                                     <ArrowUpRight className="w-4 h-4" />
@@ -291,7 +298,7 @@ const AdminGlobal = () => {
                                             )}
                                         </div>
                                     </CardContent>
-                                </Card>
+                                </button>
                             </MotionDiv>
                         ))}
                     </section>

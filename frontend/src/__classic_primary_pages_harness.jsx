@@ -8,17 +8,20 @@ import Dashboard from './pages/Dashboard';
 import PreciosUnitarios from './pages/PreciosUnitarios';
 import Proyectos from './pages/Proyectos';
 import { OtrosServicios } from './pages/Placeholders';
+import AdminGlobal from './pages/AdminGlobal';
 
 const company = { id: 7, nombre: 'Santiago Bermeo', alias: 'Santiago Bermeo', decimales_moneda: 2 };
 const base = { id: 19, nombre: 'Base técnica Santiago Bermeo', tipo_nombre: 'Base de Proyecto' };
 const pathname = window.location.pathname;
 const isSuperadminDashboard = pathname.includes('dashboard-superadmin');
+const isAdminGlobal = pathname.includes('admin-global');
+const isDeniedAdminGlobal = pathname.includes('admin-global-denied');
 const hasSelectedBase = !pathname.includes('precios-unitarios-no-base');
 const user = {
     id: 1,
     nombre: 'QA Visual',
     nombre_completo: 'QA Visual',
-    rol: isSuperadminDashboard ? 'superadministrador' : 'administrador',
+    rol: (isSuperadminDashboard || (isAdminGlobal && !isDeniedAdminGlobal)) ? 'superadministrador' : 'administrador',
     empresa_id: 7,
     empresa: company,
 };
@@ -28,6 +31,8 @@ const Page = pathname.includes('projects')
         ? PreciosUnitarios
         : pathname.includes('servicios')
             ? OtrosServicios
+            : isAdminGlobal
+                ? AdminGlobal
             : Dashboard;
 const initialPath = pathname.includes('projects')
     ? '/proyectos'
@@ -35,6 +40,8 @@ const initialPath = pathname.includes('projects')
         ? '/precios-unitarios'
         : pathname.includes('servicios')
             ? '/servicios'
+            : isAdminGlobal
+                ? '/admin-global'
             : '/dashboard';
 
 const authValue = {
