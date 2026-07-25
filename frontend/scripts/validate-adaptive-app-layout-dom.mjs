@@ -197,6 +197,26 @@ try {
         await page.keyboard.press('Escape');
         await companyMenu.waitFor({ state: 'hidden' });
         assert.equal(await companyTrigger.evaluate((node) => document.activeElement === node), true, `${profile.name}: el foco vuelve al selector de empresa`);
+        const form = page.locator('[data-adaptive-harness-form]');
+        await form.scrollIntoViewIfNeeded();
+        const formControls = await form.locator('input, textarea, button').evaluateAll((nodes) => nodes.map((node) => {
+            const rect = node.getBoundingClientRect();
+            return { width: rect.width, height: rect.height, left: rect.left, right: rect.right };
+        }));
+        assert.ok(formControls.every(({ left, right }) => left >= -1 && right <= profile.viewport.width + 1), `${profile.name}: controles del formulario dentro del viewport`);
+        if (profile.hasTouch) {
+            assert.ok(formControls.every(({ height }) => height >= 44), `${profile.name}: controles tactiles del formulario de al menos 44px`);
+            const textarea = page.locator('#adaptive-description');
+            await textarea.focus();
+            await page.setViewportSize({ width: profile.viewport.width, height: Math.max(540, Math.round(profile.viewport.height * 0.55)) });
+            await page.waitForTimeout(80);
+            const submit = page.getByRole('button', { name: 'Guardar registro' });
+            await submit.scrollIntoViewIfNeeded();
+            const submitRect = await submit.boundingBox();
+            assert.ok(submitRect && submitRect.y >= 0 && submitRect.y + submitRect.height <= page.viewportSize().height + 1, `${profile.name}: accion primaria alcanzable con viewport reducido`);
+            await page.setViewportSize(profile.viewport);
+            await page.waitForTimeout(80);
+        }
         await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-adaptive-shell-${profile.name}.png`, fullPage: true });
         await context.close();
     }

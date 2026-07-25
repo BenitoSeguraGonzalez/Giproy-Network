@@ -529,6 +529,72 @@ Resultado final: **20/20 PASS** sobre tabla compartida y Proyectos.
 Las ejecuciones unicas por objetivo de Impeccable devolvieron cero hallazgos
 para el componente compartido, el harness y Proyectos.
 
+## G00.7 - Formularios
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+### Superficie observada
+
+- `Input`, `Textarea` y `Label` compartidos.
+- Formulario representativo con campos cortos, texto largo y dos acciones.
+- Reflujo de una y dos columnas.
+- Reduccion del viewport visual equivalente a teclado virtual.
+
+### Problema observado
+
+Los inputs comunes fijaban 36 px de alto incluso en touch. El foco era de un
+solo pixel y no existia tratamiento compartido para `aria-invalid`. Los
+formularios consumidores podian recomponer columnas, pero el control base no
+garantizaba un objetivo tactil compatible con la densidad detectada.
+
+### Adecuacion aplicada
+
+- Input consume el objetivo de control de la densidad semantica.
+- Touch obtiene un minimo real de 44 px.
+- Textarea conserva 60 px como minimo y puede crecer verticalmente.
+- Foco visible de 2 px con offset.
+- `aria-invalid` obtiene borde y anillo de error sin depender de una pantalla.
+- El harness incluye etiquetas asociadas, reflujo, textarea y acciones.
+- La accion primaria se desplaza al area visible al reducirse el viewport.
+- No se aplica zoom, cambio de tamaño raiz ni compresion tipografica.
+
+### Perfiles verificados
+
+- Windows FHD 100 %, 125 % y 150 %.
+- Windows 4K/DPR 2.
+- Tablet Full HD horizontal y vertical.
+- Tablet 2K horizontal y vertical.
+- Lenovo P12 3K horizontal y vertical.
+
+Resultado: **10/10 PASS**.
+
+### Verificaciones
+
+- Todos los controles quedan dentro del viewport: PASS.
+- Controles touch >= 44 px: PASS.
+- Accion primaria alcanzable con altura reducida al 55 %: PASS.
+- Build Vite de produccion: PASS.
+- Validador DOM: PASS.
+- Matriz visual: PASS.
+
+### Evidencia
+
+- `artifacts/visual-certification/g00-7-forms-2026-07-24`.
+
+### Archivos tratados
+
+- `frontend/src/components/ui/input.jsx`.
+- `frontend/src/components/ui/textarea.jsx`.
+- `frontend/src/features/adaptive/AdaptiveAppLayoutHarness.jsx`.
+- `frontend/scripts/validate-adaptive-app-layout-dom.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
+### Detector visual
+
+La ejecucion unica de Impeccable devolvio cero hallazgos.
+
 ## Siguiente unidad
 
-`G00.7 - Formularios`: PENDIENTE.
+`G00.8 - Overlays`: PENDIENTE.
