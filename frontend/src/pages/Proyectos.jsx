@@ -4057,7 +4057,13 @@ const Proyectos = () => {
 
                 {portfolioView === 'kanban' && (
                     <div className="min-h-0 flex-1 overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
-                        <div className="h-full min-h-0 overflow-auto overscroll-contain px-3 py-3 [touch-action:pan-x_pan-y]">
+                        <div
+                            className="h-full min-h-0 overflow-auto overscroll-contain px-3 py-3 [touch-action:pan-x_pan-y]"
+                            role="region"
+                            aria-label="Tablero Kanban desplazable de proyectos"
+                            tabIndex={0}
+                            data-projects-kanban-viewport
+                        >
                             <div className="grid min-w-[1360px] gap-3 xl:grid-cols-5">
                                 {PROJECTS_KANBAN_COLUMNS.map((column) => {
                                     const projectsInColumn = kanbanProjectsByColumn[column.id] || [];
@@ -4147,7 +4153,7 @@ const Proyectos = () => {
                                                                                 type="button"
                                                                                 disabled={!previousColumn || isUpdatingState}
                                                                                 onClick={(event) => previousColumn && handleMoveProjectKanbanState(project, previousColumn.id, event)}
-                                                                                className={`${PROJECTS_SOFT_ACTION_MICRO_BUTTON_CLASS} ${PROJECTS_SOFT_ACTION_MICRO_BUTTON_ACCENT_CLASS} h-7 w-7 rounded-lg disabled:pointer-events-none disabled:opacity-40`}
+                                                                                className={`${PROJECTS_SOFT_ACTION_MICRO_BUTTON_CLASS} ${PROJECTS_SOFT_ACTION_MICRO_BUTTON_ACCENT_CLASS} h-11 w-11 rounded-xl disabled:pointer-events-none disabled:opacity-40`}
                                                                                 title={previousColumn ? `Mover a ${previousColumn.label}` : 'Sin fase anterior'}
                                                                             >
                                                                                 <ChevronRight className="h-3.5 w-3.5 rotate-180" />
@@ -4156,7 +4162,7 @@ const Proyectos = () => {
                                                                                 type="button"
                                                                                 disabled={!nextColumn || isUpdatingState}
                                                                                 onClick={(event) => nextColumn && handleMoveProjectKanbanState(project, nextColumn.id, event)}
-                                                                                className={`${PROJECTS_SOFT_ACTION_MICRO_BUTTON_CLASS} ${PROJECTS_SOFT_ACTION_MICRO_BUTTON_ACCENT_CLASS} h-7 w-7 rounded-lg disabled:pointer-events-none disabled:opacity-40`}
+                                                                                className={`${PROJECTS_SOFT_ACTION_MICRO_BUTTON_CLASS} ${PROJECTS_SOFT_ACTION_MICRO_BUTTON_ACCENT_CLASS} h-11 w-11 rounded-xl disabled:pointer-events-none disabled:opacity-40`}
                                                                                 title={nextColumn ? `Mover a ${nextColumn.label}` : 'Sin fase siguiente'}
                                                                             >
                                                                                 <ChevronRight className="h-3.5 w-3.5" />
@@ -4170,7 +4176,7 @@ const Proyectos = () => {
                                                                                 <button
                                                                                     type="button"
                                                                                     onClick={(event) => handleToggleKanbanRevisionMenu(project, event)}
-                                                                                    className={`${PROJECTS_SOFT_ACTION_MICRO_BUTTON_CLASS} ${PROJECTS_SOFT_ACTION_MICRO_BUTTON_ACCENT_CLASS} h-7 w-7 rounded-lg`}
+                                                                                    className={`${PROJECTS_SOFT_ACTION_MICRO_BUTTON_CLASS} ${PROJECTS_SOFT_ACTION_MICRO_BUTTON_ACCENT_CLASS} h-11 w-11 rounded-xl`}
                                                                                     title="Revisiones disponibles"
                                                                                 >
                                                                                     <Eye className="h-3.5 w-3.5" />
@@ -4218,7 +4224,7 @@ const Proyectos = () => {
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={(event) => handleOpenApprovedKanbanRevision(project, event)}
-                                                                                className={`${PROJECTS_SOFT_ACTION_MICRO_BUTTON_CLASS} ${PROJECTS_SOFT_ACTION_MICRO_BUTTON_ACCENT_CLASS} h-7 w-7 rounded-lg`}
+                                                                                className={`${PROJECTS_SOFT_ACTION_MICRO_BUTTON_CLASS} ${PROJECTS_SOFT_ACTION_MICRO_BUTTON_ACCENT_CLASS} h-11 w-11 rounded-xl`}
                                                                                 title="Entrar a revisión aprobada"
                                                                             >
                                                                                 <Eye className="h-3.5 w-3.5" />

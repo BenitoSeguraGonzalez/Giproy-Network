@@ -120,6 +120,10 @@ try {
             try {
                 await page.goto(`${baseUrl}${harness.path}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
                 await page.waitForTimeout(750);
+                if (harness.source === 'classic-projects-kanban-harness.html') {
+                    await page.getByRole('tab', { name: 'Kanban' }).click();
+                    await page.waitForTimeout(350);
+                }
             } catch (error) {
                 navigationError = error.message;
             }

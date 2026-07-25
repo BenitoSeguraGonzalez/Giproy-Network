@@ -1297,6 +1297,48 @@ correccion estructural ya aplicada.
 - `visual-review-contact-sheet.png`.
 - `visual-review-scroll-end-contact-sheet.png`.
 
+## C03.2 - Proyectos: vista Kanban
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+### Problemas observados y adecuacion
+
+- Se incorpora un harness que activa realmente Kanban; la evidencia previa solo
+  cubria la vista Lista.
+- El tablero conserva sus cinco fases y usa desplazamiento bidireccional propio,
+  en lugar de reducir o deformar los carriles.
+- Mover fase y abrir revisiones usaban controles de 28x28 px. Todos pasan a
+  44x44 px, con estados deshabilitados conservados.
+- El viewport Kanban declara region, nombre, foco y gesto `pan-x pan-y`.
+
+### Revision visual obligatoria
+
+- Diez capturas iniciales abiertas y revisadas.
+- Diez capturas de final de desplazamiento abiertas y revisadas.
+- Tablet vertical mantiene un carril legible por vez y permite recorrer fases
+  horizontalmente; dentro de cada fase se alcanza el ultimo proyecto.
+- Tablet horizontal y Windows HiDPI muestran las cinco fases sin alterar
+  tipografia ni densidad de las tarjetas.
+- Controles globales permanecen fuera del desplazamiento del tablero.
+
+Resultado: **10/10 PASS**; build Vite: **PASS**; Impeccable:
+**0 hallazgos**.
+
+### Evidencia
+
+- `artifacts/visual-certification/c03-2-projects-kanban-certified-2026-07-24`.
+- `visual-review-contact-sheet.png`.
+- `visual-review-scroll-end-contact-sheet.png`.
+
+### Archivos tratados
+
+- `frontend/src/pages/Proyectos.jsx`.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `frontend/classic-projects-kanban-harness.html`.
+- `docs/architecture/visual-surface-inventory.json`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
 ## Siguiente unidad
 
-`C03.2 - Proyectos: tarjetas y vistas alternativas`: EN CURSO.
+`C03.3 - Crear y editar proyecto`: EN CURSO.
