@@ -985,6 +985,42 @@ Resultado: **10/10 PASS**. Build Vite: **PASS**. Impeccable: **0 hallazgos**.
 - `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
 - `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
 
+## C01.3 - Nueva clave `/reset-password`
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+### Problemas observados y adecuacion
+
+- Se sustituye el viewport bloqueado por `100dvh` con scroll vertical
+  condicionado y recomposicion de paddings/logo.
+- Campos quedan asociados a sus etiquetas.
+- Error, token ausente y confirmacion correcta reciben semantica anunciable.
+- El token ausente ya no se expresa solo con un boton deshabilitado: se explica
+  la causa y la necesidad de solicitar otro enlace.
+- Accion principal usa contraste operativo y los controles declaran objetivo
+  tactil.
+
+### Pruebas
+
+- Token valido, claves discrepantes, correccion y respuesta exitosa.
+- Token ausente, accion bloqueada y explicacion visible.
+- Tarjeta contenida, sin overflow horizontal.
+- Diez perfiles obligatorios, incluidos viewport tactil reducido y Lenovo P12.
+
+Resultado: **10/10 PASS**. Build Vite: **PASS**. Impeccable: **0 hallazgos**.
+
+### Evidencia
+
+- `artifacts/visual-certification/c01-1-login-final-2026-07-24/*-reset-password.png`.
+
+### Archivos tratados
+
+- `frontend/src/pages/ResetPassword.jsx`.
+- `frontend/scripts/validate-login-adaptive-dom.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
 ## Siguiente unidad
 
-`C01.3 - /reset-password`: EN CURSO.
+`C01.4 - /verify-registration`: EN CURSO.

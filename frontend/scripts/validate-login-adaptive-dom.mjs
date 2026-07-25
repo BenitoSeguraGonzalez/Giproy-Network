@@ -157,6 +157,25 @@ try {
         await page.locator('#recovery-email').fill('persona@example.com');
         await page.getByRole('button', { name: /enviar enlace/i }).click();
         await page.getByRole('alert').waitFor();
+
+        await page.goto(`${baseUrl}/reset-password?token=valid-test-token`, { waitUntil: 'domcontentloaded' });
+        const resetCard = page.locator('[data-reset-password-card]');
+        await resetCard.waitFor();
+        const resetRect = await resetCard.boundingBox();
+        assert.ok(resetRect && resetRect.x >= 0 && resetRect.x + resetRect.width <= page.viewportSize().width, `${profile.id}: cambio de clave dentro del ancho`);
+        await page.locator('#new-password').fill('Clave-segura-2026');
+        await page.locator('#confirm-new-password').fill('Clave-distinta-2026');
+        await page.getByRole('button', { name: /cambiar contraseña/i }).click();
+        await page.getByRole('alert').waitFor();
+        await page.locator('#confirm-new-password').fill('Clave-segura-2026');
+        recoveryFails = false;
+        await page.getByRole('button', { name: /cambiar contraseña/i }).click();
+        await page.getByRole('status').waitFor();
+        assert.equal(await page.getByRole('button', { name: /iniciar sesión/i }).count(), 1, `${profile.id}: cambio correcto ofrece acceso`);
+        await page.goto(`${baseUrl}/reset-password`, { waitUntil: 'domcontentloaded' });
+        assert.equal(await page.getByRole('button', { name: /cambiar contraseña/i }).isDisabled(), true, `${profile.id}: token ausente bloquea envio`);
+        assert.equal(await page.getByRole('alert').count(), 1, `${profile.id}: token ausente se explica`);
+        await page.screenshot({ path: path.join(artifactRoot, `${profile.id}-reset-password.png`), fullPage: false });
         await context.close();
         console.log(`PASS ${profile.id} /login + /forgot-password`);
     }
