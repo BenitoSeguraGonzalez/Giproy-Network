@@ -10,8 +10,16 @@ import Proyectos from './pages/Proyectos';
 
 const company = { id: 7, nombre: 'Santiago Bermeo', alias: 'Santiago Bermeo', decimales_moneda: 2 };
 const base = { id: 19, nombre: 'Base técnica Santiago Bermeo', tipo_nombre: 'Base de Proyecto' };
-const user = { id: 1, nombre: 'QA Visual', nombre_completo: 'QA Visual', rol: 'administrador', empresa_id: 7, empresa: company };
 const pathname = window.location.pathname;
+const isSuperadminDashboard = pathname.includes('dashboard-superadmin');
+const user = {
+    id: 1,
+    nombre: 'QA Visual',
+    nombre_completo: 'QA Visual',
+    rol: isSuperadminDashboard ? 'superadministrador' : 'administrador',
+    empresa_id: 7,
+    empresa: company,
+};
 const Page = pathname.includes('projects') ? Proyectos : pathname.includes('precios-unitarios') ? PreciosUnitarios : Dashboard;
 const initialPath = pathname.includes('projects') ? '/proyectos' : pathname.includes('precios-unitarios') ? '/precios-unitarios' : '/dashboard';
 

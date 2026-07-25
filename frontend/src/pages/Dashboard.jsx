@@ -126,8 +126,8 @@ const Dashboard = () => {
                         </MotionDiv>
                     </header>
 
-                    <section ref={cardsViewportRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-2 custom-scrollbar">
-                        <div className="grid grid-cols-1 gap-4 pb-4 md:grid-cols-3 2xl:gap-8 2xl:pb-8">
+                    <section ref={cardsViewportRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-2 custom-scrollbar [touch-action:pan-y]" role="region" aria-label="Módulos disponibles" tabIndex={0} data-dashboard-modules>
+                        <div className="grid grid-cols-1 gap-4 pb-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 2xl:gap-8 2xl:pb-8">
                             {modules.map((module, index) => (
                                 <div
                                     key={module.id}
@@ -143,11 +143,15 @@ const Dashboard = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.5, delay: 0.1 * index }}
                                         whileHover={{ y: -8 }}
+                                        className="h-full"
                                     >
-                                        <Card
+                                        <button
+                                            type="button"
                                             onClick={() => navigate(module.path)}
-                                            className="group h-full cursor-pointer overflow-hidden rounded-3xl border-none bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col"
+                                            data-adaptive-touch-target="true"
+                                            className="group block h-full w-full rounded-3xl text-left outline-none focus-visible:ring-2 focus-visible:ring-[#B45309] focus-visible:ring-offset-2"
                                         >
+                                            <Card className="flex h-full flex-col overflow-hidden rounded-3xl border-none bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-shadow duration-300 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
                                             <CardContent className="flex h-full flex-col p-6 2xl:p-10">
                                                 <div className={`mb-8 flex h-16 w-16 items-center justify-center rounded-2xl border ${module.borderColor} ${module.color} shadow-sm transition-transform duration-300 group-hover:scale-110`}>
                                                     {module.icon}
@@ -170,7 +174,8 @@ const Dashboard = () => {
                                                     </div>
                                                 </div>
                                             </CardContent>
-                                        </Card>
+                                            </Card>
+                                        </button>
                                     </MotionDiv>
                                 </div>
                             ))}

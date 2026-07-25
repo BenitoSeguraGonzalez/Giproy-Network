@@ -1059,6 +1059,58 @@ Fecha: 2026-07-24
 - `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
 - `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
 
+## C02.1 - Consola de Operaciones `/` y `/dashboard`
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+### Problemas observados y adecuacion
+
+- Las tarjetas eran contenedores con clic sin semantica nativa. Cada modulo es
+  ahora un boton real, navegable por teclado, con foco visible y objetivo
+  tactil.
+- La region de modulos declara propiedad de scroll vertical, contencion de
+  sobre-desplazamiento y gesto `pan-y`; header y footer permanecen fuera.
+- El breakpoint anterior imponia tres columnas a tablet vertical de 800-920 px.
+  La captura revelo tarjetas excesivamente estrechas aunque el DOM no
+  registraba clipping. La composicion pasa a una columna base, dos en tablet
+  vertical, tres en horizontal y cuatro solamente en escritorio amplio.
+- Se incorporo el estado superadministrador de cuatro modulos al harness. La
+  cobertura anterior solo mostraba el estado administrador de tres modulos.
+- El certificador genera tambien captura al final del desplazamiento vertical,
+  no solo cuando existe desplazamiento horizontal.
+
+### Revision visual obligatoria
+
+- Se abrieron y revisaron las veinte capturas iniciales: dos permisos por diez
+  perfiles.
+- Se abrieron y revisaron las siete capturas adicionales de final de scroll.
+- Administrador: jerarquia, textos, acciones, version y footer completos.
+- Superadministrador: cuatro tarjetas legibles; la segunda fila queda dentro de
+  la region de modulos y es alcanzable sin mover la pagina exterior.
+- Tablet vertical: dos columnas, sin textos amputados ni solapamientos.
+- Tablet horizontal y Windows HiDPI: densidad proporcionada, sin escalado global
+  ni perdida de objetivos tactiles.
+
+Resultado: **20/20 PASS** en matriz; **27 capturas revisadas**. Build Vite:
+**PASS**. Detector Impeccable especifico: **0 hallazgos**.
+
+### Evidencia
+
+- `artifacts/visual-certification/c02-1-dashboard-visual-reviewed-2026-07-24`.
+- `visual-review-admin-contact-sheet.png`.
+- `visual-review-superadmin-contact-sheet.png`.
+- `visual-review-scroll-end-contact-sheet.png`.
+
+### Archivos tratados
+
+- `frontend/src/pages/Dashboard.jsx`.
+- `frontend/src/__classic_primary_pages_harness.jsx`.
+- `frontend/classic-dashboard-superadmin-harness.html`.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `docs/architecture/visual-surface-inventory.json`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
 ## Siguiente unidad
 
-`C02.1 - Consola de Operaciones`: EN CURSO.
+`C02.2 - Precios Unitarios`: EN CURSO.

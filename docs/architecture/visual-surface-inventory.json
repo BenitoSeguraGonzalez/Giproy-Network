@@ -102,8 +102,8 @@
     "routes": 43,
     "protectedRoutes": 38,
     "publicRoutes": 5,
-    "interactiveSurfaceFiles": 54,
-    "harnesses": 61,
+    "interactiveSurfaceFiles": 55,
+    "harnesses": 62,
     "harnessesWithoutValidator": 0
   },
   "routes": [
@@ -1645,6 +1645,25 @@
       "kind": "interactive-surface-file",
       "mode": "classic",
       "source": "src/context/PresupuestoContext.jsx",
+      "namedSurfaces": [],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "component:src/features/adaptive/AdaptiveAppLayoutHarness.jsx",
+      "kind": "interactive-surface-file",
+      "mode": "classic",
+      "source": "src/features/adaptive/AdaptiveAppLayoutHarness.jsx",
       "namedSurfaces": [],
       "profiles": [
         "desktop-fhd-100",
@@ -3371,6 +3390,29 @@
       "source": "classic-dashboard-harness.html",
       "validators": [
         "certify-android-primary-surfaces.mjs",
+        "certify-visual-surface-matrix.mjs",
+        "validate-release-visibility-dom.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-dashboard-superadmin-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-dashboard-superadmin-harness.html",
+      "source": "classic-dashboard-superadmin-harness.html",
+      "validators": [
         "certify-visual-surface-matrix.mjs"
       ],
       "profiles": [

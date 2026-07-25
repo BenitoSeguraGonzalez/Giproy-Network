@@ -373,7 +373,18 @@ try {
                 return results;
             })().catch((error) => [{ reached: false, error: error.message }]) : [];
             let scrollEndScreenshot = null;
-            if (scrollReachability?.horizontal) {
+            if (scrollReachability?.horizontal || scrollReachability?.vertical) {
+                await page.evaluate(() => {
+                    const candidates = [...document.querySelectorAll('body *')];
+                    const horizontal = candidates
+                        .filter((node) => /auto|scroll/u.test(getComputedStyle(node).overflowX))
+                        .sort((left, right) => (right.scrollWidth - right.clientWidth) - (left.scrollWidth - left.clientWidth))[0];
+                    const vertical = candidates
+                        .filter((node) => /auto|scroll/u.test(getComputedStyle(node).overflowY))
+                        .sort((left, right) => (right.scrollHeight - right.clientHeight) - (left.scrollHeight - left.clientHeight))[0];
+                    if (horizontal?.scrollWidth > horizontal?.clientWidth + 2) horizontal.scrollLeft = horizontal.scrollWidth;
+                    if (vertical?.scrollHeight > vertical?.clientHeight + 2) vertical.scrollTop = vertical.scrollHeight;
+                });
                 await page.waitForTimeout(50);
                 const scrollEndName = harness.source.replace(/\.html$/u, '-scroll-end.png');
                 const scrollEndPath = path.join(profileDirectory, scrollEndName);
