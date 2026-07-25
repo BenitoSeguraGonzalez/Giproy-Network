@@ -1263,6 +1263,40 @@ Resultado: **20/20 PASS**; build Vite: **PASS**; Impeccable:
 - `docs/architecture/visual-surface-inventory.json`.
 - `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
 
+## C03.1 - Proyectos: listado `/proyectos`
+
+Estado: **RECERTIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+### Contrato comprobado
+
+- Empresa Santiago Bermeo, busqueda, filtros, resumen y selector de vista
+  permanecen fuera del viewport desplazable.
+- La tabla posee desplazamiento vertical y horizontal exclusivo, gesto tactil
+  real y cabecera sticky.
+- El shell y los controles cambian exactamente 0 px durante el gesto de lista.
+- Se alcanzan proyecto 12, columnas finales y acciones sin mover la pagina
+  interior completa.
+
+### Revision visual obligatoria
+
+- Diez capturas iniciales abiertas y revisadas.
+- Diez capturas de final de scroll abiertas y revisadas.
+- Tablet Full HD y 2K, Lenovo P12 y Windows HiDPI conservan controles visibles,
+  filas legibles y acciones alcanzables.
+- No se aplica escalado global; la densidad de tabla se conserva y el exceso
+  pertenece al contenedor de datos.
+
+Resultado: **10/10 PASS**; contrato tactil y sticky:
+**PASS**. No se necesito cambiar el componente: la recertificacion confirma la
+correccion estructural ya aplicada.
+
+### Evidencia
+
+- `artifacts/visual-certification/c03-1-projects-recertification-2026-07-24`.
+- `visual-review-contact-sheet.png`.
+- `visual-review-scroll-end-contact-sheet.png`.
+
 ## Siguiente unidad
 
-`C03.1 - Selector y listado de proyectos`: EN CURSO.
+`C03.2 - Proyectos: tarjetas y vistas alternativas`: EN CURSO.
