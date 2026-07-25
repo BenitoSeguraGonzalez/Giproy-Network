@@ -127,12 +127,34 @@ try {
                 }
                 else if (/\/proyectos\/\d+\/assigned-users\/?$/u.test(apiPath)) body = collaborators.slice(0, 6);
                 else if (/\/proyectos\/\d+\/assignment-dashboard\/?$/u.test(apiPath)) {
-                    body = Array.from({ length: 8 }, (_, index) => ({
-                        edt_id: 601 + index,
+                    body = [{
+                        id: 600,
+                        codigo: 'PROY-SB',
+                        nombre: 'Proyecto Santiago Bermeo 1',
+                        parent_id: null,
+                        tipo: 'root',
+                        assigned_users: collaborators.slice(0, 2),
+                    }, ...Array.from({ length: 8 }, (_, index) => ({
+                        id: 601 + index,
                         codigo: `EDT-${String(index + 1).padStart(2, '0')}`,
                         nombre: `Rama constructiva Santiago ${index + 1}`,
-                        usuarios: collaborators.slice(0, (index % 5) + 1),
-                    }));
+                        parent_id: 600,
+                        tipo: 'edt',
+                        assigned_users: index % 3 === 0 ? [] : collaborators.slice(index % 5, (index % 5) + 2),
+                    }))];
+                }
+                else if (/\/proyectos\/\d+\/user-summary\/\d+\/?$/u.test(apiPath)) {
+                    body = {
+                        nombre: 'Colaborador Santiago 01 con nombre profesional extenso',
+                        email: 'colaborador1@santiago.test',
+                        cargo: 'Coordinador técnico',
+                        items: Array.from({ length: 7 }, (_, index) => ({
+                            modulo: index % 2 ? 'presupuestos' : 'datos_generales',
+                            edt_nombre: `Rama constructiva Santiago ${index + 1}`,
+                            es_global: index % 3 === 0,
+                            fecha: `2026-07-${String(24 - index).padStart(2, '0')}T12:00:00Z`,
+                        })),
+                    };
                 }
                 else if (/\/proyectos\/?$/u.test(apiPath)) body = projects;
                 else if (/\/proyectos\/[^/]+\/revisiones\/?$/u.test(apiPath)) {
@@ -213,6 +235,15 @@ try {
                 if (harness.source === 'classic-project-manager-assign-harness.html') {
                     await page.getByRole('button', { name: 'Asignar personal' }).first().click();
                     await page.waitForTimeout(500);
+                }
+                if (harness.source === 'classic-project-manager-team-dashboard-harness.html'
+                    || harness.source === 'classic-project-manager-team-summary-harness.html') {
+                    await page.getByRole('button', { name: 'Ver equipo' }).first().click();
+                    await page.waitForTimeout(500);
+                    if (harness.source === 'classic-project-manager-team-summary-harness.html') {
+                        await page.getByRole('button', { name: /Ver resumen de Colaborador Santiago 01/u }).first().click();
+                        await page.waitForTimeout(500);
+                    }
                 }
             } catch (error) {
                 navigationError = error.message;
@@ -506,6 +537,18 @@ try {
                         const assigned = document.querySelector('[data-assignment-assigned-viewport]');
                         if (available) available.scrollTop = available.scrollHeight;
                         if (assigned) assigned.scrollTop = assigned.scrollHeight;
+                    });
+                }
+                if (harness.source === 'classic-project-manager-team-dashboard-harness.html') {
+                    await page.evaluate(() => {
+                        const viewport = document.querySelector('[data-team-dashboard-viewport]');
+                        if (viewport) viewport.scrollTop = viewport.scrollHeight;
+                    });
+                }
+                if (harness.source === 'classic-project-manager-team-summary-harness.html') {
+                    await page.evaluate(() => {
+                        const viewport = document.querySelector('[data-team-summary-viewport]');
+                        if (viewport) viewport.scrollTop = viewport.scrollHeight;
                     });
                 }
                 await page.waitForTimeout(50);

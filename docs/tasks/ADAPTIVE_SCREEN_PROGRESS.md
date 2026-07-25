@@ -1542,4 +1542,51 @@ Fecha: 2026-07-24
 
 ## Siguiente unidad
 
-`C03.8 - Dashboard de equipo`: EN CURSO.
+`C03.8 - Dashboard de equipo`: **VERIFICADA VISUALMENTE**.
+
+## C03.8 - Dashboard de equipo y resumen de colaborador
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+- El mapa jerarquico dispone de un viewport vertical propio; la cabecera y la
+  salida del visor no participan en su desplazamiento.
+- Las ramas pasan de fila horizontal a bloque operativo en anchos estrechos,
+  manteniendo nombre, estado y `Gestionar personal` sin recortes.
+- Los colaboradores son botones accesibles de al menos 44 px y el acceso al
+  resumen ya no depende de `hover`.
+- El resumen de colaborador adapta avatar, identidad, cargo, correo,
+  responsabilidades y actividad a una o dos columnas segun el ancho efectivo.
+- Nombres profesionales extensos se ajustan sin invadir acciones ni tarjetas.
+- Se corrigio un defecto previo adicional: el componente utilizaba `motion`
+  sin importarlo explicitamente, potencial error de ejecucion al renderizar.
+- Resultado: **20/20 PASS** entre mapa y resumen; cuatro hojas de capturas
+  inicial/final abiertas e inspeccionadas.
+
+### Evidencia C03.8
+
+- `artifacts/visual-certification/2026-07-25T02-23-00-267Z`.
+- `classic-project-manager-team-dashboard-harness-contact-sheet.png`.
+- `classic-project-manager-team-dashboard-harness-scroll-end-contact-sheet.png`.
+- `classic-project-manager-team-summary-harness-contact-sheet.png`.
+- `classic-project-manager-team-summary-harness-scroll-end-contact-sheet.png`.
+
+### Incidencias de certificacion
+
+- El primer intento, `2026-07-25T02-22-21-392Z`, no es evidencia valida: el
+  certificador invoco `document` fuera del navegador. Se corrigio el contexto
+  Playwright y se repitieron los veinte casos desde cero.
+- Las dos advertencias de contraste heredadas de C03.7 se corrigieron antes de
+  cerrar el conjunto: avatar disponible y accion de desasignar.
+
+### Archivos tratados
+
+- `frontend/src/components/TeamDashboardModal.jsx`.
+- `frontend/src/pages/ProjectManager.jsx`.
+- Harnesses de dashboard y resumen de colaborador.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `docs/architecture/visual-surface-inventory.json`.
+
+## Siguiente unidad
+
+`C04.1 - Cabecera y selector del proyecto`: EN CURSO.

@@ -826,9 +826,9 @@ const ProjectManager = () => {
                                             .filter(u => !assignedUsers.some(au => au.id === u.id))
                                             .filter(u => includesNormalized(u.nombre_completo, modalSearch) || includesNormalized(u.email, modalSearch))
                                             .map(u => (
-                                                <div key={u.id} className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm transition-all hover:border-[#F39200]/30 hover:shadow-md">
+                                                <div key={u.id} className="group flex items-center justify-between gap-3 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm transition-all hover:border-[#F39200]/30 hover:shadow-md">
                                                     <div className="flex min-w-0 items-center gap-3">
-                                                        <div className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-[12px] font-black text-zinc-400 group-hover:bg-orange-50 group-hover:text-[#F39200] transition-colors border border-transparent group-hover:border-orange-100">
+                                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-transparent bg-zinc-50 text-[12px] font-black text-zinc-500 transition-colors group-hover:border-orange-100 group-hover:text-[#F39200]">
                                                             {u.nombre_completo?.charAt(0)}
                                                         </div>
                                                         <div className="min-w-0">
@@ -889,7 +889,7 @@ const ProjectManager = () => {
                                                 <button 
                                                     onClick={() => handleUnassignUser(u.id)}
                                                     aria-label={`Desasignar a ${u.nombre_completo}`}
-                                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/5 text-zinc-400 transition-all hover:bg-red-500/10 hover:text-red-400 active:scale-95"
+                                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/5 text-red-300 transition-all hover:bg-red-500/10 hover:text-red-200 active:scale-95"
                                                 >
                                                     <UserMinus className="w-5 h-5" />
                                                 </button>
