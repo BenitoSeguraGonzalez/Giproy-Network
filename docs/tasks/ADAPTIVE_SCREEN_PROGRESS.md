@@ -1466,6 +1466,45 @@ Fecha: 2026-07-24
 - `docs/architecture/visual-surface-inventory.json`.
 - `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
 
+## C03.5 - Gestor de personal: proyectos
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+- Cabecera, busqueda y selector Proyectos/Bases quedan fuera del scroll.
+- La tabla es el unico viewport bidireccional, posee cabecera sticky y gesto
+  tactil.
+- Se alcanzan proyectos 9-12 y las acciones de cobertura sin mover la pagina.
+- Volver, Ver equipo y Asignar personal cumplen 44 px.
+- Resultado: **10/10 PASS**; capturas iniciales y finales abiertas.
+
+## C03.6 - Gestor de personal: bases maestras
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+- La misma arquitectura preserva el selector y controles al cambiar de vista.
+- Retrato conserva columnas operativas mediante scroll propio; no comprime ni
+  escala la tabla.
+- Se alcanzan bases 7-10 y Asignar personal en el extremo derecho.
+- Resultado: **10/10 PASS**; capturas iniciales y finales abiertas.
+
+### Evidencia C03.5-C03.6
+
+- `artifacts/visual-certification/2026-07-25T02-07-08-431Z`.
+- `classic-project-manager-projects-harness-contact-sheet.png`.
+- `classic-project-manager-projects-harness-scroll-end-contact-sheet.png`.
+- `classic-project-manager-bases-harness-contact-sheet.png`.
+- `classic-project-manager-bases-harness-scroll-end-contact-sheet.png`.
+
+### Archivos tratados
+
+- `frontend/src/pages/ProjectManager.jsx`.
+- `frontend/src/__classic_primary_pages_harness.jsx`.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- Harnesses de gestor Proyectos y Bases.
+- `docs/architecture/visual-surface-inventory.json`.
+
 ## Siguiente unidad
 
-`C03.5 - Gestor de proyectos`: EN CURSO.
+`C03.7 - Modal de asignacion`: EN CURSO.

@@ -132,7 +132,15 @@ try {
                 else if (/\/proyectos\/\d+\/?$/u.test(apiPath)) body = projects[0];
                 else if (apiPath.endsWith('/proyectos/marketplace-export/statuses')) body = { projects: {} };
                 else if (apiPath.includes('/proyecto-detalles/')) body = { plazo_estimado: 180, fecha_presentacion: '2026-09-30' };
-                else if (apiPath.includes('/bases-trabajo/')) body = [{ id: 19, nombre: 'Base tecnica Santiago Bermeo', tipo: 'Base Maestra' }];
+                else if (/\/bases-trabajo\/\d+\/?$/u.test(apiPath)) body = { id: 19, nombre: 'Base tecnica Santiago Bermeo', tipo: 'Base Maestra' };
+                else if (/\/bases-trabajo\/?$/u.test(apiPath)) {
+                    body = Array.from({ length: 10 }, (_, index) => ({
+                        id: 301 + index,
+                        codigo_unico: `BM-${String(index + 1).padStart(3, '0')}`,
+                        nombre: `Base maestra Santiago Bermeo ${index + 1}`,
+                        tipo: 'Base Maestra',
+                    }));
+                }
                 else if (apiPath.includes('/personal-todos/') || apiPath.includes('/calendar-entries/')) body = [];
                 route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
             });
@@ -171,6 +179,10 @@ try {
                 }
                 if (harness.source === 'classic-projects-clone-confirm-harness.html') {
                     await page.getByRole('button', { name: /Clonar proyecto completo Proyecto Santiago Bermeo 1/u }).first().click();
+                    await page.waitForTimeout(300);
+                }
+                if (harness.source === 'classic-project-manager-bases-harness.html') {
+                    await page.getByRole('button', { name: 'Bases Maestras', exact: true }).click();
                     await page.waitForTimeout(300);
                 }
             } catch (error) {

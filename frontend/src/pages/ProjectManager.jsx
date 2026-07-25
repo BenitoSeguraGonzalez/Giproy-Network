@@ -295,8 +295,14 @@ const ProjectManager = () => {
     const totalManagedRecords = totalProjects + totalBases;
 
     const renderRecordsTable = (tableVariant = 'modern') => (
-        <Table>
-            <TableHeader className={tableVariant === 'modern' ? 'bg-[#f8f6f1] border-b border-[#eadfca]' : 'bg-zinc-50/50 border-b border-zinc-100'}>
+        <Table
+            className="min-w-[940px]"
+            scrollAxis="both"
+            containerClassName="h-full [touch-action:pan-x_pan-y]"
+            containerProps={{ 'data-project-manager-records-viewport': activeView }}
+            scrollLabel={`Listado de ${activeViewLabel.toLowerCase()}`}
+        >
+            <TableHeader className={`sticky top-0 z-10 ${tableVariant === 'modern' ? 'bg-[#f8f6f1] border-b border-[#eadfca]' : 'bg-zinc-50 border-b border-zinc-100'}`}>
                 <TableRow>
                     <TableHead className="font-black text-zinc-400 uppercase tracking-widest text-[9px] py-6 px-8 w-[150px]">Código</TableHead>
                     <TableHead className="font-black text-zinc-400 uppercase tracking-widest text-[9px] py-6">{activeView === 'projects' ? 'Proyecto' : 'Base Maestra'}</TableHead>
@@ -362,7 +368,7 @@ const ProjectManager = () => {
                                     onClick={() => handleOpenDashboard(item)}
                                     className={`flex items-center gap-3 transition-all ${activeView === 'projects' ? 'hover:scale-[1.02] cursor-pointer' : 'opacity-60 cursor-default'}`}
                                 >
-                                    <div className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl border ${
+                                    <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl border ${
                                         activeView === 'projects'
                                             ? 'bg-white border-zinc-200 text-[#136191]'
                                             : 'bg-orange-50 border-orange-100 text-[#F39200]'
@@ -389,7 +395,7 @@ const ProjectManager = () => {
                                         type="button"
                                         onClick={() => activeView === 'projects' && handleOpenDashboard(item)}
                                         disabled={activeView !== 'projects'}
-                                        className={`inline-flex h-10 items-center justify-center rounded-xl border px-4 text-[9px] font-black uppercase tracking-widest transition-all ${
+                                        className={`inline-flex h-11 items-center justify-center rounded-xl border px-4 text-[9px] font-black uppercase tracking-widest transition-all ${
                                             activeView === 'projects'
                                                 ? 'border-zinc-200 bg-white text-zinc-700 hover:border-[#F39200] hover:text-[#F39200]'
                                                 : 'border-zinc-200 bg-zinc-100 text-zinc-400'
@@ -399,7 +405,7 @@ const ProjectManager = () => {
                                     </button>
                                     <LiquidButton
                                         onClick={() => handleOpenAssign(item, activeView === 'projects' ? 'project' : 'base')}
-                                        className={`!h-10 !px-5 !text-white text-[9px] font-black uppercase tracking-widest rounded-xl ${
+                                        className={`!h-11 !px-5 !text-white text-[9px] font-black uppercase tracking-widest rounded-xl ${
                                             activeView === 'projects' ? 'bg-zinc-900 hover:bg-[#F39200]' : 'bg-[#F39200] hover:bg-zinc-900'
                                         }`}
                                     >
@@ -417,12 +423,12 @@ const ProjectManager = () => {
 
     const renderLegacyLanding = () => (
         <>
-            <header className="bg-white border-b border-zinc-200 px-8 py-4 flex-shrink-0 z-40 shadow-sm">
-                <div className="flex items-center justify-between">
+            <header className="shrink-0 border-b border-zinc-200 bg-white px-4 py-3 shadow-sm sm:px-6 lg:px-8 lg:py-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-6">
                         <button
                             onClick={() => navigate('/proyectos')}
-                            className="p-2 hover:bg-zinc-100 rounded-xl transition-colors text-zinc-500"
+                            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-zinc-500 transition-colors hover:bg-zinc-100"
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </button>
@@ -440,16 +446,16 @@ const ProjectManager = () => {
                             value={searchTerm}
                             onValueChange={setSearchTerm}
                             placeholder="Buscar proyecto..."
-                            containerClassName="w-64"
+                            containerClassName="w-full md:w-64"
                             inputClassName="w-full pl-10 pr-10 h-11 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#F39200] focus:ring-0 transition-all"
                         />
                     </div>
                 </div>
             </header>
 
-            <main className="flex-1 overflow-y-auto p-12 custom-scrollbar">
-                <div className="max-w-[1400px] mx-auto space-y-8">
-                    <div className="flex items-center justify-between">
+            <main className="min-h-0 flex-1 overflow-hidden p-4 sm:p-6 lg:p-8 xl:p-10">
+                <div className="mx-auto flex h-full min-h-0 max-w-[1400px] flex-col gap-4 lg:gap-6">
+                    <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h2 className="text-3xl font-black tracking-tight">Equipos de Trabajo</h2>
                             <div className="h-1 w-12 bg-[#F39200] mt-2 rounded-full" />
@@ -458,21 +464,21 @@ const ProjectManager = () => {
                         <div className="flex bg-white p-1 rounded-2xl border border-zinc-200 shadow-sm">
                             <button
                                 onClick={() => setActiveView('projects')}
-                                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'projects' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-600'}`}
+                                className={`min-h-11 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'projects' ? 'bg-[#1A1A1A] text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-600'}`}
                             >
                                 Proyectos
                             </button>
                             <button
                                 onClick={() => setActiveView('bases')}
-                                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'bases' ? 'bg-[#F39200] text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-600'}`}
+                                className={`min-h-11 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'bases' ? 'bg-[#F39200] text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-600'}`}
                             >
                                 Bases Maestras
                             </button>
                         </div>
                     </div>
 
-                    <Card className="bg-white border-none shadow-[0_10px_40px_rgba(0,0,0,0.03)] rounded-3xl overflow-hidden">
-                        <CardContent className="p-0">
+                    <Card className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border-none bg-white shadow-[0_10px_40px_rgba(0,0,0,0.03)]">
+                        <CardContent className="min-h-0 flex-1 p-0">
                             {loading ? (
                                 <div className="p-20 text-center flex flex-col items-center gap-4">
                                     <div className="w-10 h-10 border-4 border-zinc-100 border-t-[#F39200] rounded-full animate-spin" />
