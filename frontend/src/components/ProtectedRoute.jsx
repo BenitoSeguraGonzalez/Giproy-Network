@@ -1,17 +1,20 @@
 import { useContext } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import AsyncState from './ui/async-state';
 
 const ProtectedRoute = ({ children }) => {
     const { user, loading } = useContext(AuthContext);
     const location = useLocation();
 
     if (loading) return (
-        <div className="min-h-screen bg-[#F2F4F7] flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-                <div className="w-10 h-10 border-4 border-[#F39200] border-t-transparent rounded-full animate-spin" />
-                <span className="text-xs font-black uppercase tracking-widest text-zinc-400">Cargando...</span>
-            </div>
+        <div className="flex min-h-dvh items-center justify-center bg-[#F2F4F7] p-[var(--app-page-gutter,1rem)]">
+            <AsyncState
+                className="max-w-xl"
+                state="loading"
+                title="Preparando el entorno de trabajo"
+                description="Estamos verificando tu sesión y permisos."
+            />
         </div>
     );
 

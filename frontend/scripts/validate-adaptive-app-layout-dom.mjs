@@ -171,6 +171,20 @@ try {
         }
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, `${profile.name}: sin overflow horizontal de página`);
         assert.equal(await page.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight), true, `${profile.name}: sin overflow vertical de página`);
+        const asyncStates = page.locator('[data-adaptive-harness-async-states] [data-async-state]');
+        assert.equal(await asyncStates.count(), 3, `${profile.name}: estados asincronos representativos visibles`);
+        for (const asyncState of await asyncStates.all()) {
+            const rect = await asyncState.boundingBox();
+            assert.ok(rect && rect.x >= -1 && rect.x + rect.width <= profile.viewport.width + 1, `${profile.name}: estado asincrono contenido horizontalmente`);
+        }
+        assert.equal(await asyncStates.filter({ has: page.locator('[aria-busy="true"]') }).count(), 0, `${profile.name}: aria-busy pertenece al contenedor`);
+        assert.equal(await page.locator('[data-async-state="loading"]').getAttribute('aria-busy'), 'true', `${profile.name}: carga anuncia actividad`);
+        assert.equal(await page.locator('[data-async-state="error"]').getAttribute('role'), 'alert', `${profile.name}: error se anuncia inmediatamente`);
+        const retryButton = page.getByRole('button', { name: 'Reintentar operación' });
+        if (profile.hasTouch) {
+            const retryRect = await retryButton.boundingBox();
+            assert.ok(retryRect && retryRect.height >= 44, `${profile.name}: reintento cumple objetivo tactil`);
+        }
         assert.deepEqual(errors, [], `${profile.name}: sin errores`);
         const layoutTrigger = page.getByRole('button', { name: 'Ajustar distribución visual' });
         await layoutTrigger.click();

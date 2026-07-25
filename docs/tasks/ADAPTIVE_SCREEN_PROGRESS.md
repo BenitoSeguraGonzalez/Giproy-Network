@@ -677,6 +677,88 @@ Resultado: **10/10 PASS**.
 
 La ejecucion unica de Impeccable devolvio cero hallazgos.
 
+## G00.9 - Estados asincronos
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+### Superficie observada
+
+- Carga previa al shell protegido.
+- Estados compartidos de carga, vacio, error, sin conexion y permisos
+  insuficientes.
+- Accion de recuperacion con entrada tactil.
+- Mensajes extensos y recomposicion en diez perfiles.
+
+### Problemas observados
+
+- No existia un contrato visual y semantico comun para estados asincronos.
+- La carga de `ProtectedRoute` era una composicion aislada, sin region viva ni
+  descripcion del proceso.
+- Los consumidores podian improvisar alturas fijas, spinners y acciones sin
+  objetivo tactil coherente.
+- El movimiento del spinner no respetaba `prefers-reduced-motion`.
+
+### Adecuacion aplicada
+
+- Nuevo `AsyncState` compartido con variantes `loading`, `empty`, `error`,
+  `offline` y `forbidden`.
+- La carga declara `aria-busy` y region viva; el error usa alerta inmediata.
+- Contenedor fluido, texto con reflujo y alturas minimas, sin bloquear el alto
+  completo de la pantalla.
+- Accion opcional con objetivo semantico de 44 px en entorno tactil.
+- Spinner se inmoviliza cuando el usuario solicita movimiento reducido.
+- `ProtectedRoute` adopta el contrato global.
+- La migracion de estados particulares se ejecutara pantalla a pantalla para
+  conservar su significado y sus acciones; no se hizo un reemplazo masivo
+  ciego.
+
+### Incidencias encontradas durante la prueba
+
+1. La primera invocacion del detector se ejecuto desde `frontend` con rutas que
+   repetian ese directorio. El proceso aviso que no podia leer los tres
+   objetivos; su salida vacia fue invalidada y no se considero un resultado.
+2. Se repitio la auditoria con las rutas reales. Esta ejecucion valida devolvio
+   cero hallazgos.
+3. El build conserva el aviso previo de chunks superiores a 500 kB. Es deuda de
+   rendimiento documentada y no un fallo geometrico de esta unidad.
+
+### Perfiles verificados
+
+- Windows FHD 100 %, 125 % y 150 %.
+- Windows 4K/DPR 2.
+- Tablet Full HD horizontal y vertical.
+- Tablet 2K horizontal y vertical.
+- Lenovo P12 3K horizontal y vertical.
+
+Resultado: **10/10 PASS**.
+
+### Verificaciones
+
+- Estados contenidos por el viewport: PASS.
+- Carga y error con semantica anunciable: PASS.
+- Reintento tactil de al menos 44 px: PASS.
+- Sin overflow del documento: PASS.
+- Reduced motion en spinner: PASS por inspeccion del contrato CSS.
+- Build Vite de produccion: PASS.
+
+### Evidencia
+
+- `artifacts/visual-certification/g00-9-async-states-final-2026-07-24`.
+
+### Archivos tratados
+
+- `frontend/src/components/ui/async-state.jsx`.
+- `frontend/src/components/ProtectedRoute.jsx`.
+- `frontend/src/features/adaptive/AdaptiveAppLayoutHarness.jsx`.
+- `frontend/scripts/validate-adaptive-app-layout-dom.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
+### Detector visual
+
+La ejecucion valida de Impeccable devolvio cero hallazgos.
+
 ## Siguiente unidad
 
-`G00.9 - Estados asincronos`: PENDIENTE.
+`G00.10 - Accesibilidad operativa`: EN CURSO.

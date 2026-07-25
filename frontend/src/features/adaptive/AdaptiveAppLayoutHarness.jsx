@@ -11,6 +11,7 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
 import { Textarea } from '../../components/ui/textarea';
+import AsyncState from '../../components/ui/async-state';
 
 const authValue = {
     user: { id: 91, nombre_completo: 'Superadministrador de validación', rol: 'superadministrador', empresa_id: 3 },
@@ -85,6 +86,17 @@ const AdaptiveAppLayoutHarness = () => {
                                 <button type="submit" className="min-h-[var(--app-control-target,2.5rem)] rounded-lg bg-[#F39200] px-4 text-sm font-bold text-white">Guardar registro</button>
                             </div>
                         </form>
+                        <section className="mt-6 grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-3" data-adaptive-harness-async-states>
+                            <AsyncState compact state="loading" description="Sin bloquear el resto de la superficie." />
+                            <AsyncState compact state="empty" description="Crea el primer registro cuando estés preparado." />
+                            <AsyncState
+                                compact
+                                state="error"
+                                description="Revisa la conexión y vuelve a intentarlo. La información existente permanece intacta."
+                                actionLabel="Reintentar operación"
+                                onAction={() => {}}
+                            />
+                        </section>
                         <div className="mt-8 min-h-11 border-t border-zinc-200 pt-4 text-xs font-bold text-zinc-700" data-adaptive-harness-last-content>
                             Último contenido operativo alcanzable
                         </div>
