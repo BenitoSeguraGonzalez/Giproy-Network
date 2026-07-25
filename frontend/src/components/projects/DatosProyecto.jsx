@@ -153,7 +153,7 @@ const SOFT_ACTION_BUTTON_BASE =
     'inline-flex shrink-0 items-center justify-center border border-[#ececec] bg-[#ededed] shadow-[3px_3px_8px_#d5d5d5,-3px_-3px_8px_#ffffff] transition hover:brightness-[0.99] active:scale-[0.98] active:shadow-[inset_2px_2px_6px_#d0d0d0,inset_-2px_-2px_6px_#ffffff] disabled:cursor-not-allowed disabled:opacity-60';
 
 const renderSectionToggleIcon = (isCollapsed) => (
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#e3e3e3] bg-[#ededed] text-zinc-500 shadow-[1px_1px_4px_rgba(0,0,0,0.18),-1px_-1px_3px_rgba(255,255,255,0.58)] transition-[color,border-color,transform,box-shadow] duration-200 hover:border-[#F39200]/40 hover:text-[#F39200] active:scale-[0.98] active:shadow-[inset_2px_2px_6px_#d0d0d0,inset_-2px_-2px_6px_#ffffff]">
+    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#e3e3e3] bg-[#ededed] text-zinc-500 shadow-[1px_1px_4px_rgba(0,0,0,0.18),-1px_-1px_3px_rgba(255,255,255,0.58)] transition-[color,border-color,transform,box-shadow] duration-200 hover:border-[#F39200]/40 hover:text-[#F39200] active:scale-[0.98] active:shadow-[inset_2px_2px_6px_#d0d0d0,inset_-2px_-2px_6px_#ffffff]">
         <ChevronRight className={`h-3.5 w-3.5 transition-transform ${isCollapsed ? '' : 'rotate-90'}`} />
     </span>
 );
@@ -1282,7 +1282,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                     <button
                         type="button"
                         onClick={() => handleAddListItem(fieldName, rows)}
-                        className={`${SOFT_ACTION_BUTTON_BASE} h-8 w-8 rounded-[0.9rem] text-[#136191]`}
+                        className={`${SOFT_ACTION_BUTTON_BASE} h-11 w-11 rounded-[0.9rem] text-[#136191]`}
                         title={`Agregar ${title.toLowerCase()}`}
                         aria-label={`Agregar ${title.toLowerCase()}`}
                     >
@@ -1316,7 +1316,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveListItem(fieldName, rows, index)}
-                                    className={`${SOFT_ACTION_BUTTON_BASE} h-10 w-10 rounded-[0.9rem] text-red-600 hover:text-red-700`}
+                                    className={`${SOFT_ACTION_BUTTON_BASE} h-11 w-11 rounded-[0.9rem] text-red-600 hover:text-red-700`}
                                     title={`Quitar ${title.toLowerCase()}`}
                                 >
                                     <X className="h-4 w-4" />
@@ -1800,7 +1800,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
 
     return (
         <div className="flex h-full min-h-0 flex-col gap-3">
-            <div className="flex flex-col gap-2 rounded-[1.1rem] border border-[#ececec] bg-[#f3f3f1] px-4 py-3 shadow-[8px_8px_20px_#dddddd,-8px_-8px_20px_#ffffff] lg:flex-row lg:items-center lg:justify-between">
+            <div data-project-data-fixed-controls className="flex flex-col gap-2 rounded-[1.1rem] border border-[#ececec] bg-[#f3f3f1] px-3 py-3 shadow-[8px_8px_20px_#dddddd,-8px_-8px_20px_#ffffff] md:px-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <h2 className="flex items-center gap-2 text-lg font-black uppercase tracking-tight text-[#F39200]">
                         <Briefcase className="w-4 h-4" /> Datos de Proyecto
@@ -1809,7 +1809,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                         Información técnica, contractual y geográfica común del proyecto
                     </p>
                 </div>
-                <div className="flex items-center gap-2 lg:flex-wrap lg:justify-end">
+                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                     {isAdmin && (
                         <>
                         {saveStatus === 'saving' && (
@@ -1839,9 +1839,9 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
 
             <Card className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.25rem] border border-[#ececec] bg-[#f7f7f5] shadow-[10px_10px_26px_#dddddd,-10px_-10px_26px_#ffffff]">
                 <CardContent
-                    className="flex-1 min-h-0 overflow-hidden p-4"
+                    className="flex-1 min-h-0 overflow-hidden p-2.5 md:p-4"
                 >
-                    <div className="grid h-full min-h-0 grid-cols-12 gap-4">
+                    <div className="grid h-full min-h-0 grid-cols-12 grid-rows-[minmax(0,3fr)_minmax(0,2fr)] gap-3 lg:grid-rows-1 lg:gap-4">
                         <div className="relative col-span-12 min-h-0 lg:col-span-8">
                             <div
                                 ref={mainScrollRef}
@@ -1972,7 +1972,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                                                         <button
                                                                             type="button"
                                                                             onClick={() => handleRemoveNormativa(norma)}
-                                                                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-400 transition hover:border-red-200 hover:text-red-600"
+                                                                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500 transition hover:border-red-200 hover:text-red-600"
                                                                             title={`Quitar ${label}`}
                                                                         >
                                                                             <X className="h-3 w-3" />
@@ -2074,7 +2074,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                                             confirmLabel: 'Entendido',
                                                             size: 'compact',
                                                         })}
-                                                        className={`inline-flex h-10 items-center gap-2 rounded-[1.05rem] border bg-[#f2f2f0] px-3 text-[9px] font-black uppercase tracking-[0.14em] shadow-[4px_4px_10px_rgba(148,163,184,0.2),-4px_-4px_10px_rgba(255,255,255,0.92)] transition hover:-translate-y-0.5 ${
+                                                        className={`inline-flex h-11 items-center gap-2 rounded-[1.05rem] border bg-[#f2f2f0] px-3 text-[9px] font-black uppercase tracking-[0.14em] shadow-[4px_4px_10px_rgba(148,163,184,0.2),-4px_-4px_10px_rgba(255,255,255,0.92)] transition ${
                                                             alert.tone === 'danger'
                                                                 ? 'border-red-100 text-red-600'
                                                                 : 'border-amber-100 text-[#F39200]'
@@ -2523,7 +2523,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                         <button
                                             type="button"
                                             onClick={() => setGeoViewerOpen(true)}
-                                            className={`${SOFT_ACTION_BUTTON_BASE} h-8 w-8 rounded-xl text-[#136191]`}
+                                            className={`${SOFT_ACTION_BUTTON_BASE} h-11 w-11 rounded-xl text-[#136191]`}
                                             title="Ver georreferenciación en pantalla completa"
                                         >
                                             <Maximize2 className="h-3.5 w-3.5" />
@@ -2549,7 +2549,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                     <div className="flex items-center gap-2">
                                         {isAdmin && (
                                             <label
-                                                className={`${SOFT_ACTION_BUTTON_BASE} h-8 w-8 cursor-pointer rounded-xl text-[#136191]`}
+                                                className={`${SOFT_ACTION_BUTTON_BASE} h-11 w-11 cursor-pointer rounded-xl text-[#136191]`}
                                                 title={formData.imagen_referencial_url ? 'Cambiar imagen referencial' : 'Subir imagen referencial'}
                                             >
                                                 <ImageIcon className="h-3.5 w-3.5" />
@@ -2560,7 +2560,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                             <button
                                                 type="button"
                                                 onClick={() => setImageViewerOpen(true)}
-                                                className={`${SOFT_ACTION_BUTTON_BASE} h-8 w-8 rounded-xl text-[#136191]`}
+                                                className={`${SOFT_ACTION_BUTTON_BASE} h-11 w-11 rounded-xl text-[#136191]`}
                                                 title="Ver imagen en pantalla completa"
                                             >
                                                 <Maximize2 className="h-3.5 w-3.5" />
@@ -2576,7 +2576,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                             <Briefcase className="h-10 w-10 text-zinc-200" />
                                             {isAdmin && (
                                                 <label
-                                                    className={`${SOFT_ACTION_BUTTON_BASE} h-8 w-8 cursor-pointer rounded-xl text-[#136191]`}
+                                                    className={`${SOFT_ACTION_BUTTON_BASE} h-11 w-11 cursor-pointer rounded-xl text-[#136191]`}
                                                     title="Subir imagen referencial"
                                                 >
                                                     <ImageIcon className="h-3.5 w-3.5" />
@@ -2607,7 +2607,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                                 type="button"
                                                 onClick={() => documentInputRef.current?.click()}
                                                 disabled={documentUploading}
-                                                className={`${SOFT_ACTION_BUTTON_BASE} h-10 rounded-[1rem] px-4 text-[9px] font-black uppercase tracking-[0.18em] text-[#136191]`}
+                                                className={`${SOFT_ACTION_BUTTON_BASE} h-11 rounded-[1rem] px-4 text-[9px] font-black uppercase tracking-[0.18em] text-[#136191]`}
                                             >
                                                 {documentUploading ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Plus className="mr-2 h-3.5 w-3.5" />}
                                                 PDF
@@ -2651,7 +2651,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                                         <button
                                                             type="button"
                                                             onClick={() => handleViewDocument(document)}
-                                                            className={`${SOFT_ACTION_BUTTON_BASE} h-8 w-8 rounded-xl text-[#136191]`}
+                                                            className={`${SOFT_ACTION_BUTTON_BASE} h-11 w-11 rounded-xl text-[#136191]`}
                                                             title="Ver PDF"
                                                         >
                                                             <Eye className="h-3.5 w-3.5" />
@@ -2659,7 +2659,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                                         <button
                                                             type="button"
                                                             onClick={() => handleDownloadDocument(document)}
-                                                            className={`${SOFT_ACTION_BUTTON_BASE} h-8 w-8 rounded-xl text-[#136191]`}
+                                                            className={`${SOFT_ACTION_BUTTON_BASE} h-11 w-11 rounded-xl text-[#136191]`}
                                                             title="Descargar PDF"
                                                         >
                                                             <Download className="h-3.5 w-3.5" />
@@ -2668,7 +2668,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleDeleteDocument(document)}
-                                                                className={`${SOFT_ACTION_BUTTON_BASE} h-8 w-8 rounded-xl text-red-600`}
+                                                                className={`${SOFT_ACTION_BUTTON_BASE} h-11 w-11 rounded-xl text-red-600`}
                                                                 title="Eliminar PDF"
                                                             >
                                                                 <Trash2 className="h-3.5 w-3.5" />
@@ -2832,7 +2832,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                 <button
                                     type="button"
                                     onClick={() => handleDownloadDocument(pdfPreviewDocument)}
-                                    className={`${SOFT_ACTION_BUTTON_BASE} h-10 rounded-[1rem] px-4 text-[9px] font-black uppercase tracking-[0.18em] text-[#136191]`}
+                                    className={`${SOFT_ACTION_BUTTON_BASE} h-11 rounded-[1rem] px-4 text-[9px] font-black uppercase tracking-[0.18em] text-[#136191]`}
                                 >
                                     <Download className="mr-2 h-3.5 w-3.5" />
                                     Descargar

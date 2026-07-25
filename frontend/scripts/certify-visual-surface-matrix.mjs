@@ -204,6 +204,7 @@ try {
                 const harnessUrl = harness.source === 'classic-projects-edit-harness.html'
                     || harness.source === 'classic-project-workspace-header-harness.html'
                     || harness.source === 'classic-project-workspace-navigation-harness.html'
+                    || harness.source === 'classic-project-workspace-data-harness.html'
                     ? `${baseUrl}${harness.path}?project_id=1&tab=datos`
                     : `${baseUrl}${harness.path}`;
                 await page.goto(harnessUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -256,6 +257,17 @@ try {
                 }
                 if (harness.source === 'classic-project-workspace-navigation-harness.html') {
                     await page.getByRole('button', { name: 'Fijar navegación del proyecto' }).click();
+                    await page.waitForTimeout(350);
+                }
+                if (harness.source === 'classic-project-workspace-data-harness.html') {
+                    await page.getByRole('button', { name: /4\. Informaci.n contractual/u }).click();
+                    await page.getByRole('button', { name: /7\. Objetivos, restricciones y supuestos/u }).click();
+                    await page.evaluate(() => {
+                        const main = document.querySelector('[data-project-edit-main-viewport]');
+                        const side = document.querySelector('[data-project-edit-side-viewport]');
+                        if (main) main.scrollTop = 0;
+                        if (side) side.scrollTop = 0;
+                    });
                     await page.waitForTimeout(350);
                 }
             } catch (error) {
@@ -562,6 +574,14 @@ try {
                     await page.evaluate(() => {
                         const viewport = document.querySelector('[data-team-summary-viewport]');
                         if (viewport) viewport.scrollTop = viewport.scrollHeight;
+                    });
+                }
+                if (harness.source === 'classic-project-workspace-data-harness.html') {
+                    await page.evaluate(() => {
+                        const main = document.querySelector('[data-project-edit-main-viewport]');
+                        const side = document.querySelector('[data-project-edit-side-viewport]');
+                        if (main) main.scrollTop = main.scrollHeight;
+                        if (side) side.scrollTop = side.scrollHeight;
                     });
                 }
                 await page.waitForTimeout(50);

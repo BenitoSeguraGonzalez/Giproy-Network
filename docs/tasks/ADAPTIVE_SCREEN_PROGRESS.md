@@ -1630,4 +1630,44 @@ Fecha: 2026-07-24
 
 ## Siguiente unidad
 
-`C04.2 - Datos del proyecto`: EN CURSO.
+`C04.2 - Datos del proyecto`: **VERIFICADA VISUALMENTE**.
+
+## C04.2 - Datos del proyecto
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+- Los controles contextuales quedan fuera de los viewports de datos.
+- En escritorio y tablet paisaje se mantienen formulario y documentos en
+  paralelo; en tablet retrato se reparten en dos filas con alturas explícitas
+  3/2 y desplazamiento independiente, evitando una pagina interior interminable.
+- Se verificaron identificación, especificaciones, alcance, contratación,
+  cronograma, ubicación, objetivos/restricciones/supuestos, mapa, imagen y
+  adjuntos tanto al inicio como al final de cada panel.
+- Los acordeones, normativa, alertas, altas/bajas de listas, mapa, imagen y
+  adjuntos cumplen el objetivo táctil mínimo de 44 px.
+- No se aplica zoom global; campos y mapa conservan tamaño legible y estructura.
+- Resultado: **10/10 PASS**; capturas iniciales/finales abiertas.
+
+### Evidencia C04.2
+
+- `artifacts/visual-certification/2026-07-25T02-47-35-246Z`.
+- `classic-project-workspace-data-harness-contact-sheet.png`.
+- `classic-project-workspace-data-harness-scroll-end-contact-sheet.png`.
+
+### Incidencias de certificacion
+
+- `2026-07-25T02-44-17-915Z` se rechazo como evidencia final porque las acciones
+  de apertura desplazaban automáticamente el formulario antes de la captura
+  inicial. Se restablecieron ambos viewports a cero y se repitieron diez casos.
+
+### Archivos tratados
+
+- `frontend/src/components/projects/DatosProyecto.jsx`.
+- `frontend/classic-project-workspace-data-harness.html`.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `docs/architecture/visual-surface-inventory.json`.
+
+## Siguiente unidad
+
+`C04.3 - Stakeholders`: EN CURSO.
