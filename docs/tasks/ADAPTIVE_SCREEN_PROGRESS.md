@@ -1862,4 +1862,132 @@ Fecha: 2026-07-24
 
 ## Siguiente unidad
 
-`C04.6 - Presupuesto`: EN CURSO.
+`C04.6 - Presupuesto`: **VERIFICADA VISUALMENTE**.
+
+## C04.6 - Presupuesto
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-25
+
+- El shell del presupuesto conserva cabecera, herramientas y resumen económico
+  fijos. El listado es el único viewport bidireccional y mantiene sincronizadas
+  cabecera y filas; la página interior no se usa como sustituto del scroll.
+- El catálogo APU es persistente únicamente cuando existe ancho útil. En
+  perfiles compactos comienza como rail de 64 px y se abre como drawer
+  superpuesto de 320/384 px, sin reducir por escala el editor principal.
+- La tabla mantiene ancho informativo mínimo y desplazamiento táctil horizontal
+  y vertical reales. Unidad, cantidad, precio, subtotal y acciones siguen siendo
+  alcanzables; las cinco acciones de línea disponen de objetivos de 44 x 44 px.
+- El editor APU prioriza la tabla en tablet, conserva totales fijos y convierte
+  su catálogo de recursos en drawer. La prueba exige ancho abierto mínimo y
+  buscador visible para impedir falsos positivos de rail colapsado.
+- Tanteo usa composición maestro-detalle, con lista y edición independientes.
+  Indirectos, Pareto, notas generales, notas de línea y doble confirmación
+  conservan encabezado/pie y desplazan solo su cuerpo cuando es necesario.
+- El minimapa se abre sin dejar otro drawer activo detrás, puede minimizarse y
+  mantiene controles táctiles de 44 px.
+- El menú de reportes usa posicionamiento limitado al viewport en perfiles
+  compactos. El visor de reporte apila título y resumen económico en retrato,
+  mantiene tabla y acciones dentro del modal y ofrece objetivos táctiles de
+  44 px. El estado de generación también fue certificado.
+- Se probaron 63 líneas operativas, nueve raíces, jerarquía profunda, nombres
+  extensos, notas, recursos, costes, estados de tanteo y ambos extremos de
+  desplazamiento.
+- Resultado final: **170/170 combinaciones válidas** entre 17 superficies y 10
+  perfiles. Todas las hojas de contacto relevantes y capturas de regresiones
+  fueron abiertas e inspeccionadas; un fallo de infraestructura se repitió en
+  proceso limpio y quedó documentado, no convertido silenciosamente en PASS.
+
+### Superficies C04.6
+
+1. Presupuesto principal.
+2. Catálogo y herramientas abierto.
+3. Indirectos e IVA.
+4. Pareto.
+5. Notas generales.
+6. Notas de línea.
+7. Minimapa abierto.
+8. Minimapa minimizado.
+9. Borrado de tanteos, confirmación 1.
+10. Borrado de tanteos, confirmación 2.
+11. Tanteo maestro-detalle.
+12. Editor APU.
+13. Catálogo de recursos APU abierto.
+14. Editor de recurso.
+15. Menú de reportes.
+16. Previsualización de reporte.
+17. Generación de reporte.
+
+### Evidencia C04.6
+
+- Matriz conjunta de 17 superficies:
+  `artifacts/visual-certification/2026-07-25T05-10-49-205Z`.
+- Repetición aislada APU Lenovo P12 retrato:
+  `artifacts/visual-certification/2026-07-25T05-17-57-020Z`.
+- Catálogo APU con contrato de estado abierto:
+  `artifacts/visual-certification/2026-07-25T05-06-07-447Z`.
+- Visor de reporte corregido:
+  `artifacts/visual-certification/2026-07-25T05-08-16-117Z`.
+- Visor en los tres perfiles retrato:
+  `artifacts/visual-certification/2026-07-25T05-09-39-870Z`.
+- Tabla y notas después de ampliar objetivos táctiles:
+  `artifacts/visual-certification/2026-07-25T05-21-33-628Z`.
+- Hojas `*-contact-sheet.png` y captura `*-scroll-end.png` de las
+  ejecuciones anteriores.
+
+### Incidencias de certificación C04.6
+
+- Las primeras capturas de la superficie principal detectaron acciones
+  recortadas y herramientas demasiado pequeñas pese al PASS geométrico.
+- En retrato el catálogo persistente consumía cerca del 40 % del editor. Se
+  sustituyó por rail + drawer; no se aplicó zoom ni escalado global.
+- La primera prueba de desplazamiento encontró cabecera y cuerpo desincronizados.
+  La causa era un efecto que se ejecutaba mientras el componente mostraba el
+  estado de carga y no volvía a enlazar las referencias. Se corrigió el ciclo de
+  enlace y se añadió un contrato explícito de sincronización.
+- La primera composición APU dividía editor y catálogo aproximadamente al 50 %;
+  fue rechazada visualmente aunque la geometría pasaba.
+- El minimapa dejó inicialmente el drawer del catálogo detrás; se corrigió el
+  cierre de superficies mutuamente excluyentes.
+- El menú de reportes quedó fuera del viewport en paisaje compacto en dos
+  iteraciones y además tuvo un localizador de prueba incorrecto. Ambas
+  incidencias están preservadas en las ejecuciones previas y el resultado final
+  usa posicionamiento limitado al viewport.
+- La primera hoja del catálogo de recursos APU mostraba rail colapsado en varios
+  perfiles aunque el escenario daba PASS. Se corrigió la carrera de
+  inicialización del perfil y el certificador ahora exige drawer >= 280 px y
+  buscador visible.
+- La primera hoja del visor de reporte mostró tarjetas económicas comprimidas
+  en retrato. Se cambió la composición por contenido, apilando hasta `xl`, y se
+  repitieron los perfiles afectados.
+- La matriz conjunta terminó con 169 PASS y un
+  `net::ERR_NO_BUFFER_SPACE` al cargar el último APU en Lenovo retrato. La
+  combinación se repitió sola en un navegador limpio y pasó con captura real;
+  se clasifica como fallo de infraestructura del intento, no como PASS original.
+- El detector Impeccable conserva un aviso `side-tab` en
+  `EdtValoradaModal.jsx`. El archivo no tiene importadores ni ruta activa; queda
+  inventariado como componente huérfano y no se presenta como superficie
+  certificada.
+- Los avisos `gray-on-color` sobre clases `hover:*` de acciones son falsos
+  positivos de ramas de Tailwind: el color base y el fondo hover no se renderizan
+  como la combinación descrita. El subtotal activo sí fue corregido a
+  `text-emerald-950`.
+
+### Archivos tratados
+
+- `frontend/src/components/presupuestos/PresupuestoDetail.jsx`.
+- `frontend/src/components/presupuestos/LineasPresupuestoTab.jsx`.
+- `frontend/src/components/presupuestos/ApuBudgetEditor.jsx`.
+- `frontend/src/components/presupuestos/TanteoTab.jsx`.
+- `frontend/src/components/presupuestos/IndirectosModal.jsx`.
+- `frontend/src/components/presupuestos/ParetoModal.jsx`.
+- `frontend/src/components/presupuestos/NotasGeneralesModal.jsx`.
+- `frontend/src/components/reporting/CommonReportPreviewModal.jsx`.
+- `frontend/src/components/projects/ProjectSectionReportButton.jsx`.
+- `frontend/src/__classic_budget_harness.jsx` y 17 harnesses C04.6.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `docs/architecture/visual-surface-inventory.json`.
+
+## Siguiente unidad
+
+`C04.7 - Cronogramas`: EN CURSO.

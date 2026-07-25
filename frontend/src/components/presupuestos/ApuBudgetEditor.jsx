@@ -32,6 +32,7 @@ import { findMatchingUnit, resolveApuLineUnitDescription, resolveUnitDescription
 import { dispatchBudgetProductivityUpdated } from '../../utils/cronogramaSyncEvents';
 import AnimatedSelect from '../ui/AnimatedSelect';
 import { APP_MODAL_CLOSE_BUTTON_CLASS } from '../ui/app-modal';
+import useAdaptiveLayout from '../../hooks/useAdaptiveLayout';
 
 const MotionDiv = motion.div;
 
@@ -106,6 +107,8 @@ const ApuBudgetEditor = ({
     const { user, selectedEmpresa } = useContext(AuthContext);
     const { activePresupuesto } = usePresupuestoData();
     const useOmniClass = selectedEmpresa?.use_omniclass !== false;
+    const adaptiveLayout = useAdaptiveLayout({ moduleKey: 'presupuesto' });
+    const isCompactWorkspace = adaptiveLayout.enabled && adaptiveLayout.profile !== 'wide';
 
     // -- State --
     const [loading, setLoading] = useState(true);
@@ -156,6 +159,10 @@ const ApuBudgetEditor = ({
     const formatCalculo = formatters?.formatCalculo || ((v) => formatNumericDisplay(v, precisionCalculo));
 
     const isSidebarVisuallyCollapsed = isSidebarCollapsed && !isSidebarHoverExpanded;
+
+    useEffect(() => {
+        setIsSidebarCollapsed(isCompactWorkspace);
+    }, [isCompactWorkspace]);
     const subcategoriesById = useMemo(() => {
         const map = new Map();
         (subcategorias || []).forEach((sub) => {
@@ -873,17 +880,17 @@ const ApuBudgetEditor = ({
     return (
         <div className="h-full min-h-0 flex flex-col bg-[#F2F4F7] overflow-hidden rounded-2xl">
             {/* Header */}
-            <div className="px-7 py-4 border-b border-zinc-200 flex items-center justify-between bg-white/95 shadow-[0_10px_28px_rgba(15,23,42,0.06)]">
-                <div className="flex items-center gap-4">
+            <div className={`${isCompactWorkspace ? 'px-4 py-3' : 'px-7 py-4'} shrink-0 border-b border-zinc-200 flex items-center justify-between gap-3 bg-white/95 shadow-[0_10px_28px_rgba(15,23,42,0.06)]`}>
+                <div className="flex min-w-0 items-center gap-4">
                     <div className="w-10 h-10 bg-amber-50 rounded-[0.95rem] flex items-center justify-center border border-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
                         <Calculator className="w-5 h-5 text-[#F39200]" />
                     </div>
-                    <div>
-                        <h2 className="text-base font-black uppercase text-zinc-900 tracking-tight">Editor de APU (Nivel Presupuesto)</h2>
-                        <div className="flex items-center gap-2 mt-0.5">
+                    <div className="min-w-0">
+                        <h2 className="truncate text-base font-black uppercase text-zinc-900 tracking-tight">Editor de APU (Nivel Presupuesto)</h2>
+                        <div className="mt-0.5 flex min-w-0 items-center gap-2">
                             <span className="text-[10px] font-black uppercase tracking-widest text-[#F39200]">{formApu?.codigo}</span>
                             <span className="w-1 h-1 rounded-full bg-zinc-300" />
-                            <span className="text-[10px] font-bold text-zinc-500 truncate max-w-sm">{normalizeDescriptionCapitalization(formApu?.descripcion)}</span>
+                            <span className="min-w-0 truncate text-[10px] font-bold text-zinc-500">{normalizeDescriptionCapitalization(formApu?.descripcion)}</span>
                             <span className={`rounded-full border px-2 py-0.5 text-[8px] font-black uppercase tracking-widest ${getSyncBadge(formApu).className}`} title={getSyncBadge(formApu).message}>
                                 {getSyncBadge(formApu).label}
                             </span>
@@ -898,7 +905,7 @@ const ApuBudgetEditor = ({
                             onClick={requestClose}
                             title="Cerrar editor APU"
                             aria-label="Cerrar editor APU"
-                            className={`${APP_MODAL_CLOSE_BUTTON_CLASS} !h-10 !w-10`}
+                            className={`${APP_MODAL_CLOSE_BUTTON_CLASS} !h-11 !w-11`}
                         >
                             <X className="h-4 w-4 shrink-0" />
                             <span className="sr-only">Cerrar</span>
@@ -919,21 +926,46 @@ const ApuBudgetEditor = ({
                 ) : null}
             </div>
 
-            <div className="flex-1 min-h-0 flex overflow-hidden">
+            <div className="relative flex-1 min-h-0 flex overflow-hidden">
                 {/* Left Tree: Resources */}
-                <div className={`${isSidebarVisuallyCollapsed ? 'w-14' : 'w-96'} min-h-0 border-r border-zinc-200 bg-white flex flex-col transition-all duration-300 overflow-hidden`}>
-                    <div className="h-[104px] p-4 border-b border-white/10 bg-[#0f1115] flex items-center">
+                <div
+                    data-apu-budget-resource-sidebar="true"
+                    className={[
+                        `${isSidebarVisuallyCollapsed ? 'w-16' : 'w-96'} min-h-0 border-r border-zinc-200 bg-white flex flex-col transition-all duration-300 overflow-hidden`,
+                        isCompactWorkspace && !isSidebarVisuallyCollapsed
+                            ? 'absolute inset-y-0 left-0 z-40 max-w-[calc(100%_-_4rem)] shadow-[20px_0_38px_rgba(15,23,42,0.24)]'
+                            : 'relative shrink-0',
+                    ].join(' ')}
+                >
+                    <div className="h-[104px] gap-2 p-4 border-b border-white/10 bg-[#0f1115] flex items-center">
                         {!isSidebarVisuallyCollapsed && (
                             <ClearSearchField
                                 value={searchLeft}
                                 onValueChange={setSearchLeft}
                                 placeholder="Buscar recursos..."
                                 containerClassName="w-full"
-                                inputClassName="w-full h-10 pl-10 pr-10 bg-white border border-white/10 rounded-xl text-xs font-bold focus:border-[#F39200] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]"
+                                inputClassName="w-full h-11 pl-10 pr-10 bg-white border border-white/10 rounded-xl text-xs font-bold focus:border-[#F39200] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]"
                             />
                         )}
+                        {!isSidebarVisuallyCollapsed && isCompactWorkspace && (
+                            <button
+                                type="button"
+                                onClick={() => setIsSidebarCollapsed(true)}
+                                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/12 bg-white/[0.06] text-white/75 transition hover:border-[#F39200]/45 hover:text-[#F39200]"
+                                aria-label="Cerrar catálogo de recursos"
+                                title="Cerrar catálogo de recursos"
+                            >
+                                <PanelLeftClose className="h-5 w-5" />
+                            </button>
+                        )}
                         {isSidebarVisuallyCollapsed && (
-                            <button onClick={() => setIsSidebarCollapsed(false)} className="mx-auto w-8 h-8 rounded-[0.8rem] border border-white/10 bg-white/[0.05] flex items-center justify-center text-white/65 hover:text-[#F39200]">
+                            <button
+                                type="button"
+                                onClick={() => setIsSidebarCollapsed(false)}
+                                className="mx-auto flex h-11 w-11 items-center justify-center rounded-[0.8rem] border border-white/10 bg-white/[0.05] text-white/65 hover:text-[#F39200]"
+                                aria-label="Abrir catálogo de recursos"
+                                title="Abrir catálogo de recursos"
+                            >
                                 <PanelLeftOpen className="w-5 h-5" />
                             </button>
                         )}

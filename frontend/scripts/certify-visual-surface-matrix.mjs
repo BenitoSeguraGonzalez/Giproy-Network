@@ -238,8 +238,203 @@ try {
                         }],
                     };
                 });
+                const budgetLines = edtTree.flatMap((root, rootIndex) => {
+                    const account = {
+                        id: 2000 + rootIndex,
+                        edt_id: root.id,
+                        codigo_item: root.codigo,
+                        descripcion: root.nombre,
+                        tipo: 'CUENTA_PAQUETE',
+                        cantidad: 1,
+                        precio_unitario: 0,
+                        precio_total: 0,
+                        orden: rootIndex,
+                    };
+                    const operational = Array.from({ length: 7 }, (_, lineIndex) => {
+                        const price = 925 + (rootIndex * 175) + (lineIndex * 83.25);
+                        const quantity = 1.25 + (lineIndex * 0.75);
+                        return {
+                            id: 2100 + (rootIndex * 10) + lineIndex,
+                            edt_id: root.id,
+                            apu_id: 3000 + (rootIndex * 10) + lineIndex,
+                            codigo_item: `${root.codigo}.${lineIndex + 1}`,
+                            descripcion: `Partida técnica interdisciplinaria ${lineIndex + 1} de ${root.nombre}`,
+                            tipo: 'APU',
+                            unidad: lineIndex % 3 === 0 ? 'm³' : lineIndex % 3 === 1 ? 'm²' : 'und',
+                            cantidad: quantity,
+                            precio_unitario: price,
+                            precio_total: Number((price * quantity).toFixed(2)),
+                            orden: lineIndex + 1,
+                            tanteo_activo: lineIndex === 2,
+                            omniclass_codigo: `23-${String(rootIndex + 1).padStart(2, '0')}-${String(lineIndex + 1).padStart(2, '0')}`,
+                            omniclass_titulo: 'Elemento constructivo especializado',
+                        };
+                    });
+                    return [account, ...operational];
+                });
+                const budgetSubtotal = budgetLines.reduce((total, line) => total + Number(line.precio_total || 0), 0);
+                const budget = {
+                    id: 501,
+                    proyecto_id: 1,
+                    codigo: 'PTO-SB-001-R03',
+                    nombre: 'Presupuesto operativo Complejo hospitalario Santiago Bermeo',
+                    revision: 3,
+                    moneda: 'USD',
+                    dec_moneda: 2,
+                    dec_calculos: 4,
+                    iva_aplicado: 15,
+                    indirectos_porcentaje: 12.5,
+                    subtotal: Number(budgetSubtotal.toFixed(2)),
+                    indirectos_total: Number((budgetSubtotal * 0.125).toFixed(2)),
+                    impuestos: Number((budgetSubtotal * 1.125 * 0.15).toFixed(2)),
+                    total: Number((budgetSubtotal * 1.125 * 1.15).toFixed(2)),
+                    proyecto: {
+                        ...projects[0],
+                        id: 1,
+                        base_trabajo_id: 19,
+                        revision: 3,
+                    },
+                    detalle: budgetLines,
+                };
+                const budgetCatalogSubcategories = Array.from({ length: 6 }, (_, index) => ({
+                    id: 4000 + index,
+                    codigo: `5.${String(index + 1).padStart(2, '0')}`,
+                    descripcion: `Especialidad constructiva Santiago ${index + 1}`,
+                    subcategoria_codigo: 5,
+                }));
+                const budgetCatalogApus = Array.from({ length: 42 }, (_, index) => ({
+                    id: 5000 + index,
+                    codigo: `APU-${String(index + 1).padStart(3, '0')}`,
+                    descripcion: `Análisis de precio unitario especializado ${index + 1} con descripción técnica extensa`,
+                    unidad: index % 3 === 0 ? 'm³' : index % 3 === 1 ? 'm²' : 'und',
+                    precio_unitario: 480 + (index * 37.5),
+                    subcategoria_item_id: budgetCatalogSubcategories[index % budgetCatalogSubcategories.length].id,
+                    content_origin: index % 4 === 0 ? 'inherited' : 'local',
+                    sync_status: index % 11 === 0 ? 'diverged' : 'synced',
+                }));
                 let body = [];
-                if (/\/usuarios\/?$/u.test(apiPath)) body = collaborators;
+                if (/\/presupuestos\/501\/indirectos\/?$/u.test(apiPath)) {
+                    body = {
+                        subtotal_directo: budgetSubtotal,
+                        indirectos_porcentaje: 12.5,
+                        indirectos_total: budgetSubtotal * 0.125,
+                        iva_aplicado: 15,
+                        impuestos: budgetSubtotal * 1.125 * 0.15,
+                        total: budgetSubtotal * 1.125 * 1.15,
+                        items: [
+                            { id: 1, concepto_codigo: 'base:6', concepto_id: 6, categoria_codigo: '1.2', nombre: 'Gastos técnicos generales', porcentaje: 3.5, observaciones: 'Coordinación técnica y supervisión interdisciplinaria.', fijo: true, usuario: false },
+                            { id: 2, concepto_codigo: 'base:16', concepto_id: 16, categoria_codigo: '1.4', nombre: 'Gastos administrativos generales', porcentaje: 2.75, observaciones: 'Operación administrativa de obra.', fijo: true, usuario: false },
+                            { id: 3, concepto_codigo: 'base:60', concepto_id: 60, categoria_codigo: '4.3', nombre: 'Garantía de fiel cumplimiento', porcentaje: 1.5, observaciones: '', fijo: true, usuario: false },
+                            { id: 4, concepto_codigo: 'base:84', concepto_id: 84, categoria_codigo: '6.1', nombre: 'Utilidad', porcentaje: 4.75, observaciones: 'Margen contractual previsto.', fijo: true, usuario: false },
+                        ],
+                    };
+                }
+                else if (/\/presupuestos\/501\/pareto\/?$/u.test(apiPath)) {
+                    let accumulated = 0;
+                    const items = budgetLines.filter((line) => line.apu_id).slice(0, 20).map((line, index) => {
+                        const percentage = Math.max(1.25, 16 - (index * 0.72));
+                        accumulated = Math.min(100, accumulated + percentage);
+                        return {
+                            id: line.id,
+                            ranking: index + 1,
+                            codigo: line.codigo_item,
+                            descripcion: line.descripcion,
+                            valor: line.precio_total,
+                            porcentaje: percentage,
+                            porcentaje_acumulado: accumulated,
+                            item_type: 'linea',
+                            edt_id: line.edt_id,
+                            linea_id: line.id,
+                        };
+                    });
+                    body = {
+                        total: budget.total,
+                        visible_items: items.length,
+                        visible_acumulado: accumulated,
+                        items,
+                    };
+                }
+                else if (/\/presupuestos\/501\/notas\/generales\/?$/u.test(apiPath)) {
+                    body = Array.from({ length: 9 }, (_, index) => ({
+                        id: 6000 + index,
+                        texto: `Observación técnica ${index + 1} del presupuesto para coordinación y seguimiento de alcance.`,
+                        autor_usuario_id: index % 2 ? 2 : 1,
+                        autor_nombre: index % 2 ? 'Dirección de obra' : 'QA Visual',
+                        created_at: `2026-07-${String(24 - index).padStart(2, '0')}T13:00:00Z`,
+                    }));
+                }
+                else if (/\/presupuestos\/lineas\/\d+\/notas\/opened\/?$/u.test(apiPath)) body = { ok: true };
+                else if (/\/presupuestos\/lineas\/\d+\/notas\/?$/u.test(apiPath)) {
+                    body = Array.from({ length: 6 }, (_, index) => ({
+                        id: 6500 + index,
+                        texto: `Nota de seguimiento ${index + 1} de la partida seleccionada y su coordinación técnica.`,
+                        autor_usuario_id: index % 2 ? 2 : 1,
+                        autor_nombre: index % 2 ? 'Dirección de obra' : 'QA Visual',
+                        created_at: `2026-07-${String(24 - index).padStart(2, '0')}T13:00:00Z`,
+                    }));
+                }
+                else if (/\/apus\/\d+\/?$/u.test(apiPath)) {
+                    body = {
+                        id: 3000,
+                        codigo: 'APU-001',
+                        descripcion: 'Partida técnica interdisciplinaria de hormigón estructural',
+                        unidad: 'm³',
+                        unidad_id: 1,
+                        precio_unitario_total: 925,
+                        costo_directo: 850,
+                        porcentaje_indirectos: 12.5,
+                        subcategoria_item_id: 4000,
+                        subcategoria_item: { id: 4000, subcategoria_codigo: 5, descripcion: 'Estructuras' },
+                        lineas: Array.from({ length: 12 }, (_, index) => ({
+                            id: 7000 + index,
+                            recurso_id: 7100 + index,
+                            cantidad: 1 + (index * 0.25),
+                            rendimiento: 1,
+                            recurso: {
+                                id: 7100 + index,
+                                codigo: `REC-${String(index + 1).padStart(3, '0')}`,
+                                descripcion: `Recurso técnico especializado ${index + 1}`,
+                                unidad: index % 2 ? 'h' : 'kg',
+                                precio: 12.5 + (index * 4.25),
+                                categoria_id: (index % 4) + 1,
+                                subcategoria_item_id: 4000 + (index % 4),
+                            },
+                        })),
+                    };
+                }
+                else if (/\/recursos\/unidades\/?$/u.test(apiPath)) body = [
+                    { id: 1, codigo: 'm3', descripcion: 'm³' },
+                    { id: 2, codigo: 'm2', descripcion: 'm²' },
+                    { id: 3, codigo: 'und', descripcion: 'und' },
+                ];
+                else if (/\/recursos\/?$/u.test(apiPath)) {
+                    body = Array.from({ length: 32 }, (_, index) => ({
+                        id: 7100 + index,
+                        codigo: `REC-${String(index + 1).padStart(3, '0')}`,
+                        descripcion: `Recurso técnico especializado ${index + 1}`,
+                        unidad: index % 2 ? 'h' : 'kg',
+                        precio: 12.5 + (index * 4.25),
+                        categoria_id: (index % 4) + 1,
+                        subcategoria_item_id: 4000 + (index % 4),
+                    }));
+                }
+                else if (/\/presupuestos\/501\/notas\/summary\/?$/u.test(apiPath)) {
+                    body = {
+                        general_total: 4,
+                        general_nuevas: 1,
+                        lineas: {
+                            2100: { total: 3, nuevas: 1 },
+                            2112: { total: 2, nuevas: 0 },
+                        },
+                        last_opened_at: '2026-07-24T13:00:00Z',
+                    };
+                }
+                else if (/\/presupuestos\/501\/notas\/opened\/?$/u.test(apiPath)) body = { ok: true };
+                else if (/\/presupuestos\/501\/?$/u.test(apiPath)) body = budget;
+                else if (/\/presupuestos\/?$/u.test(apiPath)) body = [budget];
+                else if (/\/apus\/?$/u.test(apiPath)) body = budgetCatalogApus;
+                else if (/\/subcategorias-items\/?$/u.test(apiPath)) body = budgetCatalogSubcategories;
+                else if (/\/usuarios\/?$/u.test(apiPath)) body = collaborators;
                 else if (/\/stakeholders\/project\/[^/]+\/?$/u.test(apiPath)) body = stakeholders;
                 else if (/\/roles\/?$/u.test(apiPath)) body = [
                     { id: 801, nombre: 'Responsable técnico' },
@@ -304,7 +499,12 @@ try {
                         recycle_expires_at: `2026-07-${String(31 - index).padStart(2, '0')}T12:00:00Z`,
                     }));
                 }
-                else if (/\/proyectos\/\d+\/?$/u.test(apiPath)) body = projects[0];
+                else if (/\/proyectos\/\d+\/?$/u.test(apiPath)) body = {
+                    ...projects[0],
+                    id: 1,
+                    base_trabajo_id: 19,
+                    revision: 3,
+                };
                 else if (apiPath.endsWith('/proyectos/marketplace-export/statuses')) body = { projects: {} };
                 else if (apiPath.includes('/proyecto-detalles/')) body = { plazo_estimado: 180, fecha_presentacion: '2026-09-30' };
                 else if (/\/bases-trabajo\/\d+\/?$/u.test(apiPath)) body = { id: 19, nombre: 'Base tecnica Santiago Bermeo', tipo: 'Base Maestra' };
@@ -396,6 +596,87 @@ try {
                         await page.getByRole('heading', { name: 'Mover elementos' }).waitFor({ state: 'visible' });
                         await page.waitForTimeout(350);
                     }
+                }
+                if (harness.source === 'classic-project-workspace-budget-catalog-harness.html') {
+                    const openCatalog = page.getByRole('button', { name: 'Abrir catálogo y herramientas del presupuesto' });
+                    if (await openCatalog.count()) {
+                        await openCatalog.click();
+                        await page.getByRole('button', { name: 'Cerrar catálogo' }).waitFor({ state: 'visible' });
+                    }
+                    await page.waitForTimeout(350);
+                }
+                if (harness.source.startsWith('classic-project-workspace-budget-')
+                    && [
+                        'classic-project-workspace-budget-indirectos-harness.html',
+                        'classic-project-workspace-budget-pareto-harness.html',
+                        'classic-project-workspace-budget-notes-harness.html',
+                        'classic-project-workspace-budget-minimap-harness.html',
+                        'classic-project-workspace-budget-minimap-minimized-harness.html',
+                        'classic-project-workspace-budget-clear-step1-harness.html',
+                        'classic-project-workspace-budget-clear-step2-harness.html',
+                    ].includes(harness.source)) {
+                    const openCatalog = page.getByRole('button', { name: 'Abrir catálogo y herramientas del presupuesto' });
+                    if (await openCatalog.count()) await openCatalog.click();
+                    if (harness.source === 'classic-project-workspace-budget-indirectos-harness.html') {
+                        await page.getByTitle(/Indirectos e IVA/u).click();
+                    } else if (harness.source === 'classic-project-workspace-budget-pareto-harness.html') {
+                        await page.getByTitle('Pareto').click();
+                    } else if (harness.source === 'classic-project-workspace-budget-notes-harness.html') {
+                        await page.getByTitle('Notas', { exact: true }).first().click();
+                    } else if (harness.source === 'classic-project-workspace-budget-minimap-harness.html'
+                        || harness.source === 'classic-project-workspace-budget-minimap-minimized-harness.html') {
+                        await page.getByTitle('Minimapa EDT del presupuesto').click();
+                        if (harness.source === 'classic-project-workspace-budget-minimap-minimized-harness.html') {
+                            await page.getByTitle('Minimizar minimapa').click();
+                        }
+                    } else {
+                        await page.getByTitle('Borrar todos los tanteos del presupuesto').click();
+                        if (harness.source === 'classic-project-workspace-budget-clear-step2-harness.html') {
+                            await page.getByRole('button', { name: 'Entiendo, Continuar' }).click();
+                        }
+                    }
+                    await page.waitForTimeout(450);
+                }
+                if (harness.source === 'classic-project-workspace-budget-tanteo-harness.html') {
+                    await page.getByRole('button', { name: 'Abrir tanteo' }).click();
+                    await page.locator('[data-apu-line-id]').first().click();
+                    await page.waitForTimeout(450);
+                }
+                if (harness.source === 'classic-project-workspace-budget-line-notes-harness.html') {
+                    await page.getByTitle('Notas de la línea').first().evaluate((button) => button.click());
+                    await page.getByText('Notas de Línea', { exact: true }).waitFor({ state: 'visible' });
+                    await page.waitForTimeout(450);
+                }
+                if (harness.source === 'classic-project-workspace-budget-apu-editor-harness.html') {
+                    await page.locator('[data-apu-line-id]').first().dblclick();
+                    await page.getByRole('heading', { name: /Editor de APU/u }).waitFor({ state: 'visible', timeout: 10000 });
+                    await page.waitForTimeout(600);
+                }
+                if (harness.source === 'classic-project-workspace-budget-apu-resources-harness.html') {
+                    await page.locator('[data-apu-line-id]').first().dblclick();
+                    await page.getByRole('heading', { name: /Editor de APU/u }).waitFor({ state: 'visible', timeout: 10000 });
+                    // The adaptive profile is resolved after the editor mounts. Wait for that
+                    // state before opening the compact drawer so the initialization effect
+                    // cannot collapse it again after the interaction.
+                    await page.waitForTimeout(650);
+                    const openResources = page.getByRole('button', { name: 'Abrir catálogo de recursos' });
+                    if (await openResources.count()) {
+                        await openResources.click();
+                        await page.getByRole('button', { name: 'Cerrar catálogo de recursos' }).waitFor({ state: 'visible' });
+                    }
+                    await page.waitForTimeout(450);
+                    const resourceDrawer = page.locator('[data-apu-budget-resource-sidebar="true"]');
+                    const resourceDrawerWidth = await resourceDrawer.evaluate((node) => node.getBoundingClientRect().width);
+                    const resourceSearchVisible = await page.getByPlaceholder('Buscar recursos...').isVisible();
+                    if (resourceDrawerWidth < 280 || !resourceSearchVisible) {
+                        throw new Error(`APU resource drawer did not remain open (width=${resourceDrawerWidth}, searchVisible=${resourceSearchVisible})`);
+                    }
+                }
+                if (harness.source === 'classic-project-workspace-budget-report-menu-harness.html') {
+                    await page.getByRole('button', { name: 'Reporte de presupuesto' }).click();
+                    await page.getByText('Presupuesto + APUs', { exact: true }).waitFor({ state: 'visible' });
+                    await page.mouse.move(Math.round(profile.viewport[0] / 2), Math.round(profile.viewport[1] / 2));
+                    await page.waitForTimeout(350);
                 }
                 if (harness.source === 'classic-projects-kanban-harness.html') {
                     await page.getByRole('tab', { name: 'Kanban' }).click();
@@ -600,6 +881,35 @@ try {
                     };
                 })().catch((error) => ({ passed: false, reason: error.message }))
                 : null;
+            const budgetScrollContract = harness.source === 'classic-project-workspace-budget-main-harness.html'
+                ? await page.evaluate(async () => {
+                    const viewport = document.querySelector('[data-budget-scroll-parent="true"]');
+                    const header = document.querySelector('[data-budget-header-scroll="true"]');
+                    if (!viewport || !header) return { passed: false, reason: 'missing budget scroll markers' };
+                    const startTop = viewport.getBoundingClientRect().top;
+                    const horizontalTarget = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+                    viewport.scrollLeft = horizontalTarget;
+                    viewport.dispatchEvent(new Event('scroll'));
+                    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                    const horizontalReachable = horizontalTarget <= 2 || viewport.scrollLeft >= horizontalTarget - 2;
+                    const headerSynchronized = Math.abs(header.scrollLeft - viewport.scrollLeft) <= 2;
+                    viewport.scrollTop = Math.min(240, Math.max(0, viewport.scrollHeight - viewport.clientHeight));
+                    viewport.dispatchEvent(new Event('scroll'));
+                    await new Promise((resolve) => requestAnimationFrame(resolve));
+                    return {
+                        passed: horizontalReachable
+                            && headerSynchronized
+                            && viewport.getBoundingClientRect().top === startTop
+                            && (viewport.scrollHeight <= viewport.clientHeight + 2 || viewport.scrollTop > 1),
+                        horizontalReachable,
+                        headerSynchronized,
+                        headerScrollLeft: header.scrollLeft,
+                        viewportScrollLeft: viewport.scrollLeft,
+                        viewportScrollTop: viewport.scrollTop,
+                        fixedViewportTop: viewport.getBoundingClientRect().top === startTop,
+                    };
+                }).catch((error) => ({ passed: false, reason: error.message }))
+                : null;
             const scrollReachability = await page.evaluate(() => {
                 const candidates = [...document.querySelectorAll('body *')].map((node, index) => {
                     const style = getComputedStyle(node);
@@ -652,7 +962,13 @@ try {
                             || rect.bottom <= 0
                             || rect.left >= window.innerWidth
                             || rect.top >= window.innerHeight) return null;
-                        const x = Math.max(4, Math.min(window.innerWidth - 4, verticalDelta >= horizontalDelta ? rect.left + 8 : rect.left + (rect.width / 2)));
+                        const prefersContentCenter = node.hasAttribute('data-budget-scroll-parent');
+                        const x = Math.max(4, Math.min(
+                            window.innerWidth - 4,
+                            verticalDelta >= horizontalDelta && !prefersContentCenter
+                                ? rect.left + 8
+                                : rect.left + (rect.width / 2),
+                        ));
                         const y = Math.max(4, Math.min(window.innerHeight - 4, rect.top + (rect.height / 2)));
                         const hitTarget = document.elementFromPoint(x, y);
                         if (!hitTarget || !node.contains(hitTarget)) return null;
@@ -692,7 +1008,12 @@ try {
                         const rect = node.getBoundingClientRect();
                         if (rect.right <= 0 || rect.bottom <= 0 || rect.left >= window.innerWidth || rect.top >= window.innerHeight) return null;
                         return {
-                            x: Math.max(4, Math.min(window.innerWidth - 4, vertical ? rect.left + 8 : rect.left + (rect.width / 2))),
+                            x: Math.max(4, Math.min(
+                                window.innerWidth - 4,
+                                vertical && !node.hasAttribute('data-budget-scroll-parent')
+                                    ? rect.left + 8
+                                    : rect.left + (rect.width / 2),
+                            )),
                             y: Math.max(4, Math.min(window.innerHeight - 4, rect.top + (rect.height / 2))),
                         };
                     }, { id: candidate.id, vertical });
@@ -832,6 +1153,9 @@ try {
                 ...(projectsScrollContract && !projectsScrollContract.passed
                     ? [`projects list ownership failed: ${projectsScrollContract.reason || JSON.stringify(projectsScrollContract)}`]
                     : []),
+                ...(budgetScrollContract && !budgetScrollContract.passed
+                    ? [`budget table ownership failed: ${budgetScrollContract.reason || JSON.stringify(budgetScrollContract)}`]
+                    : []),
                 ...gestureReachability.filter(({ reached }) => !reached).map(({ id, axis, error }) => (
                     error ? `touch gesture audit: ${error}` : `touch gesture did not move ${id} on ${axis}`
                 )),
@@ -846,6 +1170,7 @@ try {
                 geometry,
                 scrollReachability,
                 projectsScrollContract,
+                budgetScrollContract,
                 gestureReachability,
                 failures,
                 status: failures.length ? 'FAIL' : 'PASS',

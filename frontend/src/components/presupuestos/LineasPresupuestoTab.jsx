@@ -32,7 +32,7 @@ const isStructuralBudgetRow = (linea) => linea?.tipo === 'CUENTA_PAQUETE';
 const isOperationalBudgetLine = (linea) => !isStructuralBudgetRow(linea);
 const isDesyncedBudgetLine = (linea) => isOperationalBudgetLine(linea) && !linea?.apu_id;
 const isCountableBudgetLine = (linea) => isOperationalBudgetLine(linea) && !isDesyncedBudgetLine(linea);
-const BUDGET_ROW_MIN_WIDTH = 1024;
+const BUDGET_ROW_MIN_WIDTH = 1104;
 const BUDGET_COLUMN_WIDTH = {
     item: 'w-[72px]',
     edt: 'w-[110px]',
@@ -40,7 +40,7 @@ const BUDGET_COLUMN_WIDTH = {
     quantity: 'w-[92px]',
     unitPrice: 'w-[84px]',
     subtotal: 'w-[98px]',
-    actions: 'w-[144px]',
+    actions: 'w-[224px]',
 };
 const CHAPTER_ROW_HEIGHT = 48;
 const LINE_ROW_HEIGHT = 52;
@@ -628,7 +628,7 @@ const PresupuestoNodeItem = ({
                                                     {formatMoneda(tanteoSession[linea.apu_id] !== undefined ? tanteoSession[linea.apu_id] : toDecimalNumber(parseNumericInput(linea.precio_unitario), '0'))}
                                                 </span>
                                             </div>
-                                            <div className={`${BUDGET_COLUMN_WIDTH.subtotal} text-right font-black tabular-nums text-xs shadow-sm px-2 py-1 rounded-lg border ${isDesynced ? 'bg-red-50 border-red-200 text-red-700' : tanteoSession[linea.apu_id] !== undefined ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-emerald-50 border-emerald-100 text-zinc-900'}`}>
+                                            <div className={`${BUDGET_COLUMN_WIDTH.subtotal} text-right font-black tabular-nums text-xs shadow-sm px-2 py-1 rounded-lg border ${isDesynced ? 'bg-red-50 border-red-200 text-red-700' : tanteoSession[linea.apu_id] !== undefined ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-emerald-50 border-emerald-100 text-emerald-950'}`}>
                                                 {formatMoneda(lineSubtotal)}
                                             </div>
 
@@ -639,7 +639,7 @@ const PresupuestoNodeItem = ({
                                                             e.stopPropagation();
                                                             onEquipoLockLine(linea);
                                                         }}
-                                                        className="p-1.5 text-zinc-400 hover:text-[#136191] hover:bg-blue-50 rounded transition-all"
+                                                        className="flex h-11 w-11 items-center justify-center rounded-xl text-zinc-500 transition-all hover:bg-blue-50 hover:text-[#136191]"
                                                         title="Bloquear línea Equipo"
                                                     >
                                                         <Lock className="w-4 h-4" />
@@ -651,7 +651,7 @@ const PresupuestoNodeItem = ({
                                                             e.stopPropagation();
                                                             onEquipoProposalLine(linea);
                                                         }}
-                                                        className="p-1.5 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all"
+                                                        className="flex h-11 w-11 items-center justify-center rounded-xl text-zinc-500 transition-all hover:bg-emerald-50 hover:text-emerald-700"
                                                         title="Proponer ajuste Equipo"
                                                     >
                                                         <Check className="w-4 h-4" />
@@ -663,7 +663,7 @@ const PresupuestoNodeItem = ({
                                                             e.stopPropagation();
                                                             onEditApu && onEditApu(linea);
                                                         }}
-                                                        className="p-1.5 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-all"
+                                                        className="flex h-11 w-11 items-center justify-center rounded-xl text-zinc-500 transition-all hover:bg-blue-50 hover:text-blue-600"
                                                         title="Editar APU"
                                                     >
                                                         <Edit2 className="w-4 h-4" />
@@ -674,7 +674,7 @@ const PresupuestoNodeItem = ({
                                                         e.stopPropagation();
                                                         onOpenLineNotes && onOpenLineNotes(linea);
                                                     }}
-                                                    className={`relative p-1.5 rounded transition-all ${lineNoteMeta.nuevas > 0 ? 'text-[#F39200] hover:bg-orange-50 animate-pulse' : lineNoteMeta.total > 0 ? 'text-blue-600 hover:bg-blue-50' : 'text-zinc-400 hover:text-[#F39200] hover:bg-orange-50'}`}
+                                                    className={`relative flex h-11 w-11 items-center justify-center rounded-xl transition-all ${lineNoteMeta.nuevas > 0 ? 'text-[#F39200] hover:bg-orange-50 animate-pulse' : lineNoteMeta.total > 0 ? 'text-blue-600 hover:bg-blue-50' : 'text-zinc-500 hover:text-[#F39200] hover:bg-orange-50'}`}
                                                     title={isDesynced ? 'Leer notas de la línea' : 'Notas de la línea'}
                                                 >
                                                     <FileText className="w-4 h-4" />
@@ -689,7 +689,7 @@ const PresupuestoNodeItem = ({
                                                         e.stopPropagation();
                                                         onDeleteLinea(linea.id);
                                                     }}
-                                                    className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded"
+                                                    className="flex h-11 w-11 items-center justify-center rounded-xl text-zinc-500 transition-all hover:bg-red-50 hover:text-red-600"
                                                     title="Eliminar Linea"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -1024,7 +1024,7 @@ const BudgetLineRow = ({
                                 {formatMoneda(tanteoSession[linea.apu_id] !== undefined ? tanteoSession[linea.apu_id] : toDecimalNumber(parseNumericInput(linea.precio_unitario), '0'))}
                             </span>
                         </div>
-                        <div className={`${BUDGET_COLUMN_WIDTH.subtotal} text-right font-black tabular-nums text-xs shadow-sm px-2 py-1 rounded-lg border ${isDesynced ? 'bg-red-50 border-red-200 text-red-700' : tanteoSession[linea.apu_id] !== undefined ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-emerald-50 border-emerald-100 text-zinc-900'}`}>
+                        <div className={`${BUDGET_COLUMN_WIDTH.subtotal} text-right font-black tabular-nums text-xs shadow-sm px-2 py-1 rounded-lg border ${isDesynced ? 'bg-red-50 border-red-200 text-red-700' : tanteoSession[linea.apu_id] !== undefined ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-emerald-50 border-emerald-100 text-emerald-950'}`}>
                             {formatMoneda(lineSubtotal)}
                         </div>
                         <div className={`flex items-center gap-1 transition-opacity ${BUDGET_COLUMN_WIDTH.actions} justify-end ${lineNoteMeta.total > 0 || isSelected ? 'opacity-100' : 'opacity-0 group-hover/linea:opacity-100'}`}>
@@ -1034,7 +1034,7 @@ const BudgetLineRow = ({
                                         e.stopPropagation();
                                         onEquipoLockLine(linea);
                                     }}
-                                    className="p-1.5 text-zinc-400 hover:text-[#136191] hover:bg-blue-50 rounded transition-all"
+                                    className="flex h-11 w-11 items-center justify-center rounded-xl text-zinc-500 transition-all hover:bg-blue-50 hover:text-[#136191]"
                                     title="Bloquear línea Equipo"
                                 >
                                     <Lock className="w-4 h-4" />
@@ -1046,7 +1046,7 @@ const BudgetLineRow = ({
                                         e.stopPropagation();
                                         onEquipoProposalLine(linea);
                                     }}
-                                    className="p-1.5 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all"
+                                    className="flex h-11 w-11 items-center justify-center rounded-xl text-zinc-500 transition-all hover:bg-emerald-50 hover:text-emerald-700"
                                     title="Proponer ajuste Equipo"
                                 >
                                     <Check className="w-4 h-4" />
@@ -1058,7 +1058,7 @@ const BudgetLineRow = ({
                                         e.stopPropagation();
                                         onEditApu && onEditApu(linea);
                                     }}
-                                    className="p-1.5 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-all"
+                                    className="flex h-11 w-11 items-center justify-center rounded-xl text-zinc-500 transition-all hover:bg-blue-50 hover:text-blue-600"
                                     title="Editar APU"
                                 >
                                     <Edit2 className="w-4 h-4" />
@@ -1069,7 +1069,7 @@ const BudgetLineRow = ({
                                     e.stopPropagation();
                                     onOpenLineNotes && onOpenLineNotes(linea);
                                 }}
-                                className={`relative p-1.5 rounded transition-all ${lineNoteMeta.nuevas > 0 ? 'text-[#F39200] hover:bg-orange-50 animate-pulse' : lineNoteMeta.total > 0 ? 'text-blue-600 hover:bg-blue-50' : 'text-zinc-400 hover:text-[#F39200] hover:bg-orange-50'}`}
+                                className={`relative flex h-11 w-11 items-center justify-center rounded-xl transition-all ${lineNoteMeta.nuevas > 0 ? 'text-[#F39200] hover:bg-orange-50 animate-pulse' : lineNoteMeta.total > 0 ? 'text-blue-600 hover:bg-blue-50' : 'text-zinc-500 hover:text-[#F39200] hover:bg-orange-50'}`}
                                 title={isDesynced ? 'Leer notas de la línea' : 'Notas de la línea'}
                             >
                                 <FileText className="w-4 h-4" />
@@ -1084,7 +1084,7 @@ const BudgetLineRow = ({
                                     e.stopPropagation();
                                     onDeleteLinea(linea.id);
                                 }}
-                                className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded"
+                                className="flex h-11 w-11 items-center justify-center rounded-xl text-zinc-500 transition-all hover:bg-red-50 hover:text-red-600"
                                 title="Eliminar Linea"
                             >
                                 <Trash2 className="w-4 h-4" />
@@ -1289,7 +1289,7 @@ const LineasPresupuestoTab = ({
             node.removeEventListener('scroll', syncViewport);
             window.removeEventListener('resize', syncViewport);
         };
-    }, []);
+    }, [loading]);
 
     const getQuantityDisplayValue = (lineId, persistedValue) => {
         if (Object.prototype.hasOwnProperty.call(quantityDrafts, lineId)) {
@@ -2267,7 +2267,7 @@ const LineasPresupuestoTab = ({
                                 type="button"
                                 onClick={() => navigateBudgetSearchMatch(activeBudgetSearchIndex + 1)}
                                 disabled={budgetSearchMatches.length === 0}
-                                className="inline-flex h-8 flex-none items-center justify-center gap-1 rounded-[0.8rem] border border-white/8 bg-[#15181d] px-2 text-[8px] font-black uppercase tracking-[0.12em] text-white/78 shadow-[2px_2px_6px_rgba(0,0,0,0.28),-1px_-1px_5px_rgba(255,255,255,0.04)] transition hover:border-white/14 hover:bg-[#1b1f25] hover:text-white active:translate-y-[1px] active:scale-[0.96] active:shadow-[inset_4px_4px_9px_rgba(0,0,0,0.52),inset_-3px_-3px_7px_rgba(255,255,255,0.06)] disabled:pointer-events-none disabled:opacity-35"
+                                className={`inline-flex flex-none items-center justify-center gap-1 rounded-[0.8rem] border border-white/8 bg-[#15181d] px-2 text-[8px] font-black uppercase tracking-[0.12em] text-white/78 shadow-[2px_2px_6px_rgba(0,0,0,0.28),-1px_-1px_5px_rgba(255,255,255,0.04)] transition hover:border-white/14 hover:bg-[#1b1f25] hover:text-white active:translate-y-[1px] active:scale-[0.96] active:shadow-[inset_4px_4px_9px_rgba(0,0,0,0.52),inset_-3px_-3px_7px_rgba(255,255,255,0.06)] disabled:pointer-events-none disabled:opacity-35 ${isBudgetCompact ? 'h-11' : 'h-8'}`}
                                 title="Buscar siguiente coincidencia"
                             >
                                 <ArrowDown className="h-3 w-3" />
@@ -2284,6 +2284,7 @@ const LineasPresupuestoTab = ({
                         {isSelectionMode && selectedLineIds.size > 0 && (
                                 <ControlRailIconButton
                                 onClick={clearGroupedSelection}
+                                    className={isBudgetCompact ? 'h-11 w-11' : ''}
                                     tooltip="Limpiar selección"
                                     aria-label="Limpiar selección"
                             >
@@ -2292,6 +2293,7 @@ const LineasPresupuestoTab = ({
                         )}
                             <ControlRailIconButton
                                 onClick={handleToggleSelectionMode}
+                                    className={isBudgetCompact ? 'h-11 w-11' : ''}
                                     active={isSelectionMode}
                                 tooltip={isSelectionMode ? `Seleccionar: modo activo${selectedLineIds.size > 0 ? ` · ${selectedLineIds.size} línea${selectedLineIds.size === 1 ? '' : 's'}` : ''}.` : "Seleccionar: Ctrl/Cmd + clic sobre una línea para seleccionar en grupo."}
                                     aria-label={isSelectionMode ? 'Salir de selección' : 'Seleccionar líneas'}
@@ -2300,6 +2302,7 @@ const LineasPresupuestoTab = ({
                             </ControlRailIconButton>
                             <ControlRailIconButton
                                 onClick={handleToggleTanteoMode}
+                                    className={isBudgetCompact ? 'h-11 w-11' : ''}
                                     active={isTanteoMode || tanteoVisible}
                                 tooltip={(isTanteoMode || tanteoVisible) ? 'Tanteo: modo activo.' : "Tanteo: Shift + clic sobre una línea para abrir tanteo. O activa este modo para abrir tanteo con clic simple."}
                                     aria-label={(isTanteoMode || tanteoVisible) ? 'Salir de tanteo' : 'Abrir tanteo'}
@@ -2312,7 +2315,7 @@ const LineasPresupuestoTab = ({
             </div>
             {/* Table Header */}
             <div className="h-[56px] shrink-0 overflow-hidden bg-[#111318] pr-7 text-white">
-                <div ref={budgetHeaderScrollRef} className="h-full overflow-hidden">
+                <div ref={budgetHeaderScrollRef} data-budget-header-scroll="true" className="h-full overflow-hidden">
                     <div className="flex h-full items-center gap-3 border-b border-[#272b33] pl-0 pr-3" style={{ minWidth: `${BUDGET_ROW_MIN_WIDTH}px` }}>
                         <div className={`${isSelectionMode ? 'w-12' : 'w-6'} ml-1 shrink-0`} />
                         <div className={`${BUDGET_COLUMN_WIDTH.item} shrink-0 text-center text-[10px] font-black uppercase tracking-widest text-zinc-400`}>ITEM</div>
@@ -2338,7 +2341,8 @@ const LineasPresupuestoTab = ({
                 <div
                     ref={budgetViewportRef}
                     data-budget-scroll-parent="true"
-                    className="giproy-motion-scrollbar-hide h-full min-h-0 overflow-auto pr-7"
+                    className="giproy-motion-scrollbar-hide h-full min-h-0 overflow-auto overscroll-contain pr-7"
+                    style={{ touchAction: 'pan-x pan-y' }}
                 >
                     <div style={{ minWidth: `${BUDGET_ROW_MIN_WIDTH}px` }}>
                         {visibleRows.map((row) => {

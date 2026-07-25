@@ -12,7 +12,7 @@ export const PROJECT_REPORT_MENU_CLASS = [
 ].join(' ');
 
 export const PROJECT_REPORT_MENU_ITEM_CLASS = [
-    'inline-flex h-8 w-full shrink-0 items-center justify-between rounded-full px-3',
+    'inline-flex h-11 w-full shrink-0 items-center justify-between rounded-full px-3',
     'border border-[#ececec] bg-[#f3f3f1]',
     'text-left text-[10px] font-black uppercase tracking-[0.12em] text-zinc-700',
     'shadow-[4px_4px_10px_#d6d6d1,-4px_-4px_10px_#ffffff]',
@@ -67,7 +67,7 @@ export const ProjectSectionIconButton = ({
             disabled={disabled}
             aria-label={label}
             className={[
-                'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.95rem]',
+                'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.95rem]',
                 'border border-[#ececec] bg-[#ededed] text-zinc-600',
                 'shadow-[3px_3px_8px_#d5d5d5,-3px_-3px_8px_#ffffff]',
                 'transition-[color,border-color,filter,transform,box-shadow] duration-200 hover:brightness-[0.99] hover:text-[#136191]',

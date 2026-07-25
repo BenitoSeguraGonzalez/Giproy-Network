@@ -452,7 +452,7 @@ const TanteoTab = ({ sidebar = false, onHide }) => {
                                 {onHide && (
                                     <button
                                         onClick={onHide}
-                                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/8 bg-[#15181d] text-white/62 shadow-[3px_3px_8px_rgba(0,0,0,0.32),-2px_-2px_6px_rgba(255,255,255,0.045)] transition hover:border-white/14 hover:bg-[#1b1f25] hover:text-white active:translate-y-[1px] active:scale-[0.96] active:shadow-[inset_4px_4px_9px_rgba(0,0,0,0.52),inset_-3px_-3px_7px_rgba(255,255,255,0.06)]"
+                                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/8 bg-[#15181d] text-white/62 shadow-[3px_3px_8px_rgba(0,0,0,0.32),-2px_-2px_6px_rgba(255,255,255,0.045)] transition hover:border-white/14 hover:bg-[#1b1f25] hover:text-white active:translate-y-[1px] active:scale-[0.96] active:shadow-[inset_4px_4px_9px_rgba(0,0,0,0.52),inset_-3px_-3px_7px_rgba(255,255,255,0.06)]"
                                         title="Cerrar tanteo"
                                     >
                                         <X className="h-3.5 w-3.5" />
@@ -488,7 +488,7 @@ const TanteoTab = ({ sidebar = false, onHide }) => {
                                     disabled={!hasTanteoChanges}
                                     title={applySuccess ? 'Tanteo aplicado con éxito' : 'Aplicar tanteo al APU'}
                                     aria-label={applySuccess ? 'Tanteo aplicado con éxito' : 'Aplicar tanteo al APU'}
-                                    className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.85rem] border transition-all duration-200 ${
+                                    className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.85rem] border transition-all duration-200 ${
                                         applySuccess
                                             ? 'border-emerald-400/28 bg-emerald-500/12 text-emerald-100'
                                             : !hasTanteoChanges
@@ -523,7 +523,7 @@ const TanteoTab = ({ sidebar = false, onHide }) => {
                                             setTanteoDrafts({});
                                             clearTanteoSession(selectedApuId);
                                         }} 
-                                        className="text-[9px] font-bold text-blue-600 hover:underline"
+                                        className="inline-flex min-h-11 items-center px-2 text-[9px] font-bold text-blue-600 hover:underline"
                                     >
                                         Limpiar Simulación
                                     </button>
@@ -596,7 +596,7 @@ const TanteoTab = ({ sidebar = false, onHide }) => {
                                                             {rec.tanteo_activo && (
                                                                 <button 
                                                                     onClick={() => handleRevertTanteo(rec.linea_id)}
-                                                                    className="text-[7px] font-black text-red-500 uppercase hover:underline flex items-center gap-0.5"
+                                                                    className="flex min-h-11 items-center gap-1 text-[7px] font-black uppercase text-red-500 hover:underline"
                                                                     title={`Original: ${formatNumericDisplay(rec.rendimiento_original ?? rec.rendimiento, precisionCalculo)}`}
                                                                 >
                                                                     <RotateCcw className="w-2 h-2" /> Restaurar Original
@@ -644,7 +644,7 @@ const TanteoTab = ({ sidebar = false, onHide }) => {
                                                             e.stopPropagation();
                                                             handleTanteoCommitAndNext(rec.linea_id);
                                                         }}
-                                                        className={`w-full h-9 rounded-lg px-3 text-xs font-mono font-black outline-none transition-all ${
+                                                        className={`h-11 w-full rounded-lg px-3 text-xs font-mono font-black outline-none transition-all ${
                                                             isEditableRendimiento
                                                                 ? 'bg-white border border-zinc-200 focus:border-[#F39200] focus:ring-1 focus:ring-orange-200'
                                                                 : 'border border-zinc-200 bg-zinc-100 text-zinc-500 cursor-not-allowed'

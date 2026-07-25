@@ -23,7 +23,9 @@ import {
     Calculator,
     ClipboardList,
     Search,
-    Layers
+    Layers,
+    PanelLeftOpen,
+    PanelLeftClose
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { normalizeSearchToken } from '../../utils/normalizeSearch';
@@ -257,7 +259,7 @@ const BudgetSidebarActionButton = ({
         disabled={disabled}
         title={title || label}
         className={[
-            'group relative flex h-9 w-full min-w-0 flex-col items-center justify-center rounded-[0.7rem] border border-white/8 bg-[#15181d] px-1 py-1 transition-all duration-200',
+            'group relative flex h-11 w-full min-w-0 flex-col items-center justify-center rounded-[0.7rem] border border-white/8 bg-[#15181d] px-1 py-1 transition-all duration-200',
             'shadow-[3px_3px_8px_rgba(0,0,0,0.32),-2px_-2px_6px_rgba(255,255,255,0.045)] hover:bg-[#1b1f25] hover:shadow-[2px_2px_7px_rgba(0,0,0,0.36),-2px_-2px_7px_rgba(255,255,255,0.06)]',
             'active:translate-y-[1px] active:scale-[0.96] active:shadow-[inset_4px_4px_9px_rgba(0,0,0,0.52),inset_-3px_-3px_7px_rgba(255,255,255,0.06)]',
             disabled ? 'pointer-events-none opacity-50' : '',
@@ -266,9 +268,9 @@ const BudgetSidebarActionButton = ({
         ].join(' ')}
     >
         {Icon ? (
-            <Icon className={`mb-0.5 h-[11px] w-[11px] shrink-0 transition-transform duration-300 ${animate ? 'animate-pulse' : 'group-hover:scale-105'}`} />
+            <Icon className={`mb-0.5 h-3.5 w-3.5 shrink-0 transition-transform duration-300 ${animate ? 'animate-pulse' : 'group-hover:scale-105'}`} />
         ) : null}
-        <span className="text-[5px] font-black uppercase tracking-[0.1em] leading-none">{label}</span>
+        <span className="text-[7px] font-black uppercase tracking-[0.08em] leading-none">{label}</span>
         {dotClassName ? (
             <span className={`absolute -top-1 -right-1 h-3 w-3 rounded-full border-2 border-[#111318] ${dotClassName}`} />
         ) : null}
@@ -306,6 +308,7 @@ const BudgetCatalogSidebar = React.memo(function BudgetCatalogSidebar({
     setCatalogSearchTerm,
     catalogApuSummary,
     setCatalogApuSummary,
+    onCatalogToggle,
 }) {
     const catalogApuSummaryLabel = catalogApuSummary.visible === catalogApuSummary.total
         ? `${catalogApuSummary.total} apus totales`
@@ -314,10 +317,17 @@ const BudgetCatalogSidebar = React.memo(function BudgetCatalogSidebar({
     return (
         <motion.aside
             initial={false}
-            animate={{ width: isCatalogVisuallyCollapsed ? 56 : (isCompactViewport ? 280 : 320) }}
+            animate={{ width: isCatalogVisuallyCollapsed ? 64 : 320 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="border-r border-[#e2ded6] bg-[#efefeb] flex flex-col shrink-0 overflow-hidden relative"
+            data-budget-catalog-sidebar="true"
+            className={[
+                'border-r border-[#e2ded6] bg-[#efefeb] flex flex-col shrink-0 overflow-hidden',
+                isCompactViewport && !isCatalogVisuallyCollapsed
+                    ? 'absolute inset-y-0 left-0 z-50 shadow-[20px_0_38px_rgba(15,23,42,0.22)]'
+                    : 'relative',
+            ].join(' ')}
             onMouseEnter={() => {
+                if (isCompactViewport) return;
                 setIsCatalogPointerInside(true);
                 if (isCatalogCollapsed) {
                     if (tanteoVisible) {
@@ -327,20 +337,43 @@ const BudgetCatalogSidebar = React.memo(function BudgetCatalogSidebar({
                 }
             }}
             onMouseLeave={() => {
+                if (isCompactViewport) return;
                 setIsCatalogPointerInside(false);
                 if (isCatalogCollapsed && !isCatalogSearchFocused) {
                     setIsCatalogHoverExpanded(false);
                 }
             }}
         >
-            <div className={`${isCatalogVisuallyCollapsed ? 'm-1 mb-0 px-1' : 'ml-4 mr-7 mt-3 mb-0 px-3'} flex h-[152px] flex-col overflow-hidden rounded-t-[1.25rem] border border-[#272b33] border-b-0 bg-[#111318] py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]`}>
+            <div className={`${isCatalogVisuallyCollapsed ? 'm-1 mb-0 px-1' : 'ml-4 mr-4 mt-3 mb-0 px-3'} flex ${isCatalogVisuallyCollapsed ? 'h-[64px]' : 'h-[178px]'} flex-col overflow-hidden rounded-t-[1.25rem] border border-[#272b33] border-b-0 bg-[#111318] py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]`}>
+                {isCatalogVisuallyCollapsed ? (
+                    <button
+                        type="button"
+                        onClick={onCatalogToggle}
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/12 bg-[#181b20] text-white shadow-[3px_3px_8px_rgba(0,0,0,0.35)] transition hover:border-[#F39200]/50 hover:text-[#F39200]"
+                        title="Abrir catálogo y herramientas del presupuesto"
+                        aria-label="Abrir catálogo y herramientas del presupuesto"
+                    >
+                        <PanelLeftOpen className="h-5 w-5" />
+                    </button>
+                ) : null}
                 {!isCatalogVisuallyCollapsed && (
-                    <div className="flex h-[18px] shrink-0 items-center">
+                    <div className="flex h-[28px] shrink-0 items-center justify-between gap-2">
                         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Catalogo APU</span>
+                        {isCompactViewport ? (
+                            <button
+                                type="button"
+                                onClick={onCatalogToggle}
+                                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/12 bg-[#181b20] text-white transition hover:border-[#F39200]/50 hover:text-[#F39200]"
+                                title="Cerrar catálogo"
+                                aria-label="Cerrar catálogo"
+                            >
+                                <PanelLeftClose className="h-5 w-5" />
+                            </button>
+                        ) : null}
                     </div>
                 )}
                 {!isCatalogVisuallyCollapsed && (
-                    <div className="flex h-[48px] shrink-0 items-center">
+                    <div className="flex h-[62px] shrink-0 items-center">
                         <div className="grid w-full grid-cols-6 gap-1.5 rounded-[1rem] border border-white/12 bg-[#0f1115] px-2 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ring-1 ring-black/18">
                             <BudgetSidebarActionButton
                                 onClick={() => setIsIndirectosOpen(true)}
@@ -380,6 +413,9 @@ const BudgetCatalogSidebar = React.memo(function BudgetCatalogSidebar({
                                 onClick={() => {
                                     setBudgetMiniMapOpen(true);
                                     setBudgetMiniMapMinimized(false);
+                                    if (isCompactViewport) {
+                                        onCatalogToggle();
+                                    }
                                 }}
                                 icon={Network}
                                 label="Mapa"
@@ -404,13 +440,13 @@ const BudgetCatalogSidebar = React.memo(function BudgetCatalogSidebar({
                     </div>
                 )}
                 {!isCatalogVisuallyCollapsed && (
-                    <div className="flex h-[62px] shrink-0 flex-col justify-start border-t border-white/[0.035] pt-2">
+                    <div className="flex h-[70px] shrink-0 flex-col justify-start border-t border-white/[0.035] pt-2">
                         <ClearSearchField
                             value={catalogSearchTerm}
                             onValueChange={setCatalogSearchTerm}
                             placeholder="Buscar APU o Subcategoría..."
                             containerClassName="min-w-0 w-full rounded-[0.9rem] border border-white/16 bg-white shadow-[inset_2px_2px_6px_rgba(15,23,42,0.12),inset_-2px_-2px_6px_rgba(255,255,255,0.75)]"
-                            inputClassName="h-8 w-full bg-transparent py-1 pl-9 pr-8 text-[11px] font-bold text-zinc-800 outline-none placeholder:text-zinc-400"
+                            inputClassName="h-11 w-full bg-transparent py-1 pl-9 pr-10 text-[11px] font-bold text-zinc-800 outline-none placeholder:text-zinc-400"
                             searchIconClassName="h-3 w-3 text-zinc-500 group-focus-within:text-[#F39200]"
                             clearButtonClassName="text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
                             onFocus={() => setIsCatalogSearchFocused(true)}
@@ -423,7 +459,7 @@ const BudgetCatalogSidebar = React.memo(function BudgetCatalogSidebar({
                 )}
             </div>
 
-            <div className="ml-4 mr-7 mb-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-b-[1.25rem] bg-white">
+            <div className={`${isCatalogVisuallyCollapsed ? 'mx-1' : 'ml-4 mr-4'} mb-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-b-[1.25rem] bg-white`}>
                 <CatalogoApuTab
                     compact={true}
                     isCollapsed={isCatalogVisuallyCollapsed}
@@ -520,7 +556,7 @@ const BudgetMiniMapWindow = React.memo(function BudgetMiniMapWindow({
                         <button
                             type="button"
                             onClick={() => setBudgetMiniMapMinimized((prev) => !prev)}
-                            className="rounded-xl border border-zinc-200 bg-white p-2 text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-800"
+                            className="flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-800"
                             title={budgetMiniMapMinimized ? 'Restaurar minimapa' : 'Minimizar minimapa'}
                         >
                             {budgetMiniMapMinimized ? <ChevronUp className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
@@ -528,7 +564,7 @@ const BudgetMiniMapWindow = React.memo(function BudgetMiniMapWindow({
                         <button
                             type="button"
                             onClick={() => setBudgetMiniMapOpen(false)}
-                            className="rounded-xl border border-zinc-200 bg-white p-2 text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-800"
+                            className="flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-800"
                             title="Cerrar minimapa"
                         >
                             <X className="h-4 w-4" />
@@ -711,6 +747,11 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    useEffect(() => {
+        setIsCatalogCollapsed(isCompactViewport);
+        setIsCatalogHoverExpanded(false);
+    }, [isCompactViewport]);
 
     useEffect(() => {
         if (!showBudgetReportMenu) return undefined;
@@ -1316,7 +1357,10 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
                                 className={showBudgetReportMenu ? PROJECT_REPORT_BUTTON_ACTIVE_CLASS : ''}
                             />
                             {showBudgetReportMenu ? (
-                                <ProjectReportMenu widthClassName="w-[18rem]">
+                                <ProjectReportMenu
+                                    widthClassName="w-[18rem]"
+                                    className={isCompactViewport ? '!fixed !left-auto !right-4 !top-[4.75rem] !w-[min(18rem,calc(100vw-2rem))]' : ''}
+                                >
                                     <ProjectReportMenuItem
                                         onClick={async () => {
                                             await handleDownloadReport('without_apus');
@@ -1382,6 +1426,10 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
                     setCatalogSearchTerm={setCatalogSearchTerm}
                     catalogApuSummary={catalogApuSummary}
                     setCatalogApuSummary={setCatalogApuSummary}
+                    onCatalogToggle={() => {
+                        setIsCatalogCollapsed((current) => !current);
+                        setIsCatalogHoverExpanded(false);
+                    }}
                 />
 
                 {/* 2/3 SECTION: MAIN EDITOR & TANTEO */}
@@ -1511,7 +1559,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
                             <div className="p-10 relative">
                                 <button 
                                     onClick={() => setShowClearTanteoModal(false)}
-                                    className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-xl transition-all"
+                                    className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-xl text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-600"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>

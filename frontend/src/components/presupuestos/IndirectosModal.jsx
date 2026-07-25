@@ -361,7 +361,7 @@ const IndirectosModal = ({ isOpen, onClose, onSaved, presupuestoId }) => {
                                     resetCustomComposer();
                                     onClose();
                                 }}
-                                className={`${APP_MODAL_CLOSE_BUTTON_CLASS} !h-9 !w-9 !rounded-[0.75rem]`}
+                                className={`${APP_MODAL_CLOSE_BUTTON_CLASS} !h-11 !w-11 !rounded-[0.75rem]`}
                             >
                                 <X className="w-4 h-4" />
                             </button>

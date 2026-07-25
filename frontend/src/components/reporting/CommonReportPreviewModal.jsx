@@ -65,7 +65,7 @@ const normalizePreviewText = (value) => String(value || '')
     .toLowerCase();
 
 const reportExportButtonBase = [
-    'inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-[0.85rem] px-3',
+    'inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-[0.85rem] px-3',
     'text-[10px] font-black uppercase tracking-[0.14em]',
     'transition-[color,border-color,filter,transform,box-shadow] duration-200',
     'active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50',
@@ -80,7 +80,7 @@ const reportExportButtonSoft = [
 ].join(' ');
 
 const reportModalCloseButtonClass = [
-    'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.95rem]',
+    'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.95rem]',
     'border border-[#ececec] bg-[#ededed] text-zinc-600',
     'shadow-[3px_3px_8px_#d5d5d5,-3px_-3px_8px_#ffffff]',
     'transition-[color,border-color,filter,transform,box-shadow] duration-200',
@@ -743,7 +743,10 @@ const CommonReportPreviewModal = ({
                     }
                     return (
                     <section key={`${item.id}-${index}`} className={`rounded-[2rem] border border-zinc-200 bg-white shadow-sm ${useCompactSummary ? 'p-5' : 'p-6'}`}>
-                        <div className={`${useCompactSummary ? 'mb-4 grid grid-cols-[minmax(0,1fr)_minmax(560px,640px)] items-start gap-4 pb-3' : 'mb-5 flex items-start justify-between gap-6 pb-4'} border-b border-zinc-100`}>
+                        <div className={`${useCompactSummary
+                            ? 'mb-4 grid grid-cols-1 items-start gap-4 pb-3 xl:grid-cols-[minmax(0,1fr)_minmax(560px,640px)]'
+                            : 'mb-5 flex flex-col items-stretch gap-4 pb-4 xl:flex-row xl:items-start xl:justify-between xl:gap-6'
+                        } border-b border-zinc-100`}>
                             <div className="min-w-0">
                                 <div className="text-[9px] font-black uppercase tracking-[0.2em] text-[#F39200]">{item.codigo}</div>
                                 <h3 className={`mt-1 break-words tracking-tight text-zinc-900 ${item.is_structural ? 'text-xl font-black' : 'text-xl font-bold'}`}>
@@ -760,7 +763,7 @@ const CommonReportPreviewModal = ({
                                 ) : null}
                                 {renderReportWarnings(item, 'mt-3')}
                             </div>
-                            <div className={`min-w-0 grid w-full gap-3 text-right ${resolveSummaryGridClass(item, useCompactSummary)}`}>
+                            <div className={`grid w-full min-w-0 gap-3 text-right xl:w-auto ${resolveSummaryGridClass(item, useCompactSummary)}`}>
                                 {(item.summary_cards || [
                                     { label: 'Directo', value: item.costo_directo, kind: item.summary_direct_kind || 'money' },
                                     { label: 'Indirecto', value: item.costo_indirecto, kind: item.summary_indirect_kind || 'money' },

@@ -158,3 +158,25 @@ renderizarse. Se conserva el aviso para no silenciar reglas globales.
 - Criterio de cierre: actualizar dependencias sin `--force`, ejecutar build,
   matriz visual, smokes Classic/BIM y `npm audit`; documentar por separado
   cualquier advisory que deba conservarse temporalmente.
+
+## QI-009 - Incidencias detectadas durante C04.6 Presupuesto
+
+- Estado: PARCIALMENTE CORREGIDO Y DOCUMENTADO.
+- La matriz conjunta de Presupuesto agotó el búfer de red de Chromium en la
+  combinación 170 (`ERR_NO_BUFFER_SPACE`). La combinación Lenovo P12 retrato +
+  editor APU pasó al repetirse en un proceso limpio. El intento fallido se
+  conserva en `2026-07-25T05-10-49-205Z` y la repetición válida en
+  `2026-07-25T05-17-57-020Z`.
+- El detector visual informa un `side-tab` en `EdtValoradaModal.jsx:126`. Ese
+  componente no tiene importadores ni ruta activa. No se elimina durante el
+  trabajo adaptativo para evitar una mutación funcional no autorizada; deberá
+  decidirse si se integra o se retira en una limpieza específica de código
+  huérfano.
+- El detector mantiene avisos `gray-on-color` para clases base zinc combinadas
+  con fondos `hover:*` de acciones. Son ramas de estado y no una combinación
+  renderizada simultáneamente. El único caso estático real del subtotal fue
+  corregido a texto esmeralda oscuro.
+- Las primeras evidencias mostraron falsos PASS de estado: catálogo de recursos
+  colapsado, visor de reporte comprimido y cabecera de tabla desincronizada. El
+  certificador incorpora ahora contratos de estado abierto, buscador visible,
+  ancho mínimo del drawer y sincronización de scroll.
