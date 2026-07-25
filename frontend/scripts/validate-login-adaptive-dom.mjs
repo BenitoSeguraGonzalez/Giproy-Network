@@ -58,6 +58,7 @@ try {
         });
         const page = await context.newPage();
         const errors = [];
+        let recoveryFails = false;
         page.on('pageerror', (error) => errors.push(error.message));
         await page.addInitScript(() => {
             try {
@@ -73,6 +74,13 @@ try {
             const url = new URL(route.request().url());
             if (url.pathname.endsWith('/auth/accounts-by-email')) {
                 return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(accounts) });
+            }
+            if (url.pathname.includes('/password-recovery/')) {
+                return route.fulfill({
+                    status: recoveryFails ? 503 : 200,
+                    contentType: 'application/json',
+                    body: recoveryFails ? JSON.stringify({ detail: 'Servicio temporalmente no disponible.' }) : '{}',
+                });
             }
             return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
         });
@@ -131,8 +139,26 @@ try {
         }
         await page.screenshot({ path: path.join(artifactRoot, `${profile.id}.png`), fullPage: false });
         assert.deepEqual(errors, [], `${profile.id}: sin errores`);
+
+        await page.goto(`${baseUrl}/forgot-password`, { waitUntil: 'domcontentloaded' });
+        const recoveryViewport = page.locator('[data-forgot-password-viewport]');
+        await recoveryViewport.waitFor();
+        const recoveryCard = page.locator('[data-forgot-password-card]');
+        const recoveryCardRect = await recoveryCard.boundingBox();
+        assert.ok(recoveryCardRect && recoveryCardRect.x >= 0 && recoveryCardRect.x + recoveryCardRect.width <= page.viewportSize().width, `${profile.id}: recuperacion dentro del ancho`);
+        await page.locator('#recovery-email').fill('persona@example.com');
+        await page.getByRole('button', { name: /enviar enlace/i }).click();
+        await page.getByRole('status').waitFor();
+        assert.equal(await page.getByRole('button', { name: /volver al inicio/i }).count(), 1, `${profile.id}: confirmacion ofrece retorno`);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, `${profile.id}: recuperacion sin overflow horizontal`);
+        await page.screenshot({ path: path.join(artifactRoot, `${profile.id}-forgot-password.png`), fullPage: false });
+        recoveryFails = true;
+        await page.goto(`${baseUrl}/forgot-password`, { waitUntil: 'domcontentloaded' });
+        await page.locator('#recovery-email').fill('persona@example.com');
+        await page.getByRole('button', { name: /enviar enlace/i }).click();
+        await page.getByRole('alert').waitFor();
         await context.close();
-        console.log(`PASS ${profile.id} /login`);
+        console.log(`PASS ${profile.id} /login + /forgot-password`);
     }
 } finally {
     await browser?.close();

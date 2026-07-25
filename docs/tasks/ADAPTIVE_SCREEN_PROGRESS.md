@@ -946,6 +946,45 @@ Resultado final: **10/10 PASS**.
 - `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
 - `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
 
+## C01.2 - Recuperacion `/forgot-password`
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+### Problemas observados y adecuacion
+
+- La pantalla ocultaba overflow vertical; pasa a viewport `100dvh` con scroll
+  vertical condicionado por contenido o teclado.
+- Tarjeta, logo y paddings se recomponen por espacio disponible.
+- Etiqueta y campo quedan asociados mediante `for/id`.
+- Exito usa region de estado y error usa alerta.
+- Se eliminan bordes laterales decorativos y se aumenta legibilidad.
+- Accion primaria adopta naranja operativo con contraste; acciones y retorno
+  declaran objetivo tactil.
+
+### Pruebas
+
+- Solicitud correcta y confirmacion con retorno.
+- Respuesta 503 simulada y error anunciado.
+- Tarjeta dentro del ancho y sin overflow horizontal.
+- Viewport de 540 px heredado en perfiles tactiles para comprobar altura
+  reducida.
+- Windows FHD 100/125/150 %, Windows 4K/DPR 2, tablet Full HD y 2K en ambas
+  orientaciones, Lenovo P12 en ambas orientaciones.
+
+Resultado: **10/10 PASS**. Build Vite: **PASS**. Impeccable: **0 hallazgos**.
+
+### Evidencia
+
+- `artifacts/visual-certification/c01-1-login-final-2026-07-24/*-forgot-password.png`.
+
+### Archivos tratados
+
+- `frontend/src/pages/ForgotPassword.jsx`.
+- `frontend/scripts/validate-login-adaptive-dom.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
 ## Siguiente unidad
 
-`C01.2 - /forgot-password`: EN CURSO.
+`C01.3 - /reset-password`: EN CURSO.
