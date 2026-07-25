@@ -277,6 +277,98 @@ La ejecucion unica de Impeccable sobre `Dashboard.jsx` devolvio cero hallazgos.
   del despliegue final.
 - Estado final futuro: CERTIFICADA FISICAMENTE.
 
+## G00.4 - Sistema tipografico
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+### Superficie observada
+
+- Marca y version del shell protegido.
+- Etiquetas de empresa, proyecto, licencia y base tecnica.
+- Selector global de empresa.
+- Texto operativo, metadatos, truncado y altura de linea.
+- Comportamiento con DPR y viewport CSS en diez perfiles.
+
+### Problema observado
+
+La cabecera mezclaba metadatos de 7, 8 y 9 px con `leading-none` y tracking
+amplio. Windows con DPI alto no convierte una resolucion fisica grande en mas
+espacio CSS; por ello estos textos seguian siendo pequeños y algunos dependian
+del recorte para caber.
+
+El inventario completo ha localizado 1.356 declaraciones explicitas inferiores
+a 10 px en el frontend: 1 de 5 px, 1 de 6 px, 10 de 6,5 px, 78 de 7 px, 13 de
+7,5 px, 466 de 8 px, 7 de 8,5 px, 777 de 9 px y 3 de 9,5 px. No se sustituyen
+masivamente: cada consumidor se corregira en su unidad para evitar destruir
+tablas, diagramas o jerarquias especializadas. El inventario queda registrado,
+no ignorado.
+
+### Adecuacion aplicada
+
+- Metadatos operativos de la cabecera suben a 10 px.
+- Version visible sube a 9 px con contraste reforzado.
+- Selector de empresa usa texto de 10 px y altura propia.
+- Licencia, proyecto y base usan alturas de linea que permiten glifos completos.
+- El color naranja informativo se oscurece donde contiene texto pequeño.
+- La fila contextual vertical pasa a dimensionarse por contenido real.
+- Se añade una prueba que detecta cualquier descendiente textual recortado.
+- Marca, acciones y contexto deben quedar contenidos por la cabecera.
+- No se cambia el tamaño raiz, el zoom ni la escala global.
+
+### Incidencia encontrada durante la inspeccion
+
+La primera elevacion tipografica hizo visible que la segunda fila conservaba
+una altura fija de 44 px. El DOM general seguia pasando, pero la captura Full HD
+vertical revelo recorte de glifos. Se detuvo la unidad, se corrigio la fila a
+un minimo de 52 px gobernado por contenido y se incorporo la regresion al test.
+
+### Perfiles verificados
+
+- Windows FHD 100 %, 125 % y 150 %.
+- Windows 4K/DPR 2.
+- Tablet Full HD horizontal y vertical.
+- Tablet 2K horizontal y vertical.
+- Lenovo P12 3K horizontal y vertical.
+
+Resultado final: **10/10 PASS**.
+
+### Verificaciones
+
+- Build Vite de produccion: PASS.
+- `validate-adaptive-app-layout-dom.mjs`: PASS.
+- Texto contextual sin clipping: PASS.
+- Regiones de cabecera contenidas verticalmente: PASS.
+- Sin solapamiento entre marca y acciones: PASS.
+- Sin overflow del documento: PASS.
+- Inspeccion visual vertical Full HD y 2K: PASS tras correccion.
+
+### Evidencia
+
+- Captura que permitio detectar el recorte:
+  `artifacts/visual-certification/g00-4-typography-2026-07-24`.
+- Resultado corregido:
+  `artifacts/visual-certification/g00-4-typography-final-2026-07-24`.
+
+### Archivos tratados
+
+- `frontend/src/layouts/AppLayout.jsx`.
+- `frontend/scripts/validate-adaptive-app-layout-dom.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
+### Detector visual
+
+La ejecucion unica de Impeccable no encontro errores bloqueantes. Reitero los
+tres avisos ya inventariados: acento inferior de marca y dos combinaciones de
+color en estados hover. Permanecen asignados a G00.10 para medicion objetiva.
+
+### Regla para las unidades consumidoras
+
+Cada pantalla corregira sus textos inferiores a 10 px segun su funcion:
+metadato, dato tabular, etiqueta, diagrama o adorno. Ninguna sustitucion global
+se considerara una solucion valida.
+
 ## Siguiente unidad
 
-`G00.4 - Sistema tipografico`: PENDIENTE.
+`G00.5 - Densidad y espaciado`: PENDIENTE.

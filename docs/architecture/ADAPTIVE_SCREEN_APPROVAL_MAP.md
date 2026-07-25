@@ -51,7 +51,7 @@ CSS y no se aplicara zoom global para encoger la aplicacion.
 | G00.1 | Shell protegido — VERIFICADA LOCALMENTE | cabecera, marca, empresa, version, acciones, alto util y contenido principal |
 | G00.2 | Navegacion global — VERIFICADA LOCALMENTE | retorno, rutas, menus, foco, teclado, touch y cierre exterior |
 | G00.3 | Footer y version — VERIFICADA LOCALMENTE | presencia, posicion, no solapamiento y coincidencia con `version.json` |
-| G00.4 | Sistema tipografico | tamaño legible sin escalado global, truncado, wrapping y numeros tabulares |
+| G00.4 | Sistema tipografico — VERIFICADA LOCALMENTE | tamaño legible sin escalado global, truncado, wrapping y numeros tabulares |
 | G00.5 | Densidad y espaciado | escritorio HiDPI, tablet tactil, maximos de ancho y ritmo vertical |
 | G00.6 | Tablas y listas | cabecera fija cuando proceda, scroll interno correcto y acciones alcanzables |
 | G00.7 | Formularios | reflujo de columnas, etiquetas, errores, teclado virtual y accion primaria |

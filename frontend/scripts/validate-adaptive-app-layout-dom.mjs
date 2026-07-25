@@ -107,8 +107,30 @@ try {
         const contextRect = await page.locator('[data-app-header-context]').boundingBox();
         assert.ok(brandRect && actionsRect && contextRect, `${profile.name}: regiones de cabecera medibles`);
         assert.ok(brandRect.x + brandRect.width <= actionsRect.x + 1, `${profile.name}: marca y acciones no se solapan`);
+        for (const [regionName, regionRect] of [['marca', brandRect], ['acciones', actionsRect], ['contexto', contextRect]]) {
+            assert.ok(
+                regionRect.y >= headerRect.y - 1 && regionRect.y + regionRect.height <= headerRect.y + headerRect.height + 1,
+                `${profile.name}: ${regionName} queda contenida verticalmente en la cabecera`,
+            );
+        }
         if (profile.expected === 'tablet-portrait') {
             assert.ok(contextRect.y >= brandRect.y + brandRect.height, `${profile.name}: contexto ocupa una segunda fila real`);
+            const clippedContextText = await page.locator('[data-app-header-context]').evaluate((node) => {
+                const ownerRect = node.getBoundingClientRect();
+                return [...node.querySelectorAll('span, h2, p')]
+                    .filter((child) => {
+                        const style = getComputedStyle(child);
+                        const rect = child.getBoundingClientRect();
+                        return style.display !== 'none'
+                            && style.visibility !== 'hidden'
+                            && rect.width > 0
+                            && rect.height > 0
+                            && (rect.top < ownerRect.top - 1 || rect.bottom > ownerRect.bottom + 1);
+                    })
+                    .map((child) => child.textContent.trim())
+                    .filter(Boolean);
+            });
+            assert.deepEqual(clippedContextText, [], `${profile.name}: ningun texto del contexto queda recortado`);
         }
         assert.equal(await page.locator('[data-adaptive-harness-content]').count(), 1, `${profile.name}: contenido clásico visible`);
         const pageViewport = page.locator('[data-app-page-viewport]');

@@ -550,7 +550,7 @@ const AppLayout = ({ children }) => {
             <nav
                 data-app-header
                 data-app-header-layout={isTabletPortrait ? 'stacked-context' : 'single-row'}
-                className={`${isTabletPortrait ? 'grid min-h-28 grid-cols-[minmax(0,1fr)_auto] grid-rows-[44px_44px] gap-x-3 gap-y-2 px-4 py-2' : isPortableWorkspace ? 'flex h-16 items-center justify-between px-4' : 'flex h-20 items-center justify-between px-8'} sticky top-0 z-[500] shrink-0 border-b border-zinc-200 bg-white`}
+                className={`${isTabletPortrait ? 'grid min-h-[7.5rem] grid-cols-[minmax(0,1fr)_auto] grid-rows-[44px_minmax(52px,auto)] gap-x-3 gap-y-2 px-4 py-2' : isPortableWorkspace ? 'flex h-16 items-center justify-between px-4' : 'flex h-20 items-center justify-between px-8'} sticky top-0 z-[500] shrink-0 border-b border-zinc-200 bg-white`}
             >
                 <div className={`${isTabletPortrait ? 'contents' : `flex min-w-0 items-center ${isPortableWorkspace ? 'gap-3' : 'gap-6'}`}`}>
                     {/* Branding Principal (Fijo) */}
@@ -573,7 +573,7 @@ const AppLayout = ({ children }) => {
                         />
                         <span
                             data-app-version
-                            className="whitespace-nowrap text-[8px] font-black tracking-tight text-white/75"
+                            className="whitespace-nowrap text-[9px] font-black leading-none tracking-tight text-white/80"
                             aria-label={`Version ${APP_VERSION_LABEL}`}
                         >
                             {APP_VERSION_LABEL}
@@ -596,11 +596,11 @@ const AppLayout = ({ children }) => {
                                 </div>
                             )}
                             <div className={`flex flex-col items-start min-w-0 ${isPortableWorkspace ? 'max-w-[280px]' : 'min-w-[200px]'}`}>
-                                <span className={`${isPortableWorkspace ? 'text-[9px]' : 'text-[7px]'} font-black uppercase text-zinc-400 tracking-widest leading-none mb-1`}>
+                                <span className="mb-1 text-[10px] font-black uppercase leading-none tracking-[0.14em] text-zinc-500">
                                     Contexto Operativo
                                 </span>
                                 <div className="flex items-center gap-2 w-full mt-0.5">
-                                    <h2 className={`${isPortableWorkspace ? 'text-[11px]' : 'text-[11px]'} font-black uppercase tracking-tight text-zinc-800 truncate leading-none`} title={selectedEmpresaLabel}>
+                                    <h2 className="truncate text-[11px] font-black uppercase leading-tight tracking-tight text-zinc-800" title={selectedEmpresaLabel}>
                                         {selectedEmpresaLabel}
                                     </h2>
                                     {isSuperadmin && (
@@ -608,7 +608,7 @@ const AppLayout = ({ children }) => {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowCompanySelector((current) => !current)}
-                                                className={`flex items-center gap-1 font-black bg-orange-100 text-[#F39200] rounded-full hover:bg-orange-200 transition-colors uppercase cursor-pointer ${isPortableWorkspace ? 'text-[7px] px-2 py-1' : 'text-[8px] px-2 py-0.5'}`}
+                                                className="flex min-h-7 cursor-pointer items-center gap-1 rounded-full bg-orange-100 px-2 py-1 text-[10px] font-black uppercase leading-none text-[#A55A00] transition-colors hover:bg-orange-200"
                                                 title="Cambiar empresa de trabajo"
                                                 aria-expanded={showCompanySelector}
                                                 aria-controls="app-company-selector"
@@ -623,7 +623,7 @@ const AppLayout = ({ children }) => {
                                                 aria-label="Cambiar empresa de trabajo"
                                                 className={`absolute left-0 top-full z-[520] mt-2 max-h-[min(26rem,calc(100dvh-8rem))] w-[min(18rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-2xl border border-zinc-100 bg-white p-4 shadow-2xl transition-all ${showCompanySelector ? 'visible opacity-100' : 'pointer-events-none invisible opacity-0'}`}
                                             >
-                                                <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-3 border-b border-zinc-50 pb-2">Cambiar Empresa (Auditoría)</p>
+                                                <p className="mb-3 border-b border-zinc-100 pb-2 text-[10px] font-black uppercase tracking-[0.14em] text-zinc-500">Cambiar Empresa (Auditoría)</p>
                                                 <div className="space-y-1 max-h-60 overflow-y-auto">
                                                     {empresas.map(emp => (
                                                         <button
@@ -647,13 +647,13 @@ const AppLayout = ({ children }) => {
                                 <div className={`flex items-center gap-1.5 w-full ${isPortableWorkspace ? 'mt-0.5' : 'mt-1'}`}>
                                     <ShieldCheck className={`${isPortableWorkspace ? 'h-2.5 w-2.5' : 'h-3 w-3'} flex-shrink-0 text-[#F39200]`} />
                                     <span
-                                        className={`${isPortableWorkspace ? 'text-[9px]' : 'text-[8px]'} font-black uppercase tracking-[0.14em] text-[#F39200] truncate leading-none`}
+                                        className="truncate text-[10px] font-black uppercase leading-tight tracking-[0.1em] text-[#A55A00]"
                                         title={`Licencia activa: ${activeLicenseLabel} · ${activeLicenseStatusLabel}`}
                                     >
                                         Licencia activa: {activeLicenseLabel}
                                     </span>
                                     {licenseInfo && !isPortableWorkspace && (
-                                        <span className={`inline-flex flex-shrink-0 rounded-full border px-1.5 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] ${activeLicenseStatusTone}`}>
+                                        <span className={`inline-flex flex-shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-black uppercase leading-none tracking-[0.08em] ${activeLicenseStatusTone}`}>
                                             {activeLicenseStatusLabel}
                                         </span>
                                     )}
@@ -682,7 +682,7 @@ const AppLayout = ({ children }) => {
                         {/* Bloque 2: Proyecto (Opcional) */}
                         {activeProject && !isPortableWorkspace && (
                             <div className="flex flex-col items-start min-w-[150px] border-r border-zinc-200 pr-6">
-                                <span className="text-[7px] font-black uppercase text-zinc-400 tracking-widest leading-none mb-1">
+                                <span className="mb-1 text-[10px] font-black uppercase leading-none tracking-[0.14em] text-zinc-500">
                                     Proyecto
                                 </span>
                                 <span className="text-[10px] font-bold uppercase text-zinc-800 truncate w-full mt-0.5 leading-none" title={activeProject.descripcion || activeProject.nombre}>
@@ -696,12 +696,12 @@ const AppLayout = ({ children }) => {
                             <div className={`flex flex-col items-start min-w-0 ${isPortableWorkspace ? 'max-w-[240px]' : 'min-w-[150px]'}`}>
                                 <div className="flex items-center gap-1.5 mb-1 w-full">
                                     <div className={`w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0 ${activeBaseTone.dot}`} />
-                                    <span className={`${isPortableWorkspace ? 'text-[9px]' : 'text-[7px]'} font-black uppercase tracking-widest leading-none truncate ${activeBaseTone.text}`}>
+                                    <span className={`truncate text-[10px] font-black uppercase leading-tight tracking-[0.1em] ${activeBaseTone.text}`}>
                                         {selectedBaseTrabajo.tipo_nombre || (selectedBaseTrabajo.es_maestra ? 'Base Maestra' : 'Base de Proyecto')}
                                         {selectedBaseTrabajo.tipo === 'Base de Proyecto' && selectedBaseTrabajo.revision !== null && selectedBaseTrabajo.revision !== undefined && ` (REV ${selectedBaseTrabajo.revision})`}
                                     </span>
                                 </div>
-                                <span className={`${isPortableWorkspace ? 'text-[9px]' : 'text-[10px]'} font-black uppercase italic truncate w-full mt-0.5 leading-none ${activeBaseTone.textStrong}`} title={selectedBaseTrabajo.nombre}>
+                                <span className={`mt-0.5 w-full truncate text-[10px] font-black uppercase italic leading-tight ${activeBaseTone.textStrong}`} title={selectedBaseTrabajo.nombre}>
                                     {selectedBaseTrabajo.nombre}
                                 </span>
                             </div>
