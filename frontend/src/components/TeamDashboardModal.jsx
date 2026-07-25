@@ -35,7 +35,7 @@ const AssignmentNode = ({ item, onAssign, onUserClick, level = 0 }) => {
                 className="relative ml-5 mb-3 last:mb-6 md:ml-12"
             >
                 {/* Conector tipo repisa */}
-                <div className="absolute left-[-1.5rem] top-[-1rem] bottom-1/2 w-6 border-l-2 border-b-2 border-zinc-100 rounded-bl-xl" />
+                <div className="absolute left-[-1.5rem] top-[-1rem] bottom-1/2 w-6 rounded-bl-xl border-b border-l border-zinc-100" />
                 
                 <button
                     type="button"

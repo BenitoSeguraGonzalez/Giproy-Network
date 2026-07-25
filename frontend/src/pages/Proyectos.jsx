@@ -5532,30 +5532,35 @@ const Proyectos = () => {
     if (selectedProject) {
         return (
             <div className="h-full flex flex-col bg-[#F2F4F7] text-[#1A1A1A] overflow-hidden">
-                <header className="bg-white border-b border-zinc-200 px-8 py-2 flex-shrink-0 z-40 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div className={`flex items-center transition-all duration-300 ${isProjectHeaderCollapsed ? 'gap-4' : 'gap-6'}`}>
-                            <button onClick={handleCloseSelectedProject} className="p-2 hover:bg-zinc-100 rounded-xl transition-colors text-zinc-500">
+                <header data-project-workspace-header className="z-40 flex-shrink-0 border-b border-zinc-200 bg-white px-3 py-2 shadow-sm md:px-5 xl:px-8">
+                    <div className="flex flex-wrap items-center justify-between gap-2 md:flex-nowrap md:gap-4">
+                        <div className={`flex min-w-0 flex-1 items-center transition-all duration-300 ${isProjectHeaderCollapsed ? 'gap-2 md:gap-4' : 'gap-4 md:gap-6'}`}>
+                            <button
+                                type="button"
+                                onClick={handleCloseSelectedProject}
+                                aria-label="Volver al listado de proyectos"
+                                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-zinc-500 transition-colors hover:bg-zinc-100"
+                            >
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
-                            <div>
-                                <div className={`flex items-center gap-2 transition-all duration-300 ${isProjectHeaderCollapsed ? 'mb-0' : 'mb-1'}`}>
+                            <div className="min-w-0 flex-1">
+                                <div className={`flex min-w-0 items-center gap-2 transition-all duration-300 ${isProjectHeaderCollapsed ? 'mb-0' : 'mb-1'}`}>
                                     <MarketplaceOriginBadgeSet
                                         origin={selectedProjectOrigin}
                                         loading={selectedProjectOrigin.loading}
                                         label="Origen"
                                         mode="tooltip"
                                     />
-                                    <h1 className={`font-black uppercase tracking-tight text-zinc-900 transition-all duration-300 ${
+                                    <h1 title={selectedProject.nombre} className={`min-w-0 flex-1 truncate font-black uppercase tracking-tight text-zinc-900 transition-all duration-300 ${
                                         isProjectHeaderCollapsed ? 'text-lg' : 'text-xl'
                                     }`}>{selectedProject.nombre}</h1>
-                                    <span className="px-3 py-1 bg-orange-50 text-[#F39200] border border-orange-100 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                                    <span className="shrink-0 rounded-lg border border-orange-100 bg-orange-50 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-[#F39200] md:px-3 md:text-[10px] md:tracking-widest">
                                         Rev {selectedProject.revision.toString().padStart(3, '0')}
                                     </span>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div data-project-workspace-actions className="flex w-full items-center justify-end gap-2 md:w-auto md:gap-3 xl:gap-4">
                             {!projectPermissions?.is_restricted && (
                                 <>
                                     <ProjectHeaderActionButton
@@ -5588,7 +5593,8 @@ const Proyectos = () => {
                         initial={false}
                         animate={{ width: isSidebarExpanded ? 288 : 96 }}
                         transition={{ type: 'spring', stiffness: 260, damping: 30, mass: 0.8 }}
-                        className="shrink-0 bg-white border-r border-zinc-100 overflow-x-hidden overflow-y-auto custom-scrollbar p-4"
+                        data-project-workspace-navigation
+                        className="shrink-0 bg-white border-r border-zinc-100 overflow-x-hidden overflow-y-auto custom-scrollbar p-2 md:p-4"
                         style={{ willChange: 'width' }}
                     >
                         <div className="mb-4 flex items-center justify-between gap-2">
@@ -5603,7 +5609,8 @@ const Proyectos = () => {
                                 type="button"
                                 onClick={() => setIsSidebarPinned((prev) => !prev)}
                                 title={isSidebarPinned ? 'Desfijar panel' : 'Fijar panel abierto'}
-                                className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-500 transition-colors hover:border-zinc-300 hover:text-zinc-900"
+                                aria-label={isSidebarPinned ? 'Desfijar navegación del proyecto' : 'Fijar navegación del proyecto'}
+                                className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-500 transition-colors hover:border-zinc-300 hover:text-zinc-900"
                             >
                                 {isSidebarPinned ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
                             </button>
@@ -5678,10 +5685,10 @@ const Proyectos = () => {
                     {/* Contenido de Sección */}
                     <main className={`flex-1 flex flex-col min-w-0 min-h-0 ${
                         selectedPresupuestoId || activeTab === 'cronogramas' || activeTab === 'desagregacion' || activeTab === 'edo_obs' || activeTab === 'edt_wbs' || activeTab === 'bim'
-                            ? 'overflow-hidden p-6'
+                            ? 'overflow-hidden p-3 md:p-4 xl:p-6'
                             : activeTab === 'datos' || activeTab === 'stakeholders' || activeTab === 'formula'
-                                ? 'overflow-hidden p-6'
-                                : 'overflow-y-auto custom-scrollbar p-12'
+                                ? 'overflow-hidden p-3 md:p-4 xl:p-6'
+                                : 'overflow-y-auto custom-scrollbar p-4 md:p-6 xl:p-12'
                     }`}>
                         <MotionDiv
                             key={activeTab}

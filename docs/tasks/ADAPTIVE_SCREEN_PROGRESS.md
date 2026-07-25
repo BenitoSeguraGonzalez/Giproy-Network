@@ -1589,4 +1589,45 @@ Fecha: 2026-07-24
 
 ## Siguiente unidad
 
-`C04.1 - Cabecera y selector del proyecto`: EN CURSO.
+`C04.1 - Cabecera y selector del proyecto`: **VERIFICADA VISUALMENTE**.
+
+## C04.1 - Cabecera y selector del espacio de trabajo
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+- La identidad del proyecto admite nombres extensos sin expulsar revision,
+  retorno ni acciones; el nombre se trunca con titulo completo accesible.
+- En tablet retrato las acciones forman una segunda fila contextual; en
+  paisaje/escritorio permanecen en la misma linea cuando el ancho lo permite.
+- Retorno, fijacion del selector y acciones compactas cumplen 44 px.
+- La navegacion conserva dos estados funcionales: rail compacto para maximizar
+  area de trabajo y panel fijado con etiquetas completas para exploracion.
+- El contenido interior recibe padding por contexto, sin zoom ni escalado global.
+- Resultado: **20/20 PASS**; hojas de cabecera y navegacion expandida abiertas.
+
+### Evidencia C04.1
+
+- `artifacts/visual-certification/2026-07-25T02-32-01-653Z`.
+- `classic-project-workspace-header-harness-contact-sheet.png`.
+- `classic-project-workspace-navigation-harness-contact-sheet.png`.
+
+### Incidencias de certificacion
+
+- `2026-07-25T02-29-29-842Z` paso geometria, pero se rechazo visualmente:
+  el mock de permisos ocultaba las secciones y no ejercitaba el selector.
+- Se corrigio el contrato a `allowed_modules: ['todos']` y se repitieron los
+  veinte casos completos; solo la segunda ejecucion es evidencia valida.
+
+### Archivos tratados
+
+- `frontend/src/pages/Proyectos.jsx`.
+- `frontend/src/components/projects/ProjectHeaderActionButton.jsx`.
+- `frontend/src/__classic_primary_pages_harness.jsx`.
+- Harnesses de cabecera y navegacion del workspace.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `docs/architecture/visual-surface-inventory.json`.
+
+## Siguiente unidad
+
+`C04.2 - Datos del proyecto`: EN CURSO.

@@ -19,6 +19,7 @@ const isSuperadminDashboard = pathname.includes('dashboard-superadmin');
 const isAdminGlobal = pathname.includes('admin-global');
 const isDeniedAdminGlobal = pathname.includes('admin-global-denied');
 const isProjectManager = pathname.includes('project-manager');
+const isProjectsWorkspace = pathname.includes('project-workspace');
 const hasSelectedBase = !pathname.includes('precios-unitarios-no-base');
 const user = {
     id: 1,
@@ -30,7 +31,7 @@ const user = {
 };
 const Page = isProjectManager
     ? ProjectManager
-    : pathname.includes('projects')
+    : (pathname.includes('projects') || isProjectsWorkspace)
     ? Proyectos
     : pathname.includes('precios-unitarios')
         ? PreciosUnitarios
@@ -41,7 +42,7 @@ const Page = isProjectManager
             : Dashboard;
 const initialPathname = isProjectManager
     ? '/proyectos/gestor'
-    : pathname.includes('projects')
+    : (pathname.includes('projects') || isProjectsWorkspace)
     ? '/proyectos'
     : pathname.includes('precios-unitarios')
         ? '/precios-unitarios'

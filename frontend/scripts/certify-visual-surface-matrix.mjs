@@ -108,6 +108,10 @@ try {
                     moneda: 'USD',
                     updated_at: `2026-07-${String(24 - index).padStart(2, '0')}T12:00:00Z`,
                 }));
+                if (harness.source === 'classic-project-workspace-header-harness.html'
+                    || harness.source === 'classic-project-workspace-navigation-harness.html') {
+                    projects[0].nombre = 'Proyecto Santiago Bermeo — Complejo hospitalario interdisciplinario de alcance regional';
+                }
                 const collaborators = Array.from({ length: 14 }, (_, index) => ({
                     id: 501 + index,
                     nombre_completo: `Colaborador Santiago ${String(index + 1).padStart(2, '0')}`,
@@ -126,6 +130,9 @@ try {
                     }));
                 }
                 else if (/\/proyectos\/\d+\/assigned-users\/?$/u.test(apiPath)) body = collaborators.slice(0, 6);
+                else if (/\/proyectos\/\d+\/permissions\/?$/u.test(apiPath)) {
+                    body = { is_restricted: false, allowed_modules: ['todos'] };
+                }
                 else if (/\/proyectos\/\d+\/assignment-dashboard\/?$/u.test(apiPath)) {
                     body = [{
                         id: 600,
@@ -195,6 +202,8 @@ try {
             let navigationError = null;
             try {
                 const harnessUrl = harness.source === 'classic-projects-edit-harness.html'
+                    || harness.source === 'classic-project-workspace-header-harness.html'
+                    || harness.source === 'classic-project-workspace-navigation-harness.html'
                     ? `${baseUrl}${harness.path}?project_id=1&tab=datos`
                     : `${baseUrl}${harness.path}`;
                 await page.goto(harnessUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -244,6 +253,10 @@ try {
                         await page.getByRole('button', { name: /Ver resumen de Colaborador Santiago 01/u }).first().click();
                         await page.waitForTimeout(500);
                     }
+                }
+                if (harness.source === 'classic-project-workspace-navigation-harness.html') {
+                    await page.getByRole('button', { name: 'Fijar navegación del proyecto' }).click();
+                    await page.waitForTimeout(350);
                 }
             } catch (error) {
                 navigationError = error.message;

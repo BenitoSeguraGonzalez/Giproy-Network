@@ -58,7 +58,7 @@ const ProjectHeaderActionButton = ({
                 'disabled:pointer-events-none disabled:opacity-50',
                 stacked
                     ? `min-h-[56px] ${sizeClassName} flex-col items-center justify-center gap-1.5 self-end rounded-[1rem] px-3.5 py-2.5`
-                    : `min-h-[38px] ${sizeClassName} items-center justify-center gap-1.5 rounded-full px-4 py-2`,
+                    : `min-h-11 ${sizeClassName} items-center justify-center gap-1.5 rounded-full px-4 py-2`,
                 className,
             ].join(' ')}
         >
