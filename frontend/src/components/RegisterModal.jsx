@@ -213,48 +213,60 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm">
+            <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-zinc-900/60 p-2 backdrop-blur-sm sm:p-4">
                 <MotionDiv
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden relative"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Registro de cuenta"
+                    data-register-dialog
+                    className="relative flex max-h-[calc(100dvh-1rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:rounded-3xl"
                 >
                     {/* Header naranja */}
                     <div className="h-1.5 bg-gradient-to-r from-[#F39200] via-[#E94E1B] to-[#F39200]" />
 
                     <button
+                        type="button"
                         onClick={onClose}
+                        data-adaptive-touch-target="true"
+                        aria-label="Cerrar registro"
                         className={`${APP_MODAL_CLOSE_BUTTON_CLASS} absolute right-6 top-6 z-10`}
                     >
                         <X className="h-4 w-4" />
                     </button>
 
-                    <div className="p-10">
+                    <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 pt-8 sm:p-6 sm:pt-8 md:p-8">
                         {step === 1 ? (
                             <>
-                                <div className="text-center mb-8 flex flex-col items-center">
-                                    <img src={LogoGiproyCompleto} alt="GIPROY Logo" className="h-12 w-auto object-contain mb-4" />
-                                    <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 leading-none italic">Registro de Cuenta</h2>
-                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mt-3 italic">GIPROY NETWORK SYSTEM {APP_VERSION_LABEL}</p>
+                                <div className="mb-4 flex shrink-0 flex-col items-center text-center sm:mb-6">
+                                    <img src={LogoGiproyCompleto} alt="GIPROY Logo" className="mb-3 h-10 w-auto object-contain sm:h-12" />
+                                    <h2 className="text-2xl font-black uppercase leading-none tracking-tight text-zinc-900 sm:text-3xl">Registro de Cuenta</h2>
+                                    <p className="mt-2 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-500">GIPROY NETWORK SYSTEM {APP_VERSION_LABEL}</p>
                                 </div>
 
                                 {error && (
                                     <MotionDiv
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        className="mb-8 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-2xl flex items-center gap-4"
+                                        role="alert"
+                                        className="mb-4 flex shrink-0 items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4"
                                     >
                                         <AlertCircle className="w-6 h-6 text-red-500 shrink-0" />
                                         <p className="text-xs font-black text-red-700 uppercase tracking-tight">{error}</p>
                                     </MotionDiv>
                                 )}
 
-                                <form onSubmit={handleSubmit} className="space-y-8">
-                                    <div className="relative">
+                                <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col gap-4" aria-busy={isLoading}>
+                                    <div className="relative min-h-0 flex-1">
                                         <div
                                             ref={formScrollRef}
-                                            className="giproy-motion-scrollbar-hide max-h-[52dvh] overflow-y-auto pr-5"
+                                            data-register-form-scroll
+                                            className="giproy-motion-scrollbar-hide h-full overflow-y-auto overscroll-contain pr-5 [touch-action:pan-y]"
+                                            role="region"
+                                            aria-label="Datos del registro"
+                                            tabIndex={0}
                                         >
                                             <PersonnelFormFields
                                                 formData={formData}
@@ -282,6 +294,7 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
                                                         type="button"
                                                         onClick={handleManualReview}
                                                         disabled={isLoading}
+                                                        data-adaptive-touch-target="true"
                                                         className="mt-3 h-10 rounded-lg bg-amber-700 px-4 text-[11px] font-black uppercase tracking-wide text-white disabled:opacity-50"
                                                     >
                                                         Solicitar verificación
@@ -293,17 +306,18 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
                                         <MotionScrollbar targetRef={formScrollRef} className="right-0" />
                                     </div>
 
-                                    <div className="pt-4">
+                                    <div className="shrink-0 pt-1">
                                         <LiquidButton
                                             type="submit"
-                                            className={`w-full text-white font-black uppercase tracking-widest h-14 rounded-2xl shadow-xl transition-all text-sm ${canSubmit ? 'bg-[#F39200] hover:bg-[#E94E1B] shadow-orange-500/10 active:scale-[0.98]' : 'bg-zinc-300 cursor-not-allowed shadow-zinc-500/10'}`}
+                                            data-adaptive-touch-target="true"
+                                            className={`h-14 w-full rounded-2xl text-sm font-black uppercase tracking-widest text-white shadow-xl transition-colors ${canSubmit ? 'bg-[#B45309] hover:bg-[#92400E] shadow-orange-900/10' : 'bg-zinc-400 cursor-not-allowed shadow-zinc-500/10'}`}
                                             disabled={!canSubmit}
                                         >
                                             {isLoading ? 'PROCESANDO REGISTRO...' : 'CREAR MI CUENTA AHORA'}
                                         </LiquidButton>
                                     </div>
 
-                                    <p className="text-[10px] text-center text-zinc-400 font-bold uppercase tracking-tighter leading-relaxed px-4">
+                                    <p className="shrink-0 px-2 text-center text-[11px] font-bold uppercase leading-relaxed tracking-tight text-zinc-600">
                                         Al registrarte, se creará una empresa con 1 año de validez y tu cuenta quedará como administrador inicial bajo el modelo SaaS.
                                     </p>
                                 </form>
@@ -323,6 +337,7 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
                                 </p>
                                 <LiquidButton
                                     onClick={onClose}
+                                    data-adaptive-touch-target="true"
                                     className="mt-8 bg-[#1A1A1A] text-white h-12 px-8 font-black uppercase tracking-widest rounded-xl"
                                 >
                                     Entendido

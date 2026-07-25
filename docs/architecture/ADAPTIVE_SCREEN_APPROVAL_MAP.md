@@ -66,7 +66,7 @@ global se presentara y aprobara antes de aplicarse a sus consumidores.
 
 | ID | Ruta/pantalla | Secciones y estados propios |
 |---|---|---|
-| C01.1 | `/login` | credenciales, recordar sesion, error, bloqueo, carga y acceso a recuperacion |
+| C01.1 | `/login` — VERIFICADA LOCALMENTE | credenciales, recordar sesion, error, bloqueo, carga y acceso a recuperacion |
 | C01.2 | `/forgot-password` | email, confirmacion, validacion y retorno |
 | C01.3 | `/reset-password` | token valido/invalido, nueva clave, confirmacion y expiracion |
 | C01.4 | `/verify-registration` | verificando, aprobado, rechazado, expirado y acceso |

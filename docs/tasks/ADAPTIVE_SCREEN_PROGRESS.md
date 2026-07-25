@@ -849,6 +849,103 @@ Resultado final: **10/10 PASS**.
 
 Impeccable devolvio un aviso por uso de `Inter`, documentado arriba.
 
+## C01.1 - Acceso `/login`
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+### Superficies observadas
+
+- Paso de correo y recordar credenciales.
+- Error de sesion.
+- Seleccion entre multiples empresas, incluida cuenta suspendida.
+- Paso de contraseña, visibilidad y cambio de empresa.
+- Estado de carga de ambos formularios.
+- Footer y version.
+- Modal completo de registro y formulario de personal.
+- Viewport reducido a 540 px como simulacion de teclado virtual.
+
+### Problemas observados
+
+- Tarjeta con alto minimo rigido de 340 px y espaciado excesivo en alturas
+  restringidas.
+- Enlaces y textos operativos de 8 a 10 px.
+- Accion naranja clara con texto blanco sin contraste suficiente.
+- Botones de volver y mostrar contraseña sin nombre accesible.
+- Lista de empresas con scroll visual, pero sin region accesible ni contrato
+  explicito de propiedad.
+- Modal de registro sin semantica de dialogo ni limite de `100dvh`.
+- Formulario del registro podia empujar cabecera, accion y cierre fuera del
+  viewport.
+
+### Adecuacion aplicada
+
+- Espaciado y logo se recomponen por espacio disponible, sin escalar el
+  conjunto.
+- Se elimina el alto minimo de contenido; el viewport de login conserva el
+  scroll de pagina solo cuando footer o teclado lo requieren.
+- Textos operativos aumentan y acciones textuales naranjas usan tono oscuro.
+- Botones de icono reciben nombre y objetivo tactil.
+- Lista de empresas es una region enfocables con scroll vertical propio,
+  `overscroll-contain` y `touch-action: pan-y`.
+- Errores usan `role="alert"` y superficie uniforme.
+- Modal de registro queda acotado por `100dvh`, con dialogo nombrado y cierre
+  accesible.
+- Cabecera y accion del registro permanecen fuera del cuerpo desplazable; solo
+  los datos extensos poseen scroll cuando realmente exceden el espacio.
+
+### Incidencias encontradas durante la prueba
+
+1. La matriz general solo admite harnesses y rechazo correctamente
+   `route:/login`. Se creo un validador interactivo especifico de la ruta.
+2. El primer selector de tarjeta esperaba un atributo inexistente. Se agrego
+   `data-login-card` como ancla de prueba estable.
+3. El test calculaba `bottom` sobre `boundingBox`, propiedad que Playwright no
+   devuelve. La geometria real demostraba que el footer estaba dentro; se
+   corrigio a `y + height`.
+4. Una segunda ejecucion reutilizo un puerto ocupado y termino sin producir
+   matriz valida. El validador usa ahora un puerto aislado y la ejecucion final
+   produjo diez resultados explicitos.
+5. La primera regla del modal exigia scroll incluso cuando todo cabia en FHD
+   alto. Se corrigio el contrato: scroll real solo cuando hay exceso, contenido
+   completo visible cuando no lo hay.
+6. Impeccable marco el antiguo borde lateral grueso del error. Fue retirado.
+   La auditoria especifica del modal de registro devolvio cero hallazgos.
+
+### Perfiles verificados
+
+- Windows FHD 100 %, 125 % y 150 %.
+- Windows 4K/DPR 2.
+- Tablet Full HD horizontal y vertical.
+- Tablet 2K horizontal y vertical.
+- Lenovo P12 3K horizontal y vertical.
+
+Resultado final: **10/10 PASS**.
+
+### Verificaciones
+
+- Tarjeta y dialogo dentro del viewport: PASS.
+- Footer alcanzable: PASS.
+- Lista de empresas con scroll propio: PASS.
+- Contraseña y acciones accesibles: PASS.
+- Objetivos tactiles declarados de 44x44: PASS.
+- Accion primaria alcanzable con viewport de 540 px: PASS.
+- Formulario de registro con scroll condicionado por exceso: PASS.
+- Sin overflow horizontal del documento: PASS.
+- Build Vite de produccion: PASS.
+
+### Evidencia
+
+- `artifacts/visual-certification/c01-1-login-final-2026-07-24`.
+
+### Archivos tratados
+
+- `frontend/src/pages/Login.jsx`.
+- `frontend/src/components/RegisterModal.jsx`.
+- `frontend/scripts/validate-login-adaptive-dom.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
 ## Siguiente unidad
 
-`C01.1 - /login`: EN CURSO.
+`C01.2 - /forgot-password`: EN CURSO.

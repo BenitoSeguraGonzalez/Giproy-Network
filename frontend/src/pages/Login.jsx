@@ -124,9 +124,9 @@ const Login = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6"
         >
-            <form onSubmit={handleEmailSubmit} className="space-y-6">
+            <form onSubmit={handleEmailSubmit} className="space-y-4 sm:space-y-6" aria-busy={isLoading}>
                 <div className="space-y-2">
                     <Label htmlFor="email" className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-400 ml-1">Terminal de Acceso / Email</Label>
                     <Input
@@ -146,7 +146,7 @@ const Login = () => {
                         id="remember"
                         checked={rememberMe}
                         onCheckedChange={setRememberMe}
-                        className="border-zinc-300 data-[state=checked]:bg-[#F39200] data-[state=checked]:border-[#F39200] h-5 w-5 rounded-md"
+                        className="border-zinc-300 data-[state=checked]:bg-[#B45309] data-[state=checked]:border-[#B45309] h-5 w-5 rounded-md"
                     />
                     <Label
                         htmlFor="remember"
@@ -158,6 +158,7 @@ const Login = () => {
 
                 <LiquidButton
                     type="submit"
+                    data-adaptive-touch-target="true"
                     className="w-full mt-4 bg-[#1A1A1A] hover:bg-[#333] text-white font-black uppercase tracking-[0.2em] h-14 shadow-lg shadow-zinc-500/10 active:scale-[0.98] transition-all rounded-xl text-xs flex items-center justify-center gap-2"
                     disabled={isLoading}
                 >
@@ -177,17 +178,17 @@ const Login = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6"
         >
             <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
-                    <button onClick={() => setStep('email')} className="p-2 -ml-2 text-zinc-400 hover:text-zinc-600">
+                    <button type="button" onClick={() => setStep('email')} data-adaptive-touch-target="true" aria-label="Volver al correo" className="-ml-2 inline-flex h-11 w-11 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700">
                         <ArrowLeft className="w-4 h-4" />
                     </button>
                     <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-400">Seleccione su Empresa</Label>
                 </div>
                 
-                <div className="space-y-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="max-h-[min(17.5rem,45dvh)] space-y-3 overflow-y-auto overscroll-contain pr-2 custom-scrollbar [touch-action:pan-y]" role="region" aria-label="Empresas disponibles" tabIndex={0}>
                     {accounts.map((acc) => (
                         <button
                             key={acc.empresa_id}
@@ -198,6 +199,7 @@ const Login = () => {
                                 }
                             }}
                             disabled={!acc.activo}
+                            data-adaptive-touch-target="true"
                             className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
                                 !acc.activo 
                                 ? 'opacity-50 grayscale bg-zinc-50 border-zinc-100 cursor-not-allowed' 
@@ -213,7 +215,7 @@ const Login = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs font-black uppercase text-[#1A1A1A] truncate">{getCompanyDisplayName(acc)}</p>
-                                <p className={`text-[8px] font-bold uppercase tracking-widest ${acc.activo ? 'text-zinc-400' : 'text-red-500'}`}>
+                                <p className={`text-[11px] font-bold uppercase tracking-wider ${acc.activo ? 'text-zinc-600' : 'text-red-700'}`}>
                                     {acc.activo ? 'Cuenta Activa' : 'Cuenta Suspendida'}
                                 </p>
                             </div>
@@ -231,9 +233,9 @@ const Login = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6"
         >
-            <form onSubmit={handleLoginSubmit} className="space-y-6">
+            <form onSubmit={handleLoginSubmit} className="space-y-4 sm:space-y-6" aria-busy={isLoading}>
                 <div className="flex items-center justify-between gap-4 p-4 bg-zinc-50 rounded-2xl border border-zinc-100 group">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center overflow-hidden border border-zinc-200 shadow-sm">
@@ -251,7 +253,8 @@ const Login = () => {
                     <button 
                         type="button" 
                         onClick={() => setStep(accounts.length > 1 ? 'selection' : 'email')} 
-                        className="text-[9px] font-black uppercase tracking-widest text-[#F39200] hover:underline"
+                        data-adaptive-touch-target="true"
+                        className="min-h-11 rounded-lg px-2 text-xs font-black uppercase tracking-wider text-[#9A4D00] hover:bg-orange-50 hover:underline"
                     >
                         Cambiar
                     </button>
@@ -273,7 +276,9 @@ const Login = () => {
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
+                            data-adaptive-touch-target="true"
+                            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                            className="absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
                         >
                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
@@ -282,7 +287,8 @@ const Login = () => {
 
                 <LiquidButton
                     type="submit"
-                    className="w-full mt-4 bg-[#F39200] hover:bg-[#E94E1B] text-white font-black uppercase tracking-[0.2em] h-14 shadow-lg shadow-orange-500/10 active:scale-[0.98] transition-all rounded-xl text-xs"
+                    data-adaptive-touch-target="true"
+                    className="mt-4 flex h-14 w-full items-center justify-center rounded-xl bg-[#B45309] text-xs font-black uppercase tracking-[0.2em] text-white shadow-lg shadow-orange-900/10 transition-colors hover:bg-[#92400E]"
                     disabled={isLoading}
                 >
                     {isLoading ? 'Autenticando...' : 'Acceder al Sistema'}
@@ -292,7 +298,7 @@ const Login = () => {
     );
 
     return (
-        <div data-login-viewport className="h-dvh w-full flex items-center justify-center aurora-construction px-4 py-6 relative overflow-x-hidden overflow-y-auto">
+        <div data-login-viewport data-adaptive-ui-enabled="true" className="aurora-construction relative flex h-dvh w-full items-start justify-center overflow-x-hidden overflow-y-auto px-4 py-4 sm:items-center sm:py-6">
             {/* Detalle superior naranja */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#F39200] via-[#E94E1B] to-[#F39200]" />
 
@@ -300,10 +306,10 @@ const Login = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4 }}
-                className="w-full max-w-[440px] relative z-10"
+                className="relative z-10 w-full max-w-[440px]"
             >
-                <Card className="bg-white border-none shadow-[0_20px_50px_rgba(0,0,0,0.08)] rounded-2xl overflow-hidden">
-                    <CardHeader className="space-y-6 text-center pt-12 pb-6 px-10">
+                <Card data-login-card className="bg-white border-none shadow-[0_20px_50px_rgba(0,0,0,0.08)] rounded-2xl overflow-hidden">
+                    <CardHeader className="space-y-4 px-5 pb-4 pt-7 text-center sm:space-y-6 sm:px-10 sm:pb-6 sm:pt-10">
                         <MotionDiv
                             initial={{ y: -10, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
@@ -313,7 +319,7 @@ const Login = () => {
                             <img
                                 src={LogoGiproyCompleto}
                                 alt="GIPROY Logo"
-                                className="h-16 w-auto object-contain"
+                                className="h-12 w-auto object-contain sm:h-16"
                             />
                         </MotionDiv>
                         <div className="space-y-1">
@@ -326,13 +332,14 @@ const Login = () => {
                         </div>
                     </CardHeader>
 
-                    <CardContent className="pt-2 pb-12 px-10 min-h-[340px]">
+                    <CardContent className="px-5 pb-7 pt-2 sm:px-10 sm:pb-10">
                         <AnimatePresence mode="wait">
                             {error && (
                                 <MotionDiv
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="mb-6 p-3 text-[9px] font-black uppercase tracking-widest text-[#FFFFFF] bg-[#DE2828] border-l-4 border-red-800 text-center shadow-md rounded-r-lg"
+                                    role="alert"
+                                    className="mb-6 rounded-lg border border-red-800 bg-[#B91C1C] p-3 text-center text-xs font-black uppercase leading-relaxed tracking-wider text-white shadow-md"
                                 >
                                     {error}
                                 </MotionDiv>
@@ -344,15 +351,16 @@ const Login = () => {
                         </AnimatePresence>
 
                         {step === 'email' && (
-                            <div className="mt-8 flex items-center justify-center gap-6">
-                                <Link to="/forgot-password" size="sm" className="text-[10px] font-black uppercase tracking-widest text-[#F39200] hover:text-[#E94E1B] transition-colors">
+                            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:mt-8">
+                                <Link to="/forgot-password" data-adaptive-touch-target="true" className="inline-flex min-h-11 items-center rounded-lg px-2 text-xs font-black uppercase tracking-wider text-[#9A4D00] transition-colors hover:bg-orange-50 hover:text-[#7C2D12]">
                                     ¿Olvidaste tu contraseña?
                                 </Link>
                                 <span className="w-1 h-1 bg-zinc-200 rounded-full" />
                                 <button
                                     type="button"
                                     onClick={() => setIsRegisterOpen(true)}
-                                    className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-[#F39200] transition-colors flex items-center gap-1.5"
+                                    data-adaptive-touch-target="true"
+                                    className="flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-xs font-black uppercase tracking-wider text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-[#9A4D00]"
                                 >
                                     <UserPlus className="w-3 h-3" />
                                     Crear Cuenta
@@ -362,8 +370,8 @@ const Login = () => {
                     </CardContent>
                 </Card>
 
-                <div data-login-footer className="mt-6 flex flex-col items-center gap-4 pb-2 sm:mt-10">
-                    <p className="text-zinc-400 text-[9px] font-bold uppercase tracking-[0.3em] text-center leading-relaxed">
+                <div data-login-footer className="mt-4 flex flex-col items-center gap-4 pb-2 sm:mt-6">
+                    <p className="text-center text-[11px] font-bold uppercase leading-relaxed tracking-[0.18em] text-zinc-600">
                         Authorized Environment<br />
                         © 2026 GIPROY NETWORK<br />
                         Ing. Benito Segura · Ing. Santiago Bermeo
