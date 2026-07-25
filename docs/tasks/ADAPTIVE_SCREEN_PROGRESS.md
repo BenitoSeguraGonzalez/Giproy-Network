@@ -1111,6 +1111,65 @@ Resultado: **20/20 PASS** en matriz; **27 capturas revisadas**. Build Vite:
 - `docs/architecture/visual-surface-inventory.json`.
 - `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
 
+## C02.2 - Precios Unitarios `/precios-unitarios`
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+### Problemas observados y adecuacion
+
+- Las cuatro tarjetas eran `div` con clic: pasan a botones nativos con foco
+  visible, navegacion por teclado y estado `disabled` real.
+- El retorno era menor de 44 px y carecia de nombre accesible; ahora declara
+  accion, objetivo tactil y anillo de foco.
+- El contenido extenso queda bajo una unica region de scroll vertical propia,
+  con contencion y gesto `pan-y`; la cabecera del modulo permanece fija.
+- Se incorpora el estado real sin base tecnica: Bases de Trabajo permanece
+  disponible y Subcategorias, Recursos y APU explican y aplican el bloqueo.
+- Las tarjetas mantienen dos columnas en tablet, sin reducir globalmente la
+  interfaz ni depender de la resolucion fisica.
+
+### Revision visual obligatoria
+
+- Se abrieron y revisaron veinte capturas iniciales: base activa y sin base por
+  cada uno de los diez perfiles.
+- Se revisaron las capturas de final de scroll generadas en perfiles con exceso
+  vertical.
+- Lenovo P12 vertical conserva cuatro tarjetas completas en dos columnas.
+- Full HD vertical permite alcanzar la ultima fila mediante el scroll de
+  contenido, sin desplazar la cabecera global ni cortar acciones.
+- Los badges `Base requerida` no invaden icono, titulo, descripcion o accion.
+
+Resultado: **20/20 PASS**; build Vite: **PASS**. Impeccable conserva un aviso
+estatico `gray-on-color` documentado en QI-007: las clases denunciadas
+pertenecen a estados mutuamente excluyentes y la combinacion no se renderiza.
+
+### Incidencias de prueba documentadas
+
+1. La primera ejecucion se lanzo desde la raiz con una ruta relativa propia de
+   `frontend`; fallo antes de probar y no se considero evidencia.
+2. La matriz baseline tuvo un `ERR_NO_BUFFER_SPACE` transitorio en un perfil.
+   La matriz final aislada completo las veinte combinaciones sin error.
+3. El detector relaciona clases de dos ramas condicionales como si coexistieran;
+   la inspeccion de capturas activa/sin base valida el estilo realmente
+   renderizado.
+
+### Evidencia
+
+- `artifacts/visual-certification/c02-2-precios-certified-2026-07-24`.
+- `visual-review-active-base-contact-sheet.png`.
+- `visual-review-no-base-contact-sheet.png`.
+- `visual-review-scroll-end-contact-sheet.png`.
+
+### Archivos tratados
+
+- `frontend/src/pages/PreciosUnitarios.jsx`.
+- `frontend/src/__classic_primary_pages_harness.jsx`.
+- `frontend/classic-precios-unitarios-no-base-harness.html`.
+- `docs/architecture/visual-surface-inventory.json`.
+- `docs/quality/KNOWN_ISSUES_ADAPTIVE_RELEASE.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
 ## Siguiente unidad
 
-`C02.2 - Precios Unitarios`: EN CURSO.
+`C02.3 - Otros Servicios`: EN CURSO.

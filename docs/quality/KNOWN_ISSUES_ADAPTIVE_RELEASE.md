@@ -93,6 +93,14 @@ para medir contraste y evaluar tipografia como una decision de diseno separada,
 sin alterar silenciosamente la identidad visual durante la correccion
 adaptativa.
 
+La certificacion C02.2 registra ademas un aviso estatico en
+`PreciosUnitarios.jsx:146`. Es un falso positivo verificable causado por ramas
+de clase mutuamente excluyentes dentro del mismo template: el estado
+deshabilitado usa texto zinc sobre fondo zinc, mientras el estado activo usa
+texto `#B45309` sobre el hover `amber-50`. Las capturas de ambos estados y los
+atributos `disabled` confirman que la combinacion denunciada no llega a
+renderizarse. Se conserva el aviso para no silenciar reglas globales.
+
 ## QI-008 - Workbenches BIM con columnas rigidas
 
 - Estado: CORREGIDO EN `3.1.0-beta.6`; pendiente de confirmacion fisica.

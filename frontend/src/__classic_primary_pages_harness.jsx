@@ -12,6 +12,7 @@ const company = { id: 7, nombre: 'Santiago Bermeo', alias: 'Santiago Bermeo', de
 const base = { id: 19, nombre: 'Base técnica Santiago Bermeo', tipo_nombre: 'Base de Proyecto' };
 const pathname = window.location.pathname;
 const isSuperadminDashboard = pathname.includes('dashboard-superadmin');
+const hasSelectedBase = !pathname.includes('precios-unitarios-no-base');
 const user = {
     id: 1,
     nombre: 'QA Visual',
@@ -26,7 +27,7 @@ const initialPath = pathname.includes('projects') ? '/proyectos' : pathname.incl
 const authValue = {
     user,
     selectedEmpresa: company,
-    selectedBaseTrabajo: base,
+    selectedBaseTrabajo: hasSelectedBase ? base : null,
     activeProject: null,
     licenseInfo: { access_mode: 'readwrite', usados: { proyectos: 12 }, limites: { proyectos: -1 } },
     setSelectedEmpresa: () => {},

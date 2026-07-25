@@ -65,7 +65,13 @@ const PreciosUnitarios = () => {
         <div className="h-full min-h-0 flex flex-col bg-[#F8FAFC] overflow-hidden">
             <div className="z-40 flex flex-shrink-0 flex-wrap items-center justify-between gap-3 border-b border-zinc-200 bg-white/80 px-4 py-3 backdrop-blur-md lg:px-6 2xl:px-8 2xl:py-4">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-zinc-100 rounded-xl transition-colors">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/dashboard')}
+                        aria-label="Volver a la consola de operaciones"
+                        data-adaptive-touch-target="true"
+                        className="flex h-11 w-11 touch-manipulation items-center justify-center rounded-xl transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B45309] focus-visible:ring-offset-2"
+                    >
                         <ArrowLeft className="w-5 h-5 text-zinc-500" />
                     </button>
                     <div>
@@ -93,16 +99,26 @@ const PreciosUnitarios = () => {
                 )}
             </div>
 
-            <main className="custom-scrollbar flex-1 overflow-y-auto p-4 lg:p-6 2xl:p-12">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:gap-8">
+            <main
+                className="custom-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 [touch-action:pan-y] lg:p-6 2xl:p-12"
+                role="region"
+                aria-label="Opciones de Precios Unitarios"
+                tabIndex={0}
+                data-unit-prices-menu-viewport
+            >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:gap-8">
                     {menuItems.map((item) => {
                         const isDisabled = item.requiredBase && !selectedBaseTrabajo;
 
                         return (
-                            <div
+                            <button
                                 key={item.id}
+                                type="button"
+                                disabled={isDisabled}
                                 onClick={() => !isDisabled && navigate(item.path)}
-                                className={`group relative min-h-[250px] overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white p-5 transition-all duration-500 lg:p-6 2xl:min-h-0 2xl:rounded-[2.5rem] 2xl:p-10
+                                aria-describedby={isDisabled ? `${item.id}-requirement` : undefined}
+                                data-adaptive-touch-target="true"
+                                className={`group relative min-h-[250px] w-full overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white p-5 text-left transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B45309] focus-visible:ring-offset-2 lg:p-6 2xl:min-h-0 2xl:rounded-[2.5rem] 2xl:p-10
                                     ${isDisabled
                                         ? 'opacity-60 cursor-not-allowed grayscale-[0.5]'
                                         : 'cursor-pointer hover:border-zinc-300 hover:shadow-2xl hover:shadow-black/5 active:scale-[0.98]'}`}
@@ -120,19 +136,19 @@ const PreciosUnitarios = () => {
                                 </p>
 
                                 {isDisabled && (
-                                    <div className="absolute top-6 right-6 flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200">
+                                    <div id={`${item.id}-requirement`} className="absolute right-4 top-4 flex max-w-[55%] items-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-1 text-zinc-600 lg:right-6 lg:top-6 lg:px-3">
                                         <Database className="w-3 h-3" />
                                         <span className="text-[8px] font-black uppercase tracking-widest">Base Requerida</span>
                                     </div>
                                 )}
 
                                 <div className="absolute bottom-5 right-5 flex items-center 2xl:bottom-10 2xl:right-10">
-                                    <div className={`p-3 rounded-full transition-all duration-500 ${isDisabled ? 'bg-zinc-50 text-zinc-300' : 'bg-white text-zinc-300 border border-zinc-200 group-hover:text-[#F39200] group-hover:border-amber-200 group-hover:bg-amber-50'}`}>
+                                    <div className={`p-3 rounded-full transition-all duration-500 ${isDisabled ? 'bg-zinc-50 text-zinc-500' : 'border border-zinc-200 bg-white text-[#B45309] group-hover:border-amber-200 group-hover:bg-amber-50'}`}>
                                         <ChevronRight className="w-5 h-5" />
                                     </div>
                                 </div>
 
-                            </div>
+                            </button>
                         );
                     })}
                 </div>
