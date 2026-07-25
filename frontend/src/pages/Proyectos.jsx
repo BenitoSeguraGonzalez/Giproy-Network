@@ -3983,7 +3983,7 @@ const Proyectos = () => {
                                                 <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-[#136191]" />
                                             </div>
                                         ) : (
-                                            <div className="max-h-[calc(min(30rem,calc(100dvh-25rem))-4.5rem)] space-y-3 overflow-auto pr-1">
+                                            <div className="max-h-[calc(min(30rem,calc(100dvh-25rem))-4.5rem)] space-y-3 overflow-auto overscroll-contain pr-1 [touch-action:pan-y]">
                                                 {(inlineRevisionsByRoot[expandedProjectRoot] || []).map((revisionProject) => {
                                                     const revisionFamilyCount = Math.max(
                                                         (inlineRevisionsByRoot[expandedProjectRoot] || []).length,
@@ -5343,7 +5343,7 @@ const Proyectos = () => {
         <AnimatePresence>
             {showDeleteModal && (
                 <AppModalShell isOpen={true} size="sm" zIndex="z-[200]" onClose={() => setShowDeleteModal(false)}>
-                    <div className="p-10">
+                    <AppModalBody className="p-6 sm:p-8 lg:p-10" data-project-delete-dialog-viewport>
                         <div className="flex flex-col items-center text-center">
                             <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mb-6 ${deleteStep === 1 ? 'bg-orange-50 text-orange-500' : 'bg-red-50 text-red-500'}`}>
                                 {deleteStep === 1 ? <AlertTriangle className="w-10 h-10" /> : <Trash2 className="w-10 h-10" />}
@@ -5428,7 +5428,7 @@ const Proyectos = () => {
                                 </>
                             )}
                         </div>
-                    </div>
+                    </AppModalBody>
                 </AppModalShell>
             )}
         </AnimatePresence>
@@ -5450,7 +5450,7 @@ const Proyectos = () => {
                         icon={Trash2}
                         onClose={() => setShowRecycleModal(false)}
                     />
-                    <div className="min-h-0 overflow-y-auto px-6 py-5">
+                    <AppModalBody className="px-6 py-5">
                         {recycleLoading ? (
                             <div className="flex items-center justify-center py-16">
                                 <div className="flex flex-col items-center gap-4 text-zinc-400">
@@ -5485,7 +5485,7 @@ const Proyectos = () => {
                                                         type="button"
                                                         onClick={() => handleRestoreRecycledProject(project)}
                                                         disabled={isBusy}
-                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-emerald-100 bg-emerald-50 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 disabled:opacity-50"
+                                                        className="inline-flex h-11 items-center justify-center gap-2 rounded-[0.85rem] border border-emerald-100 bg-emerald-50 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 disabled:opacity-50"
                                                     >
                                                         <RotateCcw className="h-3.5 w-3.5" />
                                                         Restaurar
@@ -5494,7 +5494,7 @@ const Proyectos = () => {
                                                         type="button"
                                                         onClick={() => handlePurgeRecycledProject(project)}
                                                         disabled={isBusy}
-                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-rose-100 bg-rose-50 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-rose-700 transition hover:border-rose-300 disabled:opacity-50"
+                                                        className="inline-flex h-11 items-center justify-center gap-2 rounded-[0.85rem] border border-rose-100 bg-rose-50 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-rose-700 transition hover:border-rose-300 disabled:opacity-50"
                                                     >
                                                         <Trash2 className="h-3.5 w-3.5" />
                                                         Borrar
@@ -5506,7 +5506,7 @@ const Proyectos = () => {
                                 })}
                             </div>
                         )}
-                    </div>
+                    </AppModalBody>
                     <AppModalFooter>
                         <button
                             type="button"
@@ -6162,7 +6162,7 @@ const Proyectos = () => {
                                     setRevisionModalMode('open');
                                 }}
                             />
-                            <div className="p-4 sm:p-6 lg:p-8">
+                            <AppModalBody className="p-4 sm:p-6 lg:p-8" data-project-revision-dialog-viewport>
                                 {loadingRevisions ? (
                                     <div className="py-20 text-center flex flex-col items-center gap-4">
                                         <div className="w-10 h-10 border-4 border-zinc-100 border-t-[#F39200] rounded-full animate-spin" />
@@ -6258,7 +6258,7 @@ const Proyectos = () => {
                                         </div>
                                     </div>
                                 )}
-                            </div>
+                            </AppModalBody>
                     </AppModalShell>
                 )}
             </AnimatePresence>
@@ -6267,7 +6267,7 @@ const Proyectos = () => {
             <AnimatePresence>
                 {showDeleteModal && (
                     <AppModalShell isOpen={true} size="sm" zIndex="z-[200]" onClose={() => setShowDeleteModal(false)}>
-                            <div className="p-10">
+                            <AppModalBody className="p-6 sm:p-8 lg:p-10" data-project-delete-dialog-viewport>
                                 <div className="flex flex-col items-center text-center">
                                     <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mb-6 ${deleteStep === 1 ? 'bg-orange-50 text-orange-500' : 'bg-red-50 text-red-500'}`}>
                                         {deleteStep === 1 ? <AlertTriangle className="w-10 h-10" /> : <Trash2 className="w-10 h-10" />}
@@ -6352,7 +6352,7 @@ const Proyectos = () => {
                                         </>
                                     )}
                                 </div>
-                            </div>
+                            </AppModalBody>
                     </AppModalShell>
                 )}
             </AnimatePresence>

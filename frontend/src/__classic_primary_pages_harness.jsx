@@ -9,6 +9,7 @@ import PreciosUnitarios from './pages/PreciosUnitarios';
 import Proyectos from './pages/Proyectos';
 import { OtrosServicios } from './pages/Placeholders';
 import AdminGlobal from './pages/AdminGlobal';
+import { AppDialogProvider } from './components/ui/AppDialogProvider';
 
 const company = { id: 7, nombre: 'Santiago Bermeo', alias: 'Santiago Bermeo', decimales_moneda: 2 };
 const base = { id: 19, nombre: 'Base técnica Santiago Bermeo', tipo_nombre: 'Base de Proyecto' };
@@ -59,8 +60,10 @@ const authValue = {
 
 createRoot(document.getElementById('root')).render(
     <MemoryRouter initialEntries={[initialPath]}>
-        <AuthContext.Provider value={authValue}>
-            <AppLayout><Page /></AppLayout>
-        </AuthContext.Provider>
+        <AppDialogProvider>
+            <AuthContext.Provider value={authValue}>
+                <AppLayout><Page /></AppLayout>
+            </AuthContext.Provider>
+        </AppDialogProvider>
     </MemoryRouter>,
 );

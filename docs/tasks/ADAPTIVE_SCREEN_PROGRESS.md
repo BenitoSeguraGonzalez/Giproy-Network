@@ -1402,6 +1402,70 @@ Fecha: 2026-07-24
 - `docs/architecture/visual-surface-inventory.json`.
 - `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
 
+## C03.4 - Proyectos: acciones, revisiones y papelera
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+### Estados tratados
+
+- Historial expandido con ocho revisiones y desplazamiento tactil propio.
+- Final del historial R007 alcanzable sin desplazar los controles del
+  portafolio.
+- Confirmacion real de clonado completo mediante el proveedor global de
+  dialogos.
+- Eliminacion en dos pasos: alcance del borrado y confirmacion final.
+- Papelera con siete proyectos, retencion, restauracion, borrado, refresco y
+  footer fijo.
+- Entrada y salida del proyecto ya quedan cubiertas por C03.3.
+
+### Adecuaciones
+
+- Los cuerpos de confirmacion y selector de revisiones pasan a ser propietarios
+  del scroll dentro de `AppModalShell`.
+- El historial declara `overscroll-contain` y gesto vertical.
+- Restaurar y Borrar pasan de 36 px a 44 px de altura tactil.
+- El harness incorpora `AppDialogProvider`; anteriormente el click de clonado
+  se ejecutaba sin renderizar el dialogo y la captura no demostraba el estado.
+- La auditoria tactil prueba primero los contenedores anidados para impedir que
+  el desplazamiento del portafolio oculte el historial antes de comprobarlo.
+
+### Incidencias registradas
+
+- La accion accesible `Papelera` coincidia tambien con doce acciones de fila.
+  La interaccion de prueba se corrige con coincidencia exacta.
+- Dos perfiles detectaron falsos negativos al probar primero el scroll padre;
+  se corrige el orden por profundidad y se repite la matriz completa.
+- Durante la conversion de cuerpos modales se detectaron cierres JSX
+  inconsistentes mediante build. Fueron corregidos antes de certificar; no se
+  acepto ninguna captura con runtime roto.
+
+### Revision visual obligatoria
+
+- Cinco estados por diez perfiles: **50/50 PASS**.
+- Se abrieron y revisaron las cinco hojas de contacto iniciales.
+- Se abrio y reviso la hoja de final del historial, confirmando R005-R007.
+- Build Vite: **PASS**.
+
+### Evidencia
+
+- `artifacts/visual-certification/2026-07-25T01-47-37-230Z`.
+- `classic-projects-clone-confirm-harness-contact-sheet.png`.
+- `classic-projects-delete-step1-harness-contact-sheet.png`.
+- `classic-projects-delete-step2-harness-contact-sheet.png`.
+- `classic-projects-recycle-harness-contact-sheet.png`.
+- `classic-projects-revisions-harness-contact-sheet.png`.
+- `classic-projects-revisions-end-contact-sheet.png`.
+
+### Archivos tratados
+
+- `frontend/src/pages/Proyectos.jsx`.
+- `frontend/src/__classic_primary_pages_harness.jsx`.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- Cinco harnesses especificos de acciones C03.4.
+- `docs/architecture/visual-surface-inventory.json`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
 ## Siguiente unidad
 
-`C03.4 - Acciones de proyecto`: EN CURSO.
+`C03.5 - Gestor de proyectos`: EN CURSO.

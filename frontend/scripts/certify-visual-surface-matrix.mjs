@@ -110,6 +110,25 @@ try {
                 }));
                 let body = [];
                 if (/\/proyectos\/?$/u.test(apiPath)) body = projects;
+                else if (/\/proyectos\/[^/]+\/revisiones\/?$/u.test(apiPath)) {
+                    body = Array.from({ length: 8 }, (_, revision) => ({
+                        ...projects[0],
+                        id: 101 + revision,
+                        revision,
+                        nombre: `Proyecto Santiago Bermeo 1 - Revision ${String(revision).padStart(3, '0')}`,
+                        ultima_modificacion: `2026-07-${String(24 - revision).padStart(2, '0')}T12:00:00Z`,
+                    }));
+                }
+                else if (apiPath.endsWith('/proyectos/papelera')) {
+                    body = Array.from({ length: 7 }, (_, index) => ({
+                        ...projects[index],
+                        id: 201 + index,
+                        trash_original_nombre: projects[index].nombre,
+                        trash_original_codigo: projects[index].codigo,
+                        deleted_at: `2026-07-${String(24 - index).padStart(2, '0')}T12:00:00Z`,
+                        recycle_expires_at: `2026-07-${String(31 - index).padStart(2, '0')}T12:00:00Z`,
+                    }));
+                }
                 else if (/\/proyectos\/\d+\/?$/u.test(apiPath)) body = projects[0];
                 else if (apiPath.endsWith('/proyectos/marketplace-export/statuses')) body = { projects: {} };
                 else if (apiPath.includes('/proyecto-detalles/')) body = { plazo_estimado: 180, fecha_presentacion: '2026-09-30' };
@@ -132,6 +151,27 @@ try {
                 if (harness.source === 'classic-projects-create-harness.html') {
                     await page.getByRole('button', { name: 'Nuevo proyecto' }).click();
                     await page.waitForTimeout(350);
+                }
+                if (harness.source === 'classic-projects-delete-step1-harness.html'
+                    || harness.source === 'classic-projects-delete-step2-harness.html') {
+                    await page.getByRole('button', { name: /Mover proyecto a papelera/u }).first().click();
+                    await page.waitForTimeout(250);
+                    if (harness.source === 'classic-projects-delete-step2-harness.html') {
+                        await page.getByRole('button', { name: 'Entiendo, Continuar' }).click();
+                        await page.waitForTimeout(200);
+                    }
+                }
+                if (harness.source === 'classic-projects-revisions-harness.html') {
+                    await page.getByRole('row').filter({ hasText: 'Proyecto Santiago Bermeo 1' }).first().click();
+                    await page.waitForTimeout(500);
+                }
+                if (harness.source === 'classic-projects-recycle-harness.html') {
+                    await page.getByRole('button', { name: 'Papelera', exact: true }).click();
+                    await page.waitForTimeout(500);
+                }
+                if (harness.source === 'classic-projects-clone-confirm-harness.html') {
+                    await page.getByRole('button', { name: /Clonar proyecto completo Proyecto Santiago Bermeo 1/u }).first().click();
+                    await page.waitForTimeout(300);
                 }
             } catch (error) {
                 navigationError = error.message;
@@ -336,10 +376,18 @@ try {
                             y,
                             verticalDelta,
                             horizontalDelta,
+                            depth: (() => {
+                                let value = 0;
+                                for (let current = node.parentElement; current; current = current.parentElement) value += 1;
+                                return value;
+                            })(),
                         };
                     })
                     .filter(Boolean)
-                    .sort((left, right) => Math.max(right.verticalDelta, right.horizontalDelta) - Math.max(left.verticalDelta, left.horizontalDelta))
+                    .sort((left, right) => (
+                        right.depth - left.depth
+                        || Math.max(right.verticalDelta, right.horizontalDelta) - Math.max(left.verticalDelta, left.horizontalDelta)
+                    ))
                     .slice(0, 8));
                 const session = await context.newCDPSession(page);
                 const results = [];
@@ -402,6 +450,15 @@ try {
                     if (horizontal?.scrollWidth > horizontal?.clientWidth + 2) horizontal.scrollLeft = horizontal.scrollWidth;
                     if (vertical?.scrollHeight > vertical?.clientHeight + 2) vertical.scrollTop = vertical.scrollHeight;
                 });
+                if (harness.source === 'classic-projects-revisions-harness.html') {
+                    await page.evaluate(() => {
+                        const portfolio = document.querySelector('[data-projects-list-viewport]');
+                        if (portfolio) portfolio.scrollTop = 0;
+                        const revisionViewport = [...document.querySelectorAll('[touch-action], [class*="touch-action:pan-y"]')]
+                            .find((node) => node.textContent?.includes('REV-007') && node.scrollHeight > node.clientHeight + 2);
+                        if (revisionViewport) revisionViewport.scrollTop = revisionViewport.scrollHeight;
+                    });
+                }
                 await page.waitForTimeout(50);
                 const scrollEndName = harness.source.replace(/\.html$/u, '-scroll-end.png');
                 const scrollEndPath = path.join(profileDirectory, scrollEndName);

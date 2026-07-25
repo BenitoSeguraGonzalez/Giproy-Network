@@ -103,7 +103,7 @@
     "protectedRoutes": 38,
     "publicRoutes": 5,
     "interactiveSurfaceFiles": 55,
-    "harnesses": 69,
+    "harnesses": 74,
     "harnessesWithoutValidator": 0
   },
   "routes": [
@@ -3518,11 +3518,77 @@
       ]
     },
     {
+      "id": "harness:classic-projects-clone-confirm-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-projects-clone-confirm-harness.html",
+      "source": "classic-projects-clone-confirm-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
       "id": "harness:classic-projects-create-harness.html",
       "kind": "harness",
       "mode": "classic",
       "path": "/classic-projects-create-harness.html",
       "source": "classic-projects-create-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-projects-delete-step1-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-projects-delete-step1-harness.html",
+      "source": "classic-projects-delete-step1-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-projects-delete-step2-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-projects-delete-step2-harness.html",
+      "source": "classic-projects-delete-step2-harness.html",
       "validators": [
         "certify-visual-surface-matrix.mjs"
       ],
@@ -3590,6 +3656,50 @@
       "mode": "classic",
       "path": "/classic-projects-kanban-harness.html",
       "source": "classic-projects-kanban-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-projects-recycle-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-projects-recycle-harness.html",
+      "source": "classic-projects-recycle-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:classic-projects-revisions-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/classic-projects-revisions-harness.html",
+      "source": "classic-projects-revisions-harness.html",
       "validators": [
         "certify-visual-surface-matrix.mjs"
       ],
