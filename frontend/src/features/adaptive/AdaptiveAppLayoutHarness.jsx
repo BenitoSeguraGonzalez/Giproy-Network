@@ -39,7 +39,7 @@ const AdaptiveAppLayoutHarness = () => {
                                 <h1 className="text-lg font-black text-zinc-900">Superficie operativa clásica</h1>
                                 <p className="text-xs text-zinc-500">La composición cambia sin escalar componentes.</p>
                             </div>
-                            <button type="button" onClick={() => setModalOpen(true)} className="min-h-11 rounded-lg bg-[#F39200] px-4 text-sm font-bold text-white">Abrir diálogo</button>
+                            <button type="button" onClick={() => setModalOpen(true)} data-adaptive-touch-target="true" className="min-h-11 rounded-lg bg-[#B45309] px-4 text-sm font-bold text-white">Abrir diálogo</button>
                         </header>
                         <Table
                             className="min-w-[760px] text-xs"
@@ -82,8 +82,8 @@ const AdaptiveAppLayoutHarness = () => {
                                 </div>
                             </div>
                             <div className="mt-4 flex flex-wrap justify-end gap-2">
-                                <button type="button" className="min-h-[var(--app-control-target,2.5rem)] rounded-lg border border-zinc-200 px-4 text-sm font-bold">Cancelar</button>
-                                <button type="submit" className="min-h-[var(--app-control-target,2.5rem)] rounded-lg bg-[#F39200] px-4 text-sm font-bold text-white">Guardar registro</button>
+                                <button type="button" data-adaptive-touch-target="true" className="min-h-[var(--app-control-target,2.5rem)] rounded-lg border border-zinc-200 px-4 text-sm font-bold">Cancelar</button>
+                                <button type="submit" data-adaptive-touch-target="true" className="min-h-[var(--app-control-target,2.5rem)] rounded-lg bg-[#B45309] px-4 text-sm font-bold text-white">Guardar registro</button>
                             </div>
                         </form>
                         <section className="mt-6 grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-3" data-adaptive-harness-async-states>
@@ -114,8 +114,8 @@ const AdaptiveAppLayoutHarness = () => {
                         </div>
                     </AppModalBody>
                     <AppModalFooter>
-                        <button type="button" onClick={() => setModalOpen(false)} className="min-h-[var(--app-control-target,2.5rem)] rounded-lg border border-zinc-300 px-4 text-sm font-bold">Cancelar</button>
-                        <button type="button" className="min-h-[var(--app-control-target,2.5rem)] rounded-lg bg-[#F39200] px-4 text-sm font-bold text-white">Guardar cambios</button>
+                        <button type="button" onClick={() => setModalOpen(false)} data-adaptive-touch-target="true" className="min-h-[var(--app-control-target,2.5rem)] rounded-lg border border-zinc-300 px-4 text-sm font-bold">Cancelar</button>
+                        <button type="button" data-adaptive-touch-target="true" className="min-h-[var(--app-control-target,2.5rem)] rounded-lg bg-[#B45309] px-4 text-sm font-bold text-white">Guardar cambios</button>
                     </AppModalFooter>
                 </AppModalShell>
             </AppLayout>

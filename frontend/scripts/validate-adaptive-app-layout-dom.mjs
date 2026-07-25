@@ -43,6 +43,20 @@ const profiles = [
     { name: 'tablet-portrait', viewport: { width: 920, height: 1472 }, expected: 'tablet-portrait', hasTouch: true, deviceScaleFactor: 2 },
 ];
 
+const luminance = (rgb) => {
+    const channels = rgb.match(/\d+(?:\.\d+)?/gu)?.slice(0, 3).map(Number) || [];
+    const linear = channels.map((value) => {
+        const normalized = value / 255;
+        return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    });
+    return (0.2126 * linear[0]) + (0.7152 * linear[1]) + (0.0722 * linear[2]);
+};
+
+const contrastRatio = (foreground, background) => {
+    const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+    return (values[0] + 0.05) / (values[1] + 0.05);
+};
+
 let browser;
 try {
     await waitForServer();
@@ -184,7 +198,35 @@ try {
         if (profile.hasTouch) {
             const retryRect = await retryButton.boundingBox();
             assert.ok(retryRect && retryRect.height >= 44, `${profile.name}: reintento cumple objetivo tactil`);
+            const undersizedControls = await page.locator('[data-adaptive-touch-target="true"]:visible').evaluateAll((nodes) => nodes
+                .map((node) => {
+                    const rect = node.getBoundingClientRect();
+                    return { label: node.getAttribute('aria-label') || node.textContent.trim(), width: rect.width, height: rect.height };
+                })
+                .filter(({ width, height }) => width < 43.5 || height < 43.5));
+            assert.deepEqual(undersizedControls, [], `${profile.name}: controles operativos visibles de al menos 44x44`);
         }
+        await retryButton.focus();
+        const focusStyle = await retryButton.evaluate((node) => {
+            const style = getComputedStyle(node);
+            return { width: Number.parseFloat(style.outlineWidth), style: style.outlineStyle, offset: Number.parseFloat(style.outlineOffset) };
+        });
+        assert.ok(focusStyle.width >= 2 && focusStyle.style !== 'none' && focusStyle.offset >= 2, `${profile.name}: foco visible no depende solo del color`);
+        const retryColors = await retryButton.evaluate((node) => {
+            const style = getComputedStyle(node);
+            return { foreground: style.color, background: style.backgroundColor };
+        });
+        assert.ok(contrastRatio(retryColors.foreground, retryColors.background) >= 4.5, `${profile.name}: accion de recuperacion supera contraste 4.5:1`);
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        const reducedMotion = await page.locator('[data-async-state="loading"] svg').evaluate((node) => {
+            const style = getComputedStyle(node);
+            const duration = style.animationDuration.endsWith('ms')
+                ? Number.parseFloat(style.animationDuration)
+                : Number.parseFloat(style.animationDuration) * 1000;
+            return { name: style.animationName, duration, iterations: style.animationIterationCount };
+        });
+        assert.ok(reducedMotion.name === 'none' || reducedMotion.duration <= 0.011, `${profile.name}: movimiento reducido limita animacion`);
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
         assert.deepEqual(errors, [], `${profile.name}: sin errores`);
         const layoutTrigger = page.getByRole('button', { name: 'Ajustar distribución visual' });
         await layoutTrigger.click();

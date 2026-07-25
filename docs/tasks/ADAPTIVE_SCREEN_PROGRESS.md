@@ -759,6 +759,96 @@ Resultado: **10/10 PASS**.
 
 La ejecucion valida de Impeccable devolvio cero hallazgos.
 
+## G00.10 - Accesibilidad operativa
+
+Estado: **VERIFICADA LOCALMENTE**
+Fecha: 2026-07-24
+
+### Superficie observada
+
+- Foco de teclado sobre controles dentro del shell adaptativo.
+- Objetivos tactiles declarados por componentes.
+- Contraste de acciones primarias y de recuperacion.
+- Animaciones y transiciones con preferencia de movimiento reducido.
+- Orden operativo de tabulacion en shell, formulario, tabla y modal.
+
+### Problemas observados
+
+- El foco dependia de reglas locales y en varios componentes era de solo 1 px.
+- No existia una politica adaptativa global para `prefers-reduced-motion`.
+- El naranja corporativo `#F39200` con texto blanco no es valido para texto
+  normal; no debe utilizarse como fondo de acciones textuales pequeñas.
+- Aplicar 44x44 de manera indiscriminada a todo elemento interactivo altera
+  composiciones internas, como chips dentro del contexto de empresa.
+
+### Adecuacion aplicada
+
+- Foco global adaptativo de 3 px, con separacion de 2 px, para elementos
+  interactivos alcanzados por teclado.
+- Movimiento y transiciones se reducen a una duracion efectiva minima cuando
+  el sistema operativo lo solicita.
+- Las acciones de prueba con texto blanco usan `#B45309`, conservando la
+  identidad naranja con contraste operativo suficiente.
+- El contrato tactil se aplica explicitamente mediante
+  `data-adaptive-touch-target`; cada pantalla declara sus controles durante su
+  adecuacion, sin agrandar indiscriminadamente todos los elementos.
+- El validador mide geometria tactil, foco no dependiente solo del color,
+  contraste minimo 4.5:1 y comportamiento bajo reduced motion.
+
+### Incidencias encontradas durante la prueba
+
+1. La primera asercion de reduced motion comparaba el texto literal de la
+   duracion. Chromium normalizo la unidad y genero un falso negativo. El test
+   se corrigio para medir milisegundos efectivos o ausencia de animacion.
+2. La primera regla de objetivos tactiles alcanzaba todos los botones. La
+   matriz detecto que el selector de empresa crecia y rebasaba la cabecera en
+   tablet Full HD horizontal. La regla se retiro y se sustituyo por contrato
+   explicito por componente. La matriz corregida pasa completa.
+3. Impeccable marco `Inter` como fuente muy utilizada. Es una decision
+   tipografica existente de producto; cambiarla globalmente excederia esta
+   unidad y alteraria metricas de todas las pantallas. El hallazgo queda
+   documentado para decision de identidad visual.
+4. Permanece el aviso previo de chunks de produccion superiores a 500 kB.
+
+### Perfiles verificados
+
+- Windows FHD 100 %, 125 % y 150 %.
+- Windows 4K/DPR 2.
+- Tablet Full HD horizontal y vertical.
+- Tablet 2K horizontal y vertical.
+- Lenovo P12 3K horizontal y vertical.
+
+Resultado final: **10/10 PASS**.
+
+### Verificaciones
+
+- Foco visible de al menos 2 px y separado del control: PASS.
+- Controles declarados tactiles de al menos 44x44: PASS.
+- Accion representativa con contraste de al menos 4.5:1: PASS.
+- Reduced motion efectivo: PASS.
+- Sin regresion geometrica del header: PASS.
+- Build Vite de produccion: PASS.
+
+### Evidencia
+
+- Matriz que descubrio la regresion:
+  `artifacts/visual-certification/g00-10-accessibility-final-2026-07-24`.
+- Matriz final corregida:
+  `artifacts/visual-certification/g00-10-accessibility-corrected-2026-07-24`.
+
+### Archivos tratados
+
+- `frontend/src/index.css`.
+- `frontend/src/components/ui/async-state.jsx`.
+- `frontend/src/features/adaptive/AdaptiveAppLayoutHarness.jsx`.
+- `frontend/scripts/validate-adaptive-app-layout-dom.mjs`.
+- `docs/architecture/ADAPTIVE_SCREEN_APPROVAL_MAP.md`.
+- `docs/tasks/ADAPTIVE_SCREEN_PROGRESS.md`.
+
+### Detector visual
+
+Impeccable devolvio un aviso por uso de `Inter`, documentado arriba.
+
 ## Siguiente unidad
 
-`G00.10 - Accesibilidad operativa`: EN CURSO.
+`C01.1 - /login`: EN CURSO.

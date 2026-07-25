@@ -74,6 +74,7 @@ const AsyncState = ({
                 <button
                     type="button"
                     onClick={onAction}
+                    data-adaptive-touch-target="true"
                     className="min-h-[var(--app-control-target,2.5rem)] max-w-full rounded-lg bg-zinc-900 px-4 py-2 text-sm font-bold text-white outline-none transition-colors hover:bg-[#B45309] focus-visible:ring-2 focus-visible:ring-[#D97706] focus-visible:ring-offset-2"
                 >
                     <span className="break-words">{actionLabel}</span>

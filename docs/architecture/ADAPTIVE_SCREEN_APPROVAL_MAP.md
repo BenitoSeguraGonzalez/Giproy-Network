@@ -57,7 +57,7 @@ CSS y no se aplicara zoom global para encoger la aplicacion.
 | G00.7 | Formularios — VERIFICADA LOCALMENTE | reflujo de columnas, etiquetas, errores, teclado virtual y accion primaria |
 | G00.8 | Overlays — VERIFICADA LOCALMENTE | modal, dialog, drawer, popover, selector, tooltip, confirmacion y alerta |
 | G00.9 | Estados asincronos — VERIFICADA LOCALMENTE | skeleton/carga, vacio, error, reintento, offline y permisos insuficientes |
-| G00.10 | Accesibilidad operativa | foco visible, orden de tabulacion, 44x44 tactil, contraste y reduced motion |
+| G00.10 | Accesibilidad operativa — VERIFICADA LOCALMENTE | foco visible, orden de tabulacion, 44x44 tactil, contraste y reduced motion |
 
 Dependencia: todas las pantallas heredan estos contratos. Cualquier cambio
 global se presentara y aprobara antes de aplicarse a sus consumidores.

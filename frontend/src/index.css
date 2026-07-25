@@ -68,6 +68,24 @@ html, body {
     min-height: 44px;
     touch-action: manipulation;
   }
+
+}
+
+[data-adaptive-ui-enabled="true"] :is(button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid #B45309;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-adaptive-ui-enabled="true"],
+  [data-adaptive-ui-enabled="true"] *,
+  [data-adaptive-ui-enabled="true"] *::before,
+  [data-adaptive-ui-enabled="true"] *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @theme inline {
