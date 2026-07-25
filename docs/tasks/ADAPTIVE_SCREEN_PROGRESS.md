@@ -1805,4 +1805,61 @@ Fecha: 2026-07-24
 
 ## Siguiente unidad
 
-`C04.5 - EDO/OBS`: EN CURSO.
+`C04.5 - EDO/OBS`: **VERIFICADA VISUALMENTE**.
+
+## C04.5 - EDO/OBS
+
+Estado: **VERIFICADA VISUALMENTE**
+Fecha: 2026-07-24
+
+- El árbol EDO utiliza un viewport bidireccional propio para cabecera, hitos,
+  responsables y acciones, sin transferir el desplazamiento a la página.
+- Se conserva un ancho informativo mínimo de 720 px en tablet retrato para que
+  código, jerarquía, nombres, roles y controles no se compriman ni solapen.
+- Las acciones de nodos permanecen visibles en contexto táctil y se activan
+  también al seleccionar un nodo en escritorio.
+- Alta, expansión, reordenación, asignación, edición y eliminación cumplen el
+  objetivo táctil mínimo de 44 px.
+- La vista gráfica adapta sus columnas, controles, minimapa y profundidad a
+  paisaje y retrato sin zoom global ni pérdida de contenido.
+- Los diálogos de hito, responsable y movimiento comparten la capa modal global,
+  con encabezado y pie estables y cuerpo desplazable cuando sea necesario.
+- Se probaron nueve hitos raíz, tres niveles, responsables, nombres extensos,
+  selección y ambos extremos del desplazamiento.
+- Resultado: **50/50 PASS** entre árbol, gráfico y tres diálogos; capturas
+  iniciales/finales abiertas e inspeccionadas.
+
+### Evidencia C04.5
+
+- Árbol: `artifacts/visual-certification/2026-07-25T03-57-22-353Z`.
+- Gráfico: `artifacts/visual-certification/2026-07-25T03-58-58-660Z`.
+- Hito: `artifacts/visual-certification/2026-07-25T04-00-44-158Z`.
+- Responsable: `artifacts/visual-certification/2026-07-25T04-02-13-469Z`.
+- Movimiento: `artifacts/visual-certification/2026-07-25T04-04-22-916Z`.
+- `classic-project-workspace-edo-tree-harness-contact-sheet.png`.
+- `classic-project-workspace-edo-tree-harness-scroll-end-contact-sheet.png`.
+- `classic-project-workspace-edo-graph-harness-contact-sheet.png`.
+- `classic-project-workspace-edo-graph-harness-scroll-end-contact-sheet.png`.
+- `classic-project-workspace-edo-milestone-harness-contact-sheet.png`.
+- `classic-project-workspace-edo-participant-harness-contact-sheet.png`.
+- `classic-project-workspace-edo-participant-harness-scroll-end-contact-sheet.png`.
+- `classic-project-workspace-edo-move-harness-contact-sheet.png`.
+
+### Incidencias y deuda visual
+
+- No se produjeron ejecuciones inválidas en la matriz final de esta unidad; las
+  aserciones de apertura de cada diálogo formaron parte del contrato.
+- El detector estético mantiene una advertencia sobre el borde lateral de cuatro
+  píxeles. Se conserva como codificación semántica de hito/responsable, coherente
+  con EDT; no afecta accesibilidad, adaptación ni interacción.
+
+### Archivos tratados
+
+- `frontend/src/components/projects/Edo.jsx`.
+- Harnesses de árbol, gráfico, hito, responsable y movimiento.
+- `frontend/scripts/certify-visual-surface-matrix.mjs`.
+- `docs/architecture/visual-surface-inventory.json`.
+
+## Siguiente unidad
+
+`C04.6 - Presupuesto`: EN CURSO.

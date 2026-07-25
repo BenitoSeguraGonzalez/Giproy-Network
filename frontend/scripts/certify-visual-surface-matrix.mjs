@@ -188,6 +188,56 @@ try {
                         }],
                     };
                 });
+                const edoResponsible = (id, parentId, index) => ({
+                    id,
+                    codigo: `EDO-R-${String(index).padStart(2, '0')}`,
+                    nombre: '',
+                    parent_id: parentId,
+                    orden: index,
+                    nivel: 3,
+                    tipo_nodo: 'STAKEHOLDER',
+                    stakeholder_id: 700 + index,
+                    rol_id: 802,
+                    actividades_claves: 'Gobernanza, coordinación interdisciplinaria y seguimiento de decisiones del hito organizacional.',
+                    stakeholder: stakeholders[(index - 1) % stakeholders.length],
+                    rol: { id: 802, nombre: 'Coordinación de proyecto' },
+                    hijos: [],
+                });
+                const edoTree = Array.from({ length: 9 }, (_, index) => {
+                    const rootId = 1400 + index;
+                    const childId = 1500 + index;
+                    return {
+                        id: rootId,
+                        codigo: `EDO-${String(index + 1).padStart(2, '0')}`,
+                        nombre: `Hito organizacional Santiago Bermeo ${index + 1} con denominación institucional extensa`,
+                        parent_id: null,
+                        orden: index + 1,
+                        nivel: 1,
+                        tipo_nodo: 'HITO',
+                        hijos: [{
+                            id: childId,
+                            codigo: `EDO-${index + 1}.1`,
+                            nombre: `Subhito de coordinación interdisciplinaria ${index + 1}`,
+                            parent_id: rootId,
+                            orden: 1,
+                            nivel: 2,
+                            tipo_nodo: 'HITO',
+                            hijos: [
+                                edoResponsible(1600 + index, childId, index + 1),
+                                {
+                                    id: 1700 + index,
+                                    codigo: `EDO-${index + 1}.1.2`,
+                                    nombre: `Nivel organizacional profundo ${index + 1}`,
+                                    parent_id: childId,
+                                    orden: 2,
+                                    nivel: 3,
+                                    tipo_nodo: 'HITO',
+                                    hijos: [edoResponsible(1800 + index, 1700 + index, index + 2)],
+                                },
+                            ],
+                        }],
+                    };
+                });
                 let body = [];
                 if (/\/usuarios\/?$/u.test(apiPath)) body = collaborators;
                 else if (/\/stakeholders\/project\/[^/]+\/?$/u.test(apiPath)) body = stakeholders;
@@ -199,6 +249,7 @@ try {
                 else if (apiPath.endsWith('/maestros/ecuador/provincias')) body = ['Pichincha', 'Guayas', 'Azuay'];
                 else if (apiPath.includes('/maestros/ecuador/cantones/')) body = ['Quito', 'Rumiñahui', 'Mejía'];
                 else if (/\/edt\/project\/\d+\/?$/u.test(apiPath)) body = edtTree;
+                else if (/\/edo\/project\/\d+\/?$/u.test(apiPath)) body = edoTree;
                 else if (/\/proyectos\/\d+\/assigned-users\/?$/u.test(apiPath)) body = collaborators.slice(0, 6);
                 else if (/\/proyectos\/\d+\/permissions\/?$/u.test(apiPath)) {
                     body = { is_restricted: false, allowed_modules: ['todos'] };
@@ -279,8 +330,11 @@ try {
                     || harness.source === 'classic-project-workspace-stakeholder-create-harness.html'
                     || harness.source === 'classic-project-workspace-stakeholder-edit-harness.html'
                     || harness.source.startsWith('classic-project-workspace-edt-')
+                    || harness.source.startsWith('classic-project-workspace-edo-')
                     ? `${baseUrl}${harness.path}?project_id=1&tab=${
-                        harness.source.startsWith('classic-project-workspace-edt-')
+                        harness.source.startsWith('classic-project-workspace-edo-')
+                            ? 'edo_obs'
+                            : harness.source.startsWith('classic-project-workspace-edt-')
                             ? 'edt_wbs'
                             : harness.source.includes('stakeholder') ? 'stakeholders' : 'datos'
                     }`
@@ -314,6 +368,32 @@ try {
                         await page.locator('#edt-node-900').click();
                         await page.getByLabel('Seleccionar nodo').first().click();
                         await page.getByRole('button', { name: 'Mover selección EDT' }).click();
+                        await page.waitForTimeout(350);
+                    }
+                }
+                if (harness.source.startsWith('classic-project-workspace-edo-')) {
+                    await page.getByTitle('EDO/OBS').click();
+                    await page.waitForTimeout(600);
+                    if (harness.source !== 'classic-project-workspace-edo-graph-harness.html') {
+                        await page.getByRole('tab', { name: 'Árbol', exact: true }).click();
+                        await page.waitForTimeout(450);
+                    }
+                    if (harness.source === 'classic-project-workspace-edo-milestone-harness.html') {
+                        await page.getByRole('button', { name: 'Nuevo hito principal' }).click();
+                        await page.getByRole('heading', { name: 'Nuevo hito' }).waitFor({ state: 'visible' });
+                        await page.waitForTimeout(350);
+                    }
+                    if (harness.source === 'classic-project-workspace-edo-participant-harness.html') {
+                        await page.locator('#edo-node-1400').click();
+                        await page.getByTitle('Asignar responsable').first().evaluate((button) => button.click());
+                        await page.getByRole('heading', { name: 'Asignar responsable' }).waitFor({ state: 'visible' });
+                        await page.waitForTimeout(350);
+                    }
+                    if (harness.source === 'classic-project-workspace-edo-move-harness.html') {
+                        await page.locator('#edo-node-1400').click();
+                        await page.getByLabel('Seleccionar nodo').first().click();
+                        await page.getByRole('button', { name: 'Mover selección EDO' }).click();
+                        await page.getByRole('heading', { name: 'Mover elementos' }).waitFor({ state: 'visible' });
                         await page.waitForTimeout(350);
                     }
                 }
@@ -719,6 +799,15 @@ try {
                 if (harness.source === 'classic-project-workspace-edt-tree-harness.html') {
                     await page.evaluate(() => {
                         const viewport = document.querySelector('[data-edt-tree-viewport]');
+                        if (viewport) {
+                            viewport.scrollTop = viewport.scrollHeight;
+                            viewport.scrollLeft = viewport.scrollWidth;
+                        }
+                    });
+                }
+                if (harness.source === 'classic-project-workspace-edo-tree-harness.html') {
+                    await page.evaluate(() => {
+                        const viewport = document.querySelector('[data-edo-tree-viewport]');
                         if (viewport) {
                             viewport.scrollTop = viewport.scrollHeight;
                             viewport.scrollLeft = viewport.scrollWidth;

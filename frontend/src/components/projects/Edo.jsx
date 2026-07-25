@@ -98,10 +98,10 @@ const EDO_INPUT_CLASS =
     'h-11 rounded-xl border-zinc-200 bg-white font-medium text-zinc-800 focus:border-[#F39200]';
 
 const EDO_SOFT_ICON_BUTTON =
-    'inline-flex h-7 w-7 items-center justify-center rounded-xl border border-[#ececec] bg-[#ededed] shadow-[2px_2px_6px_#d5d5d5,-2px_-2px_6px_#ffffff] transition hover:brightness-[0.99] active:scale-[0.98] active:shadow-[inset_2px_2px_6px_#d0d0d0,inset_-2px_-2px_6px_#ffffff] disabled:cursor-not-allowed disabled:opacity-60';
+    'inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#ececec] bg-[#ededed] shadow-[2px_2px_6px_#d5d5d5,-2px_-2px_6px_#ffffff] transition hover:brightness-[0.99] active:scale-[0.98] active:shadow-[inset_2px_2px_6px_#d0d0d0,inset_-2px_-2px_6px_#ffffff] disabled:cursor-not-allowed disabled:opacity-60';
 
 const EDO_TREE_GRID_COLUMNS =
-    'grid-cols-[4.75rem_5.25rem_minmax(0,1fr)_16rem]';
+    'grid-cols-[4.75rem_5.25rem_minmax(0,1fr)_22rem]';
 
 const EDO_MODAL_CLOSE_BUTTON =
     APP_MODAL_CLOSE_BUTTON_CLASS;
@@ -150,7 +150,7 @@ const EdoModalHeader = ({
     closeIconClassName = 'h-4 w-4',
     onClose,
 }) => (
-    <div className="flex items-center justify-between gap-4 border-b border-[#101318] bg-[#111318] px-5 py-4">
+    <div className="flex shrink-0 items-center justify-between gap-4 border-b border-[#101318] bg-[#111318] px-5 py-4">
         <div className="flex min-w-0 items-center gap-3">
             <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border ${iconWrapClassName}`}>
                 <Icon className={`h-[18px] w-[18px] ${iconClassName}`} />
@@ -188,7 +188,7 @@ const HitoModal = ({ isOpen, onClose, onSave, isEditing, initialData }) => {
     if (!isOpen) return null;
 
     return (
-        <AppModalShell isOpen={isOpen} onClose={onClose} size="md" zIndex="z-[110]" panelClassName="bg-[#f7f7f5]">
+        <AppModalShell isOpen={isOpen} onClose={onClose} size="md" zIndex="z-[1000]" panelClassName="bg-[#f7f7f5]">
             <EdoModalHeader
                 title={isEditing ? 'Editar hito' : 'Nuevo hito'}
                 subtitle="Nodo jerárquico de la estructura organizacional"
@@ -284,7 +284,7 @@ const StakeholderModal = ({ isOpen, onClose, onSave, project, isEditing, initial
     };
 
     return (
-        <AppModalShell isOpen={isOpen} onClose={onClose} size="lg" zIndex="z-[110]" panelClassName="bg-[#f7f7f5]">
+        <AppModalShell isOpen={isOpen} onClose={onClose} size="lg" zIndex="z-[1000]" panelClassName="bg-[#f7f7f5]">
             <EdoModalHeader
                 title={isEditing ? 'Editar responsable' : 'Asignar responsable'}
                 subtitle="Stakeholder del directorio común del proyecto"
@@ -408,7 +408,7 @@ const MoveSelectionModal = ({ isOpen, onClose, onConfirm, tree }) => {
     const options = [{ id: 'root', nombre: 'NIVEL RAÍZ (SIN PADRE)' }, ...flattenHitos(tree)];
 
     return (
-        <AppModalShell isOpen={isOpen} onClose={onClose} size="sm" zIndex="z-[120]" panelClassName="rounded-[1.25rem] bg-[#f7f7f5]">
+        <AppModalShell isOpen={isOpen} onClose={onClose} size="sm" zIndex="z-[1000]" panelClassName="rounded-[1.25rem] bg-[#f7f7f5]">
             <EdoModalHeader
                 title="Mover elementos"
                 subtitle="Seleccione el hito de destino"
@@ -438,11 +438,11 @@ const MoveSelectionModal = ({ isOpen, onClose, onConfirm, tree }) => {
             </AppModalBody>
             <AppModalFooter variant="flat" className="border-t border-[#ececec] bg-[#f7f7f5] px-5 py-3.5">
                 <div className="flex w-full justify-end gap-2.5">
-                    <button type="button" onClick={onClose} className="h-10 rounded-xl border border-zinc-200 bg-white px-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700">Cancelar</button>
+                    <button type="button" onClick={onClose} className="h-11 rounded-xl border border-zinc-200 bg-white px-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700">Cancelar</button>
                     <button
                         type="button"
                         onClick={() => onConfirm(targetParentId === 'root' ? null : targetParentId)}
-                        className="h-10 rounded-xl border border-[#136191]/20 bg-[#136191] px-5 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_8px_18px_rgba(19,97,145,0.24)] transition hover:bg-[#0f527b] active:scale-[0.99]"
+                        className="h-11 rounded-xl border border-[#136191]/20 bg-[#136191] px-5 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_8px_18px_rgba(19,97,145,0.24)] transition hover:bg-[#0f527b] active:scale-[0.99]"
                     >
                         Mover Ahora
                     </button>
@@ -563,7 +563,7 @@ const EdoNodeItem = ({ node, level = 0, isExpanded, expandedNodes, onToggle, onA
                         </>
                     )}
                 </div>
-                <div className={`flex h-full items-center justify-end gap-1 px-3 py-1.5 transition-opacity ${isRowHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                <div className={`flex h-full items-center justify-end gap-1 px-3 py-1.5 transition-opacity ${compact || isActive || isRowHovered ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
                     {isHito && (
                         <>
                             <button
@@ -1010,7 +1010,7 @@ const Edo = ({ project }) => {
             <div className={EDO_HEADER_SURFACE}>
                 <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
                     <div className="flex min-w-0 items-center gap-3">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.9rem] border border-blue-200/70 bg-blue-50 text-[#136191]">
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.9rem] border border-blue-200/70 bg-blue-50 text-[#136191]">
                             <Network className="h-4 w-4" />
                         </span>
                         <div className="min-w-0">
@@ -1073,7 +1073,7 @@ const Edo = ({ project }) => {
                             <button
                                 type="button"
                                 onClick={() => setHitoModal({ isOpen: true, parentId: null, isEditing: false })}
-                                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/80 bg-[#f7f7f5] text-[#136191] shadow-[0_4px_12px_rgba(0,0,0,0.26),0_0_0_1px_rgba(255,255,255,0.42)] transition hover:bg-white hover:text-[#0f527b] active:scale-[0.98] active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.18),inset_-2px_-2px_6px_rgba(255,255,255,0.75)]"
+                                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-[#f7f7f5] text-[#136191] shadow-[0_4px_12px_rgba(0,0,0,0.26),0_0_0_1px_rgba(255,255,255,0.42)] transition hover:bg-white hover:text-[#0f527b] active:scale-[0.98] active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.18),inset_-2px_-2px_6px_rgba(255,255,255,0.75)]"
                                 aria-label="Nuevo hito principal"
                             >
                                 <Plus className="h-[18px] w-[18px]" strokeWidth={2.2} />
@@ -1085,13 +1085,13 @@ const Edo = ({ project }) => {
                                 value={searchTerm}
                                 onChange={(event) => setSearchTerm(event.target.value)}
                                 placeholder={viewMode === 'graph' ? 'Buscar hito o responsable...' : 'Buscar en EDO...'}
-                                className="h-9 w-full rounded-xl border border-zinc-200 bg-white pl-10 pr-9 text-sm font-semibold text-zinc-700 shadow-[inset_1px_1px_3px_rgba(186,190,204,0.35),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] outline-none placeholder:text-zinc-400 focus:border-[#F39200] focus:ring-2 focus:ring-[#F39200]/10"
+                                className="h-11 w-full rounded-xl border border-zinc-200 bg-white pl-10 pr-12 text-sm font-semibold text-zinc-700 shadow-[inset_1px_1px_3px_rgba(186,190,204,0.35),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] outline-none placeholder:text-zinc-400 focus:border-[#F39200] focus:ring-2 focus:ring-[#F39200]/10"
                             />
                             {searchTerm ? (
                                 <button
                                     type="button"
                                     onClick={() => setSearchTerm('')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 transition hover:text-zinc-700"
+                                    className="absolute right-0 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center text-zinc-400 transition hover:text-zinc-700"
                                     aria-label="Limpiar búsqueda EDO"
                                 >
                                     <X className="h-4 w-4" />
@@ -1148,24 +1148,6 @@ const Edo = ({ project }) => {
                             ) : null}
                         </div>
                     </div>
-                    {viewMode === 'tree' ? (
-                        <div className={`mt-2 grid ${EDO_TREE_GRID_COLUMNS} items-center border-t border-white/10 text-[10px] font-black uppercase tracking-widest text-white/60`}>
-                            <div className="flex justify-center px-3 py-2.5">
-                                <SoftSelectToggle
-                                    checked={allVisibleSelected}
-                                    onChange={toggleVisibleSelection}
-                                    label={allVisibleSelected ? 'Limpiar selección visible' : 'Seleccionar todos los visibles'}
-                                    size="sm"
-                                    tone="blue"
-                                    muted={!allVisibleSelected}
-                                    disabled={visibleTreeIds.length === 0}
-                                />
-                            </div>
-                            <div className="px-2 py-2.5">Código</div>
-                            <div className="px-2 py-2.5">Descripción / Responsable</div>
-                            <div className="px-3 py-2.5 text-right">Acciones</div>
-                        </div>
-                    ) : null}
                 </div>
                 {loading ? (
                     <div className="py-20 text-center flex flex-col items-center gap-4">
@@ -1218,19 +1200,41 @@ const Edo = ({ project }) => {
                     />
                 ) : (
                     <div className="relative flex max-h-full flex-1 min-h-0 flex-col overflow-hidden border-x border-b border-[#ececec] bg-white shadow-[0_12px_34px_rgba(15,23,42,0.05)]">
-                        <div
-                            className={`flex w-full items-center justify-center overflow-hidden border-b transition-all ${dragOverNodeId === 'root' ? 'min-h-[24px] border-dashed border-[#136191] bg-[#eef5fb]' : 'min-h-[6px] border-transparent bg-white'}`}
-                            onDragOver={e => { e.preventDefault(); setDragOverNodeId('root'); }}
-                            onDragLeave={() => setDragOverNodeId(null)}
-                            onDrop={handleDropOnRoot}
-                        >
-                            {dragOverNodeId === 'root' && <span className="text-[9px] font-bold text-blue-500 uppercase">Mover a la raíz</span>}
-                        </div>
                         <div className="relative min-h-0 flex-1">
-                            <div ref={treeContainerRef} className="giproy-motion-scrollbar-hide flex h-full flex-col overflow-y-auto pr-5">
+                            <div
+                                ref={treeContainerRef}
+                                data-edo-tree-viewport
+                                className="giproy-motion-scrollbar-hide h-full overflow-auto overscroll-contain [touch-action:pan-x_pan-y]"
+                            >
+                                <div className="flex min-h-full min-w-[720px] flex-col">
+                                    <div className={`sticky top-0 z-30 grid ${EDO_TREE_GRID_COLUMNS} items-center border-b border-white/10 bg-[#111318] text-[10px] font-black uppercase tracking-widest text-white/60`}>
+                                        <div className="flex justify-center px-3 py-2.5">
+                                            <SoftSelectToggle
+                                                checked={allVisibleSelected}
+                                                onChange={toggleVisibleSelection}
+                                                label={allVisibleSelected ? 'Limpiar selección visible' : 'Seleccionar todos los visibles'}
+                                                size="sm"
+                                                tone="blue"
+                                                muted={!allVisibleSelected}
+                                                disabled={visibleTreeIds.length === 0}
+                                            />
+                                        </div>
+                                        <div className="px-2 py-2.5">Código</div>
+                                        <div className="px-2 py-2.5">Descripción / Responsable</div>
+                                        <div className="px-3 py-2.5 text-right">Acciones</div>
+                                    </div>
+                                    <div
+                                        className={`flex w-full items-center justify-center overflow-hidden border-b transition-all ${dragOverNodeId === 'root' ? 'min-h-[24px] border-dashed border-[#136191] bg-[#eef5fb]' : 'min-h-[6px] border-transparent bg-white'}`}
+                                        onDragOver={e => { e.preventDefault(); setDragOverNodeId('root'); }}
+                                        onDragLeave={() => setDragOverNodeId(null)}
+                                        onDrop={handleDropOnRoot}
+                                    >
+                                        {dragOverNodeId === 'root' && <span className="text-[9px] font-bold text-blue-500 uppercase">Mover a la raíz</span>}
+                                    </div>
                                 {filteredTree.map(node => (
                                     <EdoNodeItem key={node.id} node={node} level={0} expandedNodes={expandedNodes} isExpanded={!expandedNodes.has(node.id)} onToggle={handleToggle} onAddHito={pid => setHitoModal({ isOpen: true, parentId: pid, isEditing: false })} onAddStakeholder={pid => setStakeholderModal({ isOpen: true, parentId: pid, isEditing: false })} onEdit={n => n.tipo_nodo === 'HITO' ? setHitoModal({ isOpen: true, parentId: n.parent_id, isEditing: true, nodeData: n }) : setStakeholderModal({ isOpen: true, parentId: n.parent_id, isEditing: true, nodeData: n })} onDelete={handleDelete} onDragStartNode={onDragStartNode} onDropOnNode={onDropOnNode} dragOverNodeId={dragOverNodeId} setDragOverNodeId={setDragOverNodeId} onReorder={handleReorder} isSelected={selectedIds.has(node.id)} isActive={activeNodeId === node.id} activeNodeId={activeNodeId} onActivate={setActiveNodeId} onToggleSelection={toggleSelection} selectedIds={selectedIds} compact={isCompactViewport} />
                                 ))}
+                                </div>
                             </div>
                             <MotionScrollbar targetRef={treeContainerRef} className="right-1" />
                         </div>
