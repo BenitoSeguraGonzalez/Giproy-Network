@@ -2443,6 +2443,59 @@ Evidencia rechazada y conservada:
 
 Resultado: tarea y segmento accesibles, desplazables y completos; `30/30`.
 
+### C04.7.28 - Creación rápida de sucesora
+
+Estado: **CERTIFICADA EN 40/40 COMBINACIONES VISUALES**
+
+Contenido tratado:
+
+- diálogo de creación desde tarea origen;
+- referencia por ID/código EDT y resolución de destino;
+- tipo FC/CC/FF/CF, shortcode, desfase y unidad;
+- estado resuelto, referencia inválida y mensaje de error;
+- transición a selección visual de tarea destino;
+- acciones cancelar/crear en viewports de poca altura.
+
+Adecuación aplicada:
+
+- diálogo semántico con título accesible, `aria-modal` y contrato DOM;
+- altura máxima por `dvh`, scroll vertical único y overscroll contenido;
+- padding/radio adaptados sin escalar tipografía ni componentes;
+- acciones y sugerencias con objetivo táctil mínimo de `44px`;
+- al elegir destino se cambia automáticamente a vista Gantt, garantizando que
+  origen y candidatos sean visibles también en tablet retrato;
+- contratos explícitos para error y tarea origen de selección visual.
+
+Errores detectados y corregidos mediante captura/prueba:
+
+1. El diálogo original no tenía límite de viewport, scroll ni rol accesible.
+2. En tablet FHD horizontal las acciones inferiores quedaban parcialmente bajo
+   el borde; una superficie desplazada confirmó su alcance completo.
+3. La primera matriz de selección visual falló en los tres retratos: el modal se
+   cerraba pero la app permanecía en Tabla, dejando el origen en un timeline
+   oculto. La acción ahora abre Gantt antes de solicitar el destino.
+
+Contratos:
+
+- `data-gantt-quick-successor-dialog="true"`;
+- `data-gantt-quick-successor-error="true"`;
+- `data-gantt-quick-successor-source="true"`;
+- cuatro harnesses de estado; inventario visual: `127` harnesses.
+
+Evidencia aceptada:
+
+- resuelta/inicio: `2026-07-27T15-07-23-180Z` (`10/10`);
+- extremo inferior: `2026-07-27T15-08-37-546Z` (`10/10`);
+- referencia inválida: `2026-07-27T15-13-58-607Z` (`10/10`);
+- selección visual final: `2026-07-27T15-13-15-962Z` (`10/10`);
+- corrección retrato inspeccionada: `2026-07-27T15-12-47-278Z` (`3/3`).
+
+Evidencia rechazada y conservada:
+
+- `2026-07-27T15-10-15-810Z`: selección visual inoperable en los tres retratos.
+
+Resultado: flujo directo y visual completo; `40/40` combinaciones aceptadas.
+
 ### C04.7.4 - Panel Historial confirmado
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**

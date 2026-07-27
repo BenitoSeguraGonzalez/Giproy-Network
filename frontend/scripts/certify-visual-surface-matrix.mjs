@@ -781,6 +781,34 @@ try {
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(350);
                 }
+                if (harness.source === 'gantt-quick-successor-harness.html'
+                    || harness.source === 'gantt-quick-successor-end-harness.html'
+                    || harness.source === 'gantt-quick-successor-error-harness.html'
+                    || harness.source === 'gantt-quick-successor-visual-harness.html') {
+                    const taskMenuTrigger = page.getByRole('button', { name: 'Abrir menú de tarea' }).first();
+                    await taskMenuTrigger.waitFor({ state: 'visible' });
+                    await taskMenuTrigger.click();
+                    await page.getByRole('button', { name: 'Crear dependencia' }).click();
+                    await page.getByRole('dialog', { name: /ID 2/u }).waitFor({ state: 'visible' });
+                    if (harness.source === 'gantt-quick-successor-error-harness.html') {
+                        await page.getByPlaceholder('Ej. 38 o 1.1.3').fill('999999');
+                        await page.locator('[data-gantt-quick-successor-error="true"]').waitFor({ state: 'visible' });
+                    } else {
+                        await page.getByPlaceholder('Ej. 38 o 1.1.3').fill('3');
+                        await page.getByText('Tarea destino resuelta', { exact: true }).waitFor({ state: 'visible' });
+                    }
+                    if (harness.source === 'gantt-quick-successor-end-harness.html') {
+                        await page.locator('[data-gantt-quick-successor-dialog="true"]').evaluate((node) => { node.scrollTop = node.scrollHeight; });
+                        await page.getByRole('button', { name: 'Crear dependencia' }).waitFor({ state: 'visible' });
+                    }
+                    if (harness.source === 'gantt-quick-successor-visual-harness.html') {
+                        await page.getByRole('button', { name: 'Elegir destino' }).click();
+                        await page.locator('[data-gantt-quick-successor-dialog="true"]').waitFor({ state: 'detached' });
+                        await page.locator('[data-gantt-quick-successor-source="true"]').waitFor({ state: 'visible' });
+                    }
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
                 if (harness.source === 'gantt-pareto-harness.html') {
                     await page.getByRole('button', { name: 'Abrir Pareto del Gantt' }).click();
                     await page.getByRole('dialog', { name: 'Pareto temporal' }).waitFor({ state: 'visible' });

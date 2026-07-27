@@ -17708,6 +17708,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
     const handleStartQuickSuccessorVisualSelection = useCallback((lineId) => {
         const normalizedId = String(lineId || '');
         if (!normalizedId) return;
+        setFocusMode('timeline');
         setQuickSuccessorDialog(null);
         setQuickSuccessorItemInput('');
         setQuickSuccessorSubmitError('');
@@ -21941,16 +21942,20 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         : null}
                     {quickSuccessorDialog && quickSuccessorDialogRow
                         ? createPortal(
-                            <div className="fixed inset-0 z-[260] flex items-center justify-center bg-[rgba(255,255,255,0.18)] px-4 py-6 backdrop-blur-[1px]">
+                            <div className="fixed inset-0 z-[260] flex items-center justify-center bg-[rgba(255,255,255,0.18)] p-2 backdrop-blur-[1px] sm:px-4 sm:py-6">
                                 <div
                                     ref={quickSuccessorDialogRef}
-                                    className="w-full max-w-[33rem] rounded-[1.9rem] border border-[#F39200]/35 bg-white p-5 shadow-[0_22px_56px_rgba(15,23,42,0.22)]"
+                                    role="dialog"
+                                    aria-modal="true"
+                                    aria-labelledby="gantt-quick-successor-title"
+                                    className="max-h-[calc(100dvh-1rem)] w-full max-w-[33rem] overflow-y-auto overscroll-contain rounded-[1.35rem] border border-[#F39200]/35 bg-white p-3 shadow-[0_22px_56px_rgba(15,23,42,0.22)] sm:max-h-[calc(100dvh-3rem)] sm:rounded-[1.9rem] sm:p-5 [&_button]:min-h-11"
                                     data-gantt-no-pan="true"
+                                    data-gantt-quick-successor-dialog="true"
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="min-w-0">
                                             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#F39200]">Dependencia</p>
-                                            <h3 className="mt-2 text-[1.05rem] font-black uppercase tracking-[0.02em] text-zinc-900">
+                                            <h3 id="gantt-quick-successor-title" className="mt-2 text-[1.05rem] font-black uppercase tracking-[0.02em] text-zinc-900">
                                                 {quickSuccessorDialogReference}
                                             </h3>
                                             <p className="mt-2 text-sm font-semibold leading-snug text-zinc-500">
@@ -22086,7 +22091,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                     </div>
 
                                     {quickSuccessorSubmitError || quickSuccessorResolutionPreview.error ? (
-                                        <div className="mt-4 rounded-[1rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">
+                                        <div data-gantt-quick-successor-error="true" className="mt-4 rounded-[1rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">
                                             {quickSuccessorSubmitError || quickSuccessorResolutionPreview.error}
                                             {quickSuccessorResolutionPreview.suggestions?.length ? (
                                                 <div className="mt-3 flex flex-col gap-2">
@@ -23793,6 +23798,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         : taskEnvelopeClass
                                                 } ${isTaskBarDraggable({ isCalculable: isRowSchedulable, isManualMilestone, subbarCount: subbarVisuals.length }) ? `${isReducedInteractionDetail ? 'transition-none' : 'transition-[left,width,box-shadow,filter,transform] duration-100 ease-out'} cursor-grab active:cursor-grabbing` : ''} ${isMilestone ? '' : taskEnvelopeShadowClass} ${dependencyConstraintDiagnostics?.hasConflict && !isMilestone ? 'ring-2 ring-amber-400/70' : isCritical && !isMilestone ? 'ring-1 ring-[#c00000]/38' : ''} ${quickSuccessorSourceId === lineId ? (isReducedInteractionDetail ? 'ring-2 ring-[#F39200]' : 'ring-2 ring-[#F39200] shadow-[0_0_0_3px_rgba(243,146,0,0.16),0_10px_22px_rgba(19,97,145,0.18),inset_0_1px_0_rgba(255,255,255,0.34),inset_0_-2px_4px_rgba(8,41,63,0.16)]') : ''} ${draggingBarId === lineId ? (isReducedInteractionDetail ? 'ring-2 ring-[#F39200]/65 brightness-[1.03]' : 'ring-2 ring-[#F39200]/65 shadow-[0_12px_24px_rgba(19,97,145,0.24),inset_0_1px_0_rgba(255,255,255,0.36),inset_0_-2px_4px_rgba(8,41,63,0.18)] brightness-[1.03]') : (isReducedInteractionDetail ? '' : (isCritical ? 'hover:brightness-[1.01] hover:shadow-[0_7px_16px_rgba(159,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.18)]' : 'hover:brightness-[1.02] hover:shadow-[0_10px_20px_rgba(19,97,145,0.20),inset_0_1px_0_rgba(255,255,255,0.36),inset_0_-2px_4px_rgba(8,41,63,0.16)]'))}`}
                                                 data-bar-id={lineId}
+                                                data-gantt-quick-successor-source={quickSuccessorSourceId === lineId ? 'true' : 'false'}
                                                 data-gantt-candidate-subbars={candidateOperationalSubbars.length}
                                                 data-gantt-subbars-aligned={operationalSubbarsAlignedToTask ? 'true' : 'false'}
                                                 data-gantt-bar-left={Number(visibleBarLeftPx || 0).toFixed(2)}
