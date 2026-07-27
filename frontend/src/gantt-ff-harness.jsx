@@ -8,6 +8,10 @@ import { AppDialogProvider } from './components/ui/AppDialogProvider.jsx';
 
 const createSyntheticFixture = () => {
     const isDurationSubcontractFixture = window.location.pathname.includes('gantt-duration-display-subcontract');
+    const isSubcontractDurationFixture = window.location.pathname.includes('gantt-subcontract-duration');
+    const isSubcontractDurationPendingFixture = window.location.pathname.includes('gantt-subcontract-duration-pending');
+    const isSubcontractDurationEndFixture = window.location.pathname.includes('gantt-subcontract-duration-end');
+    const isSubcontractDurationWeeksFixture = window.location.pathname.includes('gantt-subcontract-duration-weeks');
     const isResourceEditorEmptyFixture = window.location.pathname.includes('gantt-resource-editor-empty');
     const periodStarts = ['2026-07-01', '2026-07-16', '2026-08-01', '2026-08-16', '2026-09-01', '2026-09-16'];
     const operationalRows = Array.from({ length: 36 }, (_, index) => {
@@ -17,6 +21,10 @@ const createSyntheticFixture = () => {
         const start = new Date(Date.UTC(2026, 6, 1 + (index * 2)));
         const end = new Date(start);
         end.setUTCDate(end.getUTCDate() + 7 + (index % 5));
+        const isContractRow = isSubcontractDurationFixture
+            ? (isSubcontractDurationEndFixture ? index === 35 : index === 0)
+            : false;
+        const contractualDuration = isContractRow && isSubcontractDurationPendingFixture ? 0 : 8 + (index % 5);
         return {
             id,
             linea_id: id,
@@ -37,8 +45,8 @@ const createSyntheticFixture = () => {
             is_calculable: true,
             start_date: start.toISOString().slice(0, 10),
             end_date: end.toISOString().slice(0, 10),
-            duration: 8 + (index % 5),
-            dias_calendario: 8 + (index % 5),
+            duration: contractualDuration,
+            dias_calendario: contractualDuration,
             progress: Math.min(100, (index % 7) * 15),
             predecessors: index === 0 ? '' : `${index + chapter}FS`,
             dependencies: index === 0 ? [] : [{
@@ -54,6 +62,11 @@ const createSyntheticFixture = () => {
                     subcontracted: true,
                     temporal_source: 'subcontract_contract',
                     gantt_duration_display_unit: 'week',
+                } : {}),
+                ...(isContractRow ? {
+                    subcontracted: true,
+                    temporal_source: 'subcontract_contract',
+                    gantt_duration_display_unit: isSubcontractDurationWeeksFixture ? 'week' : 'day',
                 } : {}),
                 ...(index === 1 ? {
                     governing_resource: {
@@ -289,6 +302,7 @@ const Harness = () => {
             || window.location.pathname.includes('gantt-reconciliation')
             || window.location.pathname.includes('gantt-apu-signals')
             || window.location.pathname.includes('gantt-duration-display')
+            || window.location.pathname.includes('gantt-subcontract-duration')
             || window.location.pathname.includes('gantt-resource-editor')) {
             const data = createSyntheticFixture();
             setFixture(data);

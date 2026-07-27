@@ -101,12 +101,19 @@ texto `#B45309` sobre el hover `amber-50`. Las capturas de ambos estados y los
 atributos `disabled` confirman que la combinacion denunciada no llega a
 renderizarse. Se conserva el aviso para no silenciar reglas globales.
 
-Las certificaciones C04.7.34 y C04.7.35 mantienen un aviso `gray-on-color` en
-`CronogramaGantt.jsx:19119` (`text-zinc-600` sobre `bg-orange-50`). El detector
+Las certificaciones C04.7.34, C04.7.35 y C04.7.36 mantienen un aviso
+`gray-on-color` en `CronogramaGantt.jsx:19133` (`text-zinc-600` sobre
+`bg-orange-50`). El detector
 lo localiza fuera del editor operativo de recursos modificado; no produce
 recorte ni bloqueo táctil y queda asignado a la unidad visual propietaria para
 medición de contraste y corrección, sin alterar una superficie ajena durante
 esta certificación.
+
+La ejecución de C04.7.36 vuelve a registrar `overused-font` en
+`frontend/src/index.css:16` por la familia corporativa Inter. No es un hallazgo
+introducido por la unidad ni un defecto adaptativo; sustituir la tipografía
+global sin una decisión de identidad modificaría todo el producto. Permanece
+abierto en QI-007 y no se silencia en la configuración del detector.
 
 ## QI-008 - Workbenches BIM con columnas rigidas
 

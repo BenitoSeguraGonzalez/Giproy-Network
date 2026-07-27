@@ -705,6 +705,10 @@ html, body {
   .gantt-duration-display-trigger {
     min-height: 44px;
   }
+  .gantt-subcontract-duration-control,
+  [data-gantt-subcontract-duration-input] {
+    min-height: 44px;
+  }
   [data-gantt-resource-editor="true"] :is(button, input) {
     min-height: 44px;
   }

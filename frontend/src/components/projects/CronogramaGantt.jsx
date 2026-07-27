@@ -8892,6 +8892,7 @@ const CronogramaGantt = ({
     const [durationDisplayMenuRowId, setDurationDisplayMenuRowId] = useState(null);
     const [durationDisplayMenuPosition, setDurationDisplayMenuPosition] = useState(null);
     const [subcontractDurationInputs, setSubcontractDurationInputs] = useState({});
+    const [ganttAvailableWidth, setGanttAvailableWidth] = useState(1440);
     const [zoomLevel, setZoomLevel] = useState(1);
     const [zoomInput, setZoomInput] = useState('100');
     const [isTimeScaleLocked, setIsTimeScaleLocked] = useState(false);
@@ -9329,14 +9330,26 @@ const CronogramaGantt = ({
             panelWidthClass: 'w-[310px]',
         };
     }, [focusMode, ganttColumnSettings.visibleWidths]);
-    const effectiveDataGridViewportWidth = useMemo(
-        () => clamp(
-            Math.round(gridViewportWidthOverride ?? ganttLayout.dataGridViewportWidth),
-            GANTT_GRID_VIEWPORT_MIN_PX,
-            GANTT_GRID_VIEWPORT_MAX_PX,
-        ),
-        [ganttLayout.dataGridViewportWidth, gridViewportWidthOverride]
-    );
+    const dataGridViewportBounds = useMemo(() => {
+        if (focusMode !== 'balanced') {
+            return { min: GANTT_GRID_VIEWPORT_MIN_PX, max: GANTT_GRID_VIEWPORT_MAX_PX };
+        }
+        const availableWidth = Math.max(1, Number(ganttAvailableWidth || 0));
+        return {
+            min: Math.min(GANTT_GRID_VIEWPORT_MIN_PX, Math.max(360, Math.floor(availableWidth * 0.4))),
+            max: Math.min(GANTT_GRID_VIEWPORT_MAX_PX, Math.max(360, Math.floor(availableWidth - 320))),
+        };
+    }, [focusMode, ganttAvailableWidth]);
+    const effectiveDataGridViewportWidth = useMemo(() => {
+        const responsiveDefaultWidth = focusMode === 'balanced'
+            ? Math.min(ganttLayout.dataGridViewportWidth, Math.max(360, Math.floor(ganttAvailableWidth * 0.52)))
+            : ganttLayout.dataGridViewportWidth;
+        return clamp(
+            Math.round(gridViewportWidthOverride ?? responsiveDefaultWidth),
+            dataGridViewportBounds.min,
+            dataGridViewportBounds.max,
+        );
+    }, [dataGridViewportBounds, focusMode, ganttAvailableWidth, ganttLayout.dataGridViewportWidth, gridViewportWidthOverride]);
     const holidayCalendar = trabajo?.holiday_calendar || null;
     const scheduleConfig = useMemo(
         () => buildGanttScheduleConfigWithHolidayCalendar(configDraft, holidayCalendar),
@@ -11778,6 +11791,7 @@ const CronogramaGantt = ({
             if (dragInteractionRef.current) return;
 
             const rect = root.getBoundingClientRect();
+            setGanttAvailableWidth(Math.max(1, Math.floor(rect.width)));
             const parent = root.parentElement;
             const parentHeight = parent?.clientHeight || 0;
             const viewportBottomPadding = 32;
@@ -12043,7 +12057,7 @@ const CronogramaGantt = ({
             const interaction = gridResizeInteractionRef.current;
             if (!interaction) return;
             const nextWidth = interaction.startWidth + (event.clientX - interaction.startX);
-            setGridViewportWidthOverride(clamp(Math.round(nextWidth), GANTT_GRID_VIEWPORT_MIN_PX, GANTT_GRID_VIEWPORT_MAX_PX));
+            setGridViewportWidthOverride(clamp(Math.round(nextWidth), dataGridViewportBounds.min, dataGridViewportBounds.max));
         };
         const handlePointerUp = () => {
             if (!gridResizeInteractionRef.current) return;
@@ -12057,7 +12071,7 @@ const CronogramaGantt = ({
             window.removeEventListener('pointerup', handlePointerUp);
             window.removeEventListener('pointercancel', handlePointerUp);
         };
-    }, []);
+    }, [dataGridViewportBounds.max, dataGridViewportBounds.min]);
 
     const createDependencyFromSourceToTarget = useCallback(async (sourceId, targetId, options = {}) => {
         const normalizedSourceId = String(sourceId || '');
@@ -20723,7 +20737,15 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                 </div>
                                 <div className="px-3 py-1.5" style={ganttColumnSettings.getCellGridStyle('duration')}>
                                     {row.is_calculable ? (
-                                        <div className="flex items-center justify-end rounded-[0.75rem] border border-zinc-200 bg-white px-2 py-1.5 text-right">
+                                        <div
+                                            data-gantt-subcontract-duration-control={isSubcontracted ? lineId : undefined}
+                                            data-pending={isSubcontracted && isPendingSubcontract ? 'true' : 'false'}
+                                            className={`gantt-subcontract-duration-control flex min-h-9 items-center justify-end rounded-[0.75rem] border bg-white px-2 py-1.5 text-right transition focus-within:ring-2 ${
+                                                isSubcontracted && isPendingSubcontract
+                                                    ? 'border-amber-300 focus-within:border-amber-400 focus-within:ring-amber-200/70'
+                                                    : 'border-zinc-200 focus-within:border-[#136191]/45 focus-within:ring-[#136191]/15'
+                                            }`}
+                                        >
                                             {isSubcontracted ? (
                                                 <input
                                                     type="text"
@@ -20780,7 +20802,11 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                             event.currentTarget.blur();
                                                         }
                                                     }}
-                                                    className="min-w-0 flex-1 bg-transparent text-right text-[10px] font-bold text-amber-800 outline-none"
+                                                    data-gantt-subcontract-duration-input={lineId}
+                                                    aria-label={`Duración contractual manual de ${formatCronogramaDescripcion(row) || `la partida ${lineId}`}`}
+                                                    aria-describedby={isPendingSubcontract ? `gantt-subcontract-duration-status-${lineId}` : undefined}
+                                                    className="min-h-8 min-w-0 flex-1 bg-transparent text-right text-[11px] font-bold text-amber-800 outline-none placeholder:text-amber-500/70"
+                                                    placeholder={isPendingSubcontract ? 'Definir' : undefined}
                                                     title="Duración contractual manual de la partida subcontratada"
                                                 />
                                             ) : (
@@ -21018,7 +21044,15 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                             </div>
                                         );
                                     })() : isSubcontracted ? (
-                                        <span className="inline-flex min-h-[34px] w-full items-center justify-center rounded-[0.75rem] border border-slate-200 bg-slate-50 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-600">
+                                        <span
+                                            id={`gantt-subcontract-duration-status-${lineId}`}
+                                            data-gantt-subcontract-duration-status={lineId}
+                                            className={`inline-flex min-h-[34px] w-full items-center justify-center rounded-[0.75rem] border px-2 py-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.06em] ${
+                                                isPendingSubcontract
+                                                    ? 'border-amber-200 bg-amber-50 text-amber-700'
+                                                    : 'border-sky-100 bg-sky-50 text-[#136191]'
+                                            }`}
+                                        >
                                             {isPendingSubcontract ? 'Definir duración' : ''}
                                         </span>
                                     ) : isManualMilestone ? (

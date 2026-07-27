@@ -934,6 +934,69 @@ try {
                     }
                     await page.waitForTimeout(350);
                 }
+                if (harness.source.startsWith('gantt-subcontract-duration-')) {
+                    const balanced = harness.source.includes('-balanced-') || harness.source.includes('-pending-') || harness.source.includes('-end-');
+                    await page.getByRole('button', { name: balanced ? 'Dividida' : 'Tabla', exact: true }).click();
+                    const root = page.locator('[data-gantt-view-mode]');
+                    await root.evaluate((node, expected) => {
+                        if (node.getAttribute('data-gantt-view-mode') !== expected) {
+                            throw new Error(`Gantt view mode did not change to ${expected}.`);
+                        }
+                    }, balanced ? 'balanced' : 'table');
+                    const gridViewport = page.locator('[data-gantt-left-viewport="true"]');
+                    await gridViewport.waitFor({ state: 'visible' });
+                    if (harness.source.includes('-end-')) {
+                        await gridViewport.evaluate((node) => { node.scrollTop = node.scrollHeight; });
+                        await page.waitForTimeout(250);
+                    }
+                    const inputs = page.locator('[data-gantt-subcontract-duration-input]');
+                    const input = harness.source.includes('-end-') ? inputs.last() : inputs.first();
+                    await input.scrollIntoViewIfNeeded();
+                    await input.waitFor({ state: 'visible' });
+                    const control = input.locator('xpath=..');
+                    const pending = harness.source.includes('-pending-');
+                    await control.evaluate((node, expectedPending) => {
+                        if (node.getAttribute('data-pending') !== String(expectedPending)) {
+                            throw new Error(`Unexpected subcontract duration pending state: ${node.getAttribute('data-pending')}.`);
+                        }
+                    }, pending);
+                    if (pending) {
+                        await page.locator('[data-gantt-subcontract-duration-status]').filter({ hasText: 'Definir duración' }).first().waitFor({ state: 'visible' });
+                        if ((await input.inputValue()) !== '') throw new Error('Pending subcontract duration must render as an empty contractual input.');
+                    } else {
+                        const nextValue = harness.source.includes('-weeks-') ? '2' : harness.source.includes('-end-') ? '16.75' : '12.5';
+                        await input.fill(nextValue);
+                        await input.press('Enter');
+                        await page.waitForTimeout(100);
+                        const persistedValue = Number((await input.inputValue()).replace(',', '.'));
+                        if (Math.abs(persistedValue - Number(nextValue)) > 0.0001) {
+                            throw new Error(`Contractual duration did not persist in its real row draft: expected ${nextValue}, received ${await input.inputValue()}.`);
+                        }
+                        await control.evaluate((node) => {
+                            if (node.getAttribute('data-pending') !== 'false') throw new Error('Defined subcontract duration remained pending after capture.');
+                        });
+                    }
+                    if (profile.touch) {
+                        const box = await control.boundingBox();
+                        if (!box || box.height < 43) throw new Error(`Contractual duration touch target is below 44px: ${JSON.stringify(box)}.`);
+                    }
+                    if (harness.source.includes('-balanced-')) {
+                        const resizer = page.locator('[data-gantt-grid-resizer="true"]');
+                        const resizerBox = await resizer.boundingBox();
+                        if (!resizerBox) throw new Error('Balanced Gantt resizer is not measurable.');
+                        await page.mouse.move(resizerBox.x + (resizerBox.width / 2), resizerBox.y + 80);
+                        await page.mouse.down();
+                        await page.mouse.move(profile.viewport[0] - 20, resizerBox.y + 80, { steps: 6 });
+                        await page.mouse.up();
+                        await page.waitForTimeout(150);
+                        const timelinePanelBox = await page.locator('[data-gantt-timeline-panel="true"]').boundingBox();
+                        if (!timelinePanelBox || timelinePanelBox.width < 300) {
+                            throw new Error(`Balanced Gantt resize consumed the timeline workspace: ${JSON.stringify(timelinePanelBox)}.`);
+                        }
+                    }
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
                 if (harness.source === 'gantt-duration-display-harness.html'
                     || harness.source === 'gantt-duration-display-hours-harness.html'
                     || harness.source === 'gantt-duration-display-end-harness.html'

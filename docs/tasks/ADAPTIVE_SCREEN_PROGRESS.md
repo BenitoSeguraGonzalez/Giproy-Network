@@ -2429,6 +2429,111 @@ Evidencia final:
 
 Resultado: `40/40 PASS`.
 
+### C04.7.36 - Controles contractuales reales de fila Gantt
+
+Estado: **CERTIFICADA EN 50/50 COMBINACIONES VISUALES**
+Fecha: 2026-07-27
+
+Superficie real tratada:
+
+- captura manual de duración contractual en partidas subcontratadas;
+- estado pendiente sin duración y estado definido;
+- representación y persistencia en días y semanas;
+- vista Tabla y vista Dividida;
+- primera fila y última fila virtualizada, con desplazamiento vertical y
+  horizontal propietario del panel de datos.
+
+Decisión de alcance basada en DOM real:
+
+- una exploración inicial intentó abrir el editor de recursos para una partida
+  subcontratada. El DOM y los manejadores reales demuestran que descripción,
+  acciones rápidas y editor se deshabilitan expresamente cuando
+  `isSubcontracted` es verdadero;
+- esa rama interna inaccesible no se habilitó artificialmente ni se contó como
+  cobertura. La edición contractual válida vive en las celdas `Dur.` y
+  `Tipo dur.` de la fila Gantt;
+- la duplicación histórica de celdas dentro del lienzo está detrás de
+  `USE_SPLIT_LAYOUT=false`; tampoco se reactivó para fabricar una segunda
+  superficie inexistente.
+
+Problemas observados y causas raíz:
+
+1. El input contractual carecía de contrato DOM estable, nombre accesible
+   contextual, relación con el estado pendiente y foco visible del contenedor.
+2. En entrada táctil, el control quedaba por debajo del objetivo de 44 px.
+3. La vista Dividida conservaba un ancho base fijo de 918 px para el panel de
+   datos. En P12 vertical desplazaba el timeline fuera del viewport y generaba
+   12 px de overflow documental: la resolución física 3K no evitaba el fallo
+   porque el espacio útil CSS era 920 px.
+4. El redimensionador seguía limitado por cotas fijas de escritorio y podía
+   reintroducir el desbordamiento después de una adaptación inicial correcta.
+5. La primera aserción de persistencia comparaba texto literal y rechazó
+   valores válidos normalizados al locale español (`12,5000`); se corrigió para
+   comprobar equivalencia numérica sin relajar el dato persistido.
+
+Adecuación aplicada:
+
+- control contractual con marcador estable, estado `data-pending`, etiqueta
+  accesible basada en la partida, descripción del pendiente y placeholder
+  explícito;
+- borde y anillo `focus-within` diferenciados para pendiente/definido y altura
+  táctil mínima de 44 px sin escalar globalmente la interfaz;
+- el estado `Definir duración` adopta semántica y color propios de advertencia;
+- ancho de datos de la vista Dividida derivado del ancho real observado del
+  workspace, reservando espacio útil al timeline en retrato, paisaje y Windows
+  HiDPI;
+- límites del redimensionador calculados con las mismas cotas adaptativas, de
+  forma que una interacción posterior no invalida el layout;
+- cada panel mantiene su scroll horizontal/vertical interno; no se habilitó
+  scroll de documento ni se redujo el diseño mediante zoom.
+
+Contratos y cobertura añadidos:
+
+- `data-gantt-subcontract-duration-control`;
+- `data-gantt-subcontract-duration-input`;
+- `data-gantt-subcontract-duration-status`;
+- cinco harnesses: pendiente, definido, semanas, Dividida y extremo inferior;
+- inventario visual: 43 rutas, 55 archivos interactivos y 159 harnesses.
+
+Evidencia rechazada y conservada:
+
+- `2026-07-27T18-17-24-801Z`: abrió una fila ordinaria; no demostraba el flujo
+  de subcontrata;
+- `2026-07-27T18-18-31-716Z`: todas las filas eran subcontratadas y el editor de
+  recursos no tenía disparador, conforme al contrato real;
+- `2026-07-27T18-19-45-359Z`: clicar la descripción subcontratada no abrió el
+  modal y confirmó que esa ruta de prueba era inválida;
+- `2026-07-27T18-26-40-150Z`: 9/10 fallos; ocho eran comparación textual de
+  decimales localizados y los estados Dividida de P12 vertical revelaron el
+  overflow documental real de 12 px. Ambos problemas fueron corregidos antes
+  de generar evidencia final.
+
+Verificación final:
+
+- build Vite de producción: PASS;
+- smoke Gantt Classic: PASS, incluidas 1326 comprobaciones de preview/commit,
+  puntero, escala y scroll;
+- inventario visual vigente y `git diff --check`: PASS;
+- Playwright focal Lenovo P12: `10/10 PASS`;
+- Playwright matriz completa: `50/50 PASS` en Windows FHD 100/125/150 %, 4K
+  DPR 2, tablets Full HD/2K horizontal/vertical y Lenovo P12 en ambas
+  orientaciones;
+- revisión manual de estados iniciales, definidos, pendientes y extremos en
+  todas las familias de perfil: PASS, sin clipping, overlay ni overflow de
+  documento;
+- Impeccable: ningún aviso introducido por esta unidad. Conserva el aviso
+  `gray-on-color` ajeno de QI-007, ahora en `CronogramaGantt.jsx:19133`, y el
+  aviso global ya documentado sobre la tipografía corporativa Inter.
+
+Evidencia final:
+
+- Lenovo focal: `artifacts/visual-certification/2026-07-27T18-30-30-706Z/`
+  (`10/10`);
+- matriz completa: `artifacts/visual-certification/2026-07-27T18-37-04-754Z/`
+  (`50/50`).
+
+Resultado: `50/50 PASS`.
+
 ### C04.7.5 - Calendario laboral y festivos
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**

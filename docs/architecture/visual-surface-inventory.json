@@ -103,7 +103,7 @@
     "protectedRoutes": 38,
     "publicRoutes": 5,
     "interactiveSurfaceFiles": 55,
-    "harnesses": 154,
+    "harnesses": 159,
     "harnessesWithoutValidator": 0
   },
   "routes": [
@@ -5473,6 +5473,116 @@
       "mode": "classic",
       "path": "/gantt-split-dialog-table-end-harness.html",
       "source": "gantt-split-dialog-table-end-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-subcontract-duration-balanced-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-subcontract-duration-balanced-harness.html",
+      "source": "gantt-subcontract-duration-balanced-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-subcontract-duration-defined-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-subcontract-duration-defined-harness.html",
+      "source": "gantt-subcontract-duration-defined-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-subcontract-duration-end-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-subcontract-duration-end-harness.html",
+      "source": "gantt-subcontract-duration-end-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-subcontract-duration-pending-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-subcontract-duration-pending-harness.html",
+      "source": "gantt-subcontract-duration-pending-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-subcontract-duration-weeks-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-subcontract-duration-weeks-harness.html",
+      "source": "gantt-subcontract-duration-weeks-harness.html",
       "validators": [
         "certify-visual-surface-matrix.mjs"
       ],
