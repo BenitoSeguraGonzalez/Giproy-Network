@@ -2374,6 +2374,75 @@ Hallazgos Impeccable pendientes, asignados a sus unidades visuales y no omitidos
 Resultado: interoperabilidad accesible y verificable; `30/30` combinaciones
 aceptadas entre menú, confirmación y aviso final.
 
+### C04.7.27 - Menú contextual de tarea y segmento
+
+Estado: **CERTIFICADA EN 30/30 COMBINACIONES VISUALES**
+
+Contenido tratado:
+
+- disparadores del menú en tabla densa, barra de tarea y subtramo;
+- cabecera con referencia, descripción, periodo y selección múltiple;
+- ajuste fino, contexto, undo/redo, dependencia rápida y movimiento vertical;
+- generación, división, unión, reagrupación y agrupación de tramos;
+- estados habilitado, deshabilitado y tarea/segmento activo.
+
+Adecuación aplicada:
+
+- el menú pasó a ser un contenedor contextual semántico `role="menu"` con
+  etiqueta accesible por tarea;
+- altura máxima ligada al viewport (`100dvh - 2rem`), cabecera fija y cuerpo con
+  scroll vertical propio y `overscroll-contain`;
+- ancho protegido por el viewport en retrato;
+- todas las acciones del menú tienen objetivo táctil mínimo de `44px`;
+- disparadores de tarea en tabla y timeline ampliados a `44px` y etiquetados;
+- el affordance visual de segmento conserva su tamaño compacto, pero amplía su
+  área táctil efectiva a `44px` sin deformar la barra;
+- contratos DOM de candidato, alineación y envolvente de subtramos para detectar
+  fixtures visualmente inválidos.
+
+Errores detectados y corregidos mediante captura/DOM:
+
+1. El diseño original contenía hasta once acciones de `32px`, sin viewport
+   interno y con una altura estimada fija de `332px`; podía cortar el final.
+2. El primer fixture de segmento no contenía subtramos operativos.
+3. La respuesta API y el fallback local divergían; se aseguró una fuente
+   determinista para la superficie especializada.
+4. Los subtramos existían (`SEL 1`) pero su envolvente no coincidía con la barra,
+   por lo que el renderer los ocultaba correctamente. Diagnóstico exacto:
+   barra `21.33/85.33px`, envolvente inicial `16.38/73.14px`.
+5. El tooltip interceptaba el gesto sintético; la prueba usa el botón accesible
+   real sin forzar coordenadas visuales.
+6. En tablet retrato la vista inicial es Tabla y el segmento queda fuera del
+   viewport. La certificación reproduce el flujo correcto: seleccionar tarea,
+   cambiar a Gantt y abrir el tramo visible.
+
+Contratos:
+
+- `data-gantt-task-action-menu="true"`;
+- `data-gantt-candidate-subbars`, `data-gantt-subbars-aligned`,
+  `data-gantt-subbar-envelope`;
+- `gantt-task-menu-harness.html` y `gantt-task-menu-end-harness.html`;
+- `gantt-segment-menu-harness.html`;
+- inventario visual: `123` harnesses.
+
+Evidencia aceptada:
+
+- menú de tarea, inicio y final: `2026-07-27T14-36-34-511Z` (`20/20`);
+- segmento Lenovo horizontal: `2026-07-27T14-58-54-662Z`;
+- corrección retrato: `2026-07-27T15-00-17-738Z` (`3/3`);
+- regresión final de segmento: `2026-07-27T15-00-45-146Z` (`10/10`).
+
+Evidencia rechazada y conservada:
+
+- `2026-07-27T14-40-10-482Z`, `14-42-42-984Z`, `14-43-46-822Z`,
+  `14-44-38-986Z` y `14-45-35-645Z`: fixture sin segmento materializado;
+- `2026-07-27T14-56-24-735Z`: diagnóstico de envolvente desalineado;
+- `2026-07-27T14-56-52-187Z`: tooltip interceptando el clic;
+- `2026-07-27T14-57-54-997Z`: asunción incorrecta sobre etiqueta de periodo;
+- `2026-07-27T14-59-12-800Z`: tres retratos intentaban actuar desde Tabla.
+
+Resultado: tarea y segmento accesibles, desplazables y completos; `30/30`.
+
 ### C04.7.4 - Panel Historial confirmado
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**

@@ -48,6 +48,41 @@ const createSyntheticFixture = () => {
                 { id: 7000 + index, codigo: `REC-${index + 1}`, descripcion: `Recurso especializado ${index + 1}`, unidad: 'h', cantidad: 2.5 + index },
             ],
             metadata: {
+                ...(index === 0 ? {
+                    gantt_subbars: [
+                        {
+                            id: `${id}-period-1-a`,
+                            period_id: '1',
+                            parent_period_id: '1',
+                            parent_initial_id: `valuado-initial-${id}-1`,
+                            starts_at: '2026-07-01T13:00:00.000Z',
+                            ends_at: '2026-07-05T05:00:00.000Z',
+                            percent: 65,
+                            amount: (12500 + (index * 2350)) * 0.65,
+                            status: 'draft_session',
+                            source: 'visual_certification_fixture',
+                            metadata: { label: 'Periodo 1' },
+                        },
+                        {
+                            id: `${id}-period-2-b`,
+                            period_id: '2',
+                            parent_period_id: '2',
+                            parent_initial_id: `valuado-initial-${id}-2`,
+                            starts_at: '2026-07-05T05:00:00.000Z',
+                            ends_at: '2026-07-10T21:00:00.000Z',
+                            percent: 35,
+                            amount: (12500 + (index * 2350)) * 0.35,
+                            status: 'draft_session',
+                            source: 'visual_certification_fixture',
+                            metadata: { label: 'Periodo 2' },
+                        },
+                    ],
+                    gantt_operational: {
+                        session_status: 'draft_session',
+                        subbar_count: 2,
+                        has_subbars: true,
+                    },
+                } : {}),
                 gantt_confirmed_history_v1: [
                     {
                         confirmed_at: '2026-07-24T16:30:00.000Z',
@@ -207,15 +242,40 @@ const Harness = () => {
     const [trabajo, setTrabajo] = useState(null);
 
     useEffect(() => {
+        if (window.location.pathname.includes('gantt-segment-menu-harness')) {
+            const data = createSyntheticFixture();
+            setFixture(data);
+            setTrabajo(data.trabajo);
+            return;
+        }
         ganttFixturesApi.getFfFixture()
             .then((data) => {
                 const normalizedTrabajo = {
                     ...data.trabajo,
-                    rows: (data.trabajo?.rows || []).map((row) => ({
-                        ...row,
-                        budget_line_id: row.budget_line_id ?? row.presupuesto_linea_id ?? row.linea_id,
-                        is_calculable: row.is_calculable ?? Boolean(row.apu_id),
-                    })),
+                    rows: (data.trabajo?.rows || []).map((row, index) => {
+                        const lineId = row.budget_line_id ?? row.presupuesto_linea_id ?? row.linea_id;
+                        return {
+                            ...row,
+                            budget_line_id: lineId,
+                            is_calculable: row.is_calculable ?? Boolean(row.apu_id),
+                            metadata: index === 1 ? {
+                                ...(row.metadata || {}),
+                                gantt_subbars: [
+                                    {
+                                        id: `${lineId}-period-1-a`, period_id: '1', parent_period_id: '1', parent_initial_id: `valuado-initial-${lineId}-1`,
+                                        starts_at: '2026-07-01T08:00:00.000Z', ends_at: '2026-07-05T17:00:00.000Z', percent: 65,
+                                        amount: Number(row.precio_total || 12500) * 0.65, status: 'draft_session', source: 'visual_certification_fixture', metadata: { label: 'Periodo 1' },
+                                    },
+                                    {
+                                        id: `${lineId}-period-2-b`, period_id: '2', parent_period_id: '2', parent_initial_id: `valuado-initial-${lineId}-2`,
+                                        starts_at: '2026-07-06T08:00:00.000Z', ends_at: '2026-07-09T17:00:00.000Z', percent: 35,
+                                        amount: Number(row.precio_total || 12500) * 0.35, status: 'draft_session', source: 'visual_certification_fixture', metadata: { label: 'Periodo 2' },
+                                    },
+                                ],
+                                gantt_operational: { session_status: 'draft_session', subbar_count: 2, has_subbars: true },
+                            } : row.metadata,
+                        };
+                    }),
                 };
                 setFixture(data);
                 setTrabajo(normalizedTrabajo);

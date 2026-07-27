@@ -20516,7 +20516,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         <button
                                                             type="button"
                                                             onClick={(event) => openTaskActionMenu(lineId, event.currentTarget?.getBoundingClientRect?.() || null)}
-                                                            className={`inline-flex h-[18px] w-[18px] items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25 ${
+                                                            aria-label="Abrir menú de tarea"
+                                                            className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25 ${
                                                                 selectedTaskId === lineId
                                                                     ? 'border-[#F39200] bg-[#fff7ed] text-[#F39200]'
                                                                     : 'border-zinc-200 bg-white text-zinc-500 hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200]'
@@ -22145,14 +22146,17 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         ? createPortal(
                             <div
                                 ref={taskActionMenuRef}
-                                className="fixed z-[240] w-[15.25rem] overflow-hidden rounded-[0.95rem] border border-zinc-200/90 bg-white/98 shadow-[0_14px_28px_rgba(15,23,42,0.14)] backdrop-blur-sm"
+                                role="menu"
+                                aria-label={`Acciones rápidas de ${taskActionMenuReference}`}
+                                className="fixed z-[240] flex max-h-[calc(100dvh-2rem)] w-[15.25rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-[0.95rem] border border-zinc-200/90 bg-white/98 shadow-[0_14px_28px_rgba(15,23,42,0.14)] backdrop-blur-sm [&_button]:min-h-11"
                                 style={{
                                     top: `${taskActionMenu.top}px`,
                                     left: `${taskActionMenu.left}px`,
                                 }}
                                 data-gantt-no-pan="true"
+                                data-gantt-task-action-menu="true"
                             >
-                                <div className="border-b border-zinc-100 px-3 py-2.5">
+                                <div className="shrink-0 border-b border-zinc-100 px-3 py-2.5">
                                     <div className="text-[8px] font-black uppercase tracking-[0.16em] text-[#F39200]">
                                         Acciones rápidas
                                     </div>
@@ -22175,7 +22179,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                         {formatCronogramaDescripcion(taskActionMenuRow)}
                                     </div>
                                 </div>
-                                <div className="p-2">
+                                <div className="min-h-0 overflow-y-auto overscroll-contain p-2">
                                     <div className="space-y-1">
                                         <button
                                             type="button"
@@ -23205,7 +23209,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         <button
                                                             type="button"
                                                             onClick={(event) => openTaskActionMenu(lineId, event.currentTarget?.getBoundingClientRect?.() || null)}
-                                                            className={`inline-flex h-5 w-5 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25 ${
+                                                            aria-label="Abrir menú de tarea"
+                                                            className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25 ${
                                                                 selectedTaskId === lineId
                                                                     ? 'border-[#F39200] bg-[#fff7ed] text-[#F39200]'
                                                                     : 'border-zinc-200 bg-white text-zinc-500 hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200]'
@@ -23788,6 +23793,13 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         : taskEnvelopeClass
                                                 } ${isTaskBarDraggable({ isCalculable: isRowSchedulable, isManualMilestone, subbarCount: subbarVisuals.length }) ? `${isReducedInteractionDetail ? 'transition-none' : 'transition-[left,width,box-shadow,filter,transform] duration-100 ease-out'} cursor-grab active:cursor-grabbing` : ''} ${isMilestone ? '' : taskEnvelopeShadowClass} ${dependencyConstraintDiagnostics?.hasConflict && !isMilestone ? 'ring-2 ring-amber-400/70' : isCritical && !isMilestone ? 'ring-1 ring-[#c00000]/38' : ''} ${quickSuccessorSourceId === lineId ? (isReducedInteractionDetail ? 'ring-2 ring-[#F39200]' : 'ring-2 ring-[#F39200] shadow-[0_0_0_3px_rgba(243,146,0,0.16),0_10px_22px_rgba(19,97,145,0.18),inset_0_1px_0_rgba(255,255,255,0.34),inset_0_-2px_4px_rgba(8,41,63,0.16)]') : ''} ${draggingBarId === lineId ? (isReducedInteractionDetail ? 'ring-2 ring-[#F39200]/65 brightness-[1.03]' : 'ring-2 ring-[#F39200]/65 shadow-[0_12px_24px_rgba(19,97,145,0.24),inset_0_1px_0_rgba(255,255,255,0.36),inset_0_-2px_4px_rgba(8,41,63,0.18)] brightness-[1.03]') : (isReducedInteractionDetail ? '' : (isCritical ? 'hover:brightness-[1.01] hover:shadow-[0_7px_16px_rgba(159,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.18)]' : 'hover:brightness-[1.02] hover:shadow-[0_10px_20px_rgba(19,97,145,0.20),inset_0_1px_0_rgba(255,255,255,0.36),inset_0_-2px_4px_rgba(8,41,63,0.16)]'))}`}
                                                 data-bar-id={lineId}
+                                                data-gantt-candidate-subbars={candidateOperationalSubbars.length}
+                                                data-gantt-subbars-aligned={operationalSubbarsAlignedToTask ? 'true' : 'false'}
+                                                data-gantt-bar-left={Number(visibleBarLeftPx || 0).toFixed(2)}
+                                                data-gantt-bar-width={Number(visibleBarWidthPx || 0).toFixed(2)}
+                                                data-gantt-subbar-envelope={candidateOperationalEnvelope
+                                                    ? `${Number(candidateOperationalEnvelope.leftPx || 0).toFixed(2)},${Number(candidateOperationalEnvelope.widthPx || 0).toFixed(2)}`
+                                                    : ''}
                                                 style={{
                                                     left: `${visibleBarLeftPx}px`,
                                                     width: `${visibleBarWidthPx}px`,
@@ -24006,7 +24018,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                                     <GanttHeaderTooltip disabled={Boolean(activeBarPointerHold)} content={segmentTooltipContent}>
                                                                                         <button
                                                                                             type="button"
-                                                                                            className={`absolute top-1/2 z-[3] inline-flex h-[14px] w-[14px] -translate-y-1/2 items-center justify-center rounded-full border border-white/90 bg-white/96 text-[#136191] ${suppressAffordancesDuringHold ? 'pointer-events-none opacity-0' : isSegmentAffordanceVisible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100'} ${isReducedInteractionDetail ? 'shadow-none transition-none' : 'shadow-[0_4px_8px_rgba(19,97,145,0.16)] transition-[opacity,transform,border-color,background-color,color] duration-150 hover:scale-[1.05] hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200]'} focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/40`}
+                                                                                            className={`absolute top-1/2 z-[3] inline-flex h-[14px] w-[14px] -translate-y-1/2 items-center justify-center rounded-full border border-white/90 bg-white/96 text-[#136191] before:absolute before:-inset-[15px] before:content-[''] ${suppressAffordancesDuringHold ? 'pointer-events-none opacity-0' : isSegmentAffordanceVisible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100'} ${isReducedInteractionDetail ? 'shadow-none transition-none' : 'shadow-[0_4px_8px_rgba(19,97,145,0.16)] transition-[opacity,transform,border-color,background-color,color] duration-150 hover:scale-[1.05] hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200]'} focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/40`}
                                                                                             style={{
                                                                                                 left: `${segmentActionsLeftPx}px`,
                                                                                                 zIndex: isDraggedPreviewReplacement ? 6 : undefined,
@@ -24083,7 +24095,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 {(row.is_calculable || isManualMilestone) && !displayedOperationalSubbars.length ? (
                                                     <button
                                                         type="button"
-                                                        className={`absolute top-1/2 z-[2] inline-flex h-[18px] w-[18px] -translate-y-1/2 items-center justify-center rounded-full border border-white/90 bg-white/95 text-[#136191] ${suppressAffordancesDuringHold ? 'pointer-events-none opacity-0' : areLineAffordancesVisible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100'} shadow-[0_6px_12px_rgba(19,97,145,0.16)] transition-[opacity,transform,border-color,background-color,color] duration-150 hover:scale-[1.05] hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/40`}
+                                                        className={`absolute top-1/2 z-[2] inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/90 bg-white/95 text-[#136191] ${suppressAffordancesDuringHold ? 'pointer-events-none opacity-0' : areLineAffordancesVisible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100'} shadow-[0_6px_12px_rgba(19,97,145,0.16)] transition-[opacity,transform,border-color,background-color,color] duration-150 hover:scale-[1.05] hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/40`}
                                                         style={{ left: `${quickActionsOffsetPx}px` }}
                                                         onPointerEnter={() => {
                                                             persistAffordanceHover(lineId);

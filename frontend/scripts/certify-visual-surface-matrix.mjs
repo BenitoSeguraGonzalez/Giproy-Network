@@ -745,6 +745,42 @@ try {
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(350);
                 }
+                if (harness.source === 'gantt-task-menu-harness.html'
+                    || harness.source === 'gantt-task-menu-end-harness.html') {
+                    const taskMenuTrigger = page.getByRole('button', { name: 'Abrir menú de tarea' }).first();
+                    await taskMenuTrigger.waitFor({ state: 'visible' });
+                    await taskMenuTrigger.click();
+                    const taskMenu = page.locator('[data-gantt-task-action-menu="true"]');
+                    await taskMenu.waitFor({ state: 'visible' });
+                    await page.getByRole('menu', { name: /Acciones rápidas/u }).waitFor({ state: 'visible' });
+                    if (harness.source === 'gantt-task-menu-end-harness.html') {
+                        await taskMenu.locator(':scope > div').last().evaluate((node) => { node.scrollTop = node.scrollHeight; });
+                        await page.getByRole('button', { name: 'Agrupar en todos los periodos' }).waitFor({ state: 'visible' });
+                    } else {
+                        await page.getByRole('button', { name: 'Ajuste fino' }).waitFor({ state: 'visible' });
+                    }
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
+                if (harness.source === 'gantt-segment-menu-harness.html') {
+                    const targetTaskRow = page.locator('[data-grid-row="true"]').nth(1);
+                    await targetTaskRow.click({ position: { x: 250, y: 28 } });
+                    await page.getByRole('button', { name: 'Gantt', exact: true }).click();
+                    await page.waitForTimeout(500);
+                    const segmentBar = page.locator('[data-subbar-key]').first();
+                    if (!(await segmentBar.count())) {
+                        const diagnostic = await page.locator('[data-bar-id]').first().evaluate((node) => ({ ...node.dataset }));
+                        throw new Error(`Segment fixture did not materialize: ${JSON.stringify(diagnostic)}`);
+                    }
+                    await segmentBar.hover({ force: true });
+                    const segmentMenuTrigger = page.getByRole('button', { name: /Abrir acciones del tramo/u }).first();
+                    await segmentMenuTrigger.evaluate((node) => node.click());
+                    const taskMenu = page.locator('[data-gantt-task-action-menu="true"]');
+                    await taskMenu.waitFor({ state: 'visible' });
+                    await page.getByRole('button', { name: 'Dividir tramo activo' }).waitFor({ state: 'visible' });
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
                 if (harness.source === 'gantt-pareto-harness.html') {
                     await page.getByRole('button', { name: 'Abrir Pareto del Gantt' }).click();
                     await page.getByRole('dialog', { name: 'Pareto temporal' }).waitFor({ state: 'visible' });
