@@ -8,6 +8,7 @@ import { AppDialogProvider } from './components/ui/AppDialogProvider.jsx';
 
 const createSyntheticFixture = () => {
     const isDurationSubcontractFixture = window.location.pathname.includes('gantt-duration-display-subcontract');
+    const isResourceEditorEmptyFixture = window.location.pathname.includes('gantt-resource-editor-empty');
     const periodStarts = ['2026-07-01', '2026-07-16', '2026-08-01', '2026-08-16', '2026-09-01', '2026-09-16'];
     const operationalRows = Array.from({ length: 36 }, (_, index) => {
         const id = 1001 + index;
@@ -45,7 +46,7 @@ const createSyntheticFixture = () => {
                 type: index % 5 === 0 ? 'FF' : 'FS',
                 lag: index % 4 === 0 ? 1 : 0,
             }],
-            resources: [
+            resources: isResourceEditorEmptyFixture ? [] : [
                 { id: 7000 + index, codigo: `REC-${index + 1}`, descripcion: `Recurso especializado ${index + 1}`, unidad: 'h', cantidad: 2.5 + index },
             ],
             metadata: {
@@ -287,7 +288,8 @@ const Harness = () => {
             || window.location.pathname.includes('gantt-fine-tune')
             || window.location.pathname.includes('gantt-reconciliation')
             || window.location.pathname.includes('gantt-apu-signals')
-            || window.location.pathname.includes('gantt-duration-display')) {
+            || window.location.pathname.includes('gantt-duration-display')
+            || window.location.pathname.includes('gantt-resource-editor')) {
             const data = createSyntheticFixture();
             setFixture(data);
             setTrabajo(data.trabajo);

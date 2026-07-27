@@ -2017,7 +2017,7 @@ const GanttResourceEditorModal = ({
         fallbackIndirectPercent,
     ].find((value) => value !== null && value !== undefined && Number.isFinite(value) && value >= 0) ?? 0;
     const indirectFactor = Math.max(0, resolvedIndirectPercent) / 100;
-    const apuLines = apuState.data?.lineas || [];
+    const apuLines = useMemo(() => apuState.data?.lineas || [], [apuState.data?.lineas]);
     const persistedResourceDrafts = useMemo(
         () => getPersistedResourceDrafts(row, effectiveRow),
         [effectiveRow, row]
@@ -2034,7 +2034,7 @@ const GanttResourceEditorModal = ({
         () => getPersistedResourceWorkPolicies(row, effectiveRow),
         [effectiveRow, row]
     );
-    const normalizeResourceLabel = (value) => {
+    const normalizeResourceLabel = useCallback((value) => {
         if (!value) return 'Sin descripción';
         if (typeof value === 'string') return value;
         if (typeof value === 'number') return String(value);
@@ -2043,7 +2043,7 @@ const GanttResourceEditorModal = ({
         if (value.nombre) return String(value.nombre);
         if (value.codigo) return String(value.codigo);
         return 'Sin descripción';
-    };
+    }, []);
 
     const operationalResourcesSnapshot = useMemo(() => {
         const metadata = {
@@ -2055,11 +2055,14 @@ const GanttResourceEditorModal = ({
             ? snapshot
             : null;
     }, [effectiveRow, row]);
-    const operationalSnapshotResources = operationalResourcesSnapshot?.resources || [];
+    const operationalSnapshotResources = useMemo(
+        () => operationalResourcesSnapshot?.resources || [],
+        [operationalResourcesSnapshot]
+    );
     const shouldUseOperationalSnapshotResources = operationalSnapshotResources.length > 0
         && Boolean(operationalResourcesSnapshot?.has_nested);
 
-    const resourceLines = shouldUseOperationalSnapshotResources ? operationalSnapshotResources.map((resource, index) => {
+    const resourceLines = useMemo(() => (shouldUseOperationalSnapshotResources ? operationalSnapshotResources.map((resource, index) => {
         const label = normalizeResourceLabel(resource?.descripcion ?? resource?.codigo);
         const cantidad = parsePositiveNumber(resource?.cantidad) ?? 0;
         const rendimiento = parsePositiveNumber(resource?.rendimiento_equivalente ?? resource?.rendimiento) ?? null;
@@ -2126,7 +2129,7 @@ const GanttResourceEditorModal = ({
             governingWorkHours: rendimiento ? budgetProjectedQuantity * rendimiento : 0,
             sourceLine: line,
         };
-    });
+    })), [apuLines, budgetQuantity, normalizeResourceLabel, operationalSnapshotResources, row?.unidad, shouldUseOperationalSnapshotResources]);
     const visibleResourceLines = useMemo(
         () => resourceLines.filter((item) => collectionHas(VISIBLE_RESOURCE_CATEGORY_IDS, item.categoryId)),
         [resourceLines]
@@ -2776,11 +2779,17 @@ const GanttResourceEditorModal = ({
 
     return createPortal(
         <div className="fixed inset-0 flex items-center justify-center bg-slate-950/45 px-2 py-2 backdrop-blur-[2px]" style={{ zIndex: GANTT_RESOURCE_EDITOR_MODAL_Z_INDEX }}>
-            <div className="flex max-h-[96dvh] w-[min(97vw,1380px)] flex-col overflow-hidden rounded-[0.85rem] border border-zinc-200 bg-white shadow-[0_28px_70px_rgba(15,23,42,0.26)]">
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="gantt-resource-editor-title"
+                data-gantt-resource-editor="true"
+                className="flex max-h-[96dvh] w-[min(97vw,1380px)] flex-col overflow-hidden rounded-[0.85rem] border border-zinc-200 bg-white shadow-[0_28px_70px_rgba(15,23,42,0.26)]"
+            >
                 <div className="grid items-center gap-2 border-b border-zinc-100 px-3 py-1.5 lg:grid-cols-[minmax(260px,1fr)_minmax(360px,1.25fr)_auto]">
                     <div className="min-w-0">
                         <p className="text-[8px] font-black uppercase tracking-[0.14em] text-[#F39200]">{isSubcontracted ? 'Duración contractual subcontratada' : 'Rendimientos operativos'}</p>
-                        <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                        <div id="gantt-resource-editor-title" className="mt-0.5 flex flex-wrap items-center gap-2">
                             <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#136191]">{row.codigo_item || row.item || 'APU'}</span>
                             <span className="truncate text-[13px] font-black text-zinc-900">{formatCronogramaDescripcion(row) || 'Partida'}</span>
                             {isSubcontracted ? (
@@ -2816,7 +2825,7 @@ const GanttResourceEditorModal = ({
                             disabled={saving}
                             title="Restaurar ajustes del modal"
                             aria-label="Restaurar ajustes del modal"
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-[0.75rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#136191] hover:bg-[#eff6ff] hover:text-[#136191] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/25 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex h-11 w-11 items-center justify-center rounded-[0.75rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#136191] hover:bg-[#eff6ff] hover:text-[#136191] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/25 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <RotateCcw className="h-4.5 w-4.5" />
                         </button>
@@ -2826,7 +2835,7 @@ const GanttResourceEditorModal = ({
                             disabled={saving}
                             title="Guardar borrador operativo del APU"
                             aria-label="Guardar borrador operativo del APU"
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-[0.75rem] border border-[#F39200] bg-[#F39200] text-white shadow-[0_8px_16px_rgba(243,146,0,0.16)] transition hover:-translate-y-[1px] hover:bg-[#e58300] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/35 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex h-11 w-11 items-center justify-center rounded-[0.75rem] border border-[#F39200] bg-[#F39200] text-white shadow-[0_8px_16px_rgba(243,146,0,0.16)] transition hover:-translate-y-[1px] hover:bg-[#e58300] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/35 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {saving ? <Loader2 className="h-4.5 w-4.5 animate-spin" /> : <Check className="h-4.5 w-4.5" />}
                         </button>
@@ -2836,16 +2845,16 @@ const GanttResourceEditorModal = ({
                             disabled={saving}
                             title="Cancelar"
                             aria-label="Cancelar"
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-[0.75rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex h-11 w-11 items-center justify-center rounded-[0.75rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <X className="h-4.5 w-4.5" />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-3 py-1.5">
-                    <div className="grid gap-2 xl:grid-cols-[minmax(0,1fr)]">
-                        <div className="space-y-1.5">
+                <div data-gantt-resource-editor-body="true" className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-1.5">
+                    <div className="grid min-w-0 gap-2 xl:grid-cols-[minmax(0,1fr)]">
+                        <div className="min-w-0 space-y-1.5">
                             <div className="rounded-[0.75rem] border border-zinc-200 bg-white px-2 py-1.5">
                                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-100 pb-1.5">
                                     <div className="min-w-0">
@@ -2958,7 +2967,7 @@ const GanttResourceEditorModal = ({
                                     ) : (
                                         <div
                                             data-testid="gantt-apu-light-operational-dashboard"
-                                            className="grid min-w-0 grid-cols-[minmax(210px,1.5fr)_minmax(0,4.5fr)] gap-1.5"
+                                            className="grid min-w-0 gap-1.5 lg:grid-cols-[minmax(210px,1.5fr)_minmax(0,4.5fr)]"
                                         >
                                             <button
                                                 type="button"
@@ -2999,7 +3008,7 @@ const GanttResourceEditorModal = ({
 
                                             <div
                                                 data-testid="gantt-apu-light-operational-metrics"
-                                                className="grid min-w-0 grid-cols-6 grid-rows-2 gap-1.5"
+                                                className="grid min-w-0 grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-6 lg:grid-rows-2"
                                             >
                                                 {lightEditorMetricCards.map(([label, value, unit], index) => (
                                                     <div
@@ -3183,12 +3192,12 @@ const GanttResourceEditorModal = ({
                                 </div>
                             </div>
 
-                            <div className="rounded-[0.95rem] border border-zinc-200 bg-white px-3 py-3">
+                            <div className="min-w-0 rounded-[0.95rem] border border-zinc-200 bg-white px-3 py-3">
                                 <div className="flex items-center justify-between gap-2">
                                     <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-500">Recursos del APU</p>
                                     <span className="text-[9px] font-bold text-zinc-400">{visibleResourceLines.length} ítems</span>
                                 </div>
-                                <div className="mt-2 overflow-hidden">
+                                <div className="mt-2 min-w-0 overflow-hidden">
                                     {apuState.loading ? (
                                         <div className="flex items-center gap-2 rounded-[0.8rem] border border-zinc-200 bg-zinc-50 px-3 py-2 text-[10px] font-bold text-zinc-500">
                                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -3198,13 +3207,13 @@ const GanttResourceEditorModal = ({
                                         <div className="rounded-[0.8rem] border border-red-100 bg-red-50 px-3 py-2 text-[10px] font-bold text-red-700">
                                             {apuState.error}
                                         </div>
-                                    ) : groupedResourceLines.length ? (
-                                        <div className="max-h-[340px] space-y-2.5 overflow-y-auto pr-1">
+                                    ) : visibleResourceLines.length ? (
+                                        <div className="min-w-0 max-h-[340px] space-y-2.5 overflow-y-auto pr-1">
                                             {groupedResourceLines.map((category) => {
                                                 const isCollapsed = Boolean(collapsedCategories[category.id]);
                                                 const categoryHasDominant = category.subcategories.some((group) => group.items.some((item) => item.id === dominantResourceId));
                                                 return (
-                                                    <div key={`cat-${category.id}`} className="overflow-hidden rounded-[0.8rem] border border-zinc-200 bg-white">
+                                                    <div key={`cat-${category.id}`} className="min-w-0 overflow-hidden rounded-[0.8rem] border border-zinc-200 bg-white">
                                                         <button
                                                             type="button"
                                                             onClick={() => setCollapsedCategories((prev) => ({
@@ -3232,14 +3241,14 @@ const GanttResourceEditorModal = ({
                                                             </div>
                                                         </button>
                                                         {!isCollapsed ? category.subcategories.map((group) => (
-                                                            <div key={`subcat-${category.id}-${group.meta.id || 'none'}`} className="border-t border-zinc-100 first:border-t-0">
+                                                            <div key={`subcat-${category.id}-${group.meta.id || 'none'}`} className="min-w-0 border-t border-zinc-100 first:border-t-0">
                                                                 <div className="flex items-center justify-between bg-white px-3 py-1">
                                                                     <span className="text-[7px] font-black uppercase tracking-[0.14em] text-zinc-400">
                                                                         {group.meta.codigo ? `${group.meta.codigo} · ` : ''}{group.meta.descripcion || 'General'}
                                                                     </span>
                                                                     <span className="text-[7px] font-bold text-zinc-400">{group.items.length}</span>
                                                                 </div>
-                                                                <div className="overflow-x-auto pb-1">
+                                                                <div data-gantt-resource-table-scroll="true" className="max-w-full min-w-0 overflow-x-auto overscroll-x-contain pb-2 [scrollbar-gutter:stable]">
                                                                     <div className="min-w-[1032px]">
                                                                         <div className="grid grid-cols-[minmax(340px,2fr)_64px_96px_124px_138px_124px_92px] gap-2.5 border-t border-zinc-100 bg-zinc-50/70 px-3 py-1.5 text-[7px] font-black uppercase tracking-[0.14em] text-zinc-400">
                                                                             <span>Recurso / Descripción</span>
@@ -3380,11 +3389,11 @@ const GanttResourceEditorModal = ({
                                         </p>
                                     ) : null}
                                     <div className="mt-2 border-t border-zinc-200 bg-white pt-2">
-                                        <div className="mb-1.5 flex items-center justify-between gap-2">
+                                        <div className="mb-1.5 flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                                             <p className="text-[7px] font-black uppercase tracking-[0.14em] text-zinc-400">
                                                 Totales visibles del APU
                                             </p>
-                                            <p className="text-[8px] font-black uppercase tracking-[0.12em] text-[#F39200]">
+                                            <p className="max-w-full text-left text-[8px] font-black uppercase leading-tight tracking-[0.12em] text-[#F39200] sm:max-w-[58%] sm:text-right">
                                                 Ajustado con rendimientos operativos del Gantt
                                             </p>
                                         </div>

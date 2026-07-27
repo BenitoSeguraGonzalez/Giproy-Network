@@ -89,7 +89,11 @@ try {
             const runtimeErrors = [];
             page.on('pageerror', (error) => runtimeErrors.push(error.message));
             page.on('console', (message) => {
-                if (message.type() === 'error' && !/favicon|404/u.test(message.text())) runtimeErrors.push(message.text());
+                const expectedResourceEditorFailure = harness.source === 'gantt-resource-editor-error-harness.html'
+                    && /Failed to load resource.*500/u.test(message.text());
+                if (message.type() === 'error'
+                    && !/favicon|404/u.test(message.text())
+                    && !expectedResourceEditorFailure) runtimeErrors.push(message.text());
             });
             await page.route('**/api/v1/**', (route) => {
                 const url = new URL(route.request().url());
@@ -313,6 +317,7 @@ try {
                     sync_status: index % 11 === 0 ? 'diverged' : 'synced',
                 }));
                 let body = [];
+                let responseStatus = 200;
                 if (/\/presupuestos\/501\/indirectos\/?$/u.test(apiPath)) {
                     body = {
                         subtotal_directo: budgetSubtotal,
@@ -374,7 +379,10 @@ try {
                     }));
                 }
                 else if (/\/apus\/\d+\/?$/u.test(apiPath)) {
-                    body = {
+                    if (harness.source === 'gantt-resource-editor-error-harness.html') {
+                        responseStatus = 500;
+                        body = { detail: 'No se pudo cargar el APU operativo para esta partida.' };
+                    } else body = {
                         id: 3000,
                         codigo: 'APU-001',
                         descripcion: 'Partida técnica interdisciplinaria de hormigón estructural',
@@ -385,7 +393,7 @@ try {
                         porcentaje_indirectos: 12.5,
                         subcategoria_item_id: 4000,
                         subcategoria_item: { id: 4000, subcategoria_codigo: 5, descripcion: 'Estructuras' },
-                        lineas: Array.from({ length: 12 }, (_, index) => ({
+                        lineas: harness.source === 'gantt-resource-editor-empty-harness.html' ? [] : Array.from({ length: 12 }, (_, index) => ({
                             id: 7000 + index,
                             recurso_id: 7100 + index,
                             cantidad: 1 + (index * 0.25),
@@ -550,7 +558,7 @@ try {
                     }));
                 }
                 else if (apiPath.includes('/personal-todos/') || apiPath.includes('/calendar-entries/')) body = [];
-                route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+                route.fulfill({ status: responseStatus, contentType: 'application/json', body: JSON.stringify(body) });
             });
             const startedAt = Date.now();
             let navigationError = null;
@@ -944,6 +952,30 @@ try {
                     }
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(350);
+                }
+                if (harness.source.startsWith('gantt-resource-editor')) {
+                    const trigger = page.getByTitle('Editar duración desde recursos y rendimientos').first();
+                    await trigger.waitFor({ state: 'visible' });
+                    await trigger.click();
+                    await page.getByText('Rendimientos operativos', { exact: true }).waitFor({ state: 'visible' });
+                    const editor = page.locator('[data-gantt-resource-editor="true"]');
+                    await editor.waitFor({ state: 'visible' });
+                    if (harness.source === 'gantt-resource-editor-error-harness.html') {
+                        await page.getByText('No se pudo cargar el APU operativo para esta partida.', { exact: true }).waitFor({ state: 'visible' });
+                    } else if (harness.source === 'gantt-resource-editor-empty-harness.html') {
+                        await page.getByText('Este APU no tiene recursos registrados.', { exact: true }).waitFor({ state: 'visible' });
+                    } else {
+                        await page.getByText('Recurso técnico especializado 1', { exact: true }).waitFor({ state: 'visible' });
+                    }
+                    if (harness.source === 'gantt-resource-editor-end-harness.html') {
+                        await page.locator('[data-gantt-resource-editor-body="true"]').evaluate((node) => { node.scrollTop = node.scrollHeight; });
+                    }
+                    if (harness.source === 'gantt-resource-editor-table-end-harness.html') {
+                        const resourceTable = page.locator('[data-gantt-resource-table-scroll="true"]').first();
+                        await resourceTable.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
+                    }
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(500);
                 }
                 if (harness.source === 'gantt-quick-successor-harness.html'
                     || harness.source === 'gantt-quick-successor-end-harness.html'

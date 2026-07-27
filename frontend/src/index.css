@@ -705,4 +705,7 @@ html, body {
   .gantt-duration-display-trigger {
     min-height: 44px;
   }
+  [data-gantt-resource-editor="true"] :is(button, input) {
+    min-height: 44px;
+  }
 }

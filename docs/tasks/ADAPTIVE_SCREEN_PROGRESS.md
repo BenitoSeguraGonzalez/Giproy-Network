@@ -2266,6 +2266,92 @@ Evidencia final:
 
 Resultado: `40/40 PASS`.
 
+### C04.7.34 - Editor operativo de recursos y rendimientos
+
+Estado: **CERTIFICADA EN 50/50 COMBINACIONES VISUALES**
+Fecha: 2026-07-27
+
+Superficie real abierta y revisada:
+
+- editor de rendimiento, cantidad, jornada y modo de trabajo del APU;
+- resumen de recurso gobernante y doce métricas operativas;
+- recursos agrupados por categoría/subcategoría y tabla editable de siete
+  columnas;
+- totales directos, indirectos, precio operativo y precio presupuestado;
+- estados poblado, extremo vertical, extremo horizontal de tabla, vacío y
+  error de API.
+
+Problemas observados y causas raíz:
+
+1. `resourceLines` y sus dependencias se recreaban en cada render; el efecto que
+   inicializa los borradores escribía estado indefinidamente y provocaba
+   `Maximum update depth exceeded` al abrir el editor.
+2. La tabla de 1032 px propagaba su ancho mínimo hasta el cuerpo vertical. En
+   retrato, el cuerpo adquiría 216 px de overflow horizontal aunque el scroll
+   debía pertenecer exclusivamente a la tabla.
+3. La cuadrícula de métricas saltaba directamente a una composición rígida y
+   los totales mantenían una etiqueta larga en una sola línea.
+4. reset, guardar, cancelar e inputs quedaban por debajo de 44 px en dispositivos
+   táctiles.
+5. El estado vacío comprobaba los cuatro grupos estructurales —siempre
+   existentes— en vez de los recursos visibles; mostraba cuatro categorías
+   vacías y hacía inalcanzable el mensaje de ausencia de datos.
+6. El fixture vacío conservaba recursos sintéticos en la fila y el error 500
+   esperado se contabilizaba erróneamente como fallo de runtime.
+
+Adecuación aplicada:
+
+- derivaciones de líneas, etiquetas y snapshot operacional estabilizadas con
+  memoización; eliminado el ciclo de render sin relajar dependencias;
+- diálogo semántico con título accesible, altura `dvh`, cuerpo vertical propio
+  y bloqueo explícito de overflow horizontal;
+- cadena completa de ancestros `min-width: 0`; la tabla conserva un único
+  propietario horizontal marcado y gesto táctil real;
+- resumen apilable, métricas de 2/3/6 columnas y totales de 1/2/4 columnas en
+  función del ancho útil, no de la resolución física;
+- etiqueta de ajuste económico multilínea y acciones táctiles de 44 px;
+- estado vacío gobernado por `visibleResourceLines.length`, fixture aislado y
+  estado de error esperado verificado por contenido sin silenciar otros errores.
+
+Contratos añadidos:
+
+- `data-gantt-resource-editor="true"` y semántica `dialog`;
+- `data-gantt-resource-editor-body="true"` como propietario vertical;
+- `data-gantt-resource-table-scroll="true"` como propietario horizontal;
+- cinco harnesses; inventario visual: `150` harnesses.
+
+Evidencia rechazada y conservada:
+
+- `2026-07-27T17-25-03-164Z`: bucle de render al abrir el editor;
+- `2026-07-27T17-31-39-706Z`: composición inicial con métricas, tabla y totales
+  recortados en Lenovo retrato;
+- `2026-07-27T17-36-06-342Z`: estado vacío inválido, error 500 esperado marcado
+  como runtime y scroll horizontal atribuido al cuerpo;
+- `2026-07-27T17-41-23-015Z`: scroll propietario corregido, pero las categorías
+  vacías seguían ocultando el estado de ausencia.
+
+Verificación final:
+
+- build Vite de producción: PASS;
+- smoke de frontera API de Cronogramas Classic: PASS;
+- inventario: 43 rutas, 55 archivos interactivos, 150 harnesses y ninguno sin
+  validador;
+- Playwright: `50/50 PASS` en Windows FHD 100/125/150 %, Windows 4K/DPR 2,
+  tablets Full HD y 2K horizontal/vertical y Lenovo P12 horizontal/vertical;
+- revisión manual de capturas pobladas, desplazadas, vacías y de error en los
+  diez perfiles: PASS, con scroll propietario, totales y acciones alcanzables;
+- Impeccable: la unidad no introduce avisos. Permanece un `gray-on-color` ajeno
+  en `CronogramaGantt.jsx:19104`, registrado en QI-007 para su unidad posterior.
+
+Evidencia final:
+
+- Lenovo focal: `artifacts/visual-certification/2026-07-27T17-43-08-466Z/`
+  (`10/10`);
+- matriz completa: `artifacts/visual-certification/2026-07-27T17-43-48-776Z/`
+  (`50/50`).
+
+Resultado: `50/50 PASS`.
+
 ### C04.7.5 - Calendario laboral y festivos
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**
