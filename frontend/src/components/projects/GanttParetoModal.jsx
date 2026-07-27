@@ -46,7 +46,7 @@ const PillButton = ({ active, onClick, children }) => (
         type="button"
         onClick={onClick}
         className={cx(
-            'h-8 rounded-xl border px-3 text-[10px] font-black uppercase tracking-[0.16em] transition-all',
+            'min-h-11 rounded-xl border px-3 text-[10px] font-black uppercase tracking-[0.16em] transition-all',
             active
                 ? 'border-zinc-900 bg-zinc-900 text-white'
                 : 'border-zinc-200 bg-white text-zinc-500 hover:border-[#F39200]/50 hover:text-zinc-900'
@@ -253,9 +253,14 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/35 p-4 backdrop-blur-sm">
-            <div className="flex h-[88dvh] w-full max-w-[1420px] flex-col overflow-hidden rounded-[1.75rem] border border-zinc-300 bg-[#F3F4F6] shadow-2xl">
-                <div className="border-b border-zinc-200 bg-white px-6 py-4">
+        <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/35 p-2 backdrop-blur-sm sm:p-4">
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="gantt-pareto-title"
+                className="flex h-[calc(100dvh-1rem)] w-full max-w-[1420px] flex-col overflow-hidden rounded-[1rem] border border-zinc-300 bg-[#F3F4F6] shadow-2xl sm:h-[88dvh] sm:rounded-[1.75rem]"
+            >
+                <div className="shrink-0 border-b border-zinc-200 bg-white px-3 py-3 sm:px-6 sm:py-4">
                     <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
                             <div className="flex items-center gap-3">
@@ -263,7 +268,7 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
                                     <CheckCircle2 className="h-4 w-4 text-[#F39200]" />
                                 </div>
                                 <div className="min-w-0">
-                                    <div className="text-[12px] font-black uppercase tracking-[0.18em] text-zinc-900">
+                                    <div id="gantt-pareto-title" className="text-[12px] font-black uppercase tracking-[0.18em] text-zinc-900">
                                         Pareto temporal
                                     </div>
                                     <div className="text-[11px] font-medium text-zinc-500">
@@ -276,14 +281,15 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
                             <button
                                 type="button"
                                 onClick={() => onOpenReport?.()}
-                                className="inline-flex h-9 items-center justify-center rounded-xl border border-[#F39200]/25 bg-[#fff7ed] px-3 text-[10px] font-black uppercase tracking-[0.14em] text-[#F39200] transition hover:border-[#F39200] hover:bg-[#F39200] hover:text-white"
+                                className="inline-flex h-11 items-center justify-center rounded-xl border border-[#F39200]/25 bg-[#fff7ed] px-3 text-[10px] font-black uppercase tracking-[0.14em] text-[#F39200] transition hover:border-[#F39200] hover:bg-[#F39200] hover:text-white"
                             >
                                 Reporte
                             </button>
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className={`${APP_MODAL_CLOSE_BUTTON_CLASS} !h-9 !w-9 !rounded-[0.75rem]`}
+                                className={`${APP_MODAL_CLOSE_BUTTON_CLASS} !h-11 !w-11 !rounded-[0.75rem]`}
+                                aria-label="Cerrar Pareto temporal"
                             >
                                 <X className="h-4 w-4" />
                             </button>
@@ -311,7 +317,7 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
                             <AnimatedSelect
                                 value={selectedEdtId}
                                 onChange={(event) => setSelectedEdtId(event.target.value)}
-                                className="h-9 rounded-xl border border-zinc-200 bg-white px-3 text-[11px] font-bold text-zinc-700 outline-none focus:border-[#F39200]"
+                                className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-[11px] font-bold text-zinc-700 outline-none focus:border-[#F39200]"
                             >
                                 <option value="">Toda la EDT</option>
                                 {edtOptions.map((option) => (
@@ -325,7 +331,7 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
                                 variant="compact"
                                 value={startFrom}
                                 onChange={(event) => setStartFrom(event.target.value)}
-                                className="h-9 rounded-xl border border-zinc-200 bg-white px-3 text-[11px] font-bold text-zinc-700 outline-none focus:border-[#F39200]"
+                                className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-[11px] font-bold text-zinc-700 outline-none focus:border-[#F39200]"
                                 title="Inicio de ventana"
                             />
                             <AnimatedDateInput
@@ -333,7 +339,7 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
                                 variant="compact"
                                 value={endTo}
                                 onChange={(event) => setEndTo(event.target.value)}
-                                className="h-9 rounded-xl border border-zinc-200 bg-white px-3 text-[11px] font-bold text-zinc-700 outline-none focus:border-[#F39200]"
+                                className="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-[11px] font-bold text-zinc-700 outline-none focus:border-[#F39200]"
                                 title="Fin de ventana"
                             />
                         </div>
@@ -344,14 +350,14 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
                             onValueChange={setSearch}
                             placeholder="Filtrar código o descripción"
                             containerClassName="w-full max-w-[340px] rounded-xl bg-zinc-50"
-                            inputClassName="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2 pl-10 pr-10 text-[12px] font-medium text-zinc-700 outline-none focus:border-[#F39200]"
+                            inputClassName="min-h-11 w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2 pl-10 pr-10 text-[12px] font-medium text-zinc-700 outline-none focus:border-[#F39200]"
                         />
                     </div>
                 </div>
 
-                <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1.35fr)_390px] gap-0">
-                    <div className="flex min-h-0 flex-col border-r border-zinc-200 bg-white">
-                        <div className="grid grid-cols-5 gap-3 border-b border-zinc-200 bg-zinc-50 px-4 py-3">
+                <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[max-content_max-content] gap-0 overflow-y-auto xl:grid-cols-[minmax(0,1.35fr)_390px] xl:grid-rows-none xl:overflow-hidden" data-gantt-pareto-viewport="true">
+                    <div className="flex min-h-0 flex-col border-b border-zinc-200 bg-white xl:border-b-0 xl:border-r">
+                        <div className="grid grid-cols-2 gap-2 border-b border-zinc-200 bg-zinc-50 px-3 py-3 sm:grid-cols-3 xl:grid-cols-6 xl:gap-3 xl:px-4">
                             <MetricPill label="Modo" value={selectedViewOption.label} accent />
                             <MetricPill label="Total costo" value={`$ ${formatMoney(paretoTotals.totalCost)}`} />
                             <MetricPill label="Total tiempo" value={`${formatNumber(paretoTotals.totalDuration, 2)} d`} />
@@ -370,7 +376,7 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
                             <div>Impacto</div>
                         </div>
 
-                        <div className="min-h-0 flex-1 overflow-auto">
+                        <div className="flex-none overflow-x-auto overflow-y-visible xl:min-h-0 xl:flex-1 xl:overflow-auto">
                             {loading ? (
                                 <div className="flex h-full items-center justify-center gap-2 text-sm font-semibold text-zinc-500">
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -429,7 +435,7 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
                             </div>
                         </div>
 
-                        <div className="min-h-0 flex-1 overflow-auto px-5 py-4">
+                        <div className="flex-none overflow-visible px-5 py-4 xl:min-h-0 xl:flex-1 xl:overflow-auto">
                             {selectedItem ? (
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-3">
@@ -503,7 +509,7 @@ const GanttParetoModal = ({ isOpen, onClose, presupuestoId, onNavigateToItem, on
                                     <button
                                         type="button"
                                         onClick={() => onNavigateToItem?.(selectedItem)}
-                                        className="inline-flex h-10 items-center justify-center rounded-[0.9rem] border border-[#F39200]/25 bg-[#fff7ed] px-4 text-[10px] font-black uppercase tracking-[0.14em] text-[#F39200] transition hover:border-[#F39200] hover:bg-[#F39200] hover:text-white"
+                                        className="inline-flex min-h-11 items-center justify-center rounded-[0.9rem] border border-[#F39200]/25 bg-[#fff7ed] px-4 text-[10px] font-black uppercase tracking-[0.14em] text-[#F39200] transition hover:border-[#F39200] hover:bg-[#F39200] hover:text-white"
                                     >
                                         Ir a la tarea en Gantt
                                     </button>

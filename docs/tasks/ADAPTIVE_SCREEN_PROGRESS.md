@@ -2251,6 +2251,58 @@ Capturas inspeccionadas:
 
 Resultado: `10/10` perfiles sin overflow, clipping ni superposición.
 
+### C04.7.6 - Pareto temporal del Gantt
+
+Estado: **CERTIFICADA EN 10/10 PERFILES**
+
+Contenido tratado:
+
+- modos Integrado, Tiempo y Costo;
+- Top 10/20/50 y filtro de actividades críticas;
+- filtro EDT, ventana de fechas y búsqueda;
+- seis métricas resumen;
+- tabla Pareto de 20 actividades con desplazamiento horizontal;
+- detalle financiero/temporal, navegación al Gantt y dominante actual;
+- acción de reporte y cierre.
+
+Adecuación aplicada:
+
+- escritorio `xl`: maestro–detalle simultáneo, con scrolls internos separados;
+- tablet y retrato: un único flujo vertical del modal, lista completa seguida
+  del detalle, manteniendo solo el scroll horizontal de la tabla;
+- métricas en `2/3/6` columnas según espacio real;
+- controles, fechas, filtros, cierre y CTA con objetivo táctil mínimo de `44px`;
+- modal elevado a `z-index: 1200` para quedar por encima de todos los portales
+  y controles del Gantt;
+- fixture API determinista de 20 actividades con pesos normalizados a `100%`.
+
+Errores detectados y rechazados mediante captura/prueba:
+
+1. El primer render mostraba un control negro del Gantt sobre el modal porque
+   Pareto usaba una capa inferior. Se corrigió la jerarquía modal.
+2. El fixture inicial generaba acumulados superiores a `100%`; se normalizaron
+   los pesos antes de aceptar evidencia.
+3. La primera matriz completa falló en tablet FHD/2K retrato: la tabla y el
+   viewport maestro tenían scroll vertical anidado y el gesto quedaba atrapado.
+   Se eliminó el scroll vertical interno fuera de `xl` y se añadió el contrato
+   de un único viewport vertical.
+
+Contrato: `gantt-pareto-harness.html` y
+`data-gantt-pareto-viewport="true"`.
+
+Evidencia final completa entre
+`2026-07-27T12-46-38-576Z` y `2026-07-27T12-47-26-950Z`.
+Capturas revisadas manualmente:
+
+- Lenovo horizontal:
+  `artifacts/visual-certification/2026-07-27T12-47-21-392Z/`;
+- Lenovo retrato:
+  `artifacts/visual-certification/2026-07-27T12-47-26-950Z/`;
+- tablet FHD retrato, inicio y extremo:
+  `artifacts/visual-certification/2026-07-27T12-46-02-236Z/`.
+
+Resultado: `10/10` perfiles; detector Impeccable sin hallazgos.
+
 ### C04.7.4 - Panel Historial confirmado
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**

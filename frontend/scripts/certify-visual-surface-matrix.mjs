@@ -499,6 +499,39 @@ try {
                         recycle_expires_at: `2026-07-${String(31 - index).padStart(2, '0')}T12:00:00Z`,
                     }));
                 }
+                else if (/\/cronogramas-trabajo\/\d+\/pareto\/?$/u.test(apiPath)) {
+                    const paretoItems = Array.from({ length: 20 }, (_, index) => {
+                        const costValue = 285000 - (index * 9200);
+                        const durationDays = 42 - index;
+                        const percentage = ((20 - index) / 210) * 100;
+                        return {
+                            id: 1001 + index,
+                            linea_id: 1001 + index,
+                            ranking: index + 1,
+                            codigo: `EDT-${Math.floor(index / 5) + 1}.${(index % 5) + 1}`,
+                            descripcion: `Actividad crítica interdisciplinaria ${index + 1} del complejo hospitalario Santiago Bermeo`,
+                            cantidad: 18 + (index * 2.75),
+                            cost_value: costValue,
+                            duration_days: durationDays,
+                            work_hours: durationDays * 8,
+                            porcentaje: percentage,
+                            porcentaje_acumulado: Math.min(100, (index + 1) * 5),
+                            cost_pct: percentage,
+                            time_pct: Math.max(1, 12.5 - (index * 0.48)),
+                            integrated_value: Math.max(1, 13.4 - (index * 0.52)),
+                            is_critical: index < 8,
+                            start_date: `2026-07-${String(1 + index).padStart(2, '0')}T08:00:00Z`,
+                            end_date: `2026-08-${String(1 + index).padStart(2, '0')}T17:00:00Z`,
+                        };
+                    });
+                    body = {
+                        view: url.searchParams.get('view') || 'integrated',
+                        total_items: paretoItems.length,
+                        visible_items: paretoItems.length,
+                        visible_acumulado: 100,
+                        items: paretoItems,
+                    };
+                }
                 else if (/\/proyectos\/\d+\/?$/u.test(apiPath)) body = {
                     ...projects[0],
                     id: 1,
@@ -681,6 +714,13 @@ try {
                 if (harness.source === 'gantt-tools-harness.html') {
                     await page.getByRole('button', { name: 'Herramientas del Gantt' }).click();
                     await page.getByText('Factory reset', { exact: true }).waitFor({ state: 'visible' });
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
+                if (harness.source === 'gantt-pareto-harness.html') {
+                    await page.getByRole('button', { name: 'Abrir Pareto del Gantt' }).click();
+                    await page.getByRole('dialog', { name: 'Pareto temporal' }).waitFor({ state: 'visible' });
+                    await page.getByText('EDT-1.1', { exact: false }).first().waitFor({ state: 'visible' });
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(350);
                 }
@@ -1115,6 +1155,12 @@ try {
                 if (harness.source === 'gantt-calendar-harness.html') {
                     await page.evaluate(() => {
                         const viewport = document.querySelector('[data-gantt-calendar-viewport="true"]');
+                        if (viewport) viewport.scrollTop = viewport.scrollHeight;
+                    });
+                }
+                if (harness.source === 'gantt-pareto-harness.html') {
+                    await page.evaluate(() => {
+                        const viewport = document.querySelector('[data-gantt-pareto-viewport="true"]');
                         if (viewport) viewport.scrollTop = viewport.scrollHeight;
                     });
                 }
