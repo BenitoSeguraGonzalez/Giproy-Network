@@ -808,6 +808,40 @@ try {
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(350);
                 }
+                if (harness.source === 'gantt-fine-tune-subbar-harness.html'
+                    || harness.source === 'gantt-fine-tune-subbar-error-harness.html') {
+                    const targetTaskRow = page.locator('[data-grid-row="true"]').nth(1);
+                    await targetTaskRow.click({ position: { x: 250, y: 28 } });
+                    await page.getByRole('button', { name: 'Gantt', exact: true }).click();
+                    await page.waitForTimeout(500);
+                    const segmentBar = page.locator('[data-subbar-key]').first();
+                    if (!(await segmentBar.count())) throw new Error('Fine tune segment fixture did not materialize.');
+                    await segmentBar.hover({ force: true });
+                    await page.getByRole('button', { name: /Abrir acciones del tramo/u }).first().evaluate((node) => node.click());
+                    await page.getByRole('button', { name: 'Ajuste fino' }).click();
+                    const continuation = page.getByRole('button', { name: 'Continuar edición' });
+                    if (await continuation.isVisible().catch(() => false)) await continuation.click();
+                    const fineTuneDialog = page.locator('[data-gantt-subbar-fine-tune="true"]');
+                    await fineTuneDialog.waitFor({ state: 'visible' });
+                    if (harness.source === 'gantt-fine-tune-subbar-error-harness.html') {
+                        await page.getByRole('button', { name: 'Limpiar fecha', exact: true }).click();
+                        await page.getByRole('button', { name: 'Aplicar' }).click();
+                        await page.locator('[data-gantt-subbar-fine-tune-error="true"]').waitFor({ state: 'visible' });
+                    }
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
+                if (harness.source === 'gantt-fine-tune-task-harness.html') {
+                    const taskMenuTrigger = page.getByRole('button', { name: 'Abrir menú de tarea' }).first();
+                    await taskMenuTrigger.waitFor({ state: 'visible' });
+                    await taskMenuTrigger.click();
+                    await page.getByRole('button', { name: 'Ajuste fino' }).click();
+                    const continuation = page.getByRole('button', { name: 'Continuar edición' });
+                    if (await continuation.isVisible().catch(() => false)) await continuation.click();
+                    await page.locator('[data-gantt-task-fine-tune="true"]').waitFor({ state: 'visible' });
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(500);
+                }
                 if (harness.source === 'gantt-quick-successor-harness.html'
                     || harness.source === 'gantt-quick-successor-end-harness.html'
                     || harness.source === 'gantt-quick-successor-error-harness.html'

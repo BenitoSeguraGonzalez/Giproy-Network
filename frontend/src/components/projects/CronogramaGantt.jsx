@@ -17664,16 +17664,12 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         setQuickSuccessorSourceId(null);
         setPredecessorPickerRowId(null);
         setSelectedTaskId(normalizedId);
-        if (!USE_SPLIT_LAYOUT) {
-            setEditingStartRowId(normalizedId);
-        }
+        setEditingStartRowId(normalizedId);
         setTaskActionMenu(null);
         window.requestAnimationFrame(() => {
-            if (USE_SPLIT_LAYOUT) {
-                window.requestAnimationFrame(() => {
-                    focusGanttStartInput(normalizedId);
-                });
-            }
+            window.requestAnimationFrame(() => {
+                focusGanttStartInput(normalizedId);
+            });
         });
     }, [confirmCpmSensitiveManualEdit, focusGanttStartInput, handleOpenSubbarFineTuning]);
 
@@ -20544,14 +20540,15 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                 </div>
                                 <div className="px-3 py-1.5" style={ganttColumnSettings.getCellGridStyle('start')}>
                                     {row.is_calculable ? (
-                                        <GanttHeaderTooltip content={`${buildGanttSubbarVisuals(row, draft, timelineSegments, segmentColumnWidth, scheduleConfig, valorado, effectiveTimeScale).length ? 'Inicio global de la línea: ' : 'Inicio real: '}${formatDateTime(draft.start_date || resolveVisibleRowStartDate(row, projectStartConfigDisplay))}`}>
-                                            {editingStartRowId === lineId ? (
+                                        editingStartRowId === lineId ? (
+                                            <div className="min-w-[11rem]" data-gantt-task-fine-tune="true" data-gantt-no-pan="true">
                                                 <AnimatedDateInput
                                                     type="datetime-local"
                                                     variant="compact"
                                                     autoFocus
                                                     openOnMount
                                                     compactFullDisplay
+                                                    aria-label="Inicio programado de la tarea"
                                                     value={toNativeDateTimeInputValue(draft.start_date ?? resolveVisibleRowStartDate(row, projectStartConfigDisplay))}
                                                     onChange={(event) => updateDraft(lineId, { start_date: normalizeDateTimeInput(event.target.value) })}
                                                     onBlur={() => setEditingStartRowId((current) => (current === lineId ? null : current))}
@@ -20560,9 +20557,11 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                             setEditingStartRowId((current) => (current === lineId ? null : current));
                                                         }
                                                     }}
-                                                    className={GANTT_INLINE_INPUT_CLASS}
+                                                    className={`${GANTT_INLINE_INPUT_CLASS} min-h-11`}
                                                 />
-                                            ) : (
+                                            </div>
+                                        ) : (
+                                            <GanttHeaderTooltip content={`${buildGanttSubbarVisuals(row, draft, timelineSegments, segmentColumnWidth, scheduleConfig, valorado, effectiveTimeScale).length ? 'Inicio global de la línea: ' : 'Inicio real: '}${formatDateTime(draft.start_date || resolveVisibleRowStartDate(row, projectStartConfigDisplay))}`}>
                                                 <button
                                                     type="button"
                                                     onClick={() => setEditingStartRowId(lineId)}
@@ -20572,8 +20571,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     <CalendarRange className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
                                                     <span className="min-w-0 truncate">{formatDateTime(draft.start_date || resolveVisibleRowStartDate(row, projectStartConfigDisplay))}</span>
                                                 </button>
-                                            )}
-                                        </GanttHeaderTooltip>
+                                            </GanttHeaderTooltip>
+                                        )
                                     ) : isManualMilestone ? (
                                         editingStartRowId === lineId ? (
                                             <AnimatedDateInput
@@ -21391,12 +21390,19 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         : null}
                     {subbarFineTuneDialog?.lineId && subbarFineTuneDialog?.subbarId
                         ? createPortal(
-                            <div className="fixed inset-0 z-[255] flex items-center justify-center bg-[rgba(255,255,255,0.16)] px-4 py-6 backdrop-blur-[1px]">
-                                <div className="w-full max-w-[24rem] rounded-[1.2rem] border border-zinc-200/90 bg-white px-4 py-4 shadow-[0_20px_46px_rgba(15,23,42,0.16)]" data-gantt-no-pan="true">
+                            <div className="fixed inset-0 z-[255] flex items-center justify-center bg-[rgba(255,255,255,0.16)] p-2 backdrop-blur-[1px] sm:px-4 sm:py-6">
+                                <div
+                                    role="dialog"
+                                    aria-modal="true"
+                                    aria-labelledby="gantt-subbar-fine-tune-title"
+                                    className="max-h-[calc(100dvh-1rem)] w-full max-w-[24rem] overflow-y-auto rounded-[1.2rem] border border-zinc-200/90 bg-white px-4 py-4 shadow-[0_20px_46px_rgba(15,23,42,0.16)] [&_button]:min-h-11 [&_input]:min-h-11"
+                                    data-gantt-no-pan="true"
+                                    data-gantt-subbar-fine-tune="true"
+                                >
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="min-w-0">
                                             <p className="text-[8px] font-black uppercase tracking-[0.18em] text-[#F39200]">Ajuste fino</p>
-                                            <h3 className="mt-1 text-[0.92rem] font-black uppercase tracking-[0.04em] text-zinc-900">
+                                            <h3 id="gantt-subbar-fine-tune-title" className="mt-1 text-[0.92rem] font-black uppercase tracking-[0.04em] text-zinc-900">
                                                 Inicio exacto del subtramo
                                             </h3>
                                         </div>
@@ -21435,10 +21441,17 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     }}
                                                     className={GANTT_INLINE_INPUT_CLASS}
                                                 />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSubbarFineTuneDialog((current) => ({ ...current, startsAt: '', error: '' }))}
+                                                    className="mt-2 inline-flex min-h-11 items-center justify-center rounded-[0.8rem] border border-zinc-200 bg-white px-3 text-[9px] font-black uppercase tracking-[0.1em] text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50"
+                                                >
+                                                    Limpiar fecha
+                                                </button>
                                             </div>
                                         </label>
                                         {subbarFineTuneDialog.error ? (
-                                            <div className="mt-3 rounded-[0.8rem] border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] font-bold text-amber-800">
+                                            <div className="mt-3 rounded-[0.8rem] border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] font-bold text-amber-800" role="alert" data-gantt-subbar-fine-tune-error="true">
                                                 {subbarFineTuneDialog.error}
                                             </div>
                                         ) : null}
@@ -23351,22 +23364,25 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         <div className="px-3 py-2" style={ganttColumnSettings.getCellGridStyle('start')}>
                                     {row.is_calculable ? (
                                         editingStartRowId === lineId ? (
-                                            <AnimatedDateInput
-                                                type="datetime-local"
-                                                variant="compact"
-                                                autoFocus
-                                                openOnMount
-                                                compactFullDisplay
-                                                className={GANTT_INLINE_INPUT_CLASS}
-                                                value={draft.start_date ?? toNativeDateTimeInputValue(resolveVisibleRowStartDate(row, projectStartConfigDisplay), configDraft, 'start')}
-                                                onChange={(e) => updateDraft(lineId, { start_date: e.target.value })}
-                                                onBlur={() => setEditingStartRowId((current) => (current === lineId ? null : current))}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter' || e.key === 'Escape') {
-                                                        setEditingStartRowId((current) => (current === lineId ? null : current));
-                                                    }
-                                                }}
-                                            />
+                                            <div className="min-w-[11rem]" data-gantt-task-fine-tune="true" data-gantt-no-pan="true">
+                                                <AnimatedDateInput
+                                                    type="datetime-local"
+                                                    variant="compact"
+                                                    autoFocus
+                                                    openOnMount
+                                                    compactFullDisplay
+                                                    aria-label="Inicio programado de la tarea"
+                                                    className={`${GANTT_INLINE_INPUT_CLASS} min-h-11`}
+                                                    value={draft.start_date ?? toNativeDateTimeInputValue(resolveVisibleRowStartDate(row, projectStartConfigDisplay), configDraft, 'start')}
+                                                    onChange={(e) => updateDraft(lineId, { start_date: e.target.value })}
+                                                    onBlur={() => setEditingStartRowId((current) => (current === lineId ? null : current))}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' || e.key === 'Escape') {
+                                                            setEditingStartRowId((current) => (current === lineId ? null : current));
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
                                         ) : (
                                             <GanttHeaderTooltip content={`${subbarVisuals.length ? 'Inicio global de la línea: ' : 'Inicio real: '}${formatDateTime(draft.start_date || resolveVisibleRowStartDate(row, projectStartConfigDisplay))}`}>
                                                 <button

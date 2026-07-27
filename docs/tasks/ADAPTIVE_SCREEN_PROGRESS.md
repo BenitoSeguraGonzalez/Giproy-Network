@@ -2545,6 +2545,71 @@ Evidencia aceptada:
 
 Resultado: modal y tabla completos, desplazables y táctiles; `30/30`.
 
+### C04.7.30 - Ajuste fino de tarea y subtramo
+
+Estado: **CERTIFICADA EN 30/30 COMBINACIONES VISUALES**
+
+Contenido tratado:
+
+- ajuste exacto del inicio de un subtramo mediante modal;
+- validación de fecha/hora ausente y recuperación del error;
+- ajuste del inicio global de una tarea dentro de la tabla dividida;
+- calendario, hora, cancelar, aplicar, limpiar y cerrar;
+- confirmación de seguridad CPM previa a la edición manual.
+
+Adecuación aplicada:
+
+- modal semántico con título accesible, altura basada en `dvh`, scroll propio y
+  objetivos táctiles mínimos de `44px`;
+- acción explícita `Limpiar fecha`, para permitir corregir o retirar el valor y
+  exponer la validación sin depender de teclado físico;
+- alerta de validación con rol y contrato DOM estable;
+- editor de tarea con ancho útil mínimo, etiqueta accesible y objetivo táctil;
+- apertura real del editor y calendario en diseño dividido, tanto con ratón
+  como con interacción táctil;
+- retirada de la animación de salida incompatible de `AnimatedDateInput`,
+  conservando la animación de entrada y eliminando el aviso de runtime común.
+
+Errores detectados y corregidos:
+
+1. En diseño dividido, `Ajuste fino` intentaba enfocar el calendario antes de
+   montar el editor; en tablet la acción no producía un control editable.
+2. El selector no ofrecía una vía visual para vaciar una fecha, por lo que el
+   usuario táctil no podía recuperar ese estado sin teclado.
+3. El modal original carecía de semántica de diálogo y usaba acciones de
+   `36px`.
+4. La transición de salida del calendario emitía un aviso React/Framer Motion
+   al desmontar el popover.
+5. El tooltip envolvía un hijo que cambiaba de botón a editor y dejaba una capa
+   fija transitoria fuera del viewport; se separaron ambos estados.
+
+Contratos:
+
+- `data-gantt-subbar-fine-tune="true"`;
+- `data-gantt-subbar-fine-tune-error="true"`;
+- `data-gantt-task-fine-tune="true"`;
+- tres harnesses; inventario visual: `133` harnesses.
+
+Evidencia rechazada y conservada:
+
+- `2026-07-27T15-54-57-605Z`: corrida incompleta por timeout antes de finalizar
+  la matriz;
+- `2026-07-27T15-57-39-303Z`: ausencia de vaciado UI y editor no montado;
+- `2026-07-27T16-01-22-189Z`, `2026-07-27T16-02-35-587Z` y
+  `2026-07-27T16-03-28-442Z`: iteraciones de corrección con selector ambiguo,
+  tooltip recortado y aviso de runtime.
+
+Evidencia aceptada:
+
+- Lenovo horizontal/vertical: `2026-07-27T16-04-11-200Z` (`6/6`);
+- matriz completa: `2026-07-27T16-04-37-106Z` (`30/30`).
+
+Capturas inspeccionadas manualmente: error en tablet Full HD retrato, modal en
+Lenovo P12 retrato y editor/calendario en escritorio Full HD al `150%`.
+
+Resultado: los dos recorridos de ajuste fino son editables, recuperables,
+accesibles y visibles sin recortes; `30/30`.
+
 ### C04.7.4 - Panel Historial confirmado
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**

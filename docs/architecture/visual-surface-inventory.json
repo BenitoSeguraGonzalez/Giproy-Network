@@ -103,7 +103,7 @@
     "protectedRoutes": 38,
     "publicRoutes": 5,
     "interactiveSurfaceFiles": 55,
-    "harnesses": 130,
+    "harnesses": 133,
     "harnessesWithoutValidator": 0
   },
   "routes": [
@@ -4661,6 +4661,72 @@
         "validate-gantt-santiago-critical-visual-dom.mjs",
         "validate-gantt-santiago-full-dom.mjs",
         "validate-gantt-scrollbar-geometry.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-fine-tune-subbar-error-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-fine-tune-subbar-error-harness.html",
+      "source": "gantt-fine-tune-subbar-error-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-fine-tune-subbar-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-fine-tune-subbar-harness.html",
+      "source": "gantt-fine-tune-subbar-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-fine-tune-task-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-fine-tune-task-harness.html",
+      "source": "gantt-fine-tune-task-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
       ],
       "profiles": [
         "desktop-fhd-100",

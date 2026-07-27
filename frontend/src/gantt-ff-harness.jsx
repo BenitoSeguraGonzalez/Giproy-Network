@@ -243,7 +243,8 @@ const Harness = () => {
 
     useEffect(() => {
         if (window.location.pathname.includes('gantt-segment-menu-harness')
-            || window.location.pathname.includes('gantt-split-dialog')) {
+            || window.location.pathname.includes('gantt-split-dialog')
+            || window.location.pathname.includes('gantt-fine-tune')) {
             const data = createSyntheticFixture();
             setFixture(data);
             setTrabajo(data.trabajo);

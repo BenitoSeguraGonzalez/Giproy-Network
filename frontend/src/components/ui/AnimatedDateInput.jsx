@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight, Clock3, RotateCcw } from 'lucide-react';
 
 const MotionDiv = motion.div;
@@ -580,9 +580,7 @@ const AnimatedDateInput = React.forwardRef(({
             </button>
 
             {dropdownStyle && typeof document !== 'undefined' && createPortal(
-                <AnimatePresence>
-                    {isOpen && dropdownContent}
-                </AnimatePresence>,
+                isOpen ? dropdownContent : null,
                 document.body,
             )}
         </div>
