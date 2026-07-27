@@ -702,4 +702,7 @@ html, body {
     min-width: 44px;
     min-height: 44px;
   }
+  .gantt-duration-display-trigger {
+    min-height: 44px;
+  }
 }

@@ -7,6 +7,7 @@ import { ganttFixturesApi } from './api/ganttFixtures';
 import { AppDialogProvider } from './components/ui/AppDialogProvider.jsx';
 
 const createSyntheticFixture = () => {
+    const isDurationSubcontractFixture = window.location.pathname.includes('gantt-duration-display-subcontract');
     const periodStarts = ['2026-07-01', '2026-07-16', '2026-08-01', '2026-08-16', '2026-09-01', '2026-09-16'];
     const operationalRows = Array.from({ length: 36 }, (_, index) => {
         const id = 1001 + index;
@@ -48,6 +49,11 @@ const createSyntheticFixture = () => {
                 { id: 7000 + index, codigo: `REC-${index + 1}`, descripcion: `Recurso especializado ${index + 1}`, unidad: 'h', cantidad: 2.5 + index },
             ],
             metadata: {
+                ...(isDurationSubcontractFixture && index === 0 ? {
+                    subcontracted: true,
+                    temporal_source: 'subcontract_contract',
+                    gantt_duration_display_unit: 'week',
+                } : {}),
                 ...(index === 1 ? {
                     governing_resource: {
                         name: 'Sin recurso gobernante',
@@ -280,7 +286,8 @@ const Harness = () => {
             || window.location.pathname.includes('gantt-split-dialog')
             || window.location.pathname.includes('gantt-fine-tune')
             || window.location.pathname.includes('gantt-reconciliation')
-            || window.location.pathname.includes('gantt-apu-signals')) {
+            || window.location.pathname.includes('gantt-apu-signals')
+            || window.location.pathname.includes('gantt-duration-display')) {
             const data = createSyntheticFixture();
             setFixture(data);
             setTrabajo(data.trabajo);

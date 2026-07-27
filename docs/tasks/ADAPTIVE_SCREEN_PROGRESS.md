@@ -2198,6 +2198,74 @@ Capturas inspeccionadas manualmente: Lenovo horizontal
 
 Resultado: `10/10` perfiles.
 
+### C04.7.33 - Selector de representación de duración
+
+Estado: **CERTIFICADA EN 10/10 PERFILES**
+Fecha: 2026-07-27
+
+Superficie real abierta y revisada:
+
+- selector de magnitud visible en tabla y vista dividida;
+- estados Días, Horas y Semanas con persistencia en el borrador de la fila;
+- variante contractual de partidas subcontratadas;
+- apertura en filas iniciales y en el extremo inferior del viewport propietario;
+- cierre exterior, Escape, resize y desplazamiento del contenedor.
+
+Problema observado:
+
+- los dos renderizados del selector usaban un desplegable absoluto dentro del
+  grid desplazable, por lo que podía quedar recortado por `overflow`;
+- los disparadores táctiles no garantizaban 44 px en puntero grueso;
+- la implementación duplicada mantenía dos avisos de contraste gris sobre
+  fondo azul.
+
+Adecuación aplicada:
+
+- el menú se renderiza en `document.body` mediante portal con posición fija;
+- la posición se calcula desde el disparador, se limita al viewport y cambia
+  automáticamente entre apertura superior e inferior;
+- el menú conserva scroll propio si la altura disponible es excepcional;
+- disparadores y opciones exponen `aria-haspopup`, `aria-expanded`,
+  `menuitemradio` y `aria-checked`;
+- las opciones miden al menos 44 px y los disparadores alcanzan 44 px en
+  dispositivos táctiles sin aumentar la densidad del escritorio;
+- los dos avisos Impeccable de esta unidad fueron eliminados con un color
+  semántico azul oscuro. Permanece un aviso ajeno en la línea 19095,
+  documentado para su superficie posterior.
+
+Contratos añadidos:
+
+- `gantt-duration-display-harness.html`;
+- `gantt-duration-display-hours-harness.html`;
+- `gantt-duration-display-end-harness.html`;
+- `gantt-duration-display-subcontract-harness.html`;
+- el certificador verifica persistencia de Horas, geometría completa dentro
+  del viewport, estado contractual y fila final desplazada.
+
+Evidencia rechazada:
+
+- `2026-07-27T16-51-53-317Z`: lote agotado y capturas vacías por un portal sin
+  contenedor válido; no se contabilizó;
+- `2026-07-27T16-54-49-081Z` y `2026-07-27T16-56-29-457Z`: pruebas aisladas
+  fallidas que localizaron respectivamente el contenedor ausente y dos
+  inserciones accidentales de `document.body` como nodos React. Ambas causas
+  fueron corregidas antes de generar evidencia final.
+
+Verificación final:
+
+- build Vite de producción: PASS;
+- inventario visual: 43 rutas, 55 archivos interactivos y 145 harnesses;
+- Playwright: `40/40 PASS` en Windows FHD 100/125/150 %, Windows 4K/DPR 2,
+  tablet Full HD y 2K horizontal/vertical y Lenovo P12 horizontal/vertical;
+- revisión manual de capturas iniciales, Horas, contractual y extremo inferior:
+  PASS, sin clipping, superposición ni overflow documental.
+
+Evidencia final:
+
+- `artifacts/visual-certification/2026-07-27T17-01-18-393Z/`.
+
+Resultado: `40/40 PASS`.
+
 ### C04.7.5 - Calendario laboral y festivos
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**

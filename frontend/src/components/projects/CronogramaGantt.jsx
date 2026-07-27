@@ -8866,6 +8866,7 @@ const CronogramaGantt = ({
     const [activeCpmNavigatorIndex, setActiveCpmNavigatorIndex] = useState(-1);
     const [durationDisplayUnit, setDurationDisplayUnit] = useState('day');
     const [durationDisplayMenuRowId, setDurationDisplayMenuRowId] = useState(null);
+    const [durationDisplayMenuPosition, setDurationDisplayMenuPosition] = useState(null);
     const [subcontractDurationInputs, setSubcontractDurationInputs] = useState({});
     const [zoomLevel, setZoomLevel] = useState(1);
     const [zoomInput, setZoomInput] = useState('100');
@@ -9050,6 +9051,7 @@ const CronogramaGantt = ({
     const [timelineViewportSnapshot, setTimelineViewportSnapshot] = useState({ scrollLeft: 0, width: 0 });
     const gridResizeInteractionRef = useRef(null);
     const taskActionMenuRef = useRef(null);
+    const durationDisplayMenuRef = useRef(null);
     const quickSuccessorDialogRef = useRef(null);
     const hoverPersistedAffordanceTimeoutRef = useRef(null);
     const suppressTopRailTooltips = toolsMenuOpen || historyPanelOpen || configPanelOpen || timeScaleMenuOpen;
@@ -9215,6 +9217,26 @@ const CronogramaGantt = ({
         () => GANTT_DURATION_DISPLAY_UNITS.find((item) => item.id === durationDisplayUnit) || GANTT_DURATION_DISPLAY_UNITS[1],
         [durationDisplayUnit]
     );
+    const toggleDurationDisplayMenu = useCallback((lineId, triggerNode) => {
+        if (durationDisplayMenuRowId === lineId) {
+            setDurationDisplayMenuRowId(null);
+            setDurationDisplayMenuPosition(null);
+            return;
+        }
+        const triggerRect = triggerNode?.getBoundingClientRect?.();
+        if (!triggerRect) return;
+        const safePadding = 12;
+        const menuWidth = Math.min(208, Math.max(176, window.innerWidth - safePadding * 2));
+        const estimatedMenuHeight = 184;
+        const availableBelow = window.innerHeight - triggerRect.bottom - safePadding;
+        const opensAbove = availableBelow < estimatedMenuHeight && triggerRect.top > availableBelow;
+        const left = clamp(triggerRect.right - menuWidth, safePadding, Math.max(safePadding, window.innerWidth - menuWidth - safePadding));
+        const top = opensAbove
+            ? Math.max(safePadding, triggerRect.top - estimatedMenuHeight - 6)
+            : Math.min(window.innerHeight - estimatedMenuHeight - safePadding, triggerRect.bottom + 6);
+        setDurationDisplayMenuPosition({ left, top, width: menuWidth, placement: opensAbove ? 'top' : 'bottom' });
+        setDurationDisplayMenuRowId(lineId);
+    }, [durationDisplayMenuRowId]);
     const formatVisibleDurationForRow = useCallback(
         (row, draft = {}, durationDays = 0, decimals = 2) => {
             const rowDisplayUnit = resolveGanttRowDurationDisplayUnit(row, draft, durationDisplayUnit);
@@ -11812,6 +11834,32 @@ const CronogramaGantt = ({
             document.removeEventListener('keydown', handleEscape, true);
         };
     }, [taskActionMenu]);
+
+    useEffect(() => {
+        if (!durationDisplayMenuRowId) return undefined;
+        const closeMenu = () => {
+            setDurationDisplayMenuRowId(null);
+            setDurationDisplayMenuPosition(null);
+        };
+        const handlePointerDown = (event) => {
+            if (durationDisplayMenuRef.current?.contains(event.target)) return;
+            if (event.target?.closest?.('[data-gantt-duration-display-trigger]')) return;
+            closeMenu();
+        };
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') closeMenu();
+        };
+        document.addEventListener('pointerdown', handlePointerDown, true);
+        document.addEventListener('keydown', handleKeyDown, true);
+        window.addEventListener('resize', closeMenu);
+        window.addEventListener('scroll', closeMenu, true);
+        return () => {
+            document.removeEventListener('pointerdown', handlePointerDown, true);
+            document.removeEventListener('keydown', handleKeyDown, true);
+            window.removeEventListener('resize', closeMenu);
+            window.removeEventListener('scroll', closeMenu, true);
+        };
+    }, [durationDisplayMenuRowId]);
 
     useEffect(() => {
         if (!taskActionMenu) {
@@ -20736,8 +20784,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 <GanttHeaderTooltip content={`${durationTypePresentation.tooltip}\nLa magnitud elegida también se usa para capturar la duración contractual manual.`}>
                                                     <button
                                                         type="button"
-                                                        onClick={() => setDurationDisplayMenuRowId((current) => (current === lineId ? null : lineId))}
-                                                        className={`inline-flex w-full items-center justify-center gap-1 rounded-[0.75rem] border px-2 py-1.5 text-[9px] font-black uppercase tracking-[0.1em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20 ${
+                                                        onClick={(event) => toggleDurationDisplayMenu(lineId, event.currentTarget)}
+                                                        data-gantt-duration-display-trigger={lineId}
+                                                        className={`gantt-duration-display-trigger inline-flex min-h-9 w-full items-center justify-center gap-1 rounded-[0.75rem] border px-2 py-1.5 text-[9px] font-black uppercase tracking-[0.1em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20 ${
                                                             isPendingSubcontract
                                                                 ? 'border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-300 hover:bg-amber-100/70'
                                                                 : 'border-violet-100 bg-violet-50 text-violet-700 hover:border-violet-200 hover:bg-violet-100/70'
@@ -20754,8 +20803,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 <GanttHeaderTooltip content={durationTypePresentation.tooltip}>
                                                     <button
                                                         type="button"
-                                                        onClick={() => setDurationDisplayMenuRowId((current) => (current === lineId ? null : lineId))}
-                                                        className="inline-flex w-full items-center justify-center gap-1 rounded-[0.75rem] border border-sky-100 bg-sky-50 px-2 py-1.5 text-[9px] font-black uppercase tracking-[0.1em] text-[#136191] transition hover:border-[#136191]/30 hover:bg-sky-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/20"
+                                                        onClick={(event) => toggleDurationDisplayMenu(lineId, event.currentTarget)}
+                                                        data-gantt-duration-display-trigger={lineId}
+                                                        className="gantt-duration-display-trigger inline-flex min-h-9 w-full items-center justify-center gap-1 rounded-[0.75rem] border border-sky-100 bg-sky-50 px-2 py-1.5 text-[9px] font-black uppercase tracking-[0.1em] text-[#136191] transition hover:border-[#136191]/30 hover:bg-sky-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/20"
                                                         aria-haspopup="menu"
                                                         aria-expanded={durationDisplayMenuRowId === lineId}
                                                         title="Cambiar magnitud visual de duración"
@@ -20765,9 +20815,17 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     </button>
                                                 </GanttHeaderTooltip>
                                             )}
-                                            {durationDisplayMenuRowId === lineId ? (
-                                                <div className="absolute right-0 top-[calc(100%+0.35rem)] z-[170] w-40 rounded-[0.95rem] border border-zinc-200 bg-white p-1.5 shadow-[0_16px_40px_rgba(15,23,42,0.14)]">
-                                                    <div className="px-2 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">
+                                            {durationDisplayMenuRowId === lineId && durationDisplayMenuPosition && typeof document !== 'undefined' ? createPortal(
+                                                <div
+                                                    ref={durationDisplayMenuRef}
+                                                    role="menu"
+                                                    aria-label={isSubcontracted ? 'Magnitud contractual' : 'Magnitud visible'}
+                                                    data-gantt-duration-display-menu
+                                                    data-placement={durationDisplayMenuPosition.placement}
+                                                    className="fixed z-[250] max-h-[min(18rem,calc(100dvh-1.5rem))] overflow-y-auto overscroll-contain rounded-[0.95rem] border border-zinc-200 bg-white p-1.5 shadow-[0_18px_48px_rgba(15,23,42,0.2)]"
+                                                    style={{ left: durationDisplayMenuPosition.left, top: durationDisplayMenuPosition.top, width: durationDisplayMenuPosition.width }}
+                                                >
+                                                    <div className="px-2 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-500">
                                                         {isSubcontracted ? 'Magnitud contractual' : 'Magnitud visible'}
                                                     </div>
                                                     <div className="mt-1 space-y-1">
@@ -20783,10 +20841,12 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                     });
                                                                     setDurationDisplayMenuRowId(null);
                                                                 }}
-                                                                className={`flex w-full items-center justify-between rounded-[0.8rem] border px-2 py-2 text-left transition ${
+                                                                role="menuitemradio"
+                                                                aria-checked={resolveGanttRowDurationDisplayUnit(row, draft, durationDisplayUnit) === option.id}
+                                                                className={`flex min-h-11 w-full items-center justify-between rounded-[0.8rem] border px-3 py-2 text-left transition ${
                                                                     resolveGanttRowDurationDisplayUnit(row, draft, durationDisplayUnit) === option.id
                                                                         ? 'border-[#F39200]/35 bg-[#fff7ed] text-[#F39200]'
-                                                                        : 'border-transparent bg-white text-zinc-600 hover:border-sky-100 hover:bg-sky-50 hover:text-[#136191]'
+                                                                        : 'border-transparent bg-white text-[#314b5c] hover:border-sky-100 hover:bg-sky-50 hover:text-[#136191]'
                                                                 }`}
                                                             >
                                                                 <span className="text-[10px] font-black uppercase tracking-[0.08em]">{option.shortLabel}</span>
@@ -20794,7 +20854,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                             </button>
                                                         ))}
                                                     </div>
-                                                </div>
+                                                </div>,
+                                                document.body
                                             ) : null}
                                         </div>
                                     ) : isManualMilestone ? (
@@ -23459,16 +23520,27 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                             <GanttHeaderTooltip content={durationTypePresentation.tooltip}>
                                                 <button
                                                     type="button"
-                                                    onClick={() => setDurationDisplayMenuRowId((current) => (current === lineId ? null : lineId))}
-                                                    className="inline-flex w-full items-center justify-center gap-1 rounded-[0.8rem] border border-sky-100 bg-sky-50 px-2 py-2 text-[9px] font-black uppercase tracking-[0.1em] text-[#136191] transition hover:border-[#136191]/30 hover:bg-sky-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/20"
+                                                    onClick={(event) => toggleDurationDisplayMenu(lineId, event.currentTarget)}
+                                                    data-gantt-duration-display-trigger={lineId}
+                                                    aria-haspopup="menu"
+                                                    aria-expanded={durationDisplayMenuRowId === lineId}
+                                                    className="gantt-duration-display-trigger inline-flex min-h-9 w-full items-center justify-center gap-1 rounded-[0.8rem] border border-sky-100 bg-sky-50 px-2 py-2 text-[9px] font-black uppercase tracking-[0.1em] text-[#136191] transition hover:border-[#136191]/30 hover:bg-sky-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/20"
                                                 >
                                                     <span>{durationTypePresentation.label}</span>
                                                     <ChevronDown className="h-3 w-3" />
                                                 </button>
                                             </GanttHeaderTooltip>
-                                            {durationDisplayMenuRowId === lineId ? (
-                                                <div className="absolute right-0 top-[calc(100%+0.35rem)] z-[170] w-40 rounded-[0.95rem] border border-zinc-200 bg-white p-1.5 shadow-[0_16px_40px_rgba(15,23,42,0.14)]">
-                                                    <div className="px-2 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">
+                                            {durationDisplayMenuRowId === lineId && durationDisplayMenuPosition && typeof document !== 'undefined' ? createPortal(
+                                                <div
+                                                    ref={durationDisplayMenuRef}
+                                                    role="menu"
+                                                    aria-label="Magnitud visible"
+                                                    data-gantt-duration-display-menu
+                                                    data-placement={durationDisplayMenuPosition.placement}
+                                                    className="fixed z-[250] max-h-[min(18rem,calc(100dvh-1.5rem))] overflow-y-auto overscroll-contain rounded-[0.95rem] border border-zinc-200 bg-white p-1.5 shadow-[0_18px_48px_rgba(15,23,42,0.2)]"
+                                                    style={{ left: durationDisplayMenuPosition.left, top: durationDisplayMenuPosition.top, width: durationDisplayMenuPosition.width }}
+                                                >
+                                                    <div className="px-2 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-500">
                                                         Magnitud visible
                                                     </div>
                                                     <div className="mt-1 space-y-1">
@@ -23484,10 +23556,12 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                     });
                                                                     setDurationDisplayMenuRowId(null);
                                                                 }}
-                                                                className={`flex w-full items-center justify-between rounded-[0.8rem] border px-2 py-2 text-left transition ${
+                                                                role="menuitemradio"
+                                                                aria-checked={resolveGanttRowDurationDisplayUnit(row, draft, durationDisplayUnit) === option.id}
+                                                                className={`flex min-h-11 w-full items-center justify-between rounded-[0.8rem] border px-3 py-2 text-left transition ${
                                                                     resolveGanttRowDurationDisplayUnit(row, draft, durationDisplayUnit) === option.id
                                                                         ? 'border-[#F39200]/35 bg-[#fff7ed] text-[#F39200]'
-                                                                        : 'border-transparent bg-white text-zinc-600 hover:border-sky-100 hover:bg-sky-50 hover:text-[#136191]'
+                                                                        : 'border-transparent bg-white text-[#314b5c] hover:border-sky-100 hover:bg-sky-50 hover:text-[#136191]'
                                                                 }`}
                                                             >
                                                                 <span className="text-[10px] font-black uppercase tracking-[0.08em]">{option.shortLabel}</span>
@@ -23495,7 +23569,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                             </button>
                                                         ))}
                                                     </div>
-                                                </div>
+                                                </div>,
+                                                document.body
                                             ) : null}
                                         </div>
                                     ) : edtInformationalDurationTypePresentation ? (

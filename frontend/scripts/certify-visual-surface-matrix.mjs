@@ -913,6 +913,38 @@ try {
                     }
                     await page.waitForTimeout(350);
                 }
+                if (harness.source === 'gantt-duration-display-harness.html'
+                    || harness.source === 'gantt-duration-display-hours-harness.html'
+                    || harness.source === 'gantt-duration-display-end-harness.html'
+                    || harness.source === 'gantt-duration-display-subcontract-harness.html') {
+                    const gridViewport = page.locator('[data-gantt-left-viewport="true"]');
+                    await gridViewport.waitFor({ state: 'visible' });
+                    if (harness.source === 'gantt-duration-display-end-harness.html') {
+                        await gridViewport.evaluate((node) => { node.scrollTop = node.scrollHeight; });
+                        await page.waitForTimeout(250);
+                    }
+                    const triggers = page.locator('[data-gantt-duration-display-trigger]');
+                    const trigger = harness.source === 'gantt-duration-display-end-harness.html' ? triggers.last() : triggers.first();
+                    await trigger.scrollIntoViewIfNeeded();
+                    await trigger.click();
+                    const menu = page.locator('[data-gantt-duration-display-menu]');
+                    await menu.waitFor({ state: 'visible' });
+                    if (harness.source === 'gantt-duration-display-hours-harness.html') {
+                        await menu.getByRole('menuitemradio', { name: /Horas/u }).click();
+                        await trigger.click();
+                        await menu.waitFor({ state: 'visible' });
+                        await menu.getByRole('menuitemradio', { name: /Horas/u }).evaluate((node) => {
+                            if (node.getAttribute('aria-checked') !== 'true') throw new Error('Hours duration unit did not persist in the real row draft.');
+                        });
+                    }
+                    const menuBox = await menu.boundingBox();
+                    if (!menuBox) throw new Error('Duration display menu is not measurable.');
+                    if (menuBox.x < 0 || menuBox.y < 0 || menuBox.x + menuBox.width > profile.viewport[0] + 1 || menuBox.y + menuBox.height > profile.viewport[1] + 1) {
+                        throw new Error(`Duration display menu escaped viewport: ${JSON.stringify(menuBox)}.`);
+                    }
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
                 if (harness.source === 'gantt-quick-successor-harness.html'
                     || harness.source === 'gantt-quick-successor-end-harness.html'
                     || harness.source === 'gantt-quick-successor-error-harness.html'

@@ -103,7 +103,7 @@
     "protectedRoutes": 38,
     "publicRoutes": 5,
     "interactiveSurfaceFiles": 55,
-    "harnesses": 141,
+    "harnesses": 145,
     "harnessesWithoutValidator": 0
   },
   "routes": [
@@ -4715,6 +4715,94 @@
       "mode": "classic",
       "path": "/gantt-config-harness.html",
       "source": "gantt-config-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-duration-display-end-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-duration-display-end-harness.html",
+      "source": "gantt-duration-display-end-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-duration-display-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-duration-display-harness.html",
+      "source": "gantt-duration-display-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-duration-display-hours-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-duration-display-hours-harness.html",
+      "source": "gantt-duration-display-hours-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-duration-display-subcontract-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-duration-display-subcontract-harness.html",
+      "source": "gantt-duration-display-subcontract-harness.html",
       "validators": [
         "certify-visual-surface-matrix.mjs"
       ],
