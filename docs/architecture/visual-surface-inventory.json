@@ -103,7 +103,7 @@
     "protectedRoutes": 38,
     "publicRoutes": 5,
     "interactiveSurfaceFiles": 55,
-    "harnesses": 117,
+    "harnesses": 120,
     "harnessesWithoutValidator": 0
   },
   "routes": [
@@ -4681,6 +4681,72 @@
       "mode": "classic",
       "path": "/gantt-history-harness.html",
       "source": "gantt-history-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-ms-project-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-ms-project-harness.html",
+      "source": "gantt-ms-project-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-ms-project-import-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-ms-project-import-harness.html",
+      "source": "gantt-ms-project-import-harness.html",
+      "validators": [
+        "certify-visual-surface-matrix.mjs"
+      ],
+      "profiles": [
+        "desktop-fhd-100",
+        "desktop-fhd-125",
+        "desktop-fhd-150",
+        "desktop-4k-200",
+        "tablet-fhd-landscape",
+        "tablet-fhd-portrait",
+        "tablet-2k-landscape",
+        "tablet-2k-portrait",
+        "lenovo-p12-landscape",
+        "lenovo-p12-portrait"
+      ]
+    },
+    {
+      "id": "harness:gantt-ms-project-mpp-unavailable-harness.html",
+      "kind": "harness",
+      "mode": "classic",
+      "path": "/gantt-ms-project-mpp-unavailable-harness.html",
+      "source": "gantt-ms-project-mpp-unavailable-harness.html",
       "validators": [
         "certify-visual-surface-matrix.mjs"
       ],

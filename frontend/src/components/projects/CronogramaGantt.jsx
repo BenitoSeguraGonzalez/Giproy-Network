@@ -3503,15 +3503,18 @@ const GanttResourceEditorModal = ({
     );
 };
 
-const summarizeMsProjectReason = (reason) => {
+const summarizeMsProjectReason = (reason, directMppAvailable = false) => {
+    if (directMppAvailable) {
+        return 'La exportación .mpp está disponible mediante el generador nativo del servidor.';
+    }
     if (!reason) {
-        return 'La exportación .mpp está disponible mediante generador nativo del backend.';
+        return 'El generador directo .mpp no está habilitado en este servidor.';
     }
     if (String(reason).includes('ASPOSE_TASKS_LICENSE_PATH')) {
-        return 'Falta configurar la licencia del generador .mpp del backend. Mientras tanto puedes usar XML Project.';
+        return 'Falta configurar la licencia del generador .mpp del servidor.';
     }
     if (String(reason).includes('Aspose.Tasks')) {
-        return 'El generador .mpp del backend no está listo. Mientras tanto puedes usar XML Project.';
+        return 'El generador .mpp del servidor no está listo.';
     }
     return String(reason);
 };
@@ -9594,8 +9597,8 @@ const CronogramaGantt = ({
     const directExportReason = exportCapabilities?.direct_export_reason;
     const effectiveMsProjectAvailable = directMppAvailable;
     const msProjectStatusMessage = useMemo(
-        () => summarizeMsProjectReason(directExportReason),
-        [directExportReason],
+        () => summarizeMsProjectReason(directExportReason, directMppAvailable),
+        [directExportReason, directMppAvailable],
     );
     const ganttRootRef = useRef(null);
     const dragInteractionRef = useRef(null);
@@ -19230,7 +19233,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/38">Gantt</p>
                                                         <p className="text-[11px] font-black uppercase tracking-[0.12em] text-white/90">Herramientas</p>
                                                     </div>
-                                                    <div className="gantt-dark-scrollbar max-h-[20rem] space-y-1.5 overflow-y-auto pr-1">
+                                                    <div data-gantt-tools-scroll="true" className="gantt-dark-scrollbar max-h-[20rem] space-y-1.5 overflow-y-auto pr-1">
                                                         <button
                                                             type="button"
                                                             onMouseDown={(event) => {
@@ -19291,6 +19294,59 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                             <History className="h-3.5 w-3.5 shrink-0" />
                                                             Historial
                                                         </button>
+                                                        <div className="my-2 border-t border-white/10 pt-2">
+                                                            <p className="mb-1.5 px-1 text-[8px] font-black uppercase tracking-[0.16em] text-white/38">
+                                                                Interoperabilidad
+                                                            </p>
+                                                            <div className="space-y-1.5">
+                                                                <button
+                                                                    type="button"
+                                                                    onMouseDown={(event) => {
+                                                                        event.preventDefault();
+                                                                    }}
+                                                                    onClick={() => {
+                                                                        setToolsMenuOpen(false);
+                                                                        void onExportMsProject?.('xml');
+                                                                    }}
+                                                                    disabled={typeof onExportMsProject !== 'function' || trabajoSaving}
+                                                                    className="inline-flex min-h-[46px] w-full items-center justify-start gap-2 rounded-[0.95rem] border border-white/8 bg-white/[0.035] px-3 text-left text-[9px] font-black uppercase tracking-[0.12em] text-white/84 transition hover:border-[#F39200]/30 hover:bg-white/[0.07] hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+                                                                >
+                                                                    <Download className="h-3.5 w-3.5 shrink-0" />
+                                                                    Exportar XML Project
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onMouseDown={(event) => {
+                                                                        event.preventDefault();
+                                                                    }}
+                                                                    onClick={() => {
+                                                                        setToolsMenuOpen(false);
+                                                                        void handleMsProjectExportClick();
+                                                                    }}
+                                                                    disabled={typeof onExportMsProject !== 'function' || trabajoSaving}
+                                                                    title={msProjectStatusMessage}
+                                                                    className="inline-flex min-h-[46px] w-full items-center justify-start gap-2 rounded-[0.95rem] border border-white/8 bg-white/[0.035] px-3 text-left text-[9px] font-black uppercase tracking-[0.12em] text-white/84 transition hover:border-[#F39200]/30 hover:bg-white/[0.07] hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+                                                                >
+                                                                    <Download className="h-3.5 w-3.5 shrink-0" />
+                                                                    Exportar MS Project (.mpp)
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onMouseDown={(event) => {
+                                                                        event.preventDefault();
+                                                                    }}
+                                                                    onClick={() => {
+                                                                        setToolsMenuOpen(false);
+                                                                        void handleMsProjectImportClick();
+                                                                    }}
+                                                                    disabled={typeof onImportMsProject !== 'function' || importingMsProject || trabajoSaving}
+                                                                    className="inline-flex min-h-[46px] w-full items-center justify-start gap-2 rounded-[0.95rem] border border-white/8 bg-white/[0.035] px-3 text-left text-[9px] font-black uppercase tracking-[0.12em] text-white/84 transition hover:border-[#F39200]/30 hover:bg-white/[0.07] hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+                                                                >
+                                                                    {importingMsProject ? <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" /> : <Upload className="h-3.5 w-3.5 shrink-0" />}
+                                                                    {importingMsProject ? 'Importando XML…' : 'Importar XML MS Project'}
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                         <button
                                                             type="button"
                                                             onMouseDown={(event) => {

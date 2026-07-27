@@ -177,6 +177,7 @@ export const AppDialogProvider = ({ children }) => {
     }), []);
 
     const dialog = activeDialog ? resolveDialogConfig(activeDialog) : null;
+    const dialogTitleId = dialog ? `app-dialog-title-${String(dialog.key || 'active').replace(/[^a-zA-Z0-9_-]/gu, '-')}` : undefined;
     const tone = dialog ? (TONE_STYLES[dialog.tone] || TONE_STYLES.info) : TONE_STYLES.info;
     const overlayZIndex = dialog?.zIndex || 'z-[1800]';
     const Icon = dialog?.type === 'prompt' ? MessageSquareQuote : tone.icon;
@@ -249,6 +250,9 @@ export const AppDialogProvider = ({ children }) => {
                         exit={{ opacity: 0 }}
                     >
                         <MotionDiv
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby={dialogTitleId}
                             initial={{ opacity: 0, scale: 0.96, y: 16 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.98, y: 10 }}
@@ -269,7 +273,7 @@ export const AppDialogProvider = ({ children }) => {
                                         <Icon className={`${isCompactDialog ? 'w-4 h-4' : 'w-4.5 h-4.5'} ${tone.iconClass}`} />
                                     </div>
                                     <div className="min-w-0">
-                                        <div className={`${titleClass} font-black uppercase`} style={{ color: DIALOG_TEXT_STRONG }}>
+                                        <div id={dialogTitleId} className={`${titleClass} font-black uppercase`} style={{ color: DIALOG_TEXT_STRONG }}>
                                             {dialog.title}
                                         </div>
                                         {dialog.subtitle ? (
@@ -282,7 +286,8 @@ export const AppDialogProvider = ({ children }) => {
                                 <button
                                     type="button"
                                     onClick={handleCancel}
-                                    className={`${isCompactDialog ? 'w-7.5 h-7.5 rounded-[0.8rem]' : 'w-8 h-8 rounded-[0.85rem]'} flex items-center justify-center text-zinc-400 hover:text-zinc-700 transition-all`}
+                                    aria-label="Cerrar diálogo"
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.85rem] text-zinc-400 transition-all hover:text-zinc-700"
                                     style={raisedButtonStyle}
                                 >
                                     <X className={`${isCompactDialog ? 'w-3.25 h-3.25' : 'w-3.5 h-3.5'}`} />
@@ -313,7 +318,7 @@ export const AppDialogProvider = ({ children }) => {
                                                 if (event.key === 'Escape') handleCancel();
                                             }}
                                             placeholder={dialog.placeholder}
-                                            className="w-full h-10 rounded-[0.95rem] border-none px-3.5 text-[12.5px] font-semibold outline-none"
+                                            className="h-11 w-full rounded-[0.95rem] border-none px-3.5 text-[12.5px] font-semibold outline-none"
                                             style={{
                                                 ...insetFieldStyle,
                                                 color: DIALOG_TEXT_STRONG,
@@ -331,7 +336,7 @@ export const AppDialogProvider = ({ children }) => {
                                     <button
                                         type="button"
                                         onClick={handleSecondary}
-                                        className="h-8 px-3 rounded-[0.85rem] text-[8.5px] font-black uppercase tracking-[0.13em] transition-all"
+                                        className="min-h-11 rounded-[0.85rem] px-3 text-[8.5px] font-black uppercase tracking-[0.13em] transition-all"
                                         style={{
                                             ...raisedButtonStyle,
                                             color: DIALOG_TEXT,
@@ -344,7 +349,7 @@ export const AppDialogProvider = ({ children }) => {
                                     <button
                                         type="button"
                                         onClick={handleCancel}
-                                        className="h-8 px-3 rounded-[0.85rem] text-[8.5px] font-black uppercase tracking-[0.13em] transition-all"
+                                        className="min-h-11 rounded-[0.85rem] px-3 text-[8.5px] font-black uppercase tracking-[0.13em] transition-all"
                                         style={{
                                             ...raisedButtonStyle,
                                             color: DIALOG_TEXT,
@@ -356,7 +361,7 @@ export const AppDialogProvider = ({ children }) => {
                                 <button
                                     type="button"
                                     onClick={handleConfirm}
-                                    className="h-8 px-3 rounded-[0.85rem] text-[8.5px] font-black uppercase tracking-[0.13em] transition-all"
+                                    className="min-h-11 rounded-[0.85rem] px-3 text-[8.5px] font-black uppercase tracking-[0.13em] transition-all"
                                     style={primaryButtonStyle}
                                 >
                                     {dialog.confirmLabel}

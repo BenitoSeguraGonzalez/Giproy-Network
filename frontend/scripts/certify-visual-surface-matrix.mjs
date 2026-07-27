@@ -713,7 +713,35 @@ try {
                 }
                 if (harness.source === 'gantt-tools-harness.html') {
                     await page.getByRole('button', { name: 'Herramientas del Gantt' }).click();
+                    await page.getByRole('button', { name: 'Exportar XML Project' }).waitFor({ state: 'visible' });
+                    await page.getByRole('button', { name: 'Exportar MS Project (.mpp)', exact: true }).waitFor({ state: 'visible' });
+                    await page.getByRole('button', { name: 'Importar XML MS Project' }).waitFor({ state: 'visible' });
                     await page.getByText('Factory reset', { exact: true }).waitFor({ state: 'visible' });
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
+                if (harness.source === 'gantt-ms-project-harness.html') {
+                    await page.getByRole('button', { name: 'Herramientas del Gantt' }).click();
+                    const toolsScroll = page.locator('[data-gantt-tools-scroll="true"]');
+                    await toolsScroll.evaluate((node) => { node.scrollTop = node.scrollHeight; });
+                    await page.getByRole('button', { name: 'Importar XML MS Project' }).waitFor({ state: 'visible' });
+                    await page.getByText('Factory reset', { exact: true }).waitFor({ state: 'visible' });
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
+                if (harness.source === 'gantt-ms-project-import-harness.html'
+                    || harness.source === 'gantt-ms-project-mpp-unavailable-harness.html') {
+                    await page.getByRole('button', { name: 'Herramientas del Gantt' }).click();
+                    const toolsScroll = page.locator('[data-gantt-tools-scroll="true"]');
+                    await toolsScroll.evaluate((node) => { node.scrollTop = node.scrollHeight; });
+                    if (harness.source === 'gantt-ms-project-import-harness.html') {
+                        await page.getByRole('button', { name: 'Importar XML MS Project' }).click();
+                        await page.getByRole('dialog', { name: 'Importar XML MS Project' }).waitFor({ state: 'visible' });
+                        await page.getByRole('button', { name: 'Seleccionar XML' }).waitFor({ state: 'visible' });
+                    } else {
+                        await page.getByRole('button', { name: 'Exportar MS Project (.mpp)', exact: true }).click();
+                        await page.getByRole('dialog', { name: 'Exportación .mpp no disponible' }).waitFor({ state: 'visible' });
+                    }
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(350);
                 }

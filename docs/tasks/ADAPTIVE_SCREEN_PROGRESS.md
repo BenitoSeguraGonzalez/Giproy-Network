@@ -2303,6 +2303,77 @@ Capturas revisadas manualmente:
 
 Resultado: `10/10` perfiles; detector Impeccable sin hallazgos.
 
+### C04.7.24 - Interoperabilidad Microsoft Project
+
+Estado: **CERTIFICADA EN 30/30 COMBINACIONES VISUALES**
+
+Contenido tratado:
+
+- menú desplazable de Herramientas y grupo Interoperabilidad;
+- exportación XML Project;
+- exportación directa `.mpp` condicionada por capacidad real del servidor;
+- importación XML MS Project;
+- confirmación previa de importación;
+- aviso de generador `.mpp` no disponible;
+- estados de carga, deshabilitado y alternativa XML.
+
+Adecuación aplicada:
+
+- se conectaron al menú los manejadores que existían pero no tenían ningún
+  control visible, restaurando el acceso real a la funcionalidad;
+- las tres acciones se separaron semánticamente y mantienen objetivos táctiles
+  de `46px` dentro de un viewport propio del menú;
+- se añadió un contrato de desplazamiento interno
+  `data-gantt-tools-scroll="true"`, sin desplazar el documento ni el Gantt;
+- el proveedor global de diálogos recibió `role="dialog"`, `aria-modal`, título
+  enlazado, cierre etiquetado y controles de al menos `44px`;
+- el harness del Gantt monta ahora el mismo proveedor de diálogos que producción;
+- el mensaje de disponibilidad `.mpp` distingue capacidad real, motivo del
+  servidor y carril alternativo sin contradicciones ni duplicación.
+
+Errores detectados y corregidos mediante captura/prueba:
+
+1. Los manejadores MS Project eran código inaccesible: no existían botones que
+   los invocaran en el Gantt.
+2. El menú inicial solo mostraba parte del grupo nuevo; una superficie específica
+   confirmó por captura el extremo inferior y el alcance táctil del scroll.
+3. La primera matriz modal expiró porque el harness no montaba el proveedor real
+   y el componente global carecía de semántica de diálogo. Se corrigieron ambos.
+4. El primer aviso `.mpp` decía simultáneamente disponible y no disponible.
+5. La segunda redacción repetía dos veces la alternativa XML; se simplificó antes
+   de aceptar la evidencia final.
+
+Contratos:
+
+- `gantt-ms-project-harness.html`: extremo inferior del menú;
+- `gantt-ms-project-import-harness.html`: confirmación de importación;
+- `gantt-ms-project-mpp-unavailable-harness.html`: aviso de capacidad;
+- inventario visual: `120` harnesses.
+
+Evidencia aceptada:
+
+- menú superior: `2026-07-27T14-16-05-359Z` (`10/10`);
+- menú desplazado: `2026-07-27T14-18-08-523Z` (`10/10`);
+- confirmación de importación: `2026-07-27T14-28-27-998Z` (`10/10`);
+- aviso `.mpp` final: `2026-07-27T14-29-38-727Z` (`10/10`).
+
+Evidencia rechazada y conservada:
+
+- `2026-07-27T14-22-35-260Z`: diálogo inexistente en el harness;
+- `2026-07-27T14-26-53-688Z`: contradicción de disponibilidad;
+- `2026-07-27T14-28-27-998Z`, aviso `.mpp`: texto alternativo duplicado;
+  la confirmación de importación de esta misma ejecución sí es válida.
+
+Hallazgos Impeccable pendientes, asignados a sus unidades visuales y no omitidos:
+
+- `CronogramaGantt.jsx:19022`: gris sobre fondo naranja;
+- `CronogramaGantt.jsx:20760`: gris sobre fondo celeste;
+- `CronogramaGantt.jsx:22649`: gris sobre fondo rosa;
+- `CronogramaGantt.jsx:23430`: gris sobre fondo celeste.
+
+Resultado: interoperabilidad accesible y verificable; `30/30` combinaciones
+aceptadas entre menú, confirmación y aviso final.
+
 ### C04.7.4 - Panel Historial confirmado
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**

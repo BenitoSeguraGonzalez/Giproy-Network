@@ -4,6 +4,7 @@ import './index.css';
 import CronogramaGantt from './components/projects/CronogramaGantt.jsx';
 import { AuthContext } from './context/authContextInstance';
 import { ganttFixturesApi } from './api/ganttFixtures';
+import { AppDialogProvider } from './components/ui/AppDialogProvider.jsx';
 
 const createSyntheticFixture = () => {
     const periodStarts = ['2026-07-01', '2026-07-16', '2026-08-01', '2026-08-16', '2026-09-01', '2026-09-16'];
@@ -253,11 +254,12 @@ const Harness = () => {
     };
 
     return (
-        <AuthContext.Provider value={{
-            user: { id: 1, nombre: 'DOM QA' },
-            selectedEmpresa: { id: fixture.empresa_id, nombre: fixture.empresa_nombre },
-        }}>
-            <div style={{ width: '100%', minWidth: 0, minHeight: '100dvh' }}>
+        <AppDialogProvider>
+            <AuthContext.Provider value={{
+                user: { id: 1, nombre: 'DOM QA' },
+                selectedEmpresa: { id: fixture.empresa_id, nombre: fixture.empresa_nombre },
+            }}>
+                <div style={{ width: '100%', minWidth: 0, minHeight: '100dvh' }}>
                 <CronogramaGantt
                     detail={fixture.detail}
                     project={fixture.project}
@@ -319,8 +321,9 @@ const Harness = () => {
                     onFactoryResetCronogramas={() => {}}
                     onDirtyStateChange={() => {}}
                 />
-            </div>
-        </AuthContext.Provider>
+                </div>
+            </AuthContext.Provider>
+        </AppDialogProvider>
     );
 };
 
