@@ -22351,11 +22351,17 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         : null}
                     {splitDialog && splitDialogTargetSubbar
                         ? createPortal(
-                            <div className="fixed inset-0 z-[260] flex items-center justify-center bg-slate-950/25 p-4" data-gantt-no-pan="true">
-                                <div className="flex max-h-[min(82dvh,42rem)] w-full max-w-[38rem] flex-col overflow-hidden rounded-[1rem] border border-zinc-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.24)]">
-                                    <div className="border-b border-zinc-100 px-4 py-3">
+                            <div className="fixed inset-0 z-[260] flex items-center justify-center bg-slate-950/25 p-2 sm:p-4" data-gantt-no-pan="true">
+                                <div
+                                    role="dialog"
+                                    aria-modal="true"
+                                    aria-labelledby="gantt-split-dialog-title"
+                                    data-gantt-split-dialog="true"
+                                    className="flex max-h-[calc(100dvh-1rem)] w-full max-w-[52rem] flex-col overflow-hidden rounded-[1rem] border border-zinc-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.24)] sm:max-h-[min(92dvh,48rem)] [&_button]:min-h-11 [&_input]:min-h-11"
+                                >
+                                    <div className="shrink-0 border-b border-zinc-100 px-3 py-3 sm:px-4">
                                         <div className="text-[10px] font-black uppercase tracking-[0.16em] text-[#F39200]">División controlada</div>
-                                        <div className="mt-1 text-[16px] font-black leading-tight text-zinc-900">
+                                        <div id="gantt-split-dialog-title" className="mt-1 text-[16px] font-black leading-tight text-zinc-900">
                                             {formatCronogramaDescripcion(selectedTaskRow) || 'Tramo operativo'}
                                         </div>
                                         <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-4">
@@ -22388,7 +22394,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex-1 space-y-3 overflow-hidden px-4 py-4">
+                                    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4" data-gantt-split-dialog-body="true">
                                         <div className="grid grid-cols-1 gap-2 rounded-[0.9rem] border border-zinc-200 bg-zinc-50 px-3 py-3 lg:grid-cols-[8.5rem_auto_1fr] lg:items-center">
                                             <label className="block min-w-0">
                                                 <div className="text-[9px] font-black uppercase tracking-[0.12em] text-zinc-500">Partes</div>
@@ -22490,8 +22496,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                             </div>
                                         </div>
 
-                                        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[0.95rem] border border-zinc-200">
-                                            <div className={`grid gap-0 bg-zinc-50 px-3 py-2 text-[9px] font-black uppercase tracking-[0.12em] text-zinc-500 ${splitDialogCanAlignToPeriods ? 'grid-cols-[2.5rem_minmax(0,1fr)_5.75rem_6.25rem_9.5rem_6.75rem_7rem]' : 'grid-cols-[2.5rem_minmax(0,1fr)_5.75rem_6.25rem_9.5rem_7rem]'}`}>
+                                        <div className="max-h-[22rem] shrink-0 overflow-auto rounded-[0.95rem] border border-zinc-200" data-gantt-split-table="true">
+                                            <div className={`sticky top-0 z-10 grid min-w-[58rem] gap-0 bg-zinc-50 px-3 py-2 text-[9px] font-black uppercase tracking-[0.12em] text-zinc-500 ${splitDialogCanAlignToPeriods ? 'grid-cols-[2.5rem_minmax(0,1fr)_5.75rem_6.25rem_9.5rem_6.75rem_9.5rem]' : 'grid-cols-[2.5rem_minmax(0,1fr)_5.75rem_6.25rem_9.5rem_9.5rem]'}`}>
                                                 <div>#</div>
                                                 <div>Parte</div>
                                                 <div>%</div>
@@ -22500,7 +22506,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 {splitDialogCanAlignToPeriods ? <div>Tramo</div> : null}
                                                 <div className="text-right">Acc.</div>
                                             </div>
-                                            <div className="min-h-0 max-h-[18rem] divide-y divide-zinc-200 overflow-y-auto bg-white">
+                                            <div className="min-w-[58rem] divide-y divide-zinc-200 bg-white">
                                                 {(splitDialog?.parts || []).map((part, index) => (
                                                     <div
                                                         key={part.id}
@@ -22524,7 +22530,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                             });
                                                         }}
                                                         onDragEnd={() => setSplitDialog((current) => current ? { ...current, draggingPartId: null } : current)}
-                                                        className={`grid items-center gap-0 px-3 py-2 transition hover:bg-zinc-50/60 ${splitDialogCanAlignToPeriods ? 'grid-cols-[2.5rem_minmax(0,1fr)_5.75rem_6.25rem_9.5rem_6.75rem_7rem]' : 'grid-cols-[2.5rem_minmax(0,1fr)_5.75rem_6.25rem_9.5rem_7rem]'}`}
+                                                        className={`grid items-center gap-0 px-3 py-2 transition hover:bg-zinc-50/60 ${splitDialogCanAlignToPeriods ? 'grid-cols-[2.5rem_minmax(0,1fr)_5.75rem_6.25rem_9.5rem_6.75rem_9.5rem]' : 'grid-cols-[2.5rem_minmax(0,1fr)_5.75rem_6.25rem_9.5rem_9.5rem]'}`}
                                                     >
                                                         <div className="pr-2">
                                                             <div className={`inline-flex h-8 w-8 items-center justify-center rounded-[0.7rem] border border-zinc-200 bg-zinc-50 text-[10px] font-black text-zinc-500 ${(splitDialog?.mode || 'sequential') === 'sequential' ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}>
@@ -22655,7 +22661,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                         partsCountInput: String(Math.max(2, (current.parts || []).length - 1)),
                                                                     } : current);
                                                                 }}
-                                                                className="inline-flex h-8 w-8 items-center justify-center rounded-[0.7rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-35"
+                                                                className="inline-flex h-8 w-8 items-center justify-center rounded-[0.7rem] border border-rose-100 bg-white text-rose-600 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 disabled:cursor-not-allowed disabled:opacity-35"
                                                             >
                                                                 <X className="h-4 w-4" />
                                                             </button>
@@ -22680,7 +22686,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                             </div>
                                         ) : null}
                                     </div>
-                                    <div className="flex items-center justify-end gap-2 border-t border-zinc-100 px-4 py-3">
+                                    <div className="flex shrink-0 items-center justify-end gap-2 border-t border-zinc-100 px-3 py-3 sm:px-4">
                                         <button
                                             type="button"
                                             onClick={() => setSplitDialog(null)}

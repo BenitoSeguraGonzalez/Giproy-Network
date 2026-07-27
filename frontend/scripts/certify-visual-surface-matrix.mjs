@@ -781,6 +781,33 @@ try {
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(350);
                 }
+                if (harness.source === 'gantt-split-dialog-harness.html'
+                    || harness.source === 'gantt-split-dialog-end-harness.html'
+                    || harness.source === 'gantt-split-dialog-table-end-harness.html') {
+                    const targetTaskRow = page.locator('[data-grid-row="true"]').nth(1);
+                    await targetTaskRow.click({ position: { x: 250, y: 28 } });
+                    await page.getByRole('button', { name: 'Gantt', exact: true }).click();
+                    await page.waitForTimeout(500);
+                    const segmentBar = page.locator('[data-subbar-key]').first();
+                    if (!(await segmentBar.count())) {
+                        const diagnostic = await page.locator('[data-bar-id]').first().evaluate((node) => ({ ...node.dataset }));
+                        throw new Error(`Split fixture did not materialize: ${JSON.stringify(diagnostic)}`);
+                    }
+                    await segmentBar.hover({ force: true });
+                    await page.getByRole('button', { name: /Abrir acciones del tramo/u }).first().evaluate((node) => node.click());
+                    await page.getByRole('button', { name: 'Dividir tramo activo' }).click();
+                    const splitDialog = page.locator('[data-gantt-split-dialog="true"]');
+                    await splitDialog.waitFor({ state: 'visible' });
+                    await page.getByRole('button', { name: 'Aplicar división' }).waitFor({ state: 'visible' });
+                    if (harness.source === 'gantt-split-dialog-end-harness.html') {
+                        await page.locator('[data-gantt-split-dialog-body="true"]').evaluate((node) => { node.scrollTop = node.scrollHeight; });
+                    }
+                    if (harness.source === 'gantt-split-dialog-table-end-harness.html') {
+                        await page.locator('[data-gantt-split-table="true"]').evaluate((node) => { node.scrollLeft = node.scrollWidth; });
+                    }
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
                 if (harness.source === 'gantt-quick-successor-harness.html'
                     || harness.source === 'gantt-quick-successor-end-harness.html'
                     || harness.source === 'gantt-quick-successor-error-harness.html'

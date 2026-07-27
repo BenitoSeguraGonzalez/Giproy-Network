@@ -2496,6 +2496,55 @@ Evidencia rechazada y conservada:
 
 Resultado: flujo directo y visual completo; `40/40` combinaciones aceptadas.
 
+### C04.7.29 - División controlada de segmentos
+
+Estado: **CERTIFICADA EN 30/30 COMBINACIONES VISUALES**
+
+Contenido tratado:
+
+- cabecera y métricas Disponible/Monto/Asignado/Balance;
+- número de partes, actualización y modo secuencial;
+- tabla de porcentaje, duración, inicio y acciones;
+- desplazamiento vertical del cuerpo y horizontal de la tabla;
+- reordenamiento, eliminación, cancelar y aplicar división.
+
+Adecuación aplicada:
+
+- modal semántico con título accesible y altura basada en `dvh`;
+- cabecera y pie fijos, con cuerpo vertical propietario;
+- tabla técnica preservada a `58rem`, con scroll bidimensional propio y
+  cabecera sticky; no se comprimieron columnas ni tipografía;
+- ancho del panel ampliado hasta `52rem` cuando existe espacio;
+- controles y acciones con objetivo táctil mínimo de `44px`;
+- columna de acciones ampliada para alojar tres botones sin solapamiento;
+- botón eliminar convertido a tono destructivo coherente y contrastado.
+
+Errores detectados y corregidos:
+
+1. El modal original carecía de rol accesible y usaba `overflow-hidden` en el
+   cuerpo, pudiendo ocultar tabla y mensajes.
+2. La tabla superaba ampliamente el ancho del panel, pero su contenedor cortaba
+   el contenido sin scroll horizontal.
+3. Controles de modo, filas y acciones medían entre `28px` y `40px`.
+4. El detector señaló gris sobre el estado rosa del botón eliminar; se corrigió
+   dentro de esta unidad. Permanecen tres hallazgos ya asignados a otras unidades.
+
+Contratos:
+
+- `data-gantt-split-dialog="true"`;
+- `data-gantt-split-dialog-body="true"`;
+- `data-gantt-split-table="true"`;
+- tres harnesses; inventario visual: `130` harnesses.
+
+Evidencia aceptada:
+
+- prueba Lenovo retrato inicial: `2026-07-27T15-47-27-949Z` (`3/3`);
+- matriz inicio/cuerpo/tabla: `2026-07-27T15-48-05-417Z` (`30/30`);
+- regresión del extremo de acciones tras contraste:
+  `2026-07-27T15-50-29-382Z` (`10/10`).
+
+Resultado: modal y tabla completos, desplazables y táctiles; `30/30`.
+
 ### C04.7.4 - Panel Historial confirmado
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**
