@@ -1222,6 +1222,7 @@ const GanttApuPlanningSignalsPanel = ({
         || APU_PLANNING_SIGNAL_PRESENTATION.unavailable;
     const OverallIcon = overallPresentation.Icon;
     const metrics = model?.metrics || {};
+    const validations = Array.isArray(model?.validations) ? model.validations : [];
     const unit = model?.activity?.unit || 'u';
     const metricRows = model?.available ? [
         {
@@ -1265,6 +1266,9 @@ const GanttApuPlanningSignalsPanel = ({
         <section
             id="gantt-apu-planning-signals-panel"
             data-testid="gantt-apu-planning-signals-panel"
+            data-gantt-apu-planning-signals="true"
+            role="dialog"
+            aria-labelledby="gantt-apu-planning-signals-title"
             className="flex max-h-full flex-col overflow-hidden rounded-[1rem] border border-zinc-200 bg-white shadow-[0_6px_12px_rgba(15,23,42,0.12)]"
             onPointerEnter={onPointerEnter}
             onPointerLeave={onPointerLeave}
@@ -1282,7 +1286,7 @@ const GanttApuPlanningSignalsPanel = ({
                 <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                         <Gauge className="h-4 w-4 shrink-0 text-[#136191]" />
-                        <h3 className="text-[12px] font-black text-zinc-900">Semáforos APU</h3>
+                        <h3 id="gantt-apu-planning-signals-title" className="text-[12px] font-black text-zinc-900">Semáforos APU</h3>
                         <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[9px] font-black ${overallPresentation.chipClassName}`}>
                             <OverallIcon className="h-3 w-3" />
                             {overallPresentation.label}
@@ -1303,7 +1307,7 @@ const GanttApuPlanningSignalsPanel = ({
                     type="button"
                     onPointerDown={(event) => event.stopPropagation()}
                     onClick={onTogglePinned}
-                    className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[0.75rem] border px-2.5 text-[9px] font-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/35 ${
+                    className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[0.75rem] border px-3 text-[9px] font-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/35 ${
                         pinned
                             ? 'border-[#F39200]/45 bg-[#fff7ed] text-[#F39200]'
                             : 'border-zinc-200 bg-white text-zinc-600 hover:border-[#136191]/35 hover:text-[#136191]'
@@ -1315,7 +1319,7 @@ const GanttApuPlanningSignalsPanel = ({
                 </button>
             </div>
 
-            <div className="gantt-dark-scrollbar min-h-0 overflow-y-auto px-4 py-3">
+            <div className="gantt-dark-scrollbar min-h-0 overflow-y-auto px-4 py-3" data-gantt-apu-planning-signals-body="true">
                 {!model?.available ? (
                     <div className="flex items-start gap-2 rounded-[0.85rem] bg-zinc-100 px-3 py-3 text-zinc-700">
                         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-zinc-500" />
@@ -1332,11 +1336,11 @@ const GanttApuPlanningSignalsPanel = ({
                                         <span className="text-[10px] font-black text-zinc-800">{group.label}</span>
                                         <span className="h-px flex-1 bg-zinc-200" />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                    <div className="grid grid-cols-1 gap-x-4 gap-y-1 min-[360px]:grid-cols-2">
                                         {group.values.map(([label, value, valueUnit]) => (
                                             <div key={label} className="flex min-w-0 items-baseline justify-between gap-2 py-1">
-                                                <span className="truncate text-[9px] font-semibold text-zinc-500">{label}</span>
-                                                <span className="shrink-0 text-[10px] font-black tabular-nums text-zinc-900">
+                                                <span className="min-w-0 text-[10px] font-semibold leading-tight text-zinc-500">{label}</span>
+                                                <span className="shrink-0 text-[11px] font-black tabular-nums text-zinc-900">
                                                     {value}{valueUnit ? <span className="ml-1 text-[8px] text-zinc-500">{valueUnit}</span> : null}
                                                 </span>
                                             </div>
@@ -1345,7 +1349,31 @@ const GanttApuPlanningSignalsPanel = ({
                                 </div>
                             ))}
                         </div>
-
+                        <div className="mt-4 border-t border-zinc-200 pt-3">
+                            <div className="mb-2 flex items-center gap-2">
+                                <span className="text-[10px] font-black text-zinc-800">Validaciones</span>
+                                <span className="h-px flex-1 bg-zinc-200" />
+                            </div>
+                            <div className="space-y-2">
+                                {validations.map((validation) => {
+                                    const presentation = APU_PLANNING_SIGNAL_PRESENTATION[validation.status]
+                                        || APU_PLANNING_SIGNAL_PRESENTATION.unavailable;
+                                    const ValidationIcon = presentation.Icon;
+                                    return (
+                                        <div key={validation.id} className="rounded-[0.8rem] border border-zinc-200 bg-zinc-50 px-3 py-2.5">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <p className="min-w-0 text-[10px] font-black leading-snug text-zinc-800">{validation.label}</p>
+                                                <span className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-1 text-[8px] font-black ${presentation.chipClassName}`}>
+                                                    <ValidationIcon className="h-3 w-3" />
+                                                    {presentation.label}
+                                                </span>
+                                            </div>
+                                            <p className="mt-1 text-[10px] font-semibold leading-relaxed text-zinc-500">{validation.detail}</p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </>
                 )}
             </div>
@@ -20365,7 +20393,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 </div>
                                             ) : null}
                                             {row.is_calculable && !isSubcontracted ? (
-                                                <div className="absolute right-0 top-0 flex items-center gap-1 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
+                                                <div className="gantt-row-quick-actions absolute right-0 top-0 flex items-center gap-1 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
                                                     <button
                                                         type="button"
                                                         onClick={(event) => toggleApuPlanningSignalsForRow(row, event)}
@@ -20373,7 +20401,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         onPointerLeave={scheduleCloseApuPlanningSignals}
                                                         onFocus={(event) => openApuPlanningSignalsForRow(row, event)}
                                                         onBlur={scheduleCloseApuPlanningSignals}
-                                                        className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#136191]/25 bg-white/95 text-[#136191] shadow-sm transition duration-150 hover:border-[#136191]/55 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/20"
+                                                        className="gantt-row-quick-action inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#136191]/25 bg-white/95 text-[#136191] shadow-sm transition duration-150 hover:border-[#136191]/55 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/20"
                                                         title="Semáforos de planificación del APU"
                                                         aria-label="Abrir y fijar semáforos APU de esta actividad"
                                                         aria-expanded={apuPlanningSignalsOpen && activeTaskLineId === lineId}
@@ -20384,7 +20412,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     <button
                                                         type="button"
                                                         onClick={() => void openResourceGovernanceEditor(row)}
-                                                        className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-500 shadow-sm transition duration-150 hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20"
+                                                        className="gantt-row-quick-action inline-flex h-5 w-5 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-500 shadow-sm transition duration-150 hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20"
                                                         title="Editar duración desde recursos y rendimientos"
                                                     >
                                                         <Settings className="h-2.5 w-2.5" />
@@ -23107,7 +23135,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 </div>
                                             </GanttHeaderTooltip>
                                             {row.is_calculable && !isSubcontracted ? (
-                                                <div className="absolute right-0 top-0 flex items-center gap-1 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
+                                                <div className="gantt-row-quick-actions absolute right-0 top-0 flex items-center gap-1 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
                                                     <button
                                                         type="button"
                                                         onClick={(event) => toggleApuPlanningSignalsForRow(row, event)}
@@ -23115,7 +23143,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         onPointerLeave={scheduleCloseApuPlanningSignals}
                                                         onFocus={(event) => openApuPlanningSignalsForRow(row, event)}
                                                         onBlur={scheduleCloseApuPlanningSignals}
-                                                        className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#136191]/25 bg-white/95 text-[#136191] shadow-sm transition duration-150 hover:border-[#136191]/55 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/20"
+                                                        className="gantt-row-quick-action inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#136191]/25 bg-white/95 text-[#136191] shadow-sm transition duration-150 hover:border-[#136191]/55 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#136191]/20"
                                                         title="Semáforos de planificación del APU"
                                                         aria-label="Abrir y fijar semáforos APU de esta actividad"
                                                         aria-expanded={apuPlanningSignalsOpen && activeTaskLineId === lineId}
@@ -23126,7 +23154,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     <button
                                                         type="button"
                                                         onClick={() => void openResourceGovernanceEditor(row)}
-                                                        className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-500 shadow-sm transition duration-150 hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20"
+                                                        className="gantt-row-quick-action inline-flex h-5 w-5 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-500 shadow-sm transition duration-150 hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/20"
                                                         title="Editar duración desde recursos y rendimientos"
                                                     >
                                                         <Settings className="h-2.5 w-2.5" />

@@ -2672,6 +2672,71 @@ horizontal.
 Resultado: confirmación y conflicto Presupuesto/Gantt mantienen jerarquía,
 detalle y decisiones siempre alcanzables; `40/40`.
 
+### C04.7.32 - Señales de planificación APU
+
+Estado: **CERTIFICADA EN 40/40 COMBINACIONES VISUALES**
+
+Contenido tratado:
+
+- panel flotante de semáforos del APU seleccionado;
+- estado disponible con capacidad, recursos y costo unitario;
+- cinco validaciones técnicas con estados correcto, revisar, inconsistente o sin
+  datos;
+- estado no calculable con explicación causal;
+- fijar/desacoplar, apertura desde barra superior y accesos de fila;
+- arrastre y recolocación limitada al viewport;
+- estado inicial y extremo vertical desplazado.
+
+Adecuación aplicada:
+
+- recuperación visual de las validaciones que el modelo ya calculaba pero la UI
+  no mostraba, incluyendo etiqueta, semáforo y detalle numérico/causal;
+- panel con semántica de diálogo no modal, título accesible y cuerpo de scroll
+  propietario;
+- métricas en una o dos columnas según el ancho útil, sin truncar sus etiquetas;
+- tipografía tabular reforzada para valores y unidades;
+- acción fijar/desacoplar elevada a `44px`;
+- accesos rápidos de fila conservan su densidad con ratón, pero alcanzan `44px`
+  y permanecen visibles cuando el puntero es coarse/táctil;
+- el arrastre mantiene el panel completamente dentro de los cuatro límites del
+  viewport y el cuerpo conserva su scroll independiente.
+
+Errores detectados y corregidos:
+
+1. Las cinco validaciones de integridad se calculaban, pero nunca se renderizaban
+   en el panel; el usuario solo veía un estado global sin explicación.
+2. La acción de fijado medía `32px` y los accesos de fila `20px`.
+3. Los accesos de fila dependían de `hover`, estado inexistente o inestable en
+   tablet.
+4. Las etiquetas de métricas usaban truncado incluso cuando podían reorganizarse
+   en una columna.
+5. El primer fixture “sin datos” era inválido porque un fallback reconstruía el
+   ciclo gobernante; se rechazó y se creó un caso realmente no calculable.
+
+Contratos:
+
+- `data-gantt-apu-planning-signals="true"`;
+- `data-gantt-apu-planning-signals-body="true"`;
+- cuatro harnesses; inventario visual: `141` harnesses.
+
+Evidencia rechazada y conservada:
+
+- `2026-07-27T16-16-57-801Z`: selector de prueba ambiguo;
+- `2026-07-27T16-17-33-496Z`: el estado no disponible recibía datos por fallback
+  y el tooltip del disparador contaminaba la captura.
+
+Evidencia aceptada:
+
+- Lenovo horizontal/vertical, cuatro estados:
+  `2026-07-27T16-18-35-393Z` (`8/8`);
+- matriz completa: `2026-07-27T16-19-12-290Z` (`40/40`).
+
+Capturas inspeccionadas manualmente: disponible y extremo en Lenovo P12 retrato,
+arrastrado en Lenovo P12 horizontal y estado sin datos en Lenovo P12 retrato.
+
+Resultado: métricas, validaciones, ausencia de datos, fijado, arrastre y scroll
+son comprensibles y alcanzables en todos los perfiles; `40/40`.
+
 ### C04.7.4 - Panel Historial confirmado
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**

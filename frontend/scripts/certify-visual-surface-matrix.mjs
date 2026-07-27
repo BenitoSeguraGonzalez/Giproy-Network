@@ -886,6 +886,33 @@ try {
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(350);
                 }
+                if (harness.source === 'gantt-apu-signals-harness.html'
+                    || harness.source === 'gantt-apu-signals-end-harness.html'
+                    || harness.source === 'gantt-apu-signals-dragged-harness.html'
+                    || harness.source === 'gantt-apu-signals-unavailable-harness.html') {
+                    const unavailable = harness.source.includes('-unavailable-');
+                    const targetTaskRow = page.locator('[data-grid-row="true"]').nth(unavailable ? 2 : 1);
+                    await targetTaskRow.click({ position: { x: 250, y: 28 } });
+                    const signalsButton = page.getByTestId('gantt-apu-planning-signals-button');
+                    await signalsButton.waitFor({ state: 'visible' });
+                    await signalsButton.click();
+                    const signalsPanel = page.locator('[data-gantt-apu-planning-signals="true"]');
+                    await signalsPanel.waitFor({ state: 'visible' });
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    if (harness.source === 'gantt-apu-signals-end-harness.html') {
+                        await page.locator('[data-gantt-apu-planning-signals-body="true"]').evaluate((node) => { node.scrollTop = node.scrollHeight; });
+                    }
+                    if (harness.source === 'gantt-apu-signals-dragged-harness.html') {
+                        const dragHandle = page.getByTestId('gantt-apu-planning-signals-drag-handle');
+                        const box = await dragHandle.boundingBox();
+                        if (!box) throw new Error('APU signals drag handle is not measurable.');
+                        await page.mouse.move(box.x + 24, box.y + 24);
+                        await page.mouse.down();
+                        await page.mouse.move(profile.viewport[0] - 28, profile.viewport[1] - 28, { steps: 8 });
+                        await page.mouse.up();
+                    }
+                    await page.waitForTimeout(350);
+                }
                 if (harness.source === 'gantt-quick-successor-harness.html'
                     || harness.source === 'gantt-quick-successor-end-harness.html'
                     || harness.source === 'gantt-quick-successor-error-harness.html'

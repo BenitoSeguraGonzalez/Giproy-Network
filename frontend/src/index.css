@@ -694,3 +694,12 @@ html, body {
   .bim-responsive-events { grid-template-columns: 21.25rem 26.875rem minmax(30rem, 1fr); overflow: hidden; }
   .bim-responsive-events > * { min-height: 0; }
 }
+@media (pointer: coarse) {
+  .gantt-row-quick-actions {
+    opacity: 1;
+  }
+  .gantt-row-quick-action {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

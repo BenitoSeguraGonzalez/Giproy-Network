@@ -28,7 +28,7 @@ const createSyntheticFixture = () => {
             descripcion: `Actividad técnica interdisciplinaria ${index + 1} para ejecución y control del complejo hospitalario`,
             tipo: 'PARTIDA',
             unidad: position % 3 === 0 ? 'und' : position % 2 === 0 ? 'm²' : 'm³',
-            cantidad: 8 + (index * 1.75),
+            cantidad: index === 1 ? 0 : 8 + (index * 1.75),
             precio_unitario: 925 + (index * 83.5),
             precio_total: 12500 + (index * 2350),
             apu_id: 5001 + index,
@@ -48,6 +48,40 @@ const createSyntheticFixture = () => {
                 { id: 7000 + index, codigo: `REC-${index + 1}`, descripcion: `Recurso especializado ${index + 1}`, unidad: 'h', cantidad: 2.5 + index },
             ],
             metadata: {
+                ...(index === 1 ? {
+                    governing_resource: {
+                        name: 'Sin recurso gobernante',
+                        performance_hours_per_unit: 0,
+                        candidate_count: 0,
+                    },
+                    duration_model: {
+                        jornada_horas: 8,
+                        factor_eficiencia: 1,
+                        governing_performance_hours_per_unit: 0,
+                    },
+                } : {}),
+                ...(index === 0 ? {
+                    governing_resource: {
+                        name: 'Cuadrilla especializada de estructura hospitalaria',
+                        performance_hours_per_unit: 0.42,
+                        candidate_count: 3,
+                    },
+                    duration_model: {
+                        jornada_horas: 8,
+                        factor_eficiencia: 0.85,
+                        governing_performance_hours_per_unit: 0.42,
+                        governing_resource_name: 'Cuadrilla especializada de estructura hospitalaria',
+                    },
+                    cost_model: {
+                        unit_direct_cost: 785.5,
+                        category_unit_costs: {
+                            'Equipos y Herramientas': 155.25,
+                            Transporte: 48.75,
+                            'Mano de Obra': 281.5,
+                            Materiales: 300,
+                        },
+                    },
+                } : {}),
                 ...(index === 0 ? {
                     gantt_subbars: [
                         {
@@ -245,7 +279,8 @@ const Harness = () => {
         if (window.location.pathname.includes('gantt-segment-menu-harness')
             || window.location.pathname.includes('gantt-split-dialog')
             || window.location.pathname.includes('gantt-fine-tune')
-            || window.location.pathname.includes('gantt-reconciliation')) {
+            || window.location.pathname.includes('gantt-reconciliation')
+            || window.location.pathname.includes('gantt-apu-signals')) {
             const data = createSyntheticFixture();
             setFixture(data);
             setTrabajo(data.trabajo);
