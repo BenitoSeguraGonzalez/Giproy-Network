@@ -2610,6 +2610,68 @@ Lenovo P12 retrato y editor/calendario en escritorio Full HD al `150%`.
 Resultado: los dos recorridos de ajuste fino son editables, recuperables,
 accesibles y visibles sin recortes; `30/30`.
 
+### C04.7.31 - Comparación y reconciliación
+
+Estado: **CERTIFICADA EN 40/40 COMBINACIONES VISUALES**
+
+Contenido tratado:
+
+- confirmación del tanteo actual como nueva referencia del cronograma;
+- resumen dinámico de tareas, recursos, subtramos, conflictos, impactos
+  económicos, tanteos CPM y ajustes de recursos;
+- aviso de conflicto por cambios productivos en Presupuesto;
+- comparación Presupuesto/Gantt con métricas agregadas, origen del cambio,
+  partidas nuevas/modificadas, deltas temporales, cantidades, horas útiles,
+  motor dominante y dependencias;
+- estados inicial y extremo final desplazado de ambos recorridos.
+
+Adecuación aplicada:
+
+- ambos paneles son diálogos semánticos con título accesible y contratos DOM;
+- altura basada en `dvh`, cabecera y pie fijos y cuerpo vertical propietario;
+- el resumen de confirmación usa dos columnas en el ancho mínimo y tres cuando
+  existe espacio, sin reducir tipografía ni ocultar métricas;
+- la comparativa usa dos, tres o seis columnas según el ancho útil real;
+- métricas y partidas comparten el mismo cuerpo desplazable, evitando que el
+  resumen expulse el detalle o el pie fuera de pantalla;
+- acciones apiladas en el ancho estrecho y alineadas horizontalmente cuando hay
+  espacio; todos los botones y cierres alcanzan al menos `44px`;
+- espaciado progresivo en cabecera, cuerpo y pie para retrato, paisaje y DPI
+  alto de Windows.
+
+Errores detectados y corregidos:
+
+1. La confirmación no tenía rol de diálogo, carecía de altura máxima y su cuerpo
+   no podía desplazarse si aparecían muchas métricas.
+2. La comparativa mantenía el bloque de seis métricas fuera del scroll; en
+   retrato podía consumir la altura y hacer inaccesible el detalle.
+3. El resumen saltaba de una a seis columnas en función de un único breakpoint,
+   sin etapa intermedia adecuada para tablet.
+4. Los cierres y acciones medían entre `32px` y `40px`.
+5. El pie flexible podía envolver texto y acciones sin preservar una zona de
+   decisión estable.
+
+Contratos:
+
+- `data-gantt-approval-dialog="true"`;
+- `data-gantt-approval-dialog-body="true"`;
+- `data-gantt-compare-dialog="true"`;
+- `data-gantt-compare-dialog-body="true"`;
+- cuatro harnesses; inventario visual: `137` harnesses.
+
+Evidencia aceptada:
+
+- Lenovo horizontal/vertical, inicio y extremo:
+  `2026-07-27T16-10-36-016Z` (`8/8`);
+- matriz completa: `2026-07-27T16-11-20-678Z` (`40/40`).
+
+Capturas inspeccionadas manualmente: confirmación en Lenovo P12 retrato,
+comparativa final en Lenovo P12 retrato y comparativa inicial en Lenovo P12
+horizontal.
+
+Resultado: confirmación y conflicto Presupuesto/Gantt mantienen jerarquía,
+detalle y decisiones siempre alcanzables; `40/40`.
+
 ### C04.7.4 - Panel Historial confirmado
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**

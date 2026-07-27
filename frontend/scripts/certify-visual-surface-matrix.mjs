@@ -842,6 +842,50 @@ try {
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(500);
                 }
+                if (harness.source === 'gantt-reconciliation-approval-harness.html'
+                    || harness.source === 'gantt-reconciliation-approval-end-harness.html'
+                    || harness.source === 'gantt-reconciliation-budget-harness.html'
+                    || harness.source === 'gantt-reconciliation-budget-end-harness.html') {
+                    const targetTaskRow = page.locator('[data-grid-row="true"]').nth(1);
+                    await targetTaskRow.click({ position: { x: 250, y: 28 } });
+                    await page.getByRole('button', { name: 'Gantt', exact: true }).click();
+                    await page.waitForTimeout(500);
+                    const segmentBar = page.locator('[data-subbar-key]').first();
+                    if (!(await segmentBar.count())) throw new Error('Reconciliation segment fixture did not materialize.');
+                    await segmentBar.hover({ force: true });
+                    await page.getByRole('button', { name: /Abrir acciones del tramo/u }).first().evaluate((node) => node.click());
+                    await page.getByRole('button', { name: 'Ajuste fino' }).click();
+                    const continuation = page.getByRole('button', { name: 'Continuar edición' });
+                    if (await continuation.isVisible().catch(() => false)) await continuation.click();
+                    await page.locator('[data-gantt-subbar-fine-tune="true"]').waitFor({ state: 'visible' });
+                    await page.getByRole('button', { name: 'Aplicar' }).click();
+                    const isBudgetConflict = harness.source.includes('-budget-');
+                    if (isBudgetConflict) {
+                        await page.evaluate(() => window.dispatchEvent(new CustomEvent('giproy:budget-productivity-updated', {
+                            detail: {
+                                presupuestoId: 501,
+                                source: 'budget_apu_editor',
+                                updatedAt: '2026-07-27T16:00:00.000Z',
+                                apuId: 7301,
+                            },
+                        })));
+                        const recalculate = page.getByRole('button', { name: 'Recalcular desde presupuesto' });
+                        await recalculate.waitFor({ state: 'visible' });
+                        await recalculate.click();
+                        await page.locator('[data-gantt-compare-dialog="true"]').waitFor({ state: 'visible' });
+                        if (harness.source.endsWith('-end-harness.html')) {
+                            await page.locator('[data-gantt-compare-dialog-body="true"]').evaluate((node) => { node.scrollTop = node.scrollHeight; });
+                        }
+                    } else {
+                        await page.getByRole('button', { name: 'Confirmar cronograma' }).click();
+                        await page.locator('[data-gantt-approval-dialog="true"]').waitFor({ state: 'visible' });
+                        if (harness.source.endsWith('-end-harness.html')) {
+                            await page.locator('[data-gantt-approval-dialog-body="true"]').evaluate((node) => { node.scrollTop = node.scrollHeight; });
+                        }
+                    }
+                    await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
+                    await page.waitForTimeout(350);
+                }
                 if (harness.source === 'gantt-quick-successor-harness.html'
                     || harness.source === 'gantt-quick-successor-end-harness.html'
                     || harness.source === 'gantt-quick-successor-error-harness.html'

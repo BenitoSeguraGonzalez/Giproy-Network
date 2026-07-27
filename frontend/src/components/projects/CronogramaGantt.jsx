@@ -24773,12 +24773,18 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 }}
             />
             {compareDialog?.mode === 'approval' ? (
-                <div className="fixed inset-0 z-[220] flex items-center justify-center bg-slate-950/35 p-4 backdrop-blur-[1px]">
-                    <div className="w-full max-w-md rounded-[1rem] border border-zinc-200 bg-white shadow-[0_18px_44px_rgba(15,23,42,0.22)]">
-                        <div className="flex items-start justify-between gap-3 border-b border-zinc-100 px-4 py-3">
+                <div className="fixed inset-0 z-[220] flex items-center justify-center bg-slate-950/35 p-2 backdrop-blur-[1px] sm:p-4">
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="gantt-approval-dialog-title"
+                        data-gantt-approval-dialog="true"
+                        className="flex max-h-[calc(100dvh-1rem)] w-full max-w-[42rem] flex-col overflow-hidden rounded-[1rem] border border-zinc-200 bg-white shadow-[0_18px_44px_rgba(15,23,42,0.22)] sm:max-h-[calc(100dvh-2rem)]"
+                    >
+                        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-zinc-100 px-4 py-3">
                             <div>
                                 <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#F39200]">Confirmación</p>
-                                <h3 className="mt-1 text-[14px] font-black uppercase tracking-[0.04em] text-zinc-900">
+                                <h3 id="gantt-approval-dialog-title" className="mt-1 text-[14px] font-black uppercase tracking-[0.04em] text-zinc-900">
                                     {compareDialog.title}
                                 </h3>
                                 <p className="mt-1 text-[11px] font-semibold text-zinc-500">
@@ -24788,13 +24794,13 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                             <button
                                 type="button"
                                 onClick={() => setCompareDialog(null)}
-                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.8rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:text-[#F39200]"
+                                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.8rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:text-[#F39200]"
                                 aria-label="Cerrar confirmación"
                             >
                                 <X className="h-3.5 w-3.5" />
                             </button>
                         </div>
-                        <div className="px-4 py-3">
+                        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3" data-gantt-approval-dialog-body="true">
                             {(() => {
                                 const summary = compareDialog.summary || {};
                                 const moneyCurrency = summary.costCurrency || 'USD';
@@ -24833,7 +24839,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                     : [{ label: 'Tareas modificadas', value: summary.apus || 0, tone: 'default' }];
 
                                 return (
-                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                                         {visibleEntries.map((entry) => (
                                             <div
                                                 key={`approval-metric-${entry.label}`}
@@ -24857,11 +24863,11 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                 );
                             })()}
                         </div>
-                        <div className="flex items-center justify-end gap-2 border-t border-zinc-100 px-4 py-3">
+                        <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-zinc-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
                             <button
                                 type="button"
                                 onClick={() => setCompareDialog(null)}
-                                className="inline-flex h-9 items-center justify-center rounded-[0.8rem] border border-zinc-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.14em] text-zinc-600 transition hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200]"
+                                className="inline-flex min-h-11 items-center justify-center rounded-[0.8rem] border border-zinc-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.14em] text-zinc-600 transition hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200]"
                             >
                                 Cancelar
                             </button>
@@ -24869,7 +24875,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                 type="button"
                                 onClick={() => void handleConfirmCompareDialog()}
                                 disabled={approvalSaving || compareLoading}
-                                className="inline-flex h-9 min-w-[12.5rem] items-center justify-between gap-3 rounded-[0.8rem] border border-[#F39200] bg-[#F39200] pl-4 pr-3 text-[10px] font-black uppercase tracking-[0.14em] text-white transition hover:bg-[#E94E1B] disabled:cursor-not-allowed disabled:opacity-60"
+                                className="inline-flex min-h-11 w-full items-center justify-between gap-3 rounded-[0.8rem] border border-[#F39200] bg-[#F39200] pl-4 pr-3 text-[10px] font-black uppercase tracking-[0.14em] text-white transition hover:bg-[#E94E1B] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[12.5rem]"
                             >
                                 <span>Aprobar cambios</span>
                                 {(approvalSaving || compareLoading) ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <Upload className="h-4 w-4 shrink-0" />}
@@ -24879,14 +24885,20 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 </div>
             ) : null}
             {compareDialog && compareDialog.mode !== 'approval' ? (
-                <div className="fixed inset-0 z-[220] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[1px]">
-                    <div className="flex max-h-[86dvh] w-full max-w-4xl flex-col overflow-hidden rounded-[1.2rem] border border-zinc-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.22)]">
-                        <div className="flex items-start justify-between gap-4 border-b border-zinc-100 px-5 py-4">
+                <div className="fixed inset-0 z-[220] flex items-center justify-center bg-slate-950/40 p-2 backdrop-blur-[1px] sm:p-4">
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="gantt-compare-dialog-title"
+                        data-gantt-compare-dialog="true"
+                        className="flex max-h-[calc(100dvh-1rem)] w-full max-w-4xl flex-col overflow-hidden rounded-[1.2rem] border border-zinc-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.22)] sm:max-h-[calc(100dvh-2rem)]"
+                    >
+                        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-zinc-100 px-3 py-3 sm:px-5 sm:py-4">
                             <div>
                                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#F39200]">
                                     {compareDialog.mode === 'budget-conflict' ? 'Conflicto Presupuesto/Gantt' : 'Comparativa previa'}
                                 </p>
-                                <h3 className="mt-1 text-lg font-black uppercase tracking-[0.04em] text-zinc-900">
+                                <h3 id="gantt-compare-dialog-title" className="mt-1 text-lg font-black uppercase tracking-[0.04em] text-zinc-900">
                                     {compareDialog.title}
                                 </h3>
                                 <p className="mt-2 max-w-3xl text-sm font-medium leading-relaxed text-zinc-500">
@@ -24896,14 +24908,15 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                             <button
                                 type="button"
                                 onClick={() => setCompareDialog(null)}
-                                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.9rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200]"
+                                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.9rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200]"
                                 aria-label="Cerrar comparativa"
                             >
                                 <X className="h-4 w-4" />
                             </button>
                         </div>
-                        <div className={`grid gap-3 border-b border-zinc-100 bg-zinc-50 px-5 py-4 ${
-                            compareDialog.mode === 'budget-conflict' ? 'md:grid-cols-6' : 'md:grid-cols-5'
+                        <div className="min-h-0 flex-1 overflow-y-auto" data-gantt-compare-dialog-body="true">
+                        <div className={`grid grid-cols-2 gap-3 border-b border-zinc-100 bg-zinc-50 px-3 py-3 sm:grid-cols-3 sm:px-5 sm:py-4 ${
+                            compareDialog.mode === 'budget-conflict' ? 'xl:grid-cols-6' : 'xl:grid-cols-5'
                         }`}>
                             <div className="rounded-[0.85rem] border border-zinc-200 bg-white px-3 py-2">
                                 <p className="text-[9px] font-black uppercase tracking-[0.14em] text-zinc-400">Partidas</p>
@@ -24945,7 +24958,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                 </>
                             )}
                         </div>
-                        <div className="max-h-[48dvh] overflow-auto px-5 py-4">
+                        <div className="px-3 py-3 sm:px-5 sm:py-4">
                             <div className="space-y-3">
                                 {compareDialog.mode === 'budget-conflict' && compareDialog.context ? (
                                     <div className="rounded-[0.95rem] border border-[#F39200]/20 bg-[#fff7ed] px-4 py-3">
@@ -25060,17 +25073,18 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                 )}
                             </div>
                         </div>
-                        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 px-5 py-4">
+                        </div>
+                        <div className="flex shrink-0 flex-col gap-3 border-t border-zinc-100 px-3 py-3 sm:px-5 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
                             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                 {compareDialog.mode === 'budget-conflict'
                                     ? 'Puedes mantener el tanteo y revisar después, o recalcular ahora desde presupuesto.'
                                     : 'Si confirmas, este estado pasará a ser la nueva referencia aprobada del cronograma.'}
                             </p>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
                                 <button
                                     type="button"
                                     onClick={() => setCompareDialog(null)}
-                                    className="inline-flex h-10 items-center justify-center rounded-[0.9rem] border border-zinc-200 bg-white px-4 text-[10px] font-black uppercase tracking-[0.14em] text-zinc-600 transition hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200]"
+                                    className="inline-flex min-h-11 items-center justify-center rounded-[0.9rem] border border-zinc-200 bg-white px-4 text-[10px] font-black uppercase tracking-[0.14em] text-zinc-600 transition hover:border-[#F39200] hover:bg-[#fff7ed] hover:text-[#F39200]"
                                 >
                                     {compareDialog.mode === 'budget-conflict' ? 'Mantener tanteo' : 'Cancelar'}
                                 </button>
@@ -25078,7 +25092,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                     type="button"
                                     onClick={() => void handleConfirmCompareDialog()}
                                     disabled={approvalSaving || compareLoading}
-                                    className="inline-flex h-10 items-center justify-center gap-2 rounded-[0.9rem] border border-[#F39200] bg-[#F39200] px-4 text-[10px] font-black uppercase tracking-[0.14em] text-white transition hover:bg-[#E94E1B] disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.9rem] border border-[#F39200] bg-[#F39200] px-4 text-[10px] font-black uppercase tracking-[0.14em] text-white transition hover:bg-[#E94E1B] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     {(approvalSaving || compareLoading) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                                     {compareDialog.confirmLabel}
