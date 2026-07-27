@@ -3123,7 +3123,12 @@ const GanttResourceEditorModal = ({
                                     </div>
                                     ) : null}
                                     {governancePickerOpen && governanceManualCandidates.length > 1 ? (
-                                        <div className="absolute left-0 top-[calc(100%+0.5rem)] z-20 w-full max-w-[980px] rounded-[0.95rem] border border-sky-200 bg-sky-50/95 p-2.5 shadow-[0_18px_40px_rgba(15,23,42,0.18)] backdrop-blur-[2px]">
+                                        <div
+                                            data-gantt-governance-picker="true"
+                                            role="listbox"
+                                            aria-label="Candidatos a gobernanza"
+                                            className="relative z-20 mt-2 w-full max-w-[980px] rounded-[0.95rem] border border-sky-200 bg-sky-50/95 p-2.5 shadow-[0_18px_40px_rgba(15,23,42,0.18)] backdrop-blur-[2px]"
+                                        >
                                             <div className="flex items-center justify-between gap-2">
                                                 <p className="text-[8px] font-black uppercase tracking-[0.12em] text-sky-700">
                                                     Candidatos a gobernanza
@@ -3136,6 +3141,8 @@ const GanttResourceEditorModal = ({
                                                 <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
                                                 <button
                                                     type="button"
+                                                    role="option"
+                                                    aria-selected={!manualGovernanceCandidate}
                                                     onClick={() => handleSelectGovernanceCandidate(null)}
                                                     className={`rounded-[0.8rem] border px-3 py-2 text-left transition ${
                                                         !manualGovernanceCandidate
@@ -3163,6 +3170,8 @@ const GanttResourceEditorModal = ({
                                                         <button
                                                             key={`governance-candidate-${candidate.id}`}
                                                             type="button"
+                                                            role="option"
+                                                            aria-selected={isSelected}
                                                             onClick={() => handleSelectGovernanceCandidate(candidate)}
                                                             className={`rounded-[0.8rem] border px-3 py-2 text-left transition ${
                                                                 isSelected
@@ -3435,24 +3444,30 @@ const GanttResourceEditorModal = ({
                     const totals = summarizeGanttSourceLines(resourceContributionModal.sourceLines || []);
                     return (
                         <div className="absolute inset-0 flex items-center justify-center bg-slate-950/25 px-3 py-3 backdrop-blur-[1px]" style={{ zIndex: 40 }}>
-                            <div className="flex max-h-[min(78dvh,32rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[0.9rem] border border-zinc-200 bg-[#f7f7f5] shadow-[0_24px_60px_rgba(15,23,42,0.24)]">
+                            <div
+                                data-gantt-resource-contribution-dialog="true"
+                                role="dialog"
+                                aria-modal="true"
+                                aria-labelledby="gantt-resource-contribution-title"
+                                className="flex max-h-[min(90dvh,40rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[0.9rem] border border-zinc-200 bg-[#f7f7f5] shadow-[0_24px_60px_rgba(15,23,42,0.24)]"
+                            >
                                 <div className="flex items-center justify-between gap-3 border-b border-zinc-100 bg-white px-4 py-2.5">
                                     <div className="min-w-0">
                                         <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#F39200]">Ajuste trazable de recurso explotado</p>
-                                        <h3 className="mt-0.5 truncate text-[13px] font-black text-zinc-900">
+                                        <h3 id="gantt-resource-contribution-title" className="mt-0.5 truncate text-[13px] font-black text-zinc-900">
                                             {normalizeDescriptionCapitalization(resourceContributionModal.label)}
                                         </h3>
                                     </div>
                                     <button
                                         type="button"
                                         onClick={() => setResourceContributionModal(null)}
-                                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.75rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:text-[#F39200]"
+                                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.75rem] border border-zinc-200 bg-white text-zinc-500 transition hover:border-[#F39200] hover:text-[#F39200]"
                                         aria-label="Cerrar ajuste trazable"
                                     >
                                         <X className="h-4.5 w-4.5" />
                                     </button>
                                 </div>
-                                <div className="overflow-x-auto bg-white px-4 py-3">
+                                <div data-gantt-resource-contribution-body="true" className="min-h-0 flex-1 overflow-auto overscroll-contain bg-white px-3 py-3 sm:px-4">
                                     <div className="min-w-[620px] overflow-hidden rounded-xl border border-zinc-100">
                                         <div className="grid grid-cols-[minmax(150px,1.35fr)_68px_112px_112px_112px] items-center gap-2 bg-zinc-50 px-3 py-2 text-[8px] font-black uppercase tracking-[0.14em] text-zinc-400">
                                             <span>Origen</span>
@@ -3522,11 +3537,11 @@ const GanttResourceEditorModal = ({
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-end gap-2 border-t border-zinc-100 bg-[#f7f7f5] px-5 py-3">
-                                    <button type="button" onClick={() => setResourceContributionModal(null)} className="h-10 rounded-xl border border-zinc-200 bg-white px-5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700">
+                                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-zinc-100 bg-[#f7f7f5] px-3 py-3 sm:px-5">
+                                    <button type="button" onClick={() => setResourceContributionModal(null)} className="h-11 rounded-xl border border-zinc-200 bg-white px-5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700">
                                         Cancelar
                                     </button>
-                                    <button type="button" onClick={acceptContributionModal} className="h-10 rounded-xl bg-[#F39200] px-5 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_10px_22px_rgba(243,146,0,0.18)] transition hover:bg-[#e58300]">
+                                    <button type="button" onClick={acceptContributionModal} className="h-11 rounded-xl bg-[#F39200] px-5 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_10px_22px_rgba(243,146,0,0.18)] transition hover:bg-[#e58300]">
                                         Aplicar
                                     </button>
                                 </div>

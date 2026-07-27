@@ -2352,6 +2352,83 @@ Evidencia final:
 
 Resultado: `50/50 PASS`.
 
+### C04.7.35 - Gobernanza y contribuciones trazables de recursos
+
+Estado: **CERTIFICADA EN 40/40 COMBINACIONES VISUALES**
+Fecha: 2026-07-27
+
+Subcomponentes tratados:
+
+- selector de candidatos al recurso gobernante, incluida vuelta a resolución
+  automática;
+- modal secundario de contribuciones padre/hijo de un recurso explotado;
+- modos de trabajo fijo y variable;
+- nueve líneas de origen, edición de cantidad/rendimiento, totales y extremo
+  inferior desplazado.
+
+Adecuación aplicada:
+
+- el selector deja de ser un overlay absoluto susceptible de recorte y se
+  integra en el flujo del editor; el cuerpo propietario absorbe su altura;
+- semántica `listbox`/`option`, nombre accesible y selección mediante
+  `aria-selected`;
+- candidatos en una, dos o tres columnas según el ancho útil y listado con
+  scroll propio cuando supera su altura límite;
+- modal secundario con semántica `dialog`, título accesible, altura `dvh`,
+  cabecera/pie estables y cuerpo bidireccional propietario;
+- tabla trazable conserva su modelo tabular y ancho operativo; en retrato se
+  desplaza dentro del modal sin mover el editor ni el documento;
+- cierre, Cancelar y Aplicar elevados a 44 px; acciones envuelven sin quedar
+  fuera del viewport.
+
+Errores detectados durante la certificación:
+
+1. La primera ampliación del fixture alteró el desempate y dejó un único
+   candidato; se corrigió con tres recursos válidos empatados en rendimiento,
+   que es el contrato real que habilita la selección manual.
+2. Selectores de prueba ambiguos (`Recurso...`, `Cantidad APU`, Fijo/Variable)
+   abortaron varias corridas; se sustituyeron por títulos y roles reales sin
+   relajar las aserciones.
+3. El último origen estaba correctamente montado pero fuera del viewport; la
+   prueba exigía visibilidad antes de desplazar. Se separó presencia DOM de
+   alcanzabilidad visual y el estado extremo demuestra el recorrido completo.
+
+Contratos añadidos:
+
+- `data-gantt-governance-picker="true"`;
+- `data-gantt-resource-contribution-dialog="true"`;
+- `data-gantt-resource-contribution-body="true"`;
+- cuatro harnesses; inventario visual: `154` harnesses.
+
+Evidencia rechazada y conservada:
+
+- `2026-07-27T17-50-38-056Z`: selector de recurso ambiguo;
+- `2026-07-27T17-54-26-556Z`: fixture sin empate de candidatos;
+- `2026-07-27T17-58-57-080Z`, `2026-07-27T17-59-46-861Z` y
+  `2026-07-27T18-03-47-502Z`: selectores/caso de presencia del modal secundario;
+- `2026-07-27T18-08-50-119Z`: selector ambiguo del tab Fijo.
+
+Verificación final:
+
+- build Vite de producción: PASS;
+- smoke de frontera API Cronogramas Classic: PASS;
+- inventario: 43 rutas, 55 archivos interactivos y 154 harnesses, todos con
+  validador;
+- Playwright: `40/40 PASS` en los diez perfiles;
+- revisión manual de las ocho capturas Lenovo y muestras de cada perfil Windows
+  y tablet: PASS; cabeceras, pies, última contribución y totales alcanzables;
+- Impeccable: ningún aviso nuevo; el aviso ajeno de QI-007 se desplaza a la
+  línea 19119 por las inserciones, sin cambio de naturaleza.
+
+Evidencia final:
+
+- Lenovo focal: `artifacts/visual-certification/2026-07-27T18-09-31-555Z/`
+  (`8/8`);
+- matriz completa: `artifacts/visual-certification/2026-07-27T18-10-14-582Z/`
+  (`40/40`).
+
+Resultado: `40/40 PASS`.
+
 ### C04.7.5 - Calendario laboral y festivos
 
 Estado: **CERTIFICADA EN 10/10 PERFILES**

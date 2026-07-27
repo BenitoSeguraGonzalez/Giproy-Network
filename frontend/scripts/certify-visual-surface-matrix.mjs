@@ -398,6 +398,19 @@ try {
                             recurso_id: 7100 + index,
                             cantidad: 1 + (index * 0.25),
                             rendimiento: 1,
+                            source_lines: index === 0 ? Array.from({ length: 9 }, (_, sourceIndex) => ({
+                                linea_id: 8100 + sourceIndex,
+                                apu_id: 9000 + sourceIndex,
+                                apu_codigo: `APU-${String(sourceIndex + 1).padStart(3, '0')}`,
+                                apu_descripcion: sourceIndex === 0
+                                    ? 'APU base de estructura hospitalaria'
+                                    : `APU anidado especializado de nivel ${sourceIndex}`,
+                                apu_unidad: 'm³',
+                                nested: sourceIndex > 0,
+                                cantidad: 0.25 + (sourceIndex * 0.125),
+                                rendimiento: 1,
+                                trabajo_relativo: 0.25 + (sourceIndex * 0.125),
+                            })) : [],
                             recurso: {
                                 id: 7100 + index,
                                 codigo: `REC-${String(index + 1).padStart(3, '0')}`,
@@ -953,7 +966,7 @@ try {
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(350);
                 }
-                if (harness.source.startsWith('gantt-resource-editor')) {
+                if (harness.source.startsWith('gantt-resource-')) {
                     const trigger = page.getByTitle('Editar duración desde recursos y rendimientos').first();
                     await trigger.waitFor({ state: 'visible' });
                     await trigger.click();
@@ -965,7 +978,7 @@ try {
                     } else if (harness.source === 'gantt-resource-editor-empty-harness.html') {
                         await page.getByText('Este APU no tiene recursos registrados.', { exact: true }).waitFor({ state: 'visible' });
                     } else {
-                        await page.getByText('Recurso técnico especializado 1', { exact: true }).waitFor({ state: 'visible' });
+                        await page.getByText('Recurso técnico especializado 1', { exact: true }).first().waitFor({ state: 'visible' });
                     }
                     if (harness.source === 'gantt-resource-editor-end-harness.html') {
                         await page.locator('[data-gantt-resource-editor-body="true"]').evaluate((node) => { node.scrollTop = node.scrollHeight; });
@@ -973,6 +986,27 @@ try {
                     if (harness.source === 'gantt-resource-editor-table-end-harness.html') {
                         const resourceTable = page.locator('[data-gantt-resource-table-scroll="true"]').first();
                         await resourceTable.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
+                    }
+                    if (harness.source === 'gantt-resource-editor-governance-harness.html') {
+                        await page.locator('[data-testid="gantt-apu-light-operational-dashboard"] > button').click();
+                        await page.locator('[data-gantt-governance-picker="true"]').waitFor({ state: 'visible' });
+                    }
+                    if (harness.source.startsWith('gantt-resource-editor-contribution')) {
+                        if (harness.source === 'gantt-resource-editor-contribution-fixed-harness.html') {
+                            await editor.getByRole('tab', { name: 'Fijo', exact: true }).click();
+                        } else {
+                            await editor.getByRole('tab', { name: 'Variable', exact: true }).click();
+                        }
+                        await page.getByTitle(/^Cantidad APU:/u).first().click();
+                        const contribution = page.locator('[data-gantt-resource-contribution-dialog="true"]');
+                        await contribution.waitFor({ state: 'visible' });
+                        await contribution.getByText(/anidado especializado de nivel 8/iu).waitFor({ state: 'attached' });
+                        if (harness.source === 'gantt-resource-editor-contribution-end-harness.html') {
+                            await page.locator('[data-gantt-resource-contribution-body="true"]').evaluate((node) => {
+                                node.scrollTop = node.scrollHeight;
+                                node.scrollLeft = node.scrollWidth;
+                            });
+                        }
                     }
                     await page.mouse.move(profile.viewport[0] - 6, profile.viewport[1] - 6);
                     await page.waitForTimeout(500);
