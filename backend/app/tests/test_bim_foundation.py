@@ -1,5 +1,7 @@
 import pytest
 import json
+import base64
+from types import SimpleNamespace
 from datetime import date, timedelta
 from fastapi import HTTPException
 from fastapi import FastAPI
@@ -34,6 +36,7 @@ from app.services.bim.feature_flags import resolve_bim_feature_access
 from app.services.bim import import_service
 from app.services.bim.import_service import import_json_bim_batch, import_json_bim_package, validate_json_bim_package
 from app.services.bim.link_registry import create_link_for_project, list_links_for_project
+from app.services.bim.coordination_import_stage_service import confirm_preflight, create_preflight
 from app.services.bim.model_registry import bim_tables_ready, ensure_bim_domain_tables
 from app.services.bim.model_registry import get_workspace_summary
 from app.services.bim.view_state_service import bim_view_state_table_ready, ensure_bim_view_state_table
@@ -63,6 +66,32 @@ def _bim_test_client(db, user):
     app.dependency_overrides[bim_view_states_endpoint.get_db] = override_db
     app.dependency_overrides[bim_view_states_endpoint.get_current_active_user] = override_user
     return TestClient(app)
+
+
+def _confirmed_stage(db, user, project, *, source_format, filename, content, source_domain="bim"):
+    raw = content if isinstance(content, bytes) else content.encode("utf-8")
+    staged = create_preflight(
+        db,
+        project_id=project.id,
+        company_id=project.empresa_id,
+        user_id=user.id,
+        payload=SimpleNamespace(
+            source_domain=source_domain,
+            source_format=source_format,
+            filename=filename,
+            content_base64=base64.b64encode(raw).decode("ascii"),
+            coordination_set_id=None,
+        ),
+    )
+    confirm_preflight(
+        db,
+        stage_id=staged["id"],
+        project_id=project.id,
+        company_id=project.empresa_id,
+        user_id=user.id,
+        payload=SimpleNamespace(expected_checksum_sha256=staged["checksum_sha256"], reason="Endpoint test"),
+    )
+    return staged["id"]
 
 
 def _empty_sqlite_session():
@@ -1086,13 +1115,17 @@ def test_bim_json_package_endpoint_rejects_duplicate_version_label(db, sample_em
         "elements": [{"global_id": "JSON-DUP-001", "storey_name": "Nivel 1"}],
         "activate": True,
     }
+    payload["coordination_stage_id"] = _confirmed_stage(
+        db, user, project, source_format="json", filename="modelo-json.json",
+        content=json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")),
+    )
 
     first_response = client.post(f"/bim/projects/{project.id}/imports/json-package", json=payload)
     second_response = client.post(f"/bim/projects/{project.id}/imports/json-package", json=payload)
 
     assert first_response.status_code == 200
-    assert second_response.status_code == 400
-    assert second_response.json()["detail"] == "Ya existe una version BIM con esa etiqueta para este modelo."
+    assert second_response.status_code == 200
+    assert second_response.json()["version_id"] == first_response.json()["version_id"]
 
     model = db.query(BimModel).filter(BimModel.proyecto_id == project.id).one()
     assert db.query(BimModelVersion).filter(BimModelVersion.bim_model_id == model.id).count() == 1
@@ -1128,9 +1161,7 @@ def test_bim_ifc_manifest_endpoint_registers_version_under_feature_flag(db, samp
     db.refresh(user)
     db.refresh(project)
 
-    response = _bim_test_client(db, user).post(
-        f"/bim/projects/{project.id}/imports/ifc-manifest",
-        json={
+    manifest_payload = {
             "model_name": "Modelo IFC registrado",
             "version_label": "ifc-v1",
             "source_filename": "modelo-coordinacion.ifc",
@@ -1139,7 +1170,14 @@ def test_bim_ifc_manifest_endpoint_registers_version_under_feature_flag(db, samp
             "checksum_sha256": "a" * 64,
             "file_size_bytes": 2048,
             "activate": True,
-        },
+        }
+    manifest_payload["coordination_stage_id"] = _confirmed_stage(
+        db, user, project, source_format="json", filename="modelo-coordinacion.ifc.manifest.json",
+        content=json.dumps(manifest_payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")),
+    )
+    response = _bim_test_client(db, user).post(
+        f"/bim/projects/{project.id}/imports/ifc-manifest",
+        json=manifest_payload,
     )
 
     assert response.status_code == 200
@@ -1242,13 +1280,17 @@ def test_bim_ifc_manifest_endpoint_rejects_duplicate_version_label(db, sample_em
         "source_filename": "modelo-duplicado.ifc",
         "activate": True,
     }
+    payload["coordination_stage_id"] = _confirmed_stage(
+        db, user, project, source_format="json", filename="modelo-duplicado.ifc.manifest.json",
+        content=json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")),
+    )
 
     first_response = client.post(f"/bim/projects/{project.id}/imports/ifc-manifest", json=payload)
     second_response = client.post(f"/bim/projects/{project.id}/imports/ifc-manifest", json=payload)
 
     assert first_response.status_code == 200
-    assert second_response.status_code == 400
-    assert second_response.json()["detail"] == "Ya existe una version BIM con esa etiqueta para este modelo."
+    assert second_response.status_code == 200
+    assert second_response.json()["version_id"] == first_response.json()["version_id"]
 
     model = db.query(BimModel).filter(BimModel.proyecto_id == project.id).one()
     assert db.query(BimModelVersion).filter(BimModelVersion.bim_model_id == model.id).count() == 1
@@ -1312,15 +1354,7 @@ def test_bim_ifc_text_endpoint_imports_semantic_elements_under_feature_flag(db, 
     db.refresh(user)
     db.refresh(project)
 
-    response = _bim_test_client(db, user).post(
-        f"/bim/projects/{project.id}/imports/ifc-text",
-        json={
-            "model_name": "Modelo IFC semantico",
-            "version_label": "ifc-text-v1",
-            "source_filename": "modelo-semantico.ifc",
-            "discipline": "Coordinacion",
-            "activate": True,
-            "ifc_text": """
+    ifc_text = """
 ISO-10303-21;
 DATA;
 #10=IFCBUILDINGSTOREY('2MS7',$,'Nivel 1',$,$,$,$,'Planta baja',.ELEMENT.,0.);
@@ -1328,7 +1362,18 @@ DATA;
 #21=IFCWINDOW('4MS9',$,'Ventana BIM',$,$,$,$,$);
 ENDSEC;
 END-ISO-10303-21;
-""",
+"""
+    stage_id = _confirmed_stage(db, user, project, source_format="ifc", filename="modelo-semantico.ifc", content=ifc_text)
+    response = _bim_test_client(db, user).post(
+        f"/bim/projects/{project.id}/imports/ifc-text",
+        json={
+            "coordination_stage_id": stage_id,
+            "model_name": "Modelo IFC semantico",
+            "version_label": "ifc-text-v1",
+            "source_filename": "modelo-semantico.ifc",
+            "discipline": "Coordinacion",
+            "activate": True,
+            "ifc_text": ifc_text,
         },
     )
 
@@ -1435,6 +1480,7 @@ DATA;
 ENDSEC;
 END-ISO-10303-21;
 """
+    stage_id = _confirmed_stage(db, user, project, source_format="ifc", filename="modelo archivo.ifc", content=ifc_content)
     response = _bim_test_client(db, user).post(
         f"/bim/projects/{project.id}/imports/ifc-file",
         data={
@@ -1442,6 +1488,7 @@ END-ISO-10303-21;
             "version_label": "ifc-file-v1",
             "discipline": "Coordinacion",
             "activate": "true",
+            "stage_id": str(stage_id),
         },
         files={"file": ("modelo archivo.ifc", ifc_content, "application/octet-stream")},
     )
@@ -1538,14 +1585,7 @@ def test_bim_viewer_artifact_endpoint_generates_indexed_artifact(db, sample_empr
     db.refresh(project)
     client = _bim_test_client(db, user)
 
-    import_response = client.post(
-        f"/bim/projects/{project.id}/imports/ifc-text",
-        json={
-            "model_name": "Modelo Artifact",
-            "version_label": "artifact-v1",
-            "source_filename": "artifact.ifc",
-            "activate": True,
-            "ifc_text": """
+    artifact_ifc_text = """
 ISO-10303-21;
 DATA;
 #10=IFCBUILDINGSTOREY('ART-ST01',$,'Nivel Artifact',$,$,$,$,'Nivel Artifact',.ELEMENT.,0.);
@@ -1556,7 +1596,17 @@ DATA;
 #60=IFCRELCONTAINEDINSPATIALSTRUCTURE('ART-REL-SPATIAL',$,$,$,(#20),#10);
 ENDSEC;
 END-ISO-10303-21;
-""",
+"""
+    artifact_stage_id = _confirmed_stage(db, user, project, source_format="ifc", filename="artifact.ifc", content=artifact_ifc_text)
+    import_response = client.post(
+        f"/bim/projects/{project.id}/imports/ifc-text",
+        json={
+            "coordination_stage_id": artifact_stage_id,
+            "model_name": "Modelo Artifact",
+            "version_label": "artifact-v1",
+            "source_filename": "artifact.ifc",
+            "activate": True,
+            "ifc_text": artifact_ifc_text,
         },
     )
     version_id = import_response.json()["version_id"]

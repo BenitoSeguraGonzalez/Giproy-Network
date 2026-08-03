@@ -63,7 +63,7 @@ const MergeInterparentModal = ({
 
     return (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="max-h-[85vh] w-full max-w-2xl max-w-md flex flex-col rounded-2xl border border-zinc-200 bg-white shadow-2xl overflow-hidden">
+            <div className="max-h-[85dvh] w-full max-w-2xl max-w-md flex flex-col rounded-2xl border border-zinc-200 bg-white shadow-2xl overflow-hidden">
                 <div className="p-6 border-b border-zinc-200">
                     <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-lg">

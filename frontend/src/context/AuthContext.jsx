@@ -228,6 +228,13 @@ export const AuthProvider = ({ children }) => {
             setLicenseInfo(null);
             return;
         }
+        // Los usuarios de empresa ya cargan su licencia dentro de checkAuth().
+        // Repetirla aquí dispara dos GET /admin-licenses/me concurrentes durante
+        // el arranque. Este efecto queda reservado al cambio de empresa del
+        // superadministrador, que sí necesita recalcular el contexto.
+        if (user.rol?.toLowerCase() !== 'superadministrador') {
+            return;
+        }
         const targetEmpresaId = user.rol?.toLowerCase() === 'superadministrador'
             ? (selectedEmpresa?.id || null)
             : null;

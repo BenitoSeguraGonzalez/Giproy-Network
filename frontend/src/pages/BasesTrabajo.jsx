@@ -728,7 +728,7 @@ const BasesTrabajo = () => {
     };
 
     return (
-        <div className="h-[calc(100vh-5rem)] flex flex-col bg-[#F8FAFC]">
+        <div className="h-full min-h-0 flex flex-col bg-[#F8FAFC]">
             {/* Header */}
             <header className="bg-white border-b border-zinc-200 px-8 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -1037,7 +1037,7 @@ const BasesTrabajo = () => {
                         isOpen={showRecycleModal}
                         size="lg"
                         zIndex="z-[200]"
-                        panelClassName="rounded-[2.5rem] max-h-[calc(100vh-4rem)] flex flex-col"
+                        panelClassName="rounded-[2.5rem] max-h-[calc(100dvh-4rem)] flex flex-col"
                         onClose={() => setShowRecycleModal(false)}
                     >
                         <AppModalHeader
@@ -1129,7 +1129,7 @@ const BasesTrabajo = () => {
                         isOpen={Boolean(syncHistoryBase)}
                         size="lg"
                         zIndex="z-[100]"
-                        panelClassName="rounded-[2.5rem] max-h-[calc(100vh-4rem)] flex flex-col"
+                        panelClassName="rounded-[2.5rem] max-h-[calc(100dvh-4rem)] flex flex-col"
                         onClose={() => setSyncHistoryBase(null)}
                     >
                         <AppModalHeader
@@ -1239,7 +1239,7 @@ const BasesTrabajo = () => {
                         size="xl"
                         zIndex="z-[110]"
                         overlayClassName="items-start overflow-y-auto py-6"
-                        panelClassName="rounded-[2.5rem] max-h-[calc(100vh-3rem)] flex flex-col"
+                        panelClassName="rounded-[2.5rem] max-h-[calc(100dvh-3rem)] flex flex-col"
                         onClose={() => { if (!syncingBaseId) { setSyncPreviewBase(null); setSyncPreviewData(null); setSyncPreviewTargetBaseId(null); } }}
                     >
                         <AppModalHeader

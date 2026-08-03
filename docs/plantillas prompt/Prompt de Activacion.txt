@@ -173,6 +173,30 @@ Siempre que se cree o modifique UI:
 
 OBLIGATORIO consultar el libro de estilo.
 
+También es OBLIGATORIO consultar las skills disponibles, leer completamente las
+instrucciones de las aplicables y declarar cuáles se usarán y en qué orden.
+
+### Enrutamiento automático de skills frontend
+
+- Usar siempre `impeccable`, `ui-ux-pro-max` y `emil-design-eng` como núcleo
+  cuando la TASK incluya diseño, rediseño, implementación o mejora visual.
+- Usar `review-animations` para revisar animaciones concretas existentes.
+- Usar `improve-animations` para auditar el motion general y producir planes, y
+  `find-animation-opportunities` para encontrar oportunidades; ambas son de
+  solo lectura y no deben presentarse como implementación.
+- Usar `apple-design` para gestos, springs, drag/swipe, sheets, momentum,
+  profundidad, materiales translúcidos o reduced-motion.
+- Usar `animation-vocabulary` solamente para identificar el nombre preciso de
+  un efecto descrito de forma vaga.
+- Invocar `prototype` si el objetivo pide explorar variantes de una pieza UI e
+  invocar `pick-ui-library` si requiere escoger una librería; ambas necesitan
+  invocación expresa.
+- El libro de estilo, los componentes existentes, las licencias, la TASK activa
+  y las guardas Clásico/BIM tienen precedencia sobre cualquier recomendación.
+- Ninguna skill autoriza features, dependencias o refactors fuera del slice.
+- Validar el resultado real: las skills no sustituyen build, smoke, QA visual,
+  accesibilidad ni comprobación de licencias y no interferencia BIM.
+
 ---
 
 ### Validar:

@@ -5,23 +5,30 @@ from typing import List
 from app.api import deps
 from app.schemas.polinomica import FormulaPolinomicaResponse, IndiceINECResponse
 from app.services.formula_polinomica import formula_polinomica_service
+from app.models.presupuesto import Presupuesto
+from app.services.audit_event import record_project_entity_event
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-def _verify_module_access(db: Session, presupuesto_id: int, usuario_id: int):
+def _verify_module_access(db: Session, presupuesto_id: int, current_user):
     from app.services.proyecto import proyecto_service
-    from app.models.presupuesto import Presupuesto
-    pres = db.query(Presupuesto).filter(Presupuesto.id == presupuesto_id).first()
+    query = db.query(Presupuesto).filter(Presupuesto.id == presupuesto_id)
+    if (current_user.rol or "").lower() != "superadministrador":
+        query = query.filter(Presupuesto.empresa_id == current_user.empresa_id)
+    pres = query.first()
     if not pres:
-        return # Let the main logic handle 404
+        raise HTTPException(status_code=404, detail="Presupuesto fuera de la empresa activa")
     
-    perms = proyecto_service.get_user_permissions(db, pres.proyecto_id, usuario_id)
+    perms = proyecto_service.get_user_permissions(db, pres.proyecto_id, current_user.id)
     if not perms["has_assignment"]:
-        return
+        return pres
     if "todos" in perms["allowed_modules"] or "formula_polinomica" in perms["allowed_modules"]:
-        return
+        return pres
     raise HTTPException(status_code=403, detail="Acceso denegado al módulo fórmula polinómica")
+
+def _audit_formula(db, *, presupuesto: Presupuesto, actor, event_type: str, message: str, payload: dict | None = None):
+    record_project_entity_event(db, project_id=presupuesto.proyecto_id, actor=actor, module="formula_polinomica", event_type=event_type, message=message, entity_type="formula_polinomica", entity_id=presupuesto.id, payload={"presupuesto_id": presupuesto.id, **(payload or {})})
 
 @router.get("/{presupuesto_id}", response_model=FormulaPolinomicaResponse)
 def get_formula(
@@ -33,7 +40,7 @@ def get_formula(
     Obtiene la fórmula polinómica de un presupuesto.
     Si no existe, el frontend debería invocar la regeneración.
     """
-    _verify_module_access(db, presupuesto_id, current_user.id)
+    _verify_module_access(db, presupuesto_id, current_user)
     formula = formula_polinomica_service.get_formula(db, presupuesto_id=presupuesto_id)
     if not formula:
         raise HTTPException(status_code=404, detail="Fórmula no encontrada para este presupuesto")
@@ -57,7 +64,7 @@ def regenerate_formula(
     """
     Calcula o recalcula los coeficientes de la fórmula basados en el presupuesto actual.
     """
-    _verify_module_access(db, presupuesto_id, current_user.id)
+    pres = _verify_module_access(db, presupuesto_id, current_user)
     logger.info(
         "regenerate_formula called with presupuesto_id=%s tipo=%s",
         presupuesto_id,
@@ -65,6 +72,7 @@ def regenerate_formula(
     )
     try:
         formula = formula_polinomica_service.regenerate_formula(db, presupuesto_id=presupuesto_id, tipo=tipo)
+        _audit_formula(db, presupuesto=pres, actor=current_user, event_type="polynomial_formula_regenerated", message="Fórmula polinómica regenerada.", payload={"type": tipo})
         return formula
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
@@ -92,13 +100,15 @@ def update_formula(
     """
     Actualiza la cabecera de la fórmula.
     """
-    _verify_module_access(db, presupuesto_id, current_user.id)
+    pres = _verify_module_access(db, presupuesto_id, current_user)
     formula = formula_polinomica_service.get_formula(db, presupuesto_id=presupuesto_id)
     if not formula:
         raise HTTPException(status_code=404, detail="Fórmula no encontrada")
     
     from app.repositories.formula_polinomica import formula_polinomica_repo
-    return formula_polinomica_repo.update(db, db_obj=formula, obj_in=obj_in)
+    updated = formula_polinomica_repo.update(db, db_obj=formula, obj_in=obj_in)
+    _audit_formula(db, presupuesto=pres, actor=current_user, event_type="polynomial_formula_updated", message="Fórmula polinómica actualizada.", payload={"changed_fields": sorted(obj_in.keys())})
+    return updated
 
 @router.get("/{presupuesto_id}/resources")
 def get_formula_resources(
@@ -109,7 +119,7 @@ def get_formula_resources(
     """
     Lista todos los recursos agregados en el presupuesto con su estado de asignación actual.
     """
-    _verify_module_access(db, presupuesto_id, current_user.id)
+    _verify_module_access(db, presupuesto_id, current_user)
     try:
         return formula_polinomica_service.get_formula_resources(db, presupuesto_id)
     except Exception as e:
@@ -125,12 +135,14 @@ def save_assignments(
     """
     Guarda las asignaciones manuales de recursos a monomios.
     """
-    _verify_module_access(db, presupuesto_id, current_user.id)
+    pres = _verify_module_access(db, presupuesto_id, current_user)
     try:
         current_formula = formula_polinomica_service.get_formula(db, presupuesto_id=presupuesto_id)
         formula_type = current_formula.tipo if current_formula and current_formula.tipo else "SIN_DESGLOSE"
         formula_polinomica_service.save_assignments(db, presupuesto_id, assignments)
-        return formula_polinomica_service.regenerate_formula(db, presupuesto_id, tipo=formula_type)
+        formula = formula_polinomica_service.regenerate_formula(db, presupuesto_id, tipo=formula_type)
+        _audit_formula(db, presupuesto=pres, actor=current_user, event_type="polynomial_formula_assignments_saved", message="Asignaciones de fórmula polinómica guardadas.", payload={"assignment_count": len(assignments)})
+        return formula
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -145,9 +157,10 @@ def save_indices(
     """
     Guarda las selecciones de índices para monomios y cuadrilla tipo.
     """
-    _verify_module_access(db, presupuesto_id, current_user.id)
+    pres = _verify_module_access(db, presupuesto_id, current_user)
     try:
         formula = formula_polinomica_service.save_indices(db, presupuesto_id, payload)
+        _audit_formula(db, presupuesto=pres, actor=current_user, event_type="polynomial_formula_indices_saved", message="Índices de fórmula polinómica guardados.", payload={"selection_count": len(payload)})
         return formula_polinomica_service.decorate_formula_view(db, presupuesto_id, formula)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

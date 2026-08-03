@@ -154,7 +154,7 @@ const BimCdeCollaborationPanel = ({ projectId, empresaId, selectedElement = null
                 <button type="button" onClick={() => refresh({ heartbeatFirst: true })} disabled={loading} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 text-zinc-600 hover:border-[#F39200] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-200 disabled:opacity-40" aria-label="Actualizar actividad CDE" title="Actualizar actividad CDE"><RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /></button>
             </header>
 
-            <div className="grid h-[calc(100%-44px)] min-h-0 grid-cols-[280px_minmax(0,1fr)] divide-x divide-zinc-200">
+            <div className="bim-adaptive-master-detail grid h-[calc(100%-44px)] min-h-0 overflow-auto divide-x divide-zinc-200">
                 <div className="min-h-0 overflow-auto" data-bim-cde-presences>
                     <div className="sticky top-0 flex h-8 items-center justify-between border-b border-zinc-200 bg-zinc-50 px-3 text-[9px] font-semibold uppercase text-zinc-500"><span>Conectados</span><span>{presences.length}</span></div>
                     {presences.length ? presences.map((presence) => (

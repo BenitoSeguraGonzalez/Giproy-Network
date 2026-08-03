@@ -401,10 +401,22 @@ class LicenseService:
                 .first()
             )
         if assignment:
+            target_start = assignment.starts_at
+            target_end = assignment.grace_ends_at or assignment.ends_at or assignment.starts_at
+            current_window = (
+                db.query(Empresa.license_start_date, Empresa.license_end_date)
+                .filter(Empresa.id == empresa_id)
+                .first()
+            )
+            if current_window and (
+                current_window.license_start_date == target_start
+                and current_window.license_end_date == target_end
+            ):
+                return
             db.query(Empresa).filter(Empresa.id == empresa_id).update(
                 {
-                    Empresa.license_start_date: assignment.starts_at,
-                    Empresa.license_end_date: assignment.grace_ends_at or assignment.ends_at or assignment.starts_at,
+                    Empresa.license_start_date: target_start,
+                    Empresa.license_end_date: target_end,
                 },
                 synchronize_session=False,
             )
@@ -588,9 +600,21 @@ class LicenseService:
         }
 
     @staticmethod
-    def get_company_license_snapshot(db: Session, empresa_id: int, *, today: date | None = None) -> dict:
+    def get_company_license_snapshot(
+        db: Session,
+        empresa_id: int,
+        *,
+        today: date | None = None,
+        run_housekeeping: bool = False,
+    ) -> dict:
         reference = today or date.today()
-        LicenseService.run_license_housekeeping_for_company(db, empresa_id, today=reference, commit=False)
+        if run_housekeeping:
+            LicenseService.run_license_housekeeping_for_company(
+                db,
+                empresa_id,
+                today=reference,
+                commit=False,
+            )
 
         current_assignment = (
             db.query(EmpresaLicencia)
@@ -684,7 +708,12 @@ class LicenseService:
         if not target_license:
             raise HTTPException(status_code=404, detail="Licencia destino no encontrada.")
 
-        current_snapshot = LicenseService.get_company_license_snapshot(db, empresa_id, today=reference)
+        current_snapshot = LicenseService.get_company_license_snapshot(
+            db,
+            empresa_id,
+            today=reference,
+            run_housekeeping=True,
+        )
         current_assignment = current_snapshot["current_assignment"]
         current_license = current_assignment.licencia if current_assignment else None
 

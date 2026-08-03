@@ -1,5 +1,15 @@
 # HANDOFF
 
+## 2026-07-22 - Recuperacion de imagen referencial de proyecto
+
+- `TASK-2036` confirma divergencia entre PostgreSQL y el volumen persistente:
+  la URL era valida, pero el PNG de 79.975 bytes no existia en beta.
+- El archivo se restaura con SHA-256 exacto y el endpoint vuelve a responder
+  `200 image/png`.
+- Datos de Proyecto incorpora degradacion legible ante medios ausentes, sin
+  modificar backend, DB, API, tenant, datos funcionales ni BIM.
+- Smoke focal, BIM apagado, BIM encendido y build pasan.
+
 ## 2026-07-22 - Error BIM serializable en React
 
 - `BIM-TASK-0190` corrige el crash React `#31` del workspace BIM.
@@ -10519,3 +10529,17 @@ Validar TASK activa y CHANGELOG.
   anti-BIM, matriz y baseline enterprise estan verdes.
 - Paridad demostrada: 47,50%. Programa: 10/61 slices, 16,39% realizado y
   83,61% pendiente. No se ha desplegado esta ola.
+## 2026-07-22 - TASK-2038 / BIM-TASK-0191
+
+- Administrador de empresa definido como operador propietario de BIM dentro de
+  su tenant y de las puertas comerciales/tecnicas vigentes.
+- Superadministrador conserva tutela y gobierno global, sin exclusividad
+  operativa implicita.
+- Carga IFC visible en cabecera y estado vacio; paneles vacios ocultos hasta que
+  exista modelo listo.
+- Politica: `docs/architecture/BIM_ROLE_GOVERNANCE.md`.
+- Validacion: 262 pruebas BIM, smoke BIM V2, build, anti-BIM y baseline OK.
+- Desplegado en beta con commit `cdcba86`; backend/frontend/PostgreSQL healthy,
+  home `200`, BIM anonimo `401` y sin migraciones.
+- Rollback: fuentes `deploy/backups/bim-role-governance-20260722-102609` e
+  imagenes backend/frontend `bim-role-predeploy-20260722-102609`.

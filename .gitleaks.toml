@@ -1,0 +1,75 @@
+# gitleaks config — Giproy Network
+# v1: aplicado en julio 2026 con el set de hardening cross-repo (MarketI + NurIA-Odonto).
+
+title = "Giproy Network gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow example/placeholder secrets y archivos legacy delphi"
+paths = [
+    '''\.env\.example$''',
+    '''\.env\..*\.example$''',
+    '''docs/security/README\.md$''',
+    '''delphi version/.*''',                # legacy delphi binary source — puede contener credenciales de compilacion
+    '''CloudFlared-bkp/.*''',                # backups de configuraciones cloudflared históricas
+    '''DBDump/.*''',                        # dumps SQL historicos
+    '''Backup DB Dump/.*''',
+    '''EcuadorAPi\.txt$''',                 # credenciales de API external referidas en setup
+    '''setup_ai_.*\.py$''',                 # scripts AI toolkit con credenciales dummy
+]
+regexes = [
+    '''<generar-[a-z0-9-]+>''',
+    '''placeholder.*marker''',
+    '''example\.com''',
+]
+
+stopwords = [
+    "example",
+    "placeholder",
+    "TODO",
+    "FIXME",
+    "test",
+    "demo",
+    "sample",
+    "fake",
+]
+
+# Custom rules — multiline SERVER = {... "password": "..."} pattern
+[[rules]]
+id = "giproy-server-hardcoded-credentials"
+description = "Hardcoded credential in deploy/launcher scripts (SERVER = {... 'password': '...'})"
+regex = '''(?i)(?:SERVER|server|self\._?server|config|CLIENT)\s*[:=]?\s*[\{\[\(][\s\S]*?["'']?(?:password|passwd|secret_key|token|api_key|access_key)["'']?\s*[:=]\s*["''][A-Za-z0-9\!\@\#\$\%\^\&\*_\-\.\?]{6,}["'']'''
+tags = ["secret", "deploy"]
+
+# Same literal on a single line
+[[rules]]
+id = "giproy-direct-credential-literal"
+description = "Direct credential literal anywhere in code"
+regex = '''(?i)\b(?:password|passwd|secret_key|token|api_key|access_key|auth_token)\b\s*[:=]\s*["''][A-Za-z0-9\!\@\#\$\%\^\&\*_\-\.\?]{8,}["'']'''
+tags = ["secret", "literal"]
+
+[[rules]]
+id = "giproy-stripe-secret-literal"
+description = "Hardcoded Stripe secret key"
+regex = '''sk_(test|live)_[A-Za-z0-9]{20,}'''
+tags = ["secret", "stripe"]
+
+[[rules]]
+id = "giproy-cloudflared-token-literal"
+description = "Cloudflared long-lived tunnel token (--token eyJ...)"
+regex = '''--token\s+eyJ[A-Za-z0-9_\-]{40,}\.?[A-Za-z0-9_\-]*'''
+tags = ["secret", "cloudflared"]
+
+[[rules]]
+id = "giproy-jwt-literal"
+description = "Hardcoded JWT secret_key / SECRET_KEY"
+regex = '''(?i)SECRET_KEY\s*[:=]\s*["'']?[A-Za-z0-9_\-]{16,}["'']?'''
+tags = ["secret", "jwt"]
+
+[[rules]]
+id = "giproy-db-password-assignment"
+description = "DB_PASSWORD set non-empty outside .env.example"
+regex = '''DB_PASSWORD\s*[:=]\s*["'']?(?!$)[^<\s'"''<>]{8,}["'']?'''
+tags = ["secret", "postgres", "db"]

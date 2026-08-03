@@ -27,6 +27,7 @@ export function useBimProjectWorkspace(projectId, enabled) {
     const [viewStates, setViewStates] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [warnings, setWarnings] = useState([]);
     const [reloadToken, setReloadToken] = useState(0);
 
     useEffect(() => {
@@ -37,6 +38,7 @@ export function useBimProjectWorkspace(projectId, enabled) {
                 setWorkspace(EMPTY_WORKSPACE);
                 setViewStates([]);
                 setError(null);
+                setWarnings([]);
                 setLoading(false);
                 return;
             }
@@ -45,26 +47,33 @@ export function useBimProjectWorkspace(projectId, enabled) {
                 setLoading(true);
                 setError(null);
                 const empresaId = selectedEmpresa?.id || user?.empresa_id || null;
-                const [workspaceResponse, statesResponse, elementsResponse, linksResponse] = await Promise.all([
+                const [workspaceResult, statesResult, elementsResult, linksResult] = await Promise.allSettled([
                     bimModelsApi.getWorkspace(projectId, empresaId),
                     bimViewStatesApi.listByProject(projectId, empresaId),
                     bimLinksApi.listElementsByProject(projectId, empresaId),
                     bimLinksApi.listByProject(projectId, empresaId),
                 ]);
+                if (workspaceResult.status === 'rejected') throw workspaceResult.reason;
+                const partialWarnings = [];
+                if (statesResult.status === 'rejected') partialWarnings.push('vistas guardadas');
+                if (elementsResult.status === 'rejected') partialWarnings.push('índice de elementos');
+                if (linksResult.status === 'rejected') partialWarnings.push('vínculos coordinados');
                 if (!cancelled) {
                     setWorkspace({
                         ...EMPTY_WORKSPACE,
-                        ...workspaceResponse,
-                        elements: elementsResponse || [],
-                        recent_links: linksResponse || [],
+                        ...workspaceResult.value,
+                        elements: elementsResult.status === 'fulfilled' ? (elementsResult.value || []) : [],
+                        recent_links: linksResult.status === 'fulfilled' ? (linksResult.value || []) : [],
                     });
-                    setViewStates(statesResponse || []);
+                    setViewStates(statesResult.status === 'fulfilled' ? (statesResult.value || []) : []);
+                    setWarnings(partialWarnings);
                 }
             } catch (err) {
                 if (!cancelled) {
                     setWorkspace(EMPTY_WORKSPACE);
                     setViewStates([]);
                     setError(getErrorMessage(err, 'No se pudo cargar el workspace BIM.'));
+                    setWarnings([]);
                 }
             } finally {
                 if (!cancelled) {
@@ -84,6 +93,7 @@ export function useBimProjectWorkspace(projectId, enabled) {
         viewStates,
         loading,
         error,
+        warnings,
         refresh: () => setReloadToken((value) => value + 1),
     };
 }

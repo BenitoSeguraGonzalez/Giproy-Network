@@ -44,6 +44,8 @@ from app.services.project_functional_modification import project_functional_modi
 from pydantic import BaseModel
 from decimal import Decimal
 from app.core.calculation_policy import calculate_budget_line_total
+from app.services.audit_event import record_audit_event
+from app.services.project_capability import require_project_user_capability
 
 class TanteoMutation(BaseModel):
     recurso_id: int
@@ -54,6 +56,17 @@ class TanteoRequest(BaseModel):
     mutaciones: List[TanteoMutation]
 
 router = APIRouter()
+
+
+def _audit_budget(db: Session, *, presupuesto: Presupuesto, actor: Usuario, event_type: str, message: str, entity_type: str = "budget", entity_id=None, operation_status: str = "applied", payload: dict | None = None):
+    project = getattr(presupuesto, "proyecto", None)
+    return record_audit_event(
+        db, module="presupuesto", event_type=event_type, message=message,
+        actor=actor, empresa_id=presupuesto.empresa_id, proyecto_id=presupuesto.proyecto_id,
+        proyecto_codigo_root=getattr(project, "codigo_root", None), proyecto_revision=getattr(project, "revision", None),
+        entity_type=entity_type, entity_id=entity_id if entity_id is not None else presupuesto.id,
+        operation_status=operation_status, payload={"presupuesto_id": presupuesto.id, **(payload or {})},
+    )
 
 def _resolve_target_empresa_id(current_user: Usuario, empresa_id: Optional[int]) -> int:
     target_empresa_id = current_user.empresa_id
@@ -80,6 +93,7 @@ def _verify_edt_permission(db: Session, proyecto_id: int, usuario_id: int, edt_i
         raise HTTPException(status_code=403, detail="No tiene permisos para operar en esta rama de la EDT.")
 
 def _verify_module_access(db: Session, proyecto_id: int, usuario_id: int, module: str = "presupuestos"):
+    require_project_user_capability(db, project_id=proyecto_id, user_id=usuario_id, capability="budget.view")
     from app.services.proyecto import proyecto_service
     perms = proyecto_service.get_user_permissions(db, proyecto_id, usuario_id)
     if not perms["has_assignment"]:
@@ -249,7 +263,9 @@ def create_presupuesto(
     # For creation, we need to get the project_id from the input to verify module access
     if presupuesto_in.proyecto_id:
         _verify_module_access(db, presupuesto_in.proyecto_id, current_user.id, module="presupuestos")
-    return create_presupuesto_service(db, presupuesto_in, target_empresa_id)
+    presupuesto = create_presupuesto_service(db, presupuesto_in, target_empresa_id)
+    _audit_budget(db, presupuesto=presupuesto, actor=current_user, event_type="budget_created", message="Presupuesto creado.")
+    return presupuesto
 
 @router.get("/{id}", response_model=PresupuestoResponse)
 def read_presupuesto(
@@ -380,6 +396,7 @@ def update_presupuesto_indirectos(
     refresh_presupuesto_prices(db, pres.id)
     db.commit()
     db.refresh(pres)
+    _audit_budget(db, presupuesto=pres, actor=current_user, event_type="budget_indirects_updated", message="Costes indirectos del presupuesto actualizados.", payload={"concept_codes": sorted(submitted_codes), "iva_aplicado": str(pres.iva_aplicado or 0)})
     return _serialize_indirectos(pres)
 
 @router.get("/{id}/pareto", response_model=PresupuestoParetoResponse)
@@ -494,6 +511,7 @@ def create_presupuesto_general_note(
     db.add(note)
     db.commit()
     db.refresh(note)
+    _audit_budget(db, presupuesto=pres, actor=current_user, event_type="budget_general_note_created", message="Nota general del presupuesto creada.", entity_type="budget_note", entity_id=note.id, payload={"note_type": "general"})
     return note
 
 @router.get("/lineas/{linea_id}/notas", response_model=List[PresupuestoNotaResponse])
@@ -535,6 +553,7 @@ def create_presupuesto_line_note(
     db.add(note)
     db.commit()
     db.refresh(note)
+    _audit_budget(db, presupuesto=linea.presupuesto, actor=current_user, event_type="budget_line_note_created", message="Nota de partida creada.", entity_type="budget_note", entity_id=note.id, payload={"budget_line_id": linea.id, "note_type": "line"})
     return note
 
 @router.post("/lineas/{linea_id}/notas/opened")
@@ -629,6 +648,7 @@ def apply_tanteo(
                 invalidation_reason="presupuesto_tanteo_aplicado",
             )
 
+    _audit_budget(db, presupuesto=pres, actor=current_user, event_type="budget_trial_applied", message="Tanteo aplicado y propagado.", entity_type="budget_trial", payload={"affected_apu_ids": sorted(expanded_affected_apu_ids), "mutation_count": len(request.mutaciones)})
     return {"message": "Tanteo aplicado al APU y propagado al presupuesto en cascada."}
 
 @router.delete("/{id}/tanteo/clear-all")
@@ -699,6 +719,7 @@ def clear_all_tanteos(
                 invalidation_reason="presupuesto_tanteo_revertido",
             )
             
+    _audit_budget(db, presupuesto=pres, actor=current_user, event_type="budget_trials_cleared", message="Tanteos del presupuesto restaurados.", entity_type="budget_trial", operation_status="reverted", payload={"affected_apu_ids": sorted(expanded_affected_apu_ids), "restored_count": count})
     return {"message": f"Se han revertido y restaurado {count} tanteos de rendimiento en el proyecto."}
 
 @router.delete("/{id}/tanteo/{apu_linea_id}")
@@ -756,6 +777,7 @@ def delete_tanteo(
             invalidation_reason="presupuesto_tanteo_revertido",
         )
     
+    _audit_budget(db, presupuesto=pres, actor=current_user, event_type="budget_trial_reverted", message="Tanteo individual restaurado.", entity_type="budget_trial", entity_id=apu_linea_id, operation_status="reverted", payload={"affected_apu_ids": sorted(expanded_affected_apu_ids)})
     return {"message": "Tanteo revertido exitosamente. Rendimientos restaurados en cascada."}
 
 @router.post("/{id}/lineas", response_model=PresupuestoDetalleResponse)
@@ -830,6 +852,7 @@ def add_presupuesto_linea(
         )
         db.commit()
         db.refresh(existing_line)
+        _audit_budget(db, presupuesto=pres, actor=current_user, event_type="budget_line_quantity_merged", message="Cantidad acumulada en una partida existente.", entity_type="budget_line", entity_id=existing_line.id, payload={"budget_line_id": existing_line.id})
         return existing_line
 
     ultimo = db.query(PresupuestoDetalle).filter(
@@ -905,6 +928,7 @@ def add_presupuesto_linea(
     db.commit()
 
     db.refresh(db_linea)
+    _audit_budget(db, presupuesto=pres, actor=current_user, event_type="budget_line_created", message="Partida presupuestaria creada.", entity_type="budget_line", entity_id=db_linea.id, payload={"edt_id": db_linea.edt_id, "apu_id": db_linea.apu_id})
     return db_linea
 
 
@@ -1000,6 +1024,7 @@ def update_presupuesto_linea(
             )
             db.commit()
             db.refresh(existing_line)
+            _audit_budget(db, presupuesto=presupuesto, actor=current_user, event_type="budget_lines_merged", message="Partidas presupuestarias fusionadas.", entity_type="budget_line", entity_id=existing_line.id, payload={"removed_line_id": removed_line_id, "target_line_id": existing_line.id})
             return existing_line
     
     linea.precio_total = calculate_budget_line_total(
@@ -1031,6 +1056,7 @@ def update_presupuesto_linea(
     )
     db.commit()
     db.refresh(linea)
+    _audit_budget(db, presupuesto=presupuesto, actor=current_user, event_type="budget_line_updated", message="Partida presupuestaria actualizada.", entity_type="budget_line", entity_id=linea.id, payload={"changed_fields": sorted(update_data.keys()), "edt_id": linea.edt_id})
     return linea
 
 
@@ -1093,6 +1119,7 @@ def bulk_update_presupuesto_lineas_cantidad(
         )
     db.commit()
     db.refresh(pres)
+    _audit_budget(db, presupuesto=pres, actor=current_user, event_type="budget_lines_quantity_updated", message="Cantidades de partidas actualizadas en bloque.", entity_type="budget_line_batch", payload={"budget_line_ids": requested_ids, "count": len(requested_ids)})
     return pres
 
 @router.put("/lineas/{linea_id}/move", response_model=PresupuestoMoveResponse)
@@ -1154,6 +1181,7 @@ def move_presupuesto_linea(
         calculate_presupuesto_totals(db, linea.presupuesto)
         db.commit()
         db.refresh(existing_line)
+        _audit_budget(db, presupuesto=existing_line.presupuesto, actor=current_user, event_type="budget_line_moved_and_merged", message="Partida movida y fusionada en la EDT destino.", entity_type="budget_line", entity_id=existing_line.id, payload={"removed_line_id": linea_id, "source_edt_id": old_edt_id, "target_edt_id": new_edt_id})
         return {
             "linea": existing_line,
             "merged": True,
@@ -1198,6 +1226,7 @@ def move_presupuesto_linea(
     calculate_presupuesto_totals(db, linea.presupuesto)
     db.commit()
     db.refresh(linea)
+    _audit_budget(db, presupuesto=linea.presupuesto, actor=current_user, event_type="budget_line_moved", message="Partida movida dentro de la EDT.", entity_type="budget_line", entity_id=linea.id, payload={"source_edt_id": old_edt_id, "target_edt_id": new_edt_id, "order": linea.orden})
     return {
         "linea": linea,
         "merged": False,
@@ -1219,6 +1248,7 @@ def delete_presupuesto_linea(
     # CONTROL DE ACCESO EDT
     _verify_edt_permission(db, linea.presupuesto.proyecto_id, current_user.id, linea.edt_id)
 
+    presupuesto = linea.presupuesto
     pres_id = linea.presupuesto_id
     edt_id = linea.edt_id
     db.delete(linea)
@@ -1227,4 +1257,5 @@ def delete_presupuesto_linea(
     recalculate_line_codes(db, pres_id, edt_id, commit=False)
     calculate_presupuesto_totals(db, linea.presupuesto)
     db.commit()
+    _audit_budget(db, presupuesto=presupuesto, actor=current_user, event_type="budget_line_deleted", message="Partida presupuestaria eliminada.", entity_type="budget_line", entity_id=linea_id, operation_status="deleted", payload={"edt_id": edt_id})
     return {"message": "Línea eliminada exitosamente"}

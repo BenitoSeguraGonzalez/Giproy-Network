@@ -100,6 +100,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
   }, []);
 
   const isCompactViewport = resolvePortableWorkspace({
+    moduleKey: 'formula-polinomica',
     width: viewport.width,
     height: viewport.height,
     forced: user?.role === 'superadmin' && forcedPortableWorkspace,
@@ -436,7 +437,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden animate-in fade-in duration-500">
+    <div data-formula-polinomica-workspace="true" className="flex h-full min-h-0 flex-col gap-4 overflow-hidden animate-in fade-in duration-500">
       {error && (
         <div className="mx-2 flex items-center gap-3 rounded-xl border border-rose-100 bg-rose-50 p-3 text-rose-600 animate-in slide-in-from-top-2">
           <AlertCircle className="h-4 w-4" />
@@ -447,7 +448,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
         </div>
       )}
 
-      <div className={`rounded-[1.1rem] border border-zinc-100 bg-white px-4 py-3 shadow-[0_10px_40px_rgba(0,0,0,0.03)] ${isCompactViewport ? 'flex flex-col gap-2' : 'flex items-center justify-between gap-2'}`}>
+      <div className={`shrink-0 rounded-[1.1rem] border border-zinc-100 bg-white px-4 py-3 shadow-[0_10px_40px_rgba(0,0,0,0.03)] ${isCompactViewport ? 'flex flex-col gap-2' : 'flex items-center justify-between gap-2'}`}>
         <div>
           <h2 className="flex items-center gap-2 text-lg font-black uppercase tracking-tight text-rose-500">
             <Calculator className="h-4 w-4" /> Fórmula Polinómica
@@ -478,8 +479,8 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
         </div>
       </div>
 
-      <div className={`flex gap-3 ${isCompactViewport ? 'flex-col' : 'items-stretch'}`}>
-        <ControlRail className="min-w-[280px] flex-[1_1_22rem] px-2 py-1.5">
+      <div className={`flex shrink-0 gap-3 ${isCompactViewport ? 'flex-col' : 'items-stretch'}`}>
+        <ControlRail className={`${isCompactViewport ? 'w-full min-w-0 flex-none' : 'min-w-[280px] flex-[1_1_22rem]'} px-2 py-1.5`}>
           <ControlRailSection className="min-w-0 flex-1 gap-2 pl-2 pr-1.5">
             <div className="min-w-0 flex-1">
               <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/38">Modo</p>
@@ -504,7 +505,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
           </ControlRailSection>
         </ControlRail>
 
-        <ControlRail className="min-w-[360px] flex-[1.2_1_28rem] px-2 py-1.5">
+        <ControlRail className={`${isCompactViewport ? 'w-full min-w-0 flex-none overflow-x-auto' : 'min-w-[360px] flex-[1.2_1_28rem]'} px-2 py-1.5`}>
           <ControlRailSection className="min-w-0 flex-1 justify-center gap-3 pl-2 pr-2">
             <div className="min-w-[72px] text-center">
               <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/38">Pendientes</p>
@@ -530,7 +531,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
           </ControlRailSection>
         </ControlRail>
 
-        <ControlRail className="min-w-[290px] flex-[0.8_1_18rem] px-2 py-1.5">
+        <ControlRail className={`${isCompactViewport ? 'w-full min-w-0 flex-none overflow-x-auto' : 'min-w-[290px] flex-[0.8_1_18rem]'} px-2 py-1.5`}>
           <ControlRailSection className="min-w-0 flex-1 justify-end gap-2 pl-2 pr-2">
             <button
               type="button"

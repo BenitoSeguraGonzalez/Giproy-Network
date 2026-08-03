@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime
+import json
 from typing import Optional
 from urllib.parse import urlsplit
 
@@ -50,8 +51,9 @@ from app.services.bim.import_job_service import (
     serialize_bim_import_job,
 )
 from app.schemas.bim_version_compare import BimVersionCompareResponse
-from app.schemas.bim_federation import BimFederationResponse, BimFederationSaveRequest
-from app.services.bim.federation_service import get_active_federation, save_federation_revision
+from app.schemas.bim_federation import BimFederationResponse, BimFederationSaveRequest, BimReconciliationDecisionRequest
+from app.services.bim.federation_service import build_version_reconciliation, decide_version_reconciliation, get_active_federation, save_federation_revision
+from app.services.bim.project_search_service import search_project_bim_context
 from app.schemas.bim_ids import (
     BimIdsExceptionRequest,
     BimIdsProfileImportRequest,
@@ -169,7 +171,47 @@ from app.services.bim.cde_collaboration_service import (
 from app.schemas.bim_operational_notification import BimOperationalNotificationReconcileResponse, BimOperationalNotificationResponse
 from app.services.bim.operational_notification_service import acknowledge_operational_notification, list_operational_notifications, reconcile_operational_notifications
 from app.schemas.bim_security import BimCapabilityResponse, BimGrantRequest
-from app.services.bim.capability_service import require_bim_capability, resolve_bim_capabilities, save_bim_grant
+from app.services.bim.capability_service import require_bim_capability, resolve_bim_capabilities, save_project_bim_grant
+from app.schemas.bim_coordination import (
+    ClassificationResolutionCreate,
+    CoordinationCoverageResponse,
+    CoordinationLinkCreate,
+    CoordinationLinkIdentityReconcile,
+    CoordinationProposalCreate,
+    CoordinationProposalDecision,
+    CoordinationProposalAction,
+    CoordinationSetCreate,
+    CoordinationSetOfficialAction,
+    CoordinationSetResponse,
+    CoordinationImportPreflight,
+    CoordinationImportConfirm,
+)
+from app.services.bim.coordination_service import (
+    build_coverage as build_coordination_coverage,
+    classification_summary,
+    ingest_classification_candidates,
+    create_coordination_set,
+    create_link as create_coordination_link,
+    create_proposal as create_coordination_proposal,
+    decide_proposal as decide_coordination_proposal,
+    apply_proposal as apply_coordination_proposal,
+    recover_proposal as recover_coordination_proposal,
+    list_coordination_sets,
+    reconcile_link_identity,
+    list_links as list_coordination_links,
+    list_proposals as list_coordination_proposals,
+    make_coordination_set_official,
+    upsert_classification_resolution,
+)
+from app.services.bim.coordination_import_stage_service import (
+    claim_confirmed_stage,
+    claim_confirmed_stage_reference,
+    complete_stage_consumption,
+    create_preflight as create_coordination_import_preflight,
+    confirm_preflight as confirm_coordination_import_preflight,
+    release_failed_stage_consumption,
+)
+from app.services.project_capability import require_project_capability
 from app.services.audit_event import record_audit_event
 from app.services.bim.operational_metrics import get_bim_operational_metrics
 from app.schemas.bim_rollout import BimRolloutPlanRequest, BimRolloutPlanResponse
@@ -209,6 +251,7 @@ from app.schemas.bim_schedule_interop import (
     BimScheduleComparisonRequest,
     BimScheduleComparisonResponse,
     BimScheduleImportDecisionRequest,
+    BimScheduleImportRevisionCreate,
     BimScheduleImportRevisionResponse,
     BimScheduleImportRollbackRequest,
     BimScheduleInteropCapabilitiesResponse,
@@ -332,6 +375,27 @@ def get_bim_workspace(
     return get_workspace_summary(db, project_id=project.id, company_id=project.empresa_id)
 
 
+@router.get("/projects/{project_id}/search")
+def search_bim_project_context(
+    project_id: int,
+    q: str = Query(min_length=2, max_length=160),
+    limit: int = Query(default=12, ge=1, le=30),
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_bim_access(db, project, current_user, "bim.view")
+    resolved = require_project_capability(
+        db, capability="project.view", project_id=project.id, user_id=current_user.id,
+        company_id=project.empresa_id, role=current_user.rol,
+    )
+    return search_project_bim_context(
+        db, project_id=project.id, company_id=project.empresa_id, term=q,
+        capabilities=resolved.capabilities, limit=limit,
+    )
+
+
 @router.get("/projects/{project_id}/models", response_model=list[BimModelResponse])
 def list_bim_models(
     project_id: int,
@@ -406,7 +470,7 @@ def save_project_bim_federation(
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
-    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate", project_id=project.id)
     return save_federation_revision(
         db,
         project_id=project.id,
@@ -414,6 +478,44 @@ def save_project_bim_federation(
         user_id=current_user.id,
         payload=payload,
     )
+
+
+@router.get("/projects/{project_id}/federation/reconciliation")
+def get_project_bim_federation_reconciliation(
+    project_id: int,
+    source_version_id: int = Query(..., ge=1),
+    target_version_id: int = Query(..., ge=1),
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
+    if not access.enabled:
+        raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate", project_id=project.id)
+    return build_version_reconciliation(
+        db, project_id=project.id, company_id=project.empresa_id,
+        source_version_id=source_version_id, target_version_id=target_version_id,
+    )
+
+
+@router.post("/projects/{project_id}/federation/reconciliation/decision")
+def decide_project_bim_federation_reconciliation(
+    project_id: int,
+    payload: BimReconciliationDecisionRequest,
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
+    if not access.enabled:
+        raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate", project_id=project.id)
+    result = decide_version_reconciliation(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+    record_audit_event(db, module="bim", event_type="bim_version_reconciliation_decided", message="Inferencia de cambio de versión BIM revisada.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, capability="bim.coordinate", entity_type="bim_version_reconciliation", entity_id=result["id"], operation_status=result["decision"], payload={"source_version_id": payload.source_version_id, "target_version_id": payload.target_version_id, "candidate_hash": payload.candidate_hash, "affected_link_count": result["affected_link_count"], "reason": payload.reason})
+    return result
 
 
 @router.get("/projects/{project_id}/site-georeference", response_model=BimSiteGeoreferenceResponse | None)
@@ -442,7 +544,7 @@ def save_project_bim_site_georeference(
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
-    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate", project_id=project.id)
     return save_site_georeference(
         db,
         project_id=project.id,
@@ -480,7 +582,7 @@ def save_project_bim_map_catalog(
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
-    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate", project_id=project.id)
     return save_map_catalog(
         db,
         project_id=project.id,
@@ -577,7 +679,7 @@ def create_project_bim_cde_review(project_id: int, payload: BimCdeReviewCreate, 
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
-    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate", project_id=project.id)
     return create_review(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
 
 
@@ -587,7 +689,7 @@ def comment_project_bim_cde_review(project_id: int, review_id: int, payload: Bim
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
-    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate", project_id=project.id)
     return add_review_comment(db, review_id=review_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=is_bim_company_operator(current_user.rol), payload=payload)
 
 
@@ -597,7 +699,7 @@ def transition_project_bim_cde_review(project_id: int, review_id: int, payload: 
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
-    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate", project_id=project.id)
     return transition_review(db, review_id=review_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, can_override=is_bim_company_operator(current_user.rol), payload=payload)
 
 
@@ -635,7 +737,7 @@ def import_project_ids_profile(project_id: int, payload: BimIdsProfileImportRequ
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
-    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate", project_id=project.id)
     profile, count = import_ids_profile(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
     return BimIdsProfileResponse(id=profile.id, name=profile.name, source_filename=profile.source_filename, ids_version=profile.ids_version, checksum_sha256=profile.checksum_sha256, specification_count=count, created_at=profile.fecha_creacion)
 
@@ -655,7 +757,7 @@ def exempt_project_ids_finding(project_id: int, finding_id: int, payload: BimIds
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
-    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate")
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability="bim.coordinate", project_id=project.id)
     return exempt_ids_finding(db, finding_id=finding_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, reason=payload.reason)
 
 
@@ -673,7 +775,19 @@ def _require_bim_access(db, project, current_user, capability="bim.view"):
     access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
     if not access.enabled:
         raise HTTPException(status_code=403, detail="La capa BIM no esta habilitada para este contexto.")
-    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability=capability)
+    require_bim_capability(db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol, capability=capability, project_id=project.id)
+
+
+def _require_coordination_access(db, project, current_user, capability="coordination.view"):
+    _require_bim_access(db, project, current_user, "bim.view")
+    return require_project_capability(
+        db,
+        capability=capability,
+        project_id=project.id,
+        user_id=current_user.id,
+        company_id=project.empresa_id,
+        role=current_user.rol,
+    )
 
 
 @router.post("/projects/{project_id}/cde/collaboration/presence/heartbeat", response_model=BimCdePresenceResponse)
@@ -961,9 +1075,20 @@ def export_project_bim_issue(project_id: int, issue_id: int, empresa_id: Optiona
 
 
 @router.post("/projects/{project_id}/issues/import-bcf", response_model=BimIssueResponse)
-async def import_project_bim_issue(project_id: int, file: UploadFile = File(...), version_id: Optional[int] = Form(None), empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+async def import_project_bim_issue(project_id: int, file: UploadFile = File(...), stage_id: int = Form(...), version_id: Optional[int] = Form(None), empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user)
-    return import_issue_bcf(db, content=await file.read(), project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, version_id=version_id)
+    content = await file.read()
+    operation_key = f"bcf-issue:{stage_id}:{version_id or 'none'}"
+    claim = claim_confirmed_stage(db, stage_id=stage_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, source_domain="bim", source_format="bcf", content=content, operation_key=operation_key)
+    if claim["duplicate_consumption"]:
+        return get_issue(db, issue_id=int(claim["result"]["issue_id"]), project_id=project.id, company_id=project.empresa_id)
+    try:
+        issue = import_issue_bcf(db, content=content, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, version_id=version_id)
+        complete_stage_consumption(db, stage_id=stage_id, operation_key=operation_key, result={"issue_id": issue.id})
+        return issue
+    except Exception:
+        release_failed_stage_consumption(db, stage_id=stage_id, operation_key=operation_key, error_code="bcf_import_failed")
+        raise
 
 
 @router.get("/projects/{project_id}/elements/{element_id}/quantity-candidates", response_model=list[BimQuantityCandidate])
@@ -1327,15 +1452,162 @@ def decide_project_bim_operations_transition(project_id: int, transition_id: int
 @router.get("/projects/{project_id}/capabilities", response_model=BimCapabilityResponse)
 def get_project_bim_capabilities(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project=_resolve_project(db,project_id,current_user,empresa_id);_require_bim_access(db,project,current_user)
-    return {"capabilities":sorted(resolve_bim_capabilities(db,user_id=current_user.id,company_id=project.empresa_id,role=current_user.rol))}
+    return {"capabilities":sorted(resolve_bim_capabilities(db,user_id=current_user.id,company_id=project.empresa_id,role=current_user.rol,project_id=project.id))}
 
 
 @router.put("/projects/{project_id}/capability-grants/{user_id}", response_model=BimCapabilityResponse)
 def put_project_bim_capability_grant(project_id:int,user_id:int,payload:BimGrantRequest,empresa_id:Optional[int]=None,db:Session=Depends(get_db),current_user:Usuario=Depends(get_current_active_user)):
     project=_resolve_project(db,project_id,current_user,empresa_id);_require_bim_access(db,project,current_user,"bim.admin")
-    grant=save_bim_grant(db,company_id=project.empresa_id,user_id=user_id,capabilities=payload.capabilities,granted_by=current_user.id)
-    record_audit_event(db,module="bim",event_type="bim_capabilities_updated",message="Capacidades BIM actualizadas.",actor=current_user,empresa_id=project.empresa_id,entity_type="bim_access_grant",entity_id=grant.id,payload={"target_user_id":user_id,"capabilities":grant.capabilities_json})
+    grant=save_project_bim_grant(db,project_id=project.id,company_id=project.empresa_id,user_id=user_id,capabilities=payload.capabilities,granted_by=current_user.id,edt_id=payload.edt_id)
+    record_audit_event(db,module="bim",event_type="bim_capabilities_updated",message="Capacidades BIM del proyecto actualizadas.",actor=current_user,empresa_id=project.empresa_id,proyecto_id=project.id,proyecto_codigo_root=project.codigo_root,proyecto_revision=project.revision,capability="bim.admin",entity_type="project_capability_grant",entity_id=grant.id,payload={"target_user_id":user_id,"edt_id":payload.edt_id,"capabilities":grant.capabilities_json})
     return {"capabilities":grant.capabilities_json}
+
+
+@router.get("/projects/{project_id}/coordination-sets", response_model=list[CoordinationSetResponse])
+def get_project_coordination_sets(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.view")
+    return list_coordination_sets(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/coordination-sets", response_model=CoordinationSetResponse, status_code=status.HTTP_201_CREATED)
+def post_project_coordination_set(project_id: int, payload: CoordinationSetCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.edit")
+    result = create_coordination_set(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+    record_audit_event(db, module="coordinacion", event_type="coordination_set_created", message="Conjunto de coordinacion creado.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="coordination.edit", entity_type="project_coordination_set", entity_id=result["id"], operation_status="draft", payload={"revision": result["revision"], "domains": {"budget": bool(result["presupuesto_id"]), "schedule": bool(result["cronograma_trabajo_id"]), "bim": bool(result["bim_version_ids"])}})
+    return result
+
+
+@router.post("/projects/{project_id}/coordination-sets/{coordination_set_id}/official", response_model=CoordinationSetResponse)
+def post_project_coordination_set_official(project_id: int, coordination_set_id: int, payload: CoordinationSetOfficialAction, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.approve")
+    result = make_coordination_set_official(db, coordination_set_id=coordination_set_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, expected_revision=payload.expected_revision, reason=payload.reason)
+    record_audit_event(db, module="coordinacion", event_type="coordination_set_official", message="Conjunto de coordinacion convertido en referencia oficial.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="coordination.approve", entity_type="project_coordination_set", entity_id=result["id"], operation_status="approved", payload={"revision": result["revision"], "coordination_status": result["coordination_status"], "reason": payload.reason})
+    return result
+
+
+@router.get("/projects/{project_id}/coordination-sets/{coordination_set_id}/links")
+def get_project_coordination_links(project_id: int, coordination_set_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.view")
+    return list_coordination_links(db, coordination_set_id=coordination_set_id, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/coordination-sets/{coordination_set_id}/links", status_code=status.HTTP_201_CREATED)
+def post_project_coordination_link(project_id: int, coordination_set_id: int, payload: CoordinationLinkCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.edit")
+    result = create_coordination_link(db, coordination_set_id=coordination_set_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+    record_audit_event(db, module="coordinacion", event_type="coordination_link_created", message="Vinculo 4D/5D creado.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="coordination.edit", entity_type="coordination_link", entity_id=result["id"], operation_status="draft", payload={"coordination_set_id": coordination_set_id, "allocation_type": result["allocation_type"], "allocation_value": result["allocation_value"], "additive": result["additive"]})
+    return result
+
+
+@router.post("/projects/{project_id}/coordination-sets/{coordination_set_id}/links/{link_id}/reconcile-identity")
+def post_project_coordination_link_identity_reconciliation(project_id: int, coordination_set_id: int, link_id: int, payload: CoordinationLinkIdentityReconcile, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.edit")
+    result = reconcile_link_identity(
+        db, link_id=link_id, coordination_set_id=coordination_set_id,
+        project_id=project.id, company_id=project.empresa_id,
+        activity_snapshot_id=payload.activity_snapshot_id, bim_element_id=payload.bim_element_id,
+    )
+    record_audit_event(db, module="coordinacion", event_type="coordination_link_identity_reconciled", message="Referencia histórica reconciliada con identidad canónica.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="coordination.edit", entity_type="coordination_link", entity_id=result["id"], operation_status="reconciled", payload={"coordination_set_id": coordination_set_id, "activity_snapshot_id": result["activity_snapshot_id"], "bim_element_id": result["bim_element_id"], "reason": payload.reason})
+    return result
+
+
+@router.get("/projects/{project_id}/coordination-sets/{coordination_set_id}/coverage", response_model=CoordinationCoverageResponse)
+def get_project_coordination_coverage(project_id: int, coordination_set_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.view")
+    return build_coordination_coverage(db, coordination_set_id=coordination_set_id, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/coordination-sets/{coordination_set_id}/proposals", status_code=status.HTTP_201_CREATED)
+def post_project_coordination_proposal(project_id: int, coordination_set_id: int, payload: CoordinationProposalCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.propose")
+    result = create_coordination_proposal(db, coordination_set_id=coordination_set_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+    record_audit_event(db, module="coordinacion", event_type="coordination_proposal_created", message="Propuesta coordinada creada.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="coordination.propose", correlation_id=result["correlation_id"], entity_type="coordination_proposal", entity_id=result["id"], operation_status=result["status"], payload={"coordination_set_id": coordination_set_id, "proposal_type": result["proposal_type"], "source_domain": result["source_domain"], "target_domain": result["target_domain"], "impact": result["impact"]})
+    return result
+
+
+@router.get("/projects/{project_id}/coordination-sets/{coordination_set_id}/proposals")
+def get_project_coordination_proposals(project_id: int, coordination_set_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.view")
+    return list_coordination_proposals(db, coordination_set_id=coordination_set_id, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/coordination-sets/{coordination_set_id}/proposals/{proposal_id}/decision")
+def post_project_coordination_proposal_decision(project_id: int, coordination_set_id: int, proposal_id: int, payload: CoordinationProposalDecision, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.approve" if payload.decision == "approve" else "coordination.review")
+    result = decide_coordination_proposal(db, proposal_id=proposal_id, coordination_set_id=coordination_set_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, decision=payload.decision, reason=payload.reason)
+    record_audit_event(db, module="coordinacion", event_type="coordination_proposal_decided", message="Propuesta coordinada decidida.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="coordination.approve" if payload.decision == "approve" else "coordination.review", correlation_id=result["correlation_id"], entity_type="coordination_proposal", entity_id=result["id"], operation_status=result["status"], payload={"decision": payload.decision, "reason": payload.reason})
+    return result
+
+
+@router.post("/projects/{project_id}/coordination-sets/{coordination_set_id}/proposals/{proposal_id}/apply")
+def post_project_coordination_proposal_apply(project_id: int, coordination_set_id: int, proposal_id: int, payload: CoordinationProposalAction, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.apply")
+    result = apply_coordination_proposal(db, proposal_id=proposal_id, coordination_set_id=coordination_set_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, expected_version=payload.expected_version, reason=payload.reason)
+    record_audit_event(db, module="coordinacion", event_type="coordination_proposal_applied", message="Propuesta coordinada aplicada.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="coordination.apply", correlation_id=result["correlation_id"], entity_type="coordination_proposal", entity_id=result["id"], operation_status=result["status"], payload={"coordination_set_id": coordination_set_id, "version": result["version"], "reason": payload.reason})
+    return result
+
+
+@router.post("/projects/{project_id}/coordination-sets/{coordination_set_id}/proposals/{proposal_id}/recover")
+def post_project_coordination_proposal_recover(project_id: int, coordination_set_id: int, proposal_id: int, payload: CoordinationProposalAction, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.recover")
+    result = recover_coordination_proposal(db, proposal_id=proposal_id, coordination_set_id=coordination_set_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, expected_version=payload.expected_version, reason=payload.reason)
+    record_audit_event(db, module="coordinacion", event_type="coordination_proposal_recovered", message="Propuesta coordinada recuperada.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="coordination.recover", correlation_id=result["correlation_id"], entity_type="coordination_proposal", entity_id=result["id"], operation_status=result["status"], payload={"coordination_set_id": coordination_set_id, "version": result["version"], "reason": payload.reason})
+    return result
+
+
+@router.get("/projects/{project_id}/classification-summary")
+def get_project_bim_classification_summary(project_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "bim.classification.view")
+    return classification_summary(db, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.post("/projects/{project_id}/versions/{version_id}/classification-candidates")
+def post_project_bim_classification_candidates(project_id: int, version_id: int, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "bim.classification.resolve")
+    result = ingest_classification_candidates(db, project_id=project.id, company_id=project.empresa_id, version_id=version_id)
+    record_audit_event(db, module="bim", event_type="bim_classification_candidates_ingested", message="Candidatos de clasificacion IFC incorporados sin aprobacion automatica.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="bim.classification.resolve", entity_type="bim_model_version", entity_id=version_id, operation_status="review_required", payload=result)
+    return result
+
+
+@router.post("/projects/{project_id}/coordination-imports/preflight", status_code=status.HTTP_201_CREATED)
+def post_project_coordination_import_preflight(project_id: int, payload: CoordinationImportPreflight, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.import")
+    result = create_coordination_import_preflight(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+    record_audit_event(db, module="coordinacion", event_type="coordination_import_preflight", message="Preflight de importacion coordinada generado.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="coordination.import", entity_type="coordination_import_stage", entity_id=result["id"], operation_status=result["status"], payload={"source_domain": result["source_domain"], "source_format": result["source_format"], "checksum_sha256": result["checksum_sha256"], "byte_size": result["byte_size"], "writes_to_domains": 0})
+    return result
+
+
+@router.post("/projects/{project_id}/coordination-imports/{stage_id}/confirm")
+def post_project_coordination_import_confirm(project_id: int, stage_id: int, payload: CoordinationImportConfirm, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.import")
+    result = confirm_coordination_import_preflight(db, stage_id=stage_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+    record_audit_event(db, module="coordinacion", event_type="coordination_import_confirmed", message="Staging de importacion coordinada confirmado sin aplicar al dominio.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="coordination.import", entity_type="coordination_import_stage", entity_id=result["id"], operation_status=result["status"], payload={"checksum_sha256": result["checksum_sha256"], "writes_to_domains": 0, "reason": payload.reason})
+    return result
+
+
+@router.post("/projects/{project_id}/classification-resolutions", status_code=status.HTTP_201_CREATED)
+def post_project_bim_classification_resolution(project_id: int, payload: ClassificationResolutionCreate, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "bim.classification.resolve")
+    result = upsert_classification_resolution(db, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, payload=payload)
+    record_audit_event(db, module="bim", event_type="bim_classification_resolution_saved", message="Resolucion de clasificacion BIM guardada.", actor=current_user, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, capability="bim.classification.resolve", entity_type="bim_classification_resolution", entity_id=result["id"], operation_status=result["resolution_status"], payload={"bim_element_id": result["bim_element_id"], "system": result["system"], "source_code": result["source_code"], "omniclass_id": result["omniclass_id"], "status": result["resolution_status"]})
+    return result
 
 
 @router.get("/projects/{project_id}/operational-metrics")
@@ -1450,22 +1722,44 @@ def compare_project_bim_schedule_interchange(
 )
 def create_project_bim_schedule_import_revision(
     project_id: int,
-    payload: BimScheduleInterchangeDocument,
+    payload: BimScheduleImportRevisionCreate,
     empresa_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_active_user),
 ):
     project = _resolve_project(db, project_id, current_user, empresa_id)
     _require_bim_access(db, project, current_user, "bim.schedule.link")
+    document = payload.document
+    stage_format = {"mspdi_xml": "mspdi", "p6_xml": "p6_xml", "p6_xer": "p6_xer"}.get(document.source_format)
+    if not stage_format:
+        raise HTTPException(status_code=409, detail="La revision importada requiere un formato con staging de archivo.")
+    operation_key = f"schedule-revision:{payload.coordination_stage_id}:{document.source_checksum_sha256}"
+    claim = claim_confirmed_stage_reference(
+        db,
+        stage_id=payload.coordination_stage_id,
+        project_id=project.id,
+        company_id=project.empresa_id,
+        user_id=current_user.id,
+        source_domain="schedule",
+        source_format=stage_format,
+        expected_checksum_sha256=document.source_checksum_sha256,
+        expected_filename=document.source_filename,
+        operation_key=operation_key,
+    )
+    if claim["duplicate_consumption"]:
+        return claim["result"]
     try:
-        return create_import_revision(
+        result = create_import_revision(
             db,
             project_id=project.id,
             company_id=project.empresa_id,
             user_id=current_user.id,
-            document=payload,
+            document=document,
         )
+        complete_stage_consumption(db, stage_id=payload.coordination_stage_id, operation_key=operation_key, result=result)
+        return result
     except ValueError as exc:
+        release_failed_stage_consumption(db, stage_id=payload.coordination_stage_id, operation_key=operation_key, error_code="schedule_revision_invalid")
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
@@ -2067,9 +2361,9 @@ def list_project_bim_4d_field_reports(project_id: int, activity_snapshot_id: Opt
 
 
 @router.get("/projects/{project_id}/4d/reports/{report_type}")
-def get_project_bim_4d_report(project_id: int, report_type: str, format: str = "json", baseline_id: Optional[int] = None, resource_id: Optional[int] = None, cutoff: Optional[datetime] = None, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
+def get_project_bim_4d_report(project_id: int, report_type: str, format: str = "json", official: bool = False, baseline_id: Optional[int] = None, resource_id: Optional[int] = None, cutoff: Optional[datetime] = None, empresa_id: Optional[int] = None, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_active_user)):
     project = _resolve_project(db, project_id, current_user, empresa_id); _require_bim_access(db, project, current_user, "bim.schedule.view")
-    report = build_report(db, report_type=report_type, project_id=project.id, company_id=project.empresa_id, baseline_id=baseline_id, resource_id=resource_id, cutoff=cutoff)
+    report = build_report(db, report_type=report_type, project_id=project.id, company_id=project.empresa_id, baseline_id=baseline_id, resource_id=resource_id, cutoff=cutoff, official_output=official)
     if format == "csv":
         return Response(content=report_csv(report), media_type="text/csv; charset=utf-8", headers={"Content-Disposition": f'attachment; filename="bim-4d-{report_type}-{project.id}.csv"'})
     if format != "json": raise HTTPException(status_code=422, detail="Formato de informe no soportado.")
@@ -2149,18 +2443,27 @@ def import_json_package(
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
     if not is_bim_company_operator(current_user.rol):
         raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede importar paquetes BIM.")
-
     validation = validate_json_bim_batch([payload])
     _raise_if_json_validation_has_errors(validation)
+    if payload.coordination_stage_id is None:
+        raise HTTPException(status_code=409, detail="La importacion JSON requiere un staging confirmado.")
 
+    content = json.dumps(payload.model_dump(mode="json", exclude={"coordination_stage_id"}, exclude_unset=True), ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    operation_key = f"json-package:{payload.coordination_stage_id}:{project.id}"
+    claim = claim_confirmed_stage(db, stage_id=payload.coordination_stage_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, source_domain="bim", source_format="json", content=content, operation_key=operation_key)
+    if claim["duplicate_consumption"]:
+        return claim["result"]
     try:
-        return import_json_bim_package(
+        result = import_json_bim_package(
             db,
             project_id=project.id,
             company_id=project.empresa_id,
             payload=payload,
         )
+        complete_stage_consumption(db, stage_id=payload.coordination_stage_id, operation_key=operation_key, result=result.model_dump(mode="json"))
+        return result
     except ValueError as exc:
+        release_failed_stage_consumption(db, stage_id=payload.coordination_stage_id, operation_key=operation_key, error_code="json_package_invalid")
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
@@ -2185,18 +2488,28 @@ def import_json_batch(
         raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede importar paquetes BIM.")
     if not payload.packages:
         raise HTTPException(status_code=400, detail="No se recibieron paquetes BIM para importar.")
-
     validation = validate_json_bim_batch(payload.packages)
     _raise_if_json_validation_has_errors(validation)
+    if payload.coordination_stage_id is None:
+        raise HTTPException(status_code=409, detail="La importacion JSON requiere un staging confirmado.")
 
+    canonical_payload = {"packages": [item.model_dump(mode="json", exclude={"coordination_stage_id"}, exclude_unset=True) for item in payload.packages]}
+    content = json.dumps(canonical_payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    operation_key = f"json-batch:{payload.coordination_stage_id}:{project.id}"
+    claim = claim_confirmed_stage(db, stage_id=payload.coordination_stage_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, source_domain="bim", source_format="json", content=content, operation_key=operation_key)
+    if claim["duplicate_consumption"]:
+        return claim["result"]
     try:
-        return import_json_bim_batch(
+        result = import_json_bim_batch(
             db,
             project_id=project.id,
             company_id=project.empresa_id,
             packages=payload.packages,
         )
+        complete_stage_consumption(db, stage_id=payload.coordination_stage_id, operation_key=operation_key, result=result.model_dump(mode="json"))
+        return result
     except ValueError as exc:
+        release_failed_stage_consumption(db, stage_id=payload.coordination_stage_id, operation_key=operation_key, error_code="json_batch_invalid")
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
@@ -2219,15 +2532,27 @@ def register_ifc_manifest(
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
     if not is_bim_company_operator(current_user.rol):
         raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede registrar manifiestos IFC BIM.")
+    if not payload.source_filename.strip().lower().endswith(".ifc"):
+        raise HTTPException(status_code=400, detail="El manifiesto BIM debe referenciar un archivo .ifc.")
+    if payload.coordination_stage_id is None:
+        raise HTTPException(status_code=409, detail="El manifiesto IFC requiere un staging confirmado.")
 
+    content = json.dumps(payload.model_dump(mode="json", exclude={"coordination_stage_id"}, exclude_unset=True), ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    operation_key = f"ifc-manifest:{payload.coordination_stage_id}:{project.id}"
+    claim = claim_confirmed_stage(db, stage_id=payload.coordination_stage_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, source_domain="bim", source_format="json", content=content, operation_key=operation_key)
+    if claim["duplicate_consumption"]:
+        return claim["result"]
     try:
-        return register_ifc_bim_manifest(
+        result = register_ifc_bim_manifest(
             db,
             project_id=project.id,
             company_id=project.empresa_id,
             payload=payload,
         )
+        complete_stage_consumption(db, stage_id=payload.coordination_stage_id, operation_key=operation_key, result=result.model_dump(mode="json"))
+        return result
     except ValueError as exc:
+        release_failed_stage_consumption(db, stage_id=payload.coordination_stage_id, operation_key=operation_key, error_code="ifc_manifest_invalid")
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
@@ -2250,15 +2575,26 @@ def import_ifc_text(
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
     if not is_bim_company_operator(current_user.rol):
         raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede importar IFC BIM.")
+    if payload.coordination_stage_id is None:
+        raise HTTPException(status_code=409, detail="La importacion IFC requiere un staging confirmado.")
 
+    content = payload.ifc_text.encode("utf-8")
+    operation_key = f"ifc-text:{payload.coordination_stage_id}:{payload.model_name}:{payload.version_label}"
+    claim = claim_confirmed_stage(db, stage_id=payload.coordination_stage_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, source_domain="bim", source_format="ifc", content=content, operation_key=operation_key)
+    if claim["duplicate_consumption"]:
+        return claim["result"]
     try:
-        return import_ifc_text_bim_package(
+        result = import_ifc_text_bim_package(
             db,
             project_id=project.id,
             company_id=project.empresa_id,
             payload=payload,
         )
+        serialized = result.model_dump(mode="json") if hasattr(result, "model_dump") else dict(result)
+        complete_stage_consumption(db, stage_id=payload.coordination_stage_id, operation_key=operation_key, result=serialized)
+        return result
     except ValueError as exc:
+        release_failed_stage_consumption(db, stage_id=payload.coordination_stage_id, operation_key=operation_key, error_code="ifc_text_invalid")
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
@@ -2271,6 +2607,7 @@ async def import_ifc_file(
     description: Optional[str] = Form(default=None),
     notes: Optional[str] = Form(default=None),
     activate: bool = Form(default=True),
+    stage_id: Optional[int] = Form(default=None),
     file: UploadFile = File(...),
     empresa_id: Optional[int] = None,
     db: Session = Depends(get_db),
@@ -2287,22 +2624,35 @@ async def import_ifc_file(
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
     if not is_bim_company_operator(current_user.rol):
         raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede importar IFC BIM.")
+    if not (file.filename or "").lower().endswith(".ifc"):
+        raise HTTPException(status_code=400, detail="El archivo BIM debe tener extension .ifc.")
+    if stage_id is None:
+        raise HTTPException(status_code=409, detail="La importacion IFC requiere un staging confirmado.")
 
+    content = await file.read()
+    operation_key = f"ifc-file:{stage_id}:{model_name.strip()}:{version_label.strip()}"
+    claim = claim_confirmed_stage(db, stage_id=stage_id, project_id=project.id, company_id=project.empresa_id, user_id=current_user.id, source_domain="bim", source_format="ifc", content=content, operation_key=operation_key)
+    if claim["duplicate_consumption"]:
+        return claim["result"]
     try:
-        return import_ifc_file_bim_package(
+        result = import_ifc_file_bim_package(
             db,
             project_id=project.id,
             company_id=project.empresa_id,
             model_name=model_name,
             version_label=version_label,
             source_filename=file.filename or "modelo.ifc",
-            content=await file.read(),
+            content=content,
             discipline=discipline,
             description=description,
             notes=notes,
             activate=activate,
         )
+        serialized = result.model_dump(mode="json") if hasattr(result, "model_dump") else dict(result)
+        complete_stage_consumption(db, stage_id=stage_id, operation_key=operation_key, result=serialized)
+        return result
     except ValueError as exc:
+        release_failed_stage_consumption(db, stage_id=stage_id, operation_key=operation_key, error_code="ifc_file_invalid")
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
@@ -2319,6 +2669,7 @@ async def create_ifc_import_job(
     discipline: Optional[str] = Form(default=None),
     description: Optional[str] = Form(default=None),
     notes: Optional[str] = Form(default=None),
+    stage_id: Optional[int] = Form(default=None),
     file: UploadFile = File(...),
     empresa_id: Optional[int] = None,
     db: Session = Depends(get_db),
@@ -2335,7 +2686,31 @@ async def create_ifc_import_job(
         raise HTTPException(status_code=403, detail="La capa BIM no está habilitada para este contexto.")
     if not is_bim_company_operator(current_user.rol):
         raise HTTPException(status_code=403, detail="Solo un administrador de empresa puede importar IFC BIM.")
+    if stage_id is None:
+        raise HTTPException(status_code=409, detail="La importacion IFC requiere un staging confirmado.")
 
+    content = await file.read()
+    operation_key = f"ifc-job:{stage_id}:{model_name.strip()}:{version_label.strip()}"
+    claim = claim_confirmed_stage(
+        db,
+        stage_id=stage_id,
+        project_id=project.id,
+        company_id=project.empresa_id,
+        user_id=current_user.id,
+        source_domain="bim",
+        source_format="ifc",
+        content=content,
+        operation_key=operation_key,
+    )
+    if claim["duplicate_consumption"]:
+        stored = claim.get("result") or {}
+        existing_job = get_bim_import_job(
+            db,
+            job_id=int(stored.get("job_id") or 0),
+            project_id=project.id,
+            company_id=project.empresa_id,
+        )
+        return serialize_bim_import_job(existing_job)
     try:
         job = create_bim_import_job(
             db,
@@ -2345,14 +2720,22 @@ async def create_ifc_import_job(
             model_name=model_name,
             version_label=version_label,
             source_filename=file.filename or "modelo.ifc",
-            content=await file.read(),
+            content=content,
             discipline=discipline,
             description=description,
             notes=notes,
         )
+        complete_stage_consumption(
+            db,
+            stage_id=stage_id,
+            operation_key=operation_key,
+            result={"job_id": job.id, "idempotency_key": job.idempotency_key},
+        )
     except ValueError as exc:
+        release_failed_stage_consumption(db, stage_id=stage_id, operation_key=operation_key, error_code="invalid_import")
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except RuntimeError as exc:
+        release_failed_stage_consumption(db, stage_id=stage_id, operation_key=operation_key, error_code="import_unavailable")
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     if job.status == "queued":

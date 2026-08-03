@@ -18,6 +18,7 @@ Este índice debe usarse siempre como primera referencia al retomar el programa 
 - [Plan de Validación BIM](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_VALIDATION_PLAN.md)
 - [Roadmap de Ejecución BIM](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_EXECUTION_ROADMAP.md)
 - [Plan de Adecuacion Final BIM y decisiones confirmadas](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_FINAL_ADEQUACY_PLAN.md)
+- [Plan Ejecutivo Coordinado de Adecuacion BIM](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_COORDINATED_ADEQUACY_EXECUTION_PLAN.md)
 - [Plan de Paridad Funcional BIM 4D tipo SYNCHRO](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_4D_SYNCHRO_INTEGRATION_PLAN.md)
 - [Plan de Paridad Avanzada del Nucleo BIM 4D](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_ADVANCED_4D_PARITY_PLAN.md)
 - [Estrategia de Implementación Paralela BIM](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_PARALLEL_IMPLEMENTATION_STRATEGY.md)

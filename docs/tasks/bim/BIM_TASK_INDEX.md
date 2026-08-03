@@ -270,6 +270,8 @@ iniciada.
 | `BIM-TASK-0189` | Cerrada en beta: resolucion fisica compatible, escalado 125% y rollback verificados |
 | `BIM-TASK-0190` | Cerrada en beta: errores BIM normalizados sin crash React #31 y rollback verificado |
 | `BIM-TASK-0191` | Cerrada en beta: administrador de empresa como operador BIM, carga IFC visible y politica de roles canonica |
+| `BIM-TASK-0192` | En progreso: fundacion adaptativa BIM por viewport logico, contenedor e interaccion |
+| `BIM-TASK-0193` | En progreso documental: cuestionario y plan de adecuacion transversal BIM |
 
 ## Orden de ejecucion
 

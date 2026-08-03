@@ -3,6 +3,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { bimModelsApi } from '../../api/bimModels';
 import { bimLinksApi } from '../../api/bimLinks';
 import { bimViewStatesApi } from '../../api/bimViewStates';
+import { proyectosApi } from '../../api/proyectos';
+import { empresasApi } from '../../api/empresas';
 import BimCanvasViewer from './BimCanvasViewer';
 import BimLinksPanel from './BimLinksPanel';
 import BimImportJobsPanel from './BimImportJobsPanel';
@@ -59,10 +61,24 @@ import BimFieldResourcesPanel from './BimFieldResourcesPanel';
 import BimCrewsTimecardsPanel from './BimCrewsTimecardsPanel';
 import BimViewStateToolbar from './BimViewStateToolbar';
 import BimWorkspaceV2 from './BimWorkspaceV2';
+import BimCoordinationControlPanel from './BimCoordinationControlPanel';
 import { createActivityPlanningSelection, createElementPlanningSelection, findActivitiesByGuid } from './bimPlanningSelection';
 import { useBimProjectWorkspace } from '../../hooks/bim/useBimProjectWorkspace';
 
 const BIM_CONTEXT_STORAGE_KEY = 'giproy_bim_workspace_context';
+
+const TOOL_CAPABILITY = {
+    imports: 'bim.admin', federation: 'bim.coordinate', location: 'bim.coordinate', quality: 'bim.review', ids: 'bim.classification.view',
+    schedule: 'bim.schedule.link', interchange: 'schedule.view', 'plan-actual': 'bim.progress.report', progress: 'bim.progress.report',
+    estimate: 'budget.view', contracts: 'budget.view', payments: 'budget.view', sov: 'budget.view', changes: 'budget.view',
+    'actual-costs': 'budget.view', forecast: 'budget.view', quantities: 'budget.view', productivity: 'bim.progress.report',
+    conflicts: 'coordination.view', issues: 'bim.review', reviews: 'bim.review', compare: 'bim.review',
+};
+
+const filterToolsByCapabilities = (tools, capabilities) => (tools || []).filter((tool) => {
+    const required = TOOL_CAPABILITY[tool.id];
+    return !required || capabilities.has(required);
+});
 
 const readStoredBimContext = (projectId) => {
     if (typeof window === 'undefined' || !projectId) return null;
@@ -100,7 +116,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         focusToken: null,
     });
     const projectLabel = project?.nombre || 'Proyecto activo';
-    const { workspace, viewStates, loading, error, refresh } = useBimProjectWorkspace(project?.id, access?.enabled);
+    const { workspace, viewStates, loading, error, warnings, refresh } = useBimProjectWorkspace(project?.id, access?.enabled);
     const [selectedVersionId, setSelectedVersionId] = useState(null);
     const [selectedStoreyName, setSelectedStoreyName] = useState(null);
     const [selectedElement, setSelectedElement] = useState(null);
@@ -117,8 +133,35 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
     const [viewerStateToApply, setViewerStateToApply] = useState(null);
     const [viewerStateApplyStatus, setViewerStateApplyStatus] = useState(null);
     const [federation, setFederation] = useState(null);
-    const canAdministerBim = ['administrador', 'superadministrador'].includes(access?.resolved_role);
+    const [projectCapabilities, setProjectCapabilities] = useState(null);
+    const [omniClassEnabled, setOmniClassEnabled] = useState(true);
+    const hasProjectCapability = (capability) => projectCapabilities?.has(capability) === true;
+    const canAdministerBim = hasProjectCapability('bim.admin');
     const canCreateCompanyScope = canAdministerBim;
+
+    useEffect(() => {
+        if (!project?.id || !access?.enabled) {
+            setProjectCapabilities(null);
+            return undefined;
+        }
+        let cancelled = false;
+        const companyId = access?.resolved_company_id;
+        Promise.allSettled([
+            proyectosApi.getMyCapabilities(project.id, companyId),
+            companyId ? empresasApi.getById(companyId) : Promise.resolve(null),
+        ]).then(([capabilityResult, companyResult]) => {
+            if (cancelled) return;
+            if (capabilityResult.status === 'fulfilled') {
+                setProjectCapabilities(new Set(capabilityResult.value?.capabilities || []));
+            } else {
+                setProjectCapabilities(new Set());
+            }
+            if (companyResult.status === 'fulfilled' && companyResult.value) {
+                setOmniClassEnabled(companyResult.value.use_omniclass !== false);
+            }
+        });
+        return () => { cancelled = true; };
+    }, [access?.enabled, access?.resolved_company_id, project?.id]);
 
     useEffect(() => {
         if (!project?.id || !access?.enabled) {
@@ -581,6 +624,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                         elements={visibleElements}
                         ready={workspace.ready}
                         error={error}
+                        warnings={warnings}
                         selectedElement={selectedElement}
                         selectedLink={selectedLink}
                         linkedElementIds={linkedElementIds}
@@ -650,7 +694,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 onNavigateTarget={onNavigateTarget}
             />
         );
-        const workspaceTools = {
+        const legacyWorkspaceTools = {
             viewer: [
                 { id: 'properties', label: 'Propiedades', content: propertiesTool },
                 { id: 'versions', label: 'Modelos y versiones', content: <BimVersionSelector models={workspace.models} activeVersionId={activeVersionId} onSelectVersion={handleSelectVersion} /> },
@@ -659,6 +703,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 { id: 'quantities', label: 'Cantidades', content: <BimQuantityProposalPanel projectId={project?.id} empresaId={access?.resolved_company_id} versionId={activeVersionId} element={selectedElement} /> },
             ],
             coordination: [
+                { id: 'coordination-control', label: 'Control de coordinación', content: <BimCoordinationControlPanel projectId={project?.id} empresaId={access?.resolved_company_id} activeVersionId={activeVersionId} selectedElement={selectedElement} selectedActivity={(planningGantt?.activities || []).find((activity) => activity.id === planningSelection.primaryActivityId) || null} canEdit={hasProjectCapability('coordination.edit')} canApprove={hasProjectCapability('coordination.approve')} canApply={hasProjectCapability('coordination.apply')} canRecover={hasProjectCapability('coordination.recover')} /> },
                 { id: 'cde-dashboard', label: 'Resumen', content: <BimCdeDashboardPanel projectId={project?.id} empresaId={access?.resolved_company_id} canReconcile={canCreateCompanyScope} /> },
                 { id: 'collaboration', label: 'Actividad', content: <BimCdeCollaborationPanel projectId={project?.id} empresaId={access?.resolved_company_id} selectedElement={selectedElement} /> },
                 { id: 'documents', label: 'Documentos', content: <BimCdeDocumentsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
@@ -716,6 +761,27 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 { id: 'operations-transition', label: 'Transición O&M', content: <BimOperationsTransitionPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
             ],
         };
+        // The visible information architecture is workflow-based. Existing panels remain
+        // reusable capabilities, but no longer compete as top-level destinations.
+        const unrestrictedWorkspaceTools = {
+            'planning-costs': [
+                ...legacyWorkspaceTools.planning,
+                ...legacyWorkspaceTools.production,
+            ],
+            model: legacyWorkspaceTools.viewer,
+            coordination: legacyWorkspaceTools.coordination,
+            tracking: [
+                ...legacyWorkspaceTools.field,
+                { id: 'reports', label: 'Informes', content: <BimReportsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
+            ],
+            handover: legacyWorkspaceTools.handover,
+        };
+        const workspaceTools = Object.fromEntries(
+            Object.entries(unrestrictedWorkspaceTools).map(([mode, tools]) => [
+                mode,
+                filterToolsByCapabilities(tools, projectCapabilities || new Set()),
+            ]),
+        );
         const bottomTools = [
             {
                 id: 'planning-4d',
@@ -752,7 +818,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 type: 'Elemento',
                 label: element.nombre || element.global_id,
                 meta: `${element.ifc_class || 'Sin clase'} · ${element.global_id || 'Sin GlobalId'} · ${element.storey_name || 'Sin nivel'}`,
-                workspace: 'viewer',
+                workspace: 'model',
                 onSelect: () => handleSelectElement(element),
             })),
             ...(workspace.models || []).flatMap((model) => (model.versions || []).map((version) => ({
@@ -760,7 +826,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 type: 'Modelo',
                 label: `${model.nombre || model.name || model.model_name || 'Modelo BIM'} · ${version.label}`,
                 meta: model.discipline || model.disciplina || 'Modelo y versión BIM',
-                workspace: 'viewer',
+                workspace: 'model',
                 onSelect: () => handleSelectVersion(version.id),
             }))),
             ...(workspace.recent_links || []).map((link) => ({
@@ -768,7 +834,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 type: 'Vínculo',
                 label: link.target_label || link.target_id || 'Vínculo BIM',
                 meta: `${link.target_type || 'Destino'} · ${link.link_type || 'Vínculo'}`,
-                workspace: 'planning',
+                workspace: 'planning-costs',
                 onSelect: () => handleSelectLink(link),
             })),
             ...(planningGantt?.activities || []).map((activity) => ({
@@ -776,10 +842,24 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 type: 'Actividad',
                 label: `${activity.code} · ${activity.name}`,
                 meta: `${new Date(activity.planned_start).toLocaleDateString('es')} · ${activity.global_ids.length} elementos BIM`,
-                workspace: 'planning',
+                workspace: 'planning-costs',
                 onSelect: () => handleSelectActivity(activity),
             })),
         ];
+        const searchAuthorizedProject = async (query) => {
+            const payload = await bimModelsApi.searchProjectContext(project.id, query, access?.resolved_company_id);
+            return (payload.items || []).map((item) => ({
+                ...item,
+                onSelect: async () => {
+                    if (item.kind === 'element') await resolveElementByGuid(item.global_id);
+                    if (item.kind === 'activity') {
+                        const activity = (planningGantt?.activities || []).find((candidate) => candidate.id === item.entity_id);
+                        if (activity) await handleSelectActivity(activity);
+                    }
+                    if (item.kind === 'budget_line') onNavigateTarget?.({ target_type: 'presupuesto_detalle', target_id: item.entity_id, presupuesto_id: item.budget_id });
+                },
+            }));
+        };
 
     return (
         <BimWorkspaceV2
@@ -791,6 +871,7 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 viewerMode={viewerMode}
                 loading={loading}
                 canAdminister={canAdministerBim}
+                omniClassEnabled={omniClassEnabled}
                 explorer={(
                     <BimTreePanel
                         nodes={workspace.tree_nodes}
@@ -812,7 +893,9 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 reports={<BimReportsPanel projectId={project?.id} empresaId={access?.resolved_company_id} />}
                 ready={workspace.ready}
                 error={error}
+                warnings={warnings}
                 searchItems={searchItems}
+                onSearch={searchAuthorizedProject}
                 onChangeViewerMode={setViewerMode}
                 onResetContext={resetTechnicalContext}
                 onRefresh={refresh}

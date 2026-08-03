@@ -3,6 +3,28 @@ import { withTenantConfig, withTenantParams } from './tenant';
 import { requestProjectListWithRetry } from './projectListRetry';
 
 export const proyectosApi = {
+    getMyCapabilities: async (id, empresaId = null, edtId = null) => {
+        const response = await axiosInstance.get(
+            `/proyectos/${id}/capabilities/me`,
+            withTenantConfig({ params: edtId ? { edt_id: edtId } : {} }, empresaId),
+        );
+        return response.data;
+    },
+
+    getCapabilityCatalog: async (id, empresaId = null) => {
+        const response = await axiosInstance.get(`/proyectos/${id}/capabilities/catalog`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+
+    saveCapabilityGrant: async (id, userId, payload, empresaId = null) => {
+        const response = await axiosInstance.put(
+            `/proyectos/${id}/capability-grants/${userId}`,
+            payload,
+            withTenantConfig({}, empresaId),
+        );
+        return response.data;
+    },
+
     // Obtener todos los proyectos del tenant
     getAll: async (params = {}) => {
         const response = await requestProjectListWithRetry(() => (

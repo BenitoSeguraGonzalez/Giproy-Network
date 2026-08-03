@@ -10,11 +10,12 @@ export const proyectoDetalleApi = {
         const response = await axiosInstance.post('/proyecto-detalles/', detalleData, withTenantConfig({}, empresaId));
         return response.data;
     },
-    uploadImage: async (file, empresaId = null) => {
+    uploadImage: async (codigoRoot, file, empresaId = null) => {
         const formData = new FormData();
         formData.append('file', file);
         const response = await axiosInstance.post('/proyecto-detalles/upload-image', formData, {
             ...withTenantConfig({}, empresaId),
+            params: { codigo_root: codigoRoot, ...(empresaId ? { empresa_id: empresaId } : {}) },
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

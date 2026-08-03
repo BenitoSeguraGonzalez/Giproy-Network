@@ -628,3 +628,187 @@ interpretarse como capacidades ya implementadas.
 Estas decisiones prevalecen ante ambiguedades del backlog. Cualquier cambio
 posterior requiere actualizar esta seccion, la TASK BIM correspondiente y sus
 criterios de gate antes de implementar.
+
+## 11. Reapertura controlada del diagnostico transversal - 2026-08-03
+
+La `BIM-TASK-0193` abre un cuestionario de adecuacion con el usuario. Esta
+reapertura agrega brechas al plan, pero no revoca cierres tecnicos, no modifica
+el programa 61/61 y no cierra Gate E ni Gate K. Cada frente se confirmara antes
+de convertirlo en slices de implementacion.
+
+### 11.1 Frente 01 - OmniClass con BIM y Proyectos
+
+**Diagnostico confirmado:** OmniClass tiene una implementacion funcional en el
+dominio clasico, mientras BIM conserva solo `BimElement.classification` como
+texto generico. No existe aun un contrato OmniClass BIM versionado ni una
+relacion gobernada con proyecto/revision o con los links 5D.
+
+**Fuente de verdad:** `omniclass_maestro` y los datos clasicos gobernados de
+subcategorias, recursos, APUs y Presupuesto. El dominio BIM no debe copiar ese
+catalogo; debe referenciarlo mediante un contrato estable y conservar la
+procedencia de cualquier clasificacion importada desde IFC.
+
+**Objetivo de adecuacion:** incorporar sistema, edicion, tabla, codigo, titulo,
+fuente, estado de resolucion y vigencia por version de modelo; respetar
+`empresa_id`, proyecto, revision y `Empresa.use_omniclass`; y habilitar UX de
+inspeccion/filtro antes de considerar propuestas 5D.
+
+**Orden preliminar:** contrato aditivo -> parser IFC -> resolucion contra
+maestro -> gobierno empresa/proyecto -> UX BIM -> propuestas 5D revisables.
+
+**Guardas:** no generar links automaticos, no duplicar fuentes clasicas, no
+sobrescribir clasificaciones IFC silenciosamente y no tocar EDT/APU/Presupuesto
+sin una TASK de integracion controlada separada.
+
+Estado: brecha documentada y confirmada; slices pendientes de completar el
+cuestionario y recibir aprobacion del plan integral.
+
+### 11.2 Frente 02 - Tri-sincronizacion Presupuesto <-> Gantt <-> BIM
+
+**Diagnostico confirmado:** GiProy no dispone hoy de una sincronizacion
+triangular operativa. El carril clasico Presupuesto/APU <-> Gantt es el mas
+maduro; BIM 4D tiene snapshots, baselines, links aprobables y reproduccion
+temporal; BIM 5D tiene links y propuestas controladas con EDT/APU/Presupuesto.
+Esas capacidades no comparten aun una identidad versionada ni un ciclo conjunto
+de diff, conflicto, aprobacion y rollback.
+
+**Fuentes de verdad propuestas:** Presupuesto/APU gobierna coste, cantidad
+aprobada, composicion y rendimiento; Gantt gobierna fechas, dependencias,
+calendario y baseline; la version BIM gobierna geometria, GUID, propiedades y
+cantidades IFC de origen. Ningun dominio sobrescribe otro automaticamente.
+
+**Objetivo de adecuacion:** crear un agregado de coordinacion por empresa,
+proyecto y revision que fije presupuesto/revision, baseline Gantt y version BIM,
+con enlaces estables entre linea/APU, actividad y elemento. Cada cambio cruzado
+debe generar diff y propuesta aprobable, no una propagacion circular inmediata.
+
+**Orden preliminar:** matriz de autoridad -> identidades estables -> agregado
+versionado -> adaptadores y snapshots -> preflight/conflictos -> UX y rollback
+-> certificacion end-to-end tenant-aware.
+
+**Guardas:** BIM apagado mantiene intacto el circuito Presupuesto/Gantt;
+`source_ref` textual no sera la identidad final; las revisiones independientes
+no se colapsan; y cualquier escritura clasica requiere TASK de integracion
+controlada y prueba de no mutacion accidental.
+
+Estado: brecha documentada y confirmada; no implica implementacion ni modifica
+los cierres 4D/5D existentes.
+
+### 11.3 Frente 03 - Reestructuracion integral del workspace BIM
+
+**Decision confirmada:** BIM debe dejar de presentarse como un catalogo de
+funciones y convertirse en un espacio de trabajo integrado en GiProy. La
+experiencia sera neutral y comun, pero su entrada, acciones disponibles,
+prioridades y siguiente paso se adaptaran dinamicamente a las capacidades y al
+contexto del usuario. Planificacion 4D y presupuesto 5D son el flujo principal.
+
+**Diagnostico confirmado:** el workspace actual distribuye las capacidades en
+siete espacios principales y numerosas pestanas, con funciones repetidas y sin
+una secuencia operativa comun. En escritorio puede mantener simultaneamente
+explorador izquierdo, visor, inspector derecho y panel temporal inferior. Sus
+anchos y alturas iniciales consumen una parte excesiva del area util disponible
+en un monitor fisico de 1920 x 1080 y los paneles internos no comparten un
+contrato consistente de tamano, scroll ni composicion.
+
+**Arquitectura objetivo:** consolidar la navegacion en cinco modos:
+`Planificacion y costes`, `Modelo`, `Coordinacion`, `Seguimiento` y `Entrega`.
+`Planificacion y costes` sera la entrada preferente cuando las capacidades del
+usuario lo permitan. Informes se resolvera como salida contextual y la
+administracion de modelos quedara separada del trabajo BIM cotidiano.
+
+**Flujo rector 4D/5D:** seleccionar proyecto, revision presupuestaria, baseline
+Gantt y version BIM; vincular linea/APU, actividad y elemento; validar cobertura
+y conflictos; simular tiempo y coste; producir propuestas versionadas; revisar
+y aprobar; y seguir plan frente a real. La UX debe exponer siempre la fuente de
+verdad y el estado de sincronizacion, sin escrituras circulares silenciosas.
+
+**Contrato espacial:** 1920 x 1080 es la resolucion fisica minima de referencia,
+pero la composicion se decide mediante el contenedor util CSS. La cabecera BIM
+ocupara como maximo 88 px; solo un panel lateral estara desarrollado por defecto;
+el visor conservara al menos 65% del ancho util; y la superficie 4D/5D usara una
+altura inicial de 220-260 px, sera colapsable y no superara 35% del contenedor.
+En resoluciones superiores crecera el contenido util, no el tamano indiscriminado
+de controles y paneles.
+
+**Adaptacion por capacidades:** reutilizar `bim.view`, `bim.review`,
+`bim.coordinate`, `bim.schedule.view`, `bim.schedule.link`,
+`bim.progress.report`, `bim.publish` y `bim.admin`, combinadas con permisos de
+Presupuesto y Gantt. No se crearan aplicaciones distintas por nombre de rol. Se
+debera definir ademas un contrato explicito de capacidades 5D para lectura,
+vinculacion, propuesta y aprobacion de costes BIM.
+
+**Orden preliminar:** contrato UX y medicion -> shell BIM y sistema de paneles ->
+workbench vertical Presupuesto/Gantt/BIM -> modelo y coordinacion -> seguimiento
+integrado -> entrega y administracion -> accesibilidad, rendimiento y QA visual.
+
+**Guardas:** no reducir el rediseño a cambios cosmeticos; no esconder acciones
+sin explicar la capacidad requerida; no depender solo de `window.innerWidth`;
+no abrir dos laterales por defecto; no usar tooltips como unica explicacion; no
+modificar contratos 4D/5D ni fuentes de verdad desde la capa visual.
+
+Estado: direccion UX/UI documentada y confirmada; pendiente descomponerla en
+slices verticales con criterios de aceptacion, pruebas visuales y rollback.
+
+### 11.4 Regla de coordinacion transversal entre frentes
+
+El plan es multifrente, pero constituye un unico programa de adecuacion. Los
+frentes 01, 02 y 03 no pueden convertirse en backlogs independientes ni cerrar
+por separado cuando compartan contratos, estados, permisos o superficies.
+
+La coordinacion obligatoria queda definida asi:
+
+1. **OmniClass alimenta el flujo 5D:** la clasificacion resuelta puede asistir
+   busqueda, filtros, cantidades y propuestas de enlace, pero nunca crear links
+   Presupuesto/Gantt/BIM de forma implicita.
+2. **La tri-sincronizacion gobierna el estado:** revision presupuestaria,
+   baseline Gantt, version BIM, identidades, autoridad, diff, conflicto,
+   aprobacion y rollback proceden del contrato tridominio, no de estados locales
+   inventados por el frontend.
+3. **El workspace materializa el contrato:** la UX muestra y opera los estados
+   de OmniClass y sincronizacion, pero no redefine fuentes de verdad ni elude
+   permisos backend.
+4. **Capacidades compartidas:** cualquier ampliacion 5D debe definir backend,
+   API y frontend conjuntamente; el nombre del rol no sustituye las capacidades.
+5. **Slices verticales coordinados:** cada slice debe declarar impacto sobre los
+   tres frentes, dependencias, migracion, compatibilidad, pruebas y rollback,
+   incluso cuando alguno quede expresamente como `sin impacto`.
+6. **Gate conjunto:** ningun frente se considera funcionalmente adecuado hasta
+   superar un recorrido end-to-end Presupuesto -> Gantt -> BIM -> propuesta ->
+   aprobacion -> seguimiento, incluyendo clasificacion cuando este habilitada.
+
+Orden de dependencia inicial:
+
+`autoridad e identidades -> capacidades y contratos API -> agregado 4D/5D ->
+clasificacion/resolucion OmniClass -> shell y workbench -> flujos secundarios ->
+QA end-to-end y piloto`.
+
+Se permite construir infraestructura en paralelo cuando no comparta contratos,
+pero su integracion solo puede realizarse contra las mismas identidades, estados
+y criterios de aceptacion aprobados por el programa.
+
+### 11.5 Cierre del cuestionario y plan ejecutivo coordinado
+
+La entrevista de adecuacion queda cerrada con sesenta decisiones confirmadas.
+El contrato ejecutable, dependency graph, slices, matrices y gates se consolidan
+en `BIM_COORDINATED_ADEQUACY_EXECUTION_PLAN.md`, que pasa a ser complemento
+obligatorio de este plan rector. Ninguna TASK de los frentes 01-03 puede abrirse
+o cerrarse sin declarar su impacto transversal conforme a dicho documento.
+
+Estado: cuestionario cerrado; plan ejecutivo aprobado documentalmente. No se
+autoriza aun implementacion ni modificacion de datos reales. El siguiente paso
+es crear y aprobar las TASKs de contratos y gobierno S01-S04.
+
+### 11.6 Gobierno obligatorio de porcentajes de cierre
+
+Cada cierre del programa debe informar porcentaje parcial del slice, porcentaje
+de fase y porcentaje total ponderado S01-S20. Los pesos, formula y plantilla
+canonica viven en `BIM_COORDINATED_ADEQUACY_EXECUTION_PLAN.md`. Un cierre sin
+ambos porcentajes, evidencia y estado de gates se considera documentalmente
+incompleto.
+
+Linea base actual:
+
+- diagnostico/planificacion `BIM-TASK-0193`: 100% documental;
+- implementacion del nuevo plan coordinado: 0%;
+- total del programa de adecuacion coordinada S01-S20: 0%;
+- programa BIM tecnico historico 61/61: sin cambios y separado de esta medicion.

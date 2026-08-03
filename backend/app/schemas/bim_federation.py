@@ -63,3 +63,12 @@ class BimFederationResponse(BaseModel):
     created_at: datetime
     members: list[BimFederationMemberResponse]
     summary: dict[str, int]
+
+
+class BimReconciliationDecisionRequest(BaseModel):
+    source_version_id: int = Field(gt=0)
+    target_version_id: int = Field(gt=0)
+    candidate_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    decision: Literal["approved", "rejected"]
+    selected_target_global_id: str | None = Field(default=None, max_length=255)
+    reason: str = Field(min_length=3, max_length=2000)

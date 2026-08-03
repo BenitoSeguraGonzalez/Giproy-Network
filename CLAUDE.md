@@ -195,3 +195,27 @@ No dar por buena una sesión si:
 6. Cambios realizados
 7. Rollback posible
 8. **% de finalización**
+
+---
+
+## Seguridad (transversal al resto de la familia)
+
+Cross-repo enforcement. Los mismos estandares aplican a `D:\python\MarketI` y `D:\python\NurIA-Odonto`.
+
+### Cero secretos en repo
+- `.gitleaks.toml` en la raiz con reglas que detectan: `SERVER = {\"password\": \"...\"}`, literals `password/secret_key/token = \"...\"`, JWT secrets, R2 tokens, Cloudflare tunnel tokens hex.
+- Pre-commit hook en `.husky/pre-commit` corre `gitleaks protect --staged --redact` y bloquea el commit si detecta cualquier coincidencia.
+- Allowlists explicitas solo para `.env.example`, `docs/security/README.md`, fixtures documentadas.
+
+### SSH key auth (en transicion en todos los repos)
+- Inicial: `infra/scripts/setup-ssh-keys.ps1` genera par `ed25519` y `ssh-copy-id` al server (`excomsvr` 192.168.18.106/192.168.18.110, misma maquina).
+- Final: `PasswordAuthentication no` en `/etc/ssh/sshd_config` del server.
+- Mientras tanto: passwords en vault local, nunca en repo.
+
+### Documentacion operativa
+- `docs/security/README.md` — runbook operativo (politicas, controles, escaneo pre-commit, rotacion trimestral).
+- `docs/security/incident-response.md` — playbook para incidentes de seguridad (secret leak, cuenta comprometida, etc.).
+- `docs/security/rotation-log.md` — bitacora versionada de rotacion de credenciales trimestrales.
+
+### Regla de oro cross-repo
+Si dudas entre velocidad y seguridad → gana seguridad. El deploy puede esperar; un secret leakado no se puede deshacer.

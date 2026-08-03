@@ -200,7 +200,7 @@ const AdminGlobalEmail = () => {
 
     if (!isSuperadmin) {
         return (
-            <div className="h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] p-12">
+            <div className="h-full min-h-0 bg-[#F2F4F7] p-12">
                 <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors">
                     <ArrowLeft className="w-4 h-4" /> Volver al Dashboard
                 </button>
@@ -215,7 +215,7 @@ const AdminGlobalEmail = () => {
     }
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] overflow-y-auto p-8 xl:p-12 custom-scrollbar">
+        <div className="h-full min-h-0 bg-[#F2F4F7] overflow-y-auto p-8 xl:p-12 custom-scrollbar">
             <div className="mx-auto max-w-6xl">
                 <button onClick={() => navigate('/admin-global')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors">
                     <ArrowLeft className="w-4 h-4" /> Volver a Administración Global
@@ -384,7 +384,7 @@ const AdminGlobalEmail = () => {
 
             {showHelp && (
                 <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/35 p-4">
-                    <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] bg-white shadow-2xl">
+                    <div className="max-h-[90dvh] w-full max-w-4xl overflow-y-auto rounded-[2rem] bg-white shadow-2xl">
                         <div className="flex items-start justify-between gap-4 border-b border-zinc-100 p-6">
                             <div>
                                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#F39200]">Ayuda SMTP</p>

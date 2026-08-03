@@ -20,8 +20,33 @@ from app.services.public_procurement_technical_analysis import public_procuremen
 from app.models.usuario import Usuario
 from app.models.proyecto_asignacion import ProyectoAsignacion
 from app.models.proyecto import Proyecto
+from app.models.system_audit_event import SystemAuditEvent
+from app.schemas.project_capability import (
+    ProjectCapabilityCatalogResponse,
+    ProjectCapabilityGrantRequest,
+    ProjectCapabilityResponse,
+)
+from app.services.audit_event import record_audit_event
+from app.services.project_capability import (
+    PROFILE_CAPABILITIES,
+    PROJECT_ACTION_CAPABILITIES,
+    PROJECT_CAPABILITIES,
+    require_project_capability,
+    resolve_project_capabilities,
+    save_project_capability_grant,
+)
 
 router = APIRouter()
+
+
+def _record_project_event(db, *, project: Proyecto, actor: Usuario, event_type: str, message: str, entity_type: str = "project", entity_id=None, operation_status: str = "applied", payload: dict | None = None):
+    return record_audit_event(
+        db, module="proyecto", event_type=event_type, message=message,
+        actor=actor, empresa_id=project.empresa_id, proyecto_id=project.id,
+        proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision,
+        entity_type=entity_type, entity_id=entity_id if entity_id is not None else project.id,
+        operation_status=operation_status, payload=payload or {},
+    )
 
 
 class PublicProcurementProjectMaterializeRequest(BaseModel):
@@ -270,6 +295,7 @@ def create_proyecto(
 
     try:
         proyecto = proyecto_service.create_proyecto(db=db, obj_in=proyecto_in, empresa_id=target_empresa_id)
+        _record_project_event(db, project=proyecto, actor=current_user, event_type="project_created", message="Proyecto creado.", payload={"nombre": proyecto.nombre, "revision": proyecto.revision})
         return proyecto
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -336,6 +362,7 @@ def restore_recycled_project(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     if not restored:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Proyecto no encontrado en papelera.")
+    _record_project_event(db, project=restored, actor=current_user, event_type="project_restored", message="Proyecto restaurado desde la papelera.")
     return restored
 
 
@@ -355,9 +382,13 @@ def purge_recycled_project(
         target_empresa_id = empresa_id
     elif empresa_id and empresa_id != current_user.empresa_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tiene permisos para purgar proyectos de otra empresa.")
+    target = db.query(Proyecto).filter(Proyecto.id == id, Proyecto.empresa_id == target_empresa_id).first()
+    target_snapshot = {"id": target.id, "codigo_root": target.codigo_root, "revision": target.revision} if target else None
     success = proyecto_service.purge_recycled_project(db=db, proyecto_id=id, empresa_id=target_empresa_id, current_user=current_user)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Proyecto no encontrado en papelera.")
+    if target_snapshot:
+        record_audit_event(db, module="proyecto", event_type="project_purged", message="Proyecto eliminado definitivamente de la papelera.", actor=current_user, empresa_id=target_empresa_id, proyecto_codigo_root=target_snapshot["codigo_root"], proyecto_revision=target_snapshot["revision"], entity_type="project", entity_id=target_snapshot["id"], operation_status="purged", payload={"deleted_project_id": target_snapshot["id"]})
     return
 
 
@@ -413,6 +444,7 @@ def create_revision(
         nuevo_proyecto = proyecto_service.create_revision(db=db, proyecto_id=id, empresa_id=target_empresa_id)
         if not nuevo_proyecto:
             raise HTTPException(status_code=404, detail="Proyecto original no encontrado.")
+        _record_project_event(db, project=nuevo_proyecto, actor=current_user, event_type="project_revision_created", message="Revisión de proyecto creada.", payload={"source_project_id": id, "revision": nuevo_proyecto.revision})
         return nuevo_proyecto
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error inesperado al crear revisión: {str(e)}")
@@ -440,6 +472,8 @@ def delete_revision(
     if current_user.rol.lower() == "superadministrador" and empresa_id:
         target_empresa_id = empresa_id
 
+    target = db.query(Proyecto).filter(Proyecto.id == id, Proyecto.empresa_id == target_empresa_id).first()
+    target_snapshot = {"id": target.id, "codigo_root": target.codigo_root, "revision": target.revision} if target else None
     try:
         success = proyecto_service.delete_revision(db=db, proyecto_id=id, empresa_id=target_empresa_id)
     except ValueError as exc:
@@ -452,6 +486,9 @@ def delete_revision(
 
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Revisión no encontrada.")
+
+    if target_snapshot:
+        record_audit_event(db, module="proyecto", event_type="project_revision_deleted", message="Revisión de proyecto eliminada.", actor=current_user, empresa_id=target_empresa_id, proyecto_codigo_root=target_snapshot["codigo_root"], proyecto_revision=target_snapshot["revision"], entity_type="project_revision", entity_id=target_snapshot["id"], operation_status="deleted", payload={"deleted_project_id": target_snapshot["id"]})
 
     return
 
@@ -507,7 +544,7 @@ def update_proyecto(
     )
     if not proyecto:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Proyecto no encontrado o acceso denegado.")
-    
+    _record_project_event(db, project=proyecto, actor=current_user, event_type="project_updated", message="Datos principales del proyecto actualizados.", payload={"changed_fields": sorted(proyecto_in.model_dump(exclude_unset=True).keys())})
     return proyecto
 
 @router.get("/by-base/{base_id}", response_model=ProyectoResponse)
@@ -566,6 +603,7 @@ def delete_proyecto(
             detail="No tiene permisos para eliminar proyectos de otra empresa."
         )
 
+    target = db.query(Proyecto).filter(Proyecto.id == id, Proyecto.empresa_id == target_empresa_id).first()
     try:
         success = proyecto_service.soft_delete_full_project(
             db=db,
@@ -583,7 +621,8 @@ def delete_proyecto(
         ) from exc
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Proyecto no encontrado.")
-    
+    if target:
+        _record_project_event(db, project=target, actor=current_user, event_type="project_recycled", message="Proyecto movido a la papelera.", operation_status="recycled", payload={"delete_project_base": delete_project_base})
     return
 
 @router.post("/{id}/assign", response_model=Any)
@@ -603,7 +642,9 @@ def assign_user(
     if current_user.rol.lower() not in ["administrador", "superadministrador"]:
         raise HTTPException(status_code=403, detail="No tiene permisos para asignar personal.")
     
+    project = _project_capability_scope(db, id, current_user)
     proyecto_service.assign_user(db, proyecto_id=id, usuario_id=usuario_id, asignado_por_id=current_user.id, edt_id=edt_id, modulo=modulo, es_global=es_global)
+    _record_project_event(db, project=project, actor=current_user, event_type="project_user_assigned", message="Usuario asignado al proyecto.", entity_type="project_assignment", entity_id=usuario_id, payload={"target_user_id": usuario_id, "edt_id": edt_id, "module": modulo, "global": es_global})
     return {"status": "success"}
 
 @router.delete("/{id}/assign/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -623,7 +664,9 @@ def unassign_user(
     if current_user.rol.lower() not in ["administrador", "superadministrador"]:
         raise HTTPException(status_code=403, detail="No tiene permisos para desasignar personal.")
     
+    project = _project_capability_scope(db, id, current_user)
     proyecto_service.unassign_user(db, proyecto_id=id, usuario_id=usuario_id, edt_id=edt_id, modulo=modulo, es_global=es_global)
+    _record_project_event(db, project=project, actor=current_user, event_type="project_user_unassigned", message="Usuario retirado del proyecto.", entity_type="project_assignment", entity_id=usuario_id, operation_status="removed", payload={"target_user_id": usuario_id, "edt_id": edt_id, "module": modulo, "global": es_global})
     return
 
 @router.get("/{id}/assigned-users", response_model=List[UsuarioResponse])
@@ -652,6 +695,191 @@ def get_project_permissions(
     Obtiene los permisos y restricciones del usuario actual sobre el proyecto.
     """
     return proyecto_service.get_user_permissions(db, proyecto_id=id, usuario_id=current_user.id)
+
+
+def _project_capability_scope(
+    db: Session,
+    project_id: int,
+    current_user: Usuario,
+    empresa_id: Optional[int] = None,
+) -> Proyecto:
+    resolved_company_id = current_user.empresa_id
+    if (current_user.rol or "").lower() == "superadministrador" and empresa_id:
+        resolved_company_id = empresa_id
+    project = db.query(Proyecto).filter(
+        Proyecto.id == project_id,
+        Proyecto.empresa_id == resolved_company_id,
+    ).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto fuera de la empresa activa.")
+    return project
+
+
+@router.get("/{id}/capabilities/catalog", response_model=ProjectCapabilityCatalogResponse)
+def get_project_capability_catalog(
+    id: int,
+    empresa_id: Optional[int] = Query(None),
+    db: Session = Depends(deps.get_db),
+    current_user: Usuario = Depends(deps.get_current_active_user),
+) -> Any:
+    project = _project_capability_scope(db, id, current_user, empresa_id)
+    require_project_capability(
+        db,
+        capability="project.manage",
+        project_id=project.id,
+        user_id=current_user.id,
+        company_id=project.empresa_id,
+        role=current_user.rol,
+    )
+    return {
+        "capabilities": sorted(PROJECT_CAPABILITIES),
+        "profiles": {key: sorted(value) for key, value in PROFILE_CAPABILITIES.items()},
+        "actions": PROJECT_ACTION_CAPABILITIES,
+    }
+
+
+@router.get("/{id}/capabilities/me", response_model=ProjectCapabilityResponse)
+def get_my_project_capabilities(
+    id: int,
+    edt_id: Optional[int] = Query(None),
+    empresa_id: Optional[int] = Query(None),
+    db: Session = Depends(deps.get_db),
+    current_user: Usuario = Depends(deps.get_current_active_user),
+) -> Any:
+    project = _project_capability_scope(db, id, current_user, empresa_id)
+    resolved = resolve_project_capabilities(
+        db,
+        project_id=project.id,
+        user_id=current_user.id,
+        company_id=project.empresa_id,
+        role=current_user.rol,
+        edt_id=edt_id,
+    )
+    return {
+        "capabilities": sorted(resolved.capabilities),
+        "edt_ids": list(resolved.edt_ids),
+        "modules": list(resolved.modules),
+        "source": resolved.source,
+    }
+
+
+@router.put("/{id}/capability-grants/{user_id}", response_model=ProjectCapabilityResponse)
+def put_project_capability_grant(
+    id: int,
+    user_id: int,
+    payload: ProjectCapabilityGrantRequest,
+    empresa_id: Optional[int] = Query(None),
+    db: Session = Depends(deps.get_db),
+    current_user: Usuario = Depends(deps.get_current_active_user),
+) -> Any:
+    project = _project_capability_scope(db, id, current_user, empresa_id)
+    require_project_capability(
+        db,
+        capability="project.manage",
+        project_id=project.id,
+        user_id=current_user.id,
+        company_id=project.empresa_id,
+        role=current_user.rol,
+    )
+    grant = save_project_capability_grant(
+        db,
+        project_id=project.id,
+        company_id=project.empresa_id,
+        user_id=user_id,
+        capabilities=payload.capabilities,
+        granted_by=current_user.id,
+        edt_id=payload.edt_id,
+        profile_code=payload.profile_code,
+    )
+    record_audit_event(
+        db,
+        module="proyecto",
+        event_type="project_capabilities_updated",
+        message="Capacidades funcionales del proyecto actualizadas.",
+        actor=current_user,
+        empresa_id=project.empresa_id,
+        proyecto_id=project.id,
+        proyecto_codigo_root=project.codigo_root,
+        proyecto_revision=project.revision,
+        capability="project.manage",
+        entity_type="project_capability_grant",
+        entity_id=grant.id,
+        operation_status="applied",
+        payload={
+            "target_user_id": user_id,
+            "edt_id": payload.edt_id,
+            "profile_code": payload.profile_code,
+            "capabilities": grant.capabilities_json,
+        },
+    )
+    resolved = resolve_project_capabilities(
+        db,
+        project_id=project.id,
+        user_id=user_id,
+        company_id=project.empresa_id,
+        role=(db.query(Usuario).filter(Usuario.id == user_id).first().rol),
+        edt_id=payload.edt_id,
+    )
+    return {
+        "capabilities": sorted(resolved.capabilities),
+        "edt_ids": list(resolved.edt_ids),
+        "modules": list(resolved.modules),
+        "source": resolved.source,
+    }
+
+
+@router.get("/{id}/audit-events", response_model=Any)
+def get_project_audit_events(
+    id: int,
+    empresa_id: Optional[int] = Query(None),
+    module: Optional[str] = Query(None),
+    correlation_id: Optional[str] = Query(None),
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(deps.get_db),
+    current_user: Usuario = Depends(deps.get_current_active_user),
+) -> Any:
+    project = _project_capability_scope(db, id, current_user, empresa_id)
+    require_project_capability(
+        db,
+        capability="project.audit.view",
+        project_id=project.id,
+        user_id=current_user.id,
+        company_id=project.empresa_id,
+        role=current_user.rol,
+    )
+    query = db.query(SystemAuditEvent).filter(
+        SystemAuditEvent.empresa_id == project.empresa_id,
+        (SystemAuditEvent.proyecto_id == project.id)
+        | (SystemAuditEvent.proyecto_codigo_root == project.codigo_root),
+    )
+    if module:
+        query = query.filter(SystemAuditEvent.module == module)
+    if correlation_id:
+        query = query.filter(SystemAuditEvent.correlation_id == correlation_id)
+    items = query.order_by(SystemAuditEvent.created_at.desc(), SystemAuditEvent.id.desc()).limit(limit).all()
+    return {
+        "items": [
+            {
+                "id": item.id,
+                "module": item.module,
+                "event_type": item.event_type,
+                "severity": item.severity,
+                "message": item.message,
+                "actor_user_id": item.actor_user_id,
+                "actor_role": item.actor_role,
+                "capability": item.capability,
+                "correlation_id": item.correlation_id,
+                "operation_status": item.operation_status,
+                "entity_type": item.entity_type,
+                "entity_id": item.entity_id,
+                "proyecto_revision": item.proyecto_revision,
+                "detail": item.detail_json,
+                "created_at": item.created_at,
+            }
+            for item in items
+        ],
+        "total": len(items),
+    }
 
 @router.get("/{id}/assignment-dashboard", response_model=List[Any])
 def get_assignment_dashboard(

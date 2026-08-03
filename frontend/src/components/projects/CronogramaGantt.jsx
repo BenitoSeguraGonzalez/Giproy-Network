@@ -9,6 +9,7 @@ import { ControlRail, ControlRailDivider, ControlRailIconButton, ControlRailSect
 import GridColumnManager, { useGridColumnSettings } from './GridColumnManager';
 import { includesNormalized } from '../../utils/normalizeSearch';
 import { normalizeTextInputValue } from '../../utils/normalizeInputValue';
+import useAdaptiveLayout from '../../hooks/useAdaptiveLayout';
 import { apusApi } from '../../api/apus';
 import { basesTrabajoApi } from '../../api/basesTrabajo';
 import { presupuestosApi } from '../../api/presupuestos';
@@ -2747,7 +2748,7 @@ const GanttResourceEditorModal = ({
 
     return createPortal(
         <div className="fixed inset-0 flex items-center justify-center bg-slate-950/45 px-2 py-2 backdrop-blur-[2px]" style={{ zIndex: GANTT_RESOURCE_EDITOR_MODAL_Z_INDEX }}>
-            <div className="flex max-h-[96vh] w-[min(97vw,1380px)] flex-col overflow-hidden rounded-[0.85rem] border border-zinc-200 bg-white shadow-[0_28px_70px_rgba(15,23,42,0.26)]">
+            <div className="flex max-h-[96dvh] w-[min(97vw,1380px)] flex-col overflow-hidden rounded-[0.85rem] border border-zinc-200 bg-white shadow-[0_28px_70px_rgba(15,23,42,0.26)]">
                 <div className="grid items-center gap-2 border-b border-zinc-100 px-3 py-1.5 lg:grid-cols-[minmax(260px,1fr)_minmax(360px,1.25fr)_auto]">
                     <div className="min-w-0">
                         <p className="text-[8px] font-black uppercase tracking-[0.14em] text-[#F39200]">{isSubcontracted ? 'Duración contractual subcontratada' : 'Rendimientos operativos'}</p>
@@ -3397,7 +3398,7 @@ const GanttResourceEditorModal = ({
                     const totals = summarizeGanttSourceLines(resourceContributionModal.sourceLines || []);
                     return (
                         <div className="absolute inset-0 flex items-center justify-center bg-slate-950/25 px-3 py-3 backdrop-blur-[1px]" style={{ zIndex: 40 }}>
-                            <div className="flex max-h-[min(78vh,32rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[0.9rem] border border-zinc-200 bg-[#f7f7f5] shadow-[0_24px_60px_rgba(15,23,42,0.24)]">
+                            <div className="flex max-h-[min(78dvh,32rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[0.9rem] border border-zinc-200 bg-[#f7f7f5] shadow-[0_24px_60px_rgba(15,23,42,0.24)]">
                                 <div className="flex items-center justify-between gap-3 border-b border-zinc-100 bg-white px-4 py-2.5">
                                     <div className="min-w-0">
                                         <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#F39200]">Ajuste trazable de recurso explotado</p>
@@ -8808,6 +8809,7 @@ const CronogramaGantt = ({
     onPresentationSnapshotChange,
 }) => {
     const { user } = useContext(AuthContext) || {};
+    const adaptiveLayout = useAdaptiveLayout({ moduleKey: 'gantt' });
     const forceCompactOperationalPanel = true;
     const baseRows = useMemo(() => (Array.isArray(displayRows) ? displayRows : []), [displayRows]);
     const fallbackProjectStartDate = trabajo?.fecha_inicio || detail?.fecha_inicio || project?.fecha_inicio || null;
@@ -8839,7 +8841,10 @@ const CronogramaGantt = ({
     const [isTimeScaleLocked, setIsTimeScaleLocked] = useState(false);
     const [editingZoom, setEditingZoom] = useState(false);
     const [zoomMenuOpen, setZoomMenuOpen] = useState(false);
-    const focusMode = 'balanced';
+    const [focusMode, setFocusMode] = useState(() => (
+        typeof window !== 'undefined' && window.innerWidth < 1100 ? 'table' : 'balanced'
+    ));
+    const [touchEditEnabled, setTouchEditEnabled] = useState(false);
     const [configPanelOpen, setConfigPanelOpen] = useState(false);
     const visualPreferencesStorageKey = useMemo(
         () => resolveGanttVisualPreferencesStorageKey(user, project),
@@ -16520,6 +16525,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
     };
 
     const startBarInteraction = (event, row, type, segment = null, options = {}) => {
+        if (event.pointerType === 'touch' && !touchEditEnabled) return;
         const lineId = String(resolveRowLineId(row) || '');
         const currentDraft = drafts[lineId] || {};
         const isManualMilestone = isManualMilestoneRow(row, currentDraft);
@@ -18961,6 +18967,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             ref={ganttRootRef}
             tabIndex={-1}
             className="flex min-h-0 min-w-0 flex-col gap-3 overflow-visible"
+            data-gantt-view-mode={focusMode}
+            data-gantt-touch-edit={touchEditEnabled ? 'enabled' : 'protected'}
             onPointerDownCapture={() => {
                 ganttRootRef.current?.focus?.({ preventScroll: true });
             }}
@@ -18986,6 +18994,33 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 </React.Suspense>
             ) : null}
             <div className="flex min-w-0 flex-wrap items-center gap-2.5 overflow-visible">
+                <div className="flex h-11 items-center rounded-[0.9rem] border border-zinc-200 bg-white p-1" aria-label="Vista del Gantt">
+                    {[
+                        ['table', 'Tabla'],
+                        ['balanced', 'Dividida'],
+                        ['timeline', 'Gantt'],
+                    ].map(([value, label]) => (
+                        <button
+                            key={value}
+                            type="button"
+                            onClick={() => setFocusMode(value)}
+                            aria-pressed={focusMode === value}
+                            className={`h-9 rounded-[0.7rem] px-3 text-[9px] font-black uppercase tracking-[0.1em] ${focusMode === value ? 'bg-[#136191] text-white' : 'text-zinc-500 hover:bg-zinc-50'}`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+                {(adaptiveLayout.environment.coarse || adaptiveLayout.environment.touchPoints > 0) ? (
+                    <button
+                        type="button"
+                        onClick={() => setTouchEditEnabled((current) => !current)}
+                        aria-pressed={touchEditEnabled}
+                        className={`h-11 rounded-[0.9rem] border px-3 text-[9px] font-black uppercase tracking-[0.1em] ${touchEditEnabled ? 'border-[#F39200] bg-orange-50 text-[#B86B00]' : 'border-zinc-200 bg-white text-zinc-600'}`}
+                    >
+                        {touchEditEnabled ? 'Edición táctil activa' : 'Activar edición táctil'}
+                    </button>
+                ) : null}
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2.5">
                     <ControlRail className="h-[60px] min-w-[260px] flex-[0.84_1_16rem] px-2 py-1.5">
                         <ControlRailSection className="h-full min-w-0 flex-1 gap-2 pl-2 pr-1.5">
@@ -19950,8 +19985,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                     <div className="flex h-full min-h-0 min-w-0 gap-0 overflow-visible">
                 <div
                     data-gantt-left-panel="true"
-                    className="relative flex min-h-0 flex-col shrink-0 overflow-hidden rounded-[1.15rem] border border-[#ececec] bg-white shadow-[6px_6px_16px_rgba(225,225,225,0.72),-6px_-6px_16px_rgba(255,255,255,0.95)]"
-                    style={{ width: `${effectiveDataGridViewportWidth}px` }}
+                    className={`relative min-h-0 flex-col overflow-hidden rounded-[1.15rem] border border-[#ececec] bg-white shadow-[6px_6px_16px_rgba(225,225,225,0.72),-6px_-6px_16px_rgba(255,255,255,0.95)] ${focusMode === 'timeline' ? 'hidden' : 'flex'} ${focusMode === 'table' ? 'min-w-0 flex-1' : 'shrink-0'}`}
+                    style={{ width: focusMode === 'table' ? '100%' : `${effectiveDataGridViewportWidth}px` }}
                 >
                 <div
                     data-gantt-left-header-scrollbar-mask="true"
@@ -20866,7 +20901,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                     aria-orientation="vertical"
                     aria-label="Ajustar ancho entre grid y timeline"
                     onPointerDown={handleGridResizePointerDown}
-                    className="group relative z-[135] flex w-3 shrink-0 cursor-col-resize items-stretch justify-center bg-transparent"
+                    className={`${focusMode === 'balanced' ? 'flex' : 'hidden'} group relative z-[135] w-3 shrink-0 cursor-col-resize items-stretch justify-center bg-transparent`}
                 >
                     <div
                         data-gantt-grid-resizer-line="true"
@@ -20877,7 +20912,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         <div className="h-14 w-1 rounded-full bg-[#dde1e4] transition-colors duration-150 group-hover:bg-[#F39200]/55" />
                     </div>
                 </div>
-                <div data-gantt-timeline-panel="true" className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[1.15rem] border border-[#ececec] bg-white shadow-[6px_6px_16px_rgba(225,225,225,0.72),-6px_-6px_16px_rgba(255,255,255,0.95)]">
+                <div data-gantt-timeline-panel="true" className={`${focusMode === 'table' ? 'hidden' : 'flex'} relative min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[1.15rem] border border-[#ececec] bg-white shadow-[6px_6px_16px_rgba(225,225,225,0.72),-6px_-6px_16px_rgba(255,255,255,0.95)]`}>
                 <div
                     data-gantt-timeline-header-scrollbar-mask="true"
                     aria-hidden="true"
@@ -21137,12 +21172,12 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         .filter((path) => path.key === selectedDependencyKey)
                         .map((path) => (
                             <button
-                                key={`remove-${path.key}`}
+                                key={`edit-${path.key}`}
                                 type="button"
                                 onClick={(event) => {
                                     event.preventDefault();
                                     event.stopPropagation();
-                                    removeDependencyLink(path.sourceId, path.targetId).catch(() => {});
+                                    setSelectedDependencyKey(path.key);
                                 }}
                                 className="absolute z-[18] inline-flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#F39200] bg-white text-[#F39200] shadow-[0_8px_18px_rgba(243,146,0,0.18)] transition duration-150 hover:bg-[#F39200] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/30"
                                 style={{
@@ -21150,10 +21185,10 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                     top: `${Number(path.actionY ?? path.controlY ?? 0)}px`,
                                 }}
                                 data-dependency-key={path.key}
-                                title="Romper dependencia"
-                                aria-label="Romper dependencia"
+                                title="Editar dependencia seleccionada"
+                                aria-label="Editar dependencia seleccionada"
                             >
-                                <X className="h-4 w-4" />
+                                <Pencil className="h-4 w-4" />
                             </button>
                         )) : null}
 
@@ -21161,7 +21196,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         ? createPortal(
                             <div
                                 ref={dependencyEditorRef}
-                                className="fixed z-[240] max-h-[calc(100vh-3rem)] w-[320px] overflow-y-auto rounded-[1rem] border border-[#F39200]/30 bg-white p-3 shadow-[0_16px_36px_rgba(15,23,42,0.16)]"
+                                className="fixed z-[240] max-h-[calc(100dvh-2rem)] w-[min(440px,calc(100vw-2rem))] overflow-y-auto overflow-x-hidden rounded-[1rem] border border-[#F39200]/30 bg-white p-3 shadow-[0_16px_36px_rgba(15,23,42,0.16)]"
                                 style={selectedDependencyEditorStyle
                                     ? {
                                         left: `${selectedDependencyEditorStyle.left}px`,
@@ -21271,15 +21306,19 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                 <button
                                     type="button"
                                     onClick={() => removeDependencyLink(selectedDependencyPath.sourceId, selectedDependencyPath.targetId).catch(() => {})}
-                                    className="rounded-[0.8rem] border border-[#F39200]/35 bg-[#fff7ed] px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em] text-[#F39200] transition hover:border-[#F39200] hover:bg-[#F39200] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25"
+                                    aria-label="Romper dependencia"
+                                    className="inline-flex h-11 items-center gap-2 rounded-[0.8rem] border border-[#F39200]/35 bg-[#fff7ed] px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em] text-[#F39200] transition hover:border-[#F39200] hover:bg-[#F39200] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25"
                                 >
+                                    <Trash2 className="h-3.5 w-3.5" />
                                     Romper dependencia
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => saveDependencyDraft(selectedDependencyPath).catch(() => {})}
-                                    className="rounded-[0.8rem] border border-[#F39200] bg-[#F39200] px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em] text-white transition hover:bg-[#E94E1B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25"
+                                    aria-label="Guardar dependencia"
+                                    className="inline-flex h-11 items-center gap-2 rounded-[0.8rem] border border-[#F39200] bg-[#F39200] px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em] text-white transition hover:bg-[#E94E1B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25"
                                 >
+                                    <Check className="h-3.5 w-3.5" />
                                     Guardar dependencia
                                 </button>
                             </div>
@@ -21727,7 +21766,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         </span>
                                                     </div>
                                                     {configDraft.advanced_calendar?.enabled === true ? (
-                                                        <div className="gantt-dark-scrollbar mt-3 max-h-[42vh] space-y-2 overflow-y-auto pb-4 pr-1">
+                                                        <div className="gantt-dark-scrollbar mt-3 max-h-[42dvh] space-y-2 overflow-y-auto pb-4 pr-1">
                                                             {(configDraft.advanced_calendar?.weekly_pattern || []).map((dayConfig) => {
                                                                 const dayLabel = GANTT_ADVANCED_WEEKDAYS.find((item) => item.day === dayConfig.day)?.label || `D${dayConfig.day}`;
                                                                 return (
@@ -22240,7 +22279,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                     {splitDialog && splitDialogTargetSubbar
                         ? createPortal(
                             <div className="fixed inset-0 z-[260] flex items-center justify-center bg-slate-950/25 p-4" data-gantt-no-pan="true">
-                                <div className="flex max-h-[min(82vh,42rem)] w-full max-w-[38rem] flex-col overflow-hidden rounded-[1rem] border border-zinc-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.24)]">
+                                <div className="flex max-h-[min(82dvh,42rem)] w-full max-w-[38rem] flex-col overflow-hidden rounded-[1rem] border border-zinc-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.24)]">
                                     <div className="border-b border-zinc-100 px-4 py-3">
                                         <div className="text-[10px] font-black uppercase tracking-[0.16em] text-[#F39200]">División controlada</div>
                                         <div className="mt-1 text-[16px] font-black leading-tight text-zinc-900">
@@ -24086,7 +24125,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             </div>
             </div>
             {contextTaskId && selectedTaskRow ? (
-                <aside ref={contextPanelRef} className={`${ganttLayout.panelWidthClass} custom-scrollbar shrink-0 self-start overflow-auto rounded-[1rem] border border-zinc-200 bg-white p-4 shadow-[0_8px_26px_rgba(0,0,0,0.05)]`} style={{ maxHeight: `${ganttWorkspaceHeight}px` }}>
+                <aside ref={contextPanelRef} className={`${focusMode === 'balanced' ? 'block' : 'hidden'} ${ganttLayout.panelWidthClass} custom-scrollbar shrink-0 self-start overflow-auto rounded-[1rem] border border-zinc-200 bg-white p-4 shadow-[0_8px_26px_rgba(0,0,0,0.05)]`} style={{ maxHeight: `${ganttWorkspaceHeight}px` }}>
                     <div className="flex items-start justify-between gap-3 border-b border-zinc-100 pb-3">
                         <div className="min-w-0">
                             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#F39200]">Contexto tarea</p>
@@ -24737,7 +24776,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             ) : null}
             {compareDialog && compareDialog.mode !== 'approval' ? (
                 <div className="fixed inset-0 z-[220] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[1px]">
-                    <div className="flex max-h-[86vh] w-full max-w-4xl flex-col overflow-hidden rounded-[1.2rem] border border-zinc-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.22)]">
+                    <div className="flex max-h-[86dvh] w-full max-w-4xl flex-col overflow-hidden rounded-[1.2rem] border border-zinc-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.22)]">
                         <div className="flex items-start justify-between gap-4 border-b border-zinc-100 px-5 py-4">
                             <div>
                                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#F39200]">
@@ -24802,7 +24841,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                 </>
                             )}
                         </div>
-                        <div className="max-h-[48vh] overflow-auto px-5 py-4">
+                        <div className="max-h-[48dvh] overflow-auto px-5 py-4">
                             <div className="space-y-3">
                                 {compareDialog.mode === 'budget-conflict' && compareDialog.context ? (
                                     <div className="rounded-[0.95rem] border border-[#F39200]/20 bg-[#fff7ed] px-4 py-3">

@@ -62,7 +62,7 @@ const PreciosUnitarios = () => {
     ];
 
     return (
-        <div className="h-[calc(100vh-5rem)] flex flex-col bg-[#F8FAFC] overflow-hidden">
+        <div className="h-full min-h-0 flex flex-col bg-[#F8FAFC] overflow-hidden">
             <div className="flex-shrink-0 z-40 bg-white/80 backdrop-blur-md border-b border-zinc-200 px-8 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-zinc-100 rounded-xl transition-colors">

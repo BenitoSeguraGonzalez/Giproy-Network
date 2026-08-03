@@ -1,509 +1,187 @@
 import React, { Component, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Box,
-    CalendarRange,
-    ChartNoAxesCombined,
-    ClipboardCheck,
-    FileChartColumn,
-    GitMerge,
-    Layers3,
-    MonitorX,
-    PackageCheck,
-    PanelLeft,
-    PanelRight,
-    RefreshCw,
-    RotateCcw,
-    Search,
-    Settings,
-    Upload,
-    X,
+    Box, CalendarRange, ChevronDown, CircleAlert, ClipboardCheck, GitMerge,
+    Layers3, MonitorX, PackageCheck, PanelLeft, PanelRight, RefreshCw,
+    RotateCcw, Search, Settings, Upload, X,
 } from 'lucide-react';
 import { isMinimumDesktopDisplaySupported } from '../../utils/displayResolution';
 import { getErrorMessage } from '../../utils/errorMessage';
+import useAdaptiveLayout from '../../hooks/useAdaptiveLayout';
 
-const BIM_V2_PREFERENCES_KEY = 'giproy_bim_workspace_v2_preferences';
-
-const WORKSPACES = [
-    { id: 'viewer', label: 'Visor', icon: Box },
-    { id: 'coordination', label: 'Coordinación', icon: GitMerge },
-    { id: 'planning', label: 'Planificación 4D', icon: CalendarRange },
-    { id: 'production', label: 'Producción', icon: ChartNoAxesCombined },
-    { id: 'field', label: 'Campo', icon: ClipboardCheck },
-    { id: 'handover', label: 'Entrega', icon: PackageCheck },
-    { id: 'reports', label: 'Informes', icon: FileChartColumn },
+const PREFERENCES_KEY = 'giproy_bim_workspace_v3_preferences';
+const MODES = [
+    { id: 'planning-costs', label: 'Planificación y costes', shortLabel: '4D / 5D', icon: CalendarRange },
+    { id: 'model', label: 'Modelo', shortLabel: 'Modelo', icon: Box },
+    { id: 'coordination', label: 'Coordinación', shortLabel: 'Coordinar', icon: GitMerge },
+    { id: 'tracking', label: 'Seguimiento', shortLabel: 'Seguimiento', icon: ClipboardCheck },
+    { id: 'handover', label: 'Entrega', shortLabel: 'Entrega', icon: PackageCheck },
 ];
-
-const iconButtonClass =
-    'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] disabled:cursor-not-allowed disabled:opacity-40';
+const iconButtonClass = 'inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition-[color,border-color,transform] duration-150 active:scale-[.97] hover:border-orange-500 hover:text-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:cursor-not-allowed disabled:opacity-40';
 
 const readPreferences = (projectId) => {
     if (typeof window === 'undefined' || !projectId) return {};
-    try {
-        const stored = JSON.parse(window.localStorage.getItem(BIM_V2_PREFERENCES_KEY) || '{}');
-        return stored[projectId] || {};
-    } catch {
-        return {};
-    }
+    try { return JSON.parse(window.localStorage.getItem(PREFERENCES_KEY) || '{}')[projectId] || {}; } catch { return {}; }
 };
-
 const writePreferences = (projectId, preferences) => {
     if (typeof window === 'undefined' || !projectId) return;
     try {
-        const stored = JSON.parse(window.localStorage.getItem(BIM_V2_PREFERENCES_KEY) || '{}');
-        stored[projectId] = preferences;
-        window.localStorage.setItem(BIM_V2_PREFERENCES_KEY, JSON.stringify(stored));
-    } catch {
-        // Visual preferences must never block the BIM workspace.
-    }
+        const current = JSON.parse(window.localStorage.getItem(PREFERENCES_KEY) || '{}');
+        window.localStorage.setItem(PREFERENCES_KEY, JSON.stringify({ ...current, [projectId]: preferences }));
+    } catch { /* Preferences never block project work. */ }
 };
-
 const useSupportedDesktop = () => {
-    const getSupported = () => isMinimumDesktopDisplaySupported();
-    const [supported, setSupported] = useState(getSupported);
-
+    const [supported, setSupported] = useState(() => isMinimumDesktopDisplaySupported());
     useEffect(() => {
-        const update = () => setSupported(getSupported());
+        const update = () => setSupported(isMinimumDesktopDisplaySupported());
         window.addEventListener('resize', update);
         return () => window.removeEventListener('resize', update);
     }, []);
-
     return supported;
 };
+const useSafariNotice = () => useMemo(() => {
+    if (typeof navigator === 'undefined') return false;
+    const agent = navigator.userAgent;
+    return /Safari/i.test(agent) && !/Chrome|Chromium|CriOS|Edg|OPR/i.test(agent);
+}, []);
 
 const ContextValue = ({ label, value }) => (
     <div className="min-w-0">
-        <span className="block text-[10px] font-semibold uppercase text-zinc-400">{label}</span>
-        <span className="block truncate text-xs font-semibold text-zinc-800" title={value || undefined}>
-            {value || 'Sin asignar'}
-        </span>
+        <span className="block text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{label}</span>
+        <span className="block truncate text-xs font-semibold text-zinc-900" title={value || undefined}>{value || 'Sin asignar'}</span>
     </div>
 );
-
 class BimRegionBoundary extends Component {
-    constructor(props) {
-        super(props);
-        this.state = { failed: false };
-    }
-
-    static getDerivedStateFromError() {
-        return { failed: true };
-    }
-
+    state = { failed: false };
+    static getDerivedStateFromError() { return { failed: true }; }
     componentDidUpdate(previousProps) {
-        if (previousProps.resetKey !== this.props.resetKey && this.state.failed) {
-            this.setState({ failed: false });
-        }
+        if (previousProps.resetKey !== this.props.resetKey && this.state.failed) this.setState({ failed: false });
     }
-
     render() {
-        if (this.state.failed) {
-            return (
-                <div className="grid h-full min-h-40 place-items-center border border-rose-200 bg-rose-50 p-5 text-center" role="alert">
-                    <div>
-                        <p className="text-sm font-semibold text-rose-800">Esta herramienta no pudo cargarse.</p>
-                        <p className="mt-1 text-xs text-rose-700">El resto del workspace BIM continúa disponible.</p>
-                    </div>
-                </div>
-            );
-        }
-        return this.props.children;
+        if (!this.state.failed) return this.props.children;
+        return <div className="grid h-full min-h-40 place-items-center border border-rose-200 bg-rose-50 p-5 text-center" role="alert"><div><p className="text-sm font-semibold text-rose-900">Esta herramienta no pudo cargarse.</p><p className="mt-1 text-xs text-rose-800">El resto del espacio BIM continúa disponible.</p></div></div>;
     }
 }
 
 const BimWorkspaceV2 = ({
-    projectId,
-    companyLabel,
-    projectLabel,
-    modelLabel,
-    versionLabel,
-    viewerMode,
-    loading,
-    canAdminister,
-    explorer,
-    viewer,
-    inspector,
-    workspaceTools,
-    bottomTools,
-    adminTools,
-    reports,
-    ready,
-    error,
-    searchItems = [],
-    onChangeViewerMode,
-    onResetContext,
-    onRefresh,
+    projectId, companyLabel, projectLabel, modelLabel, versionLabel, viewerMode, loading,
+    canAdminister, explorer, viewer, inspector, workspaceTools, bottomTools, adminTools,
+    ready, error, warnings = [], searchItems = [], omniClassEnabled = true,
+    onChangeViewerMode, onResetContext, onRefresh, onSearch,
 }) => {
-    const errorMessage = error ? getErrorMessage(error, 'No se pudo cargar el workspace BIM.') : '';
-    const initialPreferences = useMemo(() => readPreferences(projectId), [projectId]);
-    const [activeWorkspace, setActiveWorkspace] = useState(initialPreferences.activeWorkspace || 'viewer');
-    const [explorerVisible, setExplorerVisible] = useState(initialPreferences.explorerVisible !== false);
-    const [inspectorVisible, setInspectorVisible] = useState(initialPreferences.inspectorVisible !== false);
-    const [activeToolByWorkspace, setActiveToolByWorkspace] = useState(initialPreferences.activeToolByWorkspace || {});
-    const [bottomTool, setBottomTool] = useState(initialPreferences.bottomTool || 'planning-4d');
-    const [bottomCollapsed, setBottomCollapsed] = useState(initialPreferences.bottomCollapsed === true);
-    const [reportsViewerVisible, setReportsViewerVisible] = useState(false);
-    const [leftWidth, setLeftWidth] = useState(initialPreferences.leftWidth || 220);
-    const [rightWidth, setRightWidth] = useState(initialPreferences.rightWidth || 300);
-    const [bottomHeight, setBottomHeight] = useState(Math.max(300, initialPreferences.bottomHeight || 320));
-    const [resizeSession, setResizeSession] = useState(null);
+    const initial = useMemo(() => readPreferences(projectId), [projectId]);
+    const [activeMode, setActiveMode] = useState(initial.activeMode || 'planning-costs');
+    const [activeToolByMode, setActiveToolByMode] = useState(initial.activeToolByMode || {});
+    const [sidePanel, setSidePanel] = useState(initial.sidePanel || 'context');
+    const [bottomCollapsed, setBottomCollapsed] = useState(initial.bottomCollapsed === true);
+    const [bottomHeight, setBottomHeight] = useState(Math.min(260, Math.max(220, initial.bottomHeight || 240)));
+    const [adminOpen, setAdminOpen] = useState(false);
+    const [activeAdminTool, setActiveAdminTool] = useState(initial.activeAdminTool || 'imports');
     const [searchTerm, setSearchTerm] = useState('');
     const [searchOpen, setSearchOpen] = useState(false);
-    const searchInputRef = useRef(null);
-    const supportedDesktop = useSupportedDesktop();
+    const [remoteMatches, setRemoteMatches] = useState([]);
+    const [searching, setSearching] = useState(false);
+    const [resizeStart, setResizeStart] = useState(null);
+    const searchRef = useRef(null);
+    const onSearchRef = useRef(onSearch);
+    const legacySupported = useSupportedDesktop();
+    const adaptive = useAdaptiveLayout({ moduleKey: 'bim' });
+    const restricted = ['constrained', 'tablet-portrait'].includes(adaptive.profile);
+    const supported = adaptive.enabled ? !restricted : legacySupported;
+    const safariNotice = useSafariNotice();
+    useEffect(() => { onSearchRef.current = onSearch; }, [onSearch]);
 
+    useEffect(() => writePreferences(projectId, { activeMode, activeToolByMode, sidePanel, bottomCollapsed, bottomHeight, activeAdminTool }), [activeAdminTool, activeMode, activeToolByMode, bottomCollapsed, bottomHeight, projectId, sidePanel]);
     useEffect(() => {
-        writePreferences(projectId, {
-            activeWorkspace,
-            explorerVisible,
-            inspectorVisible,
-            activeToolByWorkspace,
-            bottomTool,
-            bottomCollapsed,
-            leftWidth,
-            rightWidth,
-            bottomHeight,
-        });
-    }, [activeToolByWorkspace, activeWorkspace, bottomCollapsed, bottomHeight, bottomTool, explorerVisible, inspectorVisible, leftWidth, projectId, rightWidth]);
-
+        if (!resizeStart) return undefined;
+        const move = (event) => setBottomHeight(Math.min(260, Math.max(220, resizeStart.height - event.clientY + resizeStart.y)));
+        const up = () => setResizeStart(null);
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up, { once: true });
+        return () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+    }, [resizeStart]);
     useEffect(() => {
-        if (!resizeSession) return undefined;
-        const handleMove = (event) => {
-            if (resizeSession.type === 'left') {
-                setLeftWidth(Math.max(220, Math.min(360, resizeSession.value + event.clientX - resizeSession.pointer)));
-            } else if (resizeSession.type === 'right') {
-                setRightWidth(Math.max(300, Math.min(480, resizeSession.value - event.clientX + resizeSession.pointer)));
-            } else {
-                setBottomHeight(Math.max(260, Math.min(520, resizeSession.value - event.clientY + resizeSession.pointer)));
-            }
+        const keydown = (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); searchRef.current?.focus(); setSearchOpen(true); }
+            if (event.altKey && /^[1-5]$/.test(event.key)) { event.preventDefault(); setActiveMode(MODES[Number(event.key) - 1].id); }
+            if (event.key === 'Escape') { setSearchOpen(false); setAdminOpen(false); }
         };
-        const handleUp = () => setResizeSession(null);
-        window.addEventListener('pointermove', handleMove);
-        window.addEventListener('pointerup', handleUp, { once: true });
-        return () => {
-            window.removeEventListener('pointermove', handleMove);
-            window.removeEventListener('pointerup', handleUp);
-        };
-    }, [resizeSession]);
-
-    useEffect(() => {
-        const handleKeyboard = (event) => {
-            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-                event.preventDefault();
-                searchInputRef.current?.focus();
-                setSearchOpen(true);
-                return;
-            }
-            if (event.altKey && /^[1-7]$/.test(event.key)) {
-                event.preventDefault();
-                setActiveWorkspace(WORKSPACES[Number(event.key) - 1].id);
-                return;
-            }
-            if (event.key === 'Escape') setSearchOpen(false);
-        };
-        window.addEventListener('keydown', handleKeyboard);
-        return () => window.removeEventListener('keydown', handleKeyboard);
+        window.addEventListener('keydown', keydown);
+        return () => window.removeEventListener('keydown', keydown);
     }, []);
+    useEffect(() => {
+        const query = searchTerm.trim();
+        if (!onSearchRef.current || query.length < 2) { setRemoteMatches([]); setSearching(false); return undefined; }
+        let cancelled = false;
+        setSearching(true);
+        const timeoutId = window.setTimeout(() => {
+            Promise.resolve(onSearchRef.current(query))
+                .then((items) => { if (!cancelled) setRemoteMatches(items || []); })
+                .catch(() => { if (!cancelled) setRemoteMatches([]); })
+                .finally(() => { if (!cancelled) setSearching(false); });
+        }, 180);
+        return () => { cancelled = true; window.clearTimeout(timeoutId); };
+    }, [searchTerm]);
 
-    if (!supportedDesktop) {
-        return (
-            <section className="grid h-full min-h-0 place-items-center overflow-hidden border border-zinc-200 bg-zinc-100" data-bim-unsupported-resolution>
-                <div className="max-w-md text-center">
-                    <MonitorX className="mx-auto h-10 w-10 text-zinc-400" aria-hidden="true" />
-                    <h2 className="mt-4 text-base font-semibold text-zinc-900">Resolución no compatible</h2>
-                    <p className="mt-2 text-sm leading-6 text-zinc-600">
-                        El workspace BIM requiere una pantalla mínima de 1920 x 1080 para operar con seguridad.
-                    </p>
-                </div>
-            </section>
-        );
-    }
+    if (!supported) return (
+        <section className="grid h-full min-h-0 place-items-center overflow-hidden border border-zinc-200 bg-zinc-100" data-bim-unsupported-resolution>
+            <div className="max-w-lg px-6 text-center"><MonitorX className="mx-auto size-10 text-zinc-500" aria-hidden="true" /><h2 className="mt-4 text-base font-semibold text-zinc-950">Espacio de trabajo insuficiente</h2><p className="mt-2 text-sm leading-6 text-zinc-700">BIM requiere una pantalla física mínima de 1920 × 1080. Gira la tablet a horizontal y cierra las barras que reduzcan el área útil.</p></div>
+        </section>
+    );
 
-    const isAdmin = activeWorkspace === 'admin';
-    const isReports = activeWorkspace === 'reports';
-    const showExplorer = ready && explorerVisible && !isAdmin && !isReports;
-    const availableTools = workspaceTools?.[activeWorkspace] || [];
-    const selectedToolId = activeToolByWorkspace[activeWorkspace] || availableTools[0]?.id;
-    const selectedTool = availableTools.find((tool) => tool.id === selectedToolId) || availableTools[0];
-    const selectedBottomTool = (bottomTools || []).find((tool) => tool.id === bottomTool) || bottomTools?.[0];
-    const selectedAdminToolId = activeToolByWorkspace.admin || adminTools?.[0]?.id;
-    const selectedAdminTool = (adminTools || []).find((tool) => tool.id === selectedAdminToolId) || adminTools?.[0];
-    const showInspector = ready && inspectorVisible && !isAdmin && !isReports && Boolean(selectedTool || inspector);
-    const showBottomDrawer = ready && ['planning', 'production'].includes(activeWorkspace) && Boolean(selectedBottomTool);
-    const gridTemplate = `${showExplorer ? `${leftWidth}px 4px ` : ''}minmax(0, 1fr)${showInspector ? ` 4px ${rightWidth}px` : ''}`;
+    const tools = workspaceTools?.[activeMode] || [];
+    const selectedToolId = activeToolByMode[activeMode] || tools[0]?.id;
+    const selectedTool = tools.find((tool) => tool.id === selectedToolId) || tools[0];
+    const selectedAdmin = (adminTools || []).find((tool) => tool.id === activeAdminTool) || adminTools?.[0];
+    const planningMode = activeMode === 'planning-costs';
+    const selectedBottom = bottomTools?.[0];
+    const explorerShown = ready && sidePanel === 'explorer' && activeMode === 'model';
+    const contextShown = ready && sidePanel === 'context' && Boolean(selectedTool || inspector);
     const normalizedSearch = searchTerm.trim().toLocaleLowerCase('es');
-    const matchingSearchItems = normalizedSearch
-        ? searchItems.filter((item) => `${item.label} ${item.meta || ''}`.toLocaleLowerCase('es').includes(normalizedSearch)).slice(0, 8)
-        : [];
-
-    const selectTool = (workspaceId, toolId) => {
-        setActiveToolByWorkspace((current) => ({ ...current, [workspaceId]: toolId }));
-    };
-
-    const resetLayout = () => {
-        setLeftWidth(220);
-        setRightWidth(300);
-        setBottomHeight(320);
-        setExplorerVisible(true);
-        setInspectorVisible(true);
-        setBottomCollapsed(false);
-    };
-
-    const openSearchItem = (item) => {
-        item.onSelect?.();
-        if (item.workspace) setActiveWorkspace(item.workspace);
-        setSearchTerm('');
-        setSearchOpen(false);
-    };
+    const matches = onSearch ? remoteMatches : (normalizedSearch ? searchItems.filter((item) => `${item.label} ${item.meta || ''}`.toLocaleLowerCase('es').includes(normalizedSearch)).slice(0, 8) : []);
+    const errorMessage = error ? getErrorMessage(error, 'No se pudo cargar el espacio BIM.') : '';
+    const selectMode = (id) => { setActiveMode(id); setAdminOpen(false); setSidePanel(id === 'model' ? 'explorer' : 'context'); };
+    const selectTool = (id) => setActiveToolByMode((current) => ({ ...current, [activeMode]: id }));
+    const openSearchItem = (item) => { item.onSelect?.(); if (item.workspace) selectMode(item.workspace); setSearchTerm(''); setSearchOpen(false); };
 
     return (
-        <section
-            className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border border-zinc-200 bg-zinc-100 text-zinc-800"
-            data-bim-workspace-v2
-            data-bim-active-workspace={activeWorkspace}
-        >
-            <header className="shrink-0 border-b border-zinc-200 bg-white">
-                <div className="flex h-12 min-w-0 items-center gap-4 px-3">
-                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#F39200] text-white">
-                        <Box className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    <div className="grid min-w-0 flex-1 grid-cols-4 gap-4">
-                        <ContextValue label="Empresa" value={companyLabel} />
-                        <ContextValue label="Proyecto" value={projectLabel} />
-                        <ContextValue label="Modelo" value={modelLabel} />
-                        <ContextValue label="Versión" value={versionLabel} />
+        <section className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden border border-zinc-300 bg-zinc-100 text-zinc-800" data-bim-workspace-v2 data-bim-active-workspace={activeMode} data-bim-adaptive-profile={adaptive.enabled ? adaptive.profile : 'legacy'}>
+            <header className="z-20 shrink-0 border-b border-zinc-300 bg-white" data-bim-primary-header>
+                <div className="flex h-11 min-w-0 items-center gap-3 px-3">
+                    <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-orange-600 text-white"><Box className="size-4" aria-hidden="true" /></span>
+                    <div className="grid min-w-0 flex-1 grid-cols-4 gap-3"><ContextValue label="Empresa" value={companyLabel} /><ContextValue label="Proyecto" value={projectLabel} /><ContextValue label="Modelo" value={modelLabel} /><ContextValue label="Revisión" value={versionLabel} /></div>
+                    <div className="relative w-[clamp(13rem,18vw,22rem)] shrink-0">
+                        <label className="flex h-9 items-center gap-2 rounded-md border border-zinc-300 bg-zinc-50 px-2.5 focus-within:border-orange-600 focus-within:ring-1 focus-within:ring-orange-600"><Search className="size-3.5 text-zinc-500" aria-hidden="true" /><span className="sr-only">Buscar en BIM</span><input ref={searchRef} type="search" value={searchTerm} onFocus={() => setSearchOpen(true)} onChange={(event) => { setSearchTerm(event.target.value); setSearchOpen(true); }} placeholder="GUID, actividad, coste o modelo" className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-zinc-500" /><kbd className="text-[9px] font-semibold text-zinc-500">Ctrl K</kbd></label>
+                        {searchOpen && normalizedSearch ? <div className="absolute right-0 top-10 z-50 w-[min(28rem,70vw)] overflow-hidden rounded-md border border-zinc-300 bg-white shadow-xl" role="listbox" aria-label="Resultados BIM" aria-busy={searching}>{searching ? <p className="px-3 py-4 text-xs text-zinc-600">Buscando en el proyecto autorizado…</p> : matches.length ? matches.map((item) => <button key={item.id} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => openSearchItem(item)} className="flex min-h-11 w-full items-center justify-between gap-3 border-b border-zinc-100 px-3 text-left last:border-0 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-600" role="option"><span className="min-w-0"><span className="block truncate text-xs font-semibold text-zinc-950">{item.label}</span><span className="block truncate text-[10px] text-zinc-600">{item.meta}</span></span><span className="shrink-0 text-[10px] font-semibold uppercase text-zinc-500">{item.type}</span></button>) : <p className="px-3 py-4 text-xs text-zinc-600">Sin coincidencias autorizadas en este proyecto.</p>}</div> : null}
                     </div>
-                    <div className="relative w-64 shrink-0">
-                        <label className="flex h-9 items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50 px-2.5 focus-within:border-[#F39200]">
-                            <Search className="h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
-                            <span className="sr-only">Buscar en BIM</span>
-                            <input
-                                ref={searchInputRef}
-                                type="search"
-                                value={searchTerm}
-                                onFocus={() => setSearchOpen(true)}
-                                onChange={(event) => {
-                                    setSearchTerm(event.target.value);
-                                    setSearchOpen(true);
-                                }}
-                                placeholder="Elemento, GUID, actividad o modelo"
-                                className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-zinc-400"
-                            />
-                            <kbd className="text-[9px] font-semibold text-zinc-400">Ctrl K</kbd>
-                        </label>
-                        {searchOpen && normalizedSearch ? (
-                            <div className="absolute right-0 top-10 z-50 w-96 overflow-hidden rounded-md border border-zinc-200 bg-white shadow-xl" role="listbox" aria-label="Resultados BIM">
-                                {matchingSearchItems.length ? matchingSearchItems.map((item) => (
-                                    <button
-                                        key={item.id}
-                                        type="button"
-                                        onMouseDown={(event) => event.preventDefault()}
-                                        onClick={() => openSearchItem(item)}
-                                        className="flex min-h-11 w-full items-center justify-between gap-3 border-b border-zinc-100 px-3 text-left last:border-b-0 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#F39200]"
-                                        role="option"
-                                    >
-                                        <span className="min-w-0">
-                                            <span className="block truncate text-xs font-semibold text-zinc-900">{item.label}</span>
-                                            <span className="block truncate text-[10px] text-zinc-500">{item.meta}</span>
-                                        </span>
-                                        <span className="shrink-0 text-[10px] font-semibold uppercase text-zinc-400">{item.type}</span>
-                                    </button>
-                                )) : <p className="px-3 py-4 text-xs text-zinc-500">No hay coincidencias en el proyecto BIM.</p>}
-                            </div>
-                        ) : null}
-                    </div>
-                    {canAdminister ? (
-                        <button type="button" onClick={() => { setActiveWorkspace('admin'); selectTool('admin', 'imports'); }} className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-[#F39200] px-3 text-xs font-semibold text-white transition-colors hover:bg-[#d87f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-200" title="Cargar y revisar modelos IFC">
-                            <Upload className="h-4 w-4" aria-hidden="true" />
-                            Cargar modelo IFC
-                        </button>
-                    ) : null}
-                    {canAdminister ? (
-                        <button
-                            type="button"
-                            onClick={() => setActiveWorkspace((current) => (current === 'admin' ? 'viewer' : 'admin'))}
-                            className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-md border bg-white px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-200 ${isAdmin ? 'border-[#F39200] text-[#F39200]' : 'border-zinc-200 text-zinc-600 hover:border-[#F39200] hover:text-[#F39200]'}`}
-                            title="Administración BIM"
-                            aria-label="Abrir administración BIM"
-                            aria-pressed={isAdmin}
-                        >
-                            {isAdmin ? <X className="h-4 w-4" aria-hidden="true" /> : <Settings className="h-4 w-4" aria-hidden="true" />}
-                            {isAdmin ? 'Cerrar administración' : 'Administrar BIM'}
-                        </button>
-                    ) : null}
+                    {canAdminister ? <button type="button" onClick={() => { setAdminOpen(true); setActiveAdminTool('imports'); }} className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-orange-600 px-3 text-xs font-semibold text-white transition-[background-color,transform] duration-150 active:scale-[.97] hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"><Upload className="size-4" aria-hidden="true" />Cargar IFC</button> : null}
                 </div>
-
-                <div className="flex h-11 min-w-0 items-center justify-between gap-3 border-t border-zinc-100 px-3">
-                    <nav className="flex h-full min-w-0 items-stretch" aria-label="Espacios de trabajo BIM">
-                        {WORKSPACES.map(({ id, label, icon: Icon }) => (
-                            <button
-                                key={id}
-                                type="button"
-                                onClick={() => setActiveWorkspace(id)}
-                                className={`relative inline-flex h-full items-center gap-2 px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#F39200] ${
-                                    activeWorkspace === id ? 'text-zinc-950' : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
-                                }`}
-                                aria-current={activeWorkspace === id ? 'page' : undefined}
-                            >
-                                <Icon className={`h-4 w-4 ${activeWorkspace === id ? 'text-[#F39200]' : ''}`} aria-hidden="true" />
-                                {label}
-                                {activeWorkspace === id ? <span className="absolute inset-x-2 bottom-0 h-0.5 bg-[#F39200]" /> : null}
-                            </button>
-                        ))}
-                    </nav>
-
-                    <div className={`flex shrink-0 items-center gap-1 ${isAdmin ? 'invisible' : ''}`}>
-                        <div className="flex h-9 items-center rounded-md border border-zinc-200 bg-zinc-50 p-0.5" role="group" aria-label="Modo del visor">
-                            <button
-                                type="button"
-                                onClick={() => onChangeViewerMode('fragments')}
-                                className={`h-8 rounded px-2 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] ${viewerMode === 'fragments' ? 'bg-white text-[#F39200] shadow-sm' : 'text-zinc-500'}`}
-                                aria-pressed={viewerMode === 'fragments'}
-                            >
-                                3D
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => onChangeViewerMode('plan')}
-                                className={`h-8 rounded px-2 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] ${viewerMode === 'plan' ? 'bg-white text-[#F39200] shadow-sm' : 'text-zinc-500'}`}
-                                aria-pressed={viewerMode === 'plan'}
-                            >
-                                2D
-                            </button>
-                            <button type="button" disabled className="h-8 rounded px-2 text-xs font-semibold text-zinc-300" title="Disponible cuando exista un plano mapeado">
-                                Dividida
-                            </button>
-                        </div>
-                        <button type="button" onClick={() => setExplorerVisible((value) => !value)} disabled={isReports} className={iconButtonClass} title="Mostrar u ocultar explorador" aria-label="Mostrar u ocultar explorador" aria-pressed={explorerVisible}>
-                            <PanelLeft className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                        <button type="button" onClick={() => setInspectorVisible((value) => !value)} className={iconButtonClass} title="Mostrar u ocultar panel contextual" aria-label="Mostrar u ocultar panel contextual" aria-pressed={inspectorVisible}>
-                            <PanelRight className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                        <button type="button" onClick={onResetContext} className={iconButtonClass} title="Restablecer contexto" aria-label="Restablecer contexto">
-                            <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                        <button type="button" onClick={resetLayout} className={iconButtonClass} title="Restablecer layout" aria-label="Restablecer layout">
-                            <Layers3 className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                        <button type="button" onClick={onRefresh} disabled={loading} className={iconButtonClass} title="Actualizar BIM" aria-label="Actualizar BIM">
-                            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin motion-reduce:animate-none' : ''}`} aria-hidden="true" />
-                        </button>
+                <div className="flex h-10 min-w-0 items-stretch justify-between border-t border-zinc-100 px-2">
+                    <nav className="flex min-w-0 items-stretch" aria-label="Flujos BIM">{MODES.map(({ id, label, shortLabel, icon: Icon }, index) => <button key={id} type="button" onClick={() => selectMode(id)} className={`relative inline-flex min-w-0 items-center gap-2 px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-600 ${activeMode === id && !adminOpen ? 'text-zinc-950' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950'}`} aria-current={activeMode === id && !adminOpen ? 'page' : undefined} title={`${label} · Alt+${index + 1}`}><Icon className={`size-4 shrink-0 ${activeMode === id && !adminOpen ? 'text-orange-600' : ''}`} aria-hidden="true" /><span className="hidden xl:inline">{label}</span><span className="xl:hidden">{shortLabel}</span>{activeMode === id && !adminOpen ? <span className="absolute inset-x-2 bottom-0 h-0.5 bg-orange-600" /> : null}</button>)}</nav>
+                    <div className="flex shrink-0 items-center gap-1">
+                        {warnings.length ? <span className="inline-flex size-8 items-center justify-center text-amber-700" title={`Carga parcial: no se pudo recuperar ${warnings.join(', ')}. El resto del workspace sigue operativo.`} aria-label={`Carga parcial: ${warnings.join(', ')}`}><CircleAlert className="size-4" aria-hidden="true" /></span> : null}
+                        <div className="flex h-8 items-center rounded-md border border-zinc-300 bg-zinc-50 p-0.5" role="group" aria-label="Vista del modelo"><button type="button" onClick={() => onChangeViewerMode('fragments')} className={`h-7 rounded px-2 text-xs font-semibold ${viewerMode === 'fragments' ? 'bg-white text-orange-700 shadow-sm' : 'text-zinc-600'}`} aria-pressed={viewerMode === 'fragments'}>3D</button><button type="button" onClick={() => onChangeViewerMode('plan')} className={`h-7 rounded px-2 text-xs font-semibold ${viewerMode === 'plan' ? 'bg-white text-orange-700 shadow-sm' : 'text-zinc-600'}`} aria-pressed={viewerMode === 'plan'}>2D</button></div>
+                        <button type="button" onClick={() => setSidePanel(sidePanel === 'explorer' ? 'none' : 'explorer')} disabled={activeMode !== 'model'} className={iconButtonClass} title="Explorador del modelo" aria-label="Explorador del modelo" aria-pressed={explorerShown}><PanelLeft className="size-4" aria-hidden="true" /></button>
+                        <button type="button" onClick={() => setSidePanel(sidePanel === 'context' ? 'none' : 'context')} className={iconButtonClass} title="Panel contextual" aria-label="Panel contextual" aria-pressed={contextShown}><PanelRight className="size-4" aria-hidden="true" /></button>
+                        <button type="button" onClick={onResetContext} className={iconButtonClass} title="Restablecer selección" aria-label="Restablecer selección"><RotateCcw className="size-4" aria-hidden="true" /></button>
+                        <button type="button" onClick={onRefresh} disabled={loading} className={iconButtonClass} title="Actualizar BIM" aria-label="Actualizar BIM"><RefreshCw className={`size-4 ${loading ? 'animate-spin motion-reduce:animate-none' : ''}`} aria-hidden="true" /></button>
+                        {canAdminister ? <button type="button" onClick={() => setAdminOpen(true)} className={iconButtonClass} title="Administrar BIM" aria-label="Administrar BIM"><Settings className="size-4" aria-hidden="true" /></button> : null}
                     </div>
                 </div>
             </header>
 
-            {isAdmin ? (
-                <div className="flex h-10 shrink-0 items-center gap-1 border-b border-zinc-200 bg-white px-3" role="tablist" aria-label="Administración BIM">
-                    <span className="mr-3 text-xs font-semibold text-zinc-900">Modelos y configuración BIM</span>
-                    {(adminTools || []).map((tool) => (
-                        <button
-                            key={tool.id}
-                            type="button"
-                            onClick={() => selectTool('admin', tool.id)}
-                            className={`h-8 rounded-md px-3 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] ${selectedAdminTool?.id === tool.id ? 'bg-zinc-900 text-white' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'}`}
-                            role="tab"
-                            aria-selected={selectedAdminTool?.id === tool.id}
-                        >
-                            {tool.label}
-                        </button>
-                    ))}
-                </div>
-            ) : availableTools.length > 0 && !isReports ? (
-                <div className="flex h-10 shrink-0 items-center gap-1 overflow-x-auto border-b border-zinc-200 bg-white px-3" role="tablist" aria-label={`Herramientas de ${activeWorkspace}`}>
-                    {availableTools.map((tool) => (
-                        <button
-                            key={tool.id}
-                            type="button"
-                            onClick={() => selectTool(activeWorkspace, tool.id)}
-                            className={`h-8 shrink-0 rounded-md px-3 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] ${selectedTool?.id === tool.id ? 'bg-zinc-900 text-white' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'}`}
-                            role="tab"
-                            aria-selected={selectedTool?.id === tool.id}
-                        >
-                            {tool.label}
-                        </button>
-                    ))}
-                </div>
-            ) : null}
+            {!omniClassEnabled ? <div className="flex min-h-9 shrink-0 items-center gap-2 border-b border-amber-300 bg-amber-50 px-3 text-xs text-amber-950" role="status" data-bim-omniclass-warning><CircleAlert className="size-4 shrink-0" aria-hidden="true" /><strong>Coordinación OmniClass desactivada.</strong><span>Los vínculos 4D/5D conservan su origen, pero la estructura común puede divergir.</span></div> : null}
+            {safariNotice ? <div className="flex min-h-8 shrink-0 items-center gap-2 border-b border-sky-200 bg-sky-50 px-3 text-[11px] text-sky-950" role="status"><CircleAlert className="size-3.5" aria-hidden="true" /><span>Safari puede mostrar divergencias en BIM. Para operación coordinada recomendamos Chrome, Edge u otro navegador Chromium disponible en macOS/iPadOS.</span></div> : null}
 
-            {isAdmin ? (
-                <main className="min-h-0 min-w-0 flex-1 overflow-auto p-2 custom-scrollbar" data-bim-admin-region>
-                    {selectedAdminTool?.content}
-                </main>
-            ) : isReports ? (
-                <main className="relative grid min-h-0 min-w-0 flex-1 gap-2 overflow-hidden p-2" style={{ gridTemplateColumns: reportsViewerVisible ? 'minmax(0, 1fr) 34%' : 'minmax(0, 1fr)' }} data-bim-reports-region>
-                    <BimRegionBoundary resetKey="reports"><div className="min-h-0 min-w-0 overflow-auto custom-scrollbar">{reports}</div></BimRegionBoundary>
-                    {reportsViewerVisible ? <BimRegionBoundary resetKey="reports-viewer"><div className="min-h-0 min-w-0 overflow-hidden">{viewer}</div></BimRegionBoundary> : null}
-                    <button
-                        type="button"
-                        onClick={() => setReportsViewerVisible((current) => !current)}
-                        className="absolute bottom-4 right-4 inline-flex h-9 items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-xs font-semibold text-zinc-700 shadow-sm hover:border-[#F39200] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]"
-                    >
-                        {reportsViewerVisible ? 'Ocultar vista 3D' : 'Vista 3D'}
-                    </button>
-                </main>
-            ) : (
-                <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-                    <div
-                        className="grid min-h-0 min-w-0 flex-1 gap-2 overflow-hidden p-2"
-                        style={{ gridTemplateColumns: gridTemplate }}
-                        data-bim-shell-layout
-                    >
-                        {showExplorer ? <BimRegionBoundary resetKey={`explorer-${projectId}`}><aside className="min-h-0 min-w-0 overflow-hidden">{explorer}</aside></BimRegionBoundary> : null}
-                        {showExplorer ? <div className="cursor-col-resize bg-zinc-200 hover:bg-[#F39200]" onPointerDown={(event) => setResizeSession({ type: 'left', pointer: event.clientX, value: leftWidth })} role="separator" aria-label="Redimensionar explorador" aria-orientation="vertical" /> : null}
-                        <main className="flex min-h-0 min-w-0 flex-col overflow-hidden" data-bim-viewer-region>
-                            {!ready ? (
-                                <div className="grid h-full min-h-0 place-items-center border border-zinc-200 bg-white p-8" data-bim-empty-state>
-                                    <div className="w-full max-w-2xl text-center">
-                                        <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-lg bg-orange-50 text-[#F39200]">
-                                            {loading ? <RefreshCw className="h-6 w-6 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Box className="h-6 w-6" aria-hidden="true" />}
-                                        </span>
-                                        <h2 className="mt-4 text-base font-semibold text-zinc-900">{loading ? 'Preparando el modelo BIM' : 'Carga el primer modelo BIM del proyecto'}</h2>
-                                        <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-zinc-600">{errorMessage || 'Selecciona un archivo IFC para procesar su geometría, propiedades y estructura espacial en este proyecto.'}</p>
-                                        {canAdminister && !loading ? <button type="button" onClick={() => { setActiveWorkspace('admin'); selectTool('admin', 'imports'); }} className="mt-5 inline-flex h-10 items-center gap-2 rounded-md bg-[#F39200] px-4 text-sm font-semibold text-white hover:bg-[#d87f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-200"><Upload className="h-4 w-4" aria-hidden="true" />Cargar modelo IFC</button> : null}
-                                        {!canAdminister && !loading ? <div className="mx-auto mt-5 max-w-lg border border-amber-200 bg-amber-50 px-4 py-3 text-left"><p className="text-xs font-semibold text-amber-900">Tu acceso BIM es de consulta o colaboración.</p><p className="mt-1 text-xs leading-5 text-amber-800">El administrador de tu empresa debe cargar el primer modelo IFC de este proyecto.</p></div> : null}
-                                        {!loading ? <div className="mt-8 grid grid-cols-3 divide-x divide-zinc-200 border-y border-zinc-200 py-4 text-left"><div className="px-4"><strong className="block text-xs text-zinc-800">1. Selecciona</strong><span className="mt-1 block text-[11px] leading-4 text-zinc-500">Archivo IFC, nombre, versión y disciplina.</span></div><div className="px-4"><strong className="block text-xs text-zinc-800">2. Procesa</strong><span className="mt-1 block text-[11px] leading-4 text-zinc-500">GiProy valida y prepara el modelo.</span></div><div className="px-4"><strong className="block text-xs text-zinc-800">3. Revisa</strong><span className="mt-1 block text-[11px] leading-4 text-zinc-500">El visor activa geometría y propiedades.</span></div></div> : null}
-                                    </div>
-                                </div>
-                            ) : (
-                                <BimRegionBoundary resetKey={`viewer-${projectId}-${viewerMode}`}>
-                                    <div className="flex h-full min-h-0 flex-col [&>section]:flex-1">{viewer}</div>
-                                </BimRegionBoundary>
-                            )}
-                        </main>
-                        {showInspector ? <div className="cursor-col-resize bg-zinc-200 hover:bg-[#F39200]" onPointerDown={(event) => setResizeSession({ type: 'right', pointer: event.clientX, value: rightWidth })} role="separator" aria-label="Redimensionar panel contextual" aria-orientation="vertical" /> : null}
-                        {showInspector ? <BimRegionBoundary resetKey={`${activeWorkspace}-${selectedTool?.id}`}><aside className="min-h-0 min-w-0 overflow-auto custom-scrollbar">{selectedTool?.content || inspector}</aside></BimRegionBoundary> : null}
-                    </div>
-
-                    {showBottomDrawer ? (
-                        <section className="relative shrink-0 border-t border-zinc-300 bg-white" style={{ height: bottomCollapsed ? 40 : bottomHeight }} data-bim-bottom-drawer>
-                            {!bottomCollapsed ? <div className="absolute inset-x-0 top-0 z-10 h-1 cursor-row-resize hover:bg-[#F39200]" onPointerDown={(event) => setResizeSession({ type: 'bottom', pointer: event.clientY, value: bottomHeight })} role="separator" aria-label="Redimensionar panel temporal" aria-orientation="horizontal" /> : null}
-                            <div className="flex h-10 items-center justify-between border-b border-zinc-200 px-3">
-                                <div className="flex items-center gap-1" role="tablist" aria-label="Planificación temporal">
-                                    {(bottomTools || []).map((tool) => (
-                                        <button
-                                            key={tool.id}
-                                            type="button"
-                                            onClick={() => {
-                                                setBottomTool(tool.id);
-                                                setBottomCollapsed(false);
-                                            }}
-                                            className={`h-8 rounded-md px-3 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] ${selectedBottomTool?.id === tool.id ? 'bg-zinc-900 text-white' : 'text-zinc-500 hover:bg-zinc-100'}`}
-                                            role="tab"
-                                            aria-selected={selectedBottomTool?.id === tool.id}
-                                        >
-                                            {tool.label}
-                                        </button>
-                                    ))}
-                                </div>
-                                <button type="button" onClick={() => setBottomCollapsed((current) => !current)} className={iconButtonClass} title={bottomCollapsed ? 'Expandir panel temporal' : 'Minimizar panel temporal'} aria-label={bottomCollapsed ? 'Expandir panel temporal' : 'Minimizar panel temporal'}>
-                                    <Layers3 className="h-4 w-4" aria-hidden="true" />
-                                </button>
-                            </div>
-                            {!bottomCollapsed ? <BimRegionBoundary resetKey={`bottom-${selectedBottomTool?.id}`}><div className="h-[calc(100%-2.5rem)] min-h-0 overflow-hidden p-2 [&>section]:h-full">{selectedBottomTool?.content}</div></BimRegionBoundary> : null}
-                        </section>
-                    ) : null}
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+                <div className="grid min-h-0 min-w-0 flex-1 gap-2 overflow-hidden p-2" style={{ gridTemplateColumns: explorerShown ? 'clamp(14rem,16vw,19rem) minmax(0,1fr)' : contextShown ? 'minmax(0,1fr) clamp(20rem,22vw,27rem)' : 'minmax(0,1fr)' }} data-bim-shell-layout>
+                    {explorerShown ? <BimRegionBoundary resetKey={`explorer-${projectId}`}><aside className="min-h-0 min-w-0 overflow-hidden border border-zinc-300 bg-white" aria-label="Explorador BIM">{explorer}</aside></BimRegionBoundary> : null}
+                    <main className="flex min-h-0 min-w-0 flex-col overflow-hidden" data-bim-viewer-region>{!ready ? <div className="grid h-full place-items-center border border-zinc-300 bg-white p-8" data-bim-empty-state><div className="max-w-xl text-center"><span className="mx-auto inline-flex size-12 items-center justify-center rounded-lg bg-orange-50 text-orange-700">{loading ? <RefreshCw className="size-6 animate-spin motion-reduce:animate-none" /> : <Box className="size-6" />}</span><h2 className="mt-4 text-base font-semibold text-zinc-950">{loading ? 'Preparando el modelo BIM' : 'BIM aún no forma parte de este proyecto'}</h2><p className="mt-2 text-sm leading-6 text-zinc-700">{errorMessage || 'El proyecto puede operar sin BIM. Cuando lo necesites, carga un IFC y GiProy preparará la coordinación 4D/5D sin alterar el presupuesto ni el Gantt vigentes.'}</p>{canAdminister && !loading ? <button type="button" onClick={() => setAdminOpen(true)} className="mt-5 inline-flex h-10 items-center gap-2 rounded-md bg-orange-600 px-4 text-sm font-semibold text-white hover:bg-orange-700"><Upload className="size-4" />Configurar BIM</button> : null}</div></div> : <BimRegionBoundary resetKey={`viewer-${projectId}-${viewerMode}`}><div className="flex h-full min-h-0 flex-col [&>section]:flex-1">{viewer}</div></BimRegionBoundary>}</main>
+                    {contextShown ? <BimRegionBoundary resetKey={`${activeMode}-${selectedTool?.id}`}><aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border border-zinc-300 bg-white" aria-label="Herramienta contextual"><div className="shrink-0 border-b border-zinc-200 p-2"><label className="block text-[10px] font-semibold uppercase tracking-wide text-zinc-500" htmlFor="bim-tool-selector">Herramienta de {MODES.find((mode) => mode.id === activeMode)?.label}</label><div className="relative mt-1"><select id="bim-tool-selector" value={selectedTool?.id || ''} onChange={(event) => selectTool(event.target.value)} className="h-9 w-full appearance-none rounded-md border border-zinc-300 bg-white pl-3 pr-9 text-xs font-semibold text-zinc-950 outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600">{tools.map((tool) => <option key={tool.id} value={tool.id}>{tool.label}</option>)}</select><ChevronDown className="pointer-events-none absolute right-3 top-2.5 size-4 text-zinc-500" aria-hidden="true" /></div></div><div className="min-h-0 flex-1 overflow-auto p-2 custom-scrollbar">{selectedTool?.content || inspector}</div></aside></BimRegionBoundary> : null}
                 </div>
-            )}
+                {planningMode && ready && selectedBottom ? <section className="relative shrink-0 border-t border-zinc-300 bg-white" style={{ height: bottomCollapsed ? 40 : bottomHeight }} data-bim-bottom-drawer>{!bottomCollapsed ? <div className="absolute inset-x-0 top-0 z-10 h-1 cursor-row-resize hover:bg-orange-600" onPointerDown={(event) => setResizeStart({ y: event.clientY, height: bottomHeight })} role="separator" aria-label="Redimensionar planificación 4D/5D" aria-orientation="horizontal" /> : null}<div className="flex h-10 items-center justify-between border-b border-zinc-200 px-3"><div className="flex min-w-0 items-center gap-3"><span className="text-xs font-semibold text-zinc-950">Coordinación presupuesto ↔ Gantt ↔ BIM</span><span className="truncate text-[10px] text-zinc-600">{selectedBottom.label}</span></div><button type="button" onClick={() => setBottomCollapsed((value) => !value)} className={iconButtonClass} title={bottomCollapsed ? 'Expandir cronología' : 'Minimizar cronología'} aria-label={bottomCollapsed ? 'Expandir cronología' : 'Minimizar cronología'}><Layers3 className="size-4" /></button></div>{!bottomCollapsed ? <BimRegionBoundary resetKey={`bottom-${selectedBottom.id}`}><div className="h-[calc(100%-2.5rem)] min-h-0 overflow-hidden p-2 [&>section]:h-full">{selectedBottom.content}</div></BimRegionBoundary> : null}</section> : null}
+            </div>
+
+            {adminOpen ? <div className="absolute inset-0 z-40 flex flex-col bg-zinc-100" role="dialog" aria-modal="true" aria-label="Administración BIM" data-bim-admin-region><div className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-300 bg-white px-3"><div><h2 className="text-sm font-semibold text-zinc-950">Administración BIM</h2><p className="text-[10px] text-zinc-600">Modelos, versiones, federación y calidad</p></div><button type="button" onClick={() => setAdminOpen(false)} className={iconButtonClass} aria-label="Cerrar administración"><X className="size-4" /></button></div><div className="flex h-10 shrink-0 items-center gap-1 overflow-x-auto border-b border-zinc-300 bg-white px-3" role="tablist">{(adminTools || []).map((tool) => <button key={tool.id} type="button" onClick={() => setActiveAdminTool(tool.id)} className={`h-8 shrink-0 rounded-md px-3 text-xs font-semibold ${selectedAdmin?.id === tool.id ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-100'}`} role="tab" aria-selected={selectedAdmin?.id === tool.id}>{tool.label}</button>)}</div><main className="min-h-0 flex-1 overflow-auto p-2 custom-scrollbar">{selectedAdmin?.content}</main></div> : null}
         </section>
     );
 };

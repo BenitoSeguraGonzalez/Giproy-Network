@@ -88,7 +88,7 @@ export default function BimCdeRfiPanel({ projectId, empresaId, selectedElement =
                 <option value="">Todos los estados</option>{Object.entries(STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
         </header>
-        <div className="grid min-h-[520px] grid-cols-[minmax(280px,0.8fr)_minmax(360px,1.2fr)] text-xs">
+        <div className="bim-adaptive-master-detail grid min-h-0 text-xs">
             <div className="border-r border-slate-200 p-3">
                 <form className="grid grid-cols-2 gap-2" onSubmit={create}>
                     <input className="col-span-2 min-w-0 border border-slate-300 px-2 py-1.5" required minLength={3} aria-label="Asunto RFI" placeholder="Asunto" value={draft.subject} onChange={(event) => setDraft({ ...draft, subject: event.target.value })} />

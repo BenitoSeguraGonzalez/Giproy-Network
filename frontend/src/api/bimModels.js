@@ -1,9 +1,43 @@
 import axiosInstance from './axiosConfig';
 import { withTenantConfig } from './tenant';
 
+const stableJson = (value) => {
+    if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
+    if (value && typeof value === 'object') {
+        return `{${Object.keys(value).filter((key) => value[key] !== undefined).sort().map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(',')}}`;
+    }
+    return JSON.stringify(value);
+};
+
+const utf8ToBase64 = (value) => {
+    const bytes = new TextEncoder().encode(value);
+    let binary = '';
+    for (let offset = 0; offset < bytes.length; offset += 0x8000) binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+    return window.btoa(binary);
+};
+
+const stageConfirmedJson = async (projectId, payload, filename, empresaId) => {
+    const staged = (await axiosInstance.post(`/bim/projects/${projectId}/coordination-imports/preflight`, {
+        source_domain: 'bim', source_format: 'json', filename,
+        content_base64: utf8ToBase64(stableJson(payload)), coordination_set_id: null,
+    }, withTenantConfig({}, empresaId))).data;
+    if (!['preflight_ready', 'confirmed', 'consumed'].includes(staged.status)) {
+        throw new Error(`El JSON no supera staging: ${(staged.errors || []).join(', ')}`);
+    }
+    return staged.status !== 'preflight_ready' ? staged : (await axiosInstance.post(
+        `/bim/projects/${projectId}/coordination-imports/${staged.id}/confirm`,
+        { expected_checksum_sha256: staged.checksum_sha256, reason: 'Importación JSON solicitada explícitamente por el usuario.' },
+        withTenantConfig({}, empresaId),
+    )).data;
+};
+
 export const bimModelsApi = {
     getWorkspace: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/workspace`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    searchProjectContext: async (projectId, query, empresaId = null) => {
+        const response = await axiosInstance.get(`/bim/projects/${projectId}/search`, withTenantConfig({ params: { q: query, limit: 12 } }, empresaId));
         return response.data;
     },
     listByProject: async (projectId, empresaId = null) => {
@@ -19,6 +53,21 @@ export const bimModelsApi = {
     },
     getFederation: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/federation`, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    getFederationReconciliation: async (projectId, sourceVersionId, targetVersionId, empresaId = null) => {
+        const response = await axiosInstance.get(
+            `/bim/projects/${projectId}/federation/reconciliation`,
+            withTenantConfig({ params: { source_version_id: sourceVersionId, target_version_id: targetVersionId } }, empresaId),
+        );
+        return response.data;
+    },
+    decideFederationReconciliation: async (projectId, payload, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/federation/reconciliation/decision`, payload, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    reconcileCoordinationLinkIdentity: async (projectId, setId, linkId, payload, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/coordination-sets/${setId}/links/${linkId}/reconcile-identity`, payload, withTenantConfig({}, empresaId));
         return response.data;
     },
     saveFederation: async (projectId, payload, empresaId = null) => {
@@ -222,6 +271,42 @@ export const bimModelsApi = {
         );
         return response.data;
     },
+    listCoordinationSets: async (projectId, empresaId = null) => (
+        await axiosInstance.get(`/bim/projects/${projectId}/coordination-sets`, withTenantConfig({}, empresaId))
+    ).data,
+    createCoordinationSet: async (projectId, payload, empresaId = null) => (
+        await axiosInstance.post(`/bim/projects/${projectId}/coordination-sets`, payload, withTenantConfig({}, empresaId))
+    ).data,
+    makeCoordinationSetOfficial: async (projectId, coordinationSetId, payload, empresaId = null) => (
+        await axiosInstance.post(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/official`, payload, withTenantConfig({}, empresaId))
+    ).data,
+    listCoordinationLinks: async (projectId, coordinationSetId, empresaId = null) => (
+        await axiosInstance.get(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/links`, withTenantConfig({}, empresaId))
+    ).data,
+    createCoordinationLink: async (projectId, coordinationSetId, payload, empresaId = null) => (
+        await axiosInstance.post(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/links`, payload, withTenantConfig({}, empresaId))
+    ).data,
+    getCoordinationCoverage: async (projectId, coordinationSetId, empresaId = null) => (
+        await axiosInstance.get(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/coverage`, withTenantConfig({}, empresaId))
+    ).data,
+    createCoordinationProposal: async (projectId, coordinationSetId, payload, empresaId = null) => (
+        await axiosInstance.post(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/proposals`, payload, withTenantConfig({}, empresaId))
+    ).data,
+    listCoordinationProposals: async (projectId, coordinationSetId, empresaId = null) => (
+        await axiosInstance.get(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/proposals`, withTenantConfig({}, empresaId))
+    ).data,
+    decideCoordinationProposal: async (projectId, coordinationSetId, proposalId, payload, empresaId = null) => (
+        await axiosInstance.post(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/proposals/${proposalId}/decision`, payload, withTenantConfig({}, empresaId))
+    ).data,
+    applyCoordinationProposal: async (projectId, coordinationSetId, proposalId, payload, empresaId = null) => (
+        await axiosInstance.post(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/proposals/${proposalId}/apply`, payload, withTenantConfig({}, empresaId))
+    ).data,
+    recoverCoordinationProposal: async (projectId, coordinationSetId, proposalId, payload, empresaId = null) => (
+        await axiosInstance.post(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/proposals/${proposalId}/recover`, payload, withTenantConfig({}, empresaId))
+    ).data,
+    getClassificationSummary: async (projectId, empresaId = null) => (
+        await axiosInstance.get(`/bim/projects/${projectId}/classification-summary`, withTenantConfig({}, empresaId))
+    ).data,
     getOperationalMetrics: async (projectId, empresaId = null) => {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/operational-metrics`, withTenantConfig({}, empresaId));
         return response.data;
@@ -440,6 +525,22 @@ export const bimModelsApi = {
         return response.data;
     },
     previewScheduleInterchange: async (projectId, format, payload, empresaId = null) => {
+        const sourceFormat = format === 'mspdi' ? 'mspdi' : format === 'p6' ? 'p6_xml' : 'p6_xer';
+        const bytes = new Uint8Array(await payload.file.arrayBuffer());
+        let binary = '';
+        for (let offset = 0; offset < bytes.length; offset += 0x8000) binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+        const staged = (await axiosInstance.post(`/bim/projects/${projectId}/coordination-imports/preflight`, {
+            source_domain: 'schedule', source_format: sourceFormat, filename: payload.file.name,
+            content_base64: window.btoa(binary), coordination_set_id: payload.coordination_set_id || null,
+        }, withTenantConfig({}, empresaId))).data;
+        if (!['preflight_ready', 'confirmed', 'consumed'].includes(staged.status)) {
+            throw new Error(`El archivo no supera staging: ${(staged.errors || []).join(', ')}`);
+        }
+        const confirmed = staged.status !== 'preflight_ready' ? staged : (await axiosInstance.post(
+            `/bim/projects/${projectId}/coordination-imports/${staged.id}/confirm`,
+            { expected_checksum_sha256: staged.checksum_sha256, reason: 'Archivo 4D seleccionado para revisión por el usuario.' },
+            withTenantConfig({}, empresaId),
+        )).data;
         const formData = new FormData();
         formData.append('file', payload.file);
         formData.append('timezone_name', payload.timezone_name);
@@ -449,7 +550,7 @@ export const bimModelsApi = {
             formData,
             withTenantConfig({ headers: { 'Content-Type': 'multipart/form-data' } }, empresaId),
         );
-        return response.data;
+        return { ...response.data, coordination_stage_id: confirmed.id };
     },
     exportScheduleInterchange: async (projectId, format, document, empresaId = null) => {
         const response = await axiosInstance.post(
@@ -459,8 +560,8 @@ export const bimModelsApi = {
         );
         return response.data;
     },
-    createScheduleImportRevision: async (projectId, document, empresaId = null) => {
-        const response = await axiosInstance.post(`/bim/projects/${projectId}/4d/schedule-interchange/revisions`, document, withTenantConfig({}, empresaId));
+    createScheduleImportRevision: async (projectId, document, coordinationStageId, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/4d/schedule-interchange/revisions`, { document, coordination_stage_id: coordinationStageId }, withTenantConfig({}, empresaId));
         return response.data;
     },
     listScheduleImportRevisions: async (projectId, empresaId = null) => {
@@ -610,17 +711,27 @@ export const bimModelsApi = {
         return response.data;
     },
     importJsonPackage: async (projectId, payload, empresaId = null) => {
+        const canonical = { ...payload };
+        delete canonical.coordination_stage_id;
+        const staged = await stageConfirmedJson(projectId, canonical, payload.source_filename || 'bim-package.json', empresaId);
         const response = await axiosInstance.post(
             `/bim/projects/${projectId}/imports/json-package`,
-            payload,
+            { ...canonical, coordination_stage_id: staged.id },
             withTenantConfig({}, empresaId),
         );
         return response.data;
     },
     importJsonBatch: async (projectId, packages, empresaId = null) => {
+        const canonicalPackages = packages.map((item) => {
+            const copy = { ...item };
+            delete copy.coordination_stage_id;
+            return copy;
+        });
+        const canonical = { packages: canonicalPackages };
+        const staged = await stageConfirmedJson(projectId, canonical, 'bim-batch.json', empresaId);
         const response = await axiosInstance.post(
             `/bim/projects/${projectId}/imports/json-batch`,
-            { packages },
+            { packages: canonicalPackages, coordination_stage_id: staged.id },
             withTenantConfig({}, empresaId),
         );
         return response.data;
@@ -634,22 +745,47 @@ export const bimModelsApi = {
         return response.data;
     },
     registerIfcManifest: async (projectId, payload, empresaId = null) => {
+        const canonical = { ...payload };
+        delete canonical.coordination_stage_id;
+        const staged = await stageConfirmedJson(projectId, canonical, payload.source_filename ? `${payload.source_filename}.manifest.json` : 'ifc-manifest.json', empresaId);
         const response = await axiosInstance.post(
             `/bim/projects/${projectId}/imports/ifc-manifest`,
-            payload,
+            { ...canonical, coordination_stage_id: staged.id },
             withTenantConfig({}, empresaId),
         );
         return response.data;
     },
     importIfcText: async (projectId, payload, empresaId = null) => {
+        const encoded = window.btoa(unescape(encodeURIComponent(payload.ifc_text)));
+        const staged = (await axiosInstance.post(`/bim/projects/${projectId}/coordination-imports/preflight`, {
+            source_domain: 'bim', source_format: 'ifc', filename: payload.source_filename || 'modelo.ifc',
+            content_base64: encoded, coordination_set_id: payload.coordination_set_id || null,
+        }, withTenantConfig({}, empresaId))).data;
+        const confirmed = staged.status !== 'preflight_ready' ? staged : (await axiosInstance.post(
+            `/bim/projects/${projectId}/coordination-imports/${staged.id}/confirm`,
+            { expected_checksum_sha256: staged.checksum_sha256, reason: 'Importación IFC solicitada explícitamente por el usuario.' },
+            withTenantConfig({}, empresaId),
+        )).data;
         const response = await axiosInstance.post(
             `/bim/projects/${projectId}/imports/ifc-text`,
-            payload,
+            { ...payload, coordination_stage_id: confirmed.id },
             withTenantConfig({}, empresaId),
         );
         return response.data;
     },
     importIfcFile: async (projectId, payload, empresaId = null) => {
+        const bytes = new Uint8Array(await payload.file.arrayBuffer());
+        let binary = '';
+        for (let offset = 0; offset < bytes.length; offset += 0x8000) binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+        const staged = (await axiosInstance.post(`/bim/projects/${projectId}/coordination-imports/preflight`, {
+            source_domain: 'bim', source_format: 'ifc', filename: payload.file.name || 'modelo.ifc',
+            content_base64: window.btoa(binary), coordination_set_id: payload.coordination_set_id || null,
+        }, withTenantConfig({}, empresaId))).data;
+        const confirmed = staged.status !== 'preflight_ready' ? staged : (await axiosInstance.post(
+            `/bim/projects/${projectId}/coordination-imports/${staged.id}/confirm`,
+            { expected_checksum_sha256: staged.checksum_sha256, reason: 'Importación IFC solicitada explícitamente por el usuario.' },
+            withTenantConfig({}, empresaId),
+        )).data;
         const formData = new FormData();
         formData.append('model_name', payload.model_name);
         formData.append('version_label', payload.version_label);
@@ -657,6 +793,7 @@ export const bimModelsApi = {
         if (payload.description) formData.append('description', payload.description);
         if (payload.notes) formData.append('notes', payload.notes);
         if (typeof payload.activate === 'boolean') formData.append('activate', String(payload.activate));
+        formData.append('stage_id', String(confirmed.id));
         formData.append('file', payload.file);
 
         const response = await axiosInstance.post(
@@ -667,12 +804,43 @@ export const bimModelsApi = {
         return response.data;
     },
     createIfcImportJob: async (projectId, payload, empresaId = null) => {
+        const bytes = new Uint8Array(await payload.file.arrayBuffer());
+        let binary = '';
+        const chunkSize = 0x8000;
+        for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+            binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+        }
+        const staged = await axiosInstance.post(
+            `/bim/projects/${projectId}/coordination-imports/preflight`,
+            {
+                source_domain: 'bim',
+                source_format: 'ifc',
+                filename: payload.file.name || 'modelo.ifc',
+                content_base64: window.btoa(binary),
+                coordination_set_id: payload.coordination_set_id || null,
+            },
+            withTenantConfig({}, empresaId),
+        );
+        if (!['preflight_ready', 'confirmed', 'consumed'].includes(staged.data.status)) {
+            throw new Error(`El preflight IFC no puede confirmarse: ${(staged.data.errors || []).join(', ')}`);
+        }
+        const confirmed = staged.data.status !== 'preflight_ready'
+            ? staged.data
+            : (await axiosInstance.post(
+                `/bim/projects/${projectId}/coordination-imports/${staged.data.id}/confirm`,
+                {
+                    expected_checksum_sha256: staged.data.checksum_sha256,
+                    reason: 'Importación IFC solicitada explícitamente por el usuario.',
+                },
+                withTenantConfig({}, empresaId),
+            )).data;
         const formData = new FormData();
         formData.append('model_name', payload.model_name);
         formData.append('version_label', payload.version_label);
         if (payload.discipline) formData.append('discipline', payload.discipline);
         if (payload.description) formData.append('description', payload.description);
         if (payload.notes) formData.append('notes', payload.notes);
+        formData.append('stage_id', String(confirmed.id));
         formData.append('file', payload.file);
 
         const response = await axiosInstance.post(

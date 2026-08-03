@@ -9,6 +9,7 @@ from app.models.usuario import Usuario
 from app.schemas.edt import EdtNodeResponse, EdtNodeCreate, EdtNodeUpdate, EdtNodeMove, EdtBulkDelete, EdtBulkMove
 from app.repositories.edt import edt_repo
 from app.services.proyecto import proyecto_service
+from app.services.audit_event import record_project_entity_event
 
 router = APIRouter()
 
@@ -147,7 +148,9 @@ def create_edt_node(
     _ensure_edt_write_access(current_user)
     target_empresa_id = _resolve_target_empresa_id(current_user, empresa_id)
 
-    return edt_repo.create(db=db, obj_in=node_in, empresa_id=target_empresa_id)
+    node = edt_repo.create(db=db, obj_in=node_in, empresa_id=target_empresa_id)
+    record_project_entity_event(db, project_id=node.proyecto_id, actor=current_user, module="edt", event_type="edt_node_created", message="Nodo EDT creado.", entity_type="edt_node", entity_id=node.id, payload={"parent_id": node.parent_id, "node_type": node.tipo_nodo})
+    return node
 
 @router.post("/bulk-delete")
 def bulk_delete_edt_nodes(
@@ -162,7 +165,10 @@ def bulk_delete_edt_nodes(
     _ensure_edt_write_access(current_user)
     target_empresa_id = _resolve_target_empresa_id(current_user, empresa_id)
 
+    project_ids = {row[0] for row in db.query(EdtNode.proyecto_id).filter(EdtNode.id.in_(bulk_in.ids), EdtNode.empresa_id == target_empresa_id).all()}
     edt_repo.delete_multiple(db=db, ids=bulk_in.ids, empresa_id=target_empresa_id)
+    for project_id in project_ids:
+        record_project_entity_event(db, project_id=project_id, actor=current_user, module="edt", event_type="edt_nodes_deleted", message="Nodos EDT eliminados.", entity_type="edt_node_batch", entity_id=project_id, operation_status="deleted", payload={"node_ids": bulk_in.ids})
     return {"message": f"{len(bulk_in.ids)} nodos eliminados correctamente"}
 
 @router.post("/bulk-move")
@@ -178,7 +184,10 @@ def bulk_move_edt_nodes(
     _ensure_edt_write_access(current_user)
     target_empresa_id = _resolve_target_empresa_id(current_user, empresa_id)
 
+    project_ids = {row[0] for row in db.query(EdtNode.proyecto_id).filter(EdtNode.id.in_(bulk_in.ids), EdtNode.empresa_id == target_empresa_id).all()}
     edt_repo.move_multiple(db=db, ids=bulk_in.ids, new_parent_id=bulk_in.new_parent_id, empresa_id=target_empresa_id)
+    for project_id in project_ids:
+        record_project_entity_event(db, project_id=project_id, actor=current_user, module="edt", event_type="edt_nodes_moved", message="Nodos EDT movidos.", entity_type="edt_node_batch", entity_id=project_id, payload={"node_ids": bulk_in.ids, "new_parent_id": bulk_in.new_parent_id})
     return {"message": f"{len(bulk_in.ids)} nodos movidos correctamente"}
 
 @router.put("/{id}", response_model=EdtNodeResponse)
@@ -198,6 +207,7 @@ def update_edt_node(
     node = edt_repo.update(db=db, id=id, obj_in=node_in, empresa_id=target_empresa_id)
     if not node:
         raise HTTPException(status_code=404, detail="Nodo no encontrado")
+    record_project_entity_event(db, project_id=node.proyecto_id, actor=current_user, module="edt", event_type="edt_node_updated", message="Nodo EDT actualizado.", entity_type="edt_node", entity_id=node.id, payload={"changed_fields": sorted(node_in.model_dump(exclude_unset=True).keys())})
     return node
 
 @router.put("/{id}/move", response_model=EdtNodeResponse)
@@ -217,6 +227,7 @@ def move_edt_node(
     node = edt_repo.move(db=db, id=id, obj_in=move_in, empresa_id=target_empresa_id)
     if not node:
         raise HTTPException(status_code=404, detail="Nodo no encontrado")
+    record_project_entity_event(db, project_id=node.proyecto_id, actor=current_user, module="edt", event_type="edt_node_moved", message="Nodo EDT movido.", entity_type="edt_node", entity_id=node.id, payload={"parent_id": node.parent_id, "order": node.orden})
     return node
 
 @router.delete("/{id}")
@@ -232,7 +243,11 @@ def delete_edt_node(
     _ensure_edt_write_access(current_user)
     target_empresa_id = _resolve_target_empresa_id(current_user, empresa_id)
 
+    target = db.query(EdtNode).filter(EdtNode.id == id, EdtNode.empresa_id == target_empresa_id).first()
+    project_id = target.proyecto_id if target else None
     success = edt_repo.delete(db=db, id=id, empresa_id=target_empresa_id)
     if not success:
         raise HTTPException(status_code=404, detail="Nodo no encontrado")
+    if project_id:
+        record_project_entity_event(db, project_id=project_id, actor=current_user, module="edt", event_type="edt_node_deleted", message="Nodo EDT eliminado.", entity_type="edt_node", entity_id=id, operation_status="deleted")
     return {"message": "Nodo eliminado correctamente"}

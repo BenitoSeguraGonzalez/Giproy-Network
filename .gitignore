@@ -103,3 +103,53 @@ docs/runtime/*
 
 # Agent tooling
 .atl/
+
+# =============================================================
+# Cross-repo security hardening baseline (MarketI + NurIA-Odonto + Giproy Network, 2026-07)
+# =============================================================
+
+# Certificados y keys privadas (CRÍTICO)
+*.pem
+*.key
+*.crt
+*.cert
+secrets/
+.secrets/
+*.gpg
+*.asc
+gh-token
+.token
+*.kubeconfig
+
+# Cloudflared NSSM token files (CloudFlared-bkp ya está excluido por carpeta)
+cloudflared-*-nssm.txt
+cloudflared-token*
+.cloudflared/
+
+# SSH keys privadas (NUNCA commitear)
+id_rsa*
+id_ed25519*
+id_ecdsa*
+known_hosts
+authorized_keys
+
+# AI-tool caches adicionales
+.aider*
+.claude/projects/
+.claude/worktrees/
+.aider.tags.cache.v4/  # ya excluido arriba, se mantiene idempotente
+
+# Database dumps cifrados gpg
+*.sql.gz.gpg
+
+# Build artifacts móviles / instaladores
+*.apk
+*.aab
+*.ipa
+*.dmg
+
+# Node build caches adicionales
+.parcel-cache/
+.turbo/
+.bun/
+.yarn/

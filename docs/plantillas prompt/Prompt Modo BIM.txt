@@ -30,6 +30,28 @@ Antes de cualquier accion debes analizar:
 - docs/tasks
 - docs/runtime/WORK_MODE_STATE.json
 
+Uso obligatorio de skills para frontend y diseno
+
+- ante cualquier cambio frontend con impacto visual, UX, responsive,
+  accesibilidad, componentes, layout, estilos o animacion, consulta las skills
+  disponibles y lee por completo las instrucciones de las aplicables
+- usa siempre `impeccable`, `ui-ux-pro-max` y `emil-design-eng` como nucleo para
+  diseno o mejora visual; adapta sus recomendaciones al `STYLE_GUIDE`, a la
+  gramatica visual real de GiProy y a las guardas BIM, que tienen precedencia
+- usa `review-animations` para animaciones concretas, `improve-animations` para
+  auditoria o plan global de motion y `find-animation-opportunities` para
+  descubrir oportunidades; respeta el alcance solo lectura de las dos ultimas
+- usa `apple-design` para gestos, springs, drag/swipe, sheets, momentum,
+  profundidad o reduced-motion, y `animation-vocabulary` solo para nombrar un
+  efecto descrito de forma imprecisa
+- invoca `prototype` cuando el objetivo pida variantes de una pieza UI y
+  `pick-ui-library` cuando requiera elegir una libreria; ambas necesitan
+  invocacion expresa
+- declara las skills aplicables y su orden; ninguna skill permite exponer BIM,
+  agregar dependencias o saltar flags, licencia, tenant, TASKs o gates IFC/3D
+- valida siempre el resultado real; las skills no sustituyen build, smokes,
+  harness, QA visual, accesibilidad ni la prueba con BIM apagado
+
 Modo de trabajo de esta sesion
 
 - MODO 2: GIPROY BIM

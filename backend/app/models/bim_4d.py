@@ -22,6 +22,7 @@ class Bim4dActivitySnapshot(Base):
     proyecto_id = Column(Integer, ForeignKey("proyectos.id", ondelete="CASCADE"), nullable=False, index=True)
     source_kind = Column(String(50), nullable=False, default="giproy_classic_schedule")
     source_ref = Column(String(255), nullable=False)
+    budget_line_id = Column(Integer, ForeignKey("presupuesto_detalles.id", ondelete="SET NULL"), nullable=True, index=True)
     snapshot_revision = Column(String(100), nullable=False)
     activity_code = Column(String(100), nullable=False)
     activity_name = Column(String(500), nullable=False)

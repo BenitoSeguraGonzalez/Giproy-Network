@@ -58,20 +58,21 @@ try {
     assert.ok(pixels.some((value) => value > 0), `Canvas WebGL no vacío: ${pixels}`);
     await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-viewer-1920x1080.png`, fullPage: true });
 
-    await page.getByRole('button', { name: 'Planificación 4D' }).click();
+    await page.getByRole('button', { name: /Planificación y costes/ }).click();
     assert.equal(await page.locator('[data-bim-bottom-drawer]').count(), 1, 'Planificación muestra drawer único');
-    assert.equal(await page.getByRole('tab', { name: 'Secuencia 4D', exact: true }).count(), 1, 'Timeline y Gantt conviven en una única superficie 4D');
+    assert.ok(await page.locator('[data-bim-bottom-drawer]').getByText('Secuencia 4D', { exact: true }).count() >= 1, 'Timeline y Gantt conviven en una única superficie 4D');
     await page.waitForSelector('[data-bim-planning-4d] [data-bim-gantt-activity="101"]');
     assert.equal(await page.locator('[data-bim-gantt-activity-selected="true"]').count(), 2, 'Selección 3D inversa resalta todas las actividades vinculadas');
     await page.getByRole('button', { name: 'Seleccionar actividad EDT-01' }).click();
     assert.equal(await page.locator('[data-bim-gantt-selected-activities]').getAttribute('data-bim-gantt-selected-activities'), '1', 'Selección Gantt establece la actividad primaria');
     assert.equal(await page.locator('[data-bim-fragments-product]').getAttribute('data-bim-planning-selection'), '1', 'Selección Gantt se proyecta al modelo fragments');
     await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-planning-1920x1080.png`, fullPage: true });
-    await page.getByRole('button', { name: 'Informes' }).click();
-    assert.equal(await page.locator('[data-bim-reports-region]').count(), 1, 'Informes usa layout dedicado');
+    await page.getByRole('button', { name: /Seguimiento/ }).click();
+    await page.locator('#bim-tool-selector').selectOption('reports');
+    assert.equal(await page.getByText('Informes BIM', { exact: true }).count(), 1, 'Informes queda integrado en el flujo de seguimiento');
     await page.keyboard.press('Control+K');
     await page.keyboard.type('Muro');
-    assert.equal(await page.getByRole('option').count(), 1, 'Búsqueda unificada devuelve elemento real del catálogo');
+    assert.equal(await page.locator('[role="listbox"] > [role="option"]').count(), 1, 'Búsqueda unificada devuelve elemento real del catálogo');
 
     const state = await page.evaluate(() => ({
         horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -80,6 +81,22 @@ try {
     assert.deepEqual(errors, [], `Sin errores de consola: ${errors.join(' | ')}`);
     assert.equal(state.horizontalOverflow, false, 'Sin overflow horizontal de página');
     assert.equal(state.verticalOverflow, false, 'Sin overflow vertical de página');
+    const accessibility = await page.evaluate(() => {
+        const visible = (node) => {
+            const style = getComputedStyle(node); const rect = node.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
+        };
+        const unnamedButtons = [...document.querySelectorAll('button')].filter(visible).filter((node) => !(node.getAttribute('aria-label') || node.getAttribute('title') || node.textContent?.trim())).length;
+        const unlabelledFields = [...document.querySelectorAll('input, select, textarea')].filter(visible).filter((node) => !(node.labels?.length || node.getAttribute('aria-label') || node.getAttribute('aria-labelledby'))).length;
+        const positiveTabindex = [...document.querySelectorAll('[tabindex]')].filter((node) => Number(node.getAttribute('tabindex')) > 0).length;
+        const ids = [...document.querySelectorAll('[id]')].map((node) => node.id).filter(Boolean);
+        return { unnamedButtons, unlabelledFields, positiveTabindex, duplicateIds: ids.filter((id, index) => ids.indexOf(id) !== index) };
+    });
+    assert.deepEqual(accessibility, { unnamedButtons: 0, unlabelledFields: 0, positiveTabindex: 0, duplicateIds: [] }, 'Controles BIM con nombre, etiqueta, orden natural e IDs únicos');
+    await page.keyboard.press('Alt+2');
+    assert.equal(await page.getByRole('button', { name: /Modelo/ }).getAttribute('aria-current'), 'page', 'Los modos son navegables por teclado');
+    await page.keyboard.press('Tab');
+    assert.ok(await page.evaluate(() => document.activeElement && document.activeElement !== document.body), 'El foco de teclado permanece visible dentro del workspace');
     await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-1920x1080.png`, fullPage: true });
     await context.close();
 
@@ -96,6 +113,38 @@ try {
     await scaledPage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-1920x1080-scaled-125.png`, fullPage: true });
     await scaledContext.close();
 
+    for (const profile of [
+        { label: '2560x1440-dpi150', viewport: { width: 1707, height: 960 }, screen: { width: 2560, height: 1440 }, deviceScaleFactor: 1.5 },
+        { label: '3840x2160-dpi200', viewport: { width: 1920, height: 1080 }, screen: { width: 3840, height: 2160 }, deviceScaleFactor: 2 },
+    ]) {
+        const largeContext = await browser.newContext(profile);
+        const largePage = await largeContext.newPage();
+        await largePage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
+        await largePage.waitForSelector('[data-bim-workspace-v2]');
+        const layout = await largePage.evaluate(() => ({
+            horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+            verticalOverflow: document.documentElement.scrollHeight > document.documentElement.clientHeight,
+        }));
+        assert.equal(layout.horizontalOverflow, false, `${profile.label} sin overflow horizontal`);
+        assert.equal(layout.verticalOverflow, false, `${profile.label} sin overflow vertical`);
+        const largeShell = await largePage.locator('[data-bim-workspace-v2]').boundingBox();
+        const largeViewer = await largePage.locator('[data-bim-viewer-region]').boundingBox();
+        assert.ok(largeViewer.width / largeShell.width >= 0.65, `${profile.label} conserva al menos 65% para el visor`);
+        await largePage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-${profile.label}.png`, fullPage: true });
+        await largeContext.close();
+    }
+
+    const safariContext = await browser.newContext({
+        viewport: { width: 1920, height: 1080 }, screen: { width: 1920, height: 1080 },
+        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15',
+    });
+    const safariPage = await safariContext.newPage();
+    await safariPage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
+    await safariPage.waitForSelector('[data-bim-workspace-v2]');
+    assert.match(await safariPage.getByRole('status').filter({ hasText: 'Safari puede mostrar divergencias' }).textContent(), /Chromium disponible en macOS\/iPadOS/);
+    assert.equal(await safariPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, 'El aviso Safari no genera overflow');
+    await safariContext.close();
+
     const unsupportedContext = await browser.newContext({ viewport: { width: 1366, height: 768 }, screen: { width: 1366, height: 768 } });
     const unsupportedPage = await unsupportedContext.newPage();
     await unsupportedPage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
@@ -104,6 +153,39 @@ try {
     assert.equal(await unsupportedPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, 'La guarda no genera overflow');
     await unsupportedPage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-unsupported-1366x768.png`, fullPage: true });
     await unsupportedContext.close();
+
+    const tabletLandscapeContext = await browser.newContext({
+        viewport: { width: 1472, height: 820 },
+        screen: { width: 1472, height: 920 },
+        deviceScaleFactor: 2,
+        hasTouch: true,
+    });
+    await tabletLandscapeContext.addInitScript(() => localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
+    const tabletLandscapePage = await tabletLandscapeContext.newPage();
+    await tabletLandscapePage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
+    await tabletLandscapePage.waitForSelector('[data-bim-workspace-v2][data-bim-adaptive-profile="tablet-landscape"]');
+    assert.equal(await tabletLandscapePage.locator('[data-bim-unsupported-resolution]').count(), 0, 'La tablet horizontal compatible monta BIM');
+    assert.equal(await tabletLandscapePage.locator('[data-bim-workspace-v2] aside').count(), 1, 'Tablet horizontal monta un único panel lateral');
+    assert.equal(await tabletLandscapePage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, 'Tablet horizontal sin overflow de página');
+    await tabletLandscapePage.getByRole('button', { name: 'Panel contextual' }).click();
+    assert.ok(await tabletLandscapePage.locator('[data-bim-workspace-v2] aside').count() <= 1, 'Nunca se montan dos paneles laterales simultáneos');
+    await tabletLandscapePage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-tablet-landscape.png`, fullPage: true });
+    await tabletLandscapeContext.close();
+
+    const tabletPortraitContext = await browser.newContext({
+        viewport: { width: 920, height: 1472 },
+        screen: { width: 920, height: 1472 },
+        deviceScaleFactor: 2,
+        hasTouch: true,
+    });
+    await tabletPortraitContext.addInitScript(() => localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
+    const tabletPortraitPage = await tabletPortraitContext.newPage();
+    await tabletPortraitPage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
+    await tabletPortraitPage.waitForSelector('[data-bim-unsupported-resolution]');
+    assert.match(await tabletPortraitPage.locator('[data-bim-unsupported-resolution]').textContent(), /Gira la tablet a horizontal/);
+    assert.equal(await tabletPortraitPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, 'La guarda tablet vertical no genera overflow');
+    await tabletPortraitPage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-tablet-portrait.png`, fullPage: true });
+    await tabletPortraitContext.close();
     console.log('validate-bim-workspace-v2-dom: ok');
 } finally {
     await browser?.close();

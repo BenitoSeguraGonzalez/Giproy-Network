@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, DECIMAL, Text
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, DECIMAL, JSON, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
@@ -85,6 +85,9 @@ class PresupuestoDetalle(Base):
     # OmniClass (Mapeo estándar)
     omniclass_codigo = Column(String(50), nullable=True, index=True)
     omniclass_titulo = Column(String(500), nullable=True)
+
+    # Estado de coordinación 4D/5D/BIM; nunca sustituye cantidades ni precios.
+    coordination_metadata_json = Column(JSON, nullable=True)
 
     # Notas inmutables adosadas a la línea
     notas = Column(Text, nullable=True)

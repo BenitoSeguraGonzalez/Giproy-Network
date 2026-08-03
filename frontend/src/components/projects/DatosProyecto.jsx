@@ -865,6 +865,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
     const [pdfPreviewUrl, setPdfPreviewUrl] = useState('');
     const [pdfPreviewLoading, setPdfPreviewLoading] = useState(false);
     const [imageViewerOpen, setImageViewerOpen] = useState(false);
+    const [referentialImageFailed, setReferentialImageFailed] = useState(false);
     const [geoViewerOpen, setGeoViewerOpen] = useState(false);
     const [geoSearchQuery, setGeoSearchQuery] = useState('');
     const [reportTemplateId, setReportTemplateId] = useState(
@@ -940,7 +941,12 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
         };
 
         if (project) loadInitialData();
-    }, [empId, initialDetail, project, loadCantones, loadCategorias]);
+        // La ficha se recarga cuando cambia el proyecto o la empresa, no cuando
+        // el portafolio reconstruye objetos equivalentes durante sus sondeos.
+        // Depender de `project` o `initialDetail` por identidad reiniciaba
+        // indefinidamente el estado de carga de esta pantalla.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [empId, project?.id, project?.codigo_root, project?.codigo, loadCantones, loadCategorias]);
 
     useEffect(() => {
         setReportTemplateId(
@@ -1038,13 +1044,19 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
         if (!file) return;
 
         try {
-            const res = await proyectoDetalleApi.uploadImage(file, empId);
+            const res = await proyectoDetalleApi.uploadImage(projectRootCode, file, empId);
+            setReferentialImageFailed(false);
             setFormData(prev => ({ ...prev, imagen_referencial_url: res.url }));
         } catch (error) {
             globalThis.reportClientError?.("Error uploading image:", error);
             appAlert("Error al subir la imagen");
         }
     };
+
+    useEffect(() => {
+        setReferentialImageFailed(false);
+        setImageViewerOpen(false);
+    }, [formData.imagen_referencial_url]);
 
     const loadProjectDocuments = useCallback(async () => {
         if (!projectRootCode) return;
@@ -1786,7 +1798,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                 ? `Pendiente de actualizar cuando el servicio de mapas esté disponible. Último error: ${formData.georef_map_error}`
                 : 'Pendiente de generar o actualizar con la vista georreferenciada aceptada.',
             className: 'border-amber-100 bg-amber-50 text-amber-700',
-            icon: <Loader2 className="h-3 w-3 animate-spin" />
+            icon: <Clock className="h-3 w-3" />
         };
     })();
 
@@ -2554,7 +2566,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                                 <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
                                             </label>
                                         )}
-                                        {formData.imagen_referencial_url && (
+                                        {formData.imagen_referencial_url && !referentialImageFailed && (
                                             <button
                                                 type="button"
                                                 onClick={() => setImageViewerOpen(true)}
@@ -2567,11 +2579,21 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                     </div>
                                 </div>
                                 <div className="relative flex aspect-video flex-col items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed border-zinc-100 bg-zinc-50">
-                                    {formData.imagen_referencial_url ? (
-                                        <img src={resolveMediaUrl(formData.imagen_referencial_url)} alt="Referencia" className="h-full w-full object-cover" />
+                                    {formData.imagen_referencial_url && !referentialImageFailed ? (
+                                        <img
+                                            src={resolveMediaUrl(formData.imagen_referencial_url)}
+                                            alt="Referencia"
+                                            className="h-full w-full object-cover"
+                                            onError={() => setReferentialImageFailed(true)}
+                                        />
                                     ) : (
                                         <div className="flex flex-col items-center gap-3 text-center">
                                             <Briefcase className="h-10 w-10 text-zinc-200" />
+                                            {referentialImageFailed && (
+                                                <p className="max-w-xs text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                                                    La imagen referencial no está disponible
+                                                </p>
+                                            )}
                                             {isAdmin && (
                                                 <label
                                                     className={`${SOFT_ACTION_BUTTON_BASE} h-8 w-8 cursor-pointer rounded-xl text-[#136191]`}
@@ -2686,9 +2708,9 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                 </CardContent>
             </Card>
 
-            {imageViewerOpen && formData.imagen_referencial_url && (
+            {imageViewerOpen && formData.imagen_referencial_url && !referentialImageFailed && (
                 <div className="fixed inset-0 z-[135] flex items-center justify-center bg-zinc-900/45 px-4 py-6 backdrop-blur-[2px]">
-                    <div className="flex h-full max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-[1.7rem] border border-[#ececec] bg-[#f7f7f5] shadow-[12px_12px_30px_rgba(15,23,42,0.28),-10px_-10px_26px_rgba(255,255,255,0.2)]">
+                    <div className="flex h-full max-h-[92dvh] w-full max-w-7xl flex-col overflow-hidden rounded-[1.7rem] border border-[#ececec] bg-[#f7f7f5] shadow-[12px_12px_30px_rgba(15,23,42,0.28),-10px_-10px_26px_rgba(255,255,255,0.2)]">
                         <div className="flex items-center justify-between gap-4 border-b border-[#101318] bg-[#111318] px-6 py-5">
                             <div className="flex min-w-0 items-center gap-3">
                                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[#F39200]/25 bg-[#F39200]/10 text-[#F39200]">
@@ -2714,6 +2736,10 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
                                     src={resolveMediaUrl(formData.imagen_referencial_url)}
                                     alt="Imagen referencial del proyecto"
                                     className="h-full w-full object-contain"
+                                    onError={() => {
+                                        setReferentialImageFailed(true);
+                                        setImageViewerOpen(false);
+                                    }}
                                 />
                             </div>
                         </div>
@@ -2731,7 +2757,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
 
             {geoViewerOpen && (
                 <div className="fixed inset-0 z-[136] flex items-center justify-center bg-zinc-900/45 px-4 py-6 backdrop-blur-[2px]">
-                    <div className="flex h-full max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-[1.7rem] border border-[#ececec] bg-[#f7f7f5] shadow-[12px_12px_30px_rgba(15,23,42,0.28),-10px_-10px_26px_rgba(255,255,255,0.2)]">
+                    <div className="flex h-full max-h-[92dvh] w-full max-w-7xl flex-col overflow-hidden rounded-[1.7rem] border border-[#ececec] bg-[#f7f7f5] shadow-[12px_12px_30px_rgba(15,23,42,0.28),-10px_-10px_26px_rgba(255,255,255,0.2)]">
                         <div className="flex items-center justify-between gap-4 border-b border-[#101318] bg-[#111318] px-6 py-5">
                             <div className="flex min-w-0 items-center gap-3">
                                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[#136191]/25 bg-[#136191]/10 text-[#136191]">
@@ -2820,7 +2846,7 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
 
             {pdfPreviewDocument && (
                 <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/55 px-4 py-6">
-                    <div className="flex h-full max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white shadow-2xl">
+                    <div className="flex h-full max-h-[92dvh] w-full max-w-6xl flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white shadow-2xl">
                         <div className="flex items-center justify-between gap-3 border-b border-zinc-100 bg-[#f2f2f0] px-5 py-4">
                             <div className="min-w-0">
                                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">Visor interno PDF</p>

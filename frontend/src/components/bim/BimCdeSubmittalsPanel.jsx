@@ -64,7 +64,7 @@ export default function BimCdeSubmittalsPanel({ projectId, empresaId, api = bimM
 
     return <section className="border border-slate-200 bg-white" data-bim-cde-submittals>
         <header className="flex h-10 items-center gap-2 border-b border-slate-200 px-3"><ClipboardCheck size={16} className="text-orange-600" /><h3 className="text-sm font-semibold text-slate-800">Submittals y planos de ingenieria</h3></header>
-        <div className="grid min-h-[540px] grid-cols-[minmax(300px,0.85fr)_minmax(380px,1.15fr)] text-xs">
+        <div className="bim-adaptive-master-detail grid min-h-0 text-xs">
             <div className="border-r border-slate-200 p-3">
                 <form className="grid grid-cols-2 gap-2" onSubmit={create}>
                     <input className="col-span-2 border border-slate-300 px-2 py-1.5" required minLength={3} aria-label="Titulo submittal" placeholder="Titulo del expediente" value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} />

@@ -5,6 +5,7 @@ import re
 import unicodedata
 from pathlib import Path
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Any, Optional
 import httpx
@@ -21,15 +22,23 @@ from app.schemas.proyecto_detalle import (
     ProyectoGeocodeRequest,
     ProyectoGeocodeResponse,
 )
+from app.schemas.cronograma_trabajo import CronogramaTrabajoUpdate
 from app.repositories.proyecto_detalle import proyecto_detalle_repo
+from app.repositories.presupuesto import presupuesto_repo
 from app.models.usuario import Usuario
 from app.models.proyecto import Proyecto
 from app.models.proyecto_documento import ProyectoDocumento
+from app.models.proyecto_detalle import ProyectoDetalle
+from app.models.presupuesto import Presupuesto
+from app.core.database import SessionLocal
 from app.services.reporting import reporting_service
+from app.services.cronograma_trabajo import cronograma_trabajo_service
+from app.services.audit_event import record_audit_event
 
 router = APIRouter()
 
 GEOCODE_USER_AGENT = "GiProy-Network/1.0 proyecto-detalles-geocoder"
+_GEOREF_MAP_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="giproy-georef")
 GEOCODE_ACCENT_ALIASES = (
     ("simon", "Simón"),
     ("bolivar", "Bolívar"),
@@ -51,6 +60,56 @@ GEOCODE_ACCENT_ALIASES = (
     ("martin", "Martín"),
     ("antonio", "Antonio"),
 )
+
+
+def _refresh_project_georef_map_cache_background(detail_id: int, empresa_id: int) -> None:
+    """Genera el mapa fuera de la respuesta HTTP y con una sesión independiente."""
+    db = SessionLocal()
+    try:
+        detail = (
+            db.query(ProyectoDetalle)
+            .filter(
+                ProyectoDetalle.id == detail_id,
+                ProyectoDetalle.empresa_id == empresa_id,
+            )
+            .first()
+        )
+        if detail:
+            reporting_service.refresh_project_georef_map_cache(db, detail, empresa_id)
+    finally:
+        db.close()
+
+
+def _queue_project_georef_map_refresh(
+    db: Session,
+    detail: ProyectoDetalle,
+    empresa_id: int,
+) -> None:
+    """Marca una regeneración una sola vez y libera inmediatamente la petición."""
+    signature = reporting_service._build_project_georef_signature(detail)
+    if not signature:
+        return
+    stored_signature = str(getattr(detail, "georef_map_signature", "") or "")
+    stored_status = str(getattr(detail, "georef_map_status", "") or "")
+    cached_payload = reporting_service._get_project_cached_georef_map_bytes(detail)
+    if stored_status == "ready" and stored_signature == signature and cached_payload:
+        return
+    if stored_status == "pending" and stored_signature == signature:
+        return
+
+    detail.georef_map_status = "pending"
+    detail.georef_map_signature = signature
+    detail.georef_map_error = None
+    db.add(detail)
+    db.commit()
+    db.refresh(detail)
+    _GEOREF_MAP_EXECUTOR.submit(
+        _refresh_project_georef_map_cache_background,
+        int(detail.id),
+        int(empresa_id),
+    )
+
+
 OVERPASS_INTERSECTION_URL = "https://overpass-api.de/api/interpreter"
 
 
@@ -70,6 +129,17 @@ def _project_exists_for_root(db: Session, codigo_root: str, empresa_id: int) -> 
         .first()
         is not None
     )
+
+
+def _project_for_root(db: Session, codigo_root: str, empresa_id: int) -> Proyecto | None:
+    return db.query(Proyecto).filter(
+        Proyecto.empresa_id == empresa_id,
+        or_(Proyecto.codigo_root == codigo_root, Proyecto.codigo == codigo_root),
+    ).order_by(Proyecto.revision.desc()).first()
+
+
+def _audit_project_detail(db: Session, *, project: Proyecto, actor: Usuario, event_type: str, message: str, entity_type: str, entity_id, operation_status: str = "applied", payload: dict | None = None):
+    return record_audit_event(db, module="proyecto", event_type=event_type, message=message, actor=actor, empresa_id=project.empresa_id, proyecto_id=project.id, proyecto_codigo_root=project.codigo_root, proyecto_revision=project.revision, entity_type=entity_type, entity_id=entity_id, operation_status=operation_status, payload=payload or {})
 
 
 def _resolve_project_upload_path(raw_path: str) -> Path:
@@ -652,6 +722,9 @@ async def upload_project_document(
     db.add(document)
     db.commit()
     db.refresh(document)
+    project = _project_for_root(db, codigo_root, target_empresa_id)
+    if project:
+        _audit_project_detail(db, project=project, actor=current_user, event_type="project_document_uploaded", message="Documento del proyecto cargado.", entity_type="project_document", entity_id=document.id, payload={"file_name": document.file_name, "size_bytes": document.size_bytes, "content_type": document.content_type})
     return document
 
 
@@ -686,6 +759,9 @@ def delete_project_document(
     db.add(document)
     db.commit()
     db.refresh(document)
+    project = _project_for_root(db, document.codigo_root, target_empresa_id)
+    if project:
+        _audit_project_detail(db, project=project, actor=current_user, event_type="project_document_deleted", message="Documento del proyecto retirado.", entity_type="project_document", entity_id=document.id, operation_status="deleted", payload={"file_name": document.file_name})
     return document
 
 @router.get("/{codigo_root}", response_model=ProyectoDetalleResponse)
@@ -706,13 +782,10 @@ def read_proyecto_detalle(
     if not detalle:
         # Si no existe, devolvemos un objeto vacío con el codigo_root para inicializarlo en el front
         return {"codigo_root": codigo_root, "empresa_id": target_empresa_id}
-    current_georef_signature = reporting_service._build_project_georef_signature(detalle)
-    stored_georef_signature = str(getattr(detalle, "georef_map_signature", "") or "")
-    stored_georef_status = str(getattr(detalle, "georef_map_status", "") or "")
-    if current_georef_signature and (
-        stored_georef_status != "ready" or stored_georef_signature != current_georef_signature
-    ):
-        reporting_service.refresh_project_georef_map_cache(db, detalle, target_empresa_id)
+    # La lectura del portafolio debe ser estrictamente de consulta. La imagen
+    # georreferenciada se regenera al guardar los datos del proyecto; hacerlo
+    # aquí iniciaba descargas de teselas por cada tarjeta y bloqueaba cargas
+    # consecutivas del portafolio.
     return detalle
 
 @router.post("/", response_model=ProyectoDetalleResponse)
@@ -745,23 +818,87 @@ def create_or_update_proyecto_detalle(
         codigo_root=detalle_in.codigo_root,
         empresa_id=target_empresa_id,
     )
+
+    # Detectar si cambió fecha_inicio para disparar sincronización de cronogramas
+    fecha_inicio_changed = False
+    if db_obj:
+        old_fecha_inicio = getattr(db_obj, 'fecha_inicio', None)
+        new_fecha_inicio = getattr(detalle_in, 'fecha_inicio', None)
+        fecha_inicio_changed = old_fecha_inicio != new_fecha_inicio
+
     if db_obj:
         detail = proyecto_detalle_repo.update(db=db, db_obj=db_obj, obj_in=detalle_in)
     else:
         detail = proyecto_detalle_repo.create(db=db, obj_in=detalle_in, empresa_id=target_empresa_id)
 
-    reporting_service.refresh_project_georef_map_cache(db, detail, target_empresa_id)
+    # Si cambió fecha_inicio, sincronizar cronogramas de todos los presupuestos
+    if fecha_inicio_changed and detail:
+        proyecto_id = db.query(Proyecto.id).filter(
+            Proyecto.codigo_root == detail.codigo_root,
+            Proyecto.empresa_id == target_empresa_id,
+        ).first()
+        if proyecto_id:
+            proyecto_id = proyecto_id[0]
+            presupuestos = presupuesto_repo.find_filtered(
+                db,
+                filters={
+                    "proyecto_id": proyecto_id,
+                    "empresa_id": target_empresa_id,
+                }
+            ) or []
+            for presupuesto in presupuestos:
+                try:
+                    cronograma_trabajo_service.update_schedule(
+                        db,
+                        presupuesto_id=presupuesto.id,
+                        proyecto_id=presupuesto.proyecto_id,
+                        empresa_id=presupuesto.empresa_id,
+                        obj_in=CronogramaTrabajoUpdate(),  # Empty update triggers sync from Datos Proyecto
+                    )
+                    record_audit_event(
+                        db,
+                        module="cronogramas_trabajo",
+                        event_type="cronograma_fecha_sincronizado",
+                        severity="info",
+                        actor=current_user,
+                        target_empresa_id=target_empresa_id,
+                        entity_type="presupuesto",
+                        entity_id=presupuesto.id,
+                        message=f"Cronograma sincronizado por cambio de fecha en Datos Proyecto",
+                    )
+                except Exception as sync_err:
+                    # Log pero no bloquear: un error de sincronización no debe fallar la actualización de Datos Proyecto
+                    pass
+
+    _queue_project_georef_map_refresh(
+        db,
+        detail,
+        target_empresa_id,
+    )
+    project = _project_for_root(db, detail.codigo_root, target_empresa_id)
+    if project:
+        _audit_project_detail(db, project=project, actor=current_user, event_type="project_details_updated", message="Datos de proyecto actualizados.", entity_type="project_details", entity_id=detail.id, payload={"changed_fields": sorted(detalle_in.model_dump(exclude_unset=True).keys()), "schedule_start_synchronized": fecha_inicio_changed})
     return detail
 
 @router.post("/upload-image")
 async def upload_project_image(
     file: UploadFile = File(...),
+    codigo_root: str = Query(..., min_length=1),
+    empresa_id: Optional[int] = Query(None),
+    db: Session = Depends(deps.get_db),
     current_user: Usuario = Depends(deps.get_current_active_user)
 ) -> Any:
     """
     Sube una imagen referencial del proyecto.
     """
-    if not file.content_type.startswith("image/"):
+    if (current_user.rol or "").lower() not in ["administrador", "superadministrador"]:
+        raise HTTPException(status_code=403, detail="No tiene permisos para subir imágenes del proyecto.")
+    target_empresa_id = _resolve_target_empresa_id(current_user, empresa_id)
+    project = _project_for_root(db, codigo_root, target_empresa_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado o acceso denegado.")
+    allowed_types = {"image/jpeg": (b"\xff\xd8\xff",), "image/png": (b"\x89PNG\r\n\x1a\n",), "image/webp": (b"RIFF",)}
+    if file.content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="El archivo debe ser una imagen.")
     
     upload_dir = "uploads/proyectos"
@@ -772,10 +909,16 @@ async def upload_project_image(
     unique_filename = f"{uuid.uuid4()}{file_extension}"
     file_path = os.path.join(upload_dir, unique_filename)
     
+    content = await file.read()
+    if not content or len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="La imagen debe contener datos y no superar 10 MiB.")
+    if not any(content.startswith(signature) for signature in allowed_types[file.content_type]):
+        raise HTTPException(status_code=400, detail="La firma del archivo no coincide con el formato de imagen declarado.")
+    if file.content_type == "image/webp" and content[8:12] != b"WEBP":
+        raise HTTPException(status_code=400, detail="La firma WebP no es válida.")
     with open(file_path, "wb") as buffer:
-        content = await file.read()
         buffer.write(content)
-    
+    _audit_project_detail(db, project=project, actor=current_user, event_type="project_reference_image_uploaded", message="Imagen referencial del proyecto cargada.", entity_type="project_image", entity_id=unique_filename, payload={"content_type": file.content_type, "size_bytes": len(content)})
     return {"url": f"/uploads/proyectos/{unique_filename}"}
 
 

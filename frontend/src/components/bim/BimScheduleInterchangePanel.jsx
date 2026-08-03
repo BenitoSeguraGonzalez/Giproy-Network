@@ -51,7 +51,7 @@ export default function BimScheduleInterchangePanel({ projectId, empresaId, api 
     const saveRevision = async () => {
         try {
             setBusy(true); setError('');
-            const created = await api.createScheduleImportRevision(projectId, preview.document, empresaId);
+            const created = await api.createScheduleImportRevision(projectId, preview.document, preview.coordination_stage_id, empresaId);
             setRevisions((current) => [created, ...current]);
         } catch (requestError) {
             setError(requestError?.response?.data?.detail || 'No se pudo guardar la revision BIM.');

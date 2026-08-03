@@ -86,7 +86,7 @@ const ApuEditorModal = ({ apuId, projectBaseId, projectRevision, onClose }) => {
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[300] flex justify-end">
+                <div className="fixed inset-0 z-[1000] flex justify-end">
                     {/* Backdrop (fondo oscurecido) */}
                     <MotionDiv
                         initial={{ opacity: 0 }}

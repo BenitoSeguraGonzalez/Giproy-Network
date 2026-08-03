@@ -148,6 +148,8 @@ const Settings = () => {
         acepta_politica_privacidad: false, acepta_politicas_comunicacion: false, autoriza_publicidad: false
     });
     const [miEmpresa, setMiEmpresa] = useState(null);
+    const [omniclassBreakAcknowledged, setOmniclassBreakAcknowledged] = useState(false);
+    const [omniclassChangeReason, setOmniclassChangeReason] = useState('');
     const [companyBackupPreflight, setCompanyBackupPreflight] = useState(null);
     const [companyBackupLoading, setCompanyBackupLoading] = useState(false);
     const [companyBackupExporting, setCompanyBackupExporting] = useState(false);
@@ -674,12 +676,18 @@ const Settings = () => {
 
     const handleUpdatePreferencias = async (e) => {
         e.preventDefault();
+        if (miEmpresa.use_omniclass === false && (!omniclassBreakAcknowledged || omniclassChangeReason.trim().length < 10)) {
+            appAlert("Para desactivar OmniClass debe reconocer la ruptura estructural e indicar un motivo de al menos 10 caracteres.");
+            return;
+        }
         try {
             await empresasApi.update(miEmpresa.id, {
                 decimales_moneda: miEmpresa.decimales_moneda,
                 decimales_calculos: miEmpresa.decimales_calculos,
                 use_omniclass: miEmpresa.use_omniclass,
-                session_timeout_minutes: miEmpresa.session_timeout_minutes
+                session_timeout_minutes: miEmpresa.session_timeout_minutes,
+                omniclass_change_acknowledged: miEmpresa.use_omniclass === false ? omniclassBreakAcknowledged : false,
+                omniclass_change_reason: miEmpresa.use_omniclass === false ? omniclassChangeReason.trim() : null,
             });
             appAlert("Preferencias guardadas correctamente. Se recomienda recargar la página para aplicar los cambios en todo el sistema.");
             fetchData();
@@ -1422,16 +1430,31 @@ const Settings = () => {
                                 <Checkbox
                                     id="use_omniclass"
                                     checked={miEmpresa?.use_omniclass !== false}
-                                    onCheckedChange={(checked) => setMiEmpresa({ ...miEmpresa, use_omniclass: checked === true })}
+                                    onCheckedChange={(checked) => {
+                                        const enabled = checked === true;
+                                        setMiEmpresa({ ...miEmpresa, use_omniclass: enabled });
+                                        if (enabled) { setOmniclassBreakAcknowledged(false); setOmniclassChangeReason(''); }
+                                    }}
                                     className="mt-1 data-[state=checked]:bg-[#F39200] data-[state=checked]:border-[#F39200]"
                                 />
                                 <div className="space-y-1">
                                     <Label htmlFor="use_omniclass" className="text-[11px] uppercase font-black tracking-widest text-zinc-500 cursor-pointer">
                                         Uso de OmniClass
                                     </Label>
-                                    <p className="text-[10px] text-zinc-400 font-medium leading-relaxed">
-                                        Si se desactiva, el sistema oculta OmniClass en catálogos, APUs, presupuesto y reportes, e ignora cualquier dato OmniClass entrante.
+                                    <p className="text-[10px] text-zinc-500 font-medium leading-relaxed">
+                                        Si se desactiva, GiProy conserva los códigos de origen pero deja de resolver la estructura común en catálogos, APUs, presupuesto, Gantt y BIM.
                                     </p>
+                                    {miEmpresa?.use_omniclass === false ? (
+                                        <div className="mt-3 border border-amber-300 bg-amber-50 p-3 text-[10px] font-semibold leading-relaxed text-amber-950" role="alert">
+                                            <div className="flex gap-2">
+                                            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                                            <span>Ruptura estructural activa: presupuesto, planificación y modelos BIM pueden usar clasificaciones incompatibles. Los vínculos se conservarán, pero no podrán considerarse plenamente coordinados.</span>
+                                            </div>
+                                            <label className="mt-3 flex items-start gap-2 normal-case tracking-normal"><Checkbox checked={omniclassBreakAcknowledged} onCheckedChange={(checked) => setOmniclassBreakAcknowledged(checked === true)} className="mt-0.5" /><span>Comprendo que Presupuesto, Gantt y BIM dejarán de compartir una clasificación contractual común.</span></label>
+                                            <Label htmlFor="omniclass-change-reason" className="mt-3 block text-[10px] font-bold text-amber-950">Motivo de desactivación</Label>
+                                            <textarea id="omniclass-change-reason" value={omniclassChangeReason} onChange={(event) => setOmniclassChangeReason(event.target.value)} rows={3} className="mt-1 w-full resize-none rounded-lg border border-amber-300 bg-white p-2 text-xs font-medium text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600" placeholder="Explique por qué el proyecto operará sin coordinación OmniClass" />
+                                        </div>
+                                    ) : null}
                                 </div>
                             </div>
                         </div>
@@ -1444,7 +1467,7 @@ const Settings = () => {
                         </p>
                     </div>
 
-                    <LiquidButton type="submit" className="w-full !h-14 bg-[#F39200] text-white text-xs font-black uppercase tracking-[0.2em]">
+                    <LiquidButton type="submit" disabled={miEmpresa?.use_omniclass === false && (!omniclassBreakAcknowledged || omniclassChangeReason.trim().length < 10)} className="w-full !h-14 bg-[#F39200] text-white text-xs font-black uppercase tracking-[0.2em] disabled:opacity-50">
                         Guardar Preferencias
                     </LiquidButton>
                 </form>
@@ -2775,7 +2798,7 @@ const Settings = () => {
     );
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] flex flex-col bg-[#F2F4F7] text-[#1A1A1A] overflow-hidden">
+        <div className="h-full min-h-0 flex flex-col bg-[#F2F4F7] text-[#1A1A1A] overflow-hidden">
             <header className="bg-white border-b border-zinc-200 px-8 py-4 sticky top-0 z-40 shadow-sm">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-6">
@@ -2889,7 +2912,7 @@ const Settings = () => {
                     panelClassName="bg-[#f7f7f5]"
                     overlayClassName="overflow-y-auto"
                 >
-                    <form onSubmit={activeTab === 'empresas' ? handleCreateEmpresa : handleCreateUsuario} className="flex max-h-[92vh] min-h-0 flex-col">
+                    <form onSubmit={activeTab === 'empresas' ? handleCreateEmpresa : handleCreateUsuario} className="flex max-h-[92dvh] min-h-0 flex-col">
                         <AppModalHeader
                             title={activeTab === 'empresas'
                                 ? (editMode ? 'Editar Empresa' : 'Registrar Empresa')

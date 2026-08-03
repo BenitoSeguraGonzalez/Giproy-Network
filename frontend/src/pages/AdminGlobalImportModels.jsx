@@ -254,7 +254,7 @@ const AdminGlobalImportModels = () => {
 
     if (!isSuperadmin) {
         return (
-            <div className="h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] p-12">
+            <div className="h-full min-h-0 bg-[#F2F4F7] p-12">
                 <button onClick={() => navigate('/admin-global')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors">
                     <ArrowLeft className="w-4 h-4" /> Volver
                 </button>
@@ -267,7 +267,7 @@ const AdminGlobalImportModels = () => {
     }
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] flex flex-col bg-[#F2F4F7]">
+        <div className="h-full min-h-0 flex flex-col bg-[#F2F4F7]">
             <main className="flex-1 overflow-y-auto p-8 xl:p-12 custom-scrollbar">
                 <div className="w-full max-w-[1600px] mx-auto">
                     <button onClick={() => navigate('/admin-global')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors">
@@ -311,7 +311,7 @@ const AdminGlobalImportModels = () => {
                                             <h2 className="font-black uppercase tracking-tight text-zinc-900">Perfiles</h2>
                                         </div>
                                     </div>
-                                    <div className="space-y-3 max-h-[52vh] overflow-y-auto custom-scrollbar pr-1">
+                                    <div className="space-y-3 max-h-[52dvh] overflow-y-auto custom-scrollbar pr-1">
                                         {loading ? (
                                             <p className="text-sm font-bold text-zinc-400">Cargando...</p>
                                         ) : profiles.map((profile) => (

@@ -116,12 +116,22 @@ const browser = await chromium.launch({
 const viewports = [
   { name: 'desktop', width: 1440, height: 900 },
   { name: 'wide', width: 1920, height: 1080 },
+  { name: 'tablet-landscape', width: 1472, height: 820, touch: true },
+  { name: 'tablet-portrait', width: 920, height: 1472, touch: true },
 ];
 
 const results = [];
 
 for (const viewport of viewports) {
-  const page = await browser.newPage({ viewport });
+  const page = await browser.newPage({
+    viewport: { width: viewport.width, height: viewport.height },
+    hasTouch: Boolean(viewport.touch),
+    isMobile: Boolean(viewport.touch),
+    deviceScaleFactor: viewport.touch ? 2 : 1,
+  });
+  if (viewport.touch) {
+    await page.addInitScript(() => window.localStorage.setItem('giproy_adaptive_ui_pilot', 'true'));
+  }
   const consoleErrors = [];
   page.on('console', (message) => {
     if (message.type() === 'error') consoleErrors.push(message.text());
@@ -190,7 +200,8 @@ for (const viewport of viewports) {
       hasHorizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 2,
       hasSettingsEmpresa: visibleText.includes('Settings Empresa') || visibleText.includes('Settings'),
       hasAjustesGlobales: visibleText.includes('Ajustes Globales'),
-      hasBim: /\bBIM\b/.test(visibleText),
+      hasBimTooling: /Cargar IFC|Visor BIM|Federaci[oó]n de modelos|Herramientas BIM/i.test(visibleText),
+      hasOmniclassStructuralWarning: visibleText.includes('Ruptura estructural activa') && visibleText.includes('presupuesto, planificación y modelos BIM'),
       visibleTextLength: visibleText.length,
       textOverflowNodes,
       zones: {
@@ -251,6 +262,14 @@ for (const viewport of viewports) {
 
   await page.getByRole('button', { name: /^Preferencias$/i }).click();
   await page.waitForSelector('[data-settings-company-zone="preferencias-empresa"]', { timeout: 15000 });
+  const omniCheckbox = page.locator('#use_omniclass');
+  if (await omniCheckbox.isChecked()) await page.getByLabel('Uso de OmniClass').click();
+  await page.getByText('Ruptura estructural activa', { exact: false }).waitFor();
+  const savePreferences = page.getByRole('button', { name: /Guardar Preferencias/i });
+  if (!(await savePreferences.isDisabled())) throw new Error(`${viewport.name}/preferencias: guardar debe bloquearse sin reconocimiento y motivo`);
+  await page.getByText(/Comprendo que Presupuesto, Gantt y BIM/).click();
+  await page.getByLabel('Motivo de desactivación').fill('Contrato externo sin clasificación común');
+  if (await savePreferences.isDisabled()) throw new Error(`${viewport.name}/preferencias: guardar debe habilitarse tras reconocimiento informado`);
   states.push(await readState('preferencias'));
 
   await page.getByRole('button', { name: /Códigos Proyecto/i }).click();
@@ -267,7 +286,7 @@ for (const viewport of viewports) {
   for (const state of states) {
     if (state.hasHorizontalOverflow) failures.push(`${viewport.name}/${state.label}: overflow horizontal ${state.bodyScrollWidth}/${state.bodyClientWidth}`);
     if (state.hasAjustesGlobales) failures.push(`${viewport.name}/${state.label}: reaparece Ajustes Globales`);
-    if (state.hasBim) failures.push(`${viewport.name}/${state.label}: aparece BIM en Settings empresa`);
+    if (state.hasBimTooling) failures.push(`${viewport.name}/${state.label}: aparecen herramientas BIM fuera del workspace`);
     if (state.textOverflowNodes.length > 0) failures.push(`${viewport.name}/${state.label}: textos con overflow ${JSON.stringify(state.textOverflowNodes)}`);
   }
 
@@ -288,6 +307,8 @@ for (const viewport of viewports) {
     const state = states.find((item) => item.label === label);
     if (!state?.zones?.[zone]) failures.push(`${viewport.name}/${label}: falta zona ${zone}`);
   }
+  const preferencesState = states.find((item) => item.label === 'preferencias');
+  if (!preferencesState?.hasOmniclassStructuralWarning) failures.push(`${viewport.name}/preferencias: falta aviso estructural OmniClass Presupuesto-Gantt-BIM`);
 
   const relevantConsoleErrors = consoleErrors.filter((item) => !/Failed to load resource/i.test(item));
   if (relevantConsoleErrors.length > 0) failures.push(`${viewport.name}: errores consola ${JSON.stringify(relevantConsoleErrors.slice(0, 5))}`);

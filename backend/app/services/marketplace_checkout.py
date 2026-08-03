@@ -186,7 +186,9 @@ class MarketplaceCheckoutService:
             "profesional": 2,
             "professional": 2,
         }
-        snapshot = license_service.get_company_license_snapshot(db, empresa_id)
+        snapshot = license_service.get_company_license_snapshot(
+            db, empresa_id, run_housekeeping=True
+        )
         current_assignment = snapshot.get("current_assignment")
         current_license = current_assignment.licencia if current_assignment else None
         if not current_license:
@@ -435,7 +437,9 @@ class MarketplaceCheckoutService:
         if not required_plans:
             return
 
-        snapshot = license_service.get_company_license_snapshot(db, empresa_id)
+        snapshot = license_service.get_company_license_snapshot(
+            db, empresa_id, run_housekeeping=True
+        )
         assignment = snapshot.get("current_assignment")
         licencia = assignment.licencia if assignment else None
         company_plan_keys = {

@@ -5,6 +5,7 @@ from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.core.debug_logger import log_debug
 from app.models.usuario import Usuario
+from app.models.empresa import Empresa
 from app.schemas.system_bim_setting import SystemBimSettingResponse, SystemBimSettingUpdate
 from app.services.audit_event import record_audit_event
 from app.services.system_bim_setting import (
@@ -68,12 +69,23 @@ def update_admin_bim_config(
     current_user: Usuario = Depends(check_superadmin),
 ):
     config = get_or_create_system_bim_setting(db)
+    previous_company_ids = set(_parse_company_ids(config.allowed_company_ids))
+    requested_company_ids = set(_parse_company_ids(payload.allowed_company_ids))
     config.titulo = payload.titulo
     config.descripcion = payload.descripcion
     config.is_enabled = payload.is_enabled
     config.superadmin_only = payload.superadmin_only
     config.allowed_company_ids = payload.allowed_company_ids
     config.updated_by = current_user.id
+
+    # First BIM activation establishes OmniClass as the coordinated default.
+    # Subsequent tenant settings remain under company control and are not forced.
+    newly_enabled_company_ids = requested_company_ids - previous_company_ids
+    if payload.is_enabled and newly_enabled_company_ids:
+        db.query(Empresa).filter(Empresa.id.in_(newly_enabled_company_ids)).update(
+            {Empresa.use_omniclass: True},
+            synchronize_session=False,
+        )
 
     db.add(config)
     db.commit()
@@ -98,6 +110,7 @@ def update_admin_bim_config(
             "is_enabled": config.is_enabled,
             "superadmin_only": config.superadmin_only,
             "allowed_company_ids": config.allowed_company_ids,
+            "omniclass_enabled_by_default_for": sorted(newly_enabled_company_ids) if payload.is_enabled else [],
         },
     )
 

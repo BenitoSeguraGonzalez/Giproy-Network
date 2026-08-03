@@ -71,6 +71,7 @@ class BimImportElementPayload(BaseModel):
 
 
 class BimJsonImportRequest(BaseModel):
+    coordination_stage_id: Optional[int] = Field(default=None, gt=0)
     model_name: str = Field(min_length=1, max_length=255)
     discipline: Optional[str] = Field(default=None, max_length=100)
     description: Optional[str] = None
@@ -95,6 +96,7 @@ class BimJsonImportResponse(BaseModel):
 
 
 class BimJsonImportBatchRequest(BaseModel):
+    coordination_stage_id: Optional[int] = Field(default=None, gt=0)
     packages: list[BimJsonImportRequest] = Field(default_factory=list)
 
 
@@ -104,6 +106,7 @@ class BimJsonImportBatchResponse(BaseModel):
 
 
 class BimIfcManifestRequest(BaseModel):
+    coordination_stage_id: Optional[int] = Field(default=None, gt=0)
     model_name: str = Field(min_length=1, max_length=255)
     version_label: str = Field(min_length=1, max_length=50)
     source_filename: str = Field(min_length=1, max_length=255)
@@ -128,6 +131,7 @@ class BimIfcManifestResponse(BaseModel):
 
 
 class BimIfcTextImportRequest(BaseModel):
+    coordination_stage_id: Optional[int] = Field(default=None, gt=0)
     model_name: str = Field(min_length=1, max_length=255)
     version_label: str = Field(min_length=1, max_length=50)
     source_filename: str = Field(min_length=1, max_length=255)

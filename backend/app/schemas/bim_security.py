@@ -5,3 +5,4 @@ class BimCapabilityResponse(BaseModel):
 
 class BimGrantRequest(BaseModel):
     capabilities: list[str] = Field(default_factory=list)
+    edt_id: int | None = None

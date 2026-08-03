@@ -13,6 +13,7 @@ from app.models.bim_4d import (
 from app.models.bim_element import BimElement
 from app.models.bim_model import BimModel
 from app.models.bim_model_version import BimModelVersion
+from app.models.presupuesto import Presupuesto, PresupuestoDetalle
 
 
 def _utc(value):
@@ -30,6 +31,7 @@ def _serialize_activity(activity):
         "company_id": activity.empresa_id,
         "source_kind": activity.source_kind,
         "source_ref": activity.source_ref,
+        "budget_line_id": activity.budget_line_id,
         "snapshot_revision": activity.snapshot_revision,
         "activity_code": activity.activity_code,
         "activity_name": activity.activity_name,
@@ -91,11 +93,24 @@ def build_gantt(db, *, baseline_id, project_id, company_id):
     approved_links = db.query(Bim4dLinkProposal, BimElement).join(BimElement, BimElement.id == Bim4dLinkProposal.bim_element_id).filter(Bim4dLinkProposal.proyecto_id == project_id, Bim4dLinkProposal.empresa_id == company_id, Bim4dLinkProposal.status == "approved", Bim4dLinkProposal.activity_snapshot_id.in_(activity_ids)).all()
     guids = {}
     for link, element in approved_links: guids.setdefault(link.activity_snapshot_id, set()).add(element.global_id)
-    serialized = [{"id": activity.id, "code": activity.activity_code, "name": activity.activity_name, "planned_start": activity.planned_start, "planned_finish": activity.planned_finish, "duration_days": round(duration[activity.id], 2), "critical": activity.id in critical_set, "global_ids": sorted(guids.get(activity.id, set()))} for activity in sorted(activities, key=lambda value: (value.planned_start, value.activity_code))]
+    serialized = [{"id": activity.id, "source_ref": activity.source_ref, "budget_line_id": activity.budget_line_id, "code": activity.activity_code, "name": activity.activity_name, "planned_start": activity.planned_start, "planned_finish": activity.planned_finish, "duration_days": round(duration[activity.id], 2), "critical": activity.id in critical_set, "global_ids": sorted(guids.get(activity.id, set()))} for activity in sorted(activities, key=lambda value: (value.planned_start, value.activity_code))]
     return {"project_id": project_id, "company_id": company_id, "baseline_id": baseline.id, "range_start": min(activity.planned_start for activity in activities), "range_finish": max(activity.planned_finish for activity in activities), "critical_path_activity_ids": critical_path, "activities": serialized, "dependencies": [{"predecessor_activity_id": item.predecessor_activity_id, "successor_activity_id": item.successor_activity_id, "dependency_type": item.dependency_type, "lag_days": item.lag_days} for item in dependencies]}
 
 
 def create_activity_snapshot(db, *, project_id, company_id, user_id, payload):
+    if payload.budget_line_id:
+        budget_line = (
+            db.query(PresupuestoDetalle)
+            .join(Presupuesto, Presupuesto.id == PresupuestoDetalle.presupuesto_id)
+            .filter(
+                PresupuestoDetalle.id == payload.budget_line_id,
+                Presupuesto.proyecto_id == project_id,
+                Presupuesto.empresa_id == company_id,
+            )
+            .first()
+        )
+        if not budget_line:
+            raise HTTPException(status_code=400, detail="La partida de la actividad 4D queda fuera del proyecto activo.")
     duplicate = db.query(Bim4dActivitySnapshot).filter(
         Bim4dActivitySnapshot.empresa_id == company_id,
         Bim4dActivitySnapshot.proyecto_id == project_id,

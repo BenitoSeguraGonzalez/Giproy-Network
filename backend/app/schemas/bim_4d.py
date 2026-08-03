@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, model_validator
 class Bim4dActivitySnapshotCreate(BaseModel):
     source_kind: Literal["giproy_classic_schedule", "microsoft_project", "primavera", "synchro"] = "giproy_classic_schedule"
     source_ref: str = Field(min_length=1, max_length=255)
+    budget_line_id: int | None = Field(default=None, gt=0)
     snapshot_revision: str = Field(min_length=1, max_length=100)
     activity_code: str = Field(min_length=1, max_length=100)
     activity_name: str = Field(min_length=2, max_length=500)
@@ -176,6 +177,8 @@ class Bim4dDeviationResponse(BaseModel):
 
 class Bim4dGanttActivity(BaseModel):
     id: int
+    source_ref: str
+    budget_line_id: int | None = None
     code: str
     name: str
     planned_start: datetime

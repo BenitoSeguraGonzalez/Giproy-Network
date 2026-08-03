@@ -28,6 +28,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100vh;
+  height: 100dvh;
   width: 100%;
   background-color: var(--bg-light);
   color: var(--text-primary);
@@ -37,6 +38,15 @@ html, body {
 #root {
   width: 100%;
   height: 100vh;
+  height: 100dvh;
+}
+
+@media (pointer: coarse) {
+  [data-adaptive-ui-enabled="true"] [data-adaptive-touch-target="true"] {
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
 }
 
 @theme inline {
@@ -473,4 +483,21 @@ html, body {
 .marketplace-internal-page .marketplace-internal-chip[data-tone="red"]::before {
   background: #ef4444;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.14);
+}
+/* BIM surfaces adapt to the region assigned by the workspace, not the browser. */
+.bim-adaptive-master-detail {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+}
+
+.bim-adaptive-master-detail > * {
+  min-width: 0;
+}
+
+.bim-adaptive-triple {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+}
+
+.bim-adaptive-triple > * {
+  min-width: 0;
+  min-height: 15rem;
 }

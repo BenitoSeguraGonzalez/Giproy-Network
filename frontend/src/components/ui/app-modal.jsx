@@ -12,7 +12,7 @@ const MODAL_SHADOW_RAISED = '-4px -4px 10px rgba(255,255,255,0.85), 5px 5px 12px
 const MODAL_SHADOW_INSET = 'inset 2px 2px 4px rgba(186,190,204,0.88), inset -3px -3px 7px rgba(255,255,255,0.78)';
 
 export const APP_MODAL_CLOSE_BUTTON_CLASS = [
-    'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.85rem]',
+    'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.85rem]',
     'border border-[#ececec] bg-[#ededed] text-zinc-600',
     'shadow-[3px_3px_8px_#d5d5d5,-3px_-3px_8px_#ffffff]',
     'transition-[color,border-color,filter,transform,box-shadow] duration-200',
@@ -44,7 +44,7 @@ export const AppModalShell = ({
 
     return (
         <div
-            className={`fixed inset-0 ${zIndex} flex items-center justify-center bg-[rgba(15,23,42,0.18)] backdrop-blur-[2px] p-3 md:p-4 ${overlayClassName}`}
+            className={`fixed inset-0 ${zIndex} flex items-start justify-center overflow-y-auto bg-[rgba(15,23,42,0.18)] p-3 backdrop-blur-[2px] sm:items-center md:p-4 ${overlayClassName}`}
             onClick={(e) => {
                 if (e.target === e.currentTarget && onClose) onClose();
             }}
@@ -54,11 +54,14 @@ export const AppModalShell = ({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.98, y: 10 }}
                 transition={{ duration: 0.18 }}
-                className={`w-full ${SIZE_MAP[size] || SIZE_MAP.lg} rounded-[1.7rem] overflow-hidden ${panelClassName}`}
+                className={`max-h-[calc(100dvh-1.5rem)] w-full ${SIZE_MAP[size] || SIZE_MAP.lg} overflow-x-hidden overflow-y-auto rounded-[1.7rem] md:max-h-[calc(100dvh-2rem)] ${panelClassName}`}
                 style={{
                     background: surfaceColor,
                     border: MODAL_BORDER,
                     boxShadow: MODAL_SHADOW_PANEL,
+                    maxHeight: 'calc(100dvh - 1.5rem)',
+                    overflowX: 'hidden',
+                    overflowY: 'auto',
                 }}
                 onClick={(e) => e.stopPropagation()}
             >

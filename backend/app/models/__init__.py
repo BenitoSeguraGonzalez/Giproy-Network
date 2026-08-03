@@ -5,6 +5,7 @@ from .registration_verification import RegistrationVerificationToken
 from .proyecto import Proyecto
 from .proyecto_apu_cpc import ProyectoApuCpc
 from .proyecto_asignacion import ProyectoAsignacion
+from .project_capability_grant import ProjectCapabilityGrant
 from .base_trabajo_asignacion import BaseTrabajoAsignacion
 from .recurso import CategoriaRecurso, Recurso
 from .apu import APU, APULinea
@@ -95,11 +96,19 @@ from .bim_model_version import BimModelVersion
 from .bim_import_job import BimImportJob
 from .bim_ifc_quality_report import BimIfcQualityReport
 from .bim_artifact import BimArtifact
-from .bim_federation import BimFederation, BimFederationMember
+from .bim_federation import BimFederation, BimFederationMember, BimVersionReconciliationDecision
 from .bim_ids import BimIdsFinding, BimIdsProfile, BimIdsValidation
 from .bim_issue import BimIssue, BimIssueAttachment, BimIssueComment, BimIssueEvent
 from .bim_quantity_proposal import BimQuantityProposal
 from .bim_access_grant import BimAccessGrant
+from .bim_coordination import (
+    BimClassificationResolution,
+    CoordinationConflict,
+    CoordinationLink,
+    CoordinationProposal,
+    ProjectCoordinationSet,
+    CoordinationImportStage,
+)
 from .bim_rollout import BimRolloutPlan
 from .bim_4d import (
     Bim4dActivitySnapshot,

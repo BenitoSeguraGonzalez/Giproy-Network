@@ -583,7 +583,7 @@ const MarketplaceBuyerDashboard = () => {
                 isOpen={ordersModalOpen}
                 onClose={() => setOrdersModalOpen(false)}
                 size="2xl"
-                panelClassName="max-h-[92vh] flex flex-col"
+                panelClassName="max-h-[92dvh] flex flex-col"
             >
                 <AppModalHeader
                     {...INTERNAL_MODAL_HEADER_PROPS}
@@ -749,7 +749,7 @@ const MarketplaceBuyerDashboard = () => {
                 isOpen={libraryModalOpen}
                 onClose={() => setLibraryModalOpen(false)}
                 size="2xl"
-                panelClassName="max-h-[92vh] flex flex-col"
+                panelClassName="max-h-[92dvh] flex flex-col"
             >
                 <AppModalHeader
                     {...INTERNAL_MODAL_HEADER_PROPS}

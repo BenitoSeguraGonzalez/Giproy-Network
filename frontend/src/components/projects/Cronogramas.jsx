@@ -60,6 +60,7 @@ import ClassicPrintOptionsModal from '../reporting/ClassicPrintOptionsModal';
 import { AppModalBody, AppModalFooter, AppModalHeader, AppModalShell } from '../ui/app-modal';
 import AnimatedDateInput from '../ui/AnimatedDateInput';
 import MotionScrollbar from '../ui/MotionScrollbar';
+import useAdaptiveLayout from '../../hooks/useAdaptiveLayout';
 import { normalizeDescriptionCapitalization, normalizeSubcategoryDisplay } from '../../utils/descriptionCapitalization';
 import { includesNormalized } from '../../utils/normalizeSearch';
 import { normalizeTextInputValue } from '../../utils/normalizeInputValue';
@@ -1392,6 +1393,7 @@ const CronogramaValorado = ({
     trabajoConfig,
 }) => {
     const { user } = useContext(AuthContext) || {};
+    const adaptiveLayout = useAdaptiveLayout({ moduleKey: 'cronogramas' });
     const [activeValueTab, setActiveValueTab] = useState('porcentajes');
     const [isNavigating, setIsNavigating] = useState(true);
     const [focusedCell, setFocusedCell] = useState(null); // { rowIndex, periodIndex }
@@ -1400,9 +1402,9 @@ const CronogramaValorado = ({
     const editInputRef = useRef(null);
     
     // Auto-collapse if resolution is limited (compact mode)
-    const isCompact = useMemo(() => {
-        return window.innerWidth <= 1920 || window.innerHeight <= 1080;
-    }, []);
+    const isCompact = adaptiveLayout.enabled
+        ? adaptiveLayout.profile !== 'wide'
+        : window.innerWidth <= 1920 || window.innerHeight <= 1080;
 
     const [showConfig, setShowConfig] = useState(!isCompact);
     const [showFooter, setShowFooter] = useState(true);

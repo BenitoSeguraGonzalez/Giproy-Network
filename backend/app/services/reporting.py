@@ -1459,7 +1459,7 @@ class ReportingService:
             db.refresh(detail)
             return True
         except Exception as exc:
-            detail.georef_map_status = "pending"
+            detail.georef_map_status = "failed"
             detail.georef_map_signature = signature
             detail.georef_map_error = str(exc)[:1000]
             db.add(detail)

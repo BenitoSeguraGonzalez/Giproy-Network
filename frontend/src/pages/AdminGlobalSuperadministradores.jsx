@@ -191,7 +191,7 @@ const AdminGlobalSuperadministradores = () => {
 
     if (!isSuperadmin) {
         return (
-            <div className="h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] p-12">
+            <div className="h-full min-h-0 bg-[#F2F4F7] p-12">
                 <button onClick={() => navigate('/admin-global')} className="mb-8 flex items-center gap-2 text-xs font-bold uppercase text-zinc-500 transition-colors hover:text-[#F39200]">
                     <ArrowLeft className="h-4 w-4" /> Volver
                 </button>
@@ -206,7 +206,7 @@ const AdminGlobalSuperadministradores = () => {
     }
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] overflow-y-auto p-8 xl:p-12 custom-scrollbar">
+        <div className="h-full min-h-0 bg-[#F2F4F7] overflow-y-auto p-8 xl:p-12 custom-scrollbar">
             <div className="mx-auto max-w-7xl">
                 <button onClick={() => navigate('/admin-global')} className="mb-8 flex items-center gap-2 text-xs font-bold uppercase text-zinc-500 transition-colors hover:text-[#F39200]">
                     <ArrowLeft className="h-4 w-4" /> Volver a Administración Global
@@ -335,7 +335,7 @@ const AdminGlobalSuperadministradores = () => {
                     panelClassName="bg-[#f7f7f5]"
                     overlayClassName="overflow-y-auto"
                 >
-                    <form onSubmit={submitEdit} className="flex max-h-[92vh] min-h-0 flex-col">
+                    <form onSubmit={submitEdit} className="flex max-h-[92dvh] min-h-0 flex-col">
                         <AppModalHeader
                             title="Editar Superadministrador"
                             subtitle="Cuenta de plataforma con privilegios globales"

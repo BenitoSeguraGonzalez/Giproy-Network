@@ -144,7 +144,7 @@ const ResourceEditorModal = ({
                     size="lg"
                     zIndex="z-[1000]"
                     overlayClassName="overflow-y-auto"
-                    panelClassName="max-h-[calc(100vh-1.5rem)] flex flex-col"
+                    panelClassName="max-h-[calc(100dvh-1.5rem)] flex flex-col"
                 >
                     <AppModalHeader
                         title={title || (editingRecurso ? 'Modificar recurso' : 'Nuevo recurso')}

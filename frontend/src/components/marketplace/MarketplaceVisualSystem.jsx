@@ -34,7 +34,7 @@ export const MarketplaceTypeBadge = ({ type }) => (
 );
 
 export const MarketplaceShell = ({ children, className = '', contentClassName = '' }) => (
-    <div className={`min-h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] ${className}`}>
+    <div className={`min-h-full bg-[#F2F4F7] ${className}`}>
         <div className={`mx-auto max-w-[1680px] px-4 py-5 sm:px-5 md:px-8 md:py-6 xl:px-10 ${contentClassName}`}>{children}</div>
     </div>
 );

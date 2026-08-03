@@ -105,8 +105,21 @@ class CommercialCapabilitiesService:
 
         return products
 
-    def resolve_company_capabilities(self, db: Session, empresa_id: int) -> dict:
-        snapshot = license_service.get_company_license_snapshot(db, empresa_id)
+    def resolve_company_capabilities(
+        self,
+        db: Session,
+        empresa_id: int,
+        *,
+        license_snapshot: dict | None = None,
+    ) -> dict:
+        # Los consumidores que ya calcularon la licencia pueden reutilizarla.
+        # Además de evitar trabajo duplicado, esto impide repetir el housekeeping
+        # (que sincroniza Empresa mediante UPDATE) dentro de la misma petición.
+        snapshot = license_snapshot or license_service.get_company_license_snapshot(
+            db,
+            empresa_id,
+            run_housekeeping=False,
+        )
         assignment = snapshot["current_assignment"]
         licencia = assignment.licencia if assignment else None
         limits = license_service.get_company_license_limits(db, empresa_id) if licencia else {}

@@ -452,6 +452,14 @@ export const buildDependencyRoute = ({
         return buildDependencyRouteResult(points);
     }
 
+    if (
+        (sourceIsMilestone || targetIsMilestone)
+        && Math.abs(startPoint.x - endPoint.x) <= DEPENDENCY_ALIGNED_ANCHOR_TOLERANCE_PX
+    ) {
+        const points = normalizePoints([startPoint, endPoint]);
+        return buildDependencyRouteResult(points);
+    }
+
     if (sourceIsMilestone && !targetIsMilestone && Math.abs(Number(lagDays || 0)) <= 0.0001) {
         const points = buildOrthogonalPoints();
         return buildDependencyRouteResult(points);

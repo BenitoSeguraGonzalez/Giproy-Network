@@ -240,7 +240,7 @@ const TeamDashboardModal = ({ isOpen, onClose, project, dashboardData, onAssign 
                 </div>
             </AppModalHeader>
 
-            <div className="flex flex-col h-[85vh] bg-[#F8F9FB] overflow-hidden relative">
+            <div className="flex flex-col h-[85dvh] bg-[#F8F9FB] overflow-hidden relative">
                 {/* Mapa Jerárquico */}
                 <div className="flex-1 overflow-y-auto p-12 pt-10 custom-scrollbar relative bg-[#FBFCFE]">
                     {loadingSummary && (

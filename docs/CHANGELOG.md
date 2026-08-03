@@ -1,3 +1,173 @@
+### 2026-08-03 - Ledger transversal de Proyecto y cobertura de mutaciones (S04)
+
+- El ledger estructurado incorpora cadena SHA-256 por tenant/proyecto, nonce,
+  verificación de integridad, payloads acotados y redacción de secretos.
+- Proyecto, Presupuesto, Gantt, EDT, EDO, interesados y fórmula polinómica
+  registran sus mutaciones materiales; una prueba AST impide regresiones de
+  cobertura y la cronología de Proyecto admite filtro por correlación.
+- Se endurecen permisos y tenant scope de interesados, EDO, documentos e imagen
+  referencial; las imágenes validan tipo, firma y límite de 10 MiB.
+- La política de retención prohíbe purga automática, conserva un mínimo de
+  3.650 días, contempla retención legal y exige integridad antes del archivo.
+- Se corrigen dos regresiones Gantt: identidad de subbarra sin padre inicial y
+  normalización de `session_id` hacia `created_from_session`.
+- Suite transversal: `45 passed`; frontend: build y smokes de imagen/proyecto
+  clásico correctos. La migración `de2062a1b2c3` queda preparada sin aplicarse
+  a datos reales.
+- Avance: S04 **95%**; fase A **88,20%**; programa total **74,35%**. Quedan
+  aislamiento transaccional del escritor y migración de logs legacy para cerrar
+  completamente el slice.
+
+### 2026-08-03 - Inventario canónico de acciones por capacidad (S01)
+
+- El contrato de Proyecto expone 33 acciones neutrales por rol con dominio,
+  capacidad requerida, dependencia de BIM y nivel de riesgo.
+- Los perfiles continúan siendo presets combinables; `consultor_integral`
+  conserva el catálogo completo y permite que una sola persona opere todos los
+  frentes sin convertir el rol nominal en autoridad rígida.
+- Pruebas de catálogo, perfiles, tenant, EDT y capacidades BIM: `9 passed`.
+- Avance: S01 **93%**; fase A **89,80%**; programa total **74,59%**. Falta
+  terminar la correspondencia exhaustiva endpoint-acción en módulos clásicos.
+
+### 2026-08-03 - Gate de identidad versionada coordinada (S02)
+
+- Los vínculos clasifican su identidad como canónica o referencia de borrador.
+- Una referencia oficial rechaza actividades sin snapshot y elementos sin ID de
+  versión, preservando las referencias legacy para reconciliación sin perderlas.
+- El panel avisa y cuantifica los vínculos pendientes, explica el siguiente paso
+  y deshabilita la aprobación mientras la identidad sea ambigua.
+- Coordinación y staging: `12 passed`; frontend de producción correcto.
+- Avance: S02 **90%**; fase A **92,47%**; programa total **74,99%**. Faltan la
+  taxonomía completa versionada y la reconciliación automática del histórico.
+
+### 2026-08-03 - Capacidades fail-closed en módulos clásicos (S03)
+
+- Presupuesto, Gantt, interesados y EDO validan la capacidad de Proyecto antes
+  de aplicar las restricciones legacy de módulo y EDT.
+- Los usuarios sin asignación dejan de recibir acceso implícito; administradores
+  técnicos no heredan aprobación económica y los grants siguen combinándose por
+  proyecto y EDT.
+- Regresión funcional: `26 passed`; matriz focal/denegaciones: `9 passed`.
+- Avance: S03 **96%**; fase A **93,53%**; programa total **75,15%**. Falta
+  separar capacidad de lectura y escritura en todos los endpoints clásicos.
+
+### 2026-08-03 - Combinaciones multidominio y cobertura no aditiva (S05-S06)
+
+- El conjunto coordinado prueba seis combinaciones válidas de Presupuesto, Gantt
+  y BIM, incluidas operación clásica sin BIM y Gantt+BIM con presupuesto de apoyo
+  fuera de la referencia coordinada.
+- Las revisiones son monotónicas, el tenant falla cerrado y los vínculos no
+  aditivos quedan visibles sin entrar en cobertura ni producir doble conteo.
+- Núcleo coordinado: `12 passed`.
+- Avance: S05 **95%**, S06 **95%**; fase B **83,32%**; programa total
+  **76,35%**. Quedan la aplicación real tridominio y la adaptación completa de
+  importadores al staging común.
+
+### 2026-08-03 - Staging común multiformato e idempotente (S08)
+
+- Preflight común para IFC, BCF, MSPDI, P6 XML, P6 XER, XLSX, JSON y conectores,
+  con validación de firma, extensión, combinación dominio/formato y checksum.
+- Proyecto y usuario fallan cerrados por tenant; repetir confirmación con el
+  mismo checksum devuelve el resultado confirmado sin una segunda transición.
+- Los manifiestos mantienen `writes_to_domains: 0`; suite combinada: `22 passed`.
+- Avance: S08 **72%**; fase B **86,68%**; programa total **77,19%**. Falta hacer
+  obligatorio el stage confirmado en cada importador histórico y probar rollback
+  durante el consumo real.
+
+### 2026-08-03 - Reconciliación revisable de GUID y versiones (S11)
+
+- Una comparación tenant/project-scoped entre versiones del mismo modelo detecta
+  GUID retenidos, altas, retiradas, sustituciones, split y merge.
+- La inferencia usa clase IFC, nombre, planta y sistema como firma semántica;
+  siempre exige revisión y reporta cero cambios automáticos.
+- Federación incorpora selectores origen/destino y un resumen compacto con los
+  candidatos pendientes, sin superponer otra superficie al workspace.
+- Federación/OmniClass: `8 passed`; frontend de producción correcto.
+- Avance: S11 **95%**; fase C **92,33%**; programa total **77,69%**. Falta
+  persistir la decisión de reconciliación y propagarla a links coordinados.
+
+### 2026-08-03 - Superficies BIM adaptativas sin overlays privados (S15)
+
+- RFI, submittals, colaboración CDE, incidencias y diario de obra sustituyen
+  matrices rígidas por master-detail/triple adaptativos al espacio de la región.
+- La notificación fija de incidencias vuelve a su panel; la aprobación de
+  estimaciones limita su ancho al contenedor sin recortar acciones.
+- Siete validadores DOM y build de producción correctos.
+- Avance: S15 **88%**; fase D **87,40%**; programa total **78,77%**. Falta la
+  auditoría visual física completa de todas las herramientas a 1920×1080 y 4K.
+
+### 2026-08-03 - Contexto BIM resiliente a fallos parciales (S13)
+
+- Workspace, vistas, elementos y vínculos se cargan con resolución independiente.
+- Si una fuente secundaria falla, el visor continúa operativo y la cabecera
+  informa qué contexto falta; solo el contrato principal produce estado fatal.
+- Build, smoke del workspace V2 y validador DOM correctos.
+- Avance: S13 **92%**; fase D **88,80%**; programa total **79,19%**. Falta
+  validar recuperación física de cámara y foco frente a referencias obsoletas.
+
+### 2026-08-03 - Apertura del diagnostico transversal BIM (BIM-TASK-0193)
+
+- Se abre un cuestionario de adecuacion BIM sin cambios de codigo, datos,
+  schema, flags, licencias, tenant ni despliegue.
+- El primer frente confirma que OmniClass es funcional en GiProy Clasico, pero
+  BIM solo dispone de una clasificacion generica sin contrato OmniClass
+  versionado ni integracion gobernada con proyecto/revision y links 5D.
+- El segundo frente confirma capacidades bilaterales Presupuesto/Gantt, BIM 4D
+  y BIM 5D, pero ausencia de identidad, orquestacion, conflictos y rollback
+  conjuntos para una tri-sincronizacion Presupuesto <-> Gantt <-> BIM.
+- El tercer frente confirma la reestructuracion integral del frontend BIM: una
+  experiencia neutral adaptada por capacidades, con Planificacion 4D y
+  Presupuesto 5D como flujo principal, cinco modos operativos y contrato
+  espacial basado en el contenedor util de un monitor fisico 1920 x 1080.
+- Se fija gobernanza transversal: los tres frentes comparten identidades,
+  capacidades, contratos, dependency graph y gate end-to-end; ningun frente
+  puede cerrarse aisladamente cuando afecte a los demas.
+- El cuestionario se cierra con 60 decisiones confirmadas y un plan ejecutivo
+  coordinado de 20 slices verticales, matriz transversal, gates UX/DPI/
+  rendimiento/seguridad/datos y piloto `SantiagoBermeo-2026-001`.
+- La aprobacion es documental: no inicia implementacion ni autoriza modificar
+  datos reales; la migracion definitiva queda condicionada a dry-run e informe.
+- Se introduce medicion ponderada S01-S20 y una plantilla obligatoria para cada
+  cierre: porcentaje parcial del slice, avance de fase y porcentaje total del
+  programa. Linea base: BIM-TASK-0193 100% documental; implementacion y total
+  coordinado 0%; programa BIM tecnico historico 61/61 sin cambios.
+- El plan rector registra la secuencia preliminar contrato, parser IFC,
+  resolucion contra el maestro, gobierno empresa/proyecto, UX y propuestas 5D.
+- El programa tecnico 61/61, Gate E, Gate K y `BIM-TASK-0192` no cambian.
+
+### 2026-07-24 - Adecuacion adaptativa global Classic y BIM (TASK-2039 a TASK-2041 / BIM-TASK-0192)
+
+- Se sustituye la resolucion fisica como criterio de layout por viewport CSS,
+  viewport visual, capacidades de entrada y perfiles adaptativos reversibles.
+- Shell, estructuras de proyecto, Formula, Presupuesto, APUs, Cronogramas,
+  Gantt, Settings, Community, Marketplace, Transferencias y BIM incorporan
+  adecuaciones de reflujo sin escalado grafico global.
+- Gantt conserva Tabla/Dividida/Gantt y protege la edicion tactil; BIM separa
+  tamano CSS del canvas y DPR, ofrece calidad Auto/Rendimiento/Alta y limita el
+  modo vertical a una superficie certificada.
+- Se agregan flags maestra/por modulo, rollback sin migraciones y matrices DOM
+  para Full HD, Windows escalado, zoom 200% y Lenovo Tab P12 simulada en ambas
+  orientaciones.
+- Build, suite adaptativa, Gantt, BIM V2 y baseline enterprise con frontend: OK.
+  La promocion queda pendiente de certificacion fisica en la Tab P12 real.
+- Docker/Compose transmiten las flags Vite, el build aislado en el servidor
+  beta valida Nginx y bundles, y se actualizan Axios/form-data/React Router con
+  una guarda de advisories aplicable a la arquitectura SPA.
+
+### 2026-07-22 - Administrador de empresa como operador BIM (TASK-2038 / BIM-TASK-0191)
+
+- Se elimina la exclusividad operativa implicita del superadministrador en
+  importacion IFC, jobs, artefactos, calidad, vistas compartidas y CDE BIM.
+- El administrador de empresa obtiene administracion BIM dentro de licencia,
+  entitlement, flags, allowlist, tenant, proyecto y capabilities.
+- La carga IFC pasa a ser visible desde la cabecera y el estado vacio, con un
+  flujo de tres pasos y mensajes de permisos claros.
+- Se documenta la politica canonica en `BIM_ROLE_GOVERNANCE.md`.
+- Suite BIM `262 passed`, smoke BIM V2, build, anti-BIM y baseline enterprise
+  correctos.
+- Desplegado en beta con commit `cdcba86`; stack healthy, home `200`, frontera
+  BIM anonima `401` y PostgreSQL sin migraciones.
+
 ### 2026-07-22 - Portafolio resiliente ante 502 transitorio (TASK-2037)
 
 - El listado clasico de proyectos reintenta fallos transitorios durante la
@@ -5,6 +175,18 @@
 - Un fallo agotado se diferencia visualmente de un tenant sin proyectos y
   ofrece reintento manual, sin alterar datos ni permisos.
 - Se preservan contratos API, tenant, licencia, PostgreSQL y GiProy BIM.
+
+### 2026-07-22 - Recuperacion de imagen referencial (TASK-2036)
+
+- Se diagnostica una referencia valida en PostgreSQL cuyo PNG faltaba en el
+  volumen persistente de beta.
+- El PNG se restaura en beta con SHA-256 coincidente y vuelve a responder
+  `200 image/png` con 79.975 bytes.
+- Datos de Proyecto deja de mostrar el icono roto si un medio no esta
+  disponible y ofrece un estado legible con la accion de carga existente.
+- Se conserva el endpoint estable de media, sin cambios de backend, DB, API,
+  tenant, datos funcionales ni BIM.
+- Smokes con BIM apagado y encendido, regresion focal y build correctos.
 
 ### 2026-07-22 - Error BIM serializable en React (BIM-TASK-0190)
 
@@ -16125,3 +16307,66 @@ Cambios realizados
 - Ubicacion BIM permite seleccionar base, overlays y opacidad, y registrar
   nuevos servicios sin alterar mapas ni contratos clasicos.
 - H05 pasa a completa; paridad 84,17% y programa 73,77%. Sin deploy.
+# 2026-07-24 - Inicio de adecuacion visual global escritorio y tablet
+
+- Se abre `TASK-2039` con trazabilidad cruzada a `BIM-TASK-0192`.
+- Se aprueba `docs/architecture/ADAPTIVE_UI_MASTER_PLAN.md` como contrato comun
+  para GiProy Clasico y GiProy BIM.
+- El layout se gobernara por viewport CSS, visual viewport, contenedor e
+  interaccion; resolucion fisica y DPR quedan limitados a diagnostico/nitidez.
+- Queda prohibido resolver la adecuacion con zoom global, `transform: scale()`
+  o reduccion indiscriminada de componentes.
+- Copia 1:1 `E:\Repositorios\GiProy Network.rar` verificada mediante SHA-256,
+  prueba interna, restauracion aislada y baseline enterprise completo.
+- No se modificaron backend, PostgreSQL, auth, tenant, licencias, flags BIM ni
+  infraestructura en esta apertura.
+### 2026-08-03 - Ejecución coordinada BIM S01-S17 (BIM-TASK-0194)
+
+- Se implementan capacidades por proyecto/EDT, envolvente de auditoría,
+  conjuntos coordinados, vínculos cuantificados, conflictos persistentes,
+  propuestas aplicables y recuperación por snapshot.
+- La referencia coordinada ya puede oficializarse con permiso y motivo; admite
+  BIM al margen y bloquea cobertura superior al 100%.
+- OmniClass conserva el origen, valida contra el maestro y se activa por defecto
+  al habilitar BIM por primera vez, sin revertir una decisión posterior.
+- El workspace BIM se sustituye por cinco flujos, prioriza 4D/5D, mantiene visor
+  dominante y añade control/bandeja coordinada dentro de la superficie común.
+- Se genera el informe de dry-run de `#SantiagoBermeo-2026-001`: inventario
+  Presupuesto/Gantt/BIM conciliado, SQL reversible generado y cero escrituras.
+- Se añade staging coordinado para IFC, BCF, MSPDI, P6 XML/XER, Excel, JSON y
+  conectores, con firma, SHA-256, deduplicación y confirmación sin escribir en
+  dominios.
+- Los vínculos coordinados incorporan tolerancia decimal, unidades canónicas,
+  cantidades con unidad obligatoria y bloqueo semántico de duplicados con
+  referencias nulas, evitando dobles conteos silenciosos.
+- Aplicación y recuperación son idempotentes; un fallo de commit ejecuta
+  rollback, conserva el snapshot anterior y permite reintentar sin duplicar el
+  efecto. La prueba usa una base aislada con commits reales.
+- La clasificación IFC se ingiere de forma idempotente desde el campo directo o
+  propiedades anidadas, conserva el origen y solo genera sugerencias exactas del
+  maestro OmniClass, con cero enlaces y cero aprobaciones automáticas.
+- Desactivar OmniClass con BIM requiere reconocimiento y motivo; backend devuelve
+  409 si faltan, conserva códigos de origen, marca resoluciones/conjuntos y
+  registra auditoría. Configuración reproduce y valida el flujo informado.
+- Federación expone si es apta para medición y bloquea cantidades oficiales con
+  versiones ausentes, escala no uniforme, unidades inválidas, CRS u origen
+  desalineados, sin impedir revisar visualmente una federación divergente.
+- El frontend resuelve capacidades en modo fail-closed: durante carga o error no
+  muestra herramientas ni acciones privilegiadas por fallback nominal de rol.
+- El shell valida accesibilidad estructural: nombres, etiquetas, IDs únicos,
+  orden natural de foco y navegación Alt+1..5 con semántica `aria-current`.
+- La actividad 4D incorpora una referencia explícita y validada a su partida de
+  origen. El control de coordinación consume la selección compartida de Gantt y
+  visor para crear en una acción el vínculo 5D/4D/BIM, o advertir de forma
+  persistente si un snapshot histórico solo permite coordinar 4D/BIM.
+- Los informes 4D/5D pasan al contrato v2 con marca `PRELIMINAR` u `OFICIAL`.
+  Backend rechaza una intención oficial sin referencia coordinada activa o con
+  línea base divergente; frontend deshabilita esa opción y explica su impacto
+  contractual.
+- Evidencia: 15 pruebas focales backend, build de producción y 37 validadores o
+  smokes BIM correctos. Persisten avisos conocidos de chunks grandes y una
+  deprecación de configuración asíncrona de Pytest.
+- Progreso: S03 **92%**, S04 **75%**, S05 **80%**, S06 **90%**, S07 **85%**, S08 **58%**, S09 **92%**, S10 **90%**, S11 **85%**, S12 **98%**, S13 **85%**, S14 **86%**,
+  S16 **82%**, S17 **75%**; fase A **82,87%**, fase B **78,52%**, fase C **89,00%**,
+  fase D **83,80%**, fase E **20,00%**; total ponderado del programa
+  **73,55%**. No se autoriza todavía escritura real.

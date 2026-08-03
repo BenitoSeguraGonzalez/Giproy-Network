@@ -1691,7 +1691,7 @@ const HierarchyGraphView = ({
                             </div>
                         </div>
                         {!miniMapMinimized && (
-                        <div className="max-h-[70vh] overflow-auto px-4 py-4">
+                        <div className="max-h-[70dvh] overflow-auto px-4 py-4">
                             <div className="mb-3 space-y-2">
                                 <div className="relative">
                                     <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />

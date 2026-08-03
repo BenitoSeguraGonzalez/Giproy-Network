@@ -885,6 +885,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
     }, [reportMenuOpen]);
 
     const isCompactViewport = resolvePortableWorkspace({
+        moduleKey: 'project-structure',
         width: viewport.width,
         height: viewport.height,
         forced: user?.role === 'superadmin' && forcedPortableWorkspace,
@@ -1576,7 +1577,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
                         onExternalSearchTermChange={setSearchTerm}
                     />
                 ) : (
-                    <div className="relative flex flex-1 min-h-0 flex-col overflow-hidden border-x border-b border-[#ececec] bg-white shadow-[0_12px_34px_rgba(15,23,42,0.05)]" style={{ maxHeight: 'calc(100vh - 400px)' }}>
+                    <div className="relative flex max-h-full flex-1 min-h-0 flex-col overflow-hidden border-x border-b border-[#ececec] bg-white shadow-[0_12px_34px_rgba(15,23,42,0.05)]">
                         <div
                             className={`flex w-full items-center justify-center overflow-hidden border-b transition-all ${dragOverNodeId === 'root' ? 'min-h-[24px] border-dashed border-emerald-600 bg-emerald-50' : 'min-h-[6px] border-transparent bg-white'}`}
                             onDragOver={(e) => { e.preventDefault(); setDragOverNodeId('root'); }}

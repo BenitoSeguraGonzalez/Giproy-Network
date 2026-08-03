@@ -491,7 +491,7 @@ const CommonReportPreviewModal = ({
                             <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">Listado ejecutivo consolidado</p>
                             <p className="mt-1 text-sm font-bold text-zinc-800">Todos los recursos finales, sin detallar la matriz periodo por periodo.</p>
                         </div>
-                        <div className="max-h-[38vh] overflow-auto">
+                        <div className="max-h-[38dvh] overflow-auto">
                             <table className="min-w-full border-separate border-spacing-0 text-left">
                                 <thead className="sticky top-0 z-10 bg-white">
                                     <tr className="text-[9px] font-black uppercase tracking-[0.12em] text-zinc-400">
@@ -563,7 +563,7 @@ const CommonReportPreviewModal = ({
     };
 
     return (
-        <AppModalShell isOpen={isOpen} onClose={onClose} size={items.some((item) => isResourceUsagePreview(preview, item)) ? '3xl' : '2xl'} zIndex="z-[420]">
+        <AppModalShell isOpen={isOpen} onClose={onClose} size={items.some((item) => isResourceUsagePreview(preview, item)) ? '3xl' : '2xl'} zIndex="z-[1110]">
             <AppModalHeader
                 title={preview?.title || 'Visor de Reporte'}
                 subtitle={`${preview?.selection_count || 0} elemento(s) seleccionado(s)`}
@@ -572,7 +572,7 @@ const CommonReportPreviewModal = ({
                 closeButtonClassName={reportModalCloseButtonClass}
                 closeIconClassName="h-4 w-4"
             />
-            <AppModalBody className="max-h-[70vh] overflow-y-auto space-y-6">
+            <AppModalBody className="max-h-[70dvh] overflow-y-auto space-y-6">
                 {items.map((item, index) => {
                     const reportKind = isEdtReport || item.preview_layout === 'edt_document' ? 'edt' : 'edo';
                     const isDocumentReport = isEdoReport || isEdtReport || item.preview_layout === 'edo_document' || item.preview_layout === 'edt_document';

@@ -695,7 +695,7 @@ const ProductDetailDialog = ({ product, canBuy, inCartQuantity, onAddToCart, onO
 
     return (
         <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onOpenChange(false); }}>
-            <DialogContent showCloseButton={false} className="flex h-[100svh] w-screen max-w-none flex-col overflow-hidden rounded-none border-0 bg-white p-0 sm:h-auto sm:max-h-[92vh] sm:w-[calc(100vw-2rem)] sm:max-w-[980px] sm:rounded-[1.6rem] sm:border sm:border-zinc-200 lg:rounded-[1.9rem]">
+            <DialogContent showCloseButton={false} className="flex h-[100dvh] w-screen max-w-none flex-col overflow-hidden rounded-none border-0 bg-white p-0 sm:h-auto sm:max-h-[92dvh] sm:w-[calc(100vw-2rem)] sm:max-w-[980px] sm:rounded-[1.6rem] sm:border sm:border-zinc-200 lg:rounded-[1.9rem]">
                 {viewModel ? (
                     <>
                         <DialogHeader className="overflow-hidden border-b border-zinc-200 p-0 text-left">
@@ -1873,7 +1873,7 @@ const Marketplace = () => {
     const rightPercent = absolutePriceCap <= 0 ? 100 : (draftPriceCap / absolutePriceCap) * 100;
 
     return (
-        <div className="h-full overflow-hidden bg-white">
+        <div data-marketplace-workspace="true" className="h-full overflow-hidden bg-white">
             {cartNotice ? (
                 <div className="pointer-events-none fixed right-5 top-24 z-[90]">
                     <div className={`flex max-w-[420px] items-start gap-3 rounded-2xl border bg-white/95 px-4 py-3 shadow-[0_20px_40px_rgba(0,0,0,0.12)] backdrop-blur ${
@@ -2281,7 +2281,7 @@ const Marketplace = () => {
             </div>
 
             <Dialog open={payPhoneModalOpen} onOpenChange={setPayPhoneModalOpen}>
-                <DialogContent showCloseButton={false} className="flex h-[100svh] w-screen max-w-none flex-col overflow-hidden rounded-none border-0 bg-white p-0 sm:h-auto sm:max-h-[88vh] sm:w-[calc(100vw-2rem)] sm:max-w-[720px] sm:rounded-[1.75rem] sm:border sm:border-zinc-200">
+                <DialogContent showCloseButton={false} className="flex h-[100dvh] w-screen max-w-none flex-col overflow-hidden rounded-none border-0 bg-white p-0 sm:h-auto sm:max-h-[88dvh] sm:w-[calc(100vw-2rem)] sm:max-w-[720px] sm:rounded-[1.75rem] sm:border sm:border-zinc-200">
                     <DialogHeader className="border-b border-zinc-200 px-4 py-4 sm:px-6 sm:py-5">
                         <DialogTitle className="text-[1.3rem] font-black tracking-tight text-zinc-950 sm:text-[1.45rem]">
                             Pagar con PayPhone
@@ -2331,7 +2331,7 @@ const Marketplace = () => {
             </Dialog>
 
             <Dialog open={payPalModalOpen} onOpenChange={setPayPalModalOpen}>
-                <DialogContent showCloseButton={false} className="flex h-[100svh] w-screen max-w-none flex-col overflow-hidden rounded-none border-0 bg-white p-0 sm:h-auto sm:max-h-[88vh] sm:w-[calc(100vw-2rem)] sm:max-w-[720px] sm:rounded-[1.75rem] sm:border sm:border-zinc-200">
+                <DialogContent showCloseButton={false} className="flex h-[100dvh] w-screen max-w-none flex-col overflow-hidden rounded-none border-0 bg-white p-0 sm:h-auto sm:max-h-[88dvh] sm:w-[calc(100vw-2rem)] sm:max-w-[720px] sm:rounded-[1.75rem] sm:border sm:border-zinc-200">
                     <DialogHeader className="border-b border-zinc-200 px-4 py-4 sm:px-6 sm:py-5">
                         <DialogTitle className="text-[1.3rem] font-black tracking-tight text-zinc-950 sm:text-[1.45rem]">
                             Pagar con PayPal
@@ -2381,7 +2381,7 @@ const Marketplace = () => {
             </Dialog>
 
             <Dialog open={cartOpen} onOpenChange={setCartOpen}>
-                <DialogContent className="flex h-[100svh] w-screen max-w-none flex-col overflow-hidden rounded-none border-0 bg-white p-0 sm:h-auto sm:max-h-[88vh] sm:w-[calc(100vw-2rem)] sm:max-w-[860px] sm:rounded-[1.75rem] sm:border sm:border-zinc-200">
+                <DialogContent className="flex h-[100dvh] w-screen max-w-none flex-col overflow-hidden rounded-none border-0 bg-white p-0 sm:h-auto sm:max-h-[88dvh] sm:w-[calc(100vw-2rem)] sm:max-w-[860px] sm:rounded-[1.75rem] sm:border sm:border-zinc-200">
                     <DialogHeader className="border-b border-zinc-200 px-4 py-4 sm:px-6 sm:py-5">
                         <DialogTitle className="text-[1.3rem] font-black tracking-tight text-zinc-950 sm:text-[1.45rem]">
                             Carrito de compras

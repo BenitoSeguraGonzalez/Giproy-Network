@@ -51,6 +51,7 @@ export const ControlRailIconButton = React.forwardRef(({
         <button
             ref={ref}
             type="button"
+            data-adaptive-touch-target="true"
             disabled={disabled}
             aria-pressed={active ? 'true' : undefined}
             className={joinClasses(

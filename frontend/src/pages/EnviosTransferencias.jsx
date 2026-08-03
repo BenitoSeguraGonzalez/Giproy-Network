@@ -250,7 +250,7 @@ function NewShipmentModal({ open, onClose, onCreated, recipients = [], empresaId
 
     return (
         <div className="fixed inset-0 z-[900] flex items-center justify-center bg-black/45 p-4">
-            <div className="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
+            <div className="max-h-[92dvh] w-full max-w-4xl overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
                 <div className="flex items-center justify-between border-b border-zinc-100 bg-white px-6 py-4">
                     <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#F39200]">Validación técnica</p>
@@ -261,7 +261,7 @@ function NewShipmentModal({ open, onClose, onCreated, recipients = [], empresaId
                     </button>
                 </div>
 
-                <div className="custom-scrollbar max-h-[calc(92vh-86px)] overflow-y-auto bg-[#F2F4F7]/60 p-5">
+                <div className="custom-scrollbar max-h-[calc(92dvh-86px)] overflow-y-auto bg-[#F2F4F7]/60 p-5">
                     {error && (
                         <div className="mb-4 rounded-[1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
                             {error}
@@ -499,7 +499,7 @@ function RecipientManagementModal({ open, onClose, recipientsInfo, onRefresh, em
 
     return (
         <div className="fixed inset-0 z-[920] flex items-center justify-center bg-black/45 p-4">
-            <div className="max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
+            <div className="max-h-[92dvh] w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
                 <div className="flex items-center justify-between border-b border-zinc-100 bg-white px-6 py-4">
                     <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#F39200]">Red de comunicacion</p>
@@ -510,7 +510,7 @@ function RecipientManagementModal({ open, onClose, recipientsInfo, onRefresh, em
                     </button>
                 </div>
 
-                <div className="custom-scrollbar max-h-[calc(92vh-86px)] overflow-y-auto bg-[#F2F4F7]/60 p-5">
+                <div className="custom-scrollbar max-h-[calc(92dvh-86px)] overflow-y-auto bg-[#F2F4F7]/60 p-5">
                     {(error || success) && (
                         <div className={`mb-4 rounded-[1rem] border px-4 py-3 text-sm font-bold ${
                             error ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
@@ -720,8 +720,8 @@ function ShipmentTimelineModal({ shipment, onClose }) {
     const timeline = shipment.timeline || [];
 
     return (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-2xl overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
+        <div data-transfer-timeline-modal="true" className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/40 p-2 backdrop-blur-sm sm:items-center sm:p-4">
+            <div className="my-2 max-h-[calc(100dvh-1rem)] w-full max-w-2xl overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:my-0 sm:max-h-[calc(100dvh-2rem)]">
                 <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4">
                     <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#136191]">Historico de transferencia</p>
@@ -739,7 +739,7 @@ function ShipmentTimelineModal({ shipment, onClose }) {
                             {shipment.direction === 'entrada' ? 'Emisor' : 'Receptor'}: {shipment.company_display_name}
                         </p>
                     </div>
-                    <div className="max-h-[52vh] overflow-y-auto rounded-[1rem] border border-zinc-200 bg-white">
+                    <div className="max-h-[52dvh] overflow-y-auto rounded-[1rem] border border-zinc-200 bg-white">
                         {timeline.length === 0 ? (
                             <div className="px-4 py-6 text-center text-xs font-black uppercase tracking-[0.14em] text-zinc-400">
                                 Sin eventos registrados.
@@ -895,7 +895,7 @@ export default function EnviosTransferencias() {
     };
 
     return (
-        <div className="h-full overflow-y-auto bg-[#F2F4F7] p-6 text-[#1A1A1A]">
+        <div data-transferencias-workspace="true" className="h-full overflow-y-auto bg-[#F2F4F7] p-3 text-[#1A1A1A] sm:p-6">
             <div className="mx-auto flex max-w-[1700px] flex-col gap-5">
                 <section className="rounded-[1.75rem] border border-zinc-200 bg-white px-6 py-4 shadow-sm">
                     <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -1005,7 +1005,7 @@ export default function EnviosTransferencias() {
 
                 {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{error}</div>}
 
-                <section className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white">
+                <section className="custom-scrollbar overflow-x-auto overflow-y-hidden rounded-[2rem] border border-zinc-200 bg-white">
                     <div className="grid min-w-[980px] grid-cols-[110px_minmax(220px,1fr)_minmax(220px,0.95fr)_180px_190px] border-b border-zinc-200 bg-zinc-50/80 px-5 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">
                         <span>Tipo</span>
                         <span>Empresa</span>
@@ -1013,7 +1013,7 @@ export default function EnviosTransferencias() {
                         <span>Estado</span>
                         <span>Acciones</span>
                     </div>
-                    <div className="custom-scrollbar max-h-[58vh] min-w-[980px] overflow-y-auto">
+                    <div className="custom-scrollbar max-h-[58dvh] min-w-[980px] overflow-y-auto">
                         {loading && <div className="p-8 text-center text-sm font-bold text-zinc-400">Cargando bandeja...</div>}
                         {!loading && (tray?.items || []).length === 0 && <div className="p-8 text-center text-sm font-bold text-zinc-400">Sin envios en el rango seleccionado.</div>}
                         {(tray?.items || []).map((item) => {
@@ -1037,26 +1037,26 @@ export default function EnviosTransferencias() {
                                         {item.status_label}
                                     </span>
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <button type="button" title="Historial" onClick={() => setTimelineShipment(item)} className={`${TRANSFER_MICRO_BUTTON_CLASS} hover:border-[#136191]/40 hover:text-[#136191]`}>
+                                        <button type="button" data-adaptive-touch-target="true" title="Historial" onClick={() => setTimelineShipment(item)} className={`${TRANSFER_MICRO_BUTTON_CLASS} hover:border-[#136191]/40 hover:text-[#136191]`}>
                                             <Clock3 className="h-4 w-4" />
                                         </button>
                                         {item.direction === 'entrada' && !['importado', 'rechazado', 'cancelado', 'expirado'].includes(item.status) && (
                                             <>
-                                                <button type="button" title="Importar" onClick={() => runAction((empresaId) => transferenciasApi.importShipment(item.id, empresaId))} className={`${TRANSFER_MICRO_BUTTON_CLASS} border-emerald-100 text-emerald-700 hover:border-emerald-300`}>
+                                                <button type="button" data-adaptive-touch-target="true" title="Importar" onClick={() => runAction((empresaId) => transferenciasApi.importShipment(item.id, empresaId))} className={`${TRANSFER_MICRO_BUTTON_CLASS} border-emerald-100 text-emerald-700 hover:border-emerald-300`}>
                                                     <PackageCheck className="h-4 w-4" />
                                                 </button>
-                                                <button type="button" title="Rechazar" onClick={() => setRejectShipment(item)} className={`${TRANSFER_MICRO_BUTTON_CLASS} border-rose-100 text-rose-700 hover:border-rose-300`}>
+                                                <button type="button" data-adaptive-touch-target="true" title="Rechazar" onClick={() => setRejectShipment(item)} className={`${TRANSFER_MICRO_BUTTON_CLASS} border-rose-100 text-rose-700 hover:border-rose-300`}>
                                                     <X className="h-4 w-4" />
                                                 </button>
                                             </>
                                         )}
                                         {item.direction === 'salida' && !['importado', 'cancelado', 'rechazado', 'expirado'].includes(item.status) && (
-                                            <button type="button" title="Cancelar envio" onClick={() => setCancelShipment(item)} className={`${TRANSFER_MICRO_BUTTON_CLASS} border-amber-100 text-amber-700 hover:border-amber-300`}>
+                                            <button type="button" data-adaptive-touch-target="true" title="Cancelar envio" onClick={() => setCancelShipment(item)} className={`${TRANSFER_MICRO_BUTTON_CLASS} border-amber-100 text-amber-700 hover:border-amber-300`}>
                                                 <X className="h-4 w-4" />
                                             </button>
                                         )}
                                         {item.status === 'bloqueado_marketplace' && (
-                                            <button type="button" title="Revalidar compras" onClick={() => runAction((empresaId) => transferenciasApi.revalidateMarketplaceRequirements(item.id, empresaId))} className={`${TRANSFER_MICRO_BUTTON_CLASS} border-amber-100 text-amber-700 hover:border-amber-300`}>
+                                            <button type="button" data-adaptive-touch-target="true" title="Revalidar compras" onClick={() => runAction((empresaId) => transferenciasApi.revalidateMarketplaceRequirements(item.id, empresaId))} className={`${TRANSFER_MICRO_BUTTON_CLASS} border-amber-100 text-amber-700 hover:border-amber-300`}>
                                                 <ShoppingCart className="h-4 w-4" />
                                             </button>
                                         )}

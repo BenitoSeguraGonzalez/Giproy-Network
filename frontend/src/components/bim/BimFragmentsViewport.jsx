@@ -6,6 +6,8 @@ import fragmentsWorkerUrl from '@thatopen/fragments/worker?url';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 import { bimModelsApi } from '../../api/bimModels';
+import useBimRenderQuality from '../../hooks/useBimRenderQuality';
+import BimRenderQualityControl from './BimRenderQualityControl';
 
 const REVIEW_BUTTON_CLASS =
     'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] disabled:cursor-not-allowed disabled:opacity-35';
@@ -73,6 +75,7 @@ const BimFragmentsViewport = ({
     const [federationVisibleCount, setFederationVisibleCount] = useState(0);
     const [selectedLocalId, setSelectedLocalId] = useState(null);
     const [reviewState, setReviewState] = useState(EMPTY_REVIEW_STATE);
+    const renderQuality = useBimRenderQuality();
     const [clipOffset, setClipOffset] = useState(0);
     const [measurementUnit, setMeasurementUnit] = useState(() => {
         if (typeof window === 'undefined') return 'm';
@@ -182,7 +185,7 @@ const BimFragmentsViewport = ({
                 scene.background = new THREE.Color(0xf7f7f5);
                 let camera = new THREE.PerspectiveCamera(42, 1, 0.01, 10000);
                 renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+                renderer.setPixelRatio(renderQuality.pixelRatio);
                 renderer.outputColorSpace = THREE.SRGBColorSpace;
                 canvas = renderer.domElement;
                 canvas.setAttribute('data-bim-fragments-product-canvas', 'true');
@@ -375,7 +378,7 @@ const BimFragmentsViewport = ({
             renderer?.dispose();
             mountRef.current?.replaceChildren();
         };
-    }, [empresaId, federationStructureKey, loadBytes, loadMemberBytes, projectId, recoveryToken, versionId]);
+    }, [empresaId, federationStructureKey, loadBytes, loadMemberBytes, projectId, recoveryToken, renderQuality.pixelRatio, versionId]);
 
     useEffect(() => {
         const runtime = runtimeRef.current;
@@ -715,6 +718,7 @@ const BimFragmentsViewport = ({
             data-bim-planning-selection={selectionApplied}
             data-bim-federation-models={runtimeRef.current?.models?.length || 0}
             data-bim-federation-visible={federationVisibleCount}
+            data-bim-render-pixel-ratio={renderQuality.pixelRatio}
         >
             <div className="flex min-h-11 items-center justify-between gap-3 border-b border-zinc-200 px-3 py-2">
                 <div className="flex min-w-0 items-center gap-2">
@@ -723,6 +727,7 @@ const BimFragmentsViewport = ({
                     <span className="text-[10px] font-semibold text-zinc-500">{state.localIds} elementos</span>
                 </div>
                 <div className="flex items-center gap-1">
+                    <BimRenderQualityControl {...renderQuality} />
                     <button type="button" onClick={resetReview} disabled={Boolean(temporalProfile)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-[#F39200] disabled:cursor-not-allowed disabled:opacity-35" title="Restablecer revisión BIM" aria-label="Restablecer revisión BIM">
                         <RotateCcw className="h-4 w-4" />
                     </button>

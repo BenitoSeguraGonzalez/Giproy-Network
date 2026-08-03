@@ -2264,7 +2264,7 @@ const Community = () => {
     );
 
     return (
-        <div className="h-[calc(100vh-5rem)] overflow-hidden bg-[#F8FAFC]">
+        <div data-community-workspace="true" className="h-full min-h-0 overflow-hidden bg-[#F8FAFC]">
             <div className="flex h-full flex-col">
                 <div className="flex items-center justify-between border-b border-zinc-200 bg-white/85 px-6 py-4 backdrop-blur-md md:px-8">
                     <div className="flex items-center gap-4">
@@ -3762,7 +3762,7 @@ const Community = () => {
                             </div>
                         }
                     />
-                    <AppModalBody className="max-h-[80vh] overflow-y-auto space-y-6 bg-[#F5F6F8]">
+                    <AppModalBody className="max-h-[80dvh] overflow-y-auto space-y-6 bg-[#F5F6F8]">
                         {structureModalTab === 'category' ? (
                             <div className="grid gap-6 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
                                 <Card className="rounded-[2rem] border border-zinc-200 bg-white shadow-[0_14px_45px_rgba(15,23,42,0.06)]">
@@ -3890,7 +3890,7 @@ const Community = () => {
                             </div>
                         }
                     />
-                    <AppModalBody className="max-h-[82vh] space-y-5 overflow-y-auto bg-[#F5F6F8]">
+                    <AppModalBody className="max-h-[82dvh] space-y-5 overflow-y-auto bg-[#F5F6F8]">
                         {selectedTopic ? (
                             <Card className="rounded-[1.7rem] border border-[#136191]/15 bg-gradient-to-r from-[#F7FBFE] via-white to-[#FFF8E8] shadow-[0_14px_45px_rgba(15,23,42,0.06)]">
                                 <CardContent className="p-5">
@@ -3927,7 +3927,7 @@ const Community = () => {
                         icon={Plus}
                         onClose={handleCloseTopicComposerModal}
                     />
-                    <AppModalBody className="max-h-[78vh] overflow-y-auto bg-[#F5F6F8]">
+                    <AppModalBody className="max-h-[78dvh] overflow-y-auto bg-[#F5F6F8]">
                         {renderTopicComposer()}
                     </AppModalBody>
                 </AppModalShell>

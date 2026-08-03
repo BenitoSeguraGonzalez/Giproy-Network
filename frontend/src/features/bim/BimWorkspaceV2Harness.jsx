@@ -79,11 +79,14 @@ const BimWorkspaceV2Harness = () => {
                 viewer={viewer}
                 inspector={panel('Propiedades', 'IfcWall · 2Q8xR08BIM')}
                 workspaceTools={{
-                    viewer: [{ id: 'properties', label: 'Propiedades', content: panel('Propiedades', 'IfcWall · 2Q8xR08BIM') }],
+                    model: [{ id: 'properties', label: 'Propiedades', content: panel('Propiedades', 'IfcWall · 2Q8xR08BIM') }],
                     coordination: [{ id: 'issues', label: 'Incidencias', content: panel('Incidencias', 'Coordinación activa') }],
-                    planning: [{ id: 'schedule', label: 'Actividad y vínculo', content: panel('Actividad y vínculo', 'EDT 1.2') }],
-                    production: [{ id: 'plan-actual', label: 'Plan vs. real', content: panel('Plan vs. real', 'Corte vigente') }],
-                    field: [{ id: 'progress', label: 'Registrar avance', content: panel('Registrar avance', 'Nivel 01') }],
+                    'planning-costs': [{ id: 'schedule', label: 'Actividad y vínculo', content: panel('Actividad y vínculo', 'EDT 1.2') }],
+                    tracking: [
+                        { id: 'progress', label: 'Registrar avance', content: panel('Registrar avance', 'Nivel 01') },
+                        { id: 'reports', label: 'Informes', content: panel('Informes BIM', 'Avance · 4D · Productividad · Recursos · Seguridad · Calidad') },
+                    ],
+                    handover: [{ id: 'dossier', label: 'Dossier', content: panel('Dossier digital', 'Entrega coordinada') }],
                 }}
                 bottomTools={[{
                     id: 'planning-4d',
@@ -93,8 +96,8 @@ const BimWorkspaceV2Harness = () => {
                 adminTools={[{ id: 'imports', label: 'Importaciones', content: panel('Importaciones IFC', 'Sin trabajos pendientes') }]}
                 reports={panel('Informes BIM', 'Avance · 4D · Productividad · Recursos · Seguridad · Calidad')}
                 searchItems={[
-                    { id: 'wall', type: 'Elemento', label: 'Muro perimetral A', meta: 'IfcWall · WALL-001', workspace: 'viewer' },
-                    { id: 'activity', type: 'Actividad', label: 'Cimentación', meta: 'EDT 1.2', workspace: 'planning' },
+                    { id: 'wall', type: 'Elemento', label: 'Muro perimetral A', meta: 'IfcWall · WALL-001', workspace: 'model' },
+                    { id: 'activity', type: 'Actividad', label: 'Cimentación', meta: 'EDT 1.2', workspace: 'planning-costs' },
                 ]}
                 onChangeViewerMode={setViewerMode}
                 onResetContext={() => setResetCount((value) => value + 1)}

@@ -451,7 +451,7 @@ const AdminHeaderToggle = ({
 );
 
 const ADMIN_MODAL_SURFACE = '#f7f7f5';
-const ADMIN_MODAL_PANEL_CLASS = 'max-h-[92vh] flex flex-col bg-[#f7f7f5]';
+const ADMIN_MODAL_PANEL_CLASS = 'max-h-[92dvh] flex flex-col bg-[#f7f7f5]';
 const ADMIN_MODAL_BODY_CLASS = 'min-h-0 flex-1 overflow-hidden bg-[#f7f7f5] p-5';
 const ADMIN_MODAL_HEADER_PROPS = {
     surfaceColor: '#1A1A1A',
@@ -3405,7 +3405,7 @@ const MarketplaceAdminDashboard = () => {
                 onClose={closeProductsModal}
                 size="2xl"
                 zIndex="z-[130]"
-                panelClassName="h-[92vh] max-h-[92vh] max-w-[92vw] flex flex-col bg-[#f7f7f5]"
+                panelClassName="h-[92dvh] max-h-[92dvh] max-w-[92vw] flex flex-col bg-[#f7f7f5]"
                 surfaceColor={ADMIN_MODAL_SURFACE}
             >
                 <AppModalHeader
@@ -3598,7 +3598,7 @@ const MarketplaceAdminDashboard = () => {
                                 ) : (
                                     <div className="min-h-0 flex-1 overflow-hidden rounded-[2rem] border border-zinc-200/60 bg-zinc-50/30">
                                         <AdminMotionScrollArea
-                                            className="max-h-[calc(92vh-23rem)]"
+                                            className="max-h-[calc(92dvh-23rem)]"
                                             contentClassName="overflow-x-auto pb-4"
                                         >
                                         <table className="w-full min-w-[1420px] text-left">
@@ -3721,7 +3721,7 @@ const MarketplaceAdminDashboard = () => {
                 onClose={closeProductEditorModal}
                 size="xl"
                 zIndex="z-[130]"
-                panelClassName="max-h-[86vh] flex flex-col bg-[#f7f7f5]"
+                panelClassName="max-h-[86dvh] flex flex-col bg-[#f7f7f5]"
                 surfaceColor={ADMIN_MODAL_SURFACE}
             >
                 <AppModalHeader
@@ -3900,7 +3900,7 @@ const MarketplaceAdminDashboard = () => {
                 onClose={requestClosePortalModal}
                 size="2xl"
                 zIndex="z-[130]"
-                panelClassName="h-[88vh] max-h-[88vh] flex flex-col bg-[#f7f7f5]"
+                panelClassName="h-[88dvh] max-h-[88dvh] flex flex-col bg-[#f7f7f5]"
                 surfaceColor={ADMIN_MODAL_SURFACE}
             >
                 <AppModalHeader

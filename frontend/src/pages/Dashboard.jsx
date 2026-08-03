@@ -104,7 +104,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] overflow-hidden bg-[#F2F4F7]">
+        <div className="h-full min-h-0 overflow-hidden bg-[#F2F4F7]">
             <main className="flex h-full flex-col overflow-hidden px-12 py-10">
                 <div className="flex h-full min-h-0 w-full max-w-[1480px] flex-1 flex-col overflow-hidden self-center">
                     <header className="mb-10 flex-shrink-0">

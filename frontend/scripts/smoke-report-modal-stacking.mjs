@@ -15,8 +15,14 @@ const parseZIndex = (value) => {
     return match ? Number(match[1]) : null;
 };
 
-const previewZ = parseZIndex(previewSource.match(/<AppModalShell[^>]*zIndex="([^"]+)"/s)?.[1]);
-const generationZ = parseZIndex(generationSource.match(/<AppModalShell[^>]*zIndex="([^"]+)"/s)?.[1]);
+const readModalZIndex = (source) => {
+    const modalStart = source.indexOf('<AppModalShell');
+    if (modalStart < 0) return null;
+    return parseZIndex(source.slice(modalStart, modalStart + 800).match(/zIndex="([^"]+)"/)?.[1]);
+};
+
+const previewZ = readModalZIndex(previewSource);
+const generationZ = readModalZIndex(generationSource);
 const ganttZValues = [...ganttSource.matchAll(/z-\[(\d+)\]/g)].map((match) => Number(match[1]));
 const highestGanttZ = Math.max(...ganttZValues.filter(Number.isFinite));
 

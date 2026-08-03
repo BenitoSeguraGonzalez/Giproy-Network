@@ -453,7 +453,7 @@ const Stakeholders = ({ project }) => {
                 {showFormModal && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-900/35 backdrop-blur-[2px] p-4">
                         <MotionDiv initial={{ opacity: 0, scale: 0.96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: 8 }} transition={{ duration: 0.18 }} className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] border border-[#ececec] bg-[#f7f7f5] shadow-[12px_12px_30px_rgba(148,163,184,0.28),-10px_-10px_26px_rgba(255,255,255,0.82)]">
-                            <form onSubmit={handleSubmit} className="flex flex-col max-h-[90vh]">
+                            <form onSubmit={handleSubmit} className="flex flex-col max-h-[90dvh]">
                                 <div className="flex items-center justify-between gap-4 border-b border-[#101318] bg-[#111318] px-5 py-4">
                                     <div className="flex min-w-0 items-center gap-3">
                                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-purple-300/20 bg-purple-400/10 text-purple-400">

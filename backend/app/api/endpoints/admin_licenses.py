@@ -37,15 +37,27 @@ def read_current_company_license(
     if not target_empresa_id:
         raise HTTPException(status_code=404, detail="Usuario no pertenece a ninguna empresa")
 
-    snapshot = license_service.get_company_license_snapshot(db, target_empresa_id)
+    snapshot = license_service.get_company_license_snapshot(
+        db,
+        target_empresa_id,
+        run_housekeeping=True,
+    )
     assignment = snapshot["current_assignment"]
     licencia = assignment.licencia if assignment else None
     next_assignment = snapshot["next_assignment"]
     uso = license_service.update_usage_metrics(db, target_empresa_id)
+    # El snapshot y las métricas pueden sincronizar campos denormalizados de
+    # Empresa. Liberar el bloqueo antes de consultar productos comerciales evita
+    # que dos cargas concurrentes de la cabecera se esperen indefinidamente.
+    db.commit()
     empresa = db.query(Empresa).get(target_empresa_id)
-    commercial_state = commercial_capabilities_service.resolve_company_capabilities(db, target_empresa_id)
+    commercial_state = commercial_capabilities_service.resolve_company_capabilities(
+        db,
+        target_empresa_id,
+        license_snapshot=snapshot,
+    )
 
-    return {
+    payload = {
         "licencia_actual": licencia.nombre if licencia else "Sin Licencia",
         "license_status": snapshot["license_status"],
         "access_mode": snapshot["access_mode"],
@@ -70,6 +82,11 @@ def read_current_company_license(
         "saas_products": commercial_state["saas_products"],
         "commercial_capabilities": commercial_state,
     }
+    # La consulta comercial abre una nueva transacción de lectura. Se cierra
+    # explícitamente para no depender del momento en que el cliente consuma la
+    # respuesta.
+    db.commit()
+    return payload
 
 @router.get("/summary")
 def read_admin_license_summary(

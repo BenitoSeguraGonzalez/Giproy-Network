@@ -131,6 +131,8 @@ class EmpresaService:
                 )
         
         update_data = empresa_in.model_dump(exclude_unset=True)
+        omniclass_acknowledged = bool(update_data.pop("omniclass_change_acknowledged", False))
+        omniclass_change_reason = str(update_data.pop("omniclass_change_reason", "") or "").strip()
         if "ruc" in update_data or "nombre" in update_data:
             raise HTTPException(status_code=409, detail="El RUC y la razón social fiscal no son editables manualmente.")
         if update_data.get("activa") is True and getattr(db_obj, "lifecycle_status", "active") == "baja_purgada":
@@ -173,6 +175,34 @@ class EmpresaService:
         validate_license_window(update_data.get("license_start_date"), update_data.get("license_end_date"))
         validate_company_limits_against_usage(db_obj, update_data)
 
+        omniclass_was_enabled = bool(getattr(db_obj, "use_omniclass", False))
+        omniclass_will_be_enabled = bool(update_data.get("use_omniclass", omniclass_was_enabled))
+        omniclass_change = omniclass_was_enabled != omniclass_will_be_enabled
+        affected_classifications = 0
+        affected_sets = 0
+        if omniclass_change:
+            from app.models.bim_coordination import BimClassificationResolution, ProjectCoordinationSet
+            from app.models.bim_model import BimModel
+            has_bim = db.query(BimModel.id).filter(BimModel.empresa_id == db_obj.id).first() is not None
+            if omniclass_was_enabled and not omniclass_will_be_enabled and has_bim:
+                if not omniclass_acknowledged or len(omniclass_change_reason) < 10:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="Desactivar OmniClass con BIM requiere reconocer la ruptura estructural e indicar un motivo de al menos 10 caracteres.",
+                    )
+            classification_rows = db.query(BimClassificationResolution).filter(BimClassificationResolution.empresa_id == db_obj.id).all()
+            set_rows = db.query(ProjectCoordinationSet).filter(ProjectCoordinationSet.empresa_id == db_obj.id).all()
+            affected_classifications = len(classification_rows)
+            affected_sets = len(set_rows)
+            for item in classification_rows:
+                if not omniclass_will_be_enabled:
+                    item.resolution_status = "disabled"
+                    item.approved_by = None; item.approved_at = None
+                elif item.resolution_status == "disabled":
+                    item.resolution_status = "suggested" if item.omniclass_id else "unresolved"
+            for item in set_rows:
+                item.omniclass_status = "unresolved" if omniclass_will_be_enabled and item.bim_version_ids_json else "disabled"
+
         updated_obj = empresa_repo.update(db, db_obj=db_obj, obj_in=EmpresaUpdate(**update_data))
 
         if update_data:
@@ -188,6 +218,25 @@ class EmpresaService:
                 entity_id=updated_obj.id,
                 message=f"Empresa actualizada: {self.get_display_name(updated_obj)}",
                 payload={"fields": sorted(update_data.keys())},
+            )
+        if omniclass_change:
+            record_audit_event(
+                db,
+                module="coordinacion",
+                event_type="tenant_omniclass_policy_changed",
+                severity="warning",
+                actor=current_user,
+                empresa_id=updated_obj.id,
+                target_empresa_id=updated_obj.id,
+                entity_type="empresa",
+                entity_id=updated_obj.id,
+                operation_status="enabled" if omniclass_will_be_enabled else "structural_break_acknowledged",
+                message="Política OmniClass de la empresa actualizada con impacto coordinado.",
+                payload={
+                    "previous": omniclass_was_enabled, "current": omniclass_will_be_enabled,
+                    "acknowledged": omniclass_acknowledged, "reason": omniclass_change_reason or None,
+                    "affected_classifications": affected_classifications, "affected_coordination_sets": affected_sets,
+                },
             )
         return updated_obj
 

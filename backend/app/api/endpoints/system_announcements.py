@@ -146,7 +146,12 @@ def read_active_system_announcements(
         or_(*scope_filters)
     )
     items = _sort_active_announcements(query.all())
-    return [_serialize(item) for item in items]
+    payload = [_serialize(item) for item in items]
+    # Esta ruta es estrictamente de lectura. Cerrar explícitamente la
+    # transacción antes de serializar la respuesta evita conexiones
+    # ``idle in transaction`` cuando el navegador cancela la petición.
+    db.rollback()
+    return payload
 
 
 @router.get("/", response_model=List[SystemAnnouncementResponse])

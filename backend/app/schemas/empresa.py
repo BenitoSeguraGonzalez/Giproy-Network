@@ -70,6 +70,8 @@ class EmpresaUpdate(BaseModel):
     decimales_moneda: Optional[int] = None
     decimales_calculos: Optional[int] = None
     use_omniclass: Optional[bool] = None
+    omniclass_change_acknowledged: Optional[bool] = None
+    omniclass_change_reason: Optional[str] = None
     marketplace_can_sell: Optional[bool] = None
     lifecycle_status: Optional[str] = None
     baja_purged_at: Optional[datetime] = None

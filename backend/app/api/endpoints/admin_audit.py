@@ -15,6 +15,7 @@ from app.models.system_announcement import SystemAnnouncement
 from app.models.system_audit_event import SystemAuditEvent
 from app.models.usuario import Usuario
 from app.schemas.system_audit_event import SystemAuditEventResponse
+from app.services.audit_event import AUDIT_RETENTION_POLICY, verify_audit_chain
 
 router = APIRouter()
 
@@ -75,6 +76,9 @@ def _serialize_structured_event(item: SystemAuditEvent) -> SystemAuditEventRespo
         actor_role=item.actor_role,
         empresa_id=item.empresa_id,
         empresa_nombre=item.empresa.nombre if item.empresa else None,
+        proyecto_id=item.proyecto_id,
+        proyecto_codigo_root=item.proyecto_codigo_root,
+        proyecto_revision=item.proyecto_revision,
         target_user_id=item.target_user_id,
         target_user_email=item.target_user.email if item.target_user else None,
         target_empresa_id=item.target_empresa_id,
@@ -84,8 +88,15 @@ def _serialize_structured_event(item: SystemAuditEvent) -> SystemAuditEventRespo
         severity=item.severity,
         entity_type=item.entity_type,
         entity_id=item.entity_id,
+        capability=item.capability,
+        correlation_id=item.correlation_id,
+        operation_status=item.operation_status,
+        previous_hash=item.previous_hash,
+        hash_nonce=item.hash_nonce,
+        event_hash=item.event_hash,
         message=item.message,
         payload=payload,
+        detail=item.detail_json,
         created_at=item.created_at,
     )
 
@@ -124,10 +135,10 @@ def read_admin_audit_summary(
             "audit_script": {"exists": AUDIT_SCRIPT.exists()},
             "sanitize_script": {"exists": SANITIZE_SCRIPT.exists()},
         },
+        "retention_policy": AUDIT_RETENTION_POLICY,
         "backlog": [
-            "La auditoría estructurada ya cubre autenticación, empresas, mantenimiento, comunicados y revocación de sesiones.",
-            "Persisten logs técnicos legacy para diagnóstico rápido mientras más módulos migran a eventos estructurados.",
-            "Sigue pendiente instrumentar cambios operativos de negocio como tenant switch auditado y eventos de presupuestos/proyectos.",
+            "La auditoría estructurada cubre autenticación, empresas, proyecto, presupuesto, Gantt, EDT, EDO, interesados y fórmula polinómica.",
+            "Los logs técnicos legacy pueden incorporarse de forma idempotente, saneada y encadenada mediante el importador controlado.",
         ],
     }
 
@@ -165,6 +176,21 @@ def read_admin_audit_events(
 
     items = query.order_by(SystemAuditEvent.created_at.desc()).limit(limit).all()
     return [_serialize_structured_event(item) for item in items]
+
+
+@router.get("/events/integrity")
+def verify_admin_audit_integrity(
+    empresa_id: int = Query(..., ge=1),
+    proyecto_id: int | None = Query(None, ge=1),
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(check_superadmin),
+):
+    query = db.query(SystemAuditEvent).filter(SystemAuditEvent.empresa_id == empresa_id)
+    if proyecto_id is None:
+        query = query.filter(SystemAuditEvent.proyecto_id.is_(None))
+    else:
+        query = query.filter(SystemAuditEvent.proyecto_id == proyecto_id)
+    return verify_audit_chain(query.order_by(SystemAuditEvent.id).all())
 
 
 @router.get("/recent-events")

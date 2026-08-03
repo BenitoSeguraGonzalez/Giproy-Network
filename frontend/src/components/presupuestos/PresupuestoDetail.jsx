@@ -536,7 +536,7 @@ const BudgetMiniMapWindow = React.memo(function BudgetMiniMapWindow({
                     </div>
                 </div>
                 {!budgetMiniMapMinimized && (
-                    <div className="max-h-[60vh] overflow-auto px-4 py-4">
+                    <div className="max-h-[60dvh] overflow-auto px-4 py-4">
                         {miniMapRoots.length > 0 ? (
                             <>
                                 <div className="mb-3 space-y-2">
@@ -693,6 +693,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
     });
     const [forcedPortableWorkspace, setForcedPortableWorkspace] = useState(() => readPortableWorkspaceOverride());
     const isCompactViewport = resolvePortableWorkspace({
+        moduleKey: 'presupuesto',
         width: windowSize.width,
         height: windowSize.height,
         forced: user?.rol?.toLowerCase() === 'superadministrador' && forcedPortableWorkspace

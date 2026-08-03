@@ -130,6 +130,11 @@ class BimScheduleImportPreviewResponse(BaseModel):
     preflight: BimSchedulePreflightResponse
 
 
+class BimScheduleImportRevisionCreate(BaseModel):
+    coordination_stage_id: int = Field(gt=0)
+    document: BimScheduleInterchangeDocument
+
+
 class BimScheduleInteropFormatCapability(BaseModel):
     format: Literal["canonical_json", "mspdi_xml", "p6_xml", "p6_xer", "mpp", "powerproject_pp"]
     status: Literal["available", "conditional", "unavailable"]

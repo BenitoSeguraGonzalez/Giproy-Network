@@ -89,7 +89,7 @@ const AdminGlobalBim = () => {
 
     if (!isSuperadmin) {
         return (
-            <div className="h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] p-12">
+            <div className="h-full min-h-0 bg-[#F2F4F7] p-12">
                 <div className="max-w-4xl mx-auto">
                     <button onClick={() => navigate('/admin-global')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors">
                         <ArrowLeft className="w-4 h-4" /> Volver
@@ -100,7 +100,7 @@ const AdminGlobalBim = () => {
     }
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] flex flex-col bg-[#F2F4F7]">
+        <div className="h-full min-h-0 flex flex-col bg-[#F2F4F7]">
             <main className="flex-1 overflow-y-auto p-12 custom-scrollbar">
                 <div className="w-full max-w-[1500px] mx-auto">
                     <button onClick={() => navigate('/admin-global')} className="flex items-center gap-2 text-zinc-500 hover:text-[#F39200] font-bold uppercase text-xs mb-8 transition-colors">
@@ -192,6 +192,9 @@ const AdminGlobalBim = () => {
                                             <Wrench className="w-4 h-4" />
                                             {saving ? 'Guardando...' : 'Guardar activación BIM'}
                                         </button>
+                                        <p className="mt-3 border border-amber-200 bg-amber-50 p-3 text-xs font-semibold leading-5 text-amber-950">
+                                            Al habilitar BIM por primera vez para una empresa, OmniClass se activa como estructura coordinada predeterminada. La empresa podrá desactivarlo después, con una advertencia explícita de ruptura estructural.
+                                        </p>
                                     </div>
                                 </div>
                             </section>

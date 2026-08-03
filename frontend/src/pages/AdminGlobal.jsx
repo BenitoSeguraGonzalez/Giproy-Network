@@ -32,7 +32,7 @@ const AdminGlobal = () => {
 
     if (!isSuperadmin) {
         return (
-            <div className="h-[calc(100vh-theme(spacing.20))] bg-[#F2F4F7] p-12">
+            <div className="h-full min-h-0 bg-[#F2F4F7] p-12">
                 <div className="max-w-4xl mx-auto">
                     <button
                         onClick={() => navigate('/dashboard')}
@@ -213,7 +213,7 @@ const AdminGlobal = () => {
     ];
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] flex flex-col bg-[#F2F4F7]">
+        <div className="h-full min-h-0 flex flex-col bg-[#F2F4F7]">
             <main className="flex-1 overflow-y-auto p-12 custom-scrollbar">
                 <div className="w-full max-w-[1500px] mx-auto">
                     <button

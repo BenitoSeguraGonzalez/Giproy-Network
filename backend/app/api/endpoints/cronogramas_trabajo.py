@@ -45,11 +45,23 @@ from app.services.apu_explosion import (
 )
 from app.services.license import license_service
 from app.services.audit_event import record_audit_event
+from app.services.project_capability import require_project_user_capability
 from app.core.calculation_policy import calculate_budget_line_total
 from app.api.endpoints.cronogramas import _get_or_create_cronograma, _serialize_cronograma, _validate_distribution
 
 router = APIRouter()
 PARETO_TOP_OPTIONS = {10, 20, 50}
+
+
+def _audit_schedule(db: Session, *, presupuesto: Presupuesto, actor: Usuario, event_type: str, message: str, entity_type: str = "work_schedule", entity_id=None, operation_status: str = "applied", payload: dict | None = None):
+    project = getattr(presupuesto, "proyecto", None)
+    return record_audit_event(
+        db, module="cronogramas_trabajo", event_type=event_type, message=message,
+        actor=actor, empresa_id=presupuesto.empresa_id, proyecto_id=presupuesto.proyecto_id,
+        proyecto_codigo_root=getattr(project, "codigo_root", None), proyecto_revision=getattr(project, "revision", None),
+        entity_type=entity_type, entity_id=entity_id if entity_id is not None else presupuesto.id,
+        operation_status=operation_status, payload={"presupuesto_id": presupuesto.id, **(payload or {})},
+    )
 
 
 def _build_cronograma_trabajo_pareto_response(
@@ -181,6 +193,7 @@ def _build_cronograma_trabajo_pareto_response(
     )
 
 def _verify_module_access(db: Session, proyecto_id: int, usuario_id: int):
+    require_project_user_capability(db, project_id=proyecto_id, user_id=usuario_id, capability="schedule.view")
     from app.services.proyecto import proyecto_service
     perms = proyecto_service.get_user_permissions(db, proyecto_id, usuario_id)
     if not perms["has_assignment"]:
@@ -810,6 +823,7 @@ def save_gantt_draft_intention(
         raise _translate_gantt_workflow_error(exc) from exc
     db.commit()
     db.refresh(draft)
+    _audit_schedule(db, presupuesto=presupuesto, actor=current_user, event_type="gantt_draft_intention_saved", message="Intención guardada en el borrador Gantt.", entity_type="gantt_draft", entity_id=draft.id, operation_status="draft", payload={"draft_version": draft.version, "intention_type": payload.intention.get("type") if isinstance(payload.intention, dict) else None})
     return _serialize_gantt_draft(draft)
 
 
@@ -916,6 +930,7 @@ def mark_gantt_draft_applied(
         raise _translate_gantt_workflow_error(exc) from exc
     db.commit()
     db.refresh(draft)
+    _audit_schedule(db, presupuesto=presupuesto, actor=current_user, event_type="gantt_draft_applied", message="Borrador Gantt aplicado al cronograma y presupuesto.", entity_type="gantt_draft", entity_id=draft.id, payload={"draft_version": draft.version, "functional_modification_id": functional_modification.id, "intention_count": len(draft.intentions or [])})
     return _serialize_gantt_draft(draft)
 
 
@@ -948,6 +963,7 @@ def discard_invalidated_gantt_draft_intentions(
         raise _translate_gantt_workflow_error(exc) from exc
     db.commit()
     db.refresh(draft)
+    _audit_schedule(db, presupuesto=presupuesto, actor=current_user, event_type="gantt_invalidated_intentions_discarded", message="Intenciones Gantt invalidadas descartadas.", entity_type="gantt_draft", entity_id=draft.id, operation_status="discarded", payload={"draft_version": draft.version})
     return _serialize_gantt_draft(draft)
 
 
@@ -980,6 +996,7 @@ def prepare_invalidated_gantt_draft_intentions_for_adjustment(
         raise _translate_gantt_workflow_error(exc) from exc
     db.commit()
     db.refresh(draft)
+    _audit_schedule(db, presupuesto=presupuesto, actor=current_user, event_type="gantt_invalidated_intentions_prepared", message="Intenciones Gantt preparadas para ajuste.", entity_type="gantt_draft", entity_id=draft.id, operation_status="draft", payload={"draft_version": draft.version})
     return _serialize_gantt_draft(draft)
 
 
@@ -1463,6 +1480,7 @@ def reload_cronograma_trabajo_holiday_calendar(
                 end_date=response.holiday_calendar.end_date,
                 force_refresh=True,
             )
+        _audit_schedule(db, presupuesto=presupuesto, actor=current_user, event_type="project_holiday_calendar_reloaded", message="Calendario laboral del proyecto recargado.", entity_type="project_calendar", entity_id=proyecto_model.id)
     return cronograma_trabajo_service.get_schedule(db, presupuesto.id, presupuesto.proyecto_id, presupuesto.empresa_id)
 
 
@@ -1481,6 +1499,7 @@ def reset_cronograma_trabajo_holiday_calendar(
     )
     if proyecto:
         project_calendar_service.reset_project_calendar(db, proyecto=proyecto)
+        _audit_schedule(db, presupuesto=presupuesto, actor=current_user, event_type="project_holiday_calendar_reset", message="Calendario laboral del proyecto restaurado.", entity_type="project_calendar", entity_id=proyecto.id, operation_status="reset")
     return cronograma_trabajo_service.get_schedule(db, presupuesto.id, presupuesto.proyecto_id, presupuesto.empresa_id)
 
 
@@ -1507,6 +1526,7 @@ def add_cronograma_trabajo_holiday_manual(
             created_by=current_user.id,
             notes=payload.notes,
         )
+        _audit_schedule(db, presupuesto=presupuesto, actor=current_user, event_type="project_holiday_added", message="Día no laborable manual agregado.", entity_type="project_calendar", entity_id=proyecto.id, payload={"date": payload.date, "name": payload.name})
     return cronograma_trabajo_service.get_schedule(db, presupuesto.id, presupuesto.proyecto_id, presupuesto.empresa_id)
 
 
@@ -1532,6 +1552,7 @@ def remove_cronograma_trabajo_holiday_day(
             holiday_name=payload.name,
             created_by=current_user.id,
         )
+        _audit_schedule(db, presupuesto=presupuesto, actor=current_user, event_type="project_holiday_removed", message="Día no laborable retirado.", entity_type="project_calendar", entity_id=proyecto.id, operation_status="removed", payload={"date": payload.date, "name": payload.name})
     return cronograma_trabajo_service.get_schedule(db, presupuesto.id, presupuesto.proyecto_id, presupuesto.empresa_id)
 
 

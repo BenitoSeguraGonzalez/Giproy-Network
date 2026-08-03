@@ -11,7 +11,7 @@ const ReportGenerationModal = ({
             isOpen={isOpen}
             onClose={null}
             size="sm"
-            zIndex="z-[430]"
+            zIndex="z-[1120]"
             panelClassName="max-w-[420px]"
         >
             <AppModalBody className="px-8 py-8">

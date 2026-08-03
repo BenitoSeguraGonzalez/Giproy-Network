@@ -69,6 +69,15 @@ def test_4d_rejects_cross_tenant_element(db, sample_empresa):
     assert cross.value.status_code == 404
 
 
+def test_4d_rejects_budget_line_outside_active_project(db, sample_empresa):
+    user, project, _element = _context(db, sample_empresa)
+    payload = _activity_payload().model_copy(update={"budget_line_id": 999999})
+    with pytest.raises(HTTPException) as outside:
+        create_activity_snapshot(db, project_id=project.id, company_id=sample_empresa.id, user_id=user.id, payload=payload)
+    assert outside.value.status_code == 400
+    assert "partida" in outside.value.detail.lower()
+
+
 def test_4d_timeline_uses_cutoff_and_progress_evidence(db, sample_empresa):
     user, project, element = _context(db, sample_empresa)
     activity = create_activity_snapshot(db, project_id=project.id, company_id=sample_empresa.id, user_id=user.id, payload=_activity_payload())
@@ -133,5 +142,18 @@ def test_4d_baseline_deviation_dependency_and_viewpoint(db, sample_empresa):
     assert all(activity["critical"] for activity in gantt["activities"])
     report = build_report(db, report_type="gantt", project_id=project.id, company_id=sample_empresa.id, baseline_id=baseline["id"])
     exported = report_csv(report)
-    assert report["contract_version"] == "giproy_bim_4d_report_v1"
+    assert report["contract_version"] == "giproy_bim_4d_report_v2"
+    assert report["reference_status"] == "preliminary"
+    assert report["watermark"].startswith("PRELIMINAR")
+    repeated = build_report(db, report_type="gantt", project_id=project.id, company_id=sample_empresa.id, baseline_id=baseline["id"])
+    assert report["snapshot_sha256"] == repeated["snapshot_sha256"]
+    assert len(report["snapshot_sha256"]) == 64
     assert "critical" in exported and "A-042" in exported
+
+
+def test_official_4d_report_requires_active_coordinated_reference(db, sample_empresa):
+    _user, project, _element = _context(db, sample_empresa)
+    with pytest.raises(HTTPException) as missing_reference:
+        build_report(db, report_type="conflicts", project_id=project.id, company_id=sample_empresa.id, official_output=True)
+    assert missing_reference.value.status_code == 409
+    assert "preliminar" in missing_reference.value.detail.lower()

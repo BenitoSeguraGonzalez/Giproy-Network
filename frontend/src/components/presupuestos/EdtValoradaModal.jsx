@@ -253,6 +253,7 @@ const EdtValoradaModal = ({ isOpen, onClose, onNavigateToNode }) => {
     }, []);
 
     const isCompactViewport = resolvePortableWorkspace({
+        moduleKey: 'presupuesto',
         width: viewport.width,
         height: viewport.height,
         forced: user?.role === 'superadmin' && forcedPortableWorkspace,
@@ -432,7 +433,7 @@ const EdtValoradaModal = ({ isOpen, onClose, onNavigateToNode }) => {
             size="2xl"
             zIndex="z-[150]"
             overlayClassName={isCompactViewport ? 'p-2' : ''}
-            panelClassName={isCompactViewport ? 'min-h-[92vh] max-h-[96vh] flex flex-col rounded-[1.35rem]' : 'min-h-[75vh] max-h-[88vh] flex flex-col'}
+            panelClassName={isCompactViewport ? 'min-h-[92dvh] max-h-[96dvh] flex flex-col rounded-[1.35rem]' : 'min-h-[75dvh] max-h-[88dvh] flex flex-col'}
         >
             <AppModalHeader
                 title="EDT Valorada"

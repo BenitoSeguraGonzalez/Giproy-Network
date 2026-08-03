@@ -1,3 +1,6 @@
+import base64
+from types import SimpleNamespace
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -10,6 +13,7 @@ from app.models.system_bim_setting import SystemBimSetting
 from app.models.usuario import Usuario
 from app.schemas.bim_model import BimImportElementPayload, BimJsonImportRequest
 from app.services.bim.import_service import import_json_bim_package
+from app.services.bim.coordination_import_stage_service import confirm_preflight, create_preflight
 
 
 IFC_CONTENT = b"""ISO-10303-21;
@@ -76,6 +80,27 @@ def test_bim_import_job_http_lifecycle_is_tenant_scoped(
     monkeypatch.setattr(bim_models_endpoint, "process_bim_import_job", lambda _job_id: None)
     user, project = _enabled_context(db, sample_empresa)
     client = _client(db, user)
+    staged = create_preflight(
+        db,
+        project_id=project.id,
+        company_id=sample_empresa.id,
+        user_id=user.id,
+        payload=SimpleNamespace(
+            source_domain="bim",
+            source_format="ifc",
+            filename="modelo-http.ifc",
+            content_base64=base64.b64encode(IFC_CONTENT).decode("ascii"),
+            coordination_set_id=None,
+        ),
+    )
+    confirm_preflight(
+        db,
+        stage_id=staged["id"],
+        project_id=project.id,
+        company_id=sample_empresa.id,
+        user_id=user.id,
+        payload=SimpleNamespace(expected_checksum_sha256=staged["checksum_sha256"], reason="HTTP test"),
+    )
 
     created = client.post(
         f"/bim/projects/{project.id}/imports/ifc-jobs",
@@ -83,6 +108,7 @@ def test_bim_import_job_http_lifecycle_is_tenant_scoped(
             "model_name": "Modelo HTTP",
             "version_label": "v1",
             "discipline": "Arquitectura",
+            "stage_id": str(staged["id"]),
         },
         files={"file": ("modelo-http.ifc", IFC_CONTENT, "application/octet-stream")},
     )

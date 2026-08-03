@@ -247,8 +247,10 @@ class CronogramaTrabajoService:
         # TASK-1079: Priorizar parent_initial_id para tramos iniciales valorados (tramo origen)
         if prioritize_parent_initial and parent_initial_id:
             parent_key = parent_initial_id
+            identity_scope = "parent"
         else:
             parent_key = parent_period_id or period_id or "unbound"
+            identity_scope = "period"
 
         starts_at = self._normalize_datetime_value(
             raw_value.get("starts_at")
@@ -266,7 +268,7 @@ class CronogramaTrabajoService:
                 raw_value.get("id")
                 or raw_value.get("subbar_id")
                 or raw_value.get("subbarId")
-                or f"line-{line_token}-parent-{parent_key}-segment-{index + 1}"
+                or f"line-{line_token}-{identity_scope}-{parent_key}-segment-{index + 1}"
             ).strip(),
             "budget_line_id": str(budget_line_id or "").strip() or None,
             "period_id": period_id,
@@ -326,15 +328,6 @@ class CronogramaTrabajoService:
         self, budget_line_id: str, metadata: Optional[dict]
     ) -> dict:
         normalized_metadata = dict(metadata or {})
-        if (
-            "session_state" not in normalized_metadata
-            and "subbars" not in normalized_metadata
-            and "manualTemporalWindow" not in normalized_metadata
-            and isinstance(normalized_metadata.get("gantt_session"), dict)
-            and isinstance(normalized_metadata.get("gantt_subbars"), list)
-        ):
-            return normalized_metadata
-
         raw_session = (
             normalized_metadata.get("gantt_session")
             or normalized_metadata.get("session_state")

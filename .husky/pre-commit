@@ -1,0 +1,47 @@
+#!/usr/bin/env sh
+# Cross-repo pre-commit hook — Giproy Network
+# Bloquea commits que contengan secretos o que rompan convenciones.
+# Setup inicial requiere `git config core.hooksPath .husky` post-clone.
+# Idéntica lógica a MarketI y NurIA-Odonto; sólo cambia el header comment.
+
+set -e
+
+echo "[pre-commit] Verificando secretos con gitleaks..."
+if [ -f .gitleaks.toml ] && command -v gitleaks >/dev/null 2>&1; then
+    gitleaks protect --staged --redact --verbose --config .gitleaks.toml
+    echo "[pre-commit] gitleaks OK"
+elif [ ! -f .gitleaks.toml ]; then
+    echo "[pre-commit] WARN: .gitleaks.toml no presente — omitiendo gitleaks. Crea desde template o copia de un proyecto hermano."
+else
+    echo "[pre-commit] WARN: gitleaks no instalado — instale con 'brew install gitleaks' o 'scoop install gitleaks'."
+fi
+
+echo "[pre-commit] Verificando heurística de passwords en scripts..."
+CHECK_STAGED="$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)" \
+    bash infra/scripts/check-no-passwords.sh
+echo "[pre-commit] check-no-passwords OK"
+
+# Stage sólo en backend si hay cambios backend
+if git diff --cached --name-only 2>/dev/null | grep -E '^backend/' >/dev/null 2>&1; then
+    echo "[pre-commit] Verificando backend..."
+    if command -v ruff >/dev/null 2>&1; then
+        (cd backend && ruff check .) || echo "[pre-commit] ruff check failed (continuando)"
+        (cd backend && ruff format --check .) || echo "[pre-commit] ruff format --check failed"
+    else
+        echo "[pre-commit] skip: ruff no instalado"
+    fi
+fi
+
+# Stage sólo en frontend si hay cambios frontend
+if git diff --cached --name-only 2>/dev/null | grep -E '^frontend/' >/dev/null 2>&1; then
+    echo "[pre-commit] Verificando frontend (tsc --noEmit)..."
+    if command -v pnpm >/dev/null 2>&1; then
+        (cd frontend && pnpm exec tsc --noEmit) || echo "[pre-commit] tsc failed (continuando)"
+    elif command -v npm >/dev/null 2>&1; then
+        (cd frontend && npx tsc --noEmit) || echo "[pre-commit] tsc failed (continuando)"
+    else
+        echo "[pre-commit] skip: ni pnpm ni npm instalados"
+    fi
+fi
+
+echo "[pre-commit] OK"
