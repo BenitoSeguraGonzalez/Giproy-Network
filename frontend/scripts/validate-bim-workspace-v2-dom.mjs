@@ -47,6 +47,11 @@ try {
     const shellBox = await shell.boundingBox();
     const viewerBox = await viewerRegion.boundingBox();
     assert.ok(viewerBox.width / shellBox.width >= 0.65, `El visor debe ocupar al menos 65%: ${viewerBox.width}/${shellBox.width}`);
+    assert.ok(viewerBox.height / shellBox.height >= 0.78, `El visor inicial debe conservar al menos 78% de alto: ${viewerBox.height}/${shellBox.height}`);
+    assert.equal(await shell.locator('aside').count(), 0, 'El estado inicial no ocupa espacio con paneles laterales');
+    assert.equal(await page.locator('[data-bim-bottom-drawer]').evaluate((node) => Math.round(node.getBoundingClientRect().height)), 40, 'La secuencia 4D inicia recogida');
+    const initialActions = await shell.locator('header button:visible').count();
+    assert.ok(initialActions <= 10, `La cabecera inicial no compite con acciones (${initialActions})`);
 
     const canvas = page.locator('canvas[data-bim-fragments-product-canvas="true"]');
     const pixels = await canvas.evaluate((node) => {
@@ -61,6 +66,7 @@ try {
     await page.getByRole('button', { name: /Planificación y costes/ }).click();
     assert.equal(await page.locator('[data-bim-bottom-drawer]').count(), 1, 'Planificación muestra drawer único');
     assert.ok(await page.locator('[data-bim-bottom-drawer]').getByText('Secuencia 4D', { exact: true }).count() >= 1, 'Timeline y Gantt conviven en una única superficie 4D');
+    await page.getByRole('button', { name: 'Expandir cronología' }).click();
     await page.waitForSelector('[data-bim-planning-4d] [data-bim-gantt-activity="101"]');
     assert.equal(await page.locator('[data-bim-gantt-activity-selected="true"]').count(), 2, 'Selección 3D inversa resalta todas las actividades vinculadas');
     await page.getByRole('button', { name: 'Seleccionar actividad EDT-01' }).click();
@@ -68,6 +74,7 @@ try {
     assert.equal(await page.locator('[data-bim-fragments-product]').getAttribute('data-bim-planning-selection'), '1', 'Selección Gantt se proyecta al modelo fragments');
     await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-planning-1920x1080.png`, fullPage: true });
     await page.getByRole('button', { name: /Seguimiento/ }).click();
+    await page.getByRole('button', { name: 'Trabajo' }).click();
     await page.locator('#bim-tool-selector').selectOption('reports');
     assert.equal(await page.getByText('Informes BIM', { exact: true }).count(), 1, 'Informes queda integrado en el flujo de seguimiento');
     await page.keyboard.press('Control+K');
@@ -99,6 +106,20 @@ try {
     assert.ok(await page.evaluate(() => document.activeElement && document.activeElement !== document.body), 'El foco de teclado permanece visible dentro del workspace');
     await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-1920x1080.png`, fullPage: true });
     await context.close();
+
+    const fallbackContext = await browser.newContext({ viewport: { width: 1920, height: 1080 }, screen: { width: 1920, height: 1080 } });
+    const fallbackPage = await fallbackContext.newPage();
+    await fallbackPage.goto(`${baseUrl}/bim-workspace-v2-harness.html?viewer=fallback`, { waitUntil: 'domcontentloaded' });
+    await fallbackPage.waitForSelector('[data-bim-three-viewer="isolated"] canvas');
+    assert.equal(await fallbackPage.getByText('Three.js', { exact: true }).count(), 0, 'El motor no aparece como acción o contenido de usuario');
+    assert.equal(await fallbackPage.getByText('Raycast 3D', { exact: true }).count(), 0, 'El raycast no aparece como contenido de usuario');
+    assert.equal(await fallbackPage.getByText('OrbitControls', { exact: true }).count(), 0, 'Los controles técnicos no aparecen como contenido de usuario');
+    assert.equal(await fallbackPage.locator('[data-bim-three-ifc-filter-button]:visible').count(), 0, 'Los filtros avanzados permanecen bajo demanda');
+    await fallbackPage.getByRole('button', { name: /Vista/ }).click();
+    assert.ok(await fallbackPage.locator('[data-bim-three-ifc-filter-button]:visible').count() > 0, 'Vista revela los filtros avanzados cuando se solicitan');
+    await fallbackPage.getByRole('button', { name: /Vista/ }).click();
+    await fallbackPage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-fallback-1920x1080.png`, fullPage: true });
+    await fallbackContext.close();
 
     const scaledContext = await browser.newContext({
         viewport: { width: 1536, height: 800 },
@@ -165,9 +186,9 @@ try {
     await tabletLandscapePage.goto(`${baseUrl}/bim-workspace-v2-harness.html`, { waitUntil: 'domcontentloaded' });
     await tabletLandscapePage.waitForSelector('[data-bim-workspace-v2][data-bim-adaptive-profile="tablet-landscape"]');
     assert.equal(await tabletLandscapePage.locator('[data-bim-unsupported-resolution]').count(), 0, 'La tablet horizontal compatible monta BIM');
-    assert.equal(await tabletLandscapePage.locator('[data-bim-workspace-v2] aside').count(), 1, 'Tablet horizontal monta un único panel lateral');
+    assert.equal(await tabletLandscapePage.locator('[data-bim-workspace-v2] aside').count(), 0, 'Tablet horizontal inicia sin paneles laterales');
     assert.equal(await tabletLandscapePage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, 'Tablet horizontal sin overflow de página');
-    await tabletLandscapePage.getByRole('button', { name: 'Panel contextual' }).click();
+    await tabletLandscapePage.getByRole('button', { name: 'Trabajo' }).click();
     assert.ok(await tabletLandscapePage.locator('[data-bim-workspace-v2] aside').count() <= 1, 'Nunca se montan dos paneles laterales simultáneos');
     await tabletLandscapePage.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-workspace-v2-tablet-landscape.png`, fullPage: true });
     await tabletLandscapeContext.close();

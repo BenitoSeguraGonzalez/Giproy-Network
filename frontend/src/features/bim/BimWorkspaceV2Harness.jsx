@@ -4,12 +4,18 @@ import { createRoot } from 'react-dom/client';
 import '../../index.css';
 import BimFragmentsViewport from '../../components/bim/BimFragmentsViewport';
 import BimPlanning4dPanel from '../../components/bim/BimPlanning4dPanel';
+import BimThreeViewer from '../../components/bim/BimThreeViewer';
 import BimWorkspaceV2 from '../../components/bim/BimWorkspaceV2';
 import { getBimFragmentsSmokeBytes } from '../../components/bim/bimFragmentsBinaryFixture';
 import { createActivityPlanningSelection, createElementPlanningSelection } from '../../components/bim/bimPlanningSelection';
 
 const FIXTURE_GUID = '0p3fMZQGz7KxQ1YkSm0020';
 const SECOND_GUID = '0p3fMZQGz7KxQ1YkSm0021';
+const useFallbackViewer = new URLSearchParams(window.location.search).get('viewer') === 'fallback';
+const ELEMENTS = [
+    { id: 1, global_id: FIXTURE_GUID, name: 'Muro perimetral A', ifc_class: 'IfcWall', metadata_json: { geometry_2d: { x: 10, y: 10, width: 80, height: 20 } } },
+    { id: 2, global_id: SECOND_GUID, name: 'Losa nivel 01', ifc_class: 'IfcSlab', metadata_json: { geometry_2d: { x: 40, y: 55, width: 120, height: 70 } } },
+];
 const GANTT = {
     range_start: '2026-07-01T00:00:00Z',
     range_finish: '2026-08-15T00:00:00Z',
@@ -55,7 +61,9 @@ const BimWorkspaceV2Harness = () => {
     const [timeline, setTimeline] = useState(null);
     const [selection, setSelection] = useState(() => createElementPlanningSelection(FIXTURE_GUID, GANTT));
     const viewer = viewerMode === 'fragments'
-        ? <BimFragmentsViewport projectId={1} versionId={1} empresaId={1} loadBytes={() => getBimFragmentsSmokeBytes()} temporalProfile={timeline} selectionProfile={selection} />
+        ? (useFallbackViewer
+            ? <BimThreeViewer elements={ELEMENTS} ready activeVersionLabel="IFC4 - R08" selectedElement={ELEMENTS[0]} onSelectElement={() => {}} />
+            : <BimFragmentsViewport projectId={1} versionId={1} empresaId={1} loadBytes={() => getBimFragmentsSmokeBytes()} temporalProfile={timeline} selectionProfile={selection} />)
         : panel('Plano BIM 2D', 'Vista técnica del nivel activo.');
 
     const selectActivity = (activity) => {

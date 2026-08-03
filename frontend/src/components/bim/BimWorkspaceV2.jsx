@@ -1,14 +1,14 @@
 import React, { Component, useEffect, useMemo, useRef, useState } from 'react';
 import {
     Box, CalendarRange, ChevronDown, CircleAlert, ClipboardCheck, GitMerge,
-    Layers3, MonitorX, PackageCheck, PanelLeft, PanelRight, RefreshCw,
-    RotateCcw, Search, Settings, Upload, X,
+    Layers3, MonitorX, MoreHorizontal, PackageCheck, PanelLeft, PanelRight,
+    RefreshCw, RotateCcw, Search, Settings, Upload, X,
 } from 'lucide-react';
 import { isMinimumDesktopDisplaySupported } from '../../utils/displayResolution';
 import { getErrorMessage } from '../../utils/errorMessage';
 import useAdaptiveLayout from '../../hooks/useAdaptiveLayout';
 
-const PREFERENCES_KEY = 'giproy_bim_workspace_v3_preferences';
+const PREFERENCES_KEY = 'giproy_bim_workspace_v4_preferences';
 const MODES = [
     { id: 'planning-costs', label: 'Planificación y costes', shortLabel: '4D / 5D', icon: CalendarRange },
     { id: 'model', label: 'Modelo', shortLabel: 'Modelo', icon: Box },
@@ -44,12 +44,6 @@ const useSafariNotice = () => useMemo(() => {
     return /Safari/i.test(agent) && !/Chrome|Chromium|CriOS|Edg|OPR/i.test(agent);
 }, []);
 
-const ContextValue = ({ label, value }) => (
-    <div className="min-w-0">
-        <span className="block text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{label}</span>
-        <span className="block truncate text-xs font-semibold text-zinc-900" title={value || undefined}>{value || 'Sin asignar'}</span>
-    </div>
-);
 class BimRegionBoundary extends Component {
     state = { failed: false };
     static getDerivedStateFromError() { return { failed: true }; }
@@ -71,10 +65,11 @@ const BimWorkspaceV2 = ({
     const initial = useMemo(() => readPreferences(projectId), [projectId]);
     const [activeMode, setActiveMode] = useState(initial.activeMode || 'planning-costs');
     const [activeToolByMode, setActiveToolByMode] = useState(initial.activeToolByMode || {});
-    const [sidePanel, setSidePanel] = useState(initial.sidePanel || 'context');
-    const [bottomCollapsed, setBottomCollapsed] = useState(initial.bottomCollapsed === true);
+    const [sidePanel, setSidePanel] = useState(initial.sidePanel || 'none');
+    const [bottomCollapsed, setBottomCollapsed] = useState(initial.bottomCollapsed !== false);
     const [bottomHeight, setBottomHeight] = useState(Math.min(260, Math.max(220, initial.bottomHeight || 240)));
     const [adminOpen, setAdminOpen] = useState(false);
+    const [utilityOpen, setUtilityOpen] = useState(false);
     const [activeAdminTool, setActiveAdminTool] = useState(initial.activeAdminTool || 'imports');
     const [searchTerm, setSearchTerm] = useState('');
     const [searchOpen, setSearchOpen] = useState(false);
@@ -103,7 +98,7 @@ const BimWorkspaceV2 = ({
         const keydown = (event) => {
             if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); searchRef.current?.focus(); setSearchOpen(true); }
             if (event.altKey && /^[1-5]$/.test(event.key)) { event.preventDefault(); setActiveMode(MODES[Number(event.key) - 1].id); }
-            if (event.key === 'Escape') { setSearchOpen(false); setAdminOpen(false); }
+            if (event.key === 'Escape') { setSearchOpen(false); setAdminOpen(false); setUtilityOpen(false); }
         };
         window.addEventListener('keydown', keydown);
         return () => window.removeEventListener('keydown', keydown);
@@ -139,44 +134,52 @@ const BimWorkspaceV2 = ({
     const normalizedSearch = searchTerm.trim().toLocaleLowerCase('es');
     const matches = onSearch ? remoteMatches : (normalizedSearch ? searchItems.filter((item) => `${item.label} ${item.meta || ''}`.toLocaleLowerCase('es').includes(normalizedSearch)).slice(0, 8) : []);
     const errorMessage = error ? getErrorMessage(error, 'No se pudo cargar el espacio BIM.') : '';
-    const selectMode = (id) => { setActiveMode(id); setAdminOpen(false); setSidePanel(id === 'model' ? 'explorer' : 'context'); };
+    const selectMode = (id) => { setActiveMode(id); setAdminOpen(false); setSidePanel('none'); setUtilityOpen(false); };
     const selectTool = (id) => setActiveToolByMode((current) => ({ ...current, [activeMode]: id }));
     const openSearchItem = (item) => { item.onSelect?.(); if (item.workspace) selectMode(item.workspace); setSearchTerm(''); setSearchOpen(false); };
 
     return (
         <section className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden border border-zinc-300 bg-zinc-100 text-zinc-800" data-bim-workspace-v2 data-bim-active-workspace={activeMode} data-bim-adaptive-profile={adaptive.enabled ? adaptive.profile : 'legacy'}>
             <header className="z-20 shrink-0 border-b border-zinc-300 bg-white" data-bim-primary-header>
-                <div className="flex h-11 min-w-0 items-center gap-3 px-3">
+                <div className="flex h-12 min-w-0 items-center gap-3 px-3">
                     <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-orange-600 text-white"><Box className="size-4" aria-hidden="true" /></span>
-                    <div className="grid min-w-0 flex-1 grid-cols-4 gap-3"><ContextValue label="Empresa" value={companyLabel} /><ContextValue label="Proyecto" value={projectLabel} /><ContextValue label="Modelo" value={modelLabel} /><ContextValue label="Revisión" value={versionLabel} /></div>
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-semibold text-zinc-950" title={projectLabel}>{projectLabel || 'Proyecto sin asignar'}</p>
+                        <p className="truncate text-[10px] text-zinc-500" title={`${companyLabel || 'Empresa'} · ${modelLabel || 'Sin modelo'} · ${versionLabel || 'Sin revisión'}`}>{companyLabel || 'Empresa'} <span aria-hidden="true">·</span> {modelLabel || 'Sin modelo'} <span aria-hidden="true">·</span> {versionLabel || 'Sin revisión'}</p>
+                    </div>
                     <div className="relative w-[clamp(13rem,18vw,22rem)] shrink-0">
                         <label className="flex h-9 items-center gap-2 rounded-md border border-zinc-300 bg-zinc-50 px-2.5 focus-within:border-orange-600 focus-within:ring-1 focus-within:ring-orange-600"><Search className="size-3.5 text-zinc-500" aria-hidden="true" /><span className="sr-only">Buscar en BIM</span><input ref={searchRef} type="search" value={searchTerm} onFocus={() => setSearchOpen(true)} onChange={(event) => { setSearchTerm(event.target.value); setSearchOpen(true); }} placeholder="GUID, actividad, coste o modelo" className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-zinc-500" /><kbd className="text-[9px] font-semibold text-zinc-500">Ctrl K</kbd></label>
                         {searchOpen && normalizedSearch ? <div className="absolute right-0 top-10 z-50 w-[min(28rem,70vw)] overflow-hidden rounded-md border border-zinc-300 bg-white shadow-xl" role="listbox" aria-label="Resultados BIM" aria-busy={searching}>{searching ? <p className="px-3 py-4 text-xs text-zinc-600">Buscando en el proyecto autorizado…</p> : matches.length ? matches.map((item) => <button key={item.id} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => openSearchItem(item)} className="flex min-h-11 w-full items-center justify-between gap-3 border-b border-zinc-100 px-3 text-left last:border-0 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-600" role="option"><span className="min-w-0"><span className="block truncate text-xs font-semibold text-zinc-950">{item.label}</span><span className="block truncate text-[10px] text-zinc-600">{item.meta}</span></span><span className="shrink-0 text-[10px] font-semibold uppercase text-zinc-500">{item.type}</span></button>) : <p className="px-3 py-4 text-xs text-zinc-600">Sin coincidencias autorizadas en este proyecto.</p>}</div> : null}
                     </div>
-                    {canAdminister ? <button type="button" onClick={() => { setAdminOpen(true); setActiveAdminTool('imports'); }} className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-orange-600 px-3 text-xs font-semibold text-white transition-[background-color,transform] duration-150 active:scale-[.97] hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"><Upload className="size-4" aria-hidden="true" />Cargar IFC</button> : null}
+                    {canAdminister && !ready ? <button type="button" onClick={() => { setAdminOpen(true); setActiveAdminTool('imports'); }} className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-orange-600 px-3 text-xs font-semibold text-white transition-[background-color,transform] duration-150 active:scale-[.97] hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"><Upload className="size-4" aria-hidden="true" />Configurar BIM</button> : null}
                 </div>
                 <div className="flex h-10 min-w-0 items-stretch justify-between border-t border-zinc-100 px-2">
                     <nav className="flex min-w-0 items-stretch" aria-label="Flujos BIM">{MODES.map(({ id, label, shortLabel, icon: Icon }, index) => <button key={id} type="button" onClick={() => selectMode(id)} className={`relative inline-flex min-w-0 items-center gap-2 px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-600 ${activeMode === id && !adminOpen ? 'text-zinc-950' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950'}`} aria-current={activeMode === id && !adminOpen ? 'page' : undefined} title={`${label} · Alt+${index + 1}`}><Icon className={`size-4 shrink-0 ${activeMode === id && !adminOpen ? 'text-orange-600' : ''}`} aria-hidden="true" /><span className="hidden xl:inline">{label}</span><span className="xl:hidden">{shortLabel}</span>{activeMode === id && !adminOpen ? <span className="absolute inset-x-2 bottom-0 h-0.5 bg-orange-600" /> : null}</button>)}</nav>
                     <div className="flex shrink-0 items-center gap-1">
                         {warnings.length ? <span className="inline-flex size-8 items-center justify-center text-amber-700" title={`Carga parcial: no se pudo recuperar ${warnings.join(', ')}. El resto del workspace sigue operativo.`} aria-label={`Carga parcial: ${warnings.join(', ')}`}><CircleAlert className="size-4" aria-hidden="true" /></span> : null}
                         <div className="flex h-8 items-center rounded-md border border-zinc-300 bg-zinc-50 p-0.5" role="group" aria-label="Vista del modelo"><button type="button" onClick={() => onChangeViewerMode('fragments')} className={`h-7 rounded px-2 text-xs font-semibold ${viewerMode === 'fragments' ? 'bg-white text-orange-700 shadow-sm' : 'text-zinc-600'}`} aria-pressed={viewerMode === 'fragments'}>3D</button><button type="button" onClick={() => onChangeViewerMode('plan')} className={`h-7 rounded px-2 text-xs font-semibold ${viewerMode === 'plan' ? 'bg-white text-orange-700 shadow-sm' : 'text-zinc-600'}`} aria-pressed={viewerMode === 'plan'}>2D</button></div>
-                        <button type="button" onClick={() => setSidePanel(sidePanel === 'explorer' ? 'none' : 'explorer')} disabled={activeMode !== 'model'} className={iconButtonClass} title="Explorador del modelo" aria-label="Explorador del modelo" aria-pressed={explorerShown}><PanelLeft className="size-4" aria-hidden="true" /></button>
-                        <button type="button" onClick={() => setSidePanel(sidePanel === 'context' ? 'none' : 'context')} className={iconButtonClass} title="Panel contextual" aria-label="Panel contextual" aria-pressed={contextShown}><PanelRight className="size-4" aria-hidden="true" /></button>
-                        <button type="button" onClick={onResetContext} className={iconButtonClass} title="Restablecer selección" aria-label="Restablecer selección"><RotateCcw className="size-4" aria-hidden="true" /></button>
-                        <button type="button" onClick={onRefresh} disabled={loading} className={iconButtonClass} title="Actualizar BIM" aria-label="Actualizar BIM"><RefreshCw className={`size-4 ${loading ? 'animate-spin motion-reduce:animate-none' : ''}`} aria-hidden="true" /></button>
-                        {canAdminister ? <button type="button" onClick={() => setAdminOpen(true)} className={iconButtonClass} title="Administrar BIM" aria-label="Administrar BIM"><Settings className="size-4" aria-hidden="true" /></button> : null}
+                        {activeMode === 'model' ? <button type="button" onClick={() => setSidePanel(sidePanel === 'explorer' ? 'none' : 'explorer')} className="inline-flex h-8 items-center gap-2 rounded-md border border-zinc-300 bg-white px-2.5 text-xs font-semibold text-zinc-700 hover:border-orange-500 hover:text-orange-700" aria-pressed={explorerShown}><PanelLeft className="size-3.5" aria-hidden="true" />Explorar</button> : null}
+                        <button type="button" onClick={() => setSidePanel(sidePanel === 'context' ? 'none' : 'context')} className="inline-flex h-8 items-center gap-2 rounded-md border border-zinc-300 bg-white px-2.5 text-xs font-semibold text-zinc-700 hover:border-orange-500 hover:text-orange-700" aria-pressed={contextShown}><PanelRight className="size-3.5" aria-hidden="true" />Trabajo</button>
+                        <div className="relative">
+                            <button type="button" onClick={() => setUtilityOpen((value) => !value)} className={iconButtonClass} title="Más acciones" aria-label="Más acciones" aria-expanded={utilityOpen}><MoreHorizontal className="size-4" aria-hidden="true" /></button>
+                            {utilityOpen ? <div className="absolute right-0 top-10 z-50 w-52 rounded-md border border-zinc-300 bg-white p-1 shadow-xl" role="menu">
+                                <button type="button" onClick={() => { onResetContext?.(); setUtilityOpen(false); }} className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-xs font-medium hover:bg-zinc-100" role="menuitem"><RotateCcw className="size-3.5" />Restablecer selección</button>
+                                <button type="button" onClick={() => { onRefresh?.(); setUtilityOpen(false); }} disabled={loading} className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-xs font-medium hover:bg-zinc-100 disabled:opacity-40" role="menuitem"><RefreshCw className={`size-3.5 ${loading ? 'animate-spin motion-reduce:animate-none' : ''}`} />Actualizar datos</button>
+                                {canAdminister ? <button type="button" onClick={() => { setAdminOpen(true); setUtilityOpen(false); }} className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-xs font-medium hover:bg-zinc-100" role="menuitem"><Settings className="size-3.5" />Administrar BIM</button> : null}
+                            </div> : null}
+                        </div>
                     </div>
                 </div>
             </header>
 
-            {!omniClassEnabled ? <div className="flex min-h-9 shrink-0 items-center gap-2 border-b border-amber-300 bg-amber-50 px-3 text-xs text-amber-950" role="status" data-bim-omniclass-warning><CircleAlert className="size-4 shrink-0" aria-hidden="true" /><strong>Coordinación OmniClass desactivada.</strong><span>Los vínculos 4D/5D conservan su origen, pero la estructura común puede divergir.</span></div> : null}
+            {!omniClassEnabled ? <div className="flex min-h-8 shrink-0 items-center gap-2 border-b border-amber-300 bg-amber-50 px-3 text-[11px] text-amber-950" role="status" data-bim-omniclass-warning><CircleAlert className="size-3.5 shrink-0" aria-hidden="true" /><strong>OmniClass desactivado:</strong><span className="truncate">presupuesto, Gantt y BIM pueden perder su estructura común.</span></div> : null}
             {safariNotice ? <div className="flex min-h-8 shrink-0 items-center gap-2 border-b border-sky-200 bg-sky-50 px-3 text-[11px] text-sky-950" role="status"><CircleAlert className="size-3.5" aria-hidden="true" /><span>Safari puede mostrar divergencias en BIM. Para operación coordinada recomendamos Chrome, Edge u otro navegador Chromium disponible en macOS/iPadOS.</span></div> : null}
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-                <div className="grid min-h-0 min-w-0 flex-1 gap-2 overflow-hidden p-2" style={{ gridTemplateColumns: explorerShown ? 'clamp(14rem,16vw,19rem) minmax(0,1fr)' : contextShown ? 'minmax(0,1fr) clamp(20rem,22vw,27rem)' : 'minmax(0,1fr)' }} data-bim-shell-layout>
+                <div className="grid min-h-0 min-w-0 flex-1 gap-2 overflow-hidden p-2" style={{ gridTemplateColumns: explorerShown ? 'clamp(14rem,16vw,18rem) minmax(0,1fr)' : contextShown ? 'minmax(0,1fr) clamp(18rem,19vw,22rem)' : 'minmax(0,1fr)' }} data-bim-shell-layout>
                     {explorerShown ? <BimRegionBoundary resetKey={`explorer-${projectId}`}><aside className="min-h-0 min-w-0 overflow-hidden border border-zinc-300 bg-white" aria-label="Explorador BIM">{explorer}</aside></BimRegionBoundary> : null}
                     <main className="flex min-h-0 min-w-0 flex-col overflow-hidden" data-bim-viewer-region>{!ready ? <div className="grid h-full place-items-center border border-zinc-300 bg-white p-8" data-bim-empty-state><div className="max-w-xl text-center"><span className="mx-auto inline-flex size-12 items-center justify-center rounded-lg bg-orange-50 text-orange-700">{loading ? <RefreshCw className="size-6 animate-spin motion-reduce:animate-none" /> : <Box className="size-6" />}</span><h2 className="mt-4 text-base font-semibold text-zinc-950">{loading ? 'Preparando el modelo BIM' : 'BIM aún no forma parte de este proyecto'}</h2><p className="mt-2 text-sm leading-6 text-zinc-700">{errorMessage || 'El proyecto puede operar sin BIM. Cuando lo necesites, carga un IFC y GiProy preparará la coordinación 4D/5D sin alterar el presupuesto ni el Gantt vigentes.'}</p>{canAdminister && !loading ? <button type="button" onClick={() => setAdminOpen(true)} className="mt-5 inline-flex h-10 items-center gap-2 rounded-md bg-orange-600 px-4 text-sm font-semibold text-white hover:bg-orange-700"><Upload className="size-4" />Configurar BIM</button> : null}</div></div> : <BimRegionBoundary resetKey={`viewer-${projectId}-${viewerMode}`}><div className="flex h-full min-h-0 flex-col [&>section]:flex-1">{viewer}</div></BimRegionBoundary>}</main>
-                    {contextShown ? <BimRegionBoundary resetKey={`${activeMode}-${selectedTool?.id}`}><aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border border-zinc-300 bg-white" aria-label="Herramienta contextual"><div className="shrink-0 border-b border-zinc-200 p-2"><label className="block text-[10px] font-semibold uppercase tracking-wide text-zinc-500" htmlFor="bim-tool-selector">Herramienta de {MODES.find((mode) => mode.id === activeMode)?.label}</label><div className="relative mt-1"><select id="bim-tool-selector" value={selectedTool?.id || ''} onChange={(event) => selectTool(event.target.value)} className="h-9 w-full appearance-none rounded-md border border-zinc-300 bg-white pl-3 pr-9 text-xs font-semibold text-zinc-950 outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600">{tools.map((tool) => <option key={tool.id} value={tool.id}>{tool.label}</option>)}</select><ChevronDown className="pointer-events-none absolute right-3 top-2.5 size-4 text-zinc-500" aria-hidden="true" /></div></div><div className="min-h-0 flex-1 overflow-auto p-2 custom-scrollbar">{selectedTool?.content || inspector}</div></aside></BimRegionBoundary> : null}
+                    {contextShown ? <BimRegionBoundary resetKey={`${activeMode}-${selectedTool?.id}`}><aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border border-zinc-300 bg-white" aria-label="Herramienta contextual"><div className="flex h-11 shrink-0 items-center gap-2 border-b border-zinc-200 px-2"><div className="relative min-w-0 flex-1"><select id="bim-tool-selector" aria-label={`Herramienta de ${MODES.find((mode) => mode.id === activeMode)?.label}`} value={selectedTool?.id || ''} onChange={(event) => selectTool(event.target.value)} className="h-8 w-full appearance-none rounded-md border border-zinc-300 bg-white pl-2.5 pr-8 text-xs font-semibold text-zinc-950 outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600">{tools.map((tool) => <option key={tool.id} value={tool.id}>{tool.label}</option>)}</select><ChevronDown className="pointer-events-none absolute right-2.5 top-2 size-3.5 text-zinc-500" aria-hidden="true" /></div><button type="button" onClick={() => setSidePanel('none')} className="inline-flex size-8 items-center justify-center rounded-md text-zinc-500 hover:bg-zinc-100" aria-label="Cerrar panel de trabajo"><X className="size-4" /></button></div><div className="min-h-0 flex-1 overflow-auto p-2 custom-scrollbar">{selectedTool?.content || inspector}</div></aside></BimRegionBoundary> : null}
                 </div>
                 {planningMode && ready && selectedBottom ? <section className="relative shrink-0 border-t border-zinc-300 bg-white" style={{ height: bottomCollapsed ? 40 : bottomHeight }} data-bim-bottom-drawer>{!bottomCollapsed ? <div className="absolute inset-x-0 top-0 z-10 h-1 cursor-row-resize hover:bg-orange-600" onPointerDown={(event) => setResizeStart({ y: event.clientY, height: bottomHeight })} role="separator" aria-label="Redimensionar planificación 4D/5D" aria-orientation="horizontal" /> : null}<div className="flex h-10 items-center justify-between border-b border-zinc-200 px-3"><div className="flex min-w-0 items-center gap-3"><span className="text-xs font-semibold text-zinc-950">Coordinación presupuesto ↔ Gantt ↔ BIM</span><span className="truncate text-[10px] text-zinc-600">{selectedBottom.label}</span></div><button type="button" onClick={() => setBottomCollapsed((value) => !value)} className={iconButtonClass} title={bottomCollapsed ? 'Expandir cronología' : 'Minimizar cronología'} aria-label={bottomCollapsed ? 'Expandir cronología' : 'Minimizar cronología'}><Layers3 className="size-4" /></button></div>{!bottomCollapsed ? <BimRegionBoundary resetKey={`bottom-${selectedBottom.id}`}><div className="h-[calc(100%-2.5rem)] min-h-0 overflow-hidden p-2 [&>section]:h-full">{selectedBottom.content}</div></BimRegionBoundary> : null}</section> : null}
             </div>

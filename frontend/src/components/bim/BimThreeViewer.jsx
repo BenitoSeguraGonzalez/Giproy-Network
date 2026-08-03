@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { Box, Cpu, Layers3, RotateCcw } from 'lucide-react';
+import { Box, ChevronDown, Layers3, RotateCcw, SlidersHorizontal } from 'lucide-react';
 import { adaptViewerArtifactToElements } from './bimViewerArtifactAdapter';
 import useBimRenderQuality from '../../hooks/useBimRenderQuality';
 import BimRenderQualityControl from './BimRenderQualityControl';
@@ -106,6 +106,7 @@ const BimThreeViewer = ({
     const [raycastHit, setRaycastHit] = useState(null);
     const [raycastHover, setRaycastHover] = useState(null);
     const [focusedElement, setFocusedElement] = useState(null);
+    const [viewControlsOpen, setViewControlsOpen] = useState(false);
     const renderQuality = useBimRenderQuality();
     const artifactElements = useMemo(() => adaptViewerArtifactToElements(viewerArtifact), [viewerArtifact]);
     const sourceElements = artifactElements.length > 0 ? artifactElements : elements;
@@ -385,63 +386,30 @@ const BimThreeViewer = ({
             data-bim-three-hidden-ifc-classes={hiddenIfcClasses.size}
             data-bim-three-visible-ifc-classes={visibleIfcClassCount}
             data-bim-render-pixel-ratio={renderQuality.pixelRatio}
-            className="flex min-h-[360px] flex-col overflow-hidden rounded-[1.25rem] border border-zinc-200 bg-white"
+            className="flex min-h-[360px] flex-col overflow-hidden border border-zinc-200 bg-white"
         >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 px-4 py-3">
-                <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">
-                        Viewer BIM 3D / IFC foundation
-                    </p>
-                    <h3 className="mt-1 text-sm font-black uppercase tracking-tight text-zinc-900">
-                        Escena tridimensional aislada
-                    </h3>
-                </div>
-                <div className="flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.16em]">
+            <div className="relative flex h-11 shrink-0 items-center justify-between gap-3 border-b border-zinc-200 px-3">
+                <div className="flex min-w-0 items-center gap-2">
+                    <h3 className="text-xs font-semibold text-zinc-900">Modelo 3D</h3>
+                    <div className="flex gap-1.5 text-[10px] font-semibold">
                     <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-1 text-[#C26F00]">
                         <Box className="h-3 w-3" /> {preparedElements.length} elementos
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-1 text-[#136191]">
+                    {visibleThreeElements.length !== preparedElements.length ? <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-1 text-[#136191]">
                         <Layers3 className="h-3 w-3" /> {visibleThreeElements.length} visibles
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 text-zinc-600">
-                        <Cpu className="h-3 w-3" /> Three.js
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 text-zinc-700">
-                        Raycast 3D
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-1 text-zinc-700">
-                        OrbitControls
-                    </span>
-                    {artifactElements.length > 0 ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">
-                            Artefacto viewer
-                        </span>
-                    ) : null}
+                    </span> : null}
+                    </div>
                 </div>
-                <button
-                    type="button"
-                    data-bim-three-reset-view="true"
-                    onClick={handleResetCamera}
-                    disabled={!ready || preparedElements.length === 0}
-                    className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-zinc-200 bg-white px-3 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600 transition hover:border-[#F39200] hover:text-[#F39200] disabled:pointer-events-none disabled:opacity-40"
-                >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    Reset vista 3D
-                </button>
-                <button
-                    type="button"
-                    data-bim-three-focus-selected="true"
-                    onClick={handleFocusSelectedElement}
-                    disabled={!ready || !selectedSceneElement}
-                    className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-zinc-200 bg-white px-3 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600 transition hover:border-[#F39200] hover:text-[#F39200] disabled:pointer-events-none disabled:opacity-40"
-                >
-                    <Box className="h-3.5 w-3.5" />
-                    Enfocar elemento
-                </button>
-                <BimRenderQualityControl {...renderQuality} />
-                <div className="flex basis-full flex-wrap items-center gap-2">
+                <button type="button" onClick={() => setViewControlsOpen((value) => !value)} className="inline-flex h-8 items-center gap-2 rounded-md border border-zinc-300 bg-white px-2.5 text-xs font-semibold text-zinc-700 hover:border-orange-500 hover:text-orange-700" aria-expanded={viewControlsOpen}><SlidersHorizontal className="size-3.5" />Vista<ChevronDown className={`size-3 transition-transform ${viewControlsOpen ? 'rotate-180' : ''}`} /></button>
+                {viewControlsOpen ? <div className="absolute right-3 top-10 z-30 w-[min(34rem,calc(100%-1.5rem))] rounded-md border border-zinc-300 bg-white p-3 shadow-xl">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button type="button" data-bim-three-reset-view="true" onClick={handleResetCamera} disabled={!ready || preparedElements.length === 0} className="inline-flex h-8 items-center gap-2 rounded-md border border-zinc-200 px-2.5 text-xs font-semibold text-zinc-700 hover:border-orange-500 disabled:opacity-40"><RotateCcw className="size-3.5" />Restablecer vista</button>
+                        <button type="button" data-bim-three-focus-selected="true" onClick={handleFocusSelectedElement} disabled={!ready || !selectedSceneElement} className="inline-flex h-8 items-center gap-2 rounded-md border border-zinc-200 px-2.5 text-xs font-semibold text-zinc-700 hover:border-orange-500 disabled:opacity-40"><Box className="size-3.5" />Enfocar selección</button>
+                        <BimRenderQualityControl {...renderQuality} />
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-3">
                     <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
-                        IFC 3D
+                        Filtrar clase
                     </span>
                     {ifcClassFilters.map((ifcClass) => (
                         <button
@@ -458,10 +426,10 @@ const BimThreeViewer = ({
                             {ifcClass === 'all' ? 'Todas' : ifcClass}
                         </button>
                     ))}
-                </div>
-                <div className="flex basis-full flex-wrap items-center gap-2">
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
                     <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
-                        Visibilidad 3D
+                        Visibilidad
                     </span>
                     {ifcClassFilters
                         .filter((ifcClass) => ifcClass !== 'all')
@@ -493,7 +461,8 @@ const BimThreeViewer = ({
                     >
                         Reset
                     </button>
-                </div>
+                    </div>
+                </div> : null}
             </div>
             <div className="relative min-h-[320px] flex-1 bg-zinc-50" ref={mountRef}>
                 {!ready || visibleThreeElements.length === 0 ? (
@@ -508,22 +477,11 @@ const BimThreeViewer = ({
                         </div>
                     </div>
                 ) : null}
-                <div className="pointer-events-none absolute bottom-3 left-3 rounded-2xl border border-zinc-200 bg-white/90 px-3 py-2 text-[11px] text-zinc-500 shadow-sm">
-                    <p className="font-black uppercase tracking-[0.16em] text-zinc-700">
+                <div className="pointer-events-none absolute bottom-3 left-3 rounded-md border border-zinc-200 bg-white/90 px-2.5 py-1.5 text-[10px] text-zinc-600 shadow-sm">
+                    <p className="font-semibold text-zinc-800">
                         {activeVersionLabel || 'Version BIM'} {activeStoreyName ? `· ${activeStoreyName}` : ''}
                     </p>
-                    <p className="mt-1">
-                        IFC foundation: parsing semantico, artefacto viewer y escena 3D local aislada.
-                    </p>
-                    <p className="mt-1 font-bold text-[#F39200]">
-                        Hit 3D: {raycastHit ? `${raycastHit.ifcClass || 'IFC'} · ${raycastHit.globalId || raycastHit.elementId}` : 'selecciona un elemento'}
-                    </p>
-                    <p className="mt-1 font-bold text-zinc-700">
-                        Hover 3D: {raycastHover ? `${raycastHover.ifcClass || 'IFC'} · ${raycastHover.globalId || raycastHover.elementId}` : 'sin elemento'}
-                    </p>
-                    <p className="mt-1 font-bold text-[#136191]">
-                        Foco 3D: {focusedElement ? `${focusedElement.ifcClass || 'IFC'} · ${focusedElement.globalId || focusedElement.elementId}` : 'sin foco activo'}
-                    </p>
+                    {raycastHit ? <p className="mt-0.5 text-orange-700">{raycastHit.ifcClass || 'IFC'} · {raycastHit.globalId || raycastHit.elementId}</p> : null}
                 </div>
                 {inspectedSceneElement ? (
                     <aside className="pointer-events-none absolute right-3 top-3 w-[min(280px,calc(100%-1.5rem))] rounded-2xl border border-zinc-200 bg-white/95 p-3 text-[11px] shadow-sm">
