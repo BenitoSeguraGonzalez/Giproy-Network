@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Blocks, Link2, Search, Trash2 } from 'lucide-react';
+import { Blocks, Link2, Search, Trash2, X } from 'lucide-react';
 
 import { apusApi } from '../../api/apus';
 import { bimLinksApi } from '../../api/bimLinks';
@@ -85,6 +85,14 @@ const BimLinksPanel = ({
     const [loadingTargets, setLoadingTargets] = useState(false);
     const [linkSearchTerm, setLinkSearchTerm] = useState('');
     const [linkFilterType, setLinkFilterType] = useState('all');
+    const [createOpen, setCreateOpen] = useState(false);
+
+    useEffect(() => {
+        if (!createOpen) return undefined;
+        const onKeyDown = (event) => event.key === 'Escape' && setCreateOpen(false);
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, [createOpen]);
 
     const sortedElements = useMemo(
         () =>
@@ -259,7 +267,19 @@ const BimLinksPanel = ({
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-4 space-y-3 rounded-2xl border border-zinc-200 bg-white p-3">
+            <div className="mt-4 flex items-center justify-between rounded-2xl border border-zinc-200 bg-white p-3">
+                <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">Vínculo presupuesto · Gantt · BIM</p>
+                    <p className="mt-1 text-xs text-zinc-500">Asocia el elemento activo con una EDT, APU o línea de presupuesto.</p>
+                </div>
+                <button type="button" onClick={() => setCreateOpen(true)} disabled={!ready} className="rounded-xl bg-[#F39200] px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-white disabled:opacity-50">
+                    <Link2 className="mr-1 inline h-3.5 w-3.5" /> Nuevo vínculo
+                </button>
+            </div>
+
+            {createOpen ? <div className="fixed inset-0 z-[80] flex items-center justify-center bg-zinc-950/45 p-6" onMouseDown={(event) => event.target === event.currentTarget && setCreateOpen(false)}>
+                <form onSubmit={async (event) => { await handleSubmit(event); if (!submitting) setCreateOpen(false); }} className="w-full max-w-xl space-y-3 rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xl">
+                    <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Link2 className="h-4 w-4 text-[#F39200]" /><p className="text-sm font-black text-zinc-800">Crear vínculo BIM</p></div><button type="button" onClick={() => setCreateOpen(false)} aria-label="Cerrar"><X className="h-4 w-4 text-zinc-500" /></button></div>
                 <div className="flex items-center gap-2">
                     <Link2 className="h-4 w-4 text-[#F39200]" />
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">Registro rápido BIM</p>
@@ -317,25 +337,10 @@ const BimLinksPanel = ({
                     onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
                 />
 
-                <button
-                    type="submit"
-                    disabled={submitting || !ready}
-                    className="w-full rounded-xl bg-[#F39200] px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    {submitting ? 'Registrando...' : 'Crear vínculo BIM'}
-                </button>
-
-                <p className="text-[11px] text-zinc-500">
-                    Este formulario técnico permite vincular un elemento BIM con `EDT`, `APUs` o `Presupuesto` usando selectores reales del proyecto activo.
-                </p>
-                {selectedElement ? (
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#F39200]">
-                        Elemento activo: {selectedElement.nombre || selectedElement.global_id}
-                    </p>
-                ) : null}
-
-                {message ? <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">{message}</p> : null}
-            </form>
+                    <button type="submit" disabled={submitting || !ready} className="w-full rounded-xl bg-[#F39200] px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-white disabled:opacity-50">{submitting ? 'Registrando...' : 'Crear vínculo BIM'}</button>
+                    {message ? <p className="text-[11px] font-bold text-zinc-500">{message}</p> : null}
+                </form>
+            </div> : null}
 
             <div className="mt-4 space-y-2">
                 {filteredRecentLinks.length > 0 ? (

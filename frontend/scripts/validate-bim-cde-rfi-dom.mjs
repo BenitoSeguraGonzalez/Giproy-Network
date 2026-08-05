@@ -18,6 +18,7 @@ try {
     const page = await context.newPage(); const errors = [];
     page.on('pageerror', (error) => errors.push(error.message)); page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
     await page.goto(`${baseUrl}/bim-cde-rfi-harness.html`, { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: /Nueva RFI|Crear RFI|Nueva solicitud/i }).click();
     await page.getByLabel('Asunto RFI').fill('Definir resistencia del hormigon');
     await page.getByLabel('Pregunta RFI').fill('Confirmar resistencia especificada para el muro seleccionado.');
     await page.getByLabel('Responsable RFI').selectOption('8');

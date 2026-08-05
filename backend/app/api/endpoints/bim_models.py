@@ -197,6 +197,7 @@ from app.services.bim.coordination_service import (
     apply_proposal as apply_coordination_proposal,
     recover_proposal as recover_coordination_proposal,
     list_coordination_sets,
+    list_conflicts as list_coordination_conflicts,
     reconcile_link_identity,
     list_links as list_coordination_links,
     list_proposals as list_coordination_proposals,
@@ -1522,6 +1523,26 @@ def get_project_coordination_coverage(project_id: int, coordination_set_id: int,
     project = _resolve_project(db, project_id, current_user, empresa_id)
     _require_coordination_access(db, project, current_user, "coordination.view")
     return build_coordination_coverage(db, coordination_set_id=coordination_set_id, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.get("/projects/{project_id}/coordination-sets/{coordination_set_id}/conflicts")
+def get_project_coordination_conflicts(
+    project_id: int,
+    coordination_set_id: int,
+    conflict_status: str = Query("open", alias="status", pattern="^(open|resolved|dismissed|all)$"),
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.view")
+    return list_coordination_conflicts(
+        db,
+        coordination_set_id=coordination_set_id,
+        project_id=project.id,
+        company_id=project.empresa_id,
+        status=conflict_status,
+    )
 
 
 @router.post("/projects/{project_id}/coordination-sets/{coordination_set_id}/proposals", status_code=status.HTTP_201_CREATED)

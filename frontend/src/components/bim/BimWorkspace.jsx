@@ -20,12 +20,7 @@ import BimIdsPanel from './BimIdsPanel';
 import BimIssuesPanel from './BimIssuesPanel';
 import BimQuantityProposalPanel from './BimQuantityProposalPanel';
 import BimCostEstimatePanel from './BimCostEstimatePanel';
-import BimCostContractsPanel from './BimCostContractsPanel';
-import BimCostPaymentsPanel from './BimCostPaymentsPanel';
-import BimCostSovPanel from './BimCostSovPanel';
-import BimCostChangeOrdersPanel from './BimCostChangeOrdersPanel';
-import BimActualCostLedgerPanel from './BimActualCostLedgerPanel';
-import BimCostForecastPanel from './BimCostForecastPanel';
+import BimCostControlWorkbench from './BimCostControlWorkbench';
 import BimAsBuiltAcceptancePanel from './BimAsBuiltAcceptancePanel';
 import BimPunchClosurePanel from './BimPunchClosurePanel';
 import BimHandoverDossierPanel from './BimHandoverDossierPanel';
@@ -62,23 +57,40 @@ import BimCrewsTimecardsPanel from './BimCrewsTimecardsPanel';
 import BimViewStateToolbar from './BimViewStateToolbar';
 import BimWorkspaceV2 from './BimWorkspaceV2';
 import BimCoordinationControlPanel from './BimCoordinationControlPanel';
-import { createActivityPlanningSelection, createElementPlanningSelection, findActivitiesByGuid } from './bimPlanningSelection';
+import {
+    createActivityPlanningSelection,
+    createElementPlanningSelection,
+    findActivitiesByGuid,
+} from './bimPlanningSelection';
 import { useBimProjectWorkspace } from '../../hooks/bim/useBimProjectWorkspace';
 
 const BIM_CONTEXT_STORAGE_KEY = 'giproy_bim_workspace_context';
 
 const TOOL_CAPABILITY = {
-    imports: 'bim.admin', federation: 'bim.coordinate', location: 'bim.coordinate', quality: 'bim.review', ids: 'bim.classification.view',
-    schedule: 'bim.schedule.link', interchange: 'schedule.view', 'plan-actual': 'bim.progress.report', progress: 'bim.progress.report',
-    estimate: 'budget.view', contracts: 'budget.view', payments: 'budget.view', sov: 'budget.view', changes: 'budget.view',
-    'actual-costs': 'budget.view', forecast: 'budget.view', quantities: 'budget.view', productivity: 'bim.progress.report',
-    conflicts: 'coordination.view', issues: 'bim.review', reviews: 'bim.review', compare: 'bim.review',
+    imports: 'bim.admin',
+    federation: 'bim.coordinate',
+    location: 'bim.coordinate',
+    quality: 'bim.review',
+    ids: 'bim.classification.view',
+    schedule: 'bim.schedule.link',
+    interchange: 'schedule.view',
+    'plan-actual': 'bim.progress.report',
+    progress: 'bim.progress.report',
+    estimate: 'budget.view',
+    'cost-control': 'budget.view',
+    quantities: 'budget.view',
+    productivity: 'bim.progress.report',
+    conflicts: 'coordination.view',
+    issues: 'bim.review',
+    reviews: 'bim.review',
+    compare: 'bim.review',
 };
 
-const filterToolsByCapabilities = (tools, capabilities) => (tools || []).filter((tool) => {
-    const required = TOOL_CAPABILITY[tool.id];
-    return !required || capabilities.has(required);
-});
+const filterToolsByCapabilities = (tools, capabilities) =>
+    (tools || []).filter((tool) => {
+        const required = TOOL_CAPABILITY[tool.id];
+        return !required || capabilities.has(required);
+    });
 
 const readStoredBimContext = (projectId) => {
     if (typeof window === 'undefined' || !projectId) return null;
@@ -97,7 +109,10 @@ const writeStoredBimContext = (projectId, context) => {
         const rawValue = window.localStorage.getItem(BIM_CONTEXT_STORAGE_KEY);
         const parsed = rawValue ? JSON.parse(rawValue) : {};
         parsed[projectId] = context;
-        window.localStorage.setItem(BIM_CONTEXT_STORAGE_KEY, JSON.stringify(parsed));
+        window.localStorage.setItem(
+            BIM_CONTEXT_STORAGE_KEY,
+            JSON.stringify(parsed),
+        );
     } catch {
         // ignore storage issues to keep BIM shell non-blocking
     }
@@ -116,7 +131,8 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         focusToken: null,
     });
     const projectLabel = project?.nombre || 'Proyecto activo';
-    const { workspace, viewStates, loading, error, warnings, refresh } = useBimProjectWorkspace(project?.id, access?.enabled);
+    const { workspace, viewStates, loading, error, warnings, refresh } =
+        useBimProjectWorkspace(project?.id, access?.enabled);
     const [selectedVersionId, setSelectedVersionId] = useState(null);
     const [selectedStoreyName, setSelectedStoreyName] = useState(null);
     const [selectedElement, setSelectedElement] = useState(null);
@@ -127,7 +143,8 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
     const [renamingViewStateId, setRenamingViewStateId] = useState(null);
     const [duplicatingViewStateId, setDuplicatingViewStateId] = useState(null);
     const [deletingViewStateId, setDeletingViewStateId] = useState(null);
-    const [fragmentsViewportAvailable, setFragmentsViewportAvailable] = useState(false);
+    const [fragmentsViewportAvailable, setFragmentsViewportAvailable] =
+        useState(false);
     const [viewerMode, setViewerMode] = useState('fragments');
     const [viewerStateSnapshot, setViewerStateSnapshot] = useState(null);
     const [viewerStateToApply, setViewerStateToApply] = useState(null);
@@ -135,7 +152,8 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
     const [federation, setFederation] = useState(null);
     const [projectCapabilities, setProjectCapabilities] = useState(null);
     const [omniClassEnabled, setOmniClassEnabled] = useState(true);
-    const hasProjectCapability = (capability) => projectCapabilities?.has(capability) === true;
+    const hasProjectCapability = (capability) =>
+        projectCapabilities?.has(capability) === true;
     const canAdministerBim = hasProjectCapability('bim.admin');
     const canCreateCompanyScope = canAdministerBim;
 
@@ -152,15 +170,21 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         ]).then(([capabilityResult, companyResult]) => {
             if (cancelled) return;
             if (capabilityResult.status === 'fulfilled') {
-                setProjectCapabilities(new Set(capabilityResult.value?.capabilities || []));
+                setProjectCapabilities(
+                    new Set(capabilityResult.value?.capabilities || []),
+                );
             } else {
                 setProjectCapabilities(new Set());
             }
             if (companyResult.status === 'fulfilled' && companyResult.value) {
-                setOmniClassEnabled(companyResult.value.use_omniclass !== false);
+                setOmniClassEnabled(
+                    companyResult.value.use_omniclass !== false,
+                );
             }
         });
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, [access?.enabled, access?.resolved_company_id, project?.id]);
 
     useEffect(() => {
@@ -169,10 +193,17 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             return undefined;
         }
         let cancelled = false;
-        bimModelsApi.getFederation(project.id, access?.resolved_company_id)
-            .then((payload) => { if (!cancelled) setFederation(payload); })
-            .catch(() => { if (!cancelled) setFederation(null); });
-        return () => { cancelled = true; };
+        bimModelsApi
+            .getFederation(project.id, access?.resolved_company_id)
+            .then((payload) => {
+                if (!cancelled) setFederation(payload);
+            })
+            .catch(() => {
+                if (!cancelled) setFederation(null);
+            });
+        return () => {
+            cancelled = true;
+        };
     }, [access?.enabled, access?.resolved_company_id, project?.id]);
 
     const applyWorkspaceSelection = (payload = {}, viewStateId = null) => {
@@ -181,12 +212,16 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         setSelectedStoreyName(payload.storey_name || null);
 
         const restoredElement = payload.element_id
-            ? (workspace.elements || []).find((element) => element.id === payload.element_id) || null
+            ? (workspace.elements || []).find(
+                  (element) => element.id === payload.element_id,
+              ) || null
             : null;
         setSelectedElement(restoredElement);
 
         const restoredLink = payload.link_id
-            ? (workspace.recent_links || []).find((link) => link.id === payload.link_id) || null
+            ? (workspace.recent_links || []).find(
+                  (link) => link.id === payload.link_id,
+              ) || null
             : null;
         setSelectedLink(restoredLink);
     };
@@ -206,7 +241,11 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             selection: { global_id: viewpoint.selected_guids?.[0] || null },
             visibility: viewpoint.visibility || {},
             clipping: viewpoint.clipping || {},
-            colors: [], filters: {}, ghost: {}, measurements: [], units: 'm',
+            colors: [],
+            filters: {},
+            ghost: {},
+            measurements: [],
+            units: 'm',
             apply_token: `issue-${issue?.id}-${Date.now()}`,
         });
     };
@@ -228,10 +267,15 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
     const handleSelectLink = (link) => {
         setSelectedViewStateId(null);
         if (link?.bim_element_id) {
-            const linkedElement = (workspace.elements || []).find((element) => element.id === link.bim_element_id) || null;
+            const linkedElement =
+                (workspace.elements || []).find(
+                    (element) => element.id === link.bim_element_id,
+                ) || null;
             if (linkedElement) {
                 handleSelectElement(linkedElement);
-                setSelectedVersionId(linkedElement.bim_model_version_id || null);
+                setSelectedVersionId(
+                    linkedElement.bim_model_version_id || null,
+                );
                 setSelectedStoreyName(linkedElement.storey_name || null);
             }
         }
@@ -239,31 +283,59 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
     };
 
     const visibleElements = (workspace.elements || []).filter((element) => {
-        const versionMatch = selectedVersionId ? element.bim_model_version_id === selectedVersionId : true;
-        const storeyMatch = selectedStoreyName ? element.storey_name === selectedStoreyName : true;
+        const versionMatch = selectedVersionId
+            ? element.bim_model_version_id === selectedVersionId
+            : true;
+        const storeyMatch = selectedStoreyName
+            ? element.storey_name === selectedStoreyName
+            : true;
         return versionMatch && storeyMatch;
     });
 
     const activeVersionLabel =
         (workspace.models || [])
             .flatMap((model) => model.versions || [])
-            .find((version) => version.id === (selectedVersionId || workspace.active_version_id))?.label ||
+            .find(
+                (version) =>
+                    version.id ===
+                    (selectedVersionId || workspace.active_version_id),
+            )?.label ||
         workspace.active_version_label ||
         null;
     const activeVersionId = selectedVersionId || workspace.active_version_id;
     const activeModel = (workspace.models || []).find((model) =>
-        (model.versions || []).some((version) => version.id === activeVersionId),
+        (model.versions || []).some(
+            (version) => version.id === activeVersionId,
+        ),
     );
-    const activeModelLabel = activeModel?.nombre || activeModel?.name || activeModel?.model_name || null;
-    const companyLabel = access?.resolved_company_name || access?.company_name || access?.resolved_company_id?.toString() || null;
-    const linkedElementIds = Array.from(new Set((workspace.recent_links || []).map((link) => link.bim_element_id).filter(Boolean)));
-    const elementLinkCounts = (workspace.recent_links || []).reduce((accumulator, link) => {
-        if (!link?.bim_element_id) {
+    const activeModelLabel =
+        activeModel?.nombre ||
+        activeModel?.name ||
+        activeModel?.model_name ||
+        null;
+    const companyLabel =
+        access?.resolved_company_name ||
+        access?.company_name ||
+        access?.resolved_company_id?.toString() ||
+        null;
+    const linkedElementIds = Array.from(
+        new Set(
+            (workspace.recent_links || [])
+                .map((link) => link.bim_element_id)
+                .filter(Boolean),
+        ),
+    );
+    const elementLinkCounts = (workspace.recent_links || []).reduce(
+        (accumulator, link) => {
+            if (!link?.bim_element_id) {
+                return accumulator;
+            }
+            accumulator[link.bim_element_id] =
+                (accumulator[link.bim_element_id] || 0) + 1;
             return accumulator;
-        }
-        accumulator[link.bim_element_id] = (accumulator[link.bim_element_id] || 0) + 1;
-        return accumulator;
-    }, {});
+        },
+        {},
+    );
     const validationIssuesByElementId = {};
 
     useEffect(() => {
@@ -276,10 +348,16 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             }
 
             try {
-                const response = await bimViewStatesApi.getWorkspaceContext(project.id, access?.resolved_company_id);
+                const response = await bimViewStatesApi.getWorkspaceContext(
+                    project.id,
+                    access?.resolved_company_id,
+                );
                 const payload = response?.payload || {};
                 if (!cancelled) {
-                    applyWorkspaceSelection(payload, payload.view_state_id || null);
+                    applyWorkspaceSelection(
+                        payload,
+                        payload.view_state_id || null,
+                    );
                 }
                 if (!cancelled) {
                     setContextHydrated(true);
@@ -289,7 +367,8 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 if (!cancelled && localContext) {
                     applyWorkspaceSelection(
                         {
-                            active_version_id: localContext.activeVersionId || null,
+                            active_version_id:
+                                localContext.activeVersionId || null,
                             storey_name: localContext.storeyName || null,
                             element_id: localContext.elementId || null,
                             link_id: localContext.linkId || null,
@@ -307,7 +386,13 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         return () => {
             cancelled = true;
         };
-    }, [access?.resolved_company_id, project?.id, workspace.elements, workspace.ready, workspace.recent_links]);
+    }, [
+        access?.resolved_company_id,
+        project?.id,
+        workspace.elements,
+        workspace.ready,
+        workspace.recent_links,
+    ]);
 
     useEffect(() => {
         if (!selectedVersionId && workspace.active_version_id) {
@@ -320,7 +405,9 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             return;
         }
         const availableVersionIds = new Set(
-            (workspace.models || []).flatMap((model) => (model.versions || []).map((version) => version.id)),
+            (workspace.models || []).flatMap((model) =>
+                (model.versions || []).map((version) => version.id),
+            ),
         );
         if (!availableVersionIds.has(selectedVersionId)) {
             setSelectedVersionId(workspace.active_version_id || null);
@@ -331,7 +418,11 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         if (!selectedStoreyName) {
             return;
         }
-        const availableStoreys = new Set(visibleElements.map((element) => element.storey_name || 'Sin nivel'));
+        const availableStoreys = new Set(
+            visibleElements.map(
+                (element) => element.storey_name || 'Sin nivel',
+            ),
+        );
         if (!availableStoreys.has(selectedStoreyName)) {
             setSelectedStoreyName(null);
         }
@@ -341,21 +432,32 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         if (!selectedElement) {
             return;
         }
-        const nextSelected = visibleElements.find((element) => element.id === selectedElement.id) || null;
+        const nextSelected =
+            visibleElements.find(
+                (element) => element.id === selectedElement.id,
+            ) || null;
         if (nextSelected) {
             setSelectedElement(nextSelected);
             return;
         }
-        const selectedVersionMatches = !selectedVersionId || selectedElement.bim_model_version_id === selectedVersionId;
-        const selectedStoreyMatches = !selectedStoreyName || selectedElement.storey_name === selectedStoreyName;
-        if (!selectedVersionMatches || !selectedStoreyMatches) setSelectedElement(null);
+        const selectedVersionMatches =
+            !selectedVersionId ||
+            selectedElement.bim_model_version_id === selectedVersionId;
+        const selectedStoreyMatches =
+            !selectedStoreyName ||
+            selectedElement.storey_name === selectedStoreyName;
+        if (!selectedVersionMatches || !selectedStoreyMatches)
+            setSelectedElement(null);
     }, [selectedElement, visibleElements]);
 
     useEffect(() => {
         if (!selectedLink) {
             return;
         }
-        const nextLink = (workspace.recent_links || []).find((link) => link.id === selectedLink.id) || null;
+        const nextLink =
+            (workspace.recent_links || []).find(
+                (link) => link.id === selectedLink.id,
+            ) || null;
         setSelectedLink(nextLink);
     }, [selectedLink, workspace.recent_links]);
 
@@ -365,7 +467,9 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             return;
         }
 
-        const matchingLinks = (workspace.recent_links || []).filter((link) => link.bim_element_id === selectedElement.id);
+        const matchingLinks = (workspace.recent_links || []).filter(
+            (link) => link.bim_element_id === selectedElement.id,
+        );
         if (matchingLinks.length === 0) {
             setSelectedLink(null);
             return;
@@ -373,7 +477,9 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
 
         setSelectedLink((current) => {
             if (current && current.bim_element_id === selectedElement.id) {
-                const refreshedCurrent = matchingLinks.find((link) => link.id === current.id);
+                const refreshedCurrent = matchingLinks.find(
+                    (link) => link.id === current.id,
+                );
                 return refreshedCurrent || matchingLinks[0];
             }
             return matchingLinks[0];
@@ -391,30 +497,48 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             elementId: selectedElement?.id || null,
             linkId: selectedLink?.id || null,
         });
-    }, [project?.id, selectedElement?.id, selectedLink?.id, selectedStoreyName, selectedVersionId, selectedViewStateId]);
+    }, [
+        project?.id,
+        selectedElement?.id,
+        selectedLink?.id,
+        selectedStoreyName,
+        selectedVersionId,
+        selectedViewStateId,
+    ]);
 
     useEffect(() => {
         if (!project?.id || !contextHydrated) {
             return;
         }
         const timeoutId = window.setTimeout(() => {
-            bimViewStatesApi.updateWorkspaceContext(
-                project.id,
-                {
-                    view_state_id: selectedViewStateId || null,
-                    active_version_id: selectedVersionId || null,
-                    storey_name: selectedStoreyName || null,
-                    element_id: selectedElement?.id || null,
-                    link_id: selectedLink?.id || null,
-                },
-                access?.resolved_company_id,
-            ).catch(() => {
-                // Keep local fallback as non-blocking backup.
-            });
+            bimViewStatesApi
+                .updateWorkspaceContext(
+                    project.id,
+                    {
+                        view_state_id: selectedViewStateId || null,
+                        active_version_id: selectedVersionId || null,
+                        storey_name: selectedStoreyName || null,
+                        element_id: selectedElement?.id || null,
+                        link_id: selectedLink?.id || null,
+                    },
+                    access?.resolved_company_id,
+                )
+                .catch(() => {
+                    // Keep local fallback as non-blocking backup.
+                });
         }, 250);
 
         return () => window.clearTimeout(timeoutId);
-    }, [access?.resolved_company_id, contextHydrated, project?.id, selectedElement?.id, selectedLink?.id, selectedStoreyName, selectedVersionId, selectedViewStateId]);
+    }, [
+        access?.resolved_company_id,
+        contextHydrated,
+        project?.id,
+        selectedElement?.id,
+        selectedLink?.id,
+        selectedStoreyName,
+        selectedVersionId,
+        selectedViewStateId,
+    ]);
 
     const handleSaveViewState = async (viewName, scope = 'personal') => {
         if (!project?.id || !viewName?.trim()) {
@@ -447,7 +571,10 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             setSelectedViewStateId(createdState?.id || null);
             refresh();
         } catch (viewStateError) {
-            window.alert(viewStateError?.response?.data?.detail || 'No se pudo guardar la vista BIM actual.');
+            window.alert(
+                viewStateError?.response?.data?.detail ||
+                    'No se pudo guardar la vista BIM actual.',
+            );
         } finally {
             setSavingViewState(false);
         }
@@ -457,11 +584,24 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         const payload = viewState?.payload || {};
         applyWorkspaceSelection(payload, viewState?.id || null);
         if (payload.viewer_state) {
-            setViewerMode(payload.viewer_state.filters?.viewer_mode === 'plan' ? 'plan' : 'fragments');
-            setViewerStateApplyStatus({ status: 'applying', viewStateId: viewState.id });
-            setViewerStateToApply({ ...payload.viewer_state, apply_token: viewState.id });
+            setViewerMode(
+                payload.viewer_state.filters?.viewer_mode === 'plan'
+                    ? 'plan'
+                    : 'fragments',
+            );
+            setViewerStateApplyStatus({
+                status: 'applying',
+                viewStateId: viewState.id,
+            });
+            setViewerStateToApply({
+                ...payload.viewer_state,
+                apply_token: viewState.id,
+            });
         } else {
-            setViewerStateApplyStatus({ status: 'legacy', viewStateId: viewState?.id || null });
+            setViewerStateApplyStatus({
+                status: 'legacy',
+                viewStateId: viewState?.id || null,
+            });
             setViewerStateToApply(null);
         }
     };
@@ -483,7 +623,10 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             }
             refresh();
         } catch (viewStateError) {
-            window.alert(viewStateError?.response?.data?.detail || 'No se pudo renombrar la vista BIM.');
+            window.alert(
+                viewStateError?.response?.data?.detail ||
+                    'No se pudo renombrar la vista BIM.',
+            );
         } finally {
             setRenamingViewStateId(null);
         }
@@ -496,7 +639,9 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         try {
             setDuplicatingViewStateId(viewState.id);
             const targetScope =
-                viewState.scope === 'company' && !canAdministerBim ? 'personal' : viewState.scope;
+                viewState.scope === 'company' && !canAdministerBim
+                    ? 'personal'
+                    : viewState.scope;
             const duplicatedState = await bimViewStatesApi.duplicateByProject(
                 project.id,
                 viewState.id,
@@ -506,7 +651,10 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
             setSelectedViewStateId(duplicatedState?.id || null);
             refresh();
         } catch (viewStateError) {
-            window.alert(viewStateError?.response?.data?.detail || 'No se pudo duplicar la vista BIM.');
+            window.alert(
+                viewStateError?.response?.data?.detail ||
+                    'No se pudo duplicar la vista BIM.',
+            );
         } finally {
             setDuplicatingViewStateId(null);
         }
@@ -516,19 +664,28 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         if (!project?.id || !viewState?.id) {
             return;
         }
-        const confirmed = window.confirm(`¿Eliminar la vista BIM "${viewState.nombre}"?`);
+        const confirmed = window.confirm(
+            `¿Eliminar la vista BIM "${viewState.nombre}"?`,
+        );
         if (!confirmed) {
             return;
         }
         try {
             setDeletingViewStateId(viewState.id);
-            await bimViewStatesApi.deleteByProject(project.id, viewState.id, access?.resolved_company_id);
+            await bimViewStatesApi.deleteByProject(
+                project.id,
+                viewState.id,
+                access?.resolved_company_id,
+            );
             if (selectedViewStateId === viewState.id) {
                 setSelectedViewStateId(null);
             }
             refresh();
         } catch (viewStateError) {
-            window.alert(viewStateError?.response?.data?.detail || 'No se pudo eliminar la vista BIM.');
+            window.alert(
+                viewStateError?.response?.data?.detail ||
+                    'No se pudo eliminar la vista BIM.',
+            );
         } finally {
             setDeletingViewStateId(null);
         }
@@ -542,11 +699,20 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
         setSelectedLink(null);
         setTimeline4d(null);
         setPlanningCutoff('');
-        setPlanningSelection({ activityIds: [], primaryActivityId: null, guids: [], primaryGuid: '', source: null, focusToken: null });
+        setPlanningSelection({
+            activityIds: [],
+            primaryActivityId: null,
+            guids: [],
+            primaryGuid: '',
+            source: null,
+            focusToken: null,
+        });
     };
 
     const resolveElementByGuid = async (guid) => {
-        const localElement = (workspace.elements || []).find((item) => item.global_id === guid);
+        const localElement = (workspace.elements || []).find(
+            (item) => item.global_id === guid,
+        );
         if (localElement) {
             setResolvedElement(localElement);
             setSelectedVersionId(localElement.bim_model_version_id || null);
@@ -559,10 +725,14 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
                 { q: guid, page: 1, page_size: 10 },
                 access?.resolved_company_id,
             );
-            const resolvedElement = (response.items || []).find((item) => item.global_id === guid);
+            const resolvedElement = (response.items || []).find(
+                (item) => item.global_id === guid,
+            );
             if (resolvedElement) {
                 setResolvedElement(resolvedElement);
-                setSelectedVersionId(resolvedElement.bim_model_version_id || null);
+                setSelectedVersionId(
+                    resolvedElement.bim_model_version_id || null,
+                );
                 setSelectedStoreyName(resolvedElement.storey_name || null);
             }
             return resolvedElement || null;
@@ -578,17 +748,30 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
     };
 
     const handleSelectActivity = async (activity) => {
-        const selection = createActivityPlanningSelection(activity, `activity-${activity?.id || 'none'}-${Date.now()}`);
+        const selection = createActivityPlanningSelection(
+            activity,
+            `activity-${activity?.id || 'none'}-${Date.now()}`,
+        );
         setPlanningSelection(selection);
-        if (activity?.planned_start) setPlanningCutoff(new Date(activity.planned_start).toISOString().slice(0, 10));
-        if (selection.primaryGuid) await resolveElementByGuid(selection.primaryGuid);
+        if (activity?.planned_start)
+            setPlanningCutoff(
+                new Date(activity.planned_start).toISOString().slice(0, 10),
+            );
+        if (selection.primaryGuid)
+            await resolveElementByGuid(selection.primaryGuid);
         else setResolvedElement(null);
     };
 
     const handleGanttChange = (gantt) => {
         setPlanningGantt(gantt);
-        if (planningSelection.source === 'element' && planningSelection.primaryGuid) {
-            const matches = findActivitiesByGuid(planningSelection.primaryGuid, gantt);
+        if (
+            planningSelection.source === 'element' &&
+            planningSelection.primaryGuid
+        ) {
+            const matches = findActivitiesByGuid(
+                planningSelection.primaryGuid,
+                gantt,
+            );
             setPlanningSelection((current) => ({
                 ...current,
                 activityIds: matches.map((activity) => activity.id),
@@ -599,306 +782,849 @@ const BimWorkspace = ({ project, access, onNavigateTarget }) => {
 
     const highlightedElementIds = useMemo(() => {
         const selectedGuids = new Set(planningSelection.guids);
-        return visibleElements.filter((element) => selectedGuids.has(element.global_id)).map((element) => element.id);
+        return visibleElements
+            .filter((element) => selectedGuids.has(element.global_id))
+            .map((element) => element.id);
     }, [planningSelection.guids, visibleElements]);
 
     const viewer = (
-            <div className="flex h-full min-h-0 flex-col [&>section]:flex-1">
-                {viewerMode === 'fragments' ? (
-                    <BimFragmentsViewport
-                        projectId={project?.id}
-                        versionId={selectedVersionId || workspace.active_version_id}
-                        empresaId={access?.resolved_company_id}
-                        onAvailabilityChange={setFragmentsViewportAvailable}
-                        onSelectGuid={handleSelectGuid}
-                        onViewerStateChange={setViewerStateSnapshot}
-                        viewerStateToApply={viewerStateToApply}
-                        onViewerStateApplied={setViewerStateApplyStatus}
-                        federationMembers={federation?.members || []}
-                        temporalProfile={timeline4d}
-                        selectionProfile={planningSelection}
-                    />
-                ) : null}
-                {viewerMode === 'plan' ? (
-                    <BimCanvasViewer
-                        elements={visibleElements}
-                        ready={workspace.ready}
-                        error={error}
-                        warnings={warnings}
-                        selectedElement={selectedElement}
-                        selectedLink={selectedLink}
-                        linkedElementIds={linkedElementIds}
-                        highlightedElementIds={highlightedElementIds}
-                        elementLinkCounts={elementLinkCounts}
-                        validationIssuesByElementId={validationIssuesByElementId}
-                        onSelectElement={handleSelectElement}
-                        activeVersionLabel={activeVersionLabel}
-                        activeStoreyName={selectedStoreyName}
-                    />
-                ) : null}
-                {viewerMode === 'fragments' && !fragmentsViewportAvailable ? (
-                    <BimThreeViewer
-                        elements={visibleElements}
-                        ready={workspace.ready}
-                        selectedElement={selectedElement}
-                        linkedElementIds={linkedElementIds}
-                        highlightedElementIds={highlightedElementIds}
-                        activeVersionLabel={activeVersionLabel}
-                        activeStoreyName={selectedStoreyName}
-                        onSelectElement={handleSelectElement}
-                    />
-                ) : null}
-            </div>
-        );
+        <div className="flex h-full min-h-0 flex-col [&>section]:flex-1">
+            {viewerMode === 'fragments' ? (
+                <BimFragmentsViewport
+                    projectId={project?.id}
+                    versionId={selectedVersionId || workspace.active_version_id}
+                    empresaId={access?.resolved_company_id}
+                    onAvailabilityChange={setFragmentsViewportAvailable}
+                    onSelectGuid={handleSelectGuid}
+                    onViewerStateChange={setViewerStateSnapshot}
+                    viewerStateToApply={viewerStateToApply}
+                    onViewerStateApplied={setViewerStateApplyStatus}
+                    federationMembers={federation?.members || []}
+                    temporalProfile={timeline4d}
+                    selectionProfile={planningSelection}
+                />
+            ) : null}
+            {viewerMode === 'plan' ? (
+                <BimCanvasViewer
+                    elements={visibleElements}
+                    ready={workspace.ready}
+                    error={error}
+                    warnings={warnings}
+                    selectedElement={selectedElement}
+                    selectedLink={selectedLink}
+                    linkedElementIds={linkedElementIds}
+                    highlightedElementIds={highlightedElementIds}
+                    elementLinkCounts={elementLinkCounts}
+                    validationIssuesByElementId={validationIssuesByElementId}
+                    onSelectElement={handleSelectElement}
+                    activeVersionLabel={activeVersionLabel}
+                    activeStoreyName={selectedStoreyName}
+                />
+            ) : null}
+            {viewerMode === 'fragments' && !fragmentsViewportAvailable ? (
+                <BimThreeViewer
+                    elements={visibleElements}
+                    ready={workspace.ready}
+                    selectedElement={selectedElement}
+                    linkedElementIds={linkedElementIds}
+                    highlightedElementIds={highlightedElementIds}
+                    activeVersionLabel={activeVersionLabel}
+                    activeStoreyName={selectedStoreyName}
+                    onSelectElement={handleSelectElement}
+                />
+            ) : null}
+        </div>
+    );
 
-        const viewStateTool = (
-            <BimViewStateToolbar
-                viewStates={viewStates}
-                loading={loading}
-                activeViewStateId={selectedViewStateId}
-                canCreateCompanyScope={canCreateCompanyScope}
-                canManageCompanyViews={canCreateCompanyScope}
-                onRefresh={refresh}
-                onApplyViewState={handleApplyViewState}
-                onSaveViewState={handleSaveViewState}
-                onRenameViewState={handleRenameViewState}
-                onDuplicateViewState={handleDuplicateViewState}
-                onDeleteViewState={handleDeleteViewState}
-                saving={savingViewState}
-                renamingViewStateId={renamingViewStateId}
-                duplicatingViewStateId={duplicatingViewStateId}
-                deletingViewStateId={deletingViewStateId}
-                applyStatus={viewerStateApplyStatus}
-            />
-        );
-        const linksTool = (
-            <BimLinksPanel
-                linkSummary={workspace.link_summary}
-                ready={workspace.ready}
-                projectId={project?.id}
-                empresaId={access?.resolved_company_id}
-                elements={visibleElements}
-                recentLinks={workspace.recent_links}
-                selectedElement={selectedElement}
-                selectedLinkId={selectedLink?.id}
-                onSelectLink={handleSelectLink}
-                onRefresh={refresh}
-            />
-        );
-        const propertiesTool = (
-            <BimPropertiesPanel
-                groups={workspace.property_groups}
-                ready={workspace.ready}
-                selectedElement={selectedElement}
-                selectedLink={selectedLink}
-                onNavigateTarget={onNavigateTarget}
-            />
-        );
-        const legacyWorkspaceTools = {
-            viewer: [
-                { id: 'properties', label: 'Propiedades', content: propertiesTool },
-                { id: 'versions', label: 'Modelos y versiones', content: <BimVersionSelector models={workspace.models} activeVersionId={activeVersionId} onSelectVersion={handleSelectVersion} /> },
-                { id: 'views', label: 'Vistas guardadas', content: viewStateTool },
-                { id: 'links', label: 'Vínculos', content: linksTool },
-                { id: 'quantities', label: 'Cantidades', content: <BimQuantityProposalPanel projectId={project?.id} empresaId={access?.resolved_company_id} versionId={activeVersionId} element={selectedElement} /> },
-            ],
-            coordination: [
-                { id: 'coordination-control', label: 'Control de coordinación', content: <BimCoordinationControlPanel projectId={project?.id} empresaId={access?.resolved_company_id} activeVersionId={activeVersionId} selectedElement={selectedElement} selectedActivity={(planningGantt?.activities || []).find((activity) => activity.id === planningSelection.primaryActivityId) || null} canEdit={hasProjectCapability('coordination.edit')} canApprove={hasProjectCapability('coordination.approve')} canApply={hasProjectCapability('coordination.apply')} canRecover={hasProjectCapability('coordination.recover')} /> },
-                { id: 'cde-dashboard', label: 'Resumen', content: <BimCdeDashboardPanel projectId={project?.id} empresaId={access?.resolved_company_id} canReconcile={canCreateCompanyScope} /> },
-                { id: 'collaboration', label: 'Actividad', content: <BimCdeCollaborationPanel projectId={project?.id} empresaId={access?.resolved_company_id} selectedElement={selectedElement} /> },
-                { id: 'documents', label: 'Documentos', content: <BimCdeDocumentsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'rfis', label: 'RFI', content: <BimCdeRfiPanel projectId={project?.id} empresaId={access?.resolved_company_id} selectedElement={selectedElement} /> },
-                { id: 'submittals', label: 'Submittals', content: <BimCdeSubmittalsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'reviews', label: 'Revisiones', content: <BimCdeReviewPanel projectId={project?.id} empresaId={access?.resolved_company_id} selectedElement={selectedElement} viewerState={viewerStateSnapshot} /> },
-                { id: 'issues', label: 'Incidencias', content: <BimIssuesPanel projectId={project?.id} versionId={activeVersionId} empresaId={access?.resolved_company_id} currentUserId={access?.resolved_user_id || access?.user_id} viewerState={viewerStateSnapshot} onOpenIssue={handleOpenIssue} /> },
-                { id: 'quality', label: 'Calidad', content: <BimQualityReportPanel projectId={project?.id} versionId={activeVersionId} empresaId={access?.resolved_company_id} canGenerate={canCreateCompanyScope} /> },
-                { id: 'ids', label: 'IDS', content: <BimIdsPanel projectId={project?.id} versionId={activeVersionId} empresaId={access?.resolved_company_id} onSelectGuid={handleSelectGuid} /> },
-                { id: 'compare', label: 'Comparar versiones', content: <BimVersionComparePanel projectId={project?.id} empresaId={access?.resolved_company_id} models={workspace.models} activeVersionId={activeVersionId} onSelectGuid={handleSelectGuid} /> },
-                { id: 'federation', label: 'Federación', content: <BimFederationPanel projectId={project?.id} empresaId={access?.resolved_company_id} models={workspace.models} federation={federation} onFederationChange={setFederation} /> },
-                { id: 'location', label: 'Ubicación', content: <BimSiteGeoreferencePanel projectId={project?.id} empresaId={access?.resolved_company_id} activeVersionId={activeVersionId} onSelectVersion={handleSelectVersion} /> },
-                { id: 'conflicts', label: 'Conflictos', content: <BimSpaceTimeConflictPanel projectId={project?.id} empresaId={access?.resolved_company_id} onSelectGuid={handleSelectGuid} /> },
-            ],
-            planning: [
-                { id: 'schedule', label: 'Actividad y vínculo', content: <BimScheduleLinkPanel projectId={project?.id} empresaId={access?.resolved_company_id} element={selectedElement} /> },
-                { id: 'interchange', label: 'Intercambio', content: <BimScheduleInterchangePanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'links', label: 'Vínculos', content: linksTool },
-                { id: 'properties', label: 'Propiedades', content: propertiesTool },
-            ],
-            production: [
-                { id: 'plan-actual', label: 'Plan vs. real', content: <BimPlanActualPanel projectId={project?.id} empresaId={access?.resolved_company_id} onOpenViewpoint={(viewpoint) => viewpoint && handleOpenIssue({ version_id: viewpoint.source_version_id, viewpoint })} /> },
-                { id: 'erp-exchange', label: 'ERP', content: <BimErpExchangePanel projectId={project?.id} empresaId={access?.resolved_company_id} canManage={canCreateCompanyScope} /> },
-                { id: 'integrations', label: 'Integraciones', content: <BimIntegrationGatewayPanel projectId={project?.id} empresaId={access?.resolved_company_id} canManage={canCreateCompanyScope} /> },
-                { id: 'estimate', label: 'Estimación', content: <BimCostEstimatePanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'contracts', label: 'Contratos', content: <BimCostContractsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'payments', label: 'Pagos', content: <BimCostPaymentsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'sov', label: 'Valores', content: <BimCostSovPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'changes', label: 'Cambios', content: <BimCostChangeOrdersPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'actual-costs', label: 'Reales', content: <BimActualCostLedgerPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'forecast', label: 'Forecast', content: <BimCostForecastPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'events', label: 'Eventos', content: <BimUnplannedEventsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'workfronts', label: 'Frentes', content: <BimWorkfrontScenarioPanel projectId={project?.id} empresaId={access?.resolved_company_id} versionId={activeVersionId} element={selectedElement} onSelectGuid={handleSelectGuid} /> },
-                { id: 'quantities', label: 'Cantidades', content: <BimQuantityProposalPanel projectId={project?.id} empresaId={access?.resolved_company_id} versionId={activeVersionId} element={selectedElement} /> },
-                { id: 'productivity', label: 'Productividad', content: <BimProductivityProposalPanel projectId={project?.id} empresaId={access?.resolved_company_id} element={selectedElement} /> },
-                { id: 'resources', label: 'Recursos', content: <BimResourceCapacityPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'partitions', label: 'Particiones', content: <BimConstructiblePartitionPanel projectId={project?.id} empresaId={access?.resolved_company_id} element={selectedElement} /> },
-                { id: 'equipment', label: 'Equipos', content: <BimEquipmentMotionPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-            ],
-            field: [
-                { id: 'diary', label: 'Diario', content: <BimFieldDiaryPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'crews', label: 'Cuadrillas', content: <BimCrewsTimecardsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'materials', label: 'Materiales', content: <BimFieldResourcesPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'documents', label: 'Documentos', content: <BimFieldDocumentsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'issues', label: 'Incidencias', content: <BimFieldIssuesPanel projectId={project?.id} versionId={activeVersionId} empresaId={access?.resolved_company_id} viewerState={viewerStateSnapshot} onOpenIssue={handleOpenIssue} /> },
-                { id: 'progress', label: 'Registrar avance', content: <BimFieldReportPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'safety', label: 'Inspecciones', content: <BimSafetyRiskPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'properties', label: 'Elemento', content: propertiesTool },
-            ],
-            handover: [
-                { id: 'as-built', label: 'As-built', content: <BimAsBuiltAcceptancePanel projectId={project?.id} empresaId={access?.resolved_company_id} models={workspace.models} activeVersionId={activeVersionId} /> },
-                { id: 'commissioning', label: 'Commissioning', content: <BimCommissioningRegistryPanel projectId={project?.id} empresaId={access?.resolved_company_id} versionId={activeVersionId} element={selectedElement} /> },
-                { id: 'punch-closure', label: 'Cierre punch', content: <BimPunchClosurePanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'handover-dossier', label: 'Dossier digital', content: <BimHandoverDossierPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-                { id: 'operations-transition', label: 'Transición O&M', content: <BimOperationsTransitionPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-            ],
-        };
-        // The visible information architecture is workflow-based. Existing panels remain
-        // reusable capabilities, but no longer compete as top-level destinations.
-        const unrestrictedWorkspaceTools = {
-            'planning-costs': [
-                ...legacyWorkspaceTools.planning,
-                ...legacyWorkspaceTools.production,
-            ],
-            model: legacyWorkspaceTools.viewer,
-            coordination: legacyWorkspaceTools.coordination,
-            tracking: [
-                ...legacyWorkspaceTools.field,
-                { id: 'reports', label: 'Informes', content: <BimReportsPanel projectId={project?.id} empresaId={access?.resolved_company_id} /> },
-            ],
-            handover: legacyWorkspaceTools.handover,
-        };
-        const workspaceTools = Object.fromEntries(
-            Object.entries(unrestrictedWorkspaceTools).map(([mode, tools]) => [
-                mode,
-                filterToolsByCapabilities(tools, projectCapabilities || new Set()),
-            ]),
-        );
-        const bottomTools = [
+    const viewStateTool = (
+        <BimViewStateToolbar
+            viewStates={viewStates}
+            loading={loading}
+            activeViewStateId={selectedViewStateId}
+            canCreateCompanyScope={canCreateCompanyScope}
+            canManageCompanyViews={canCreateCompanyScope}
+            onRefresh={refresh}
+            onApplyViewState={handleApplyViewState}
+            onSaveViewState={handleSaveViewState}
+            onRenameViewState={handleRenameViewState}
+            onDuplicateViewState={handleDuplicateViewState}
+            onDeleteViewState={handleDeleteViewState}
+            saving={savingViewState}
+            renamingViewStateId={renamingViewStateId}
+            duplicatingViewStateId={duplicatingViewStateId}
+            deletingViewStateId={deletingViewStateId}
+            applyStatus={viewerStateApplyStatus}
+        />
+    );
+    const linksTool = (
+        <BimLinksPanel
+            linkSummary={workspace.link_summary}
+            ready={workspace.ready}
+            projectId={project?.id}
+            empresaId={access?.resolved_company_id}
+            elements={visibleElements}
+            recentLinks={workspace.recent_links}
+            selectedElement={selectedElement}
+            selectedLinkId={selectedLink?.id}
+            onSelectLink={handleSelectLink}
+            onRefresh={refresh}
+        />
+    );
+    const propertiesTool = (
+        <BimPropertiesPanel
+            groups={workspace.property_groups}
+            ready={workspace.ready}
+            selectedElement={selectedElement}
+            selectedLink={selectedLink}
+            onNavigateTarget={onNavigateTarget}
+        />
+    );
+    const legacyWorkspaceTools = {
+        viewer: [
+            { id: 'properties', label: 'Propiedades', content: propertiesTool },
             {
-                id: 'planning-4d',
-                label: 'Secuencia 4D',
+                id: 'versions',
+                label: 'Modelos y versiones',
                 content: (
-                    <BimPlanning4dPanel
-                        projectId={project?.id}
-                        empresaId={access?.resolved_company_id}
-                        cutoff={planningCutoff}
-                        selectedGuid={planningSelection.primaryGuid}
-                        selectedActivityIds={planningSelection.activityIds}
-                        primaryActivityId={planningSelection.primaryActivityId}
-                        onCutoffChange={setPlanningCutoff}
-                        onTimelineChange={setTimeline4d}
-                        onGanttChange={handleGanttChange}
-                        onSelectActivity={handleSelectActivity}
+                    <BimVersionSelector
+                        models={workspace.models}
+                        activeVersionId={activeVersionId}
+                        onSelectVersion={handleSelectVersion}
                     />
                 ),
             },
-        ];
-        const adminTools = canCreateCompanyScope
-            ? [
-                  { id: 'imports', label: 'Cargar modelo IFC', content: <BimImportJobsPanel projectId={project?.id} empresaId={access?.resolved_company_id} onImportReady={refresh} /> },
-                  { id: 'versions', label: 'Modelos y versiones', content: <BimVersionSelector models={workspace.models} activeVersionId={activeVersionId} onSelectVersion={handleSelectVersion} /> },
-                  { id: 'federation', label: 'Federación', content: <BimFederationPanel projectId={project?.id} empresaId={access?.resolved_company_id} models={workspace.models} federation={federation} onFederationChange={setFederation} /> },
-                  { id: 'location', label: 'Ubicación', content: <BimSiteGeoreferencePanel projectId={project?.id} empresaId={access?.resolved_company_id} activeVersionId={activeVersionId} onSelectVersion={handleSelectVersion} /> },
-                  { id: 'quality', label: 'Calidad', content: <BimQualityReportPanel projectId={project?.id} versionId={activeVersionId} empresaId={access?.resolved_company_id} canGenerate /> },
-                  { id: 'ids', label: 'IDS', content: <BimIdsPanel projectId={project?.id} versionId={activeVersionId} empresaId={access?.resolved_company_id} onSelectGuid={handleSelectGuid} /> },
-              ]
-            : [];
-        const searchItems = [
-            ...visibleElements.map((element) => ({
-                id: `element-${element.id}`,
-                type: 'Elemento',
-                label: element.nombre || element.global_id,
-                meta: `${element.ifc_class || 'Sin clase'} · ${element.global_id || 'Sin GlobalId'} · ${element.storey_name || 'Sin nivel'}`,
-                workspace: 'model',
-                onSelect: () => handleSelectElement(element),
-            })),
-            ...(workspace.models || []).flatMap((model) => (model.versions || []).map((version) => ({
-                id: `version-${version.id}`,
-                type: 'Modelo',
-                label: `${model.nombre || model.name || model.model_name || 'Modelo BIM'} · ${version.label}`,
-                meta: model.discipline || model.disciplina || 'Modelo y versión BIM',
-                workspace: 'model',
-                onSelect: () => handleSelectVersion(version.id),
-            }))),
-            ...(workspace.recent_links || []).map((link) => ({
-                id: `link-${link.id}`,
-                type: 'Vínculo',
-                label: link.target_label || link.target_id || 'Vínculo BIM',
-                meta: `${link.target_type || 'Destino'} · ${link.link_type || 'Vínculo'}`,
-                workspace: 'planning-costs',
-                onSelect: () => handleSelectLink(link),
-            })),
-            ...(planningGantt?.activities || []).map((activity) => ({
-                id: `activity-${activity.id}`,
-                type: 'Actividad',
-                label: `${activity.code} · ${activity.name}`,
-                meta: `${new Date(activity.planned_start).toLocaleDateString('es')} · ${activity.global_ids.length} elementos BIM`,
-                workspace: 'planning-costs',
-                onSelect: () => handleSelectActivity(activity),
-            })),
-        ];
-        const searchAuthorizedProject = async (query) => {
-            const payload = await bimModelsApi.searchProjectContext(project.id, query, access?.resolved_company_id);
-            return (payload.items || []).map((item) => ({
-                ...item,
-                onSelect: async () => {
-                    if (item.kind === 'element') await resolveElementByGuid(item.global_id);
-                    if (item.kind === 'activity') {
-                        const activity = (planningGantt?.activities || []).find((candidate) => candidate.id === item.entity_id);
-                        if (activity) await handleSelectActivity(activity);
-                    }
-                    if (item.kind === 'budget_line') onNavigateTarget?.({ target_type: 'presupuesto_detalle', target_id: item.entity_id, presupuesto_id: item.budget_id });
-                },
-            }));
-        };
-
-    return (
-        <BimWorkspaceV2
-                projectId={project?.id}
-                companyLabel={companyLabel}
-                projectLabel={projectLabel}
-                modelLabel={activeModelLabel}
-                versionLabel={activeVersionLabel}
-                viewerMode={viewerMode}
-                loading={loading}
-                canAdminister={canAdministerBim}
-                omniClassEnabled={omniClassEnabled}
-                explorer={(
-                    <BimTreePanel
-                        nodes={workspace.tree_nodes}
-                        elements={visibleElements}
-                        ready={workspace.ready}
+            { id: 'views', label: 'Vistas guardadas', content: viewStateTool },
+            { id: 'links', label: 'Vínculos', content: linksTool },
+            {
+                id: 'quantities',
+                label: 'Cantidades',
+                content: (
+                    <BimQuantityProposalPanel
                         projectId={project?.id}
                         empresaId={access?.resolved_company_id}
                         versionId={activeVersionId}
-                        selectedElement={selectedElement}
-                        selectedElementId={selectedElement?.id}
-                        onSelectElement={handleSelectElement}
+                        element={selectedElement}
                     />
-                )}
-                viewer={viewer}
-                inspector={propertiesTool}
-                workspaceTools={workspaceTools}
-                bottomTools={bottomTools}
-                adminTools={adminTools}
-                reports={<BimReportsPanel projectId={project?.id} empresaId={access?.resolved_company_id} />}
-                ready={workspace.ready}
-                error={error}
-                warnings={warnings}
-                searchItems={searchItems}
-                onSearch={searchAuthorizedProject}
-                onChangeViewerMode={setViewerMode}
-                onResetContext={resetTechnicalContext}
-                onRefresh={refresh}
+                ),
+            },
+        ],
+        coordination: [
+            {
+                id: 'coordination-control',
+                label: 'Control de coordinación',
+                content: (
+                    <BimCoordinationControlPanel
+                        embedded
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        activeVersionId={activeVersionId}
+                        selectedElement={selectedElement}
+                        selectedActivity={
+                            (planningGantt?.activities || []).find(
+                                (activity) =>
+                                    activity.id ===
+                                    planningSelection.primaryActivityId,
+                            ) || null
+                        }
+                        canEdit={hasProjectCapability('coordination.edit')}
+                        canApprove={hasProjectCapability(
+                            'coordination.approve',
+                        )}
+                        canApply={hasProjectCapability('coordination.apply')}
+                        canRecover={hasProjectCapability(
+                            'coordination.recover',
+                        )}
+                    />
+                ),
+            },
+            {
+                id: 'cde-dashboard',
+                label: 'Resumen',
+                content: (
+                    <BimCdeDashboardPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        canReconcile={canCreateCompanyScope}
+                    />
+                ),
+            },
+            {
+                id: 'collaboration',
+                label: 'Actividad',
+                content: (
+                    <BimCdeCollaborationPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        selectedElement={selectedElement}
+                    />
+                ),
+            },
+            {
+                id: 'documents',
+                label: 'Documentos',
+                content: (
+                    <BimCdeDocumentsPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'rfis',
+                label: 'RFI',
+                content: (
+                    <BimCdeRfiPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        selectedElement={selectedElement}
+                    />
+                ),
+            },
+            {
+                id: 'submittals',
+                label: 'Submittals',
+                content: (
+                    <BimCdeSubmittalsPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'reviews',
+                label: 'Revisiones',
+                content: (
+                    <BimCdeReviewPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        selectedElement={selectedElement}
+                        viewerState={viewerStateSnapshot}
+                    />
+                ),
+            },
+            {
+                id: 'issues',
+                label: 'Incidencias',
+                content: (
+                    <BimIssuesPanel
+                        projectId={project?.id}
+                        versionId={activeVersionId}
+                        empresaId={access?.resolved_company_id}
+                        currentUserId={
+                            access?.resolved_user_id || access?.user_id
+                        }
+                        viewerState={viewerStateSnapshot}
+                        onOpenIssue={handleOpenIssue}
+                    />
+                ),
+            },
+            {
+                id: 'quality',
+                label: 'Calidad',
+                content: (
+                    <BimQualityReportPanel
+                        projectId={project?.id}
+                        versionId={activeVersionId}
+                        empresaId={access?.resolved_company_id}
+                        canGenerate={canCreateCompanyScope}
+                    />
+                ),
+            },
+            {
+                id: 'ids',
+                label: 'IDS',
+                content: (
+                    <BimIdsPanel
+                        projectId={project?.id}
+                        versionId={activeVersionId}
+                        empresaId={access?.resolved_company_id}
+                        onSelectGuid={handleSelectGuid}
+                    />
+                ),
+            },
+            {
+                id: 'compare',
+                label: 'Comparar versiones',
+                content: (
+                    <BimVersionComparePanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        models={workspace.models}
+                        activeVersionId={activeVersionId}
+                        onSelectGuid={handleSelectGuid}
+                    />
+                ),
+            },
+            {
+                id: 'federation',
+                label: 'Federación',
+                content: (
+                    <BimFederationPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        models={workspace.models}
+                        federation={federation}
+                        onFederationChange={setFederation}
+                    />
+                ),
+            },
+            {
+                id: 'location',
+                label: 'Ubicación',
+                content: (
+                    <BimSiteGeoreferencePanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        activeVersionId={activeVersionId}
+                        onSelectVersion={handleSelectVersion}
+                    />
+                ),
+            },
+            {
+                id: 'conflicts',
+                label: 'Conflictos',
+                content: (
+                    <BimSpaceTimeConflictPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        onSelectGuid={handleSelectGuid}
+                    />
+                ),
+            },
+        ],
+        planning: [
+            {
+                id: 'schedule',
+                label: 'Actividad y vínculo',
+                content: (
+                    <BimScheduleLinkPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        element={selectedElement}
+                        selectedActivityId={planningSelection.primaryActivityId}
+                    />
+                ),
+            },
+            {
+                id: 'interchange',
+                label: 'Intercambio',
+                content: (
+                    <BimScheduleInterchangePanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            { id: 'links', label: 'Vínculos', content: linksTool },
+            { id: 'properties', label: 'Propiedades', content: propertiesTool },
+        ],
+        production: [
+            {
+                id: 'plan-actual',
+                label: 'Plan vs. real',
+                content: (
+                    <BimPlanActualPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        embedded
+                        onOpenViewpoint={(viewpoint) =>
+                            viewpoint &&
+                            handleOpenIssue({
+                                version_id: viewpoint.source_version_id,
+                                viewpoint,
+                            })
+                        }
+                    />
+                ),
+            },
+            {
+                id: 'erp-exchange',
+                label: 'ERP',
+                content: (
+                    <BimErpExchangePanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        canManage={canCreateCompanyScope}
+                    />
+                ),
+            },
+            {
+                id: 'integrations',
+                label: 'Integraciones',
+                content: (
+                    <BimIntegrationGatewayPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        canManage={canCreateCompanyScope}
+                    />
+                ),
+            },
+            {
+                id: 'estimate',
+                label: 'Estimación',
+                content: (
+                    <BimCostEstimatePanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        embedded
+                    />
+                ),
+            },
+            {
+                id: 'cost-control',
+                label: 'Control económico',
+                content: (
+                    <BimCostControlWorkbench
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'events',
+                label: 'Eventos',
+                content: (
+                    <BimUnplannedEventsPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'workfronts',
+                label: 'Frentes',
+                content: (
+                    <BimWorkfrontScenarioPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        versionId={activeVersionId}
+                        element={selectedElement}
+                        onSelectGuid={handleSelectGuid}
+                    />
+                ),
+            },
+            {
+                id: 'quantities',
+                label: 'Cantidades',
+                content: (
+                    <BimQuantityProposalPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        versionId={activeVersionId}
+                        element={selectedElement}
+                    />
+                ),
+            },
+            {
+                id: 'productivity',
+                label: 'Productividad',
+                content: (
+                    <BimProductivityProposalPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        element={selectedElement}
+                    />
+                ),
+            },
+            {
+                id: 'resources',
+                label: 'Recursos',
+                content: (
+                    <BimResourceCapacityPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'partitions',
+                label: 'Particiones',
+                content: (
+                    <BimConstructiblePartitionPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        element={selectedElement}
+                    />
+                ),
+            },
+            {
+                id: 'equipment',
+                label: 'Equipos',
+                content: (
+                    <BimEquipmentMotionPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+        ],
+        field: [
+            {
+                id: 'diary',
+                label: 'Diario',
+                content: (
+                    <BimFieldDiaryPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'crews',
+                label: 'Cuadrillas',
+                content: (
+                    <BimCrewsTimecardsPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'materials',
+                label: 'Materiales',
+                content: (
+                    <BimFieldResourcesPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'documents',
+                label: 'Documentos',
+                content: (
+                    <BimFieldDocumentsPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'issues',
+                label: 'Incidencias',
+                content: (
+                    <BimFieldIssuesPanel
+                        projectId={project?.id}
+                        versionId={activeVersionId}
+                        empresaId={access?.resolved_company_id}
+                        viewerState={viewerStateSnapshot}
+                        onOpenIssue={handleOpenIssue}
+                    />
+                ),
+            },
+            {
+                id: 'progress',
+                label: 'Registrar avance',
+                content: (
+                    <BimFieldReportPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'safety',
+                label: 'Inspecciones',
+                content: (
+                    <BimSafetyRiskPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            { id: 'properties', label: 'Elemento', content: propertiesTool },
+        ],
+        handover: [
+            {
+                id: 'as-built',
+                label: 'As-built',
+                content: (
+                    <BimAsBuiltAcceptancePanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        models={workspace.models}
+                        activeVersionId={activeVersionId}
+                    />
+                ),
+            },
+            {
+                id: 'commissioning',
+                label: 'Commissioning',
+                content: (
+                    <BimCommissioningRegistryPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                        versionId={activeVersionId}
+                        element={selectedElement}
+                    />
+                ),
+            },
+            {
+                id: 'punch-closure',
+                label: 'Cierre punch',
+                content: (
+                    <BimPunchClosurePanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'handover-dossier',
+                label: 'Dossier digital',
+                content: (
+                    <BimHandoverDossierPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+            {
+                id: 'operations-transition',
+                label: 'Transición O&M',
+                content: (
+                    <BimOperationsTransitionPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+        ],
+    };
+    // The visible information architecture is workflow-based. Existing panels remain
+    // reusable capabilities, but no longer compete as top-level destinations.
+    const unrestrictedWorkspaceTools = {
+        'planning-costs': [
+            ...legacyWorkspaceTools.planning,
+            ...legacyWorkspaceTools.production,
+        ],
+        model: legacyWorkspaceTools.viewer,
+        coordination: legacyWorkspaceTools.coordination,
+        tracking: [
+            ...legacyWorkspaceTools.field,
+            {
+                id: 'reports',
+                label: 'Informes',
+                content: (
+                    <BimReportsPanel
+                        projectId={project?.id}
+                        empresaId={access?.resolved_company_id}
+                    />
+                ),
+            },
+        ],
+        handover: legacyWorkspaceTools.handover,
+    };
+    const workspaceTools = Object.fromEntries(
+        Object.entries(unrestrictedWorkspaceTools).map(([mode, tools]) => [
+            mode,
+            filterToolsByCapabilities(tools, projectCapabilities || new Set()),
+        ]),
+    );
+    const bottomTools = [
+        {
+            id: 'planning-4d',
+            label: 'Secuencia 4D',
+            content: (
+                <BimPlanning4dPanel
+                    projectId={project?.id}
+                    empresaId={access?.resolved_company_id}
+                    cutoff={planningCutoff}
+                    selectedGuid={planningSelection.primaryGuid}
+                    selectedActivityIds={planningSelection.activityIds}
+                    primaryActivityId={planningSelection.primaryActivityId}
+                    onCutoffChange={setPlanningCutoff}
+                    onTimelineChange={setTimeline4d}
+                    onGanttChange={handleGanttChange}
+                    onSelectActivity={handleSelectActivity}
+                />
+            ),
+        },
+    ];
+    const adminTools = canCreateCompanyScope
+        ? [
+              {
+                  id: 'imports',
+                  label: 'Cargar modelo IFC',
+                  content: (
+                      <BimImportJobsPanel
+                          projectId={project?.id}
+                          empresaId={access?.resolved_company_id}
+                          onImportReady={refresh}
+                      />
+                  ),
+              },
+              {
+                  id: 'versions',
+                  label: 'Modelos y versiones',
+                  content: (
+                      <BimVersionSelector
+                          models={workspace.models}
+                          activeVersionId={activeVersionId}
+                          onSelectVersion={handleSelectVersion}
+                      />
+                  ),
+              },
+              {
+                  id: 'federation',
+                  label: 'Federación',
+                  content: (
+                      <BimFederationPanel
+                          projectId={project?.id}
+                          empresaId={access?.resolved_company_id}
+                          models={workspace.models}
+                          federation={federation}
+                          onFederationChange={setFederation}
+                      />
+                  ),
+              },
+              {
+                  id: 'location',
+                  label: 'Ubicación',
+                  content: (
+                      <BimSiteGeoreferencePanel
+                          projectId={project?.id}
+                          empresaId={access?.resolved_company_id}
+                          activeVersionId={activeVersionId}
+                          onSelectVersion={handleSelectVersion}
+                      />
+                  ),
+              },
+              {
+                  id: 'quality',
+                  label: 'Calidad',
+                  content: (
+                      <BimQualityReportPanel
+                          projectId={project?.id}
+                          versionId={activeVersionId}
+                          empresaId={access?.resolved_company_id}
+                          canGenerate
+                      />
+                  ),
+              },
+              {
+                  id: 'ids',
+                  label: 'IDS',
+                  content: (
+                      <BimIdsPanel
+                          projectId={project?.id}
+                          versionId={activeVersionId}
+                          empresaId={access?.resolved_company_id}
+                          onSelectGuid={handleSelectGuid}
+                      />
+                  ),
+              },
+          ]
+        : [];
+    const searchItems = [
+        ...visibleElements.map((element) => ({
+            id: `element-${element.id}`,
+            type: 'Elemento',
+            label: element.nombre || element.global_id,
+            meta: `${element.ifc_class || 'Sin clase'} · ${element.global_id || 'Sin GlobalId'} · ${element.storey_name || 'Sin nivel'}`,
+            workspace: 'model',
+            onSelect: () => handleSelectElement(element),
+        })),
+        ...(workspace.models || []).flatMap((model) =>
+            (model.versions || []).map((version) => ({
+                id: `version-${version.id}`,
+                type: 'Modelo',
+                label: `${model.nombre || model.name || model.model_name || 'Modelo BIM'} · ${version.label}`,
+                meta:
+                    model.discipline ||
+                    model.disciplina ||
+                    'Modelo y versión BIM',
+                workspace: 'model',
+                onSelect: () => handleSelectVersion(version.id),
+            })),
+        ),
+        ...(workspace.recent_links || []).map((link) => ({
+            id: `link-${link.id}`,
+            type: 'Vínculo',
+            label: link.target_label || link.target_id || 'Vínculo BIM',
+            meta: `${link.target_type || 'Destino'} · ${link.link_type || 'Vínculo'}`,
+            workspace: 'planning-costs',
+            onSelect: () => handleSelectLink(link),
+        })),
+        ...(planningGantt?.activities || []).map((activity) => ({
+            id: `activity-${activity.id}`,
+            type: 'Actividad',
+            label: `${activity.code} · ${activity.name}`,
+            meta: `${new Date(activity.planned_start).toLocaleDateString('es')} · ${activity.global_ids.length} elementos BIM`,
+            workspace: 'planning-costs',
+            onSelect: () => handleSelectActivity(activity),
+        })),
+    ];
+    const searchAuthorizedProject = async (query) => {
+        const payload = await bimModelsApi.searchProjectContext(
+            project.id,
+            query,
+            access?.resolved_company_id,
+        );
+        return (payload.items || []).map((item) => ({
+            ...item,
+            onSelect: async () => {
+                if (item.kind === 'element')
+                    await resolveElementByGuid(item.global_id);
+                if (item.kind === 'activity') {
+                    const activity = (planningGantt?.activities || []).find(
+                        (candidate) => candidate.id === item.entity_id,
+                    );
+                    if (activity) await handleSelectActivity(activity);
+                }
+                if (item.kind === 'budget_line')
+                    onNavigateTarget?.({
+                        target_type: 'presupuesto_detalle',
+                        target_id: item.entity_id,
+                        presupuesto_id: item.budget_id,
+                    });
+            },
+        }));
+    };
+
+    return (
+        <BimWorkspaceV2
+            projectId={project?.id}
+            companyLabel={companyLabel}
+            projectLabel={projectLabel}
+            modelLabel={activeModelLabel}
+            versionLabel={activeVersionLabel}
+            viewerMode={viewerMode}
+            loading={loading}
+            canAdminister={canAdministerBim}
+            omniClassEnabled={omniClassEnabled}
+            explorer={
+                <BimTreePanel
+                    nodes={workspace.tree_nodes}
+                    elements={visibleElements}
+                    ready={workspace.ready}
+                    projectId={project?.id}
+                    empresaId={access?.resolved_company_id}
+                    versionId={activeVersionId}
+                    selectedElement={selectedElement}
+                    selectedElementId={selectedElement?.id}
+                    onSelectElement={handleSelectElement}
+                />
+            }
+            viewer={viewer}
+            inspector={propertiesTool}
+            workspaceTools={workspaceTools}
+            bottomTools={bottomTools}
+            adminTools={adminTools}
+            reports={
+                <BimReportsPanel
+                    projectId={project?.id}
+                    empresaId={access?.resolved_company_id}
+                />
+            }
+            ready={workspace.ready}
+            error={error}
+            warnings={warnings}
+            searchItems={searchItems}
+            onSearch={searchAuthorizedProject}
+            onChangeViewerMode={setViewerMode}
+            onResetContext={resetTechnicalContext}
+            onRefresh={refresh}
         />
     );
 };

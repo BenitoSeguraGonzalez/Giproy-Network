@@ -89,12 +89,24 @@ const BimWorkspaceV2Harness = () => {
                 workspaceTools={{
                     model: [{ id: 'properties', label: 'Propiedades', content: panel('Propiedades', 'IfcWall · 2Q8xR08BIM') }],
                     coordination: [{ id: 'issues', label: 'Incidencias', content: panel('Incidencias', 'Coordinación activa') }],
-                    'planning-costs': [{ id: 'schedule', label: 'Actividad y vínculo', content: panel('Actividad y vínculo', 'EDT 1.2') }],
+                    'planning-costs': [
+                        { id: 'schedule', label: 'Actividad y vínculo', content: panel('Actividad y vínculo', 'EDT 1.2') },
+                        { id: 'estimate', label: 'Estimación', content: panel('Estimación', 'QTO aprobado y precios gobernados') },
+                        { id: 'cost-control', label: 'Control económico', content: panel('Control económico', 'Compromisos, certificaciones, cambios, costes reales y previsión') },
+                        { id: 'workfronts', label: 'Frentes', content: panel('Frentes de trabajo', 'Sectorización constructiva') },
+                        { id: 'interchange', label: 'Intercambio', content: panel('Intercambio', 'Planificación externa') },
+                    ],
                     tracking: [
                         { id: 'progress', label: 'Registrar avance', content: panel('Registrar avance', 'Nivel 01') },
                         { id: 'reports', label: 'Informes', content: panel('Informes BIM', 'Avance · 4D · Productividad · Recursos · Seguridad · Calidad') },
                     ],
-                    handover: [{ id: 'dossier', label: 'Dossier', content: panel('Dossier digital', 'Entrega coordinada') }],
+                    handover: [
+                        { id: 'as-built', label: 'As-built', content: panel('Aceptación as-built', 'Revisión inmutable y decisión auditable') },
+                        { id: 'commissioning', label: 'Commissioning', content: panel('Commissioning técnico', 'Sistemas, activos y pruebas') },
+                        { id: 'punch-closure', label: 'Cierre punch', content: panel('Cierre punch', 'Hallazgos y aceptación') },
+                        { id: 'handover-dossier', label: 'Dossier digital', content: panel('Dossier digital', 'Entrega coordinada') },
+                        { id: 'operations-transition', label: 'Transición O&M', content: panel('Transición a Operaciones', 'Receptor y baseline de activos') },
+                    ],
                 }}
                 bottomTools={[{
                     id: 'planning-4d',

@@ -36,9 +36,17 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState('');
     const [refreshToken, setRefreshToken] = useState(0);
+    const [createOpen, setCreateOpen] = useState(false);
     const completedJobIdsRef = useRef(new Set());
     const fileInputRef = useRef(null);
     const onImportReadyRef = useRef(onImportReady);
+
+    useEffect(() => {
+        if (!createOpen) return undefined;
+        const onKeyDown = (event) => event.key === 'Escape' && setCreateOpen(false);
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, [createOpen]);
 
     useEffect(() => {
         onImportReadyRef.current = onImportReady;
@@ -86,11 +94,11 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
         event.preventDefault();
         if (!file || !modelName.trim() || !versionLabel.trim()) {
             setMessage('Completa modelo, versión y archivo IFC.');
-            return;
+            return false;
         }
         if (!file.name.toLowerCase().endsWith('.ifc')) {
             setMessage('Selecciona un archivo con extensión .ifc.');
-            return;
+            return false;
         }
 
         try {
@@ -109,8 +117,10 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
             setFile(null);
             if (fileInputRef.current) fileInputRef.current.value = '';
             setRefreshToken((value) => value + 1);
+            return true;
         } catch (error) {
             setMessage(error?.response?.data?.detail || 'No se pudo iniciar la importación IFC.');
+            return false;
         } finally {
             setSubmitting(false);
         }
@@ -145,9 +155,11 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
                 >
                     <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin motion-reduce:animate-none' : ''}`} />
                 </button>
+                <button type="button" onClick={() => setCreateOpen(true)} className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#F39200] px-3 text-[10px] font-black uppercase tracking-[0.12em] text-white"><FileUp className="h-3.5 w-3.5" /> Nueva carga</button>
             </div>
 
-            <form onSubmit={handleSubmit} className="grid gap-2 p-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.25fr)_110px_minmax(0,1fr)_auto]">
+            {createOpen ? <div className="fixed inset-0 z-[80] grid place-items-center bg-zinc-950/45 p-6" onMouseDown={(event) => event.target === event.currentTarget && setCreateOpen(false)}><form role="dialog" aria-modal="true" aria-labelledby="bim-import-title" onSubmit={async (event) => { const created = await handleSubmit(event); if (created) setCreateOpen(false); }} className="grid w-full max-w-2xl gap-3 rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xl sm:grid-cols-2">
+                <h4 id="bim-import-title" className="col-span-full text-sm font-black text-zinc-900">Nueva carga IFC</h4>
                 <label className="grid gap-1 text-[10px] font-bold text-zinc-600">
                     Modelo
                     <input value={modelName} onChange={(event) => setModelName(event.target.value)} className={FIELD_CLASS} maxLength={255} placeholder="Ej. Arquitectura" />
@@ -175,7 +187,8 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
                         Cargar y procesar
                     </button>
                 </div>
-            </form>
+                <button type="button" onClick={() => setCreateOpen(false)} className="h-9 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-600">Cancelar</button>
+            </form></div> : null}
 
             {message ? <p className="border-t border-zinc-100 px-4 py-2 text-xs font-semibold text-rose-700" role="alert">{message}</p> : null}
 

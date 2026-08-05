@@ -36,8 +36,8 @@ const BimPlanActualHarness = () => {
         }),
     }), [baselines]);
     return (
-        <main className="min-h-screen bg-[#F2F4F7] p-3" data-bim-plan-actual-harness data-focused-guid={focusedGuid}>
-            <div className="mx-auto w-full max-w-md">
+        <main className="h-screen overflow-hidden bg-[#F2F4F7] p-6" data-bim-plan-actual-harness data-focused-guid={focusedGuid}>
+            <div className="h-[calc(100vh-48px)] overflow-hidden border border-zinc-200 bg-white">
                 <BimPlanActualPanel projectId={1} empresaId={1} api={api} onOpenViewpoint={(viewpoint) => setFocusedGuid(viewpoint.selected_guids[0] || '')} />
             </div>
         </main>

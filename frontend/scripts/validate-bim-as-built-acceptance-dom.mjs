@@ -14,6 +14,7 @@ try {
         const page = await browser.newPage({ viewport });
         await page.goto(`${url}/bim-as-built-acceptance-harness.html`);
         await page.locator('[data-bim-as-built-acceptance]').waitFor();
+        await page.getByRole('button', { name: /Nueva|Crear|Agregar/i }).first().click();
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
         if (viewport.width === 1920) {
             await page.getByLabel('Declaración as-built').fill('Modelo final comprobado contra obra ejecutada.');

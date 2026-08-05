@@ -289,6 +289,12 @@ export const bimModelsApi = {
     getCoordinationCoverage: async (projectId, coordinationSetId, empresaId = null) => (
         await axiosInstance.get(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/coverage`, withTenantConfig({}, empresaId))
     ).data,
+    listCoordinationConflicts: async (projectId, coordinationSetId, empresaId = null, status = 'open') => (
+        await axiosInstance.get(
+            `/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/conflicts`,
+            withTenantConfig({ params: { status } }, empresaId),
+        )
+    ).data,
     createCoordinationProposal: async (projectId, coordinationSetId, payload, empresaId = null) => (
         await axiosInstance.post(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/proposals`, payload, withTenantConfig({}, empresaId))
     ).data,

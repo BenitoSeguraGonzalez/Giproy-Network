@@ -14,6 +14,7 @@ export default function BimAsBuiltAcceptancePanel({ projectId, empresaId, models
     const [reason, setReason] = useState('');
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
+    const [createOpen, setCreateOpen] = useState(false);
 
     useEffect(() => { if (activeVersionId) setForm((current) => ({ ...current, version_id: current.version_id || activeVersionId })); }, [activeVersionId]);
     const load = useCallback(async () => {
@@ -28,6 +29,7 @@ export default function BimAsBuiltAcceptancePanel({ projectId, empresaId, models
         }
     }, [api, empresaId, projectId]);
     useEffect(() => { load(); }, [load]);
+    useEffect(() => { if (!createOpen) return undefined; const close = (event) => { if (event.key === 'Escape') setCreateOpen(false); }; window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close); }, [createOpen]);
 
     const selected = items.find((item) => item.id === selectedId) || items[0];
     const create = async (event) => {
@@ -43,6 +45,7 @@ export default function BimAsBuiltAcceptancePanel({ projectId, empresaId, models
             setItems((current) => [value, ...current]);
             setSelectedId(value.id);
             setForm((current) => ({ ...current, revision: `ASB-${String(items.length + 2).padStart(2, '0')}`, declaration_notes: '' }));
+            setCreateOpen(false);
         } catch (requestError) {
             setError(requestError?.response?.data?.detail || 'No se pudo presentar la entrega as-built.');
         } finally { setBusy(false); }
@@ -62,10 +65,11 @@ export default function BimAsBuiltAcceptancePanel({ projectId, empresaId, models
         <section className="flex h-full min-h-0 flex-col overflow-hidden border border-zinc-200 bg-white" data-bim-as-built-acceptance>
             <header className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-200 px-3">
                 <div className="flex min-w-0 items-center gap-2"><PackageCheck size={16} className="shrink-0 text-[#F39200]" /><div className="min-w-0"><h3 className="truncate text-xs font-semibold">Aceptación as-built</h3><p className="truncate text-[10px] text-zinc-500">Versión IFC inmutable · calidad y decisión auditables</p></div></div>
-                <button type="button" onClick={load} disabled={busy} aria-label="Actualizar entregas as-built" title="Actualizar" className="grid h-8 w-8 place-items-center border border-zinc-200 text-zinc-600 disabled:opacity-40"><RefreshCw size={14} className={busy ? 'animate-spin' : ''} /></button>
+                <div className="flex items-center gap-2"><button type="button" onClick={() => setCreateOpen(true)} disabled={busy || !versions.length} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-orange-600 px-3 text-[10px] font-semibold text-white disabled:opacity-40"><PackageCheck size={13} />Nueva aceptación</button><button type="button" onClick={load} disabled={busy} aria-label="Actualizar entregas as-built" title="Actualizar" className="grid h-8 w-8 place-items-center border border-zinc-200 text-zinc-600 disabled:opacity-40"><RefreshCw size={14} className={busy ? 'animate-spin' : ''} /></button></div>
             </header>
-            <div className="grid min-h-0 flex-1 grid-cols-[360px_minmax(0,1fr)]">
-                <form onSubmit={create} className="grid content-start gap-2 overflow-y-auto border-r border-zinc-200 p-3">
+            <div className="relative flex min-h-0 flex-1">
+                <form onSubmit={create} className={`${createOpen ? 'absolute inset-0 z-30 m-6 grid content-start gap-2 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-5 shadow-2xl' : 'hidden'}`} role={createOpen ? 'dialog' : undefined} aria-modal={createOpen ? 'true' : undefined}>
+                    <div className="mb-2 flex items-center justify-between border-b border-zinc-200 pb-3"><div><h4 className="text-sm font-semibold text-zinc-950">Nueva aceptación as-built</h4><p className="text-[11px] text-zinc-600">Presenta una versión IFC lista para revisión.</p></div><button type="button" onClick={() => setCreateOpen(false)} aria-label="Cerrar nueva aceptación" className="inline-flex size-8 items-center justify-center rounded-md text-zinc-500 hover:bg-zinc-100"><X size={15} /></button></div>
                     <select required aria-label="Versión as-built" value={form.version_id} onChange={(event) => setForm({ ...form, version_id: event.target.value })} className="h-9 min-w-0 border border-zinc-300 px-2 text-xs"><option value="">Versión BIM lista</option>{versions.map((version) => <option key={version.id} value={version.id}>{version.modelName} · {version.version_label || version.label}</option>)}</select>
                     <input required aria-label="Revisión de entrega as-built" value={form.revision} onChange={(event) => setForm({ ...form, revision: event.target.value })} className="h-9 border border-zinc-300 px-2 text-xs" />
                     <textarea required aria-label="Criterios de aceptación as-built" value={form.criteria} onChange={(event) => setForm({ ...form, criteria: event.target.value })} className="h-24 resize-none border border-zinc-300 p-2 text-xs" />
@@ -73,7 +77,7 @@ export default function BimAsBuiltAcceptancePanel({ projectId, empresaId, models
                     <button disabled={busy || !versions.length} className="h-9 bg-zinc-800 text-xs font-semibold text-white disabled:opacity-40">Presentar para aceptación</button>
                     {error ? <p role="alert" className="text-xs text-red-700">{error}</p> : null}
                 </form>
-                <main className="flex min-w-0 flex-col overflow-hidden" data-bim-as-built-ledger>
+                <main className="flex min-w-0 flex-1 flex-col overflow-hidden" data-bim-as-built-ledger>
                     <div className="min-h-0 flex-1 overflow-y-auto">
                         {!items.length ? <p className="p-8 text-center text-xs text-zinc-500">Sin entregas as-built presentadas.</p> : items.map((item) => <button type="button" key={item.id} onClick={() => setSelectedId(item.id)} className={`grid w-full grid-cols-[110px_130px_minmax(180px,1fr)_120px] gap-3 border-b px-4 py-3 text-left text-xs ${selected?.id === item.id ? 'bg-orange-50' : 'hover:bg-zinc-50'}`}><span><strong className="block">{item.revision}</strong><small className="uppercase text-zinc-500">{STATUS_LABELS[item.status]}</small></span><span><small className="block text-zinc-500">Versión</small><strong>{item.version_label}</strong></span><span className="min-w-0"><small className="block text-zinc-500">Checksum IFC</small><code className="block truncate text-[10px]">{item.source_checksum_sha256}</code></span><span><small className="block text-zinc-500">Calidad</small><strong className={item.quality_status === 'passed' ? 'text-emerald-700' : 'text-amber-700'}>{item.quality_status}</strong></span></button>)}
                     </div>

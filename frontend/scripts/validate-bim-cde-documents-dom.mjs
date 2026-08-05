@@ -18,11 +18,13 @@ try {
     const page = await context.newPage(); const errors = [];
     page.on('pageerror', (error) => errors.push(error.message)); page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
     await page.goto(`${baseUrl}/bim-cde-documents-harness.html`, { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: 'Nueva revisión' }).click();
     await page.getByLabel('Codigo documental CDE').fill('ARQ-001'); await page.getByLabel('Titulo documental CDE').fill('Planta arquitectura');
     await page.getByLabel('Archivo documental CDE').setInputFiles({ name: 'planta-p01.pdf', mimeType: 'application/pdf', buffer: Buffer.from('p01') });
-    await page.getByRole('button', { name: 'Registrar revision' }).click(); await page.waitForSelector('[data-bim-cde-revision="current"]');
+    await page.getByRole('button', { name: /Registrar revisi.n/ }).click(); await page.waitForSelector('[data-bim-cde-revision="current"]');
+    await page.getByRole('button', { name: 'Nueva revisión' }).click();
     await page.getByLabel('Version documental CDE').fill('C01'); await page.getByLabel('Archivo documental CDE').setInputFiles({ name: 'planta-c01.pdf', mimeType: 'application/pdf', buffer: Buffer.from('c01') });
-    await page.getByRole('button', { name: 'Registrar revision' }).click(); await page.waitForSelector('[data-bim-cde-revision="superseded"]');
+    await page.getByRole('button', { name: /Registrar revisi.n/ }).click(); await page.waitForSelector('[data-bim-cde-revision="superseded"]');
     assert.equal(await page.locator('[data-bim-cde-revision="current"]').count(), 1, 'Solo existe una revision vigente');
     assert.equal(await page.locator('[data-bim-cde-revision="superseded"]').count(), 1, 'El historial conserva la revision anterior');
     const downloadPromise = page.waitForEvent('download'); await page.getByLabel('Descargar revision 2').click(); assert.equal((await downloadPromise).suggestedFilename(), 'planta-c01.pdf');

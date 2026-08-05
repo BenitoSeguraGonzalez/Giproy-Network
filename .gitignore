@@ -153,3 +153,6 @@ authorized_keys
 .turbo/
 .bun/
 .yarn/
+
+# Perfil temporal del navegador usado para capturar el manual
+manual-usuario/.capture-browser/
