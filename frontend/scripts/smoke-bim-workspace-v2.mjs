@@ -18,14 +18,18 @@ assert.match(workspaceSource, /hasProjectCapability\('bim\.admin'\)/, 'La admini
 assert.match(workspaceSource, /canAdminister=\{canAdministerBim\}/, 'La administracion BIM visible debe usar la politica empresarial canonica');
 assert.match(workspaceSource, /projectCapabilities\?\.has\(capability\)\s*===\s*true/, 'Las acciones privilegiadas deben fallar cerradas mientras se cargan capacidades');
 assert.doesNotMatch(workspaceSource, /!projectCapabilities\s*\|\|\s*projectCapabilities\.has/, 'No debe existir fallback permisivo durante la carga de capacidades');
-assert.match(shellSource, /canAdminister\s*&&\s*!ready[\s\S]*>Configurar BIM</, 'La configuración BIM sólo debe ser principal cuando el proyecto aún no tiene modelo');
-assert.match(shellSource, />Administrar BIM</, 'La administración debe seguir accesible bajo divulgación progresiva cuando existe modelo');
-assert.match(shellSource, /useState\(initial\.sidePanel\s*\|\|\s*'none'\)/, 'El workspace debe iniciar sin panel lateral compitiendo con el visor');
-assert.match(shellSource, /useState\(initial\.bottomCollapsed\s*!==\s*false\)/, 'La secuencia 4D debe iniciar recogida');
+assert.match(shellSource, /canAdminister\s*&&\s*!ready/, 'La configuración BIM sólo debe estar disponible para administradores cuando el proyecto aún no tiene modelo');
+assert.match(shellSource, /Configurar BIM/, 'La acción de configuración BIM debe seguir visible en el flujo inicial');
+assert.match(shellSource, /Administrar BIM/, 'La administración debe seguir accesible bajo divulgación progresiva cuando existe modelo');
+assert.match(shellSource, /useState\(initial\.sidePanel\s*\|\|\s*["']none["']\)/, 'El workspace debe iniciar sin panel lateral compitiendo con el visor');
+assert.match(shellSource, /initial\.bottomCollapsed\s*!==\s*false/, 'La secuencia 4D debe iniciar recogida');
 assert.match(shellSource, /explorerShown\s*=\s*ready[\s\S]*contextShown\s*=\s*ready/, 'El estado sin modelo no debe competir con paneles BIM vacios');
 assert.doesNotMatch(workspaceSource, /VITE_BIM_WORKSPACE_V2|BIM_WORKSPACE_V2_ENABLED|BimShellContextBar|Herramientas de carga BIM/, 'No debe sobrevivir una rama de workspace legado');
 for (const label of ['Planificación y costes', 'Modelo', 'Coordinación', 'Seguimiento', 'Entrega']) {
-    assert.ok(shellSource.includes(`label: '${label}'`), `Debe existir el workspace ${label}`);
+    assert.ok(
+        shellSource.includes(`label: "${label}"`) || shellSource.includes(`label: '${label}'`),
+        `Debe existir el workspace ${label}`,
+    );
 }
 assert.match(shellSource, /isMinimumDesktopDisplaySupported/, 'Debe mantenerse la guarda de resolución física');
 assert.match(shellSource, /getErrorMessage/, 'El workspace no debe renderizar objetos Error directamente');

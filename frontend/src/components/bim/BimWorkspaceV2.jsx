@@ -17,12 +17,14 @@ import {
   Settings,
   Upload,
   X,
+  CircleHelp,
 } from "lucide-react";
 import { isMinimumDesktopDisplaySupported } from "../../utils/displayResolution";
 import { getErrorMessage } from "../../utils/errorMessage";
 import useAdaptiveLayout from "../../hooks/useAdaptiveLayout";
 import BimTaskNavigator from "./BimTaskNavigator";
 import { getBimToolMeta } from "./bimWorkflowCatalog";
+import ContextualHelpPanel from "../ui/ContextualHelpPanel";
 
 const PREFERENCES_KEY = "giproy_bim_workspace_v4_preferences";
 const MODES = [
@@ -171,6 +173,7 @@ const BimWorkspaceV2 = ({
   );
   const [adminOpen, setAdminOpen] = useState(false);
   const [utilityOpen, setUtilityOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [activeAdminTool, setActiveAdminTool] = useState(
     initial.activeAdminTool || "imports",
   );
@@ -188,6 +191,7 @@ const BimWorkspaceV2 = ({
   );
   const supported = adaptive.enabled ? !restricted : legacySupported;
   const safariNotice = useSafariNotice();
+  const helpGuide = activeMode === "planning-costs" ? "planning" : activeMode === "model" ? "model" : activeMode;
   useEffect(() => {
     onSearchRef.current = onSearch;
   }, [onSearch]);
@@ -534,6 +538,16 @@ const BimWorkspaceV2 = ({
             ) : null}
             <button
               type="button"
+              onClick={() => setHelpOpen(true)}
+              className={iconButtonClass}
+              title="Abrir guía contextual"
+              aria-label="Abrir guía contextual"
+              data-contextual-help-trigger
+            >
+              <CircleHelp className="size-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
               onClick={toggleSelectedTask}
               className="inline-flex h-8 items-center gap-2 rounded-md border border-zinc-300 bg-white px-2.5 text-xs font-semibold text-zinc-700 hover:border-orange-500 hover:text-orange-700"
               aria-pressed={contextShown || workbenchShown}
@@ -630,6 +644,20 @@ const BimWorkspaceV2 = ({
             macOS/iPadOS.
           </span>
         </div>
+      ) : null}
+
+      {helpOpen ? (
+        <ContextualHelpPanel
+          guide={helpGuide}
+          context={{
+            projectLabel,
+            companyLabel,
+            modelLabel,
+            versionLabel,
+            omniClassEnabled,
+          }}
+          onClose={() => setHelpOpen(false)}
+        />
       ) : null}
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
