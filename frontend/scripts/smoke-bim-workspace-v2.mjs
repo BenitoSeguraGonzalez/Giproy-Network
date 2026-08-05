@@ -51,7 +51,11 @@ for (const action of ['Aprobar', 'Aplicar', 'Recuperar']) {
     assert.ok(coordinationSource.includes(action), `La bandeja coordinada debe ofrecer ${action}`);
 }
 assert.match(coordinationSource, /overallocated_count\s*>\s*0/, 'La UI debe bloquear oficialización con cobertura superior al 100%');
-assert.match(workspaceSource, /selectedActivity=\{\(planningGantt\?\.activities[\s\S]*planningSelection\.primaryActivityId/, 'La actividad seleccionada debe llegar al control coordinado');
+assert.match(
+    workspaceSource,
+    /selectedActivity=\{\s*\(planningGantt\?\.activities[\s\S]*planningSelection\.primaryActivityId/,
+    'La actividad seleccionada debe llegar al control coordinado',
+);
 assert.match(coordinationSource, /data-coordination-shared-context/, 'Debe existir un contexto compartido 5D, 4D y BIM');
 assert.match(coordinationSource, /api\.reconcileCoordinationLinkIdentity[\s\S]*Reconciliar vínculo/, 'Las referencias históricas deben poder reconciliarse desde la selección canónica');
 assert.match(coordinationSource, /api\.createCoordinationLink[\s\S]*budget_line_id[\s\S]*activity_snapshot_id[\s\S]*bim_element_id/, 'La acción contextual debe crear un vínculo tridominio cuando la actividad conserva partida');
