@@ -24,6 +24,8 @@ import { presupuestosApi } from "../../api/presupuestos";
 import { cronogramasApi } from "../../api/cronogramas";
 import { empresasApi } from "../../api/empresas";
 import { proyectosApi } from "../../api/proyectos";
+import { bimViewStatesApi } from "../../api/bimViewStates";
+import BimSavedViewsPanel from "./BimSavedViewsPanel";
 
 const STAGES = [
   { id: "overview", label: "Inicio", icon: ClipboardCheck },
@@ -79,7 +81,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
   const [selectedBudgetLine, setSelectedBudgetLine] = useState(null);
   const [omniClassEnabled, setOmniClassEnabled] = useState(true);
   const [projectCapabilities, setProjectCapabilities] = useState(new Set());
-  const { workspace, loading, error, warnings, refresh } = useBimProjectWorkspace(
+  const { workspace, viewStates, loading, error, warnings, refresh } = useBimProjectWorkspace(
     project?.id,
     access?.enabled,
   );
@@ -148,7 +150,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
   const goTo = (next) => setStage(next);
   const empresaId = access?.resolved_company_id;
   const stagePanel = {
-    model: <div className="grid min-h-0 gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)]"><div className="grid min-h-0 gap-4"><BimImportJobsPanel projectId={project?.id} empresaId={empresaId} onImportReady={refresh} /><BimElementExplorerPanel elements={effectiveWorkspace?.elements || []} selectedElementId={selectedElement?.id || selectedElement?.global_id} onSelectElement={setSelectedElement} /></div><BimVersionSelector models={effectiveWorkspace?.models || []} activeVersionId={activeVersionId || effectiveWorkspace?.active_version_id} onSelectVersion={setActiveVersionId} /></div>,
+    model: <div className="grid min-h-0 gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)]"><div className="grid min-h-0 gap-4"><BimImportJobsPanel projectId={project?.id} empresaId={empresaId} onImportReady={refresh} /><BimElementExplorerPanel elements={effectiveWorkspace?.elements || []} selectedElementId={selectedElement?.id || selectedElement?.global_id} onSelectElement={setSelectedElement} /><BimSavedViewsPanel views={viewStates} onCreate={async (payload) => { await bimViewStatesApi.createByProject(project?.id, { ...payload, version_id: activeVersionId || effectiveWorkspace?.active_version_id || null }, empresaId); refresh(); }} /></div><BimVersionSelector models={effectiveWorkspace?.models || []} activeVersionId={activeVersionId || effectiveWorkspace?.active_version_id} onSelectVersion={setActiveVersionId} /></div>,
     costs: <BimCostEstimatePanel projectId={project?.id} empresaId={empresaId} embedded onSelectLine={setSelectedBudgetLine} />,
     schedule: <BimGanttPanel projectId={project?.id} empresaId={empresaId} onSelectActivity={setSelectedActivity} selectedGuid={selectedElement?.global_id || selectedElement?.guid || ''} />,
     coordination: coordinationBlocked ? null : <BimCoordinationControlPanel embedded projectId={project?.id} empresaId={empresaId} selectedElement={selectedElement} selectedActivity={selectedActivity} selectedBudgetLine={selectedBudgetLine} canEdit={projectCapabilities.has("bim.edit")} canApprove={projectCapabilities.has("bim.approve")} canApply={projectCapabilities.has("bim.apply")} canRecover={projectCapabilities.has("bim.recover")} />,
