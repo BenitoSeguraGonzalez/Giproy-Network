@@ -39,6 +39,12 @@ try {
   await flowNav.getByRole("button", { name: "Seguimiento", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Controlar avance y coste real" }).count(), 1);
   assert.deepEqual(errors, [], `Errores de navegador: ${errors.join(" | ")}`);
+  const widePage = await browser.newPage({ viewport: { width: 2560, height: 1440 }, screen: { width: 2560, height: 1440 } });
+  await widePage.goto(`${baseUrl}/bim-flow-workspace-harness.html`, { waitUntil: "domcontentloaded" });
+  await widePage.waitForSelector('[data-bim-flow-workspace]');
+  assert.equal(await widePage.locator('[data-bim-flow-workspace]').count(), 1, "El flujo debe adaptarse a resoluciones mayores");
+  assert.equal(await widePage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, "No debe existir overflow horizontal a 2560px");
+  await widePage.close();
   await browser.close();
   console.log("validate-bim-flow-workspace-dom: ok");
 } finally { cleanup(); }
