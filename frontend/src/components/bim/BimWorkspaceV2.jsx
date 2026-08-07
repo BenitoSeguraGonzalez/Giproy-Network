@@ -344,6 +344,16 @@ const BimWorkspaceV2 = ({
     setActiveMode(id);
     setAdminOpen(false);
     setSidePanel("none");
+    if (id !== "model") {
+      const modeTools = workspaceTools?.[id] || [];
+      const firstTool = modeTools[0];
+      if (firstTool) {
+        setActiveToolByMode((current) => ({
+          ...current,
+          [id]: current[id] || firstTool.id,
+        }));
+      }
+    }
     setUtilityOpen(false);
   };
   const selectTool = (id) => {
@@ -367,9 +377,10 @@ const BimWorkspaceV2 = ({
   };
   const beginBimWorkflow = () => {
     setShowStartGuide(false);
-    setActiveMode("planning-costs");
-    setSidePanel("none");
+    selectMode("planning-costs");
   };
+  const workflowLandingShown =
+    ready && activeMode !== "model" && activeMode !== "planning-costs" && sidePanel === "none";
 
   return (
     <section
@@ -820,9 +831,21 @@ const BimWorkspaceV2 = ({
                       </div>
                     </section>
                   ) : null}
+                  {workflowLandingShown ? (
+                    <section className="grid min-h-0 flex-1 place-items-center border border-zinc-300 bg-white p-8" data-bim-workflow-landing>
+                      <div className="max-w-2xl text-center">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-orange-700">Flujo {MODES.find((mode) => mode.id === activeMode)?.label}</p>
+                        <h2 className="mt-2 text-xl font-semibold text-zinc-950">Trabaja en {MODES.find((mode) => mode.id === activeMode)?.label}</h2>
+                        <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-zinc-600">El visor 3D queda fuera de este paso. Abre Trabajo para elegir la herramienta y mantener el contexto del proyecto.</p>
+                        <button type="button" onClick={toggleSelectedTask} className="mt-5 inline-flex h-10 items-center gap-2 rounded-md bg-orange-600 px-4 text-sm font-semibold text-white transition-[background-color,transform] duration-150 active:scale-[.97] hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
+                          Comenzar flujo <ArrowRight className="size-4" aria-hidden="true" />
+                        </button>
+                      </div>
+                    </section>
+                  ) : null}
                   <div
                     className={
-                      workbenchShown
+                      workflowLandingShown || workbenchShown
                         ? "pointer-events-none invisible absolute inset-0 flex min-h-0 flex-col [&>section]:flex-1"
                         : "flex min-h-0 flex-1 flex-col [&>section]:flex-1"
                     }
