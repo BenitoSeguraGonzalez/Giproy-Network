@@ -10,10 +10,10 @@ Este documento es la lista de aceptación del flujo BIM. Una pantalla montada no
 | Configuración de empresa, unidades, clasificación, coordenadas, identificación y roles | Parcial | Existen superficies administrativas; falta certificación de extremo a extremo desde un proyecto sin BIM. |
 | Proyecto BIM configurado sin modelo | Certificado | Inicio BIM y estado pendiente de modelo. |
 | Importación IFC con validación, GUID, unidades, coordenadas, clasificación y duplicados | Parcial | El panel de importación existe; falta ejecutar un IFC válido, uno con advertencias y uno rechazado. |
-| Exploración por estructura, disciplina, sistema, clasificación y propiedades | Parcial | Existe selector de versión/elementos; falta certificar navegación contextual y vistas guardadas. |
+| Exploración por estructura, disciplina, sistema, clasificación y propiedades | Parcial | El explorador contextual por GUID, propiedad, disciplina y clasificación ya está implementado; faltan vistas guardadas, comparación y filtros de sistema/planta certificados. |
 | Presupuesto 5D con QTO, propuestas y estados de vínculo | Parcial | Panel 5D y estados de estimación existen; falta validar vínculos completos partida-elemento-unidad-cantidad-coste-versión. |
 | Planificación 4D con baseline, borrador y secuencia | Parcial | Gantt y baseline existen; falta cerrar persistencia de secuencia y cobertura completa. |
-| Matriz de tri-sincronización y navegación bidireccional | Parcial | La compuerta positiva/negativa está certificada; falta probar navegación en las tres direcciones. |
+| Matriz de tri-sincronización y navegación bidireccional | Parcial | La compuerta positiva/negativa y el contexto actividad-elemento están certificados; falta cerrar navegación de partida y retorno desde modelo 3D. |
 | Coordinación como bandeja de decisiones | Parcial | Panel de coordinación existe; falta ejecutar incidencia completa con responsable, fecha, impacto y reconciliación. |
 | Seguimiento con previsto/ejecutado/coste/plazo/evidencias | Parcial | Panel de reportes existe; falta simular una fecha de control y registrar evidencia. |
 | Entrega con as-built, incidencias, commissioning y dossier | Parcial | Dossier y modal existen; falta recorrer estados hasta cerrado con dependencias. |
