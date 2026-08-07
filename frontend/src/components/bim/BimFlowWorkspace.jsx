@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -17,6 +17,8 @@ import BimCoordinationControlPanel from "./BimCoordinationControlPanel";
 import BimReportsPanel from "./BimReportsPanel";
 import BimGanttPanel from "./BimGanttPanel";
 import BimHandoverDossierPanel from "./BimHandoverDossierPanel";
+import { presupuestosApi } from "../../api/presupuestos";
+import { cronogramasApi } from "../../api/cronogramas";
 
 const STAGES = [
   { id: "overview", label: "Inicio", icon: ClipboardCheck },
@@ -65,6 +67,7 @@ const count = (value) => (Array.isArray(value) ? value.length : 0);
 
 export default function BimFlowWorkspace({ project, access, onNavigateTarget }) {
   const [stage, setStage] = useState("overview");
+  const [domainState, setDomainState] = useState({ budget: "loading", gantt: "loading" });
   const { workspace, loading, error, warnings, refresh } = useBimProjectWorkspace(
     project?.id,
     access?.enabled,
@@ -79,6 +82,30 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
     [workspace],
   );
   const hasModel = metrics.models > 0 || metrics.elements > 0;
+  useEffect(() => {
+    let active = true;
+    if (!project?.id) return undefined;
+    const loadDomains = async () => {
+      try {
+        const budgets = await presupuestosApi.getByProyecto(project.id, access?.resolved_company_id);
+        const budget = Array.isArray(budgets) ? budgets[0] : budgets;
+        if (!budget?.id) {
+          if (active) setDomainState({ budget: "missing", gantt: "missing" });
+          return;
+        }
+        try {
+          await cronogramasApi.getTrabajo(budget.id, access?.resolved_company_id);
+          if (active) setDomainState({ budget: "ready", gantt: "ready" });
+        } catch {
+          if (active) setDomainState({ budget: "ready", gantt: "missing" });
+        }
+      } catch {
+        if (active) setDomainState({ budget: "missing", gantt: "unknown" });
+      }
+    };
+    loadDomains();
+    return () => { active = false; };
+  }, [access?.resolved_company_id, project?.id]);
   const goTo = (next) => setStage(next);
   const empresaId = access?.resolved_company_id;
   const stagePanel = {
@@ -116,6 +143,12 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {[['Modelo', metrics.models, 'versiones cargadas', 'model'], ['Elementos', metrics.elements, 'elementos disponibles', 'model'], ['Vínculos', metrics.links, 'relaciones registradas', 'coordination'], ['Tri-sincronización', hasModel ? 'En revisión' : 'Pendiente', 'presupuesto ↔ Gantt ↔ BIM', 'costs']].map(([label, value, detail, target]) => <button key={label} type="button" onClick={() => goTo(target)} className="border border-zinc-300 bg-white p-4 text-left transition-[border-color,transform] duration-150 hover:-translate-y-0.5 hover:border-orange-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"><span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">{label}</span><strong className="mt-2 block text-xl tabular-nums text-zinc-950">{value}</strong><span className="mt-1 block text-xs text-zinc-600">{detail}</span><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-orange-700">Abrir etapa <ArrowRight className="size-3.5" aria-hidden="true" /></span></button>)}
             </div>
+            <section className="mt-4 border border-zinc-300 bg-white" data-bim-tri-sync-status>
+              <header className="border-b border-zinc-200 px-4 py-3"><h2 className="text-sm font-semibold text-zinc-950">Tri-sincronización del proyecto</h2><p className="mt-1 text-xs text-zinc-600">La coordinación solo puede oficializarse cuando los tres dominios tienen una fuente válida.</p></header>
+              <div className="grid divide-y divide-zinc-200 md:grid-cols-3 md:divide-x md:divide-y-0">
+                {[['Presupuesto', domainState.budget, 'costs'], ['Gantt', domainState.gantt, 'schedule'], ['BIM', hasModel ? 'ready' : 'missing', 'model']].map(([label, value, target]) => <button key={label} type="button" onClick={() => goTo(target)} className="flex items-center gap-3 p-4 text-left hover:bg-zinc-50"><span className={`grid size-8 place-items-center rounded-full ${value === 'ready' ? 'bg-emerald-50 text-emerald-700' : value === 'loading' ? 'bg-zinc-100 text-zinc-500' : 'bg-amber-50 text-amber-700'}`}>{value === 'ready' ? <CheckCircle2 className="size-4" aria-hidden="true" /> : <AlertTriangle className="size-4" aria-hidden="true" />}</span><span><strong className="block text-xs text-zinc-950">{label}</strong><span className="text-[11px] text-zinc-600">{value === 'ready' ? 'Disponible' : value === 'loading' ? 'Comprobando…' : value === 'missing' ? 'Pendiente' : 'No verificado'}</span></span></button>)}
+              </div>
+            </section>
             <section className="mt-6 border border-zinc-300 bg-white"><header className="border-b border-zinc-200 px-4 py-3"><h2 className="text-sm font-semibold text-zinc-950">Orden recomendado de trabajo</h2><p className="mt-1 text-xs text-zinc-600">Cada etapa produce un resultado que alimenta la siguiente.</p></header><div className="grid divide-y divide-zinc-200 md:grid-cols-3 md:divide-x md:divide-y-0">{[['01', 'Validar modelo', 'Versión BIM lista y clasificada', 'model'], ['02', 'Construir 5D y 4D', 'Partidas, actividades y elementos vinculados', 'costs'], ['03', 'Coordinar y cerrar', 'Incidencias resueltas y entrega aprobada', 'coordination']].map(([number, title, detail, target]) => <button key={number} type="button" onClick={() => goTo(target)} className="p-4 text-left hover:bg-zinc-50"><span className="text-[11px] font-bold text-orange-700">{number}</span><h3 className="mt-2 text-sm font-semibold text-zinc-950">{title}</h3><p className="mt-1 text-xs leading-5 text-zinc-600">{detail}</p></button>)}</div></section>
           </div>
         ) : (
