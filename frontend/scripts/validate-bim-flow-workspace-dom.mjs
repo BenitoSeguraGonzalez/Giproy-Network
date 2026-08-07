@@ -53,7 +53,7 @@ try {
   await readyPage.waitForSelector('[data-bim-tri-sync-status]');
   assert.match(await readyPage.locator('[data-bim-coordination-gate]').innerText(), /lista para revisión/, "El estado listo debe desbloquear coordinación");
   await readyPage.getByRole("navigation", { name: "Flujo operativo BIM" }).getByRole("button", { name: "Coordinación", exact: true }).click();
-  await readyPage.waitForTimeout(500);
+  await readyPage.waitForTimeout(1500);
   assert.equal(await readyPage.locator('[data-bim-coordination-control]').count(), 1, `La coordinación debe abrirse con tri-sincronización lista: ${(await readyPage.locator('body').innerText()).slice(0, 500)}`);
   await readyPage.close();
   await browser.close();

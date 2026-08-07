@@ -37,6 +37,8 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
     const [message, setMessage] = useState('');
     const [refreshToken, setRefreshToken] = useState(0);
     const [createOpen, setCreateOpen] = useState(false);
+    const [qualityReport, setQualityReport] = useState(null);
+    const [qualityLoading, setQualityLoading] = useState(false);
     const completedJobIdsRef = useRef(new Set());
     const fileInputRef = useRef(null);
     const onImportReadyRef = useRef(onImportReady);
@@ -136,6 +138,11 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
         }
     };
 
+    const loadQualityReport = async (job) => {
+        if (!job.version_id) { setMessage('La importación aún no tiene una versión revisable.'); return; }
+        try { setQualityLoading(true); setMessage(''); const report = await bimModelsApi.getIfcQualityReport(projectId, job.version_id, empresaId); setQualityReport(report); } catch (error) { setMessage(error?.response?.data?.detail || 'No se pudo cargar el informe de calidad IFC.'); } finally { setQualityLoading(false); }
+    };
+
     return (
         <section className="rounded-lg border border-zinc-200 bg-white" data-bim-import-jobs>
             <div className="flex min-h-12 items-center justify-between gap-3 border-b border-zinc-200 px-4 py-2.5">
@@ -225,11 +232,13 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
                                         <RotateCcw className="h-4 w-4" />
                                     </button>
                                 ) : null}
+                                {job.status === 'succeeded' && job.version_id ? <button type="button" className={ICON_BUTTON_CLASS} onClick={() => loadQualityReport(job)} title="Ver informe de calidad IFC" aria-label={`Ver informe de calidad ${job.model_name}`} disabled={qualityLoading}>{qualityLoading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}</button> : null}
                             </div>
                         </div>
                     ))}
                 </div>
             ) : null}
+            {qualityReport ? <div className="border-t border-zinc-200 bg-zinc-50 px-4 py-3" data-bim-ifc-quality-report><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-semibold text-zinc-900">Informe de calidad IFC</p><p className="text-[10px] text-zinc-600">Resultado previo a aceptar la versión en el modelo.</p></div><button type="button" onClick={() => setQualityReport(null)} className="text-xs font-semibold text-zinc-500">Cerrar</button></div><div className="mt-2 grid gap-2 text-[10px] sm:grid-cols-4"><span>Estado <strong>{qualityReport.status || 'N/D'}</strong></span><span>GUID inválidos <strong>{qualityReport.invalid_guid_count ?? 0}</strong></span><span>Duplicados <strong>{qualityReport.duplicate_guid_count ?? 0}</strong></span><span>Sin clasificación <strong>{qualityReport.unclassified_count ?? 0}</strong></span></div></div> : null}
         </section>
     );
 };
