@@ -18,6 +18,8 @@ import {
   Upload,
   X,
   CircleHelp,
+  ArrowRight,
+  CheckCircle2,
 } from "lucide-react";
 import { isMinimumDesktopDisplaySupported } from "../../utils/displayResolution";
 import { getErrorMessage } from "../../utils/errorMessage";
@@ -174,6 +176,9 @@ const BimWorkspaceV2 = ({
   const [adminOpen, setAdminOpen] = useState(false);
   const [utilityOpen, setUtilityOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [showStartGuide, setShowStartGuide] = useState(
+    initial.startGuideDismissed !== true,
+  );
   const [activeAdminTool, setActiveAdminTool] = useState(
     initial.activeAdminTool || "imports",
   );
@@ -205,6 +210,7 @@ const BimWorkspaceV2 = ({
         bottomCollapsed,
         bottomHeight,
         activeAdminTool,
+        startGuideDismissed: !showStartGuide,
       }),
     [
       activeAdminTool,
@@ -214,6 +220,7 @@ const BimWorkspaceV2 = ({
       bottomHeight,
       projectId,
       sidePanel,
+      showStartGuide,
     ],
   );
   useEffect(() => {
@@ -357,6 +364,11 @@ const BimWorkspaceV2 = ({
     if (item.workspace) selectMode(item.workspace);
     setSearchTerm("");
     setSearchOpen(false);
+  };
+  const beginBimWorkflow = () => {
+    setShowStartGuide(false);
+    setActiveMode("planning-costs");
+    setSidePanel("none");
   };
 
   return (
@@ -762,15 +774,62 @@ const BimWorkspaceV2 = ({
               </div>
             ) : (
               <BimRegionBoundary resetKey={`viewer-${projectId}-${viewerMode}`}>
-                <div
-                  className={
-                    workbenchShown
-                      ? "pointer-events-none invisible absolute inset-0 flex min-h-0 flex-col [&>section]:flex-1"
-                      : "flex h-full min-h-0 flex-col [&>section]:flex-1"
-                  }
-                  aria-hidden={workbenchShown || undefined}
-                >
-                  {viewer}
+                <div className="flex h-full min-h-0 flex-col overflow-hidden bg-zinc-100">
+                  {!workbenchShown && showStartGuide ? (
+                    <section
+                      className="shrink-0 border-b border-zinc-300 bg-white px-4 py-3"
+                      aria-label="Inicio del trabajo BIM"
+                      data-bim-start-guide
+                    >
+                      <div className="flex min-w-0 items-center gap-4">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-orange-700">
+                            Empieza por aquí
+                          </p>
+                          <h2 className="mt-0.5 text-sm font-semibold text-zinc-950">
+                            Coordina primero la planificación y los costes
+                          </h2>
+                          <p className="mt-0.5 truncate text-xs text-zinc-600">
+                            Vincula presupuesto, Gantt y elementos BIM en este orden para que cada decisión conserve su contexto.
+                          </p>
+                        </div>
+                        <ol className="hidden shrink-0 items-center gap-2 text-[11px] text-zinc-600 2xl:flex" aria-label="Pasos recomendados">
+                          <li className="inline-flex items-center gap-1.5 font-semibold text-zinc-900"><span className="grid size-5 place-items-center rounded-full bg-orange-100 text-orange-950">1</span> Presupuesto</li>
+                          <ArrowRight className="size-3.5 text-zinc-400" aria-hidden="true" />
+                          <li className="inline-flex items-center gap-1.5 font-semibold text-zinc-900"><span className="grid size-5 place-items-center rounded-full bg-orange-100 text-orange-950">2</span> Gantt</li>
+                          <ArrowRight className="size-3.5 text-zinc-400" aria-hidden="true" />
+                          <li className="inline-flex items-center gap-1.5 font-semibold text-zinc-900"><span className="grid size-5 place-items-center rounded-full bg-orange-100 text-orange-950">3</span> BIM</li>
+                        </ol>
+                        <button
+                          type="button"
+                          onClick={beginBimWorkflow}
+                          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-orange-600 px-3 text-xs font-semibold text-white transition-[background-color,transform] duration-150 active:scale-[.97] hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                        >
+                          Abrir planificación
+                          <ArrowRight className="size-3.5" aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowStartGuide(false)}
+                          className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                          aria-label="Ocultar guía de inicio"
+                          title="Ocultar guía de inicio"
+                        >
+                          <CheckCircle2 className="size-4" aria-hidden="true" />
+                        </button>
+                      </div>
+                    </section>
+                  ) : null}
+                  <div
+                    className={
+                      workbenchShown
+                        ? "pointer-events-none invisible absolute inset-0 flex min-h-0 flex-col [&>section]:flex-1"
+                        : "flex min-h-0 flex-1 flex-col [&>section]:flex-1"
+                    }
+                    aria-hidden={workbenchShown || undefined}
+                  >
+                    {viewer}
+                  </div>
                 </div>
               </BimRegionBoundary>
             )}
