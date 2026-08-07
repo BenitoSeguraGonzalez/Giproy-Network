@@ -39,6 +39,7 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
     const [createOpen, setCreateOpen] = useState(false);
     const [qualityReport, setQualityReport] = useState(null);
     const [qualityLoading, setQualityLoading] = useState(false);
+    const [reviewReason, setReviewReason] = useState('');
     const completedJobIdsRef = useRef(new Set());
     const fileInputRef = useRef(null);
     const onImportReadyRef = useRef(onImportReady);
@@ -142,6 +143,10 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
         if (!job.version_id) { setMessage('La importación aún no tiene una versión revisable.'); return; }
         try { setQualityLoading(true); setMessage(''); const report = await bimModelsApi.getIfcQualityReport(projectId, job.version_id, empresaId); setQualityReport(report); } catch (error) { setMessage(error?.response?.data?.detail || 'No se pudo cargar el informe de calidad IFC.'); } finally { setQualityLoading(false); }
     };
+    const decideVersion = async (decision) => {
+        if (!qualityReport?.version_id || reviewReason.trim().length < 5) { setMessage('Indica un motivo de revisión de al menos 5 caracteres.'); return; }
+        try { setQualityLoading(true); await bimModelsApi.decideVersionReview(projectId, qualityReport.version_id, { decision, reason: reviewReason.trim() }, empresaId); setMessage(`Versión ${decision === 'accepted' ? 'aceptada' : decision === 'rejected' ? 'rechazada' : 'enviada a corrección'}.`); setReviewReason(''); setRefreshToken((value) => value + 1); } catch (error) { setMessage(error?.response?.data?.detail || 'No se pudo guardar la decisión de revisión.'); } finally { setQualityLoading(false); }
+    };
 
     return (
         <section className="rounded-lg border border-zinc-200 bg-white" data-bim-import-jobs>
@@ -238,7 +243,7 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
                     ))}
                 </div>
             ) : null}
-            {qualityReport ? <div className="border-t border-zinc-200 bg-zinc-50 px-4 py-3" data-bim-ifc-quality-report><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-semibold text-zinc-900">Informe de calidad IFC</p><p className="text-[10px] text-zinc-600">Resultado previo a aceptar la versión en el modelo.</p></div><button type="button" onClick={() => setQualityReport(null)} className="text-xs font-semibold text-zinc-500">Cerrar</button></div><div className="mt-2 grid gap-2 text-[10px] sm:grid-cols-4"><span>Estado <strong>{qualityReport.status || 'N/D'}</strong></span><span>GUID inválidos <strong>{qualityReport.invalid_guid_count ?? 0}</strong></span><span>Duplicados <strong>{qualityReport.duplicate_guid_count ?? 0}</strong></span><span>Sin clasificación <strong>{qualityReport.unclassified_count ?? 0}</strong></span></div></div> : null}
+            {qualityReport ? <div className="border-t border-zinc-200 bg-zinc-50 px-4 py-3" data-bim-ifc-quality-report><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-semibold text-zinc-900">Informe de calidad IFC</p><p className="text-[10px] text-zinc-600">Resultado previo a aceptar la versión en el modelo.</p></div><button type="button" onClick={() => setQualityReport(null)} className="text-xs font-semibold text-zinc-500">Cerrar</button></div><div className="mt-2 grid gap-2 text-[10px] sm:grid-cols-4"><span>Estado <strong>{qualityReport.status || 'N/D'}</strong></span><span>GUID inválidos <strong>{qualityReport.invalid_guid_count ?? 0}</strong></span><span>Duplicados <strong>{qualityReport.duplicate_guid_count ?? 0}</strong></span><span>Sin clasificación <strong>{qualityReport.unclassified_count ?? 0}</strong></span></div><div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto]"><input aria-label="Motivo de revisión IFC" value={reviewReason} onChange={(event) => setReviewReason(event.target.value)} placeholder="Motivo verificable" className="h-8 rounded-md border border-zinc-300 px-2 text-xs" /><button type="button" onClick={() => decideVersion('accepted')} disabled={qualityLoading || reviewReason.trim().length < 5} className="h-8 rounded-md bg-emerald-700 px-3 text-[10px] font-semibold text-white disabled:opacity-40">Aceptar</button><button type="button" onClick={() => decideVersion('correction_required')} disabled={qualityLoading || reviewReason.trim().length < 5} className="h-8 rounded-md border border-amber-400 px-3 text-[10px] font-semibold text-amber-800 disabled:opacity-40">Corregir</button><button type="button" onClick={() => decideVersion('rejected')} disabled={qualityLoading || reviewReason.trim().length < 5} className="h-8 rounded-md border border-rose-300 px-3 text-[10px] font-semibold text-rose-700 disabled:opacity-40">Rechazar</button></div></div> : null}
         </section>
     );
 };

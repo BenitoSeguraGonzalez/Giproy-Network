@@ -901,6 +901,10 @@ export const bimModelsApi = {
         );
         return response.data;
     },
+    decideVersionReview: async (projectId, versionId, payload, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/versions/${versionId}/review-decision`, payload, withTenantConfig({}, empresaId));
+        return response.data;
+    },
     listArtifacts: async (projectId, versionId, empresaId = null) => {
         const response = await axiosInstance.get(
             `/bim/projects/${projectId}/versions/${versionId}/artifacts`,

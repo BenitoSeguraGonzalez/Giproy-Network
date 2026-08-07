@@ -28,7 +28,9 @@ from app.schemas.bim_model import (
     BimModelResponse,
     BimViewerArtifactResponse,
     BimWorkspaceSummaryResponse,
+    BimVersionReviewDecisionRequest,
 )
+from app.models.bim_model_version import BimModelVersion
 from app.services.bim.artifact_service import generate_viewer_artifact
 from app.services.bim.demo_bootstrap import bootstrap_demo_bim_project
 from app.services.bim.feature_flags import resolve_bim_feature_access
@@ -3000,6 +3002,32 @@ def read_bim_ifc_quality_report(
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     return serialize_ifc_quality_report(report)
+
+
+@router.post("/projects/{project_id}/versions/{version_id}/review-decision", response_model=BimModelResponse)
+def decide_bim_version_review(
+    project_id: int,
+    version_id: int,
+    payload: BimVersionReviewDecisionRequest,
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
+    if not access.enabled or not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="No tienes permisos para decidir la revisión BIM.")
+    version = db.query(BimModelVersion).join(BimModelVersion.bim_model).filter(BimModelVersion.id == version_id, BimModelVersion.bim_model.has(proyecto_id=project.id, empresa_id=project.empresa_id)).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="Versión BIM no encontrada.")
+    version.status = payload.decision
+    version.notes = payload.reason
+    version.is_active = payload.decision == "accepted"
+    if version.is_active:
+        db.query(BimModelVersion).filter(BimModelVersion.bim_model_id == version.bim_model_id, BimModelVersion.id != version.id).update({BimModelVersion.is_active: False}, synchronize_session=False)
+    db.commit()
+    db.refresh(version)
+    return version.bim_model
 
 
 @router.get(

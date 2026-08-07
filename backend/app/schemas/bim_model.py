@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -19,6 +19,11 @@ class BimModelVersionResponse(BaseModel):
     notes: Optional[str] = None
     fecha_creacion: datetime
     fecha_actualizacion: Optional[datetime] = None
+
+
+class BimVersionReviewDecisionRequest(BaseModel):
+    decision: Literal['accepted', 'correction_required', 'rejected']
+    reason: str = Field(min_length=5, max_length=1000)
 
 
 class BimModelResponse(BaseModel):
