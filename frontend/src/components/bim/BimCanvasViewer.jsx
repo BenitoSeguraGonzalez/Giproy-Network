@@ -695,8 +695,8 @@ const BimCanvasViewer = ({
             data-bim-canvas-ifc-filter-count={ifcClassFilters.length}
             className="flex min-h-[320px] min-w-0 max-w-full flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white"
         >
-            <div className="border-b border-zinc-200 px-3 py-2">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="overflow-x-auto border-b border-zinc-200 px-3 py-2">
+                <div className="flex min-w-max flex-nowrap items-center gap-2">
                     <div>
                         <p className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">Modelo BIM</p>
                         <h3 className="mt-0.5 text-xs font-bold text-zinc-900">
@@ -748,8 +748,15 @@ const BimCanvasViewer = ({
                     >
                         Reset vista
                     </button>
+                    <label className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2 text-[9px] font-bold uppercase tracking-[0.1em] text-zinc-600">
+                        <span className="sr-only">Filtrar clase IFC</span>
+                        <select value={activeIfcClass} onChange={(event) => setActiveIfcClass(event.target.value)} className="max-w-32 bg-transparent text-[9px] font-bold uppercase outline-none">
+                            <option value="all">IFC todas</option>
+                            {ifcClassFilters.map((item) => <option key={item.ifcClass} value={item.ifcClass}>{item.ifcClass} ({item.count})</option>)}
+                        </select>
+                    </label>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="hidden">
                     <button
                         type="button"
                         onClick={() => setActiveIfcClass('all')}
@@ -776,7 +783,7 @@ const BimCanvasViewer = ({
                         </button>
                     ))}
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+                <div className="hidden">
                     <span className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
                         <Search className="h-3.5 w-3.5" />
                         Zoom {Math.round(viewport.scale * 100)}%
@@ -796,7 +803,7 @@ const BimCanvasViewer = ({
                         </span>
                     ) : null}
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+                <div className="hidden">
                     <span className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-600">
                         Visibles {laidOutElements.length}
                     </span>
