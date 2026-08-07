@@ -82,6 +82,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
     [workspace],
   );
   const hasModel = metrics.models > 0 || metrics.elements > 0;
+  const coordinationBlocked = domainState.budget !== "ready" || domainState.gantt !== "ready" || !hasModel;
   useEffect(() => {
     let active = true;
     if (!project?.id) return undefined;
@@ -111,7 +112,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
   const stagePanel = {
     costs: <BimCostEstimatePanel projectId={project?.id} empresaId={empresaId} embedded />,
     schedule: <BimGanttPanel projectId={project?.id} empresaId={empresaId} />,
-    coordination: <BimCoordinationControlPanel embedded projectId={project?.id} empresaId={empresaId} />,
+    coordination: coordinationBlocked ? null : <BimCoordinationControlPanel embedded projectId={project?.id} empresaId={empresaId} />,
     tracking: <BimReportsPanel projectId={project?.id} empresaId={empresaId} />,
     handover: <BimHandoverDossierPanel projectId={project?.id} empresaId={empresaId} />,
   }[stage];
@@ -149,6 +150,11 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
                 {[['Presupuesto', domainState.budget, 'costs'], ['Gantt', domainState.gantt, 'schedule'], ['BIM', hasModel ? 'ready' : 'missing', 'model']].map(([label, value, target]) => <button key={label} type="button" onClick={() => goTo(target)} className="flex items-center gap-3 p-4 text-left hover:bg-zinc-50"><span className={`grid size-8 place-items-center rounded-full ${value === 'ready' ? 'bg-emerald-50 text-emerald-700' : value === 'loading' ? 'bg-zinc-100 text-zinc-500' : 'bg-amber-50 text-amber-700'}`}>{value === 'ready' ? <CheckCircle2 className="size-4" aria-hidden="true" /> : <AlertTriangle className="size-4" aria-hidden="true" />}</span><span><strong className="block text-xs text-zinc-950">{label}</strong><span className="text-[11px] text-zinc-600">{value === 'ready' ? 'Disponible' : value === 'loading' ? 'Comprobando…' : value === 'missing' ? 'Pendiente' : 'No verificado'}</span></span></button>)}
               </div>
             </section>
+            <div className={`mt-4 flex items-center gap-2 border p-3 text-xs ${coordinationBlocked ? "border-amber-300 bg-amber-50 text-amber-950" : "border-emerald-300 bg-emerald-50 text-emerald-950"}`} data-bim-coordination-gate>
+              {coordinationBlocked ? <AlertTriangle className="size-4 shrink-0" aria-hidden="true" /> : <CheckCircle2 className="size-4 shrink-0" aria-hidden="true" />}
+              <span><strong>{coordinationBlocked ? "Coordinación bloqueada" : "Coordinación lista para revisión"}.</strong> {coordinationBlocked ? "Completa los tres dominios antes de crear una referencia oficial." : "Ya puedes revisar y oficializar la relación tridominio."}</span>
+              <button type="button" onClick={() => goTo("coordination")} className="ml-auto shrink-0 font-semibold underline underline-offset-2">Revisar</button>
+            </div>
             <section className="mt-6 border border-zinc-300 bg-white"><header className="border-b border-zinc-200 px-4 py-3"><h2 className="text-sm font-semibold text-zinc-950">Orden recomendado de trabajo</h2><p className="mt-1 text-xs text-zinc-600">Cada etapa produce un resultado que alimenta la siguiente.</p></header><div className="grid divide-y divide-zinc-200 md:grid-cols-3 md:divide-x md:divide-y-0">{[['01', 'Validar modelo', 'Versión BIM lista y clasificada', 'model'], ['02', 'Construir 5D y 4D', 'Partidas, actividades y elementos vinculados', 'costs'], ['03', 'Coordinar y cerrar', 'Incidencias resueltas y entrega aprobada', 'coordination']].map(([number, title, detail, target]) => <button key={number} type="button" onClick={() => goTo(target)} className="p-4 text-left hover:bg-zinc-50"><span className="text-[11px] font-bold text-orange-700">{number}</span><h3 className="mt-2 text-sm font-semibold text-zinc-950">{title}</h3><p className="mt-1 text-xs leading-5 text-zinc-600">{detail}</p></button>)}</div></section>
           </div>
         ) : (
