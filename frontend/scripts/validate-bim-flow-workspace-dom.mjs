@@ -30,6 +30,10 @@ try {
   assert.equal(await page.getByRole("heading", { name: "Construir el presupuesto 5D" }).count(), 1);
   await flowNav.getByRole("button", { name: "Planificación 4D", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Construir la planificación 4D" }).count(), 1);
+  await flowNav.getByRole("button", { name: "Inicio", exact: true }).click();
+  assert.match(await page.locator('[data-bim-coordination-gate]').innerText(), /Coordinación bloqueada/, "La coordinación debe bloquearse sin tri-sincronización completa");
+  await flowNav.getByRole("button", { name: "Coordinación", exact: true }).click();
+  assert.equal(await page.getByRole("heading", { name: "Resolver la coordinación" }).count(), 1);
   await flowNav.getByRole("button", { name: "Entrega", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Preparar la entrega" }).count(), 1);
   await flowNav.getByRole("button", { name: "Seguimiento", exact: true }).click();
