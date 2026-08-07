@@ -17,6 +17,8 @@ import BimCoordinationControlPanel from "./BimCoordinationControlPanel";
 import BimReportsPanel from "./BimReportsPanel";
 import BimGanttPanel from "./BimGanttPanel";
 import BimHandoverDossierPanel from "./BimHandoverDossierPanel";
+import BimImportJobsPanel from "./BimImportJobsPanel";
+import BimVersionSelector from "./BimVersionSelector";
 import { presupuestosApi } from "../../api/presupuestos";
 import { cronogramasApi } from "../../api/cronogramas";
 
@@ -68,6 +70,7 @@ const count = (value) => (Array.isArray(value) ? value.length : 0);
 export default function BimFlowWorkspace({ project, access, onNavigateTarget }) {
   const [stage, setStage] = useState("overview");
   const [domainState, setDomainState] = useState({ budget: "loading", gantt: "loading" });
+  const [activeVersionId, setActiveVersionId] = useState(null);
   const { workspace, loading, error, warnings, refresh } = useBimProjectWorkspace(
     project?.id,
     access?.enabled,
@@ -110,6 +113,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
   const goTo = (next) => setStage(next);
   const empresaId = access?.resolved_company_id;
   const stagePanel = {
+    model: <div className="grid gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)]"><BimImportJobsPanel projectId={project?.id} empresaId={empresaId} onImportReady={refresh} /><BimVersionSelector models={workspace?.models || []} activeVersionId={activeVersionId || workspace?.active_version_id} onSelectVersion={setActiveVersionId} /></div>,
     costs: <BimCostEstimatePanel projectId={project?.id} empresaId={empresaId} embedded />,
     schedule: <BimGanttPanel projectId={project?.id} empresaId={empresaId} />,
     coordination: coordinationBlocked ? null : <BimCoordinationControlPanel embedded projectId={project?.id} empresaId={empresaId} />,
