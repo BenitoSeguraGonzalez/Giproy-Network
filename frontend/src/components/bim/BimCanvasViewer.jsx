@@ -695,8 +695,8 @@ const BimCanvasViewer = ({
             data-bim-canvas-ifc-filter-count={ifcClassFilters.length}
             className="flex min-h-[320px] min-w-0 max-w-full flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white"
         >
-            <div className="overflow-x-auto border-b border-zinc-200 px-3 py-2">
-                <div className="flex min-w-max flex-nowrap items-center gap-2">
+            <div className="overflow-hidden border-b border-zinc-200 px-2 py-1.5">
+                <div className="flex min-w-0 flex-nowrap items-center gap-1">
                     <div>
                         <p className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">Modelo BIM</p>
                         <h3 className="mt-0.5 text-xs font-bold text-zinc-900">
@@ -706,47 +706,57 @@ const BimCanvasViewer = ({
                     <button
                         type="button"
                         onClick={() => setShowOnlyLinked((current) => !current)}
-                        className={`inline-flex h-8 items-center gap-2 rounded-lg border px-2.5 text-[9px] font-bold uppercase tracking-[0.12em] transition-colors ${
+                        title="Mostrar solo elementos vinculados"
+                        aria-label="Mostrar solo elementos vinculados"
+                        className={`inline-flex size-8 shrink-0 items-center justify-center rounded-lg border px-0 text-[9px] font-bold transition-colors ${
                             showOnlyLinked
                                 ? 'border-orange-200 bg-orange-50 text-[#F39200]'
                                 : 'border-zinc-200 bg-white text-zinc-600 hover:border-[#F39200] hover:text-[#F39200]'
                         }`}
                     >
                         <Link2 className="h-4 w-4" />
-                        {showOnlyLinked ? 'Mostrando vinculados' : 'Solo vinculados'}
+                        <span className="sr-only">{showOnlyLinked ? 'Mostrando vinculados' : 'Solo vinculados'}</span>
                     </button>
                     <button
                         type="button"
                         onClick={fitScene}
-                        className="inline-flex h-8 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200]"
+                        title="Encuadrar escena"
+                        aria-label="Encuadrar escena"
+                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white px-0 text-[9px] font-bold transition-colors hover:border-[#F39200] hover:text-[#F39200]"
                     >
                         <Maximize2 className="h-4 w-4" />
-                        Encuadrar escena
+                        <span className="sr-only">Encuadrar escena</span>
                     </button>
                     <button
                         type="button"
                         onClick={handleFitLinked}
+                        title="Encuadrar elementos vinculados"
+                        aria-label="Encuadrar elementos vinculados"
                         disabled={linkedLaidOutElements.length === 0}
-                        className="inline-flex h-9 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white px-0 text-[9px] font-bold text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                         <Link2 className="h-4 w-4" />
-                        Encuadrar vinculados
+                        <span className="sr-only">Encuadrar vinculados</span>
                     </button>
                     <button
                         type="button"
                         onClick={handleFitSelected}
+                        title="Encuadrar elemento activo"
+                        aria-label="Encuadrar elemento activo"
                         disabled={!selectedElement}
-                        className="inline-flex h-9 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white px-0 text-[9px] font-bold text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                         <Building2 className="h-4 w-4" />
-                        Encuadrar activo
+                        <span className="sr-only">Encuadrar activo</span>
                     </button>
                     <button
                         type="button"
                         onClick={handleResetViewport}
-                        className="inline-flex h-9 items-center rounded-xl border border-zinc-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200]"
+                        title="Restablecer vista"
+                        aria-label="Restablecer vista"
+                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white px-0 text-[9px] font-bold text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200]"
                     >
-                        Reset vista
+                        <span className="sr-only">Reset vista</span>
                     </button>
                     <label className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2 text-[9px] font-bold uppercase tracking-[0.1em] text-zinc-600">
                         <span className="sr-only">Filtrar clase IFC</span>
