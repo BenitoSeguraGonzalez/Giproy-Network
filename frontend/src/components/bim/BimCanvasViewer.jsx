@@ -935,7 +935,7 @@ const BimCanvasViewer = ({
                                 </div>
                             </div>
                         ) : null}
-                        <div className="pointer-events-none absolute bottom-2 left-2 max-w-[18rem] rounded-lg border border-zinc-200 bg-white/95 px-2.5 py-2 text-[10px] text-zinc-500 shadow-sm">
+                        <div className="hidden">
                             <p className="font-bold uppercase tracking-[0.12em] text-zinc-700">
                                 {laidOutElements.length} elementos visibles
                             </p>
@@ -959,7 +959,7 @@ const BimCanvasViewer = ({
                             ) : null}
                             {error ? <p className="mt-2 font-bold text-rose-500">No se pudo actualizar el workspace BIM.</p> : null}
                         </div>
-                        <div className="pointer-events-none absolute left-2 top-2 w-[14rem] rounded-lg border border-zinc-200 bg-white/95 px-2.5 py-2 text-[10px] text-zinc-500 shadow-sm">
+                        <div className="hidden">
                             <p className="font-black uppercase tracking-[0.16em] text-zinc-700">Leyenda BIM</p>
                             <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
                                 <div className="flex items-center gap-2">
@@ -996,7 +996,7 @@ const BimCanvasViewer = ({
                                 <p>Total visibles: {laidOutElements.length}</p>
                             </div>
                         </div>
-                        <div className="pointer-events-none absolute right-2 top-2 rounded-lg border border-zinc-200 bg-white/95 p-2 text-[10px] text-zinc-500 shadow-sm">
+                        <div className="hidden">
                             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-700">Minimapa BIM</p>
                             <div
                                 ref={minimapRef}
