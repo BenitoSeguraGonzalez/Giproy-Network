@@ -27,6 +27,7 @@ try {
   await flowNav.getByRole("button", { name: "Modelo", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Preparar y validar el modelo" }).count(), 1);
   assert.equal(await page.locator('[data-bim-element-explorer]').count(), 1, "Modelo debe incluir exploración contextual de elementos");
+  assert.equal(await page.locator('[data-bim-saved-views]').count(), 1, "Modelo debe permitir vistas guardadas y comparación");
   await flowNav.getByRole("button", { name: "Presupuesto 5D", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Construir el presupuesto 5D" }).count(), 1);
   await flowNav.getByRole("button", { name: "Planificación 4D", exact: true }).click();
