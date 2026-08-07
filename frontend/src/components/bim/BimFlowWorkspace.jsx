@@ -21,6 +21,8 @@ import BimImportJobsPanel from "./BimImportJobsPanel";
 import BimVersionSelector from "./BimVersionSelector";
 import { presupuestosApi } from "../../api/presupuestos";
 import { cronogramasApi } from "../../api/cronogramas";
+import { empresasApi } from "../../api/empresas";
+import { proyectosApi } from "../../api/proyectos";
 
 const STAGES = [
   { id: "overview", label: "Inicio", icon: ClipboardCheck },
@@ -71,6 +73,8 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
   const [stage, setStage] = useState("overview");
   const [domainState, setDomainState] = useState({ budget: "loading", gantt: "loading" });
   const [activeVersionId, setActiveVersionId] = useState(null);
+  const [omniClassEnabled, setOmniClassEnabled] = useState(true);
+  const [projectCapabilities, setProjectCapabilities] = useState(new Set());
   const { workspace, loading, error, warnings, refresh } = useBimProjectWorkspace(
     project?.id,
     access?.enabled,
@@ -86,6 +90,31 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
   );
   const hasModel = metrics.models > 0 || metrics.elements > 0;
   const coordinationBlocked = domainState.budget !== "ready" || domainState.gantt !== "ready" || !hasModel;
+  useEffect(() => {
+    if (!project?.id || !access?.enabled) {
+      // The reset is intentional: capability state belongs to the active project/tenant.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setProjectCapabilities(new Set());
+      setOmniClassEnabled(true);
+      return undefined;
+    }
+    let cancelled = false;
+    Promise.allSettled([
+      proyectosApi.getMyCapabilities(project.id, access?.resolved_company_id),
+      access?.resolved_company_id ? empresasApi.getById(access.resolved_company_id) : Promise.resolve(null),
+    ]).then(([capabilityResult, companyResult]) => {
+      if (cancelled) return;
+      setProjectCapabilities(
+        capabilityResult.status === "fulfilled"
+          ? new Set(capabilityResult.value?.capabilities || [])
+          : new Set(),
+      );
+      if (companyResult.status === "fulfilled" && companyResult.value) {
+        setOmniClassEnabled(companyResult.value.use_omniclass !== false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [access?.enabled, access?.resolved_company_id, project?.id]);
   useEffect(() => {
     let active = true;
     if (!project?.id) return undefined;
@@ -116,7 +145,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
     model: <div className="grid gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)]"><BimImportJobsPanel projectId={project?.id} empresaId={empresaId} onImportReady={refresh} /><BimVersionSelector models={workspace?.models || []} activeVersionId={activeVersionId || workspace?.active_version_id} onSelectVersion={setActiveVersionId} /></div>,
     costs: <BimCostEstimatePanel projectId={project?.id} empresaId={empresaId} embedded />,
     schedule: <BimGanttPanel projectId={project?.id} empresaId={empresaId} />,
-    coordination: coordinationBlocked ? null : <BimCoordinationControlPanel embedded projectId={project?.id} empresaId={empresaId} />,
+    coordination: coordinationBlocked ? null : <BimCoordinationControlPanel embedded projectId={project?.id} empresaId={empresaId} canEdit={projectCapabilities.has("bim.edit")} canApprove={projectCapabilities.has("bim.approve")} canApply={projectCapabilities.has("bim.apply")} canRecover={projectCapabilities.has("bim.recover")} />,
     tracking: <BimReportsPanel projectId={project?.id} empresaId={empresaId} />,
     handover: <BimHandoverDossierPanel projectId={project?.id} empresaId={empresaId} />,
   }[stage];
@@ -133,13 +162,13 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
           <button type="button" onClick={refresh} disabled={loading} className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 text-xs font-semibold text-zinc-700 hover:border-orange-500 hover:text-orange-700 disabled:opacity-50"><RefreshCw className={loading ? "size-3.5 animate-spin" : "size-3.5"} aria-hidden="true" />Actualizar estado</button>
         </div>
         <nav className="flex min-w-0 overflow-x-auto border-t border-zinc-100 px-2" aria-label="Flujo operativo BIM">
-          {STAGES.map(({ id, label, icon: Icon }) => (
-            <button key={id} type="button" onClick={() => goTo(id)} aria-current={stage === id ? "page" : undefined} className={`relative inline-flex h-11 shrink-0 items-center gap-2 px-3 text-xs font-semibold ${stage === id ? "text-zinc-950" : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950"}`}><Icon className={`size-4 ${stage === id ? "text-orange-600" : ""}`} aria-hidden="true" />{label}{stage === id ? <span className="absolute inset-x-2 bottom-0 h-0.5 bg-orange-600" /> : null}</button>
+          {STAGES.map(({ id, label, icon: StageIcon }) => (
+            <button key={id} type="button" onClick={() => goTo(id)} aria-current={stage === id ? "page" : undefined} className={`relative inline-flex h-11 shrink-0 items-center gap-2 px-3 text-xs font-semibold ${stage === id ? "text-zinc-950" : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950"}`}>{React.createElement(StageIcon, { className: `size-4 ${stage === id ? "text-orange-600" : ""}`, "aria-hidden": true })}{label}{stage === id ? <span className="absolute inset-x-2 bottom-0 h-0.5 bg-orange-600" /> : null}</button>
           ))}
         </nav>
       </header>
       <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4 lg:p-6">
-        {!workspace?.omniclass_enabled ? <div className="mb-4 flex items-start gap-2 border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950"><AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" /><p><strong>OmniClass desactivado.</strong> La coordinación común entre presupuesto, Gantt y BIM puede quedar incompleta.</p></div> : null}
+        {!omniClassEnabled ? <div className="mb-4 flex items-start gap-2 border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950"><AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" /><p><strong>OmniClass desactivado.</strong> La coordinación común entre presupuesto, Gantt y BIM puede quedar incompleta.</p></div> : null}
         {warnings?.length ? <div className="mb-4 flex items-start gap-2 border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950"><AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" /><p>Carga parcial: {warnings.join(", ")}. Revisa el estado antes de oficializar vínculos.</p></div> : null}
         {error ? <div className="mb-4 border border-rose-300 bg-rose-50 p-3 text-xs text-rose-900" role="alert">No se pudo cargar el estado BIM: {String(error?.message || error)}</div> : null}
         {stage === "overview" ? (
