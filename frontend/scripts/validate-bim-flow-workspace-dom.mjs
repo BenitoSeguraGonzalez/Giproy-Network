@@ -26,6 +26,7 @@ try {
   for (const label of ["Modelo", "Presupuesto 5D", "Planificación 4D", "Coordinación", "Seguimiento", "Entrega"]) assert.equal(await flowNav.getByRole("button", { name: label, exact: true }).count(), 1, `Etapa visible: ${label}`);
   await flowNav.getByRole("button", { name: "Modelo", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Preparar y validar el modelo" }).count(), 1);
+  assert.equal(await page.locator('[data-bim-element-explorer]').count(), 1, "Modelo debe incluir exploración contextual de elementos");
   await flowNav.getByRole("button", { name: "Presupuesto 5D", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Construir el presupuesto 5D" }).count(), 1);
   await flowNav.getByRole("button", { name: "Planificación 4D", exact: true }).click();
