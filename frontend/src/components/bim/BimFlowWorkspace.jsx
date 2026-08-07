@@ -69,7 +69,7 @@ const stageCopy = {
 
 const count = (value) => (Array.isArray(value) ? value.length : 0);
 
-export default function BimFlowWorkspace({ project, access, onNavigateTarget }) {
+export default function BimFlowWorkspace({ project, access, onNavigateTarget, workspaceOverride = null, domainStateOverride = null }) {
   const [stage, setStage] = useState("overview");
   const [domainState, setDomainState] = useState({ budget: "loading", gantt: "loading" });
   const [activeVersionId, setActiveVersionId] = useState(null);
@@ -79,17 +79,19 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
     project?.id,
     access?.enabled,
   );
+  const effectiveWorkspace = workspaceOverride || workspace;
+  const effectiveDomainState = domainStateOverride || domainState;
   const metrics = useMemo(
     () => ({
-      models: count(workspace?.models),
-      versions: count(workspace?.versions),
-      elements: count(workspace?.elements),
-      links: count(workspace?.recent_links),
+      models: count(effectiveWorkspace?.models),
+      versions: count(effectiveWorkspace?.versions),
+      elements: count(effectiveWorkspace?.elements),
+      links: count(effectiveWorkspace?.recent_links),
     }),
-    [workspace],
+    [effectiveWorkspace],
   );
   const hasModel = metrics.models > 0 || metrics.elements > 0;
-  const coordinationBlocked = domainState.budget !== "ready" || domainState.gantt !== "ready" || !hasModel;
+  const coordinationBlocked = effectiveDomainState.budget !== "ready" || effectiveDomainState.gantt !== "ready" || !hasModel;
   useEffect(() => {
     if (!project?.id || !access?.enabled) {
       // The reset is intentional: capability state belongs to the active project/tenant.
@@ -142,7 +144,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
   const goTo = (next) => setStage(next);
   const empresaId = access?.resolved_company_id;
   const stagePanel = {
-    model: <div className="grid gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)]"><BimImportJobsPanel projectId={project?.id} empresaId={empresaId} onImportReady={refresh} /><BimVersionSelector models={workspace?.models || []} activeVersionId={activeVersionId || workspace?.active_version_id} onSelectVersion={setActiveVersionId} /></div>,
+    model: <div className="grid gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)]"><BimImportJobsPanel projectId={project?.id} empresaId={empresaId} onImportReady={refresh} /><BimVersionSelector models={effectiveWorkspace?.models || []} activeVersionId={activeVersionId || effectiveWorkspace?.active_version_id} onSelectVersion={setActiveVersionId} /></div>,
     costs: <BimCostEstimatePanel projectId={project?.id} empresaId={empresaId} embedded />,
     schedule: <BimGanttPanel projectId={project?.id} empresaId={empresaId} />,
     coordination: coordinationBlocked ? null : <BimCoordinationControlPanel embedded projectId={project?.id} empresaId={empresaId} canEdit={projectCapabilities.has("bim.edit")} canApprove={projectCapabilities.has("bim.approve")} canApply={projectCapabilities.has("bim.apply")} canRecover={projectCapabilities.has("bim.recover")} />,
@@ -180,7 +182,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
             <section className="mt-4 border border-zinc-300 bg-white" data-bim-tri-sync-status>
               <header className="border-b border-zinc-200 px-4 py-3"><h2 className="text-sm font-semibold text-zinc-950">Tri-sincronización del proyecto</h2><p className="mt-1 text-xs text-zinc-600">La coordinación solo puede oficializarse cuando los tres dominios tienen una fuente válida.</p></header>
               <div className="grid divide-y divide-zinc-200 md:grid-cols-3 md:divide-x md:divide-y-0">
-                {[['Presupuesto', domainState.budget, 'costs'], ['Gantt', domainState.gantt, 'schedule'], ['BIM', hasModel ? 'ready' : 'missing', 'model']].map(([label, value, target]) => <button key={label} type="button" onClick={() => goTo(target)} className="flex items-center gap-3 p-4 text-left hover:bg-zinc-50"><span className={`grid size-8 place-items-center rounded-full ${value === 'ready' ? 'bg-emerald-50 text-emerald-700' : value === 'loading' ? 'bg-zinc-100 text-zinc-500' : 'bg-amber-50 text-amber-700'}`}>{value === 'ready' ? <CheckCircle2 className="size-4" aria-hidden="true" /> : <AlertTriangle className="size-4" aria-hidden="true" />}</span><span><strong className="block text-xs text-zinc-950">{label}</strong><span className="text-[11px] text-zinc-600">{value === 'ready' ? 'Disponible' : value === 'loading' ? 'Comprobando…' : value === 'missing' ? 'Pendiente' : 'No verificado'}</span></span></button>)}
+                {[['Presupuesto', effectiveDomainState.budget, 'costs'], ['Gantt', effectiveDomainState.gantt, 'schedule'], ['BIM', hasModel ? 'ready' : 'missing', 'model']].map(([label, value, target]) => <button key={label} type="button" onClick={() => goTo(target)} className="flex items-center gap-3 p-4 text-left hover:bg-zinc-50"><span className={`grid size-8 place-items-center rounded-full ${value === 'ready' ? 'bg-emerald-50 text-emerald-700' : value === 'loading' ? 'bg-zinc-100 text-zinc-500' : 'bg-amber-50 text-amber-700'}`}>{value === 'ready' ? <CheckCircle2 className="size-4" aria-hidden="true" /> : <AlertTriangle className="size-4" aria-hidden="true" />}</span><span><strong className="block text-xs text-zinc-950">{label}</strong><span className="text-[11px] text-zinc-600">{value === 'ready' ? 'Disponible' : value === 'loading' ? 'Comprobando…' : value === 'missing' ? 'Pendiente' : 'No verificado'}</span></span></button>)}
               </div>
             </section>
             <div className={`mt-4 flex items-center gap-2 border p-3 text-xs ${coordinationBlocked ? "border-amber-300 bg-amber-50 text-amber-950" : "border-emerald-300 bg-emerald-50 text-emerald-950"}`} data-bim-coordination-gate>

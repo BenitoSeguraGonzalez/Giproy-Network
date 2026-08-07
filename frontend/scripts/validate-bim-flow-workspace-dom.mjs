@@ -47,6 +47,14 @@ try {
   assert.equal(await widePage.locator('[data-bim-flow-workspace]').count(), 1, "El flujo debe adaptarse a resoluciones mayores");
   assert.equal(await widePage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, "No debe existir overflow horizontal a 2560px");
   await widePage.close();
+  const readyPage = await browser.newPage({ viewport: { width: 1920, height: 1080 }, screen: { width: 1920, height: 1080 } });
+  await readyPage.goto(`${baseUrl}/bim-flow-workspace-harness.html?ready=1`, { waitUntil: "domcontentloaded" });
+  await readyPage.waitForSelector('[data-bim-tri-sync-status]');
+  assert.match(await readyPage.locator('[data-bim-coordination-gate]').innerText(), /lista para revisión/, "El estado listo debe desbloquear coordinación");
+  await readyPage.getByRole("navigation", { name: "Flujo operativo BIM" }).getByRole("button", { name: "Coordinación", exact: true }).click();
+  await readyPage.waitForTimeout(500);
+  assert.equal(await readyPage.locator('[data-bim-coordination-control]').count(), 1, `La coordinación debe abrirse con tri-sincronización lista: ${(await readyPage.locator('body').innerText()).slice(0, 500)}`);
+  await readyPage.close();
   await browser.close();
   console.log("validate-bim-flow-workspace-dom: ok");
 } finally { cleanup(); }
