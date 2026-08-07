@@ -386,7 +386,7 @@ const BimThreeViewer = ({
             data-bim-three-hidden-ifc-classes={hiddenIfcClasses.size}
             data-bim-three-visible-ifc-classes={visibleIfcClassCount}
             data-bim-render-pixel-ratio={renderQuality.pixelRatio}
-            className="flex min-h-[360px] flex-col overflow-hidden border border-zinc-200 bg-white"
+            className="flex h-full min-h-[360px] flex-col overflow-hidden border border-zinc-200 bg-white"
         >
             <div className="relative flex h-11 shrink-0 items-center justify-between gap-3 border-b border-zinc-200 px-3">
                 <div className="flex min-w-0 items-center gap-2">

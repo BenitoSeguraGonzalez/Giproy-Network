@@ -693,7 +693,7 @@ const BimCanvasViewer = ({
             data-bim-canvas-ifc-filter={activeIfcClass}
             data-bim-canvas-filtered-elements={filteredElements.length}
             data-bim-canvas-ifc-filter-count={ifcClassFilters.length}
-            className="flex min-h-[320px] min-w-0 max-w-full flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white"
+            className="flex h-full min-h-[320px] min-w-0 max-w-full flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white"
         >
             <div className="overflow-hidden border-b border-zinc-200 px-2 py-1.5">
                 <div className="flex min-w-0 flex-nowrap items-center gap-1">
