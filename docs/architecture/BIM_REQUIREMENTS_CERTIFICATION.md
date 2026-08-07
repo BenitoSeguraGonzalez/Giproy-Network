@@ -41,6 +41,8 @@ Se ejecutaron 91 pruebas de backend sobre activación OmniClass, importación, p
 
 La inspección de `SantiagoBermeo-2026-001` identificó proyecto `id=7`, un modelo, una versión y 144 elementos BIM. Esta lectura fue únicamente diagnóstica; no se borró ni modificó ningún dato.
 
+El preflight de reset generó `backups/bim-santiago-scope-audit.json` (123 KB) con los registros BIM directamente ligados al proyecto. El reset destructivo queda deliberadamente fuera de la simulación hasta disponer de una migración transaccional que resuelva todas las dependencias; no se ejecuta un borrado incompleto.
+
 ## Simulación reproducible ejecutada
 
 La simulación de flujo desde cero se ejecutó en una base SQLite aislada mediante `test_bim_gate_a_pipeline.py`, `test_bim_omniclass_activation_default.py`, `test_bim_ifc_quality.py`, `test_bim_import_jobs.py`, `test_bim_qto.py`, `test_bim_schedule_4d.py`, `test_bim_coordination_core.py`, `test_bim_actual_cost_ledger.py` y `test_bim_handover_dossier.py`.
