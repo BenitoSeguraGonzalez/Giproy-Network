@@ -402,65 +402,14 @@ const BimThreeViewer = ({
                 </div>
                 <button type="button" onClick={() => setViewControlsOpen((value) => !value)} className="inline-flex h-8 items-center gap-2 rounded-md border border-zinc-300 bg-white px-2.5 text-xs font-semibold text-zinc-700 hover:border-orange-500 hover:text-orange-700" aria-expanded={viewControlsOpen}><SlidersHorizontal className="size-3.5" />Vista<ChevronDown className={`size-3 transition-transform ${viewControlsOpen ? 'rotate-180' : ''}`} /></button>
                 {viewControlsOpen ? <div className="absolute right-3 top-10 z-30 w-[min(34rem,calc(100%-1.5rem))] rounded-md border border-zinc-300 bg-white p-3 shadow-xl">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <button type="button" data-bim-three-reset-view="true" onClick={handleResetCamera} disabled={!ready || preparedElements.length === 0} className="inline-flex h-8 items-center gap-2 rounded-md border border-zinc-200 px-2.5 text-xs font-semibold text-zinc-700 hover:border-orange-500 disabled:opacity-40"><RotateCcw className="size-3.5" />Restablecer vista</button>
-                        <button type="button" data-bim-three-focus-selected="true" onClick={handleFocusSelectedElement} disabled={!ready || !selectedSceneElement} className="inline-flex h-8 items-center gap-2 rounded-md border border-zinc-200 px-2.5 text-xs font-semibold text-zinc-700 hover:border-orange-500 disabled:opacity-40"><Box className="size-3.5" />Enfocar selección</button>
+                    <div className="flex items-center gap-1.5">
+                        <button type="button" title="Restablecer vista" aria-label="Restablecer vista" data-bim-three-reset-view="true" onClick={handleResetCamera} disabled={!ready || preparedElements.length === 0} className="grid size-8 place-items-center rounded-md border border-zinc-200 text-zinc-700 hover:border-orange-500 disabled:opacity-40"><RotateCcw className="size-3.5" /></button>
+                        <button type="button" title="Enfocar selección" aria-label="Enfocar selección" data-bim-three-focus-selected="true" onClick={handleFocusSelectedElement} disabled={!ready || !selectedSceneElement} className="grid size-8 place-items-center rounded-md border border-zinc-200 text-zinc-700 hover:border-orange-500 disabled:opacity-40"><Box className="size-3.5" /></button>
                         <BimRenderQualityControl {...renderQuality} />
                     </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-3">
-                    <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
-                        Filtrar clase
-                    </span>
-                    {ifcClassFilters.map((ifcClass) => (
-                        <button
-                            key={ifcClass}
-                            type="button"
-                            data-bim-three-ifc-filter-button={ifcClass}
-                            onClick={() => setActiveIfcClass(ifcClass)}
-                            className={`inline-flex h-7 items-center rounded-full border px-2 text-[9px] font-black uppercase tracking-[0.12em] transition ${
-                                activeIfcClass === ifcClass
-                                    ? 'border-[#F39200] bg-orange-50 text-[#C26F00]'
-                                    : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300'
-                            }`}
-                        >
-                            {ifcClass === 'all' ? 'Todas' : ifcClass}
-                        </button>
-                    ))}
-                    </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
-                        Visibilidad
-                    </span>
-                    {ifcClassFilters
-                        .filter((ifcClass) => ifcClass !== 'all')
-                        .map((ifcClass) => {
-                            const isVisible = !hiddenIfcClasses.has(ifcClass);
-                            return (
-                                <button
-                                    key={ifcClass}
-                                    type="button"
-                                    data-bim-three-ifc-visibility-button={ifcClass}
-                                    aria-pressed={isVisible}
-                                    onClick={() => toggleIfcClassVisibility(ifcClass)}
-                                    className={`inline-flex h-7 items-center rounded-full border px-2 text-[9px] font-black uppercase tracking-[0.12em] transition ${
-                                        isVisible
-                                            ? 'border-zinc-200 bg-white text-zinc-600 hover:border-[#F39200] hover:text-[#C26F00]'
-                                            : 'border-zinc-200 bg-zinc-100 text-zinc-400 line-through'
-                                    }`}
-                                >
-                                    {ifcClass}
-                                </button>
-                            );
-                        })}
-                    <button
-                        type="button"
-                        data-bim-three-reset-visibility="true"
-                        onClick={resetIfcClassVisibility}
-                        disabled={hiddenIfcClasses.size === 0}
-                        className="inline-flex h-7 items-center rounded-full border border-zinc-200 bg-white px-2 text-[9px] font-black uppercase tracking-[0.12em] text-zinc-500 transition hover:border-[#136191] hover:text-[#136191] disabled:pointer-events-none disabled:opacity-40"
-                    >
-                        Reset
-                    </button>
+                    <div className="mt-3 grid grid-cols-2 gap-2 border-t border-zinc-100 pt-3">
+                      <label className="text-[9px] font-black uppercase tracking-[0.14em] text-zinc-400">Filtrar clase<select value={activeIfcClass} onChange={(event) => setActiveIfcClass(event.target.value)} className="mt-1 h-8 w-full rounded-md border border-zinc-200 bg-white px-2 text-[11px] font-semibold normal-case tracking-normal text-zinc-700">{ifcClassFilters.map((ifcClass) => <option key={ifcClass} value={ifcClass}>{ifcClass === 'all' ? 'Todas las clases' : ifcClass}</option>)}</select></label>
+                      <fieldset className="min-w-0"><legend className="text-[9px] font-black uppercase tracking-[0.14em] text-zinc-400">Visibilidad</legend><div className="mt-1 flex h-8 items-center gap-2 overflow-x-auto rounded-md border border-zinc-200 bg-white px-2">{ifcClassFilters.filter((ifcClass) => ifcClass !== 'all').map((ifcClass) => { const isVisible = !hiddenIfcClasses.has(ifcClass); return <label key={ifcClass} className="inline-flex shrink-0 items-center gap-1 text-[10px] font-semibold text-zinc-600"><input type="checkbox" checked={isVisible} onChange={() => toggleIfcClassVisibility(ifcClass)} className="accent-orange-600" />{ifcClass.replace(/^IFC/i, '')}</label>; })}</div></fieldset>
                     </div>
                 </div> : null}
             </div>
