@@ -76,6 +76,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
   const [activeVersionId, setActiveVersionId] = useState(null);
   const [selectedElement, setSelectedElement] = useState(null);
   const [selectedActivity, setSelectedActivity] = useState(null);
+  const [selectedBudgetLine, setSelectedBudgetLine] = useState(null);
   const [omniClassEnabled, setOmniClassEnabled] = useState(true);
   const [projectCapabilities, setProjectCapabilities] = useState(new Set());
   const { workspace, loading, error, warnings, refresh } = useBimProjectWorkspace(
@@ -148,9 +149,9 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
   const empresaId = access?.resolved_company_id;
   const stagePanel = {
     model: <div className="grid min-h-0 gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)]"><div className="grid min-h-0 gap-4"><BimImportJobsPanel projectId={project?.id} empresaId={empresaId} onImportReady={refresh} /><BimElementExplorerPanel elements={effectiveWorkspace?.elements || []} selectedElementId={selectedElement?.id || selectedElement?.global_id} onSelectElement={setSelectedElement} /></div><BimVersionSelector models={effectiveWorkspace?.models || []} activeVersionId={activeVersionId || effectiveWorkspace?.active_version_id} onSelectVersion={setActiveVersionId} /></div>,
-    costs: <BimCostEstimatePanel projectId={project?.id} empresaId={empresaId} embedded />,
+    costs: <BimCostEstimatePanel projectId={project?.id} empresaId={empresaId} embedded onSelectLine={setSelectedBudgetLine} />,
     schedule: <BimGanttPanel projectId={project?.id} empresaId={empresaId} onSelectActivity={setSelectedActivity} selectedGuid={selectedElement?.global_id || selectedElement?.guid || ''} />,
-    coordination: coordinationBlocked ? null : <BimCoordinationControlPanel embedded projectId={project?.id} empresaId={empresaId} selectedElement={selectedElement} selectedActivity={selectedActivity} canEdit={projectCapabilities.has("bim.edit")} canApprove={projectCapabilities.has("bim.approve")} canApply={projectCapabilities.has("bim.apply")} canRecover={projectCapabilities.has("bim.recover")} />,
+    coordination: coordinationBlocked ? null : <BimCoordinationControlPanel embedded projectId={project?.id} empresaId={empresaId} selectedElement={selectedElement} selectedActivity={selectedActivity} selectedBudgetLine={selectedBudgetLine} canEdit={projectCapabilities.has("bim.edit")} canApprove={projectCapabilities.has("bim.approve")} canApply={projectCapabilities.has("bim.apply")} canRecover={projectCapabilities.has("bim.recover")} />,
     tracking: <BimReportsPanel projectId={project?.id} empresaId={empresaId} />,
     handover: <BimHandoverDossierPanel projectId={project?.id} empresaId={empresaId} />,
   }[stage];

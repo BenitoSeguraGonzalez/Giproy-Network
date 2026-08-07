@@ -72,6 +72,7 @@ const BimCoordinationControlPanel = ({
     activeVersionId,
     selectedElement = null,
     selectedActivity = null,
+    selectedBudgetLine = null,
     canEdit = false,
     canApprove = false,
     canApply = false,
@@ -340,7 +341,7 @@ const BimCoordinationControlPanel = ({
                 projectId,
                 current.id,
                 {
-                    budget_line_id: selectedActivity.budget_line_id || null,
+                    budget_line_id: selectedActivity.budget_line_id || selectedBudgetLine?.budget_line_id || selectedBudgetLine?.id || null,
                     activity_ref:
                         selectedActivity.source_ref ||
                         `activity-${selectedActivity.id}`,
@@ -854,9 +855,9 @@ const BimCoordinationControlPanel = ({
                                             Partida 5D
                                         </span>
                                         <span className="truncate text-xs font-medium text-zinc-900">
-                                            {selectedActivity?.budget_line_id
-                                                ? `#${selectedActivity.budget_line_id}`
-                                                : 'Pendiente en la actividad'}
+                                            {selectedActivity?.budget_line_id || selectedBudgetLine?.budget_line_id || selectedBudgetLine?.id
+                                                ? `#${selectedActivity?.budget_line_id || selectedBudgetLine?.budget_line_id || selectedBudgetLine?.id}`
+                                                : 'Selecciona una partida en Presupuesto 5D'}
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-4 py-4">
@@ -898,7 +899,7 @@ const BimCoordinationControlPanel = ({
                                                 className="size-4"
                                                 aria-hidden="true"
                                             />
-                                            {selectedActivity?.budget_line_id
+                                            {selectedActivity?.budget_line_id || selectedBudgetLine?.budget_line_id || selectedBudgetLine?.id
                                                 ? 'Vincular partida, actividad y elemento'
                                                 : 'Vincular actividad y elemento'}
                                         </button>
