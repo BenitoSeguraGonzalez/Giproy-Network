@@ -430,6 +430,10 @@ OBLIGATORIO antes de declarar solucionado cualquier bug, regresión, hotfix, sli
 
 ## REGLA FINAL
 
+## NORMA GLOBAL PERSISTENTE — VERIFICACIÓN CONTRA EL PROMPT
+
+Esta norma se mantiene activa durante todas las secciones, subtareas y continuaciones de la sesión. Ningún resultado puede considerarse bueno, terminado o listo para entregar hasta verificarlo explícitamente contra todos los requisitos del prompt vigente. Las correcciones parciales no pueden presentarse como completas. La revisión debe cubrir funcionalidad, integración, interfaz visual, flujo real y despliegue cuando sean parte de la petición. Todo requisito pendiente debe declararse y seguir trabajándose; no se sustituirá la solución por excusas.
+
 - NO ROMPER EL SISTEMA  
 - NO SALTARSE LICENCIAS  
 - NO ROMPER DISEÑO  

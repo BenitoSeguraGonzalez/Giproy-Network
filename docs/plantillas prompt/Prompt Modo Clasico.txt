@@ -155,3 +155,6 @@ Formato obligatorio de respuesta
 6. cambios realizados
 7. rollback posible
 8. porcentaje de finalizacion
+## NORMA GLOBAL PERSISTENTE — VERIFICACIÓN CONTRA EL PROMPT
+
+La norma permanece activa entre todas las secciones clásicas y sus integraciones: no cerrar ninguna tarea ni declarar un resultado correcto sin verificarlo contra todos los requisitos del prompt vigente. No se aceptan parches parciales presentados como solución completa.

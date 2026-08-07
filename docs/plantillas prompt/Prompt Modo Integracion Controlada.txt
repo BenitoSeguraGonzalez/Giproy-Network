@@ -360,3 +360,6 @@ Formato obligatorio de respuesta
 6. cambios realizados
 7. rollback posible
 8. porcentaje de finalizacion
+## NORMA GLOBAL PERSISTENTE — VERIFICACIÓN CONTRA EL PROMPT
+
+Esta regla se hereda automáticamente en cada sección, frente y continuación. Toda integración debe verificarse de extremo a extremo contra el prompt vigente antes de marcarla como terminada: funcionalidad, contratos, UI, flujo real, compatibilidad y despliegue. Si queda un requisito pendiente, debe permanecer abierto y trabajarse; queda prohibido presentar una corrección parcial como completa o justificar el incumplimiento con excusas.

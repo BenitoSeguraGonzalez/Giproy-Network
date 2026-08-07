@@ -288,3 +288,6 @@ Formato obligatorio de respuesta
 6. cambios realizados
 7. rollback posible
 8. porcentaje de finalizacion
+## NORMA GLOBAL PERSISTENTE — VERIFICACIÓN CONTRA EL PROMPT
+
+La norma permanece activa entre todas las etapas BIM: no cerrar ninguna sección ni declarar el módulo terminado sin comprobar cada requisito del prompt vigente, incluida la experiencia visual, el flujo real, la integración y las pruebas. Las entregas parciales deben identificarse como parciales y continuar hasta su resolución.
