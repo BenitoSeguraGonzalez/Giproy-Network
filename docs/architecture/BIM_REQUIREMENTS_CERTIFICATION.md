@@ -38,3 +38,5 @@ Cada paso debe dejar evidencia de pantalla, respuesta API, estado persistido y r
 ## Evidencia automatizada actual
 
 Se ejecutaron 91 pruebas de backend sobre activación OmniClass, importación, propuestas 5D, planificación 4D, coordinación, entrega, simulaciones IFC, compuertas, búsqueda y comparación de versiones: todas pasan. Estas pruebas certifican reglas de dominio y persistencia, pero no sustituyen la simulación de usuario en frontend; por eso las filas marcadas como parciales permanecen abiertas.
+
+La inspección de `SantiagoBermeo-2026-001` identificó proyecto `id=7`, un modelo, una versión y 144 elementos BIM. Esta lectura fue únicamente diagnóstica; no se borró ni modificó ningún dato.
