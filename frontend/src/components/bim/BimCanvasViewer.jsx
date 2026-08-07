@@ -326,8 +326,8 @@ const BimCanvasViewer = ({
 
         setViewport({
             scale: nextScale,
-            offsetX: padding - targetBounds.minX * nextScale,
-            offsetY: padding - targetBounds.minY * nextScale,
+            offsetX: (canvasSize.width - targetBounds.width * nextScale) / 2 - targetBounds.minX * nextScale,
+            offsetY: (canvasSize.height - targetBounds.height * nextScale) / 2 - targetBounds.minY * nextScale,
         });
     };
 
