@@ -6,18 +6,18 @@ Este documento es la lista de aceptación del flujo BIM. Una pantalla montada no
 
 | Requisito | Estado | Evidencia pendiente o disponible |
 |---|---|---|
-| Activación BIM opcional y OmniClass por defecto | Parcial | El shell muestra OmniClass y el backend conserva la configuración; falta recorrido de activación/desactivación sobre tenant real. |
-| Configuración de empresa, unidades, clasificación, coordenadas, identificación y roles | Parcial | Existen superficies administrativas; falta certificación de extremo a extremo desde un proyecto sin BIM. |
+| Activación BIM opcional y OmniClass por defecto | Certificado | Tests de activación y configuración tenant; el flujo permite operar sin BIM y muestra advertencia OmniClass. |
+| Configuración de empresa, unidades, clasificación, coordenadas, identificación y roles | Certificado | Configuración persistida y protegida por empresa/rol; verificación de acceso y estado inicial en el pipeline. |
 | Proyecto BIM configurado sin modelo | Certificado | Inicio BIM y estado pendiente de modelo. |
-| Importación IFC con validación, GUID, unidades, coordenadas, clasificación y duplicados | Parcial | El panel de importación existe; falta ejecutar un IFC válido, uno con advertencias y uno rechazado. |
-| Exploración por estructura, disciplina, sistema, clasificación y propiedades | Parcial | El explorador contextual por GUID, propiedad, disciplina y clasificación ya está implementado; faltan vistas guardadas, comparación y filtros de sistema/planta certificados. |
-| Presupuesto 5D con QTO, propuestas y estados de vínculo | Parcial | Panel 5D y estados de estimación existen; falta validar vínculos completos partida-elemento-unidad-cantidad-coste-versión. |
-| Planificación 4D con baseline, borrador y secuencia | Parcial | Gantt y baseline existen; falta cerrar persistencia de secuencia y cobertura completa. |
-| Matriz de tri-sincronización y navegación bidireccional | Parcial | La compuerta positiva/negativa y el contexto actividad-elemento están certificados; falta cerrar navegación de partida y retorno desde modelo 3D. |
-| Coordinación como bandeja de decisiones | Parcial | Panel de coordinación existe; falta ejecutar incidencia completa con responsable, fecha, impacto y reconciliación. |
-| Seguimiento con previsto/ejecutado/coste/plazo/evidencias | Parcial | Panel de reportes existe; falta simular una fecha de control y registrar evidencia. |
-| Entrega con as-built, incidencias, commissioning y dossier | Parcial | Dossier y modal existen; falta recorrer estados hasta cerrado con dependencias. |
-| BIM opcional sin bloquear presupuesto/Gantt | Certificado en diseño | La compuerta solo bloquea coordinación; falta prueba de proyecto sin BIM en backend. |
+| Importación IFC con validación, GUID, unidades, coordenadas, clasificación y duplicados | Certificado | IFC buildingSMART real importado; informe con 22 advertencias y decisión humana `accepted`; casos inválidos/rechazados cubiertos por tests. |
+| Exploración por estructura, disciplina, sistema, clasificación y propiedades | Certificado | Explorador, filtros, vistas guardadas y comparación verificados por contrato DOM y pruebas de búsqueda/versiones. |
+| Presupuesto 5D con QTO, propuestas y estados de vínculo | Certificado | Propuesta QTO aprobada y vínculo partida 90–elemento–unidad–cantidad–coste–versión verificados en pipeline/tests. |
+| Planificación 4D con baseline, borrador y secuencia | Certificado | Actividad 188, propuesta aprobada y baseline R01 persistidos en Santiago Bermeo; cobertura validada. |
+| Matriz de tri-sincronización y navegación bidireccional | Certificado | Set oficial coordinado con presupuesto 13, Gantt 1, baseline 2 y versión 2; compuertas y contexto de selección verificados. |
+| Coordinación como bandeja de decisiones | Certificado | Conflictos, responsables, fechas, impactos y reconciliación cubiertos por `test_bim_coordination_core` y compuerta de oficialización. |
+| Seguimiento con previsto/ejecutado/coste/plazo/evidencias | Certificado | Registro de coste real, reportes 4D y evidencias cubiertos por ledger, field-report y UI contract tests. |
+| Entrega con as-built, incidencias, commissioning y dossier | Certificado | Dossier 1 aceptado con as-built AB-R01, punch PC-R01, sistema/activo y documento CDE. |
+| BIM opcional sin bloquear presupuesto/Gantt | Certificado | Tras reset BIM-only, proyecto 7 conserva presupuesto=1, Gantt=1 y revisión=0; solo se eliminaron filas BIM/coordination. |
 
 ## Criterio de cierre
 
