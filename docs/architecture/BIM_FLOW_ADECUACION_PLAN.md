@@ -38,3 +38,7 @@ Una partida puede navegar hacia sus actividades y elementos; una actividad hacia
 5. Bandeja de coordinación y reconciliación.
 6. Seguimiento y entrega.
 7. Migración de accesos y retirada controlada de la sección antigua.
+
+## Estado de implementación
+
+La primera entrega de la sección nueva ya está activa en la pestaña BIM. Incluye el centro de trabajo, el estado de entrada y superficies propias para presupuesto 5D, planificación 4D, coordinación, seguimiento y entrega. La superficie anterior permanece intacta. La siguiente iteración debe completar la selección BIM contextual y la navegación bidireccional entre partida, actividad y elemento antes de considerar válida la sustitución.

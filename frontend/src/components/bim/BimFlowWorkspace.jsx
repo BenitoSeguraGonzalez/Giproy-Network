@@ -15,6 +15,8 @@ import { useBimProjectWorkspace } from "../../hooks/bim/useBimProjectWorkspace";
 import BimCostEstimatePanel from "./BimCostEstimatePanel";
 import BimCoordinationControlPanel from "./BimCoordinationControlPanel";
 import BimReportsPanel from "./BimReportsPanel";
+import BimGanttPanel from "./BimGanttPanel";
+import BimHandoverDossierPanel from "./BimHandoverDossierPanel";
 
 const STAGES = [
   { id: "overview", label: "Inicio", icon: ClipboardCheck },
@@ -81,8 +83,10 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget }) 
   const empresaId = access?.resolved_company_id;
   const stagePanel = {
     costs: <BimCostEstimatePanel projectId={project?.id} empresaId={empresaId} embedded />,
+    schedule: <BimGanttPanel projectId={project?.id} empresaId={empresaId} />,
     coordination: <BimCoordinationControlPanel embedded projectId={project?.id} empresaId={empresaId} />,
     tracking: <BimReportsPanel projectId={project?.id} empresaId={empresaId} />,
+    handover: <BimHandoverDossierPanel projectId={project?.id} empresaId={empresaId} />,
   }[stage];
 
   return (
