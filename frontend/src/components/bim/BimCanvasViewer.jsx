@@ -165,14 +165,16 @@ const buildElementLayout = (elements = []) => {
 
         const width = 64 + ((element.id % 3) * 18);
         const height = 42 + ((element.id % 4) * 12);
-        const column = index % 4;
-        const row = Math.floor(index / 4);
+        // Distribuir la escena derivada en una retícula apaisada: el canvas
+        // debe aprovechar el ancho de trabajo sin crear una columna infinita.
+        const column = index % 10;
+        const row = Math.floor(index / 10);
         const offsetSeed = element.id % 11;
 
         return {
             ...element,
-            x: 48 + column * 122 + offsetSeed * 1.5,
-            y: 48 + row * 96 + (offsetSeed % 5) * 4,
+            x: 48 + column * 102 + offsetSeed * 1.5,
+            y: 48 + row * 72 + (offsetSeed % 5) * 4,
             width,
             height,
             geometrySource: 'derived',
