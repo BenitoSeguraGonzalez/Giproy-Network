@@ -168,6 +168,10 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
             <p className="truncate text-sm font-semibold text-zinc-950">BIM del proyecto</p>
             <p className="truncate text-[11px] text-zinc-600">{project?.nombre || "Proyecto activo"} · flujo operativo coordinado</p>
           </div>
+          <span role="status" title={omniClassEnabled ? "OmniClass activado · clasificación común disponible" : "OmniClass desactivado · la coordinación común entre presupuesto, Gantt y BIM puede quedar incompleta"} aria-label={omniClassEnabled ? "OmniClass activado, clasificación común disponible" : "OmniClass desactivado, coordinación común incompleta"} className={`inline-flex h-8 shrink-0 items-center gap-2 rounded-full border px-2.5 text-[11px] font-semibold ${omniClassEnabled ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-300 bg-amber-50 text-amber-900"}`}>
+            <span aria-hidden="true" className={`size-2 rounded-full ${omniClassEnabled ? "bg-emerald-500" : "bg-amber-500"}`} />
+            OmniClass
+          </span>
           <button type="button" onClick={refresh} disabled={loading} className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 text-xs font-semibold text-zinc-700 hover:border-orange-500 hover:text-orange-700 disabled:opacity-50"><RefreshCw className={loading ? "size-3.5 animate-spin" : "size-3.5"} aria-hidden="true" />Actualizar estado</button>
         </div>
         <nav className="flex min-w-0 overflow-x-auto border-t border-zinc-100 px-2" aria-label="Flujo operativo BIM">
@@ -177,7 +181,6 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
         </nav>
       </header>
       <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4 lg:p-6">
-        {!omniClassEnabled ? <div className="mb-4 flex items-start gap-2 border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950"><AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" /><p><strong>OmniClass desactivado.</strong> La coordinación común entre presupuesto, Gantt y BIM puede quedar incompleta.</p></div> : null}
         {warnings?.length ? <div className="mb-4 flex items-start gap-2 border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950"><AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" /><p>Carga parcial: {warnings.join(", ")}. Revisa el estado antes de oficializar vínculos.</p></div> : null}
         {error ? <div className="mb-4 border border-rose-300 bg-rose-50 p-3 text-xs text-rose-900" role="alert">No se pudo cargar el estado BIM: {String(error?.message || error)}</div> : null}
         {stage === "overview" ? (
