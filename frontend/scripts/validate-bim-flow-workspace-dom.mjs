@@ -36,8 +36,10 @@ try {
   assert.equal(await page.getByRole("heading", { name: "Resolver la coordinación" }).count(), 1);
   await flowNav.getByRole("button", { name: "Entrega", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Preparar la entrega" }).count(), 1);
+  assert.equal(await page.locator('[data-bim-handover-dossier]').count(), 1, "Entrega debe mostrar su dossier, no el visor 3D");
   await flowNav.getByRole("button", { name: "Seguimiento", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Controlar avance y coste real" }).count(), 1);
+  assert.equal(await page.locator('[data-bim-reports]').count(), 1, "Seguimiento debe mostrar reportes propios");
   assert.deepEqual(errors, [], `Errores de navegador: ${errors.join(" | ")}`);
   const widePage = await browser.newPage({ viewport: { width: 2560, height: 1440 }, screen: { width: 2560, height: 1440 } });
   await widePage.goto(`${baseUrl}/bim-flow-workspace-harness.html`, { waitUntil: "domcontentloaded" });
