@@ -695,18 +695,18 @@ const BimCanvasViewer = ({
             data-bim-canvas-ifc-filter-count={ifcClassFilters.length}
             className="flex min-h-[320px] min-w-0 max-w-full flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white"
         >
-            <div className="border-b border-zinc-200 px-5 py-4">
+            <div className="border-b border-zinc-200 px-3 py-2">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400">Canvas BIM</p>
-                        <h3 className="mt-1 text-sm font-black uppercase tracking-widest text-zinc-900">
-                            Viewer tecnico 2D incubado
+                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">Modelo BIM</p>
+                        <h3 className="mt-0.5 text-xs font-bold text-zinc-900">
+                            Inspección 2D
                         </h3>
                     </div>
                     <button
                         type="button"
                         onClick={() => setShowOnlyLinked((current) => !current)}
-                        className={`inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-[10px] font-black uppercase tracking-[0.18em] transition-colors ${
+                        className={`inline-flex h-8 items-center gap-2 rounded-lg border px-2.5 text-[9px] font-bold uppercase tracking-[0.12em] transition-colors ${
                             showOnlyLinked
                                 ? 'border-orange-200 bg-orange-50 text-[#F39200]'
                                 : 'border-zinc-200 bg-white text-zinc-600 hover:border-[#F39200] hover:text-[#F39200]'
@@ -718,7 +718,7 @@ const BimCanvasViewer = ({
                     <button
                         type="button"
                         onClick={fitScene}
-                        className="inline-flex h-9 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200]"
+                        className="inline-flex h-8 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200]"
                     >
                         <Maximize2 className="h-4 w-4" />
                         Encuadrar escena
@@ -935,8 +935,8 @@ const BimCanvasViewer = ({
                                 </div>
                             </div>
                         ) : null}
-                        <div className="pointer-events-none absolute bottom-4 left-4 rounded-2xl border border-zinc-200 bg-white/90 px-4 py-3 text-xs text-zinc-500 shadow-sm backdrop-blur">
-                            <p className="font-black uppercase tracking-[0.16em] text-zinc-700">
+                        <div className="pointer-events-none absolute bottom-2 left-2 max-w-[18rem] rounded-lg border border-zinc-200 bg-white/95 px-2.5 py-2 text-[10px] text-zinc-500 shadow-sm">
+                            <p className="font-bold uppercase tracking-[0.12em] text-zinc-700">
                                 {laidOutElements.length} elementos visibles
                             </p>
                             <p className="mt-1">Rueda: zoom • arrastra: paneo • clic: seleccionar</p>
@@ -959,9 +959,9 @@ const BimCanvasViewer = ({
                             ) : null}
                             {error ? <p className="mt-2 font-bold text-rose-500">No se pudo actualizar el workspace BIM.</p> : null}
                         </div>
-                        <div className="pointer-events-none absolute left-4 top-4 rounded-2xl border border-zinc-200 bg-white/90 px-4 py-3 text-xs text-zinc-500 shadow-sm backdrop-blur">
+                        <div className="pointer-events-none absolute left-2 top-2 w-[14rem] rounded-lg border border-zinc-200 bg-white/95 px-2.5 py-2 text-[10px] text-zinc-500 shadow-sm">
                             <p className="font-black uppercase tracking-[0.16em] text-zinc-700">Leyenda BIM</p>
-                            <div className="mt-3 flex flex-col gap-2">
+                            <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
                                 <div className="flex items-center gap-2">
                                     <span className="h-3 w-3 rounded-full border border-zinc-400 bg-[#CBD5E1]" />
                                     <span>Elemento sin vínculos</span>
@@ -987,7 +987,7 @@ const BimCanvasViewer = ({
                                     <span>Advertencia de validación</span>
                                 </div>
                             </div>
-                            <div className="mt-3 border-t border-zinc-200 pt-3 text-[11px]">
+                            <div className="mt-2 border-t border-zinc-200 pt-2 text-[10px]">
                                 <p>
                                     Geometría importada:{' '}
                                     {laidOutElements.filter((element) => element.geometrySource === 'imported').length}
@@ -996,7 +996,7 @@ const BimCanvasViewer = ({
                                 <p>Total visibles: {laidOutElements.length}</p>
                             </div>
                         </div>
-                        <div className="pointer-events-none absolute right-4 top-4 rounded-2xl border border-zinc-200 bg-white/90 p-3 text-xs text-zinc-500 shadow-sm backdrop-blur">
+                        <div className="pointer-events-none absolute right-2 top-2 rounded-lg border border-zinc-200 bg-white/95 p-2 text-[10px] text-zinc-500 shadow-sm">
                             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-700">Minimapa BIM</p>
                             <div
                                 ref={minimapRef}
@@ -1016,7 +1016,7 @@ const BimCanvasViewer = ({
                                         handleMinimapPointerDown(simulatedEvent);
                                     }
                                 }}
-                                className="relative mt-2 h-24 w-36 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
+                                className="relative mt-1 h-20 w-28 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50"
                             >
                                 {laidOutElements.map((element) => {
                                     const isActive = element.id === selectedElement?.id;
