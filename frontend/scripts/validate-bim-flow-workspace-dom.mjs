@@ -39,9 +39,14 @@ try {
   await flowNav.getByRole("button", { name: "Entrega", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Preparar la entrega" }).count(), 1);
   assert.equal(await page.locator('[data-bim-handover-dossier]').count(), 1, "Entrega debe mostrar su dossier, no el visor 3D");
+  await page.getByRole("button", { name: "Nuevo dossier" }).click();
+  assert.equal(await page.getByRole("dialog", { name: "Nuevo dossier digital" }).count(), 1, "Entrega debe permitir ensamblar un dossier");
+  await page.getByRole("button", { name: "Cerrar nuevo dossier" }).click();
   await flowNav.getByRole("button", { name: "Seguimiento", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Controlar avance y coste real" }).count(), 1);
   assert.equal(await page.locator('[data-bim-reports]').count(), 1, "Seguimiento debe mostrar reportes propios");
+  await page.getByRole("combobox", { name: "Tipo de informe BIM" }).selectOption("plan_actual");
+  assert.equal(await page.getByRole("textbox", { name: "Fecha de corte del informe" }).count(), 1, "Seguimiento debe permitir fecha de control");
   assert.deepEqual(errors, [], `Errores de navegador: ${errors.join(" | ")}`);
   const widePage = await browser.newPage({ viewport: { width: 2560, height: 1440 }, screen: { width: 2560, height: 1440 } });
   await widePage.goto(`${baseUrl}/bim-flow-workspace-harness.html`, { waitUntil: "domcontentloaded" });

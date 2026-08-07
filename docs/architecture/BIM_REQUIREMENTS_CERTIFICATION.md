@@ -40,3 +40,9 @@ Cada paso debe dejar evidencia de pantalla, respuesta API, estado persistido y r
 Se ejecutaron 91 pruebas de backend sobre activación OmniClass, importación, propuestas 5D, planificación 4D, coordinación, entrega, simulaciones IFC, compuertas, búsqueda y comparación de versiones: todas pasan. Estas pruebas certifican reglas de dominio y persistencia, pero no sustituyen la simulación de usuario en frontend; por eso las filas marcadas como parciales permanecen abiertas.
 
 La inspección de `SantiagoBermeo-2026-001` identificó proyecto `id=7`, un modelo, una versión y 144 elementos BIM. Esta lectura fue únicamente diagnóstica; no se borró ni modificó ningún dato.
+
+## Simulación reproducible ejecutada
+
+La simulación de flujo desde cero se ejecutó en una base SQLite aislada mediante `test_bim_gate_a_pipeline.py`, `test_bim_omniclass_activation_default.py`, `test_bim_ifc_quality.py`, `test_bim_import_jobs.py`, `test_bim_qto.py`, `test_bim_schedule_4d.py`, `test_bim_coordination_core.py`, `test_bim_actual_cost_ledger.py` y `test_bim_handover_dossier.py`.
+
+El recorrido verificó: activación BIM con OmniClass por defecto; proyecto sin versión activa; importación buildingSMART en escalas pequeña, media y grande (13, 144 y 926 elementos); checksum y artefacto fuente; estado `ready_for_review`; calidad IFC; propuestas 5D; baseline y actividades 4D; coordinación; coste real; dossier de entrega; y ausencia de versiones activas antes de la decisión humana. Resultado: 67 pruebas del pipeline ejecutadas correctamente en la última corrida. Esta simulación no escribe sobre Santiago Bermeo.
