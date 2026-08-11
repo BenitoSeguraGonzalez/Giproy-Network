@@ -33,6 +33,7 @@ nuevas ejecuciones BIM deben usar la estructura paralela de este directorio.
 | `BIM-TASK-0016` | N/A | Migracion Alembic del dominio BIM principal |
 | `BIM-TASK-0017` | N/A | Gobierno runtime de esquema BIM y tests focales |
 | `BIM-TASK-0018` | N/A | Contratos API BIM bajo flags y tenant |
+| `BIM-TASK-0195` | `TASK-2048` | Modal de dossier por encima del workspace |
 | `BIM-TASK-0019` | N/A | Importacion JSON BIM y workspace activo |
 | `BIM-TASK-0020` | N/A | Links BIM latentes con EDT |
 | `BIM-TASK-0021` | N/A | Links BIM latentes con APUs y Presupuesto |

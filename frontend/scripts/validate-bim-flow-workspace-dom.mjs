@@ -41,7 +41,17 @@ try {
   assert.equal(await page.locator('[data-bim-handover-dossier]').count(), 1, "Entrega debe mostrar su dossier, no el visor 3D");
   await page.getByRole("button", { name: "Nuevo dossier" }).click();
   assert.equal(await page.getByRole("dialog", { name: "Nuevo dossier digital" }).count(), 1, "Entrega debe permitir ensamblar un dossier");
-  await page.getByRole("button", { name: "Cerrar nuevo dossier" }).click();
+  const closeButton = page.getByRole("button", { name: "Cerrar nuevo dossier" });
+  const closeButtonReceivesPointer = await closeButton.evaluate((button) => {
+    const rect = button.getBoundingClientRect();
+    const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    return hit === button || button.contains(hit);
+  });
+  assert.equal(closeButtonReceivesPointer, true, "El modal de dossier debe quedar por encima del contenido BIM y recibir interacción");
+  await closeButton.click();
+  assert.equal(await page.getByRole("dialog", { name: "Nuevo dossier digital" }).count(), 0, "El modal debe cerrarse sin solapamientos");
+  await page.waitForFunction(() => document.activeElement?.matches('button') && document.activeElement?.textContent?.includes("Nuevo dossier"));
+  assert.equal(await page.getByRole("button", { name: "Nuevo dossier" }).evaluate((button) => document.activeElement === button), true, "El foco debe volver al disparador al cerrar el modal");
   await flowNav.getByRole("button", { name: "Seguimiento", exact: true }).click();
   assert.equal(await page.getByRole("heading", { name: "Controlar avance y coste real" }).count(), 1);
   assert.equal(await page.locator('[data-bim-reports]').count(), 1, "Seguimiento debe mostrar reportes propios");

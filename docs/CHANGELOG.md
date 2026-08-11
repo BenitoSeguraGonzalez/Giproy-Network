@@ -1,3 +1,10 @@
+### 2026-08-11 - Modal BIM de dossier sin solapamiento
+
+- `TASK-2048` / `BIM-TASK-0195`: el diálogo de nuevo dossier se eleva mediante
+  portal y deja de quedar detrás del contenido del workspace.
+- Regresión de puntero, cierre y restauración de foco; contrato BIM, harness DOM
+  y build Vite correctos.
+
 ### 2026-08-11 - Precertificacion legal-tecnica del beta publicado
 
 - `TASK-2045` congela la identidad del beta mediante IDs de imagen y hashes,

@@ -1,5 +1,12 @@
 # HANDOFF
 
+## 2026-08-11 - Gate BIM de dossier desbloqueado
+
+- `TASK-2048` / `BIM-TASK-0195` corrigen la intercepción del modal de entrega.
+- El diálogo usa portal, mantiene teclado y devuelve el foco al disparador.
+- Contrato BIM, Playwright DOM y build frontend pasan localmente.
+- Sin cambios de API, datos, tenant, permisos, licencias o feature flags.
+
 ## 2026-07-22 - Recuperacion de imagen referencial de proyecto
 
 - `TASK-2036` confirma divergencia entre PostgreSQL y el volumen persistente:
