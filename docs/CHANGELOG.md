@@ -7,7 +7,12 @@
 - La consulta pública de estado RUC queda protegida contra respuestas tardías.
 - Un nuevo smoke de símbolos runtime se integra al baseline enterprise; el gate
   de seguridad se sincroniza con `react-router-dom` 7.18.2.
-- Sin cambios de API, DB, auth, tenant, permisos, BIM, Docker ni despliegue.
+- Sin cambios de API, DB, auth, tenant, permisos, BIM ni configuración Docker.
+- Desplegado en beta como `task2051-20260811` desde `7ad2b23`; backend
+  `9867986b7019...`, frontend `131243327e98...` y cuatro servicios healthy.
+- Backup previo `giproy-beta-20260811-154835.sql.gz` (555 MB,
+  `15c74a48ad9e...`); OpenAPI interno/público y login HTTP 200, nueve heads
+  Alembic correctos y rollback preservado como `task2051-predeploy-20260811`.
 
 ### 2026-08-11 - Hardening clásico de configuración, precios y proyectos
 
