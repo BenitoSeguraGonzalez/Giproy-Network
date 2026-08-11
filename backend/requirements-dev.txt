@@ -1,0 +1,4 @@
+-r requirements.txt
+
+# Herramientas de desarrollo y prueba: no se instalan en la imagen publicada.
+pytest==8.4.2

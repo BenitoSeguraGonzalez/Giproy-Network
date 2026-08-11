@@ -481,7 +481,11 @@ def test_license_readonly_queues_reminder_email_every_five_days_and_final_day(db
     assert final_email.payload["days_until_delete"] == 0
 
 
-def test_email_dispatch_endpoint_is_superadmin_only_and_marks_pending_as_sent(db, sample_empresa):
+def test_email_dispatch_endpoint_is_superadmin_only_and_marks_pending_as_sent(db, sample_empresa, monkeypatch):
+    monkeypatch.setattr(
+        "app.services.license_notifications.send_transactional_email",
+        lambda **kwargs: {"success": True, "backend": "mock", **kwargs},
+    )
     buyer = _admin_user(db, sample_empresa.id)
     superadmin = Usuario(
         email="super-license-notices@giproy.test",
@@ -525,7 +529,11 @@ def test_email_dispatch_endpoint_is_superadmin_only_and_marks_pending_as_sent(db
         app.dependency_overrides.clear()
 
 
-def test_email_dispatch_endpoint_retries_failed_events_only_when_requested(db, sample_empresa):
+def test_email_dispatch_endpoint_retries_failed_events_only_when_requested(db, sample_empresa, monkeypatch):
+    monkeypatch.setattr(
+        "app.services.license_notifications.send_transactional_email",
+        lambda **kwargs: {"success": True, "backend": "mock", **kwargs},
+    )
     buyer = _admin_user(db, sample_empresa.id)
     superadmin = Usuario(
         email="super-retry-license-notices@giproy.test",

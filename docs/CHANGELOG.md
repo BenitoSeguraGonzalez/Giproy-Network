@@ -1,3 +1,17 @@
+### 2026-08-11 - Precertificacion legal-tecnica del beta publicado
+
+- `TASK-2045` congela la identidad del beta mediante IDs de imagen y hashes,
+  delimita artefactos publicados frente a herramientas internas y registra el
+  inventario inicial de licencias frontend/backend.
+- Se crea un informe de precertificacion que no declara produccion lista mientras
+  sigan pendientes TASK-2044, avisos de terceros, privacidad, titularidad y el
+  baseline final de la candidata 1:1.
+- Se separan los expedientes para registro de software, eventual patentabilidad
+  de una contribucion tecnica y Terminos/Privacidad del SaaS en Ecuador.
+- Se incorpora una matriz accionable de pendientes para titularidad,
+  dependencias, atribuciones, privacidad y preparacion del ejemplar SENADI.
+- Sin cambios de codigo, datos, schema, flags, licencias operativas o servidor.
+
 ### 2026-08-03 - Ledger transversal de Proyecto y cobertura de mutaciones (S04)
 
 - El ledger estructurado incorpora cadena SHA-256 por tenant/proyecto, nonce,
@@ -16370,3 +16384,46 @@ Cambios realizados
   S16 **82%**, S17 **75%**; fase A **82,87%**, fase B **78,52%**, fase C **89,00%**,
   fase D **83,80%**, fase E **20,00%**; total ponderado del programa
   **73,55%**. No se autoriza todavía escritura real.
+
+# 2026-08-10 - TASK-2043
+
+- Se valida y endurece el WAF de GiProy Beta entre Traefik y el frontend,
+  manteniendo OWASP CRS en `DetectionOnly` y sin modificar Traefik ni
+  cloudflared. Se preservan los límites de 0,5 CPU/256 MiB, se soportan cargas
+  IFC/JSON mayores, se minimiza y rota la auditoría y se configura la confianza
+  de `CF-Connecting-IP` solo desde la red proxy. Se añade hardening no
+  privilegiado y rollback focal; la propagación de IP a través del segundo
+  Nginx del frontend queda documentada como deuda previa y fuera del slice.
+
+# 2026-08-10 - TASK-2044
+
+- Se programa un estudio horario de siete días sobre el WAF en `DetectionOnly`,
+  con agregación sin queries, IP, cabeceras ni cuerpos y gate humano previo a
+  bloqueo. Se preparan y montan en solo lectura los puntos CRS 900/999, sin
+  exclusiones especulativas ni cambios en Traefik/cloudflared.
+### 2026-08-11 - Cierre tecnico de licencias y consentimiento versionado
+
+- `TASK-2046` añade evidencia append-only de aceptación legal, separa los
+  consentimientos opcionales y publica Terminos, Privacidad y avisos.
+- Se retira del árbol el paquete Aspose “Retail + License Key”; la integración
+  requiere licencia/JAR externos y falla cerrada cuando no están configurados.
+- `BIM-TASK-0194` sustituye React Leaflet Hippocratic-2.1 por un adaptador local
+  sobre Leaflet BSD-2-Clause, conservando mapas Classic/BIM y atribución OSM.
+- El generador de compliance produce CycloneDX, avisos, textos de licencia,
+  manifiesto por hashes y certificado técnico firmable desde el contenedor.
+- Build, lint focal, auditoría runtime, smokes legales/Classic/BIM y 11 pruebas
+  backend focalizadas están correctos. El baseline completo conserva 12 fallos
+  no relacionados sobre 912 pruebas y por ello la TASK general sigue abierta.
+# TASK-2047 - Registro internacional de empresas
+
+- El alta pública ya no fuerza ni bloquea el país en Ecuador.
+- RUC/SRI se aplica exclusivamente a Ecuador; España y otros países conservan
+  su identificador fiscal declarado y requieren razón social explícita.
+- La creación administrativa comparte la misma política fiscal por país y
+  presenta el detalle accionable de errores del backend.
+- Razón social, país, región, localidad y persona de contacto se persisten en
+  sus campos correspondientes, sin migraciones ni cambios BIM.
+- Suite backend `915 passed, 2 skipped`, build, baseline enterprise, smoke
+  anti-BIM y Playwright responsive de registro correctos.
+- Deploy pendiente: el harness BIM encendido detecta una superposición
+  preexistente en `Cerrar nuevo dossier` fuera del alcance de TASK-2047.

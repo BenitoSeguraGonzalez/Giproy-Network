@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- standalone Playwright harness entry */
 import React, { useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -20,7 +21,7 @@ const initialCatalog = {
     id: 401, project_id: 7, company_id: 1, revision: 1, status: 'active', project_root_code: 'GEO-01', project_revision: 3,
     justification: 'Servicios iniciales', created_by: 4, created_at: '2026-07-20T12:00:00Z',
     layers: [
-        { key: 'openstreetmap', name: 'OpenStreetMap', kind: 'basemap', service_type: 'xyz', url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; OpenStreetMap', layer_name: null, min_zoom: 3, max_zoom: 22, opacity: 1, visible: true, order: 0 },
+        { key: 'openstreetmap', name: 'OpenStreetMap', kind: 'basemap', service_type: 'xyz', url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>', layer_name: null, min_zoom: 3, max_zoom: 22, opacity: 1, visible: true, order: 0 },
         { key: 'site-logistics', name: 'Logística de obra', kind: 'overlay', service_type: 'wms', url: 'https://maps.example.test/wms', attribution: '', layer_name: 'site_logistics', min_zoom: 3, max_zoom: 22, opacity: 0.7, visible: false, order: 1 },
     ],
 };

@@ -68,14 +68,31 @@ class EmpresaService:
         return empresa_repo.get_all(db)
 
     def create_empresa(self, db: Session, empresa_in: EmpresaCreate, current_user: Usuario) -> Empresa:
-        if not empresa_in.ruc or len(empresa_in.ruc.strip()) != 13 or not empresa_in.ruc.strip().isdigit():
+        country = str(empresa_in.pais or "").strip()
+        if not country:
+            raise HTTPException(status_code=400, detail="Debe seleccionar el país de la empresa.")
+        is_ecuador = country.casefold() == "ecuador"
+        identifier = str(empresa_in.ruc or "").strip()
+        identifier = identifier if is_ecuador else identifier.upper()
+        if not identifier or len(identifier) > 20:
+            raise HTTPException(status_code=400, detail="La identificación fiscal debe contener entre 1 y 20 caracteres.")
+        if is_ecuador and (len(identifier) != 13 or not identifier.isdigit()):
             raise HTTPException(status_code=400, detail="El RUC empresarial debe contener exactamente 13 dígitos.")
+        if db.query(Empresa.id).filter(Empresa.ruc == identifier).first():
+            raise HTTPException(status_code=400, detail="Ya existe una empresa con esta identificación fiscal.")
+        empresa_in.ruc = identifier
+        empresa_in.pais = country
         from app.services.sri_ruc import lookup_ruc
 
-        fiscal_data = lookup_ruc(db, empresa_in.ruc.strip())
-        if not fiscal_data:
+        fiscal_data = lookup_ruc(db, identifier) if is_ecuador else None
+        if is_ecuador and not fiscal_data:
             raise HTTPException(status_code=409, detail="El RUC no consta en la fuente fiscal vigente.")
-        empresa_in.nombre = fiscal_data["business_name"]
+        if is_ecuador:
+            empresa_in.nombre = fiscal_data["business_name"]
+        else:
+            empresa_in.nombre = str(empresa_in.nombre or "").strip()
+            if not empresa_in.nombre:
+                raise HTTPException(status_code=400, detail="Debe indicar la razón social o nombre legal de la empresa.")
         license_start_date = empresa_in.license_start_date or date.today()
         license_end_date = empresa_in.license_end_date or (license_start_date + timedelta(days=365))
         if empresa_in.telefono:
@@ -95,13 +112,13 @@ class EmpresaService:
             license_start_date=license_start_date, 
             license_end_date=license_end_date
         )
-        db_obj.fiscal_status = fiscal_data.get("status")
-        db_obj.fiscal_taxpayer_type = fiscal_data.get("taxpayer_type")
-        db_obj.fiscal_start_date = fiscal_data.get("start_date")
-        db_obj.fiscal_economic_activity = fiscal_data.get("economic_activity")
-        db_obj.fiscal_source = fiscal_data.get("source")
-        db_obj.fiscal_source_date = fiscal_data.get("source_date")
-        db_obj.fiscal_verified_at = datetime.now(timezone.utc)
+        db_obj.fiscal_status = fiscal_data.get("status") if fiscal_data else None
+        db_obj.fiscal_taxpayer_type = fiscal_data.get("taxpayer_type") if fiscal_data else None
+        db_obj.fiscal_start_date = fiscal_data.get("start_date") if fiscal_data else None
+        db_obj.fiscal_economic_activity = fiscal_data.get("economic_activity") if fiscal_data else None
+        db_obj.fiscal_source = fiscal_data.get("source") if fiscal_data else "self_declared"
+        db_obj.fiscal_source_date = fiscal_data.get("source_date") if fiscal_data else None
+        db_obj.fiscal_verified_at = datetime.now(timezone.utc) if fiscal_data else None
         db.commit()
         db.refresh(db_obj)
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {
     MapPin, Calendar, Ruler, FileText, Image as ImageIcon,
     Save, Loader2, MapPinned, Briefcase, ChevronRight,
@@ -35,7 +35,7 @@ import { APP_MODAL_CLOSE_BUTTON_CLASS } from '../ui/app-modal';
 
 // Import Leaflet (we'll initialize it only if window is available)
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents } from '../maps/LeafletMap';
 import L from 'leaflet';
 
 // Fix Leaflet marker icon issue
@@ -274,9 +274,6 @@ const serializeEditableListItems = (items) => {
         : '';
 };
 
-const parseObjectiveItems = parseListItems;
-const serializeObjectiveItems = serializeListItems;
-
 const formatDocumentSize = (bytes) => {
     const value = Number(bytes || 0);
     if (!Number.isFinite(value) || value <= 0) return '0 KB';
@@ -289,20 +286,6 @@ const formatDocumentDate = (dateValue) => {
     const date = new Date(dateValue);
     if (Number.isNaN(date.getTime())) return 'Sin fecha';
     return date.toLocaleDateString('es-ES');
-};
-
-const formatContractMoney = (amount, currency = 'USD') => {
-    const numericAmount = Number(amount || 0);
-    if (!Number.isFinite(numericAmount)) return '0';
-    try {
-        return new Intl.NumberFormat('es-EC', {
-            style: 'currency',
-            currency: currency || 'USD',
-            maximumFractionDigits: 2,
-        }).format(numericAmount);
-    } catch {
-        return `${numericAmount.toLocaleString('es-EC', { maximumFractionDigits: 2 })} ${currency || ''}`.trim();
-    }
 };
 
 const joinGeocodeQueryParts = (parts) => parts
@@ -713,7 +696,7 @@ const GeoMapViewport = React.memo(({
         keyboard={fullscreen}
         style={{ height: '100%', width: '100%' }}
     >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <MapCenterUpdater lat={lat} lng={lng} zoom={zoom || DEFAULT_MAP_CENTER.zoom} />
         <MapSizeUpdater trigger={sizeTrigger} />
         <LocationMarker
@@ -772,17 +755,6 @@ const DatosProyecto = ({ project, initialDetail = null, onProjectNameSaved }) =>
     const [categorias, setCategorias] = useState([]);
     const [provincias, setProvincias] = useState([]);
     const [cantones, setCantones] = useState([]);
-
-    const openDatePicker = useCallback((inputRef) => {
-        const input = inputRef?.current;
-        if (!input || !isAdmin) return;
-        input.focus();
-        if (typeof input.showPicker === 'function') {
-            input.showPicker();
-            return;
-        }
-        input.click();
-    }, [isAdmin]);
 
     const loadCategorias = useCallback(async (tipoId) => {
         try {

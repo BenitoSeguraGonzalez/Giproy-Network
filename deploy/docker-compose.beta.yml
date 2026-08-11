@@ -161,15 +161,78 @@ services:
     depends_on:
       backend:
         condition: service_started
+    # El frontend queda aislado de Traefik y solo acepta tráfico desde el WAF
+    # por la red backend.
+    networks:
+      - backend
+
+  waf:
+    # Reverse proxy WAF aislado. CRS permanece en detección hasta completar la
+    # ventana de observación y las exclusiones focales de falsos positivos.
+    image: owasp/modsecurity-crs:4.25-nginx-lts@sha256:dc68fb3684bd5e68d0b59a4b27a4b41847c16815e0bd4f9dac4c74b8d5c4028b
+    container_name: giproy-beta-waf
+    restart: unless-stopped
+    environment:
+      BACKEND: http://giproy-beta-frontend:80
+      SERVER_NAME: ${GIPROY_HOST}
+      PORT: "8080"
+      MODSEC_RULE_ENGINE: DetectionOnly
+      MODSEC_TAG: giproy-beta-waf
+      MODSEC_AUDIT_ENGINE: RelevantOnly
+      MODSEC_AUDIT_LOG_FORMAT: JSON
+      # Evita persistir cuerpos, credenciales y PII en el audit log.
+      MODSEC_AUDIT_LOG_PARTS: "AHZ"
+      ALLOWED_METHODS: "GET HEAD POST OPTIONS PUT PATCH DELETE"
+      BLOCKING_PARANOIA: "1"
+      DETECTION_PARANOIA: "1"
+      ANOMALY_INBOUND: "5"
+      ANOMALY_OUTBOUND: "4"
+      # GiProy maneja JSON operativos extensos e IFC reales > 13 MiB.
+      MODSEC_REQ_BODY_LIMIT: "134217728"
+      MODSEC_REQ_BODY_NOFILES_LIMIT: "16777216"
+      MODSEC_REQ_BODY_LIMIT_ACTION: Reject
+      MAX_FILE_SIZE: "134217728"
+      COMBINED_FILE_SIZES: "134217728"
+      # No inspeccionar respuestas grandes/artefactos BIM; el WAF protege la
+      # entrada y evita retener datos de respuesta en memoria.
+      MODSEC_RESP_BODY_ACCESS: "Off"
+      # Traefik es el único peer permitido y Cloudflare entrega la IP original.
+      REAL_IP_HEADER: CF-Connecting-IP
+      SET_REAL_IP_FROM: 172.18.0.0/16
+      NGINX_X_FORWARDED_PROTO: https
+      NGINX_X_FORWARDED_PORT: "443"
+      NGINX_WORKER_PROCESSES: "2"
+    depends_on:
+      frontend:
+        condition: service_healthy
+    volumes:
+      - ./waf/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:ro
+      - ./waf/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:ro
+    networks:
+      - backend
+      - proxy
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
       - traefik.http.routers.giproy-beta.rule=Host(`${GIPROY_HOST}`)
       - traefik.http.routers.giproy-beta.entrypoints=web
-      - traefik.http.services.giproy-beta.loadbalancer.server.port=80
-    networks:
-      - proxy
-      - backend
+      - traefik.http.services.giproy-beta.loadbalancer.server.port=8080
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+          pids: 64
 
 volumes:
   giproy_beta_postgres_data:

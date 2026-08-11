@@ -3,6 +3,10 @@ import sys
 from decimal import Decimal
 from pprint import pprint
 
+# Script diagnóstico manual que usa la base configurada; no pertenece a la
+# suite aislada de pytest.
+__test__ = False
+
 # Añadir el raíz del backend al path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

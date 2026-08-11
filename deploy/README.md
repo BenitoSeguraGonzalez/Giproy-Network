@@ -60,6 +60,20 @@ ese Traefik. Por eso el host inicial recomendado es:
 GIPROY_HOST=giproy.excomconsultores.com
 ```
 
+### Recreación segura del WAF después de cambiar el frontend
+
+El WAF Nginx resuelve `BACKEND` al arrancar y puede conservar la IP anterior
+del contenedor frontend. Después de recrear `giproy-beta-frontend`, recrear
+también únicamente el WAF para evitar que una ruta de GiProy sirva otro
+proyecto:
+
+```bash
+GIPROY_IMAGE_TAG=<tag> docker compose -f deploy/docker-compose.beta.yml up -d --force-recreate waf
+```
+
+Verificar desde Traefik que `/auth/login` contiene `GIPROY | Engineering ERP`
+antes de validar el despliegue públicamente.
+
 ## Operacion recurrente
 
 Para repetir despliegues:

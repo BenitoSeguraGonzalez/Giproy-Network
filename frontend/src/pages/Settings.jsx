@@ -766,7 +766,7 @@ const Settings = () => {
             fetchData();
         } catch (error) {
             globalThis.reportClientError?.("Error al procesar empresa:", error);
-            appAlert("Error al procesar empresa");
+            appAlert(error.response?.data?.detail || "Error al procesar empresa");
         }
     };
 
@@ -2967,8 +2967,9 @@ const Settings = () => {
                                     </div>
                                     <div className="grid grid-cols-1 gap-4">
                                         <div className="space-y-2">
-                                            <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">RUC</Label>
-                                            <Input required value={newEmpresa.ruc} onChange={e => setNewEmpresa({ ...newEmpresa, ruc: e.target.value })} className="h-12 rounded-xl bg-zinc-50 border-zinc-200" />
+                                            <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">{newEmpresa.pais === 'Ecuador' ? 'RUC' : 'Identificación fiscal'}</Label>
+                                            <Input required maxLength={newEmpresa.pais === 'Ecuador' ? 13 : 20} inputMode={newEmpresa.pais === 'Ecuador' ? 'numeric' : 'text'} value={newEmpresa.ruc} onChange={e => setNewEmpresa({ ...newEmpresa, ruc: e.target.value })} className="h-12 rounded-xl bg-zinc-50 border-zinc-200" />
+                                            {newEmpresa.pais && newEmpresa.pais !== 'Ecuador' && <p className="text-[9px] font-bold text-zinc-500 ml-1">NIF/NIE/CIF o identificador fiscal equivalente. No se consulta el SRI.</p>}
                                         </div>
                                     </div>
                                     <div className="space-y-2">

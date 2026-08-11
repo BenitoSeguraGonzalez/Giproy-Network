@@ -12,7 +12,7 @@ from app.services.bim.site_georeference_service import get_active_site_georefere
 
 
 def test_site_georeference_endpoints_are_registered():
-    routes = {(route.path, method) for route in app.routes for method in getattr(route, "methods", set())}
+    routes = {(path, method.upper()) for path, operations in app.openapi()["paths"].items() for method in operations}
     path = "/api/v1/bim/projects/{project_id}/site-georeference"
     assert (path, "GET") in routes
     assert (path, "PUT") in routes

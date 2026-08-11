@@ -128,6 +128,7 @@ def test_conecta_checkout_creates_independent_accumulative_packs(db):
     product = _bootstrap_conecta(db)
     buyer_company = _create_company(db, name="Compradora Conecta", seq=9201)
     buyer = _create_user(db, email="buyer-conecta@giproy.test", company=buyer_company)
+    _assign_transfer_license(db, buyer_company)
 
     order = marketplace_checkout_service.checkout(
         db,

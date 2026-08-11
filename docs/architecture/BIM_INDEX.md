@@ -42,6 +42,7 @@ planificacion legacy y no deben reutilizarse para cerrar trabajo BIM nuevo.
 ### TASK madre de control BIM
 
 - [BIM-TASK-0000](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0000.md)
+- [BIM-TASK-0194 - Adaptador Leaflet permisivo](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0194.md)
 
 ### Subtasks del programa BIM
 

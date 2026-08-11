@@ -1,5 +1,14 @@
 # Estado Real del Codigo BIM
 
+## Actualizacion 2026-08-11 - Mapa sin dependencia Hippocratic
+
+- `TASK-2046` / `BIM-TASK-0194` retiran `react-leaflet` y
+  `@react-leaflet/core` del runtime publicado.
+- Un adaptador React local conserva XYZ, WMS, puntos, tooltips y selección sobre
+  Leaflet BSD-2-Clause, con atribución OpenStreetMap completa.
+- Build, smoke visual BIM, aislamiento anti-BIM y mapa Classic están correctos;
+  no cambia API, esquema ni datos BIM.
+
 ## Actualizacion 2026-07-22 - Gobierno de roles y carga IFC visible
 
 - `TASK-2038` / `BIM-TASK-0191` reconocen al administrador de empresa como

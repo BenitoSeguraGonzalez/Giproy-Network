@@ -604,6 +604,16 @@ def delete_proyecto(
         )
 
     target = db.query(Proyecto).filter(Proyecto.id == id, Proyecto.empresa_id == target_empresa_id).first()
+    target_snapshot = (
+        {
+            "empresa_id": target.empresa_id,
+            "id": target.id,
+            "codigo_root": target.codigo_root,
+            "revision": target.revision,
+        }
+        if target
+        else None
+    )
     try:
         success = proyecto_service.soft_delete_full_project(
             db=db,
@@ -621,8 +631,22 @@ def delete_proyecto(
         ) from exc
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Proyecto no encontrado.")
-    if target:
-        _record_project_event(db, project=target, actor=current_user, event_type="project_recycled", message="Proyecto movido a la papelera.", operation_status="recycled", payload={"delete_project_base": delete_project_base})
+    if target_snapshot:
+        record_audit_event(
+            db,
+            module="proyecto",
+            event_type="project_recycled",
+            message="Proyecto movido a la papelera.",
+            actor=current_user,
+            empresa_id=target_snapshot["empresa_id"],
+            proyecto_id=target_snapshot["id"],
+            proyecto_codigo_root=target_snapshot["codigo_root"],
+            proyecto_revision=target_snapshot["revision"],
+            entity_type="project",
+            entity_id=target_snapshot["id"],
+            operation_status="recycled",
+            payload={"delete_project_base": delete_project_base},
+        )
     return
 
 @router.post("/{id}/assign", response_model=Any)

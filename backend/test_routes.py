@@ -11,8 +11,8 @@ client = TestClient(app)
 
 def test_routes():
     print("Listing all registered routes:")
-    for route in app.routes:
-        print(f"Path: {route.path}, Name: {getattr(route, 'name', 'N/A')}")
+    for path, operations in app.openapi()["paths"].items():
+        print(f"Path: {path}, Methods: {', '.join(method.upper() for method in operations)}")
 
     # Test the specific EDO route
     # Note: This doesn't need the server running, it tests the app object directly

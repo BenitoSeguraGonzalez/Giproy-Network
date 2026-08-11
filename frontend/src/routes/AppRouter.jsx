@@ -5,6 +5,7 @@ import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
 import VerifyRegistration from '../pages/VerifyRegistration';
 import RucReviewStatus from '../pages/RucReviewStatus';
+import LegalDocument from '../pages/LegalDocument';
 import ProtectedRoute from '../components/ProtectedRoute';
 import AppLayout from '../layouts/AppLayout';
 import { PresupuestoProvider } from '../context/PresupuestoContext';
@@ -95,6 +96,7 @@ const AppRouter = () => {
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/verify-registration" element={<VerifyRegistration />} />
                 <Route path="/ruc-review" element={<RucReviewStatus />} />
+                <Route path="/legal/:document" element={<LegalDocument />} />
 
                 {/* Rutas protegidas — con encabezado persistente (AppLayout) */}
                 <Route path="/" element={withProtectedLayout(<Dashboard />)} />

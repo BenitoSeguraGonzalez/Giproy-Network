@@ -2,6 +2,10 @@ import api from './axiosConfig';
 import { withoutTenant } from './tenant';
 
 export const publicAuthApi = {
+    getLegalManifest: async () => {
+        const response = await api.get('/legal/manifest', withoutTenant());
+        return response.data;
+    },
     register: async (payload) => {
         const response = await api.post('/register', payload, withoutTenant());
         return response.data;
