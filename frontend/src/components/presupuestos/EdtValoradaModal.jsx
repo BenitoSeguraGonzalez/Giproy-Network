@@ -307,6 +307,10 @@ const EdtValoradaModal = ({ isOpen, onClose, onNavigateToNode }) => {
         }
     }, [selectedNode, selectedNodeId, setSelectedNodeId]);
 
+    const [generatingReport, setGeneratingReport] = useState(null);
+    const [reportPreview, setReportPreview] = useState(null);
+    const [showReportPreview, setShowReportPreview] = useState(false);
+
     if (!isOpen) {
         return null;
     }
@@ -331,10 +335,6 @@ const EdtValoradaModal = ({ isOpen, onClose, onNavigateToNode }) => {
         onNavigateToNode?.(nodeId);
         onClose();
     };
-
-    const [generatingReport, setGeneratingReport] = useState(null);
-    const [reportPreview, setReportPreview] = useState(null);
-    const [showReportPreview, setShowReportPreview] = useState(false);
 
     const handleDownloadEdtReport = async (type) => {
         if (!activeProyecto?.id) return;

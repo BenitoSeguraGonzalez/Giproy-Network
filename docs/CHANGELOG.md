@@ -1,3 +1,26 @@
+### 2026-08-11 - Hardening transversal de módulos clásicos no BIM
+
+- `TASK-2051` corrige fallos runtime en Gantt, Cronogramas, EDT valorada y el
+  checkout de Marketplace, incluido un orden condicional ilegal de hooks.
+- Dashboard reduce renders y reconstrucciones del observador, y sus tarjetas
+  recuperan semántica de botón, teclado y foco visible.
+- La consulta pública de estado RUC queda protegida contra respuestas tardías.
+- Un nuevo smoke de símbolos runtime se integra al baseline enterprise; el gate
+  de seguridad se sincroniza con `react-router-dom` 7.18.2.
+- Sin cambios de API, DB, auth, tenant, permisos, BIM, Docker ni despliegue.
+
+### 2026-08-11 - Hardening clásico de configuración, precios y proyectos
+
+- `TASK-2050` corrige el crash al abrir restauraciones internas desde
+  Configuración y añade una guarda de regresión para el setter legacy eliminado.
+- Proyectos descarta respuestas tardías entre empresas, tolera respuestas con
+  forma inesperada y procesa detalles en lotes de ocho para reducir presión API.
+- Precios Unitarios recupera navegación semántica por teclado, estados disabled,
+  foco visible y transiciones más económicas.
+- Configuración elimina referencias BIM de la experiencia clásica y su QA visual
+  cubre desktop y tablet en siete zonas operativas.
+- Sin cambios de API, DB, auth, tenant, permisos, Docker ni despliegue.
+
 ### 2026-08-11 - Modal BIM de dossier sin solapamiento
 
 - `TASK-2048` / `BIM-TASK-0195`: el diálogo de nuevo dossier se eleva mediante

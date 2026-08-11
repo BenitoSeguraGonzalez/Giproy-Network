@@ -333,7 +333,7 @@ const Settings = () => {
         } finally {
             setLoading(false);
         }
-    }, [activeTab, user?.rol, user?.empresa_id, selectedEmpresa?.id, selectedBaseTrabajo?.tipo, selectedBaseTrabajo?.id, isSuperAdmin]);
+    }, [activeTab, user?.empresa_id, selectedEmpresa?.id, selectedBaseTrabajo?.tipo, selectedBaseTrabajo?.id, isSuperAdmin, setSelectedEmpresa]);
 
     const fetchPaises = useCallback(async () => {
         try {
@@ -658,7 +658,7 @@ const Settings = () => {
         if (requestedTab === 'usuarios' && user?.rol !== 'usuario') {
             setActiveTab('usuarios');
         }
-    }, [requestedTab, user?.rol, isSuperAdmin]);
+    }, [requestedTab, user?.rol, isSuperAdmin, navigate]);
 
     useEffect(() => {
         fetchData();
@@ -884,7 +884,7 @@ const Settings = () => {
             empresa_id: user.empresa_id || '',
         });
         marketplaceProfileEditHandledRef.current = true;
-    }, [requestedEditUser, user, isSuperAdmin]);
+    }, [requestedEditUser, user, isSuperAdmin, navigate]);
 
     const handleDeleteUsuario = async (u) => {
         const role = (u.rol || '').toLowerCase();
@@ -1442,15 +1442,15 @@ const Settings = () => {
                                         Uso de OmniClass
                                     </Label>
                                     <p className="text-[10px] text-zinc-500 font-medium leading-relaxed">
-                                        Si se desactiva, GiProy conserva los códigos de origen pero deja de resolver la estructura común en catálogos, APUs, presupuesto, Gantt y BIM.
+                                        Si se desactiva, GiProy conserva los códigos de origen pero deja de resolver la estructura común en catálogos, APUs, presupuesto, Gantt y modelos coordinados.
                                     </p>
                                     {miEmpresa?.use_omniclass === false ? (
                                         <div className="mt-3 border border-amber-300 bg-amber-50 p-3 text-[10px] font-semibold leading-relaxed text-amber-950" role="alert">
                                             <div className="flex gap-2">
                                             <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                                            <span>Ruptura estructural activa: presupuesto, planificación y modelos BIM pueden usar clasificaciones incompatibles. Los vínculos se conservarán, pero no podrán considerarse plenamente coordinados.</span>
+                                            <span>Ruptura estructural activa: presupuesto, planificación y modelos digitales pueden usar clasificaciones incompatibles. Los vínculos se conservarán, pero no podrán considerarse plenamente coordinados.</span>
                                             </div>
-                                            <label className="mt-3 flex items-start gap-2 normal-case tracking-normal"><Checkbox checked={omniclassBreakAcknowledged} onCheckedChange={(checked) => setOmniclassBreakAcknowledged(checked === true)} className="mt-0.5" /><span>Comprendo que Presupuesto, Gantt y BIM dejarán de compartir una clasificación contractual común.</span></label>
+                                            <label className="mt-3 flex items-start gap-2 normal-case tracking-normal"><Checkbox checked={omniclassBreakAcknowledged} onCheckedChange={(checked) => setOmniclassBreakAcknowledged(checked === true)} className="mt-0.5" /><span>Comprendo que Presupuesto, Gantt y los modelos digitales dejarán de compartir una clasificación contractual común.</span></label>
                                             <Label htmlFor="omniclass-change-reason" className="mt-3 block text-[10px] font-bold text-amber-950">Motivo de desactivación</Label>
                                             <textarea id="omniclass-change-reason" value={omniclassChangeReason} onChange={(event) => setOmniclassChangeReason(event.target.value)} rows={3} className="mt-1 w-full resize-none rounded-lg border border-amber-300 bg-white p-2 text-xs font-medium text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600" placeholder="Explique por qué el proyecto operará sin coordinación OmniClass" />
                                         </div>
@@ -2030,12 +2030,6 @@ const Settings = () => {
                                                                 onClick={() => {
                                                                     setCompanyBackupInternalRestoreTarget(item);
                                                                     setCompanyBackupRestoreResult(null);
-                                                                    setCompanyBackupRestoreConfirmations({
-                                                                        impact: '',
-                                                                        companyName: '',
-                                                                        userEmail: '',
-                                                                        phrase: '',
-                                                                    });
                                                                 }}
                                                                 className="inline-flex min-h-[36px] items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-3 text-[9px] font-black uppercase tracking-[0.16em] text-red-700 transition-colors hover:bg-red-50"
                                                             >

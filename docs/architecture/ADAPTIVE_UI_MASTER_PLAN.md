@@ -257,7 +257,7 @@ eliminado sin tocar el stack beta activo.
 Gate de dependencias: Axios `1.18.1` y `form-data` `4.0.6`. El smoke
 `npm run smoke:deployment-security` impide regresiones y solo admite el aviso
 de React Router relativo a RSC mientras el codigo conserve arquitectura SPA
-sin APIs RSC. React Router DOM queda en `7.18.1`, ultima version estable
+sin APIs RSC. React Router DOM queda en `7.18.2`, version validada y bloqueada
 disponible y validada por las suites del proyecto.
 
 ## Lista de certificacion fisica Lenovo Tab P12

@@ -170,8 +170,12 @@ for (const viewport of viewports) {
   await page.route('**/api/v1/proyectos/**', async (route) => route.fulfill({ json: [] }));
 
   await page.goto(`${baseUrl}/settings-empresa-harness.html`, { waitUntil: 'domcontentloaded' });
-  await page.waitForSelector('text=Settings', { timeout: 30000 });
-  await page.waitForSelector('[data-settings-company-tabs="mi-empresa"]', { timeout: 30000 });
+  try {
+    await page.waitForSelector('[data-settings-company-tabs="mi-empresa"]', { timeout: 30000 });
+  } catch (error) {
+    const bodyText = await page.locator('body').innerText().catch(() => '');
+    throw new Error(`Settings empresa no monto su estructura. URL=${page.url()} errores=${JSON.stringify(consoleErrors)} body=${bodyText.slice(0, 500)} vite=${viteOutput.slice(-1000)} causa=${error.message}`);
+  }
   await page.waitForTimeout(300);
 
   const readState = async (label) => page.evaluate((stateLabel) => {
@@ -198,10 +202,10 @@ for (const viewport of viewports) {
       bodyScrollWidth: document.documentElement.scrollWidth,
       bodyClientWidth: document.documentElement.clientWidth,
       hasHorizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 2,
-      hasSettingsEmpresa: visibleText.includes('Settings Empresa') || visibleText.includes('Settings'),
+      hasSettingsEmpresa: Boolean(document.querySelector('[data-settings-company-tabs="mi-empresa"]')),
       hasAjustesGlobales: visibleText.includes('Ajustes Globales'),
       hasBimTooling: /Cargar IFC|Visor BIM|Federaci[oó]n de modelos|Herramientas BIM/i.test(visibleText),
-      hasOmniclassStructuralWarning: visibleText.includes('Ruptura estructural activa') && visibleText.includes('presupuesto, planificación y modelos BIM'),
+      hasOmniclassStructuralWarning: visibleText.includes('Ruptura estructural activa') && visibleText.includes('presupuesto, planificación y modelos digitales'),
       visibleTextLength: visibleText.length,
       textOverflowNodes,
       zones: {
@@ -267,7 +271,7 @@ for (const viewport of viewports) {
   await page.getByText('Ruptura estructural activa', { exact: false }).waitFor();
   const savePreferences = page.getByRole('button', { name: /Guardar Preferencias/i });
   if (!(await savePreferences.isDisabled())) throw new Error(`${viewport.name}/preferencias: guardar debe bloquearse sin reconocimiento y motivo`);
-  await page.getByText(/Comprendo que Presupuesto, Gantt y BIM/).click();
+  await page.getByText(/Comprendo que Presupuesto, Gantt y los modelos digitales/).click();
   await page.getByLabel('Motivo de desactivación').fill('Contrato externo sin clasificación común');
   if (await savePreferences.isDisabled()) throw new Error(`${viewport.name}/preferencias: guardar debe habilitarse tras reconocimiento informado`);
   states.push(await readState('preferencias'));
@@ -308,7 +312,7 @@ for (const viewport of viewports) {
     if (!state?.zones?.[zone]) failures.push(`${viewport.name}/${label}: falta zona ${zone}`);
   }
   const preferencesState = states.find((item) => item.label === 'preferencias');
-  if (!preferencesState?.hasOmniclassStructuralWarning) failures.push(`${viewport.name}/preferencias: falta aviso estructural OmniClass Presupuesto-Gantt-BIM`);
+  if (!preferencesState?.hasOmniclassStructuralWarning) failures.push(`${viewport.name}/preferencias: falta aviso estructural OmniClass para presupuesto, planificación y modelos digitales`);
 
   const relevantConsoleErrors = consoleErrors.filter((item) => !/Failed to load resource/i.test(item));
   if (relevantConsoleErrors.length > 0) failures.push(`${viewport.name}: errores consola ${JSON.stringify(relevantConsoleErrors.slice(0, 5))}`);

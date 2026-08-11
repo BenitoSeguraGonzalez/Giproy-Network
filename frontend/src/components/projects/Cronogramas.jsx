@@ -4471,7 +4471,7 @@ const CronogramaRecursosReadOnly = ({
         const value = manualLimits?.[String(resourceId)]?.[String(periodId)];
         return value === null || value === undefined ? '' : String(value);
     };
-    const getPeriodCapacityStatus = (resourceId, periodId, demand) => {
+    const getPeriodCapacityStatus = useCallback((resourceId, periodId, demand) => {
         const rawLimit = manualLimits?.[String(resourceId)]?.[String(periodId)];
         if (rawLimit === null || rawLimit === undefined || rawLimit === '') {
             return { hasLimit: false, limit: null, excess: 0, overloaded: false };
@@ -4488,7 +4488,7 @@ const CronogramaRecursosReadOnly = ({
             excess,
             overloaded: excess > 0,
         };
-    };
+    }, [manualLimits]);
     const overloadSummary = useMemo(() => {
         const overloadedResources = new Set();
         let overloadedPeriods = 0;
@@ -4507,7 +4507,7 @@ const CronogramaRecursosReadOnly = ({
             periods: overloadedPeriods,
             maxExcess,
         };
-    }, [manualLimits, rows]);
+    }, [getPeriodCapacityStatus, rows]);
     const levelingSimulation = useMemo(() => {
         const moves = [];
         const unresolved = [];
@@ -4569,7 +4569,7 @@ const CronogramaRecursosReadOnly = ({
             unresolvedQuantity,
             overloadedQuantity,
         };
-    }, [manualLimits, rows]);
+    }, [getPeriodCapacityStatus, rows]);
     const categoryGroups = useMemo(() => {
         const grouped = new Map();
         rows.forEach((row) => {
@@ -5187,6 +5187,15 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
         () => buildDisplayRows(selectedBudgetDetail?.detalle, cronograma?.rows || [], selectedBudgetDetail?.edt_tree),
         [selectedBudgetDetail?.detalle, selectedBudgetDetail?.edt_tree, cronograma?.rows],
     );
+    const currency = cronograma?.moneda || 'USD';
+    const decMoneda = cronograma?.dec_moneda ?? 2;
+    const activeManualTemporalSummary = useMemo(
+        () => summarizeActiveManualTemporalRows(displayRows, currency, decMoneda),
+        [currency, decMoneda, displayRows],
+    );
+    const selectedDistributionModeLabel = DISTRIBUTION_OPTIONS.find(
+        (option) => option.value === configState.distributionMode,
+    )?.label || 'Usuario';
     const trabajoDisplayRows = useMemo(
         () => buildDisplayRows(selectedBudgetDetail?.detalle, cronogramaTrabajo?.rows || [], selectedBudgetDetail?.edt_tree),
         [selectedBudgetDetail?.detalle, selectedBudgetDetail?.edt_tree, cronogramaTrabajo?.rows],

@@ -6,7 +6,7 @@ import { globSync } from 'node:fs';
 const packageLock = JSON.parse(readFileSync(new URL('../package-lock.json', import.meta.url), 'utf8'));
 assert.equal(packageLock.packages['node_modules/axios']?.version, '1.18.1', 'Axios debe conservar la version corregida');
 assert.equal(packageLock.packages['node_modules/form-data']?.version, '4.0.6', 'form-data debe conservar la version corregida');
-assert.equal(packageLock.packages['node_modules/react-router-dom']?.version, '7.18.1', 'React Router DOM debe conservar la ultima version SPA validada');
+assert.equal(packageLock.packages['node_modules/react-router-dom']?.version, '7.18.2', 'React Router DOM debe conservar la version SPA validada y bloqueada en el lockfile');
 
 const sourceFiles = globSync('src/**/*.{js,jsx}', { cwd: new URL('..', import.meta.url), exclude: ['**/node_modules/**'] });
 const rscTokens = ['unstable_RSC', 'RSCStaticRouter', 'createCallServer', 'decodeReply', 'react-server-dom'];

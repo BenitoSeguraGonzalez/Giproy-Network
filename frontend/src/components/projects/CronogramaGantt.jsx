@@ -5720,7 +5720,7 @@ const regroupGanttOperationalSubbarsByParentInitial = (subbars = [], activeSubba
     if (!earliestStart || !latestEnd) return null;
     const mergedSegment = {
         ...activeSubbar,
-        id: createGanttOperationalSubbarId(activeSubbar?.id || periodToken),
+        id: createGanttOperationalSubbarId(activeSubbar?.id || parentToken),
         starts_at: earliestStart.toISOString(),
         ends_at: latestEnd.toISOString(),
         percent: roundConfigNumber(grouped.reduce((sum, segment) => sum + Number(segment?.percent || 0), 0), 4),

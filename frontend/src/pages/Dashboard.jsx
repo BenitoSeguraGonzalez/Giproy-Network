@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import {
     Calculator,
@@ -19,7 +19,8 @@ const Dashboard = () => {
     const moduleCardRefs = useRef({});
     const [activeModuleId, setActiveModuleId] = useState('unit-prices');
 
-    const modules = [
+    const modules = useMemo(() => {
+        const availableModules = [
         {
             id: 'unit-prices',
             title: 'Precios Unitarios',
@@ -47,10 +48,10 @@ const Dashboard = () => {
             color: 'bg-zinc-50',
             borderColor: 'border-zinc-200'
         }
-    ];
+        ];
 
-    if (user?.rol?.toLowerCase() === 'superadministrador') {
-        modules.push({
+        if (user?.rol?.toLowerCase() === 'superadministrador') {
+            availableModules.push({
             id: 'admin-global',
             title: 'Administración Global',
             description: 'Gobierno de plataforma, comunicados, auditoría y herramientas del sistema.',
@@ -58,14 +59,15 @@ const Dashboard = () => {
             path: '/admin-global',
             color: 'bg-violet-50',
             borderColor: 'border-violet-200'
-        });
-    }
-
-    useEffect(() => {
-        if (!modules.some((module) => module.id === activeModuleId)) {
-            setActiveModuleId(modules[0]?.id || '');
+            });
         }
-    }, [activeModuleId, modules]);
+
+        return availableModules;
+    }, [user?.rol]);
+
+    const effectiveActiveModuleId = modules.some((module) => module.id === activeModuleId)
+        ? activeModuleId
+        : (modules[0]?.id || '');
 
     useEffect(() => {
         const viewport = cardsViewportRef.current;
@@ -143,10 +145,13 @@ const Dashboard = () => {
                                         transition={{ duration: 0.5, delay: 0.1 * index }}
                                         whileHover={{ y: -8 }}
                                     >
-                                        <Card
+                                        <button
+                                            type="button"
                                             onClick={() => navigate(module.path)}
-                                            className="group h-full cursor-pointer overflow-hidden rounded-3xl border-none bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col"
+                                            className="group block h-full w-full rounded-3xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] focus-visible:ring-offset-2"
+                                            aria-label={`Ingresar al módulo ${module.title}`}
                                         >
+                                        <Card className="h-full cursor-pointer overflow-hidden rounded-3xl border-none bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-shadow duration-200 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col">
                                             <CardContent className="flex h-full flex-col p-10">
                                                 <div className={`mb-8 flex h-16 w-16 items-center justify-center rounded-2xl border ${module.borderColor} ${module.color} shadow-sm transition-transform duration-300 group-hover:scale-110`}>
                                                     {module.icon}
@@ -170,6 +175,7 @@ const Dashboard = () => {
                                                 </div>
                                             </CardContent>
                                         </Card>
+                                        </button>
                                     </MotionDiv>
                                 </div>
                             ))}
@@ -184,7 +190,7 @@ const Dashboard = () => {
                         </div>
                         <div className="flex gap-4">
                             {modules.map((module) => {
-                                const isActive = module.id === activeModuleId;
+                                const isActive = module.id === effectiveActiveModuleId;
                                 return (
                                     <button
                                         key={`${module.id}-indicator`}

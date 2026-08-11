@@ -45,6 +45,10 @@ for (const token of [
     'await activateProjectSelection(createdRevision, { replace: true })',
     'Clonar Proyecto Completo',
     'aria-label={`Clonar proyecto completo ${project.nombre || project.codigo || project.id}`}',
+    'const requestId = ++projectFetchRequestRef.current;',
+    'if (requestId !== projectFetchRequestRef.current) return false;',
+    'const data = Array.isArray(response) ? response : [];',
+    'const detailBatchSize = 8;',
 ]) {
     assert.equal(
         proyectosSource.includes(token),

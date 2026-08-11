@@ -70,6 +70,7 @@
     "smoke:bim-erp-exchange": "node scripts/validate-bim-erp-exchange-dom.mjs",
     "smoke:bim-integration-gateway": "node scripts/validate-bim-integration-gateway-dom.mjs",
     "smoke:classic-precios-unitarios-ui": "node scripts/smoke-classic-precios-unitarios-ui-guards.mjs",
+    "smoke:classic-runtime-symbols": "node scripts/smoke-classic-runtime-symbols.mjs",
     "smoke:gantt-classic": "node scripts/smoke-cronogramas-gantt-dependencies.mjs && node scripts/smoke-cronogramas-gantt-critical-path.mjs && node scripts/smoke-cronogramas-gantt-manual-milestone-drag.mjs && node scripts/smoke-gantt-preview-commit-double-blind.mjs && node scripts/smoke-cronogramas-gantt-manual-milestone-dependencies.mjs && node scripts/smoke-cronogramas-gantt-sequence-commit.mjs && node scripts/smoke-classic-no-bim-contamination.mjs",
     "generate-api": "npx openapi-typescript ../docs/architecture/openapi.json -o src/api/schema.d.ts"
   },

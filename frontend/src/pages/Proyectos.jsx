@@ -790,6 +790,7 @@ const Proyectos = () => {
     const [proyectos, setProyectos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [projectLoadError, setProjectLoadError] = useState(false);
+    const projectFetchRequestRef = useRef(0);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProject, setSelectedProject] = useState(null);
     const [activeTab, setActiveTab] = useState('datos');
@@ -1242,7 +1243,8 @@ const Proyectos = () => {
         }
     }, [activeTab, location.search, sectionItems, selectedProject]);
 
-    const fetchProyectos = async () => {
+    const fetchProyectos = useCallback(async () => {
+        const requestId = ++projectFetchRequestRef.current;
         try {
             setLoading(true);
             setProjectLoadError(false);
@@ -1251,17 +1253,23 @@ const Proyectos = () => {
                 ...(empId ? { empresa_id: empId } : {}),
                 solo_raices: true
             };
-            const data = await proyectosApi.getAll(params);
+            const response = await proyectosApi.getAll(params);
+            if (requestId !== projectFetchRequestRef.current) return false;
+            const data = Array.isArray(response) ? response : [];
             setProyectos(data);
             try {
                 const statusData = await proyectosApi.getProjectMarketplaceExportStatuses({ empresaId: empId });
+                if (requestId !== projectFetchRequestRef.current) return false;
                 setMarketplaceExportStatuses(statusData?.projects || {});
             } catch (statusError) {
+                if (requestId !== projectFetchRequestRef.current) return false;
                 console.warn('No se pudo cargar estado marketplace de proyectos:', statusError?.message || statusError);
                 setMarketplaceExportStatuses({});
             }
-            const detailEntries = await Promise.all(
-                data.map(async (project) => {
+            const detailEntries = [];
+            const detailBatchSize = 8;
+            for (let index = 0; index < data.length; index += detailBatchSize) {
+                const batch = await Promise.all(data.slice(index, index + detailBatchSize).map(async (project) => {
                     const rootCode = project.codigo_root || project.codigo;
                     try {
                         const detail = await proyectoDetalleApi.getByRoot(rootCode, empId);
@@ -1270,18 +1278,26 @@ const Proyectos = () => {
                         console.warn(`No se pudo cargar detalle del proyecto ${rootCode}:`, error.message);
                         return [rootCode, null];
                     }
-                })
-            );
+                }));
+                if (requestId !== projectFetchRequestRef.current) return false;
+                detailEntries.push(...batch);
+            }
             setProjectDetailsMap(Object.fromEntries(detailEntries));
+            return true;
         } catch (error) {
-            setProjectLoadError(true);
-            globalThis.reportClientError?.("Error cargando proyectos:", error);
+            if (requestId === projectFetchRequestRef.current) {
+                setProjectLoadError(true);
+                globalThis.reportClientError?.("Error cargando proyectos:", error);
+            }
+            return false;
         } finally {
-            setLoading(false);
+            if (requestId === projectFetchRequestRef.current) {
+                setLoading(false);
+            }
         }
-    };
+    }, [selectedEmpresa?.id, user?.empresa_id]);
 
-    const fetchBasesMaestras = async () => {
+    const fetchBasesMaestras = useCallback(async () => {
         try {
             const res = await basesTrabajoApi.getAll({ empresa_id: selectedEmpresa?.id });
             // Solo bases de tipo "Base Maestra" para clonar
@@ -1289,7 +1305,7 @@ const Proyectos = () => {
         } catch (error) {
             globalThis.reportClientError?.("Error cargando bases maestras:", error);
         }
-    };
+    }, [selectedEmpresa?.id]);
 
     const [isInputFocused, setIsInputFocused] = useState(false);
 
@@ -1318,8 +1334,7 @@ const Proyectos = () => {
     useEffect(() => {
         fetchProyectos();
         if (selectedEmpresa) fetchBasesMaestras();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedEmpresa?.id]);
+    }, [fetchBasesMaestras, fetchProyectos, selectedEmpresa]);
 
     const getProjectPresentationMeta = (project) => {
         const rootCode = project.codigo_root || project.codigo;

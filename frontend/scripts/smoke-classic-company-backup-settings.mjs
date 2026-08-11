@@ -89,6 +89,12 @@ assert.equal(
 );
 
 assert.equal(
+    settingsSource.includes('setCompanyBackupRestoreConfirmations'),
+    false,
+    'Settings no debe invocar el setter eliminado del flujo legacy de triple confirmacion',
+);
+
+assert.equal(
     settingsSource.includes('BORRAR DATOS ACTUALES'),
     false,
     'Settings no debe exigir confirmaciones intermedias de borrado',

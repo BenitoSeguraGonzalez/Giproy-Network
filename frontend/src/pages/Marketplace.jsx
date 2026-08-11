@@ -1631,7 +1631,7 @@ const Marketplace = () => {
     }, [cartLicenseProducts, licenseInfo?.licencia_actual]);
     const licenseCheckoutNotice = useMemo(() => {
         if (!cartLicenseProducts.length) return null;
-        const firstOffer = resolveLicenseOfferMeta(cartLicenseProducts[0].product);
+        const firstOffer = resolveMarketplaceLicenseOfferMeta(cartLicenseProducts[0].product);
         const currentPlan = licenseInfo?.licencia_actual || 'plan actual';
         const targetPlan = firstOffer.licenseName || cartLicenseProducts[0].product?.titulo || 'nueva licencia';
         const durationLabel = firstOffer.billingCycle === 'annual'
