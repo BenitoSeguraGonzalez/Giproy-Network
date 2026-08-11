@@ -1,6 +1,6 @@
 # Matriz de aplicación UX BIM
 
-Fecha: 2026-08-03  
+Fecha: 2026-08-03
 Estado: activa; sustituye la aceptación visual basada únicamente en presencia de componentes
 
 ## Propósito

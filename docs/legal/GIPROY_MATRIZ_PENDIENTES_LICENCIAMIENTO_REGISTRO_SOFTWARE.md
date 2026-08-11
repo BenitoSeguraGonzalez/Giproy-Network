@@ -2,10 +2,10 @@
 
 ## Matriz de pendientes para cumplimiento de licenciamiento y registro de software
 
-**Fecha de emisión:** 11 de agosto de 2026  
-**Versión examinada:** despliegue beta publicado  
-**URL de referencia:** `giproy.excomconsultores.com`  
-**TASK de trazabilidad:** `TASK-2045`  
+**Fecha de emisión:** 11 de agosto de 2026
+**Versión examinada:** despliegue beta publicado
+**URL de referencia:** `giproy.excomconsultores.com`
+**TASK de trazabilidad:** `TASK-2045`
 **Estado:** documento de trabajo para regularización; no constituye dictamen legal
 
 ---
@@ -92,8 +92,8 @@ de distribución.
 ### 4.1 React Leaflet y `@react-leaflet/core`
 
 **Versiones observadas:** `react-leaflet@4.2.1` y
-`@react-leaflet/core@2.1.0`.  
-**Licencia declarada:** Hippocratic-2.1.  
+`@react-leaflet/core@2.1.0`.
+**Licencia declarada:** Hippocratic-2.1.
 **Prioridad:** crítica.
 
 Acción requerida, eligiendo una ruta documentada:
@@ -108,8 +108,8 @@ Leaflet, que declara BSD-2-Clause.
 
 ### 4.2 `web-ifc`
 
-**Versión observada:** `0.0.77`.  
-**Licencia:** MPL-2.0.  
+**Versión observada:** `0.0.77`.
+**Licencia:** MPL-2.0.
 **Prioridad:** alta.
 
 - [ ] Incluir el texto completo MPL-2.0 y los avisos del componente.
@@ -142,8 +142,8 @@ Para MIT, BSD, ISC, Apache-2.0, 0BSD y otras licencias permisivas:
 
 ### 5.1 `language_tool_python`
 
-**Versión observada:** `2.9.4`.  
-**Licencia:** GPL-3.0-only.  
+**Versión observada:** `2.9.4`.
+**Licencia:** GPL-3.0-only.
 **Uso observado:** backend SaaS no enviado al navegador.
 
 - [ ] Confirmar que la librería Python no fue modificada.
@@ -389,4 +389,3 @@ jurídica ni una garantía de aceptación por SENADI.
 - Responsable de seguridad: _______________  Fecha: __________
 - Titular/representante legal: _____________  Fecha: __________
 - Abogado de propiedad intelectual: ________  Fecha: __________
-

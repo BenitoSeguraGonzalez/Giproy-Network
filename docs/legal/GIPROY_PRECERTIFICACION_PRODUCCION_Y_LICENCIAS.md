@@ -2,9 +2,9 @@
 
 ## Informe de precertificacion de licencias y preparacion para produccion
 
-**Fecha de corte:** 11 de agosto de 2026  
-**Artefacto examinado:** despliegue beta publicado  
-**URL declarada:** `giproy.excomconsultores.com`  
+**Fecha de corte:** 11 de agosto de 2026
+**Artefacto examinado:** despliegue beta publicado
+**URL declarada:** `giproy.excomconsultores.com`
 **Estado del documento:** PRECERTIFICACION; NO CONSTITUYE CERTIFICADO FINAL
 
 ### 1. Objeto
