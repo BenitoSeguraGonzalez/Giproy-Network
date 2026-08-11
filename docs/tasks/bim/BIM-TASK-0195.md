@@ -2,7 +2,7 @@
 
 Fecha: 2026-08-11
 
-Estado: CERRADA EN CANDIDATA LOCAL
+Estado: CERRADA Y DESPLEGADA EN BETA
 
 Relacionado: TASK-2048
 
@@ -12,6 +12,7 @@ Relacionado: TASK-2048
 - Conserva Escape, trampa de foco y retorno a `Nuevo dossier`.
 - Playwright verifica hit-testing, cierre y foco a 1920x1080.
 - Contrato `BimFlowWorkspace`, harness DOM y build Vite correctos.
+- Beta frontend `28205aecdff7...` y stack completo saludables.
 
 ## Rollback
 

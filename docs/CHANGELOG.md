@@ -4,6 +4,10 @@
   portal y deja de quedar detrás del contenido del workspace.
 - Regresión de puntero, cierre y restauración de foco; contrato BIM, harness DOM
   y build Vite correctos.
+- Desplegado en beta con backup `giproy-beta-20260811-134818.sql.gz`; backend
+  `810957034d87...`, frontend `28205aecdff7...` y cuatro servicios healthy.
+- Se registra la revisión Alembic histórica ausente `001122334455`; este release
+  sin migraciones se publicó con `RUN_MIGRATIONS=0`, sin alterar el esquema.
 
 ### 2026-08-11 - Precertificacion legal-tecnica del beta publicado
 
