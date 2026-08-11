@@ -8,8 +8,10 @@
 - Sin cambios de API, datos, tenant, permisos, licencias o feature flags.
 - Beta `task2048-20260811`: cuatro servicios healthy; home, health y OpenAPI
   públicos 200. Backup `giproy-beta-20260811-134818.sql.gz`.
-- La revisión Alembic histórica `001122334455` falta en el checkout; al no haber
-  migraciones en la candidata se desplegó sin mutar el esquema.
+- `TASK-2049` corrige el diagnóstico Alembic: `001122334455` sí existe y está en
+  `head`. El fallo usó una imagen predeterminada antigua sin el tag de release.
+- Backup `giproy-beta-20260811-135545.sql.gz`; `upgrade heads` y `current`
+  correctos con `task2048-20260811`, sin stamp manual ni cambios de esquema.
 
 ## 2026-07-22 - Recuperacion de imagen referencial de proyecto
 

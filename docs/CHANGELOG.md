@@ -6,8 +6,10 @@
   y build Vite correctos.
 - Desplegado en beta con backup `giproy-beta-20260811-134818.sql.gz`; backend
   `810957034d87...`, frontend `28205aecdff7...` y cuatro servicios healthy.
-- Se registra la revisión Alembic histórica ausente `001122334455`; este release
-  sin migraciones se publicó con `RUN_MIGRATIONS=0`, sin alterar el esquema.
+- `TASK-2049` corrige el diagnóstico: `001122334455` existe y está aplicada. La
+  comprobación fallida había seleccionado una imagen predeterminada antigua.
+- El deploy exporta explícitamente su tag; tras backup, `upgrade heads` y
+  `alembic current` pasan con la imagen `task2048-20260811`.
 
 ### 2026-08-11 - Precertificacion legal-tecnica del beta publicado
 

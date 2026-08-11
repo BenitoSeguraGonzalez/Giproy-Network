@@ -6,6 +6,8 @@ COMPOSE_FILE="${COMPOSE_FILE:-$APP_ROOT/deploy/docker-compose.beta.yml}"
 ENV_FILE="${ENV_FILE:-$APP_ROOT/deploy/.env}"
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-1}"
 RUN_BACKUP="${RUN_BACKUP:-1}"
+GIPROY_IMAGE_TAG="${GIPROY_IMAGE_TAG:-local}"
+export GIPROY_IMAGE_TAG
 
 cd "$APP_ROOT"
 
@@ -16,6 +18,7 @@ if [ ! -f "$ENV_FILE" ]; then
 fi
 
 echo "== GiProy beta deploy =="
+echo "Release image tag: $GIPROY_IMAGE_TAG"
 ./deploy/scripts/giproy-beta-preflight.sh
 
 if [ "$RUN_BACKUP" = "1" ]; then
