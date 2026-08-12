@@ -39,7 +39,7 @@ fi
 echo "== GiProy beta deploy =="
 echo "Release image tag: $GIPROY_IMAGE_TAG"
 echo "Release commit: $RELEASE_COMMIT"
-./deploy/scripts/giproy-beta-preflight.sh
+bash ./deploy/scripts/giproy-beta-preflight.sh
 
 # The public manifest identifies the deployed URL but never prints values from
 # the environment file. It is sourced again below for migrations.
@@ -49,7 +49,7 @@ source "$ENV_FILE"
 set +a
 
 if [ "$RUN_BACKUP" = "1" ]; then
-  ./deploy/scripts/giproy-beta-backup.sh
+  bash ./deploy/scripts/giproy-beta-backup.sh
 fi
 
 echo
