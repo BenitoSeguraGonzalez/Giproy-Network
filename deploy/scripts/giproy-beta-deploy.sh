@@ -43,10 +43,13 @@ bash ./deploy/scripts/giproy-beta-preflight.sh
 
 # The public manifest identifies the deployed URL but never prints values from
 # the environment file. It is sourced again below for migrations.
+REQUESTED_IMAGE_TAG="$GIPROY_IMAGE_TAG"
 set -a
 # shellcheck disable=SC1090
 source "$ENV_FILE"
 set +a
+GIPROY_IMAGE_TAG="$REQUESTED_IMAGE_TAG"
+export GIPROY_IMAGE_TAG
 
 if [ "$RUN_BACKUP" = "1" ]; then
   bash ./deploy/scripts/giproy-beta-backup.sh
