@@ -51,19 +51,30 @@ set +a
 GIPROY_IMAGE_TAG="$REQUESTED_IMAGE_TAG"
 export GIPROY_IMAGE_TAG
 
+# `--env-file` has precedence for Compose interpolation. Preserve the secret
+# environment file but materialize a private, per-release override so build and
+# up resolve the identical image tag.
+COMPOSE_ENV_FILE="$(mktemp)"
+cleanup_release_files() {
+  rm -f "$COMPOSE_ENV_FILE"
+  [ -n "${FRONTEND_EVIDENCE_ROOT:-}" ] && rm -rf "$FRONTEND_EVIDENCE_ROOT"
+}
+trap cleanup_release_files EXIT
+grep -v '^GIPROY_IMAGE_TAG=' "$ENV_FILE" > "$COMPOSE_ENV_FILE"
+printf 'GIPROY_IMAGE_TAG=%s\n' "$GIPROY_IMAGE_TAG" >> "$COMPOSE_ENV_FILE"
+compose() { docker compose --env-file "$COMPOSE_ENV_FILE" -f "$COMPOSE_FILE" "$@"; }
+
 if [ "$RUN_BACKUP" = "1" ]; then
   bash ./deploy/scripts/giproy-beta-backup.sh
 fi
 
 echo
 echo "-- Build backend image for release inventory --"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build backend
+compose build backend
 
 echo
 echo "-- Generate public legal evidence --"
 FRONTEND_EVIDENCE_ROOT="$(mktemp -d)"
-cleanup_evidence_root() { rm -rf "$FRONTEND_EVIDENCE_ROOT"; }
-trap cleanup_evidence_root EXIT
 cp frontend/package.json frontend/package-lock.json "$FRONTEND_EVIDENCE_ROOT/"
 docker run --rm --user "$(id -u):$(id -g)" -v "$FRONTEND_EVIDENCE_ROOT:/work" -w /work node:22-alpine npm ci --ignore-scripts >/dev/null
 python3 scripts/compliance/generate_release_evidence.py \
@@ -78,11 +89,11 @@ python3 scripts/compliance/generate_release_evidence.py \
 
 echo
 echo "-- Build frontend image with evidence --"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build frontend
+compose build frontend
 
 echo
 echo "-- Start database --"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d postgres
+compose up -d postgres
 
 if [ "$RUN_MIGRATIONS" = "1" ]; then
   echo
@@ -91,16 +102,16 @@ if [ "$RUN_MIGRATIONS" = "1" ]; then
   # shellcheck disable=SC1090
   source "$ENV_FILE"
   set +a
-  TABLE_COUNT="$(docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T postgres \
+  TABLE_COUNT="$(compose exec -T postgres \
     psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc \
     "select count(*) from information_schema.tables where table_schema = 'public' and table_name <> 'alembic_version';" | tr -d '[:space:]')"
 
   if [ "${TABLE_COUNT:-0}" = "0" ]; then
     echo "Empty schema detected; running controlled bootstrap and stamping Alembic heads."
-    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" --profile tools run --rm bootstrap
+    compose --profile tools run --rm bootstrap
   else
     echo "Existing schema detected; running Alembic migrations."
-    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" --profile tools run --rm migrate
+    compose --profile tools run --rm migrate
   fi
 else
   echo "Migrations skipped because RUN_MIGRATIONS=$RUN_MIGRATIONS"
@@ -108,11 +119,11 @@ fi
 
 echo
 echo "-- Start app --"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d backend frontend
+compose up -d backend frontend
 
 echo
 echo "-- Status --"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" ps
+compose ps
 
 echo
 echo "Deploy command finished."
