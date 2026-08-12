@@ -7,9 +7,28 @@ ENV_FILE="${ENV_FILE:-$APP_ROOT/deploy/.env}"
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-1}"
 RUN_BACKUP="${RUN_BACKUP:-1}"
 GIPROY_IMAGE_TAG="${GIPROY_IMAGE_TAG:-local}"
+GIPROY_RELEASE_REF="${GIPROY_RELEASE_REF:-}"
 export GIPROY_IMAGE_TAG
 
 cd "$APP_ROOT"
+
+if [ -z "$GIPROY_RELEASE_REF" ]; then
+  echo "GIPROY_RELEASE_REF must be the immutable full Git commit for this release." >&2
+  exit 1
+fi
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "Refusing deployment: APP_ROOT is not a Git checkout." >&2
+  exit 1
+fi
+RELEASE_COMMIT="$(git rev-parse HEAD)"
+if [ "$RELEASE_COMMIT" != "$GIPROY_RELEASE_REF" ]; then
+  echo "Refusing deployment: GIPROY_RELEASE_REF does not match HEAD ($RELEASE_COMMIT)." >&2
+  exit 1
+fi
+if [ -n "$(git status --porcelain --untracked-files=all)" ]; then
+  echo "Refusing deployment: Git checkout has local or untracked changes." >&2
+  exit 1
+fi
 
 if [ ! -f "$ENV_FILE" ]; then
   echo "Missing env file: $ENV_FILE" >&2
@@ -19,15 +38,44 @@ fi
 
 echo "== GiProy beta deploy =="
 echo "Release image tag: $GIPROY_IMAGE_TAG"
+echo "Release commit: $RELEASE_COMMIT"
 ./deploy/scripts/giproy-beta-preflight.sh
+
+# The public manifest identifies the deployed URL but never prints values from
+# the environment file. It is sourced again below for migrations.
+set -a
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+set +a
 
 if [ "$RUN_BACKUP" = "1" ]; then
   ./deploy/scripts/giproy-beta-backup.sh
 fi
 
 echo
-echo "-- Build images --"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build
+echo "-- Build backend image for release inventory --"
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build backend
+
+echo
+echo "-- Generate public legal evidence --"
+FRONTEND_EVIDENCE_ROOT="$(mktemp -d)"
+cleanup_evidence_root() { rm -rf "$FRONTEND_EVIDENCE_ROOT"; }
+trap cleanup_evidence_root EXIT
+cp frontend/package.json frontend/package-lock.json "$FRONTEND_EVIDENCE_ROOT/"
+docker run --rm --user "$(id -u):$(id -g)" -v "$FRONTEND_EVIDENCE_ROOT:/work" -w /work node:22-alpine npm ci --ignore-scripts >/dev/null
+python3 scripts/compliance/generate_release_evidence.py \
+  --root "$APP_ROOT" \
+  --output "dist/compliance/$GIPROY_IMAGE_TAG" \
+  --public-output "frontend/public/legal/release" \
+  --frontend-root "$FRONTEND_EVIDENCE_ROOT" \
+  --local-image "giproy-beta-backend:$GIPROY_IMAGE_TAG" \
+  --image "frontend=giproy-beta-frontend:$GIPROY_IMAGE_TAG" \
+  --image "backend=giproy-beta-backend:$GIPROY_IMAGE_TAG" \
+  --deployment-url "${GIPROY_HOST:-}"
+
+echo
+echo "-- Build frontend image with evidence --"
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build frontend
 
 echo
 echo "-- Start database --"

@@ -36,9 +36,26 @@ def sha256(path: Path) -> str:
 def git_files(root: Path) -> list[Path]:
     result = subprocess.run(
         ["git", "ls-files", "-co", "--exclude-standard"], cwd=root,
-        check=True, capture_output=True, text=True,
+        check=False, capture_output=True, text=True,
     )
-    return [root / line for line in result.stdout.splitlines() if line]
+    if result.returncode == 0:
+        return [root / line for line in result.stdout.splitlines() if line]
+    ignored_directories = {".git", "node_modules", "dist", "__pycache__", ".venv"}
+    return [path for path in root.rglob("*") if not any(part in ignored_directories for part in path.relative_to(root).parts)]
+
+
+def source_revision(root: Path) -> tuple[str, bool]:
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root, check=False,
+        capture_output=True, text=True,
+    )
+    if revision.returncode != 0:
+        return "SOURCE_ARCHIVE", True
+    dirty = bool(subprocess.run(
+        ["git", "status", "--porcelain"], cwd=root, check=True,
+        capture_output=True, text=True,
+    ).stdout.strip())
+    return revision.stdout.strip(), dirty
 
 
 def scan_forbidden(root: Path) -> list[str]:
@@ -93,14 +110,13 @@ def _normalize_backend_license(name: str, declared: str, classifiers: list[str])
     return declared
 
 
-def remote_backend_components(ssh_host: str, container: str) -> list[dict[str, str]]:
+def _runtime_backend_components(identity: str, command: list[str]) -> list[dict[str, str]]:
     code = '''import json
 import importlib.metadata as m
 print(json.dumps([{"name": d.metadata.get("Name"), "version": d.version, "license": d.metadata.get("License-Expression") or d.metadata.get("License") or "UNKNOWN", "classifiers": [x for x in (d.metadata.get_all("Classifier") or []) if x.startswith("License ::")]} for d in m.distributions()]))
 '''
     encoded = base64.b64encode(code.encode("utf-8")).decode("ascii")
-    command = f"echo {encoded} | base64 -d | docker exec -i {container} python -"
-    result = subprocess.run(["ssh", ssh_host, command], check=True, capture_output=True, text=True)
+    result = subprocess.run(command, input=encoded, check=True, capture_output=True, text=True)
     installed = json.loads(result.stdout)
     components = []
     for item in installed:
@@ -109,9 +125,24 @@ print(json.dumps([{"name": d.metadata.get("Name"), "version": d.version, "licens
         components.append({
             "name": name, "version": str(item.get("version") or "UNKNOWN"),
             "license": _normalize_backend_license(name, declared, item.get("classifiers") or []),
-            "scope": "backend-runtime", "source": f"container://{container}", "license_file": "",
+            "scope": "backend-runtime", "source": f"container://{identity}", "license_file": "",
         })
     return sorted(components, key=lambda component: component["name"].lower())
+
+
+def remote_backend_components(ssh_host: str, container: str) -> list[dict[str, str]]:
+    command = f"base64 -d | docker exec -i {container} python -"
+    return _runtime_backend_components(container, ["ssh", ssh_host, command])
+
+
+def local_backend_components(container: str) -> list[dict[str, str]]:
+    command = f"base64 -d | docker exec -i {container} python -"
+    return _runtime_backend_components(container, ["bash", "-lc", command])
+
+
+def local_image_components(image: str) -> list[dict[str, str]]:
+    command = f"base64 -d | docker run --rm -i {image} python -"
+    return _runtime_backend_components(image, ["bash", "-lc", command])
 
 
 def backend_components(root: Path, pip_report: Path | None) -> list[dict[str, str]]:
@@ -149,8 +180,11 @@ def main() -> int:
     parser.add_argument("--image", action="append", default=[], help="service=image@sha256:...; repeatable")
     parser.add_argument("--pip-report", type=Path, help="pip --report JSON from the target runtime")
     parser.add_argument("--remote-container", help="ssh-host/container-name for exact published Python inventory")
+    parser.add_argument("--local-container", help="local Docker container for exact published Python inventory")
+    parser.add_argument("--local-image", help="local Docker image for the exact backend runtime inventory")
     parser.add_argument("--deployment-url", default="", help="URL represented by the supplied immutable images")
     parser.add_argument("--frontend-root", type=Path, help="exact installed frontend tree used to build the image")
+    parser.add_argument("--public-output", type=Path, help="directory where public, release-bound artifacts are published")
     parser.add_argument("--report-only", action="store_true", help="emit evidence for a non-compliant artifact, but never mark it certifiable")
     args = parser.parse_args()
     root = args.root.resolve()
@@ -164,12 +198,20 @@ def main() -> int:
     report_path = None
     if args.pip_report:
         report_path = args.pip_report if args.pip_report.is_absolute() else root / args.pip_report
+    runtime_sources = [value for value in (args.remote_container, args.local_container, args.local_image) if value]
+    if len(runtime_sources) > 1:
+        parser.error("use only one of --remote-container, --local-container or --local-image")
     if args.remote_container:
         ssh_host, container = args.remote_container.split("/", 1)
         backend = remote_backend_components(ssh_host, container)
+    elif args.local_container:
+        backend = local_backend_components(args.local_container)
+    elif args.local_image:
+        backend = local_image_components(args.local_image)
     else:
         backend = backend_components(root, report_path)
     frontend_root = args.frontend_root.resolve() if args.frontend_root else None
+    revision, dirty = source_revision(root)
     components = frontend_components(root, frontend_root) + backend
     denied = [item for item in components if any(marker.lower() in item["license"].lower() for marker in DENIED_LICENSE_MARKERS)]
     if denied and not args.report_only:
@@ -214,8 +256,6 @@ def main() -> int:
     notices_path = output / "THIRD_PARTY_NOTICES.md"
     notices_path.write_text("\n".join(notices) + "\n", encoding="utf-8")
 
-    revision = subprocess.run(["git", "rev-parse", "HEAD"], cwd=root, check=True, capture_output=True, text=True).stdout.strip()
-    dirty = bool(subprocess.run(["git", "status", "--porcelain"], cwd=root, check=True, capture_output=True, text=True).stdout.strip())
     manifest = {
         "schema": "giproy-release-evidence-v1", "git_commit": revision,
         "git_dirty": dirty, "images": sorted(args.image),
@@ -248,6 +288,28 @@ def main() -> int:
     ]
     certificate_path = output / "CERTIFICADO_TECNICO.md"
     certificate_path.write_text("\n".join(certificate_lines), encoding="utf-8")
+
+    if args.public_output:
+        public_output = args.public_output if args.public_output.is_absolute() else root / args.public_output
+        public_output.mkdir(parents=True, exist_ok=True)
+        published = (sbom_path, notices_path, manifest_path, certificate_path)
+        for artifact in published:
+            shutil.copyfile(artifact, public_output / artifact.name)
+        public_manifest = {
+            "schema": "giproy-public-release-evidence-v1",
+            "release": manifest,
+            "artifacts": {
+                artifact.name: {
+                    "url": f"/legal/release/{artifact.name}",
+                    "sha256": sha256(artifact),
+                }
+                for artifact in published
+            },
+            "disclaimer": "Evidencia técnica del release; no sustituye revisión jurídica ni acreditación de titularidad.",
+        }
+        (public_output / "public-release-manifest.json").write_text(
+            json.dumps(public_manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
     print(manifest_path)
     return 0
 
