@@ -39,7 +39,7 @@ const IndirectosModal = ({ isOpen, onClose, onSaved, presupuestoId }) => {
     const formatters = useFormatters();
     const formatNumericDisplay = formatters?.formatNumericDisplay || ((v) => String(v || '').replace('.', ','));
     const parseNumericInput = formatters?.parseNumericInput || ((v) => String(v || '').replace(',', '.'));
-    const { formatMoneda, formatCalculo } = formatters || {};
+    const { formatMoneda } = formatters || {};
 
     const [selectedCategoriaCodigo, setSelectedCategoriaCodigo] = useState(FIRST_FIXED_CATEGORY);
     const [selectedCatalogConceptId, setSelectedCatalogConceptId] = useState(INDIRECTOS_CONCEPTOS_POR_CATEGORIA[FIRST_FIXED_CATEGORY]?.[0]?.id || '');

@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }) => {
             setLicenseInfo(data);
         } catch (e) {
             console.warn("No se pudo cargar info de licencia:", e.message);
-            setLicenseInfo(null);
+            queueMicrotask(() => setLicenseInfo(null));
         }
     }, []);
 
@@ -225,7 +225,7 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         if (!user) {
-            setLicenseInfo(null);
+            queueMicrotask(() => setLicenseInfo(null));
             return;
         }
         // Los usuarios de empresa ya cargan su licencia dentro de checkAuth().
@@ -238,7 +238,7 @@ export const AuthProvider = ({ children }) => {
         const targetEmpresaId = user.rol?.toLowerCase() === 'superadministrador'
             ? (selectedEmpresa?.id || null)
             : null;
-        refreshLicenseInfo(targetEmpresaId);
+        queueMicrotask(() => refreshLicenseInfo(targetEmpresaId));
     }, [user, selectedEmpresa?.id, refreshLicenseInfo]);
 
 
@@ -385,12 +385,12 @@ export const AuthProvider = ({ children }) => {
             : null;
 
         if (baseEmpresaId !== null && baseEmpresaId !== empresaId) {
-            setSelectedBaseTrabajo(null);
+            queueMicrotask(() => setSelectedBaseTrabajo(null));
             localStorage.removeItem('giproy_working_base');
         }
 
         if (projectEmpresaId !== null && projectEmpresaId !== empresaId) {
-            setActiveProject(null);
+            queueMicrotask(() => setActiveProject(null));
             localStorage.removeItem('giproy_working_project');
         }
     }, [

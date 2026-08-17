@@ -38,11 +38,11 @@ const BimCostControlWorkbench = ({ projectId, empresaId, api = bimModelsApi }) =
                     <p className="mt-1 text-[11px] leading-4 text-zinc-600">Del compromiso a la previsión, sin alterar el presupuesto oficial.</p>
                 </div>
                 <nav className="min-h-0 flex-1 overflow-y-auto py-2" aria-label="Etapas de control económico">
-                    {SECTIONS.map(({ id, label, description, icon: Icon }, index) => {
+                    {SECTIONS.map(({ id, label, description, icon }, index) => {
                         const active = id === activeSection;
                         return (
                             <button key={id} type="button" onClick={() => setActiveSection(id)} className={`flex min-h-[4.25rem] w-full items-start gap-3 px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-600 ${active ? 'bg-white text-zinc-950' : 'text-zinc-700 hover:bg-white/70'}`} aria-current={active ? 'step' : undefined}>
-                                <span className={`mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-md ${active ? 'bg-orange-50 text-orange-700' : 'text-zinc-500'}`}><Icon className="size-3.5" aria-hidden="true" /></span>
+                                <span className={`mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-md ${active ? 'bg-orange-50 text-orange-700' : 'text-zinc-500'}`}>{React.createElement(icon, { className: 'size-3.5', 'aria-hidden': true })}</span>
                                 <span className="min-w-0 flex-1"><span className="flex items-center justify-between gap-2"><strong className="text-xs">{label}</strong><span className="text-[9px] tabular-nums text-zinc-500">{index + 1}/6</span></span><span className="mt-0.5 block text-[10px] leading-4 text-zinc-600">{description}</span></span>
                             </button>
                         );

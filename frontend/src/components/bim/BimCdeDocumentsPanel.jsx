@@ -1,3 +1,5 @@
+const legacyFormEnabled = Boolean(import.meta.env.VITE_ENABLE_LEGACY_BIM_FORMS);
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Archive, Download, FileStack, History, LockKeyhole, Save, Upload, X } from 'lucide-react';
 
@@ -106,7 +108,7 @@ export default function BimCdeDocumentsPanel({ projectId, empresaId, api = bimMo
     return <section className="border border-slate-200 bg-white" data-bim-cde-documents>
         <header className="flex items-center gap-2 border-b border-slate-200 px-3 py-2"><FileStack size={16} className="text-orange-600" /><h3 className="text-sm font-semibold text-slate-800">Documentos CDE</h3><button type="button" onClick={() => setUploadOpen(true)} className="ml-auto inline-flex h-7 items-center gap-1 bg-orange-600 px-2.5 text-[11px] font-semibold text-white"><Upload size={13}/>Nueva revisión</button><label className="flex items-center gap-1 text-[10px] text-slate-600"><input type="checkbox" checked={includeArchived} onChange={(event) => setIncludeArchived(event.target.checked)} />Archivados</label></header>
         <div className="space-y-3 p-3 text-xs">
-            {false && <form className="hidden" onSubmit={upload}>
+            {legacyFormEnabled && <form className="hidden" onSubmit={upload}>
                 <input className="min-w-0 border border-slate-300 px-2 py-1.5" required aria-label="Codigo documental CDE" placeholder="Codigo documental" value={draft.document_code} onChange={(event) => setDraft({ ...draft, document_code: event.target.value })} />
                 <input className="min-w-0 border border-slate-300 px-2 py-1.5" required aria-label="Version documental CDE" placeholder="Version, p. ej. P01" value={draft.version_label} onChange={(event) => setDraft({ ...draft, version_label: event.target.value })} />
                 <input className="col-span-2 min-w-0 border border-slate-300 px-2 py-1.5" required aria-label="Titulo documental CDE" placeholder="Titulo" value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} />

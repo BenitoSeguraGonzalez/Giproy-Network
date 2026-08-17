@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useMemo, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
  
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { includesNormalized } from '../utils/normalizeSearch';
 import {
     Plus,
@@ -47,7 +47,7 @@ import CodeColorizer from '../utils/codeColorizer';
 import { normalizeTextInputValue } from '../utils/normalizeInputValue';
 import { appAlert, appConfirm } from '../utils/appDialog';
 import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
-import MarketplaceOriginBadgeSet, { getMarketplaceOwnershipTone } from '../components/marketplace/MarketplaceOriginBadgeSet';
+import MarketplaceOriginBadgeSet from '../components/marketplace/MarketplaceOriginBadgeSet';
 import * as descriptionCapitalization from '../utils/descriptionCapitalization';
 import AnimatedSelect from '../components/ui/AnimatedSelect';
 

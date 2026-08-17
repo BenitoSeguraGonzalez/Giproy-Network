@@ -61,10 +61,12 @@ const ClassicPrintOptionsModal = ({
 
     useEffect(() => {
         if (!isOpen) return;
-        setPageSize(defaultPageSize);
-        setOrientation(defaultOrientation);
-        setPrintMode(supportsPagination ? defaultPrintMode : 'complete');
-        setRowsPerPage(String(defaultRowsPerPage));
+        queueMicrotask(() => {
+            setPageSize(defaultPageSize);
+            setOrientation(defaultOrientation);
+            setPrintMode(supportsPagination ? defaultPrintMode : 'complete');
+            setRowsPerPage(String(defaultRowsPerPage));
+        });
     }, [defaultOrientation, defaultPageSize, defaultPrintMode, defaultRowsPerPage, isOpen, supportsPagination]);
 
     const handleConfirm = () => {

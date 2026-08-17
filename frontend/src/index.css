@@ -12,6 +12,13 @@
   --text-primary: #1A1A1A;
   --text-secondary: #4B5563;
   --silver-light: #E0E0E0;
+  --surface-primary: #FFFFFF;
+  --surface-subtle: #F8FAFC;
+  --border-subtle: #E4E7EC;
+  --focus-ring: #F39200;
+  --motion-fast: 120ms;
+  --motion-standard: 180ms;
+  --motion-slow: 240ms;
 
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
@@ -22,6 +29,26 @@
   background-color: var(--bg-light);
 
   --radius: 0.75rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: var(--motion-fast) !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: var(--motion-fast) !important;
+  }
 }
 
 html, body {

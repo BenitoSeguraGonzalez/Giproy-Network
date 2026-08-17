@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Check, Download, RefreshCw, RotateCcw, Send } from 'lucide-react';
 
 import { bimModelsApi } from '../../api/bimModels';
@@ -13,12 +13,12 @@ export default function BimErpExchangePanel({ projectId, empresaId, canManage = 
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState('');
 
-    const load = async () => {
+    const load = useCallback(async () => {
         if (!projectId) return;
         try { setPackages(await api.listErpExchangePackages(projectId, empresaId)); }
         catch (error) { setMessage(error?.response?.data?.detail || 'No se pudieron cargar los paquetes ERP BIM.'); }
-    };
-    useEffect(() => { load(); }, [projectId, empresaId]);
+    }, [api, empresaId, projectId]);
+    useEffect(() => { void load(); }, [load]);
 
     const current = useMemo(() => packages.find((item) => item.status === 'published'), [packages]);
     const generate = async () => {

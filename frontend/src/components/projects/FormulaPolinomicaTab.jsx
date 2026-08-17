@@ -185,7 +185,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
     setError(null);
     try {
       await Promise.all([loadFormula(budgetId), fetchResources(budgetId), fetchIndicesCatalog()]);
-    } catch (loadError) {
+    } catch {
       setError('Error crítico al cargar datos');
     } finally {
       setLoading(false);

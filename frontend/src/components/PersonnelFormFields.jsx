@@ -1,18 +1,14 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import SearchableSelect from './ui/searchable-select';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { maestrosApi } from '../api/maestros';
 import { formatInternationalPhone, getInternationalPhoneValidationMessage, resolveCountryPhonePrefix } from '../utils/phoneFormatter';
 import { validarRucEcuador, requiereValidacionRucEcuador } from '../utils/rucValidator';
 import { publicAuthApi } from '../api/publicAuth';
-import AnimatedSelect from './ui/AnimatedSelect';
+import { getRegistrationCountryPolicy } from '../utils/registrationCountry';
 
 const PERSONNEL_SECTION_CLASS = 'rounded-[1.15rem] border border-[#ececec] bg-white p-4 shadow-[4px_4px_12px_#e1e1e1,-4px_-4px_12px_#ffffff]';
 const PERSONNEL_SECTION_TITLE_CLASS = 'mb-4 text-[10px] font-black text-[#F39200] uppercase tracking-[0.2em] border-b border-orange-100 pb-2';
 
-const PersonnelFormFields = ({ formData, setFormData, isSuperAdmin = false, allowSuperAdminRole = false, hidePolicies = false, isEditing = false, paises = [], availableRoles = [], publicRegister = false, countryLocked = false, onRucStatusChange }) => {
+const PersonnelFormFields = ({ formData, setFormData, isSuperAdmin = false, allowSuperAdminRole = false, hidePolicies = false, isEditing = false, paises = [], availableRoles = [], publicRegister = false, countryLocked = false, onRucStatusChange, onCountryChange, countryDetectionStatus = 'idle' }) => {
     const [provincias, setProvincias] = useState([]);
     const [cantones, setCantones] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
@@ -26,6 +22,7 @@ const PersonnelFormFields = ({ formData, setFormData, isSuperAdmin = false, allo
     const [rucLookup, setRucLookup] = useState(null);
     const rucLoadingRef = useRef(false);
     const isEcuador = requiereValidacionRucEcuador(formData.pais);
+    const countryPolicy = getRegistrationCountryPolicy(formData.pais);
 
     const consultarRucApi = async (ruc) => {
         if (!publicRegister || rucLoadingRef.current || rucVerified) return;
@@ -345,13 +342,19 @@ const PersonnelFormFields = ({ formData, setFormData, isSuperAdmin = false, allo
                     <SearchableSelect
                         options={paises.map(p => ({ id: p.id, nombre: p.nombre }))}
                         value={formData.pais}
-                        onChange={(val) => { setFormData(prev => ({ ...prev, pais: val, provincia: '', canton: '', empresa_nombre: requiereValidacionRucEcuador(val) ? '' : prev.empresa_nombre })); setRucError(''); setRucTouched(false); setRucVerified(false); setRucLookup(null); }}
+                        onChange={(val) => { onCountryChange?.(val); setFormData(prev => ({ ...prev, pais: val, provincia: '', canton: '', empresa_nombre: requiereValidacionRucEcuador(val) ? '' : prev.empresa_nombre })); setRucError(''); setRucTouched(false); setRucVerified(false); setRucLookup(null); }}
                         placeholder={countryLocked ? 'País detectado por IP' : 'Buscar país...'}
                         label="País"
                         valueKey="nombre"
                         disabled={countryLocked}
                         triggerClassName={selectTriggerClass}
                     />
+                    {publicRegister && countryDetectionStatus === 'detecting' && (
+                        <p className="text-[9px] font-semibold text-zinc-500">Detectando país por conexión…</p>
+                    )}
+                    {publicRegister && countryDetectionStatus === 'detected' && (
+                        <p className="text-[9px] font-semibold text-zinc-500">País sugerido por conexión; puedes cambiarlo.</p>
+                    )}
                 </div>
                 {formData.pais === 'Ecuador' ? (
                     <>
@@ -384,17 +387,19 @@ const PersonnelFormFields = ({ formData, setFormData, isSuperAdmin = false, allo
                 ) : (
                     <>
                         <div className={fieldSpaceClass}>
-                            <Label htmlFor="provincia" className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">Provincia / Región</Label>
+                            <Label htmlFor="provincia" className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">{countryPolicy.provinceLabel}</Label>
                             <Input id="provincia" value={formData.provincia} onChange={handleChange} className={inputClass} />
                         </div>
-                        <div className={`${fieldSpaceClass} ${publicRegister ? '' : 'opacity-50'}`}>
-                            <Label htmlFor="canton" className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">{publicRegister ? 'Cantón' : 'Cantón (Opcional)'}</Label>
-                            <Input id="canton" value={formData.canton} onChange={handleChange} className={inputClass} />
-                        </div>
+                        {!publicRegister && (
+                            <div className={`${fieldSpaceClass} opacity-50`}>
+                                <Label htmlFor="canton" className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">Cantón (Opcional)</Label>
+                                <Input id="canton" value={formData.canton} onChange={handleChange} className={inputClass} />
+                            </div>
+                        )}
                     </>
                 )}
                 <div className={fieldSpaceClass}>
-                    <Label htmlFor="ciudad" className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">Ciudad</Label>
+                    <Label htmlFor="ciudad" className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">{countryPolicy.cityLabel}</Label>
                     <Input id="ciudad" value={formData.ciudad} onChange={handleChange} className={inputClass} />
                 </div>
             </div>

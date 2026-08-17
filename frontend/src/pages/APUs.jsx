@@ -12,7 +12,7 @@ import AnimatedSelect from '../components/ui/AnimatedSelect';
  * @typedef {import('../api/api-client').Schemas} Schemas
  */
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import {
     Trash2, AlertCircle, Check, ArrowLeft, Layers, FolderOpen,
     Copy, Edit2, ClipboardList, Database, Plus, Calculator, X,
@@ -37,7 +37,6 @@ import CodeColorizer from '../utils/codeColorizer';
 import { normalizeTextInputValue } from '../utils/normalizeInputValue';
 import { useFormatters } from '../hooks/useFormatters';
 import { appAlert, appConfirm } from '../utils/appDialog';
-import { roundDecimal } from '../utils/math';
 import {
     divideDecimalNumber,
     roundDecimalNumber,
@@ -333,8 +332,9 @@ const APUs = () => {
 
     // -- Use Formatters with robust fallbacks --
     const formatters = useFormatters();
-    const formatNumericDisplay = formatters?.formatNumericDisplay || ((v, d) => String(v || '').replace('.', ','));
-    const parseNumericInput = formatters?.parseNumericInput || ((v) => String(v || '').replace(',', '.'));
+    const formatNumericDisplay = formatters?.formatNumericDisplay || ((v) => String(v || '').replace('.', ','));
+
+    const parseNumericInput = useMemo(() => formatters?.parseNumericInput || ((v) => String(v || '').replace(',', '.')), [formatters]);
     const { 
         formatMoneda, 
         formatMonedaInput, 
@@ -364,7 +364,7 @@ const APUs = () => {
     const [loading, setLoading] = useState(true);
     const [apuUnidades, setApuUnidades] = useState([]);
     const [resourceUnidades, setResourceUnidades] = useState([]);
-    const [categorias, setCategorias] = useState([]);
+    const [, setCategorias] = useState([]);
     const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
     const [bulkDeleteStep, setBulkDeleteStep] = useState(1);
     const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -574,7 +574,7 @@ const APUs = () => {
                 orden: Number(l.orden ?? index),
             })),
         });
-    }, []);
+    }, [buildPersistedLineOrder]);
 
     const isApuEditorDirty = useMemo(() => {
         if (!editingApu || initialApuEditorSnapshot === null) return false;
@@ -843,7 +843,7 @@ const APUs = () => {
         previousSubcatIdRef.current = selectedSubcatId;
     }, [selectedSubcatId]);
 
-    const getNextApuCode = () => {
+    const getNextApuCode = useCallback(() => {
         const subcat = subcategorias.find(s => s.id === selectedSubcatId);
         if (!subcat) return '5-XX-001';
 
@@ -860,16 +860,16 @@ const APUs = () => {
 
         const nextSeq = (maxSeq + 1).toString().padStart(4, '0');
         return `${prefix}-${nextSeq}`;
-    };
+    }, [apus, selectedSubcatId, subcategorias]);
 
-    const getEffectiveCategoria = (linea) => (
+    const getEffectiveCategoria = useCallback((linea) => (
         linea?.categoria_calc ||
         (linea?.is_apu
             ? 2
             : parseInt(String(linea?.item_obj?.codigo || linea?.item_obj?.item_obj?.codigo || '').charAt(0) || '1'))
-    );
+    ), []);
 
-    const buildPersistedLineOrder = (lineas = []) => {
+    const buildPersistedLineOrder = useCallback((lineas = []) => {
         const categoryPriority = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 };
         return [...lineas]
             .sort((a, b) => {
@@ -880,7 +880,7 @@ const APUs = () => {
                 return String(a.unique_key || a.id || '').localeCompare(String(b.unique_key || b.id || ''));
             })
             .map((linea, index) => ({ ...linea, orden: index }));
-    };
+    }, [getEffectiveCategoria]);
 
     const reorderLineasWithinCategory = (lineas = [], sourceKey, targetKey) => {
         const sourceIndex = lineas.findIndex((linea) => String(linea.unique_key || linea.id) === String(sourceKey));
@@ -956,7 +956,7 @@ const APUs = () => {
         return parseGlobalBaseRendimiento(fallbackBase);
     };
 
-    const handleCreateNew = async () => {
+    const handleCreateNew = useCallback(async () => {
         await handleAbandonCurrentApuEditor({
             title: 'Crear nuevo APU',
             message: pendingDuplicatedApuId
@@ -987,7 +987,7 @@ const APUs = () => {
                 setInitialApuEditorSnapshot(serializeApuEditorState(nextForm));
             },
         });
-    };
+    }, [handleAbandonCurrentApuEditor, pendingDuplicatedApuId, apuUnidades, getNextApuCode, selectedSubcatId, savedRendimientoGlobalPreference, serializeApuEditorState]);
 
     useEffect(() => {
         if (!shouldOpenEditorFromProject || loading || editingApu || requestedApuId) {
@@ -1069,7 +1069,7 @@ const APUs = () => {
                 fullApu.unidad_id || unitStr,
                 apuUnidades.length > 0 ? apuUnidades[0].id : null
             );
-            const matchedUnit = findMatchingUnit(apuUnidades, resolvedUnitId);
+
 
             const nextForm = {
                 id: fullApu.id,
@@ -1185,6 +1185,7 @@ const APUs = () => {
         editingApu,
         isApuEditorDirty,
         pendingDuplicatedApuId,
+        persistCurrentApuEditor,
     ]);
 
     useEffect(() => {
@@ -1238,6 +1239,7 @@ const APUs = () => {
         isApuEditorDirty,
         navigate,
         pendingDuplicatedApuId,
+        persistCurrentApuEditor,
     ]);
 
     const handleDuplicateApu = async (id, e) => {
@@ -1899,7 +1901,7 @@ const APUs = () => {
                 : value;
             
             const numValue = normalizedValue === '' ? '' : normalizedValue; 
-            const safeNumValue = (v) => (v === '' || isNaN(v)) ? 0 : v;
+
 
             const lineaModificada = prev.lineas.find(l => String(l.unique_key) === String(uniqueKey) || String(l.id) === String(uniqueKey));
             const targetCat = lineaModificada ? getEffectiveCategoria(lineaModificada) : null;
@@ -2072,7 +2074,7 @@ const APUs = () => {
                 rendimiento_num: parseNumericInput(l.rendimiento)
             };
         });
-    }, [formApu.lineas, parseNumericInput, resolveEditorLinePrice]);
+    }, [buildPersistedLineOrder, formApu.lineas, parseNumericInput, resolveEditorLinePrice]);
 
     const renderEditorLineActions = (linea, rowKey) => (
         <div className="flex items-center gap-1 rounded-xl border border-zinc-200 bg-white/95 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm">
@@ -2224,7 +2226,7 @@ const APUs = () => {
     };
 
 
-    const buildApuEditorPayload = () => {
+    const buildApuEditorPayload = useCallback(() => {
         if (!formApu.descripcion.trim()) {
             appAlert("La descripción es obligatoria.");
             return null;
@@ -2263,9 +2265,9 @@ const APUs = () => {
         }
 
         return payload;
-    };
+    }, [activeProject?.base_trabajo_id, apuUnidades, buildPersistedLineOrder, formApu.codigo, formApu.descripcion, formApu.lineas, formApu.omniclass_codigo, formApu.omniclass_titulo, formApu.por_validar, formApu.subcategoria_item_id, formApu.unidad, formApu.unidad_id, parseNumericInput, selectedBaseTrabajo?.id, useOmniClass]);
 
-    const persistCurrentApuEditor = async ({ closeEditor = true, successMessage = null } = {}) => {
+    const persistCurrentApuEditor = useCallback(async ({ closeEditor = true, successMessage = null } = {}) => {
         const payload = buildApuEditorPayload();
         if (!payload) return null;
 
@@ -2310,7 +2312,7 @@ const APUs = () => {
         } finally {
             setSaving(false);
         }
-    };
+    }, [buildApuEditorPayload, editingApu, effectiveBaseRevision, fetchData, formApu, selectedEmpresa?.id, serializeApuEditorState, user?.empresa_id]);
 
     const handleSaveApu = async () => {
         await persistCurrentApuEditor({

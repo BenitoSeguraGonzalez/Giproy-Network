@@ -190,8 +190,6 @@ const BimThreeViewer = ({
         });
     };
 
-    const resetIfcClassVisibility = () => setHiddenIfcClasses(new Set());
-
     useEffect(() => {
         const mount = mountRef.current;
         if (!mount || !ready || visibleThreeElements.length === 0) {

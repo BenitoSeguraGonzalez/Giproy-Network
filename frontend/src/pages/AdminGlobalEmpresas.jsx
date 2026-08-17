@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Building2, Download, Loader2, Power, RefreshCw, RotateCcw, Search, Trash2, Upload } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
@@ -55,7 +55,7 @@ const AdminGlobalEmpresas = () => {
     const [recoveryConfirm, setRecoveryConfirm] = useState('');
     const [backupBusy, setBackupBusy] = useState(false);
 
-    const loadEmpresas = async () => {
+    const loadEmpresas = useCallback(async () => {
         if (!isSuperadmin) {
             setLoading(false);
             return;
@@ -69,11 +69,11 @@ const AdminGlobalEmpresas = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isSuperadmin]);
 
     useEffect(() => {
         loadEmpresas();
-    }, [isSuperadmin]);
+    }, [loadEmpresas]);
 
     const filteredEmpresas = useMemo(() => (
         empresas.filter((empresa) => {

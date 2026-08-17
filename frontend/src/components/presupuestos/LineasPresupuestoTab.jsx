@@ -7,7 +7,7 @@ import CodeColorizer from '../../utils/codeColorizer';
 import { getIndirectosStatus } from '../../utils/indirectosStatus';
 import { appConfirm } from '../../utils/appDialog';
 import { useFormatters } from '../../hooks/useFormatters';
-import { formatoMoneda, roundDecimal } from '../../utils/math';
+import { formatoMoneda } from '../../utils/math';
 import {
     divideDecimalNumber,
     roundDecimalNumber,
@@ -74,7 +74,6 @@ const focusAndSelectInput = (input) => {
     });
 };
 
-const getEditableQuantityInputs = () => Array.from(document.querySelectorAll('[data-apu-quantity-id]'));
 const getVisibleBudgetLineIds = () =>
     Array.from(document.querySelectorAll('[data-apu-line-id]'))
         .map((element) => Number(element.getAttribute('data-apu-line-id')))
@@ -1161,7 +1160,6 @@ const LineasPresupuestoTab = ({
     const parseNumericInput = formatters?.parseNumericInput || ((v) => String(v || '').replace(',', '.'));
     const { 
         formatMoneda = fallbackFormatMoneda,
-        formatCalculo 
     } = formatters || {};
     const moneyDecimals = formatters?.precisionMoneda ?? 2;
     const quantityDecimals = formatters?.precisionCalculo ?? 4;
@@ -1173,7 +1171,7 @@ const LineasPresupuestoTab = ({
     const [quantityDrafts, setQuantityDrafts] = useState({});
     const [quantityEditOrigins, setQuantityEditOrigins] = useState({});
     const [quantityCommittedValues, setQuantityCommittedValues] = useState({});
-    const [activeDragLineId, setActiveDragLineId] = useState(null);
+    const [, setActiveDragLineId] = useState(null);
     const [budgetMoveNotice, setBudgetMoveNotice] = useState(null);
     const [selectedLineIds, setSelectedLineIds] = useState(new Set());
     const [selectionAnchorId, setSelectionAnchorId] = useState(null);
@@ -1466,7 +1464,8 @@ const LineasPresupuestoTab = ({
         focusQuantityInputForLine(nextId, 'auto');
     };
 
-    const lineas = activePresupuesto?.detalle || [];
+    const activeDetalle = activePresupuesto?.detalle;
+    const lineas = useMemo(() => activeDetalle || [], [activeDetalle]);
     const lineasByEdtId = useMemo(() => {
         const map = new Map();
         for (const linea of lineas) {
@@ -1674,7 +1673,7 @@ const LineasPresupuestoTab = ({
         return offsets;
     }, [flattenedRows]);
 
-    const scrollLineIntoView = (lineId, behavior = 'auto') => {
+    const scrollLineIntoView = useCallback((lineId, behavior = 'auto') => {
         const viewport = budgetViewportRef.current;
         if (!(viewport instanceof HTMLElement)) return;
         const rowIndex = flattenedRows.findIndex((row) => row.type === 'line' && Number(row.linea.id) === Number(lineId));
@@ -1691,7 +1690,7 @@ const LineasPresupuestoTab = ({
         } else if (bottom > currentBottom) {
             viewport.scrollTo({ top: Math.max(0, bottom - viewport.clientHeight), behavior });
         }
-    };
+    }, [ensureRenderedRowsForIndex, flattenedRows, rowTopOffsets]);
 
     const navigateBudgetSearchMatch = useCallback((targetIndex = 0) => {
         if (budgetSearchMatches.length === 0) return;
@@ -1853,12 +1852,15 @@ const LineasPresupuestoTab = ({
             if (event.key !== 'Escape') return;
             if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
             event.preventDefault();
-            resetBudgetWorkbenchModes();
+            clearGroupedSelection();
+            setIsSelectionMode(false);
+            setIsTanteoMode(false);
+            setTanteoVisible && setTanteoVisible(false);
         };
 
         window.addEventListener('keydown', handleSelectionEscape);
         return () => window.removeEventListener('keydown', handleSelectionEscape);
-    }, [isSelectionMode, isTanteoMode, tanteoVisible]);
+    }, [isSelectionMode, isTanteoMode, setTanteoVisible, tanteoVisible]);
 
     if (loading) {
         return (
@@ -1916,10 +1918,6 @@ const LineasPresupuestoTab = ({
                 metaTone: 'text-red-600'
             };
 
-    const handleAddLinea = (edtId) => {
-        setSelectedNodeId(edtId);
-    };
-
     const handleDeleteLinea = async (lineaId) => {
         const confirmed = await appConfirm({
             title: 'Eliminar línea',
@@ -1957,13 +1955,6 @@ const LineasPresupuestoTab = ({
     const resetSelectionWorkbench = () => {
         clearGroupedSelection();
         setIsSelectionMode(false);
-    };
-
-    const resetBudgetWorkbenchModes = () => {
-        clearGroupedSelection();
-        setIsSelectionMode(false);
-        setIsTanteoMode(false);
-        setTanteoVisible && setTanteoVisible(false);
     };
 
     const handleToggleSelectionMode = () => {
@@ -2064,14 +2055,6 @@ const LineasPresupuestoTab = ({
             }
         } catch (error) {
             globalThis.reportClientError?.("Error moviendo rubro:", error);
-        }
-    };
-
-    const handleUpdateLinea = async (lineaId, updateData) => {
-        try {
-            await updateApuInBudget(lineaId, updateData);
-        } catch (error) {
-            globalThis.reportClientError?.("Error actualizando linea:", error);
         }
     };
 

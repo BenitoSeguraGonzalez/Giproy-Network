@@ -140,7 +140,7 @@ const AppHint = ({
 
     useEffect(() => {
         if (disabled && visible) {
-            setVisible(false);
+            queueMicrotask(() => setVisible(false));
         }
     }, [disabled, visible]);
 

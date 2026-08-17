@@ -71,7 +71,8 @@ import {
     sumCronogramaDistribution,
 } from '../../utils/cronogramaNumbers';
 import { ControlRail, ControlRailDivider, ControlRailIconButton, ControlRailSection } from '../ui/ControlRail';
-import GridColumnManager, { useGridColumnSettings } from './GridColumnManager';
+import GridColumnManager from './GridColumnManager';
+import { useGridColumnSettings } from '../../hooks/useGridColumnSettings';
 import CodeColorizer from '../../utils/codeColorizer';
 import {
     downloadClassicCurvePdf,
@@ -1387,7 +1388,7 @@ const CronogramaValorado = ({
     setSelectedRowIds,
     onCopyDistribution,
     onPasteDistribution,
-    distributionSum,
+    _distributionSum,
     onValueTabChange,
     trabajoRows,
     trabajoConfig,
@@ -1429,8 +1430,8 @@ const CronogramaValorado = ({
     const distributionModeButtonRef = useRef(null);
     const [periodTypeMenuOpen, setPeriodTypeMenuOpen] = useState(false);
     const [distributionModeMenuOpen, setDistributionModeMenuOpen] = useState(false);
-    const [periodTypeMenuStyle, setPeriodTypeMenuStyle] = useState(null);
-    const [distributionModeMenuStyle, setDistributionModeMenuStyle] = useState(null);
+    const [_periodTypeMenuStyle, setPeriodTypeMenuStyle] = useState(null);
+    const [_distributionModeMenuStyle, setDistributionModeMenuStyle] = useState(null);
     const columnStorageKey = useMemo(() => {
         const userId = String(user?.id || user?.usuario_id || user?.email || 'anonymous').trim() || 'anonymous';
         const projectId = String(detail?.proyecto_id || detail?.project_id || detail?.id || 'sin-proyecto').trim() || 'sin-proyecto';
@@ -1929,7 +1930,7 @@ const CronogramaValorado = ({
         ],
     );
 
-    const syncStatus = useMemo(() => {
+    const _syncStatus = useMemo(() => {
         if (hasPeriodTypePreview || configState.distributionMode !== cronograma?.distribution_mode) {
             if (configState.distributionMode !== 'gantt' && activeManualTemporalSummary.count) {
                 return {
@@ -1977,7 +1978,7 @@ const CronogramaValorado = ({
             label: 'Modo valorado',
             detail: 'El cronograma usa una distribución global; Gantt no se modifica automáticamente.',
         };
-    }, [activeManualTemporalSummary.count, configState.distributionMode, cronograma?.distribution_mode, cronograma?.has_line_overrides, hasPeriodTypePreview, manualScheduleSummary.count, selectedDistributionModeLabel]);
+    }, [activeManualTemporalSummary.count, configState.distributionMode, cronograma?.distribution_mode, cronograma?.has_line_overrides, hasPeriodTypePreview, manualScheduleSummary.count, manualScheduleSummary.formattedPendingAmount, selectedDistributionModeLabel]);
 
     // Sincronización de scroll vertical
     const syncScroll = (source, target) => {
@@ -2003,7 +2004,7 @@ const CronogramaValorado = ({
         if (!rowNode || !scroller) return;
         const rowTop = rowNode.offsetTop;
         const rowHeight = rowNode.offsetHeight || 1;
-        const viewportTop = scroller.scrollTop;
+        const _viewportTop = scroller.scrollTop;
         const viewportHeight = scroller.clientHeight || 1;
         const targetTop = Math.max(0, rowTop - Math.max(0, (viewportHeight - rowHeight) / 2));
         scroller.scrollTo({ top: targetTop, behavior });
@@ -2249,7 +2250,7 @@ const CronogramaValorado = ({
     return (
         <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
             {/* Configuración legacy reemplazada por banda integrada bajo el header del valorado. */}
-            {false ? (
+            {legacyConfigEnabled ? (
             <div className={`transition-all duration-300 ease-in-out ${showConfig ? 'shrink-0' : 'h-0 overflow-hidden opacity-0'}`}>
                 <section className="grid grid-cols-1 xl:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] gap-3">
                     <div className="rounded-[1.25rem] border border-white/10 bg-[#101318] p-3.5 text-white shadow-[0_20px_44px_rgba(15,23,42,0.18)] ring-1 ring-black/12">
@@ -2296,11 +2297,11 @@ const CronogramaValorado = ({
                                         <span>{PERIOD_OPTIONS.find((option) => option.value === configState.periodType)?.label || 'Mensual'}</span>
                                         <ChevronDown className={`h-3.5 w-3.5 text-white/44 transition ${periodTypeMenuOpen ? 'rotate-180' : ''}`} />
                                     </button>
-                                    {periodTypeMenuOpen && periodTypeMenuStyle
+                                    {periodTypeMenuOpen && _periodTypeMenuStyle
                                         ? createPortal(
                                             <div
                                                 style={{
-                                                    ...periodTypeMenuStyle,
+                                                    ..._periodTypeMenuStyle,
                                                     minWidth: `${Math.max(periodTypeButtonRef.current?.offsetWidth || 0, 168)}px`,
                                                 }}
                                                 className="rounded-[0.95rem] border border-zinc-700 bg-[#16191f] p-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.36)]"
@@ -2371,11 +2372,11 @@ const CronogramaValorado = ({
                                             <span className="truncate">{selectedDistributionModeLabel}</span>
                                             <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-white/44 transition ${distributionModeMenuOpen ? 'rotate-180' : ''}`} />
                                         </button>
-                                        {distributionModeMenuOpen && distributionModeMenuStyle
+                                        {distributionModeMenuOpen && _distributionModeMenuStyle
                                             ? createPortal(
                                                 <div
                                                     style={{
-                                                        ...distributionModeMenuStyle,
+                                                        ..._distributionModeMenuStyle,
                                                         minWidth: `${Math.max(distributionModeButtonRef.current?.offsetWidth || 0, 220)}px`,
                                                     }}
                                                     className="rounded-[0.95rem] border border-zinc-700 bg-[#16191f] p-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.36)]"
@@ -2668,10 +2669,10 @@ const CronogramaValorado = ({
                                             <span className="truncate">{selectedDistributionModeLabel}</span>
                                             <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-white/55 transition ${distributionModeMenuOpen ? 'rotate-180' : ''}`} />
                                         </button>
-                                        {distributionModeMenuOpen && distributionModeMenuStyle
+                                        {distributionModeMenuOpen && _distributionModeMenuStyle
                                             ? createPortal(
                                                 <div
-                                                    style={{ ...distributionModeMenuStyle, minWidth: `${Math.max(distributionModeButtonRef.current?.offsetWidth || 0, 220)}px` }}
+                                                    style={{ ..._distributionModeMenuStyle, minWidth: `${Math.max(distributionModeButtonRef.current?.offsetWidth || 0, 220)}px` }}
                                                     className="rounded-[0.95rem] border border-zinc-700 bg-[#16191f] p-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.36)]"
                                                 >
                                                     <div className="px-2 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">Modo derivación</div>
@@ -2785,10 +2786,10 @@ const CronogramaValorado = ({
                                     <span className="truncate">{PERIOD_OPTIONS.find((option) => option.value === configState.periodType)?.label || 'Mensual'}</span>
                                     <ChevronDown className={`h-3 w-3 shrink-0 text-white/44 transition ${periodTypeMenuOpen ? 'rotate-180' : ''}`} />
                                 </button>
-                                {periodTypeMenuOpen && periodTypeMenuStyle
+                                {periodTypeMenuOpen && _periodTypeMenuStyle
                                     ? createPortal(
                                         <div
-                                            style={{ ...periodTypeMenuStyle, minWidth: `${Math.max(periodTypeButtonRef.current?.offsetWidth || 0, 168)}px` }}
+                                            style={{ ..._periodTypeMenuStyle, minWidth: `${Math.max(periodTypeButtonRef.current?.offsetWidth || 0, 168)}px` }}
                                             className="rounded-[0.95rem] border border-zinc-700 bg-[#16191f] p-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.36)]"
                                         >
                                             <div className="px-2 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">Tipo de periodo</div>
@@ -3788,14 +3789,14 @@ const TrabajoDateField = ({
         setPickerOpen(false);
     };
 
-    const handleToday = () => {
+    const _handleToday = () => {
         const todayValue = formatDateInputValue(new Date());
         onChange?.(todayValue);
         commitValue(todayValue);
         setPickerOpen(false);
     };
 
-    const handleClear = () => {
+    const _handleClear = () => {
         onChange?.('');
         commitValue('');
         setPickerOpen(false);
@@ -4374,8 +4375,8 @@ const CronogramaRecursosReadOnly = ({
     onRefresh,
     onLimitChange,
     onSaveState,
-    onResetStateDraft,
-    onPersistLevelingProposal,
+    _onResetStateDraft,
+    _onPersistLevelingProposal,
     onApproveLevelingProposal,
     onRequestLevelingApplication,
     onCancelLevelingApplication,
@@ -4395,7 +4396,8 @@ const CronogramaRecursosReadOnly = ({
     const [selectedSubcatId, setSelectedSubcatId] = useState(null);
     const [searchSubcategories, setSearchSubcategories] = useState('');
 
-    const allRows = recursos?.recursos || [];
+    const recursosRows = recursos?.recursos;
+    const allRows = useMemo(() => recursosRows || [], [recursosRows]);
 
     const categoryCounts = useMemo(() => {
         const counts = { 1: 0, 2: 0, 3: 0, 4: 0 };
@@ -4440,11 +4442,13 @@ const CronogramaRecursosReadOnly = ({
             (row.codigo && row.codigo.toLowerCase().includes(lowerSearch))
         );
     }, [allRows, recursosSearch]);
-    const periodos = recursos?.periodos || [];
+    const recursosPeriodos = recursos?.periodos;
+    const periodos = useMemo(() => recursosPeriodos || [], [recursosPeriodos]);
     const summary = recursos?.summary || {};
     const peakPeriod = [...periodos].sort((a, b) => Number(b.costo || 0) - Number(a.costo || 0))[0] || null;
     const adjustmentKeys = Object.keys(recursosState?.adjustments || {});
-    const manualLimits = recursosStateDraft?.manual_limits || {};
+    const recursosManualLimits = recursosStateDraft?.manual_limits;
+    const manualLimits = useMemo(() => recursosManualLimits || {}, [recursosManualLimits]);
     const persistedLevelingProposal = recursosStateDraft?.leveling_proposal || null;
     const approvedLevelingProposal = persistedLevelingProposal?.status === 'approved' ? persistedLevelingProposal : null;
     const levelingApplicationIntent = recursosStateDraft?.leveling_application_intent || null;
@@ -4612,7 +4616,7 @@ const CronogramaRecursosReadOnly = ({
     }, [rows, selectedCat, selectedSubcatId]);
     const periodGridStyle = useMemo(() => ({
         gridTemplateColumns: `repeat(${Math.max(periodos.length, 1)}, minmax(8rem, 1fr))`,
-    }), [periodos.length]);
+    }), [periodos]);
 
     if (loading) {
         return (
@@ -5076,6 +5080,8 @@ const resolveApiErrorMessage = (error, fallback) => {
     return error?.message || fallback;
 };
 
+const legacyConfigEnabled = Boolean(import.meta.env.VITE_ENABLE_LEGACY_CRONOGRAM_CONFIG);
+
 const Cronogramas = ({ project, initialProjectDetail = null }) => {
     const { user, selectedEmpresa } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
@@ -5154,9 +5160,9 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
     const distributionModeButtonRef = useRef(null);
     const [periodTypeMenuOpen, setPeriodTypeMenuOpen] = useState(false);
     const [distributionModeMenuOpen, setDistributionModeMenuOpen] = useState(false);
-    const [periodTypeMenuStyle, setPeriodTypeMenuStyle] = useState(null);
-    const [distributionModeMenuStyle, setDistributionModeMenuStyle] = useState(null);
-    const distributionSum = useMemo(
+    const [_periodTypeMenuStyle, setPeriodTypeMenuStyle] = useState(null);
+    const [_distributionModeMenuStyle, setDistributionModeMenuStyle] = useState(null);
+    const _distributionSum = useMemo(
         () => sumCronogramaDistribution(configState.globalDistribution || [], 2),
         [configState.globalDistribution],
     );
@@ -5261,22 +5267,21 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
             selectedBudgetDetail?.revision,
         ],
     );
+    const effectiveGanttCronogramaStart = cronogramaTrabajo?.fecha_inicio;
+    const effectiveGanttCronogramaEnd = cronogramaTrabajo?.fecha_fin;
+    const effectiveGanttProjectStart = project?.fecha_inicio;
+    const effectiveGanttProjectEnd = project?.fecha_fin_estimada;
+    const hasEffectiveGanttProject = Boolean(project);
+    const hasEffectiveGanttSchedule = Boolean(cronogramaTrabajo);
     const effectiveGanttDetail = useMemo(() => {
         if (detail) return detail;
-        if (!project && !cronogramaTrabajo) return null;
+        if (!hasEffectiveGanttProject && !hasEffectiveGanttSchedule) return null;
         return {
             ...detail,
-            fecha_inicio: detail?.fecha_inicio || cronogramaTrabajo?.fecha_inicio || project?.fecha_inicio || null,
-            fecha_finalizacion: detail?.fecha_finalizacion || cronogramaTrabajo?.fecha_fin || project?.fecha_fin_estimada || null,
+            fecha_inicio: detail?.fecha_inicio || effectiveGanttCronogramaStart || effectiveGanttProjectStart || null,
+            fecha_finalizacion: detail?.fecha_finalizacion || effectiveGanttCronogramaEnd || effectiveGanttProjectEnd || null,
         };
-    }, [
-        cronogramaTrabajo?.fecha_fin,
-        cronogramaTrabajo?.fecha_inicio,
-        detail,
-        project?.fecha_fin_estimada,
-        project?.fecha_inicio,
-        project,
-    ]);
+    }, [detail, effectiveGanttCronogramaEnd, effectiveGanttCronogramaStart, effectiveGanttProjectEnd, effectiveGanttProjectStart, hasEffectiveGanttProject, hasEffectiveGanttSchedule]);
     const hasGanttBudgetContext = Boolean(resolvedBudgetId || selectedBudget);
     const ganttReadyToMount = Boolean(project && hasGanttBudgetContext);
     const ganttBootstrapping = resolveEffectiveGanttBootstrapState({
@@ -6423,7 +6428,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
         }
     }, [cronogramaRecursosState, cronogramaRecursosStateDraft, empId, reloadCronogramaRecursosState, resolvedBudgetId]);
 
-    const handleClearCronogramaRecursosLevelingProposal = useCallback(async () => {
+    const _handleClearCronogramaRecursosLevelingProposal = useCallback(async () => {
         if (!resolvedBudgetId || !cronogramaRecursosState) return;
         setCronogramaRecursosStateSaving(true);
         setCronogramaRecursosStateError('');
@@ -6791,7 +6796,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
             // If it can't be normalized (too far from 100), ask to balance first or try to balance now
             const confirmedBalance = await appConfirm({
                 title: 'Distribución incompleta',
-                message: `La suma actual es ${formatPercent(distributionSum, 2)}. ¿Desea cuadrar automáticamente el 100% en el último periodo antes de aplicar?`,
+                message: `La suma actual es ${formatPercent(_distributionSum, 2)}. ¿Desea cuadrar automáticamente el 100% en el último periodo antes de aplicar?`,
                 confirmLabel: 'Cuadrar y Aplicar',
                 tone: 'warning'
             });
@@ -7009,7 +7014,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
         }
     }, []);
 
-    const handleClearValoradoOverrides = async (overrideSummary = null) => {
+    const _handleClearValoradoOverrides = async (overrideSummary = null) => {
         if (!resolvedBudgetId || !cronograma) return;
         if (configState.periodType !== cronograma.period_type || configState.distributionMode !== cronograma.distribution_mode) {
             await appAlert({
@@ -8165,14 +8170,14 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                     onRefresh={handleRefreshCronogramaRecursos}
                     onLimitChange={handleCronogramaRecursosLimitChange}
                     onSaveState={handleSaveCronogramaRecursosState}
-                    onResetStateDraft={handleResetCronogramaRecursosStateDraft}
-                    onPersistLevelingProposal={handlePersistCronogramaRecursosLevelingProposal}
+                    _onResetStateDraft={handleResetCronogramaRecursosStateDraft}
+                    _onPersistLevelingProposal={handlePersistCronogramaRecursosLevelingProposal}
                     onApproveLevelingProposal={handleApproveCronogramaRecursosLevelingProposal}
                     onRequestLevelingApplication={handleRequestCronogramaRecursosLevelingApplication}
                     onCancelLevelingApplication={handleCancelCronogramaRecursosLevelingApplication}
                     onApplyLevelingApplication={handleApplyCronogramaRecursosLevelingApplication}
                     onRollbackLevelingApplication={handleRollbackCronogramaRecursosLevelingApplication}
-                    onClearLevelingProposal={handleClearCronogramaRecursosLevelingProposal}
+                    onClearLevelingProposal={_handleClearCronogramaRecursosLevelingProposal}
                 />
             ) : (
                 <div className="flex min-h-0 flex-1 flex-col gap-3">
@@ -8191,7 +8196,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                         onConfigChange={handleConfigChange}
                         onApplyConfig={handleApplyConfig}
                         onRecalculateFromGantt={handleRecalculateValoradoFromGantt}
-                        onClearLineOverrides={handleClearValoradoOverrides}
+                        onClearLineOverrides={_handleClearValoradoOverrides}
                         onRecalculateCashFlow={handleRecalculateCashFlow}
                         onApplyCashConstraintLineDraft={handleApplyCashConstraintLineDraft}
                         onBalanceGlobal={handleBalanceGlobal}
@@ -8207,7 +8212,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                         setSelectedRowIds={setSelectedRowIds}
                         onCopyDistribution={handleCopyDistribution}
                         onPasteDistribution={handlePasteDistribution}
-                        distributionSum={distributionSum}
+                        _distributionSum={_distributionSum}
                         onValueTabChange={setValoradoReportTab}
                         trabajoRows={cronogramaTrabajo?.rows || []}
                         trabajoConfig={cronogramaTrabajo?.config || null}

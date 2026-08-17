@@ -1,6 +1,6 @@
 const sanitizeFilenamePart = (value, fallback = 'Documento') => {
     const sanitized = String(value || '')
-        .replace(/[<>:"/\\|?*\x00-\x1F]/g, ' ')
+        .replace(/[<>:"/\\|?*]/g, ' ').replace(new RegExp('[' + String.fromCharCode(0) + '-' + String.fromCharCode(31) + ']', 'g'), ' ')
         .replace(/\s+/g, ' ')
         .trim();
     return sanitized || fallback;

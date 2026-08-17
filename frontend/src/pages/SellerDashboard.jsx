@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
     AlertTriangle,
     Building2,
@@ -358,7 +358,7 @@ const SellerDashboard = () => {
             return rightDate - leftDate;
         }), [currentProducts, user?.id]);
 
-    const resetFormState = () => {
+    const resetFormState = useCallback(() => {
         setForm({
             ...initialForm,
             product_type: isSystemSellingContext ? 'adicional' : 'base_maestra',
@@ -367,7 +367,7 @@ const SellerDashboard = () => {
         setEditingProductId(null);
         setSourceSearch('');
         setSourceOptions([]);
-    };
+    }, [isSystemSellingContext]);
 
     const resetCategoryFormState = () => {
         setCategoryForm(initialCategoryForm);
@@ -404,7 +404,7 @@ const SellerDashboard = () => {
         setModerationWorkbenchOpen(true);
     };
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         const requests = [
             marketplaceApi.getCategories(),
             marketplaceApi.getCompanyStats(),
@@ -435,13 +435,13 @@ const SellerDashboard = () => {
         setSystemProducts(sellerProductsRes.data || []);
         setSystemSales(sellerSalesRes.data || []);
         setManagedCategories(adminCategoriesRes?.data || []);
-    };
+    }, [isSuperAdmin]);
 
     useEffect(() => {
         if (!canSell || !companyCanSell || !profileComplete) return;
         if (isSuperAdmin && !selectedEmpresa?.id && panelMode === 'company') return;
         loadData().catch((error) => globalThis.reportClientError?.('Error cargando panel vendedor marketplace:', error));
-    }, [canSell, companyCanSell, profileComplete, isSuperAdmin, selectedEmpresa?.id, panelMode]);
+    }, [canSell, companyCanSell, profileComplete, isSuperAdmin, selectedEmpresa?.id, panelMode, loadData]);
 
     useEffect(() => {
         setForm((prev) => ({
@@ -451,7 +451,7 @@ const SellerDashboard = () => {
                 : (isSystemSellingContext ? 'adicional' : 'base_maestra'),
             product_kind: canUseManualProducts ? prev.product_kind : 'referenced',
         }));
-    }, [isSystemSellingContext, canUseManualProducts]);
+    }, [categoryOptions, isSystemSellingContext, canUseManualProducts]);
 
     useEffect(() => {
         if (!requiresReference || !form.source_type || !canSell || !companyCanSell || !profileComplete || isSystemSellingContext) {
@@ -487,7 +487,7 @@ const SellerDashboard = () => {
 
     useEffect(() => {
         resetFormState();
-    }, [panelMode]);
+    }, [panelMode, resetFormState]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -1092,96 +1092,6 @@ const SellerDashboard = () => {
                                         onClick={() => handleReviewCorrection(product)}
                                     />
                                     <p className="text-[11px] font-semibold text-zinc-500 xl:text-right">Úsalo para comprobar qué se cambió antes de la nueva decisión.</p>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-        );
-    };
-
-    const renderApprovedProductsQueue = ({ products, tone = 'company' }) => {
-        if (products.length === 0) return null;
-
-        const isSystemTone = tone === 'system';
-        const sectionTone = isSystemTone
-            ? 'border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-pink-50'
-            : 'border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-lime-50';
-        const badgeTone = isSystemTone
-            ? 'border-fuchsia-200 bg-white text-fuchsia-700'
-            : 'border-emerald-200 bg-white text-emerald-700';
-        const iconTone = isSystemTone
-            ? 'border-fuchsia-200 bg-fuchsia-100 text-fuchsia-700'
-            : 'border-emerald-200 bg-emerald-100 text-emerald-700';
-
-        return (
-            <section id="seller-approved-queue" className={`rounded-[2rem] border p-7 shadow-[0_16px_50px_rgba(15,23,42,0.05)] ${sectionTone}`}>
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-start gap-4">
-                        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${iconTone}`}>
-                            <Sparkles className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">Catálogo vivo</p>
-                            <h2 className="text-xl font-black uppercase tracking-tight text-zinc-900">Productos aprobados y activos</h2>
-                            <p className="mt-2 max-w-3xl text-sm font-medium leading-relaxed text-zinc-600">
-                                Este bloque concentra tus publicaciones ya listas para vender, con acceso rápido a edición, clonación o pausa comercial.
-                            </p>
-                        </div>
-                    </div>
-                    <div className={`rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] ${badgeTone}`}>
-                        {products.length} en catálogo
-                    </div>
-                </div>
-
-                <div className="mt-6 grid gap-4 xl:grid-cols-2">
-                    {products.map((product) => (
-                        <div key={`approved-${product.id}`} className="rounded-[1.5rem] border border-white/80 bg-white/90 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
-                            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                                <div>
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <p className="text-lg font-black text-zinc-900">{product.titulo}</p>
-                                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">
-                                            Aprobada
-                                        </span>
-                                    </div>
-                                    <p className="mt-2 text-sm font-semibold text-zinc-500">
-                                        {product.product_type}
-                                        {product.category?.nombre ? ` | ${product.category.nombre}` : ''}
-                                        {' | activa'}
-                                    </p>
-                                    <p className="mt-3 text-sm font-medium leading-relaxed text-zinc-700">
-                                        {product.resumen || 'Producto aprobado y activo dentro del catálogo comercial.'}
-                                    </p>
-                                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                                        Actualizada {resolveObservationTimestamp(product) ? new Date(resolveObservationTimestamp(product)).toLocaleDateString() : 'sin fecha visible'}
-                                    </p>
-                                </div>
-                                <div className="flex flex-col items-start gap-3 lg:items-end">
-                                    <p className="text-lg font-black text-zinc-700">{formatAmount(product.precio)} {product.moneda}</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        <ProjectSectionIconButton
-                                            icon={Pencil}
-                                            label="Editar"
-                                            hintContent="Editar publicación aprobada"
-                                            onClick={() => handleReviewCorrection(product)}
-                                            className="hover:text-[#F39200]"
-                                        />
-                                        <ProjectSectionIconButton
-                                            icon={Copy}
-                                            label="Clonar"
-                                            hintContent="Clonar publicación"
-                                            onClick={() => handleCloneProduct(product)}
-                                        />
-                                        <ProjectSectionIconButton
-                                            icon={Power}
-                                            label="Pausar"
-                                            hintContent="Pausar publicación"
-                                            onClick={() => handleToggleProductActive(product)}
-                                            className="border-red-200 bg-white text-red-700 hover:text-red-700"
-                                        />
-                                    </div>
                                 </div>
                             </div>
                         </div>

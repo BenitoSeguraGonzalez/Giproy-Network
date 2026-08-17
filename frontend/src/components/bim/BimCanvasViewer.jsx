@@ -312,7 +312,7 @@ const BimCanvasViewer = ({
         height: canvasSize.height / viewport.scale,
     };
 
-    const fitElements = (targetElements = []) => {
+    const fitElements = useCallback((targetElements = []) => {
         if (!canvasSize.width || !canvasSize.height || targetElements.length === 0) {
             return;
         }
@@ -331,11 +331,11 @@ const BimCanvasViewer = ({
             offsetX: (canvasSize.width - targetBounds.width * nextScale) / 2 - targetBounds.minX * nextScale,
             offsetY: (canvasSize.height - targetBounds.height * nextScale) / 2 - targetBounds.minY * nextScale,
         });
-    };
+    }, [canvasSize.height, canvasSize.width]);
 
-    const fitScene = () => {
+    const fitScene = useCallback(() => {
         fitElements(laidOutElements);
-    };
+    }, [fitElements, laidOutElements]);
 
     const handleFitLinked = () => {
         fitElements(linkedLaidOutElements);
@@ -383,12 +383,12 @@ const BimCanvasViewer = ({
     }, [canvasSize.height, canvasSize.width, laidOutElements, selectedElement]);
 
     useEffect(() => {
-        fitSelectedCallback();
+        queueMicrotask(() => fitSelectedCallback());
     }, [fitSelectedCallback]);
 
     useEffect(() => {
-        fitScene();
-    }, [activeIfcClass, canvasSize.height, canvasSize.width, showOnlyLinked]);
+        queueMicrotask(() => fitScene());
+    }, [activeIfcClass, canvasSize.height, canvasSize.width, fitScene, showOnlyLinked]);
 
     useEffect(() => {
         if (activeIfcClass === 'all') {
@@ -396,9 +396,9 @@ const BimCanvasViewer = ({
         }
         const availableClasses = new Set(elements.map((element) => element.ifc_class || 'Sin clase IFC'));
         if (!availableClasses.has(activeIfcClass)) {
-            setActiveIfcClass('all');
+            queueMicrotask(() => setActiveIfcClass('all'));
         }
-    }, [activeIfcClass, elements]);
+    }, [activeIfcClass, elements, validationIssuesByElementId]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -562,6 +562,7 @@ const BimCanvasViewer = ({
         laidOutElements,
         linkedElementIdSet,
         elementLinkCounts,
+        validationIssuesByElementId,
         highlightedElementIdSet,
         selectedElement?.id,
         selectedLink?.bim_element_id,

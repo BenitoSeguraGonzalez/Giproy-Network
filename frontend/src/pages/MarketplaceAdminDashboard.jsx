@@ -864,7 +864,7 @@ const getPortalImportFileExtension = (filename) => {
     return match?.[1]?.toUpperCase() || 'ARCHIVO';
 };
 
-const getPortalImportWorkspaceStatus = ({ files, importing, analysis }) => {
+const _getPortalImportWorkspaceStatus = ({ files, importing, analysis }) => {
     if (importing) {
         return {
             label: 'Analizando fuentes',
@@ -1117,6 +1117,7 @@ const AdminMotionScrollArea = ({ children, className = '', contentClassName = ''
 };
 
 const MarketplaceAdminDashboard = () => {
+    const legacyMarketplacePreviewEnabled = Boolean(import.meta.env.VITE_ENABLE_LEGACY_MARKETPLACE_PREVIEW);
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
     const currentCompanyName = user?.empresa_nombre || user?.empresa?.nombre || '';
@@ -1131,7 +1132,7 @@ const MarketplaceAdminDashboard = () => {
     const [productsLoading, setProductsLoading] = useState(true);
     const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(true);
     const [adminOrdersLoading, setAdminOrdersLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    const [, setSaving] = useState(false);
     const [productSaving, setProductSaving] = useState(false);
     const [paymentMethodSavingSlug, setPaymentMethodSavingSlug] = useState('');
     const [adminOrderActionId, setAdminOrderActionId] = useState(null);
@@ -1857,7 +1858,7 @@ const MarketplaceAdminDashboard = () => {
         setProductForm((current) => ({ ...current, category_id: '' }));
     }, [productEditorModalOpen, productForm.category_id, selectableCategoryIds]);
 
-    const handleEditCategory = (category) => {
+    const _handleEditCategory = (category) => {
         setEditingCategoryId(category.id);
         setForm({
             nombre: category.nombre || '',
@@ -1868,7 +1869,7 @@ const MarketplaceAdminDashboard = () => {
         });
     };
 
-    const handleSubmit = async (event) => {
+    const _handleSubmit = async (event) => {
         event.preventDefault();
         if (!form.nombre.trim()) {
             await appAlert({
@@ -1906,7 +1907,7 @@ const MarketplaceAdminDashboard = () => {
         }
     };
 
-    const handleDeleteCategory = async (category) => {
+    const _handleDeleteCategory = async (category) => {
         const confirmed = await appConfirm({
             title: 'Borrar categoría',
             message: `Vas a borrar la categoría “${category.nombre}”. Esta acción no se puede deshacer.`,
@@ -2346,7 +2347,7 @@ const MarketplaceAdminDashboard = () => {
         }
     };
 
-    const openPortalPreview = async () => {
+    const _openPortalPreview = async () => {
         const isValid = await validatePortalPreview();
         if (!isValid) return;
         setPortalPreviewPayload(buildPortalPayload());
@@ -2588,7 +2589,7 @@ const MarketplaceAdminDashboard = () => {
         || portalForm.import_analysis !== null
     ), [portalForm, todayIso]);
 
-    const requestCloseProductEditorModal = async () => {
+    const _requestCloseProductEditorModal = async () => {
         if (!isGenericProductDirty) {
             closeProductEditorModal();
             return;
@@ -4422,7 +4423,7 @@ const MarketplaceAdminDashboard = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    {false ? (
+                                    {legacyMarketplacePreviewEnabled ? (
                                         <>
                                     <div className="mt-3 grid gap-3 xl:grid-cols-[1.4fr_1fr]">
                                         <div className="rounded-[1rem] border border-white bg-white p-3">
@@ -5012,7 +5013,7 @@ const MarketplaceAdminDashboard = () => {
                             </details>
                         </div>
                     ) : null}
-                    {false ? (
+                    {legacyMarketplacePreviewEnabled ? (
                         <div className="rounded-[1.5rem] border border-zinc-200 bg-white p-5">
                             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400">Previo de importación</p>
                             <div className="mt-3 grid gap-3 md:grid-cols-3 xl:grid-cols-6">

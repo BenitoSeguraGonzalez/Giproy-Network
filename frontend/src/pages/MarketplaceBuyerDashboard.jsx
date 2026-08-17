@@ -8,7 +8,7 @@ import ClearSearchField from '../components/ui/ClearSearchField';
 import MotionScrollbar from '../components/ui/MotionScrollbar';
 import { AuthContext } from '../context/AuthContext';
 import { buildMarketplaceEntityLink, getMarketplaceEntityActionLabel } from '../utils/marketplaceEntityLinks';
-import { resolveMarketplacePaymentMethodLabel, resolveMarketplacePaymentStatusLabel, resolveMarketplaceRefundResolutionLabel } from '../utils/marketplacePaymentLabels';
+import { resolveMarketplacePaymentMethodLabel, resolveMarketplacePaymentStatusLabel } from '../utils/marketplacePaymentLabels';
 import { appAlert, appConfirm } from '../utils/appDialog';
 import {
     MarketplaceDashboardHeader,

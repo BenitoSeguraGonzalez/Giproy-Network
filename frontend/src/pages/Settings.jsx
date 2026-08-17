@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import { PLANTILLAS_OPCIONES } from '../constants/plantillas';
 import { Trash2, Edit2, Plus, Save, X, Building2, Users, Settings as SettingsIcon, Shield, Camera, Globe, ChevronDown, Check, AlertCircle, Info, RefreshCw, Loader2, CheckCircle2, XCircle, AlertTriangle, Briefcase, FileText, Eye, ShieldCheck, Search, Power, ArrowLeft, Building, Loader2 as LoaderIcon, CheckCircle2 as CheckIcon, XCircle as XIcon, AlertTriangle as AlertIcon, ShieldCheck as ShieldIcon } from 'lucide-react';
@@ -709,6 +709,7 @@ const Settings = () => {
         setDeleteEmpresaStep(1);
         setShowDeleteEmpresaModal(true);
     };
+
 
     const handleDeleteEmpresaConfirm = async () => {
         if (!empresaToDelete) return;
@@ -2872,7 +2873,7 @@ const Settings = () => {
 
                     <div className="flex-1">
                         <AnimatePresence mode="wait">
-                            <motion.div
+                            <Motion.div
                                 key={activeTab}
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -2885,14 +2886,16 @@ const Settings = () => {
                                         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Sincronizando Sistema...</p>
                                     </div>
                                 ) : (
-                                    activeTab === 'preferencias' ? renderPreferencias() :
+                                    activeTab === 'empresas' ? renderEmpresas() :
+                                            activeTab === 'superadmins' ? renderSuperadmins() :
+                                            activeTab === 'preferencias' ? renderPreferencias() :
                                             activeTab === 'mi-empresa' ? renderMiEmpresa() :
                                                 activeTab === 'backup-empresa' ? renderCompanyBackupPanel() :
                                                 activeTab === 'config-proyecto' ? renderProyectoConfig() :
                                                     activeTab === 'plantillas' ? renderPlantillasConfig() :
                                                         renderUsuarios()
                                 )}
-                            </motion.div>
+                            </Motion.div>
                         </AnimatePresence>
                     </div>
                 </div>

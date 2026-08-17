@@ -57,7 +57,7 @@ const MergeInterparentModal = ({
                 transfer_amount: transferAmount,
             });
         }
-    }, [reajustePct, totalSourceAmount, transferAmount, targetSubbar, currency, decMoneda, onConfirmMerge]);
+    }, [reajustePct, transferAmount, targetSubbar, currency, decMoneda, onConfirmMerge]);
 
     if (!open || !sourceSubbars?.length || !targetSubbar) return null;
 

@@ -26,14 +26,6 @@ const isStructuralNode = (node, moduleType) => (
         : node?.tipo_nodo === 'HITO'
 );
 
-const collectIdsRecursively = (nodes = [], bucket = []) => {
-    nodes.forEach((node) => {
-        bucket.push(node.id);
-        collectIdsRecursively(node.hijos || [], bucket);
-    });
-    return bucket;
-};
-
 const findNodePath = (nodes = [], nodeId, trail = []) => {
     for (const node of nodes) {
         const nextTrail = [...trail, node];
@@ -801,14 +793,6 @@ const HierarchyGraphView = ({
             else next.add(nodeId);
             return next;
         });
-    };
-
-    const handleExpandAll = () => {
-        setCollapsedIds(new Set());
-    };
-
-    const handleCollapseAll = () => {
-        setCollapsedIds(new Set(collectIdsRecursively(graphSourceTree)));
     };
 
     const navigateToSearchMatch = (match) => {

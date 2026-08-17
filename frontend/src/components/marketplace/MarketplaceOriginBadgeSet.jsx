@@ -6,22 +6,7 @@ const BADGE_STYLES = {
     internal: 'border-rose-200 bg-rose-50 text-rose-700',
 };
 
-export const getMarketplaceOwnershipTone = (origin) => {
-    const resolved = resolveOriginPayload(origin);
-    const ownershipKind = resolved?.ownershipKind || 'owned';
-    if (ownershipKind === 'acquired') {
-        return {
-            dot: 'bg-amber-500',
-            text: 'text-amber-700',
-            textStrong: 'text-amber-800',
-        };
-    }
-    return {
-        dot: 'bg-emerald-500',
-        text: 'text-emerald-700',
-        textStrong: 'text-emerald-800',
-    };
-};
+
 
 const resolveOriginPayload = (origin) => {
     if (!origin) {

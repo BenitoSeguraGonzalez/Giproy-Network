@@ -167,7 +167,6 @@ const AnimatedDateInput = React.forwardRef(({
     title,
     min,
     max,
-    clearable = true,
     variant = 'default',
     align = 'auto',
     openOnMount = false,
@@ -200,19 +199,19 @@ const AnimatedDateInput = React.forwardRef(({
 
     useEffect(() => {
         if (!isOpen) {
-            setDraftParts(resolvedParts);
+            queueMicrotask(() => setDraftParts(resolvedParts));
         }
     }, [isOpen, resolvedParts]);
 
     useEffect(() => {
         if (!openOnMount || disabled || readOnly) return;
-        setIsOpen(true);
+        queueMicrotask(() => setIsOpen(true));
     }, [disabled, openOnMount, readOnly]);
 
     useEffect(() => {
         if (!isOpen) return;
         if (draftParts) {
-            setVisibleMonthDate(new Date(draftParts.year, draftParts.month, 1));
+            queueMicrotask(() => setVisibleMonthDate(new Date(draftParts.year, draftParts.month, 1)));
         }
     }, [draftParts, isOpen]);
 
@@ -384,14 +383,6 @@ const AnimatedDateInput = React.forwardRef(({
         if (type === 'date') {
             setIsOpen(false);
         }
-    };
-
-    const handleClear = () => {
-        if (disabled || readOnly) return;
-        hasInteractedRef.current = true;
-        setDraftParts(null);
-        commitValue(null);
-        setIsOpen(false);
     };
 
     const handleKeyDown = (event) => {

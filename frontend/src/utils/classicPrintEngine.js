@@ -546,7 +546,7 @@ const resolveHierarchyCardBodyRows = (node, { isEdt = false, currency = 'USD', t
     return rows.length ? rows : [{ label: '', value: 'Sin definicion o responsable vinculado' }];
 };
 
-const drawHierarchyCard = (canvas, item, { moduleType = 'edo', accent = '#F39200', currency = 'USD', totalValorado = 0 }) => {
+const drawHierarchyCard = (canvas, item, { moduleType = 'edo', currency = 'USD', totalValorado = 0 }) => {
     const { node, x, y, width, height } = item;
     const isEdt = moduleType === 'edt';
     const code = node.codigo || node.codigo_visible || node.item_visible || '-';
@@ -630,27 +630,6 @@ const drawHierarchyCard = (canvas, item, { moduleType = 'edo', accent = '#F39200
         color: '#6B7280',
         maxWidth: lineMaxWidth,
     });
-};
-
-const splitHierarchyPrintPages = (nodes = [], rowsPerPage = 30) => {
-    const leafBudget = normalizeRowsPerPage(rowsPerPage, 30);
-    const pages = [];
-    let current = [];
-    let currentLeaves = 0;
-
-    nodes.forEach((node) => {
-        const nodeLeaves = Math.max(1, countHierarchyLeaves(node));
-        if (current.length && currentLeaves + nodeLeaves > leafBudget) {
-            pages.push(current);
-            current = [];
-            currentLeaves = 0;
-        }
-        current.push(node);
-        currentLeaves += nodeLeaves;
-    });
-
-    if (current.length) pages.push(current);
-    return pages.length ? pages : [[]];
 };
 
 const splitHierarchyNodeIntoReadablePages = (node, leafBudget) => {

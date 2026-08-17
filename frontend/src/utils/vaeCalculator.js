@@ -4,15 +4,15 @@
  */
 
 const normalizeResourceCpcPercentage = (recurso = {}) => {
-    if (recurso?.hasOwnProperty('cpc_porcentaje')) {
+    if (Object.prototype.hasOwnProperty.call(recurso, 'cpc_porcentaje')) {
         return Number(recurso.cpc_porcentaje || 0);
     }
     return Number(recurso?.cpc?.porcentaje || 0);
 };
 
 const hasResolvableResourceCpc = (recurso = {}) => {
-    if (recurso?.hasOwnProperty('has_cpc')) return Boolean(recurso.has_cpc);
-    if (recurso?.hasOwnProperty('cpc_codigo')) return Boolean(recurso.cpc_codigo);
+    if (Object.prototype.hasOwnProperty.call(recurso, 'has_cpc')) return Boolean(recurso.has_cpc);
+    if (Object.prototype.hasOwnProperty.call(recurso, 'cpc_codigo')) return Boolean(recurso.cpc_codigo);
     return Boolean(recurso?.cpc?.codCPC);
 };
 

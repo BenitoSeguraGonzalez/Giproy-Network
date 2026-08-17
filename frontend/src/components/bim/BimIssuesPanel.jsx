@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { CheckCircle2, Download, MessageSquarePlus, Plus, UserRoundCheck } from 'lucide-react';
 
 import { bimModelsApi } from '../../api/bimModels';
@@ -13,13 +13,13 @@ const BimIssuesPanel = ({ projectId, versionId, empresaId, currentUserId, viewer
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const refresh = async () => {
+    const refresh = useCallback(async () => {
         if (!projectId) return;
         const items = await api.listIssues(projectId, empresaId);
         setIssues(items || []);
         if (selectedId && !items.some((item) => item.id === selectedId)) setSelectedId(null);
-    };
-    useEffect(() => { refresh().catch(() => setIssues([])); }, [empresaId, projectId]);
+    }, [api, empresaId, projectId, selectedId]);
+    useEffect(() => { void refresh().catch(() => setIssues([])); }, [refresh]);
     const selected = issues.find((issue) => issue.id === selectedId) || null;
     const replace = (issue) => setIssues((current) => current.map((item) => item.id === issue.id ? issue : item));
 

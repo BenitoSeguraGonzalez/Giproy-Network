@@ -8,7 +8,7 @@ import apusApi from '../../api/apus';
 import { presupuestosApi } from '../../api/presupuestos';
 import { appAlert, appConfirm } from '../../utils/appDialog';
 import { useFormatters } from '../../hooks/useFormatters';
-import { roundDecimal } from '../../utils/math';
+
 import {
     divideDecimalNumber,
     roundDecimalNumber,
@@ -544,7 +544,7 @@ const TanteoTab = ({ sidebar = false, onHide }) => {
                                         : formatNumericDisplay(currentVal, precisionCalculo);
                                     const isEquip = Number(rec.subcategoria_codigo) === 1;
                                     const isLabor = Number(rec.subcategoria_codigo) === 4;
-                                    const isMaterial = Number(rec.subcategoria_codigo) === 2;
+
                                     const isTransport = Number(rec.subcategoria_codigo) === 3;
                                     const resourceIcon = isEquip
                                         ? <Wrench className="w-3 h-3 text-blue-600" />

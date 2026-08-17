@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Copy, Power, RefreshCw, RotateCw, Send } from 'lucide-react';
 
 import { bimModelsApi } from '../../api/bimModels';
@@ -14,14 +14,14 @@ export default function BimIntegrationGatewayPanel({ projectId, empresaId, canMa
     const [secretOnce, setSecretOnce] = useState('');
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState('');
-    const load = async () => {
+    const load = useCallback(async () => {
         if (!projectId) return;
         try {
             const [subscriptionRows, deliveryRows] = await Promise.all([api.listIntegrationSubscriptions(projectId, empresaId), api.listIntegrationDeliveries(projectId, empresaId)]);
             setSubscriptions(subscriptionRows); setDeliveries(deliveryRows);
         } catch (error) { setMessage(error?.response?.data?.detail || 'No se pudo cargar el gateway BIM.'); }
-    };
-    useEffect(() => { load(); }, [projectId, empresaId]);
+    }, [api, empresaId, projectId]);
+    useEffect(() => { void load(); }, [load]);
     const activeCount = useMemo(() => subscriptions.filter((item) => item.status === 'active').length, [subscriptions]);
     const pendingCount = useMemo(() => deliveries.filter((item) => ['pending', 'retry'].includes(item.status)).length, [deliveries]);
     const create = async () => {

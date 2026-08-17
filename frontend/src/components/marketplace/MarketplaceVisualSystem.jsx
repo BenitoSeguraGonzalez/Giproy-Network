@@ -3,16 +3,9 @@ import { Link } from 'react-router-dom';
 
 import { Card, CardContent } from '../ui/card';
 import { getMarketplaceSellerDisplayName } from '../../utils/marketplaceSeller';
+import { isMarketplaceSystemProduct, MARKETPLACE_TYPE_LABELS } from '../../utils/marketplaceProductMeta';
 
-export const MARKETPLACE_TYPE_LABELS = {
-    licencia: 'Licencia',
-    addon: 'Addon',
-    adicional: 'Adicional',
-    portal_compras_publicas: 'Portal compras publicas',
-    base_maestra: 'Base Maestra',
-    apu: 'APU',
-    proyecto: 'Proyecto',
-};
+
 
 const PRODUCT_TYPE_META = {
     licencia: 'border-sky-200 bg-sky-50 text-sky-700',
@@ -24,8 +17,7 @@ const PRODUCT_TYPE_META = {
     proyecto: 'border-violet-200 bg-violet-50 text-violet-700',
 };
 
-export const isMarketplaceSystemProduct = (product) =>
-    (product?.seller?.rol || '').toLowerCase() === 'superadministrador';
+
 
 export const MarketplaceTypeBadge = ({ type }) => (
     <span className={`inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${PRODUCT_TYPE_META[type] || PRODUCT_TYPE_META.adicional}`}>

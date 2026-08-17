@@ -454,7 +454,6 @@ export const buildSubbarVisualsFromTimeline = ({
     timelineSegments = [],
     segmentColumnWidth = 1,
     minWidthPx = 6,
-    timeScale = 'day',
 }) => {
     if (!Array.isArray(subbars) || !subbars.length || !Array.isArray(timelineSegments) || !timelineSegments.length) {
         return [];

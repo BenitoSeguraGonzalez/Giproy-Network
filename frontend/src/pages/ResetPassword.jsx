@@ -4,7 +4,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../co
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { LiquidButton } from '../components/ui/liquid-button';
-import { motion } from 'framer-motion';
 import { publicAuthApi } from '../api/publicAuth';
 import LogoGiproyCompleto from '../assets/LogoGiproyCompleto.png';
 

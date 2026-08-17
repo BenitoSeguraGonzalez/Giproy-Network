@@ -31,7 +31,7 @@ const BimFieldDiaryPanel = ({ projectId, empresaId, api = bimModelsApi, onOpenEv
         } catch (error) { setMessage(error?.response?.data?.detail || 'No se pudo cargar el diario de obra.'); }
     }, [api, empresaId, projectId]);
 
-    useEffect(() => { load(); }, [load]);
+    useEffect(() => { queueMicrotask(() => void load()); }, [load]);
     const activityById = useMemo(() => Object.fromEntries(activities.map((item) => [item.id, item])), [activities]);
     const areaById = useMemo(() => Object.fromEntries(areas.map((item) => [item.id, item])), [areas]);
     const filtered = useMemo(() => {
@@ -57,11 +57,7 @@ const BimFieldDiaryPanel = ({ projectId, empresaId, api = bimModelsApi, onOpenEv
         }));
     }, [filtered]);
 
-    useEffect(() => {
-        if (!days.length) { setSelectedDay(''); setSelectedId(null); return; }
-        if (!days.some((item) => item.day === selectedDay)) { setSelectedDay(days[0].day); setSelectedId(days[0].reports[0]?.id || null); }
-    }, [days, selectedDay]);
-    const activeDay = days.find((item) => item.day === selectedDay) || null;
+    const activeDay = days.find((item) => item.day === selectedDay) || days[0] || null;
     const selected = activeDay?.reports.find((item) => item.id === selectedId) || activeDay?.reports[0] || null;
 
     useEffect(() => {

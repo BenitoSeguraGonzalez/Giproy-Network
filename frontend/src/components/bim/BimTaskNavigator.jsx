@@ -11,7 +11,7 @@ const BimTaskNavigator = ({ mode, modeLabel, tools, selectedTool, onSelectTool, 
     const activeGroup = groups.find((group) => group.label === selectedGroup);
 
     useEffect(() => {
-        setSelectedGroup(null);
+        queueMicrotask(() => setSelectedGroup(null));
     }, [mode]);
 
     const choose = (toolId) => {

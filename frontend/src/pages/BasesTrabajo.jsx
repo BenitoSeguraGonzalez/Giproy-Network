@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useCallback, useMemo, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import {
     Plus,
     FolderOpen,
@@ -35,7 +35,7 @@ import SearchableSelect from '../components/ui/searchable-select';
 import { appAlert, appConfirm } from '../utils/appDialog';
 import { AppModalShell, AppModalHeader, AppModalFooter } from '../components/ui/app-modal';
 import { useFormatters } from '../hooks/useFormatters';
-import MarketplaceOriginBadgeSet, { getMarketplaceOwnershipTone } from '../components/marketplace/MarketplaceOriginBadgeSet';
+import MarketplaceOriginBadgeSet from '../components/marketplace/MarketplaceOriginBadgeSet';
 import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
 import useMarketplaceOriginsMap from '../hooks/useMarketplaceOriginsMap';
 import ClearSearchField from '../components/ui/ClearSearchField';
@@ -104,14 +104,14 @@ const BasesTrabajo = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('todas');
     const [nextCode, setNextCode] = useState('');
-    const [sortOrder, setSortOrder] = useState('recent');
+    const [sortOrder] = useState('recent');
 
     // Modal States
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [isCloning, setIsCloning] = useState(false);
     const [editingBase, setEditingBase] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [deleteStep, setDeleteStep] = useState(1);
+    const [, setDeleteStep] = useState(1);
     const [baseToDelete, setBaseToDelete] = useState(null);
     const [linkedProject, setLinkedProject] = useState(null);
     const [deleting, setDeleting] = useState(false);
@@ -505,7 +505,7 @@ const BasesTrabajo = () => {
             try {
                 const project = await proyectosApi.getByBaseId(base.id);
                 setLinkedProject(project);
-            } catch (err) { console.warn("No linked project"); }
+            } catch { console.warn("No linked project"); }
         }
     };
 
@@ -798,7 +798,6 @@ const BasesTrabajo = () => {
                             const isProjectVariant = activeBase.tipo === 'Base de Proyecto' && Boolean(activeBase.source_base_id);
                             const isVisuallySelected = selectedBaseTrabajo?.id === activeBase.id;
                             const activeBaseOriginData = originsMap.get(`base_trabajo:${activeBase.id}`) || null;
-                            const ownershipTone = getMarketplaceOwnershipTone(activeBaseOriginData);
                             const sourceBase = activeBase.source_base_id ? baseMapById.get(activeBase.source_base_id) : null;
 
                             return (

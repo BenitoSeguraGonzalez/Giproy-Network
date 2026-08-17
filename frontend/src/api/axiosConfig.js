@@ -45,7 +45,6 @@ const AUTH_EXPIRATION_DETAILS = [
 ];
 
 const shouldExpireSessionFor401 = (config = {}, detail = null) => {
-    const path = getRequestPath(config);
     if (shouldBypass401Recovery(config)) {
         return true;
     }

@@ -1,4 +1,4 @@
-import { Fragment, cloneElement, useState, useEffect, useContext, useCallback, useMemo, Suspense, useRef } from 'react';
+import { cloneElement, useState, useEffect, useContext, useCallback, useMemo, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { proyectosApi } from '../api/proyectos';
 import { proyectoDetalleApi } from '../api/proyectoDetalle';
@@ -6,86 +6,40 @@ import { presupuestosApi } from '../api/presupuestos';
 import { basesTrabajoApi } from '../api/basesTrabajo';
 import projectCalendarEntriesApi from '../api/projectCalendarEntries';
 import personalTodosApi from '../api/personalTodos';
-import { PLANTILLAS_OPCIONES } from '../constants/plantillas';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
-import { LiquidButton } from '../components/ui/liquid-button';
-import ProjectHeaderActionButton from '../components/projects/ProjectHeaderActionButton';
-import { ProjectSectionIconButton } from '../components/projects/ProjectSectionReportButton';
-import { Input } from '../components/ui/input';
-import { Textarea } from '../components/ui/textarea';
-import AppHint from '../components/ui/AppHint';
-import { Label } from '../components/ui/label';
-import ClearSearchField from '../components/ui/ClearSearchField';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
     ArrowLeft,
-    ArrowRight,
     Plus,
     Building2,
-    Search,
-    Filter,
     X,
-    Save,
     Pencil,
     Check,
-    LayoutDashboard,
     Users,
-    Network,
-    ListTree,
     Calculator,
-    Calendar,
     CalendarDays,
     Circle,
     CheckCircle2,
-    ChevronRight,
-    ChevronDown,
     Briefcase,
-    Settings2,
     Copy,
     FileText,
     UploadCloud,
-    ArchiveX,
     Trash2,
     AlertTriangle,
-    XCircle,
-    UserPlus,
-    Database,
-    PanelLeftClose,
-    PanelLeftOpen,
     Eye,
     Play,
     LayoutList,
-    KanbanSquare,
-    ListTodo,
-    MessageSquareText,
-    Store,
-    RotateCcw
+    KanbanSquare
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "../components/ui/table";
-import SearchableSelect from '../components/ui/searchable-select';
-import { PresupuestoProvider } from '../context/PresupuestoContext';
+
+
 import { appAlert, appConfirm } from '../utils/appDialog';
-import { AppModalShell, AppModalHeader, AppModalBody, AppModalFooter } from '../components/ui/app-modal';
 import { useFormatters } from '../hooks/useFormatters';
 import { includesNormalized } from '../utils/normalizeSearch';
-import { getIndirectosStatus } from '../utils/indirectosStatus';
-import MarketplaceOriginBadgeSet, { getMarketplaceOwnershipTone } from '../components/marketplace/MarketplaceOriginBadgeSet';
 import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
 import useMarketplaceOriginsMap from '../hooks/useMarketplaceOriginsMap';
 import { lazyWithChunkRecovery } from '../utils/lazyImportRecovery';
 import { useBimFeatureAccess } from '../hooks/bim/useBimFeatureAccess';
-import ProjectSegmentedSwitch from '../components/projects/ProjectSegmentedSwitch';
-import AnimatedSelect from '../components/ui/AnimatedSelect';
-import AnimatedDateInput from '../components/ui/AnimatedDateInput';
-import DatosProyecto from '../components/projects/DatosProyecto';
 
 const Stakeholders = lazyWithChunkRecovery(() => import('../components/projects/Stakeholders'));
 const Edo = lazyWithChunkRecovery(() => import('../components/projects/Edo'));
@@ -95,15 +49,20 @@ const DesagregacionTab = lazyWithChunkRecovery(() => import('../components/proje
 const FormulaPolinomicaTab = lazyWithChunkRecovery(() => import('../components/projects/FormulaPolinomicaTab'));
 const PresupuestoDetail = lazyWithChunkRecovery(() => import('../components/presupuestos/PresupuestoDetail'));
 const BimTab = lazyWithChunkRecovery(() => import('../components/projects/BimTab'));
+const ProjectRecycleModal = lazyWithChunkRecovery(() => import('../components/projects/ProjectRecycleModal'));
 
 const MotionDiv = motion.div;
 const MotionAside = motion.aside;
 const MotionButton = motion.button;
 
 const ProjectSectionFallback = () => (
-    <div className="flex h-full min-h-[320px] items-center justify-center rounded-[1.4rem] border border-zinc-200 bg-white">
-        <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-200 border-t-[#F39200]" />
+    <div
+        className="flex h-full min-h-[320px] items-center justify-center rounded-[1.4rem] border border-zinc-200 bg-white"
+        role="status"
+        aria-live="polite"
+    >
+        <div className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.16em] text-zinc-600">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-200 border-t-[#F39200] motion-reduce:animate-none" aria-hidden="true" />
             Cargando sección
         </div>
     </div>
@@ -144,11 +103,11 @@ const PROJECTS_VIEW_OPTIONS = [
     { id: 'kanban', label: 'Kanban', icon: KanbanSquare },
 ];
 const PROJECTS_KANBAN_COLUMNS = [
-    { id: 'prefactibilidad', label: 'Pre-Factibilidad / Factibilidad', emoji: '💡', state: 'Pre-Factibilidad / Factibilidad' },
-    { id: 'planificacion', label: 'Planificación / Diseño', emoji: '📐', state: 'Planificación / Diseño' },
-    { id: 'licitacion', label: 'Licitación / Aprobación', emoji: '📋', state: 'Licitación / Aprobación' },
-    { id: 'ejecucion', label: 'En ejecución', emoji: '🏗️', state: 'En ejecución' },
-    { id: 'finalizado', label: 'Finalizado', emoji: '✅', state: 'Finalizado' },
+    { id: 'prefactibilidad', label: 'Pre-Factibilidad / Factibilidad', icon: Circle, state: 'Pre-Factibilidad / Factibilidad' },
+    { id: 'planificacion', label: 'Planificación / Diseño', icon: Pencil, state: 'Planificación / Diseño' },
+    { id: 'licitacion', label: 'Licitación / Aprobación', icon: FileText, state: 'Licitación / Aprobación' },
+    { id: 'ejecucion', label: 'En ejecución', icon: Building2, state: 'En ejecución' },
+    { id: 'finalizado', label: 'Finalizado', icon: CheckCircle2, state: 'Finalizado' },
 ];
 const PORTFOLIO_CALENDAR_PREVIEW_LIMIT = 3;
 const PORTFOLIO_TODO_FILTER_OPTIONS = [
@@ -245,27 +204,6 @@ const ProjectMarketplaceExportButton = ({
             )}
         </button>
     );
-};
-
-const getProjectBudgetChipClasses = (totalPresupuesto) => {
-    const total = Number(totalPresupuesto || 0);
-    if (total > 0) {
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    }
-    if (total === 0) {
-        return 'bg-amber-50 text-amber-700 border-amber-200';
-    }
-    return 'bg-red-50 text-red-700 border-red-200';
-};
-
-const getProjectIndirectosChipClasses = (indirectosStatusKey) => {
-    if (indirectosStatusKey === 'rojo') {
-        return 'bg-red-50 text-red-700 border-red-200';
-    }
-    if (indirectosStatusKey === 'ambar') {
-        return 'bg-amber-50 text-amber-700 border-amber-200';
-    }
-    return 'bg-emerald-50 text-emerald-700 border-emerald-200';
 };
 
 const getProjectEstimatedTimeMeta = (project, detailsMap) => {
@@ -527,35 +465,6 @@ const buildMonthMatrix = (anchorDate) => {
 
 const toCalendarDateKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-const getPortfolioCalendarEventMeta = (project, portfolioProjects = []) => {
-    const workflowState = getProjectDisplayState(project, portfolioProjects);
-
-    if (workflowState === 'Finalizado') {
-        return {
-            variant: 'milestone',
-            badge: 'Hito',
-            classes: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-            dotClasses: 'bg-emerald-500',
-        };
-    }
-
-    if (workflowState === 'Licitación / Aprobación' || workflowState === 'En ejecución') {
-        return {
-            variant: 'deadline',
-            badge: 'Clave',
-            classes: 'bg-amber-50 text-amber-700 border border-amber-200',
-            dotClasses: 'bg-amber-500',
-        };
-    }
-
-    return {
-        variant: 'revision',
-        badge: 'Revisión',
-        classes: 'bg-blue-50 text-[#136191] border border-blue-200',
-        dotClasses: 'bg-[#136191]',
-    };
-};
-
 const getPortfolioAutomaticEventMeta = (eventKind) => {
     if (eventKind === 'project-created') {
         return {
@@ -780,9 +689,7 @@ const Proyectos = () => {
     const [isSidebarHovered, setIsSidebarHovered] = useState(false);
     
     // -- Robust formatters with fallbacks --
-    const formatters = useFormatters();
-    const formatNumericDisplay = formatters?.formatNumericDisplay || ((v) => String(v || '').replace('.', ','));
-    const parseNumericInput = formatters?.parseNumericInput || ((v) => String(v || '').replace(',', '.'));
+    const formatters = useFormatters();    const parseNumericInput = formatters?.parseNumericInput || ((v) => String(v || '').replace(',', '.'));
     const { formatMoneda } = formatters || {};
 
     const navigate = useNavigate();
@@ -890,16 +797,6 @@ const Proyectos = () => {
                     // Auto-selección de pestaña permitida
                     const allowed = perms.allowed_modules || [];
                     if (!allowed.includes('todos')) {
-                        const moduleMapInv = {
-                            'datos_generales': 'datos',
-                            'stakeholders': 'stakeholders',
-                            'edo': 'edo_obs',
-                            'edt': 'edt_wbs',
-                            'presupuestos': 'presupuesto',
-                            'cronogramas': 'cronogramas',
-                            'desagregacion': 'desagregacion',
-                            'formula_polinomica': 'formula'
-                        };
                         
                         const currentModule = {
                             'datos': 'datos_generales',
@@ -1048,6 +945,7 @@ const Proyectos = () => {
     const [deleting, setDeleting] = useState(false);
     const [deleteProjectBase, setDeleteProjectBase] = useState(true);
     const [showRecycleModal, setShowRecycleModal] = useState(false);
+    const [recycleModalActivated, setRecycleModalActivated] = useState(false);
     const [recycledProjects, setRecycledProjects] = useState([]);
     const [recycleLoading, setRecycleLoading] = useState(false);
     const [recycleActionId, setRecycleActionId] = useState(null);
@@ -1058,7 +956,6 @@ const Proyectos = () => {
     const [editingDateValue, setEditingDateValue] = useState('');
     const selectedProjectOrigin = useMarketplaceOrigin('proyecto', selectedProject?.id);
     const { originsMap } = useMarketplaceOriginsMap();
-    const selectedProjectTone = getMarketplaceOwnershipTone(selectedProjectOrigin);
     const selectedProjectRootCode = selectedProject ? (selectedProject.codigo_root || selectedProject.codigo) : '';
     const selectedProjectDetail = selectedProjectRootCode ? (projectDetailsMap[selectedProjectRootCode] || null) : null;
     const isSidebarExpanded = isSidebarPinned || isSidebarHovered;
@@ -1094,7 +991,7 @@ const Proyectos = () => {
         return toCalendarDateKey(today);
     });
     const [portfolioCalendarEntries, setPortfolioCalendarEntries] = useState([]);
-    const [portfolioCalendarEntriesLoading, setPortfolioCalendarEntriesLoading] = useState(false);
+    const [, setPortfolioCalendarEntriesLoading] = useState(false);
     const [portfolioCalendarEntriesAvailable, setPortfolioCalendarEntriesAvailable] = useState(true);
     const [portfolioCalendarEntriesError, setPortfolioCalendarEntriesError] = useState('');
     const [portfolioCalendarRevisionMapByRoot, setPortfolioCalendarRevisionMapByRoot] = useState({});
@@ -1811,7 +1708,7 @@ const Proyectos = () => {
         }
     }, [marketplaceExportForm, marketplaceExportProject, selectedEmpresa?.id, user?.empresa_id]);
 
-    const handleOpenRevisionModal = async (project, options = {}) => {
+    const handleOpenRevisionModal = useCallback(async (project, options = {}) => {
         const { mode = 'open', targetColumnId = null } = options;
         setProjectForRevisions(project);
         setLoadingRevisions(true);
@@ -1874,7 +1771,7 @@ const Proyectos = () => {
         } finally {
             setLoadingRevisions(false);
         }
-    };
+    }, [activateProjectSelection, buildRevisionBudgetEntry]);
 
     const buildProjectApuEditorPath = useCallback((revisionProject) => {
         const params = new URLSearchParams({
@@ -2181,17 +2078,6 @@ const Proyectos = () => {
         }
     };
 
-    const formatRecycleDateTime = (dateString) => {
-        if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
     const fetchRecycledProjects = async () => {
         const empId = selectedEmpresa?.id || user?.empresa_id;
         setRecycleLoading(true);
@@ -2207,6 +2093,7 @@ const Proyectos = () => {
     };
 
     const openProjectRecycleModal = async () => {
+        setRecycleModalActivated(true);
         setShowRecycleModal(true);
         await fetchRecycledProjects();
     };
@@ -2369,7 +2256,6 @@ const Proyectos = () => {
 
         return merged;
     }, [
-        buildInlineRevisionList,
         inlineRevisionsByRoot,
         kanbanRevisionOptionsByRoot,
         portfolioCalendarRevisionMapByRoot,
@@ -2494,10 +2380,6 @@ const Proyectos = () => {
         return events;
     }, [filteredProjects, portfolioCalendarRevisionsByRoot, projectDetailsMap, selectedEmpresa]);
 
-    const selectedCalendarDayEvents = useMemo(
-        () => calendarEventsByDate[portfolioCalendarSelectedKey] || [],
-        [calendarEventsByDate, portfolioCalendarSelectedKey]
-    );
 
     const calendarEntriesByDate = useMemo(() => {
         const entries = {};
@@ -2509,10 +2391,6 @@ const Proyectos = () => {
         return entries;
     }, [portfolioCalendarEntries]);
 
-    const selectedCalendarDayEntries = useMemo(
-        () => calendarEntriesByDate[portfolioCalendarSelectedKey] || [],
-        [calendarEntriesByDate, portfolioCalendarSelectedKey]
-    );
 
     const calendarMixedItemsByDate = useMemo(() => {
         const mixed = {};
@@ -2562,22 +2440,10 @@ const Proyectos = () => {
         return mixed;
     }, [calendarEntriesByDate, calendarEventsByDate]);
 
-    const calendarMixedPreviewByDate = useMemo(() => {
-        const preview = {};
-        Object.entries(calendarMixedItemsByDate).forEach(([key, items]) => {
-            preview[key] = items.slice(0, PORTFOLIO_CALENDAR_PREVIEW_LIMIT);
-        });
-        return preview;
-    }, [calendarMixedItemsByDate]);
 
     const selectedCalendarDayMixedItems = useMemo(
         () => calendarMixedItemsByDate[portfolioCalendarSelectedKey] || [],
         [calendarMixedItemsByDate, portfolioCalendarSelectedKey]
-    );
-
-    const portfolioCalendarHoveredItem = useMemo(
-        () => selectedCalendarDayMixedItems.find((item) => item.id === portfolioCalendarHoveredItemId) || null,
-        [portfolioCalendarHoveredItemId, selectedCalendarDayMixedItems]
     );
     const portfolioTodosVisibleItems = useMemo(() => {
         const ordered = [...portfolioTodos].sort((a, b) => {
@@ -2603,7 +2469,6 @@ const Proyectos = () => {
         [selectedEmpresa?.id, user?.empresa_id, user?.id]
     );
 
-    const selectedCalendarDayHasOverflow = selectedCalendarDayMixedItems.length > PORTFOLIO_CALENDAR_PREVIEW_LIMIT;
 
     const portfolioCalendarLegend = useMemo(() => ([
         { id: 'created', label: 'Alta de proyecto', classes: 'bg-zinc-100 text-zinc-700 border-zinc-200' },
@@ -2754,7 +2619,6 @@ const Proyectos = () => {
             cancelled = true;
         };
     }, [
-        buildInlineRevisionList,
         filteredProjects,
         portfolioCalendarRevisionsByRoot,
         selectedEmpresa?.id,
@@ -2944,8 +2808,6 @@ const Proyectos = () => {
     }, [
         buildRevisionBudgetEntry,
         expandedProjectRoot,
-        getProjectEntityBudget,
-        getProjectCalculatedBudget,
         inlineRevisionsByRoot,
         selectedEmpresa?.id,
         user?.empresa_id,
@@ -2976,7 +2838,7 @@ const Proyectos = () => {
         } finally {
             setKanbanRevisionLoadingRoot(null);
         }
-    }, [buildInlineRevisionList, kanbanRevisionOptionsByRoot, selectedEmpresa?.id, user?.empresa_id]);
+    }, [kanbanRevisionOptionsByRoot, selectedEmpresa?.id, user?.empresa_id]);
 
     const handleToggleKanbanRevisionMenu = useCallback(async (project, event = null) => {
         event?.stopPropagation?.();
@@ -3146,42 +3008,6 @@ const Proyectos = () => {
         portfolioCalendarForm.title,
         portfolioCalendarSelectedKey,
         canOperatePortfolioCalendarEntries,
-        portfolioCalendarEntriesError,
-        selectedEmpresa?.id,
-        user?.empresa_id,
-    ]);
-
-    const handleDeletePortfolioCalendarEntry = useCallback(async (entry) => {
-        if (!canOperatePortfolioCalendarEntries) {
-            appAlert(portfolioCalendarEntriesError || 'La capa manual del calendario no está disponible en el backend activo.');
-            return;
-        }
-        if (!entry?.id) return;
-
-        const confirmed = await appConfirm({
-            title: `Eliminar ${getPortfolioCalendarEntryTypeLabel(entry.entry_type).toLowerCase()}`,
-            message: 'Esta entrada desaparecerá del calendario del portafolio. ¿Desea continuar?',
-            confirmLabel: 'Eliminar',
-            cancelLabel: 'Cancelar',
-            tone: 'warning',
-        });
-        if (!confirmed) return;
-
-        try {
-            const empId = selectedEmpresa?.id || user?.empresa_id;
-            await projectCalendarEntriesApi.delete(entry.id, empId);
-            setPortfolioCalendarEntries((current) => current.filter((item) => item.id !== entry.id));
-            if (portfolioCalendarEditingEntry?.id === entry.id) {
-                closePortfolioCalendarComposer();
-            }
-        } catch (error) {
-            globalThis.reportClientError?.('Error eliminando entrada del calendario:', error);
-            appAlert(error?.response?.data?.detail || 'No se pudo eliminar la entrada del calendario.');
-        }
-    }, [
-        closePortfolioCalendarComposer,
-        canOperatePortfolioCalendarEntries,
-        portfolioCalendarEditingEntry?.id,
         portfolioCalendarEntriesError,
         selectedEmpresa?.id,
         user?.empresa_id,
@@ -4076,13 +3902,15 @@ const Proyectos = () => {
                             <div className="grid min-w-[1360px] gap-3 xl:grid-cols-5">
                                 {PROJECTS_KANBAN_COLUMNS.map((column) => {
                                     const projectsInColumn = kanbanProjectsByColumn[column.id] || [];
+                                    const PhaseIcon = column.icon;
                                     return (
                                         <div key={column.id} className="flex min-h-0 flex-col rounded-[1.35rem] border border-zinc-200 bg-zinc-50/60 p-2.5">
                                             <div className="mb-2.5 flex items-center justify-between gap-3 rounded-[1rem] border border-zinc-200 bg-white px-3 py-2">
                                                 <div className="min-w-0">
                                                     <div className="text-[8px] font-black uppercase tracking-[0.22em] text-zinc-400">Fase</div>
-                                                    <div className="mt-0.5 truncate text-xs font-black text-[#1A1A1A]">
-                                                        {column.emoji} {column.label}
+                                                    <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs font-black text-[#1A1A1A]">
+                                                        <PhaseIcon className="h-3.5 w-3.5 shrink-0 text-[#136191]" aria-hidden="true" />
+                                                        <span className="truncate">{column.label}</span>
                                                     </div>
                                                 </div>
                                                 <div className="inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-zinc-200 bg-zinc-50 px-2 text-[10px] font-black text-zinc-500">
@@ -5440,100 +5268,28 @@ const Proyectos = () => {
         </AnimatePresence>
     );
 
-    const renderProjectRecycleModal = () => (
-        <AnimatePresence>
-            {showRecycleModal && (
-                <AppModalShell
-                    isOpen={showRecycleModal}
-                    size="lg"
-                    zIndex="z-[200]"
-                    panelClassName="rounded-[2.5rem] max-h-[calc(100dvh-4rem)] flex flex-col"
-                    onClose={() => setShowRecycleModal(false)}
-                >
-                    <AppModalHeader
-                        title="Papelera de proyectos"
-                        subtitle="Retención operativa de 7 días antes del borrado definitivo."
-                        icon={Trash2}
-                        onClose={() => setShowRecycleModal(false)}
-                    />
-                    <div className="min-h-0 overflow-y-auto px-6 py-5">
-                        {recycleLoading ? (
-                            <div className="flex items-center justify-center py-16">
-                                <div className="flex flex-col items-center gap-4 text-zinc-400">
-                                    <div className="h-10 w-10 animate-spin rounded-full border-4 border-zinc-100 border-t-[#F39200]" />
-                                    <p className="text-[10px] font-black uppercase tracking-widest">Cargando papelera...</p>
-                                </div>
-                            </div>
-                        ) : recycledProjects.length === 0 ? (
-                            <div className="rounded-[2rem] border border-dashed border-zinc-200 bg-zinc-50/70 px-6 py-12 text-center">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Sin proyectos en papelera</p>
-                                <p className="mt-3 text-sm font-medium text-zinc-500">Los proyectos eliminados se mostrarán aquí durante 7 días.</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {recycledProjects.map((project) => {
-                                    const projectName = project.trash_original_nombre || project.nombre;
-                                    const projectCode = project.trash_original_codigo || project.codigo;
-                                    const isBusy = recycleActionId === project.id;
-                                    return (
-                                        <div key={project.id} className="rounded-[1.5rem] border border-zinc-200 bg-white px-4 py-3.5 shadow-[0_8px_20px_rgba(0,0,0,0.03)]">
-                                            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                                                <div className="min-w-0">
-                                                    <p className="truncate text-[12px] font-black uppercase tracking-tight text-zinc-900">{projectName}</p>
-                                                    <div className="mt-1 flex flex-wrap gap-2 text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
-                                                        <span>{projectCode || 'Sin código'}</span>
-                                                        <span>Eliminado: {formatRecycleDateTime(project.deleted_at)}</span>
-                                                        <span>Expira: {formatRecycleDateTime(project.recycle_expires_at)}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex shrink-0 items-center gap-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRestoreRecycledProject(project)}
-                                                        disabled={isBusy}
-                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-emerald-100 bg-emerald-50 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700 transition hover:border-emerald-300 disabled:opacity-50"
-                                                    >
-                                                        <RotateCcw className="h-3.5 w-3.5" />
-                                                        Restaurar
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handlePurgeRecycledProject(project)}
-                                                        disabled={isBusy}
-                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-[0.85rem] border border-rose-100 bg-rose-50 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-rose-700 transition hover:border-rose-300 disabled:opacity-50"
-                                                    >
-                                                        <Trash2 className="h-3.5 w-3.5" />
-                                                        Borrar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
+    const renderProjectRecycleModal = () => recycleModalActivated ? (
+        <Suspense
+            fallback={showRecycleModal ? (
+                <AppModalShell isOpen={true} size="lg" zIndex="z-[200]" onClose={() => setShowRecycleModal(false)}>
+                    <div className="flex min-h-48 items-center justify-center text-xs font-bold text-zinc-600" role="status" aria-live="polite">
+                        Preparando papelera de proyectos
                     </div>
-                    <AppModalFooter>
-                        <button
-                            type="button"
-                            onClick={() => setShowRecycleModal(false)}
-                            className="h-11 rounded-[1rem] bg-zinc-50 px-5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition hover:bg-zinc-100"
-                        >
-                            Cerrar
-                        </button>
-                        <LiquidButton
-                            onClick={fetchRecycledProjects}
-                            disabled={recycleLoading}
-                            className="!h-11 bg-[#1A1A1A] text-white"
-                        >
-                            <RotateCcw className="mr-2 h-4 w-4" />
-                            Actualizar
-                        </LiquidButton>
-                    </AppModalFooter>
                 </AppModalShell>
-            )}
-        </AnimatePresence>
-    );
+            ) : null}
+        >
+            <ProjectRecycleModal
+                isOpen={showRecycleModal}
+                projects={recycledProjects}
+                loading={recycleLoading}
+                actionId={recycleActionId}
+                onClose={() => setShowRecycleModal(false)}
+                onRefresh={fetchRecycledProjects}
+                onRestore={handleRestoreRecycledProject}
+                onPurge={handlePurgeRecycledProject}
+            />
+        </Suspense>
+    ) : null;
 
     if (selectedProject) {
         return (
@@ -6269,99 +6025,8 @@ const Proyectos = () => {
                 )}
             </AnimatePresence>
 
-            {/* Modal de Eliminación con Doble Confirmación */}
-            <AnimatePresence>
-                {showDeleteModal && (
-                    <AppModalShell isOpen={true} size="sm" zIndex="z-[200]" onClose={() => setShowDeleteModal(false)}>
-                            <div className="p-10">
-                                <div className="flex flex-col items-center text-center">
-                                    <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mb-6 ${deleteStep === 1 ? 'bg-orange-50 text-orange-500' : 'bg-red-50 text-red-500'}`}>
-                                        {deleteStep === 1 ? <AlertTriangle className="w-10 h-10" /> : <Trash2 className="w-10 h-10" />}
-                                    </div>
-
-                                    {deleteStep === 1 ? (
-                                        <>
-                                                <h2 className="text-2xl font-black uppercase tracking-tight mb-4">¿Eliminar Proyecto?</h2>
-                                                <p className="text-zinc-500 text-sm font-medium mb-8">
-                                                    Estás a punto de eliminar <strong>{projectToDelete?.nombre}</strong>.
-                                                    Esta acción moverá el proyecto y sus revisiones a papelera durante 7 días.
-                                                </p>
-                                            <button
-                                                type="button"
-                                                onClick={() => setDeleteProjectBase((value) => !value)}
-                                                className={`mb-6 flex w-full items-start gap-3 rounded-[1.25rem] border px-4 py-3 text-left transition ${
-                                                    deleteProjectBase
-                                                        ? 'border-rose-200 bg-rose-50 text-rose-800'
-                                                        : 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                                                }`}
-                                            >
-                                                <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
-                                                    deleteProjectBase ? 'border-rose-300 bg-white' : 'border-emerald-300 bg-white'
-                                                }`}>
-                                                    {deleteProjectBase ? <Check className="h-3.5 w-3.5" /> : null}
-                                                </span>
-                                                <span className="min-w-0">
-                                                    <span className="block text-[10px] font-black uppercase tracking-[0.16em]">
-                                                        {deleteProjectBase ? 'Mover tambien la Base de Proyecto' : 'Conservar Base como Base Maestra'}
-                                                    </span>
-                                                    <span className="mt-1 block text-[11px] font-semibold leading-relaxed">
-                                                        {deleteProjectBase
-                                                            ? 'La base asociada tambien quedara en papelera junto al proyecto.'
-                                                            : 'Se borrara el proyecto, pero la base quedara disponible como Base de Trabajo reutilizable.'}
-                                                    </span>
-                                                </span>
-                                            </button>
-                                            <div className="flex flex-col w-full gap-3">
-                                                <LiquidButton
-                                                    onClick={() => setDeleteStep(2)}
-                                                    className="w-full !h-14 bg-[#1A1A1A] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl"
-                                                >
-                                                    Entiendo, Continuar
-                                                </LiquidButton>
-                                                <button
-                                                    onClick={() => setShowDeleteModal(false)}
-                                                    className="w-full h-14 bg-zinc-50 text-zinc-500 text-[11px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-100 transition-all"
-                                                >
-                                                    Cancelar
-                                                </button>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <h2 className="text-2xl font-black uppercase tracking-tight mb-4 text-red-600">CONFIRMACIÓN FINAL</h2>
-                                            <p className="text-zinc-500 text-sm font-medium mb-8">
-                                                ¿Estás seguro? {deleteProjectBase
-                                                    ? 'El proyecto y su base quedaran ocultos de la operacion normal y podran restaurarse desde la papelera mientras no expiren.'
-                                                    : 'El proyecto quedara oculto en papelera y la base asociada se convertira en Base de Trabajo reutilizable.'}
-                                            </p>
-                                            <div className="flex flex-col w-full gap-3">
-                                                <LiquidButton
-                                                    onClick={handleDeleteProject}
-                                                    disabled={deleting}
-                                                    className="w-full !h-14 bg-red-600 text-white text-[11px] font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2"
-                                                >
-                                                    {deleting ? (
-                                                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                                                    ) : (
-                                                        <Trash2 className="w-4 h-4" />
-                                                    )}
-                                                    Mover a Papelera
-                                                </LiquidButton>
-                                                <button
-                                                    onClick={() => setShowDeleteModal(false)}
-                                                    disabled={deleting}
-                                                    className="w-full h-14 bg-zinc-50 text-zinc-500 text-[11px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-100 transition-all"
-                                                >
-                                                    Dar Marcha Atrás
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                    </AppModalShell>
-                )}
-            </AnimatePresence>
+            {/* El mismo contrato de borrado se comparte con la vista de portafolio. */}
+            {renderProjectDeleteModal()}
         </div>
     );
 };

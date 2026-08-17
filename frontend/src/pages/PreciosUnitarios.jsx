@@ -3,15 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
-import MarketplaceOriginBadgeSet from '../components/marketplace/MarketplaceOriginBadgeSet';
-import {
-    Database,
-    LayoutGrid,
-    Wrench,
-    FileSpreadsheet,
-    ArrowLeft,
-    ChevronRight
-} from 'lucide-react';
+
+
 const PreciosUnitarios = () => {
     const navigate = useNavigate();
     const { selectedBaseTrabajo } = useContext(AuthContext);
@@ -79,10 +72,10 @@ const PreciosUnitarios = () => {
                 </div>
 
                 {selectedBaseTrabajo && (
-                    <div className="flex items-center gap-3 bg-zinc-900 px-6 py-2 rounded-2xl border border-zinc-800 shadow-xl shadow-black/10 transition-all hover:scale-105">
+                    <div className="flex items-center gap-3 bg-zinc-900 px-6 py-2 rounded-2xl border border-zinc-800 shadow-lg shadow-black/10 transition-[border-color,box-shadow] duration-200">
                         <Database className="w-4 h-4 text-[#F39200] animate-pulse" />
                         <div className="flex flex-col">
-                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500 italic">Base Técnica Activa</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400">Base Técnica Activa</span>
                             <div className="flex items-center gap-2 mt-0.5">
                                 <MarketplaceOriginBadgeSet
                                     origin={activeBaseOrigin}
@@ -129,12 +122,12 @@ const PreciosUnitarios = () => {
                                 {isDisabled && (
                                     <div id={`${item.id}-requirement`} className="absolute top-6 right-6 flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200">
                                         <Database className="w-3 h-3" />
-                                        <span className="text-[8px] font-black uppercase tracking-widest">Base Requerida</span>
+                                        <span className="text-[10px] font-black uppercase tracking-[0.14em]">Base requerida</span>
                                     </div>
                                 )}
 
                                 <div className="absolute bottom-10 right-10 flex items-center">
-                                    <div className={`p-3 rounded-full transition-[color,background-color,border-color] duration-200 ${isDisabled ? 'bg-zinc-50 text-zinc-400' : 'bg-white text-zinc-500 border border-zinc-200 group-hover:text-orange-700 group-hover:border-amber-200 group-hover:bg-amber-50'}`}>
+                                    <div className={`p-3 rounded-full transition-[color,background-color,border-color] duration-200 ${isDisabled ? 'bg-zinc-50 text-zinc-500' : 'bg-white text-amber-800 border border-zinc-200 group-hover:text-amber-950 group-hover:border-amber-300 group-hover:bg-amber-50'}`}>
                                         <ChevronRight className="w-5 h-5" />
                                     </div>
                                 </div>

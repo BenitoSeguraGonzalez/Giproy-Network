@@ -120,7 +120,7 @@ export const OtrosServicios = () => {
         }
         return servicePlaceholders.findIndex((item) => item.id === a.id) - servicePlaceholders.findIndex((item) => item.id === b.id);
     });
-    const renderServiceCard = (item, index) => {
+    const renderServiceCard = (item) => {
         const Icon = item.icon;
         const eyebrow = item.path ? 'Submódulo activo' : 'Próximamente';
         const cta = item.path ? 'Abrir submódulo' : 'Estado actual';

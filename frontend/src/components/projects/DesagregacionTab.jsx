@@ -1153,7 +1153,7 @@ const DesagregacionTab = ({ project }) => {
 
     const selectedApuDetail = selectedLine?.apu_id ? apuDetails[selectedLine.apu_id] : null;
     const selectedApuIsLoading = selectedLine?.apu_id ? loadingApuIds.has(String(selectedLine.apu_id)) : false;
-    const selectedApuResources = selectedApuDetail?.recursos || [];
+    const selectedApuResources = useMemo(() => selectedApuDetail?.recursos || [], [selectedApuDetail]);
     const selectedApuResourceGroups = useMemo(() => {
         const groups = CATEGORIAS_BASE.map((category) => ({
             ...category,

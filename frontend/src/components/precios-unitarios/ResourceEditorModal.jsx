@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { X, SpellCheck, Save, LayoutGrid, Package } from 'lucide-react';
 import { Input } from '../ui/input';
 import ClearSearchField from '../ui/ClearSearchField';
@@ -80,7 +80,7 @@ const ResourceEditorModal = ({
         || 0
     );
     const showEquipmentOwnershipField = resolvedCategoryId === 1;
-    const governingKindOptions = resolvedCategoryId === 1
+    const governingKindOptions = useMemo(() => (resolvedCategoryId === 1
         ? [
             { value: 'equipo_maquinaria', label: 'Equipo / Maquinaria' },
             { value: 'herramientas', label: 'Herramientas' },
@@ -91,7 +91,7 @@ const ResourceEditorModal = ({
                 { value: 'mano_obra_semiespecializada', label: 'Mano de obra semiespecializada' },
                 { value: 'mano_obra_no_especializada', label: 'Mano de obra no especializada' },
             ]
-            : [];
+            : []), [resolvedCategoryId]);
 
     useEffect(() => {
         if (!enableOmniClass) {

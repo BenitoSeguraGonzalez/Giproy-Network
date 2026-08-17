@@ -24,12 +24,14 @@ export function useBimFeatureAccess() {
     const { user, selectedEmpresa } = useContext(AuthContext);
     const [access, setAccess] = useState(DEFAULT_ACCESS);
     const [loading, setLoading] = useState(true);
+    const hasUser = Boolean(user);
+    const userEmpresaId = user?.empresa_id;
 
     useEffect(() => {
         let cancelled = false;
 
         const loadAccess = async () => {
-            if (!user) {
+            if (!hasUser) {
                 setAccess(DEFAULT_ACCESS);
                 setLoading(false);
                 return;
@@ -37,7 +39,7 @@ export function useBimFeatureAccess() {
 
             try {
                 setLoading(true);
-                const empresaId = selectedEmpresa?.id || user?.empresa_id || null;
+                const empresaId = selectedEmpresa?.id || userEmpresaId || null;
                 const data = await bimApi.getFeatureFlags(empresaId);
                 if (!cancelled) {
                     setAccess({ ...DEFAULT_ACCESS, ...data });
@@ -58,7 +60,7 @@ export function useBimFeatureAccess() {
         return () => {
             cancelled = true;
         };
-    }, [selectedEmpresa?.id, user?.empresa_id, user?.id]);
+    }, [hasUser, selectedEmpresa?.id, userEmpresaId, user?.id]);
 
     return { access, loading };
 }

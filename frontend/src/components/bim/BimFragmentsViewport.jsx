@@ -115,6 +115,7 @@ const BimFragmentsViewport = ({
     }, [clipOffset, measurementUnit, reviewState, selectedLocalId, state.selectedGuid, versionId]);
 
     useEffect(() => {
+        const mountNode = mountRef.current;
         if (!versionId || (!projectId && !loadBytes)) {
             onAvailabilityRef.current?.(false);
             setState({ status: 'idle', error: '', bytes: 0, localIds: 0, selectedGuid: '' });
@@ -157,7 +158,7 @@ const BimFragmentsViewport = ({
                     artifactBytes = memberPayloads[0]?.bytes;
                 }
                 if (disposed) return;
-                const mount = mountRef.current;
+                const mount = mountNode;
                 if (!mount) throw new Error('No se pudo montar el canvas Fragments.');
                 if (!artifactBytes?.byteLength || !memberPayloads?.length) throw new Error('No hay artifacts Fragments activos para la federacion.');
 
@@ -376,9 +377,9 @@ const BimFragmentsViewport = ({
             controls?.dispose();
             if (fragments) void fragments.dispose();
             renderer?.dispose();
-            mountRef.current?.replaceChildren();
+            mountNode?.replaceChildren();
         };
-    }, [empresaId, federationStructureKey, loadBytes, loadMemberBytes, projectId, recoveryToken, renderQuality.pixelRatio, versionId]);
+    }, [empresaId, federationStructureKey, loadBytes, loadMemberBytes, projectId, recoveryToken, renderMembers, renderQuality.pixelRatio, versionId]);
 
     useEffect(() => {
         const runtime = runtimeRef.current;

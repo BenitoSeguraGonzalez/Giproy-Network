@@ -1,16 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, AlertCircle } from 'lucide-react';
-import { LiquidButton } from './ui/liquid-button';
+import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { APP_MODAL_CLOSE_BUTTON_CLASS } from './ui/app-modal';
 import { maestrosApi } from '../api/maestros';
 import { publicAuthApi } from '../api/publicAuth';
-import PersonnelFormFields from './PersonnelFormFields';
-import MotionScrollbar from './ui/MotionScrollbar';
 import LogoGiproyCompleto from '../assets/LogoGiproyCompleto.png';
 import { appAlert } from '../utils/appDialog';
 import { formatInternationalPhone, getInternationalPhoneValidationMessage, resolveCountryPhonePrefix } from '../utils/phoneFormatter';
 import { validarRucEcuador, requiereValidacionRucEcuador } from '../utils/rucValidator';
+import { detectConnectionCountry, getRegistrationCountryPolicy, resolveDetectedCountry } from '../utils/registrationCountry';
 
 const MotionDiv = motion.div;
 
@@ -25,7 +22,6 @@ const REGISTER_REQUIRED_FIELDS = [
     ['profesion', 'Profesión / cargo'],
     ['pais', 'País'],
     ['provincia', 'Provincia'],
-    ['canton', 'Cantón'],
     ['ciudad', 'Ciudad'],
     ['movil', 'Móvil de contacto'],
 ];
@@ -38,6 +34,7 @@ const RegisterModal = ({ isOpen, onClose }) => {
     const formScrollRef = useRef(null);
     const dialogRef = useRef(null);
     const closeButtonRef = useRef(null);
+    const countryManuallySelectedRef = useRef(false);
     const [formData, setFormData] = useState({
         nombre_completo: '',
         email: '',
@@ -87,7 +84,9 @@ const RegisterModal = ({ isOpen, onClose }) => {
     const [rucLookup, setRucLookup] = useState(null);
     const [certificateCode, setCertificateCode] = useState('');
     const [manualReviewStatus, setManualReviewStatus] = useState(null);
+    const [countryDetectionStatus, setCountryDetectionStatus] = useState('idle');
     const isRucRequired = requiereValidacionRucEcuador(formData.pais);
+    const countryPolicy = getRegistrationCountryPolicy(formData.pais);
     const canSubmit = !isLoading
         && !isBlank(formData.email) && isValidEmail(formData.email)
         && !isBlank(formData.password)
@@ -107,9 +106,21 @@ const RegisterModal = ({ isOpen, onClose }) => {
             const fetchPaises = async () => {
                 try {
                     const data = await maestrosApi.getPaises();
-                    setPaises(Array.isArray(data) ? data : []);
+                    const availableCountries = Array.isArray(data) ? data : [];
+                    setPaises(availableCountries);
+                    if (countryManuallySelectedRef.current || formData.pais) return;
+                    setCountryDetectionStatus('detecting');
+                    const detected = await detectConnectionCountry();
+                    const country = resolveDetectedCountry(detected, availableCountries);
+                    if (country && !countryManuallySelectedRef.current) {
+                        setFormData(prev => prev.pais ? prev : { ...prev, pais: country.nombre });
+                        setCountryDetectionStatus('detected');
+                    } else {
+                        setCountryDetectionStatus('generic');
+                    }
                 } catch {
                     setPaises([]);
+                    setCountryDetectionStatus('generic');
                 }
             };
             fetchPaises();
@@ -123,7 +134,7 @@ const RegisterModal = ({ isOpen, onClose }) => {
                 .catch(() => setError('No se pudo verificar la versión de los documentos legales. Intente nuevamente.'));
 
         }
-    }, [isOpen]);
+    }, [isOpen, formData.pais]);
 
     const handleManualReview = async () => {
         setError(null);
@@ -150,7 +161,10 @@ const RegisterModal = ({ isOpen, onClose }) => {
         e.preventDefault();
         setError(null);
 
-        const missingFields = REGISTER_REQUIRED_FIELDS
+        const requiredFields = countryPolicy.requiresCanton
+            ? [...REGISTER_REQUIRED_FIELDS, ['canton', 'Cantón']]
+            : REGISTER_REQUIRED_FIELDS;
+        const missingFields = requiredFields
             .filter(([key]) => isBlank(formData[key]))
             .map(([, label]) => label);
         if (!requiereValidacionRucEcuador(formData.pais) && isBlank(formData.empresa_nombre)) {
@@ -319,6 +333,11 @@ const RegisterModal = ({ isOpen, onClose }) => {
                                                 paises={paises}
                                                 publicRegister
                                                 countryLocked={false}
+                                                countryDetectionStatus={countryDetectionStatus}
+                                                onCountryChange={() => {
+                                                    countryManuallySelectedRef.current = true;
+                                                    setCountryDetectionStatus('manual');
+                                                }}
                                                 onRucStatusChange={(verified, lookup) => {
                                                     setRucVerified(verified);
                                                     setRucLookup(lookup);

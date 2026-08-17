@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useMemo, useCallback, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 
 import {
     Building2, Search, Plus, Filter, Package, Users, HardHat, Truck,
@@ -33,7 +33,8 @@ import { roundDecimal } from '../utils/math';
 import { useFormatters } from '../hooks/useFormatters';
 import { getOmniClassTableForResourceCategory } from '../utils/omniclass';
 import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
-import MarketplaceOriginBadgeSet, { getMarketplaceOwnershipTone } from '../components/marketplace/MarketplaceOriginBadgeSet';
+import MarketplaceOriginBadgeSet from '../components/marketplace/MarketplaceOriginBadgeSet';
+import { getMarketplaceOwnershipTone } from '../utils/marketplaceOwnershipTone';
 import * as descriptionCapitalization from '../utils/descriptionCapitalization';
 
 const getResourceVariantBadge = (item) => {
@@ -376,7 +377,7 @@ const Recursos = () => {
     
     // -- Robust formatters with fallbacks --
     const formatters = useFormatters();
-    const formatNumericDisplay = formatters?.formatNumericDisplay || ((v) => String(v || '').replace('.', ','));
+
     const parseNumericInput = formatters?.parseNumericInput || ((v) => String(v || '').replace(',', '.'));
     const { formatMoneda, formatMonedaInput } = formatters || {};
 

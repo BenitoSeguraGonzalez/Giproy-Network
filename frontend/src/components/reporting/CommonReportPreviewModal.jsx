@@ -90,7 +90,7 @@ const reportModalCloseButtonClass = [
 
 const ReportExportButton = ({
     children,
-    icon: Icon,
+    icon,
     iconSrc,
     iconClassName = 'h-4 w-4',
     labelClassName = '',
@@ -110,7 +110,7 @@ const ReportExportButton = ({
             {iconSrc ? (
                 <img src={iconSrc} alt="" aria-hidden="true" className={`${iconClassName} object-contain`} />
             ) : (
-                <Icon className={iconClassName} />
+                React.createElement(icon, { className: iconClassName })
             )}
             <span className={labelClassName}>{children}</span>
         </button>

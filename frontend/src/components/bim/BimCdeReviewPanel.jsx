@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Bell, CheckCircle2, MessageSquare, Plus, RotateCcw, Send, XCircle } from 'lucide-react';
 
 import { bimModelsApi } from '../../api/bimModels';
@@ -25,7 +25,7 @@ const BimCdeReviewPanel = ({ projectId, empresaId, selectedElement, viewerState,
     const selected = useMemo(() => reviews.find((item) => item.id === selectedId) || reviews[0] || null, [reviews, selectedId]);
     const unread = notifications.filter((item) => !item.read_at);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         if (!projectId) return;
         try {
             const [reviewRows, documentRows, userRows, notificationRows] = await Promise.all([
@@ -39,9 +39,9 @@ const BimCdeReviewPanel = ({ projectId, empresaId, selectedElement, viewerState,
         } catch (error) {
             setMessage(error?.response?.data?.detail || 'No se pudieron cargar las revisiones CDE.');
         }
-    };
+    }, [api, empresaId, projectId]);
 
-    useEffect(() => { load(); }, [projectId, empresaId]);
+    useEffect(() => { load(); }, [load]);
 
     const chooseDocument = async (value) => {
         setDocumentId(value); setForm((current) => ({ ...current, document_revision_id: '' }));

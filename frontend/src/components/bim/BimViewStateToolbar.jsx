@@ -79,8 +79,10 @@ const BimViewStateToolbar = ({
         }
         const activeViewState = viewStates.find((state) => state.id === activeViewStateId) || null;
         const newDraftScope = activeViewState?.scope === 'company' ? 'company' : 'personal';
-        setDraftName(activeViewState?.nombre || '');
-        setDraftScope(newDraftScope);
+        queueMicrotask(() => {
+            setDraftName(activeViewState?.nombre || '');
+            setDraftScope(newDraftScope);
+        });
     }, [activeViewStateId, isEditingName, viewStates]);
 
     const handleStartSave = () => {

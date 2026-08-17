@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Calculator, Check, FileCheck2, RefreshCw, X } from 'lucide-react';
 import { bimModelsApi } from '../../api/bimModels';
 
@@ -22,7 +22,7 @@ const BimQuantityProposalPanel = ({ projectId, empresaId, versionId, element, ap
     const [reason, setReason] = useState('');
     const [error, setError] = useState('');
 
-    const refreshSnapshots = async () => {
+    const refreshSnapshots = useCallback(async () => {
         if (!projectId || !versionId) return;
         try {
             const rows = await api.listQtoSnapshots(projectId, versionId, empresaId);
@@ -31,12 +31,12 @@ const BimQuantityProposalPanel = ({ projectId, empresaId, versionId, element, ap
         } catch {
             setSnapshots([]);
         }
-    };
+    }, [api, empresaId, projectId, versionId]);
 
     useEffect(() => {
         setSelectedSnapshotId(null);
-        refreshSnapshots();
-    }, [empresaId, projectId, versionId]);
+        void refreshSnapshots();
+    }, [refreshSnapshots]);
 
     useEffect(() => {
         setProposal(null);
@@ -47,7 +47,7 @@ const BimQuantityProposalPanel = ({ projectId, empresaId, versionId, element, ap
                 .then(setCandidates)
                 .catch(() => setCandidates([]));
         }
-    }, [empresaId, element?.id, projectId]);
+    }, [api, empresaId, element?.id, projectId]);
 
     const selectedSnapshot = useMemo(
         () => snapshots.find((item) => item.id === selectedSnapshotId) || snapshots[0] || null,

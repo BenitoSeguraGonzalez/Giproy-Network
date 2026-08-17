@@ -143,7 +143,7 @@ const filterEdoTreeBySearch = (nodes, query) => {
 const EdoModalHeader = ({
     title,
     subtitle,
-    icon: Icon = Network,
+    icon = Network,
     iconClassName = 'text-[#136191]',
     iconWrapClassName = 'border-[#136191]/20 bg-[#136191]/10',
     closeButtonClassName = EDO_MODAL_CLOSE_BUTTON,
@@ -153,7 +153,7 @@ const EdoModalHeader = ({
     <div className="flex items-center justify-between gap-4 border-b border-[#101318] bg-[#111318] px-5 py-4">
         <div className="flex min-w-0 items-center gap-3">
             <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border ${iconWrapClassName}`}>
-                <Icon className={`h-[18px] w-[18px] ${iconClassName}`} />
+                {React.createElement(icon, { className: `h-[18px] w-[18px] ${iconClassName}` })}
             </span>
             <div className="min-w-0">
                 <h2 className="text-sm font-black uppercase tracking-tight text-white">{title}</h2>

@@ -1,20 +1,15 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import {
-    Calculator,
-    Building2,
-    ShieldCheck,
-    Wrench,
-    ArrowUpRight
-} from 'lucide-react';
+
+
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 const MotionDiv = motion.div;
-import { Card, CardContent } from '../components/ui/card';
 
 const Dashboard = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
+    const shouldReduceMotion = useReducedMotion();
     const cardsViewportRef = useRef(null);
     const moduleCardRefs = useRef({});
     const [activeModuleId, setActiveModuleId] = useState('unit-prices');
@@ -111,9 +106,9 @@ const Dashboard = () => {
                 <div className="flex h-full min-h-0 w-full max-w-[1480px] flex-1 flex-col overflow-hidden self-center">
                     <header className="mb-10 flex-shrink-0">
                         <MotionDiv
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
+                            transition={{ duration: shouldReduceMotion ? 0.12 : 0.24 }}
                         >
                             <h2 className="text-4xl font-black tracking-tight text-[#1A1A1A] sm:text-5xl">
                                 Consola de <span className="text-[#F39200]">Operaciones</span>
@@ -140,10 +135,10 @@ const Dashboard = () => {
                                     onFocus={() => setActiveModuleId(module.id)}
                                 >
                                     <MotionDiv
-                                        initial={{ opacity: 0, y: 30 }}
+                                        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.5, delay: 0.1 * index }}
-                                        whileHover={{ y: -8 }}
+                                        transition={{ duration: shouldReduceMotion ? 0.12 : 0.24, delay: shouldReduceMotion ? 0 : 0.04 * index }}
+                                        whileHover={shouldReduceMotion ? undefined : { y: -3 }}
                                     >
                                         <button
                                             type="button"
@@ -169,7 +164,7 @@ const Dashboard = () => {
                                                     <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400 transition-colors group-hover:text-[#F39200]">
                                                         Ingresar al módulo
                                                     </span>
-                                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-100 bg-zinc-50 transition-all group-hover:bg-[#F39200]">
+                                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-100 bg-zinc-50 transition-[background-color,border-color] duration-200 group-hover:bg-[#F39200]">
                                                         <ArrowUpRight className="h-5 w-5 text-zinc-400 transition-colors group-hover:text-white" />
                                                     </div>
                                                 </div>
@@ -196,15 +191,17 @@ const Dashboard = () => {
                                         key={`${module.id}-indicator`}
                                         type="button"
                                         onClick={() => handleIndicatorClick(module.id)}
-                                        className={`h-1 rounded-full transition-all duration-200 ${
-                                            isActive
-                                                ? 'w-12 bg-[#F39200]'
-                                                : 'w-10 bg-zinc-200 hover:bg-zinc-300'
-                                        }`}
+                                        className="group/indicator flex h-11 w-12 items-center justify-center rounded-lg focus-visible:outline-none"
                                         title={`Ir a ${module.title}`}
                                         aria-label={`Ir a ${module.title}`}
                                         aria-pressed={isActive}
-                                    />
+                                    >
+                                        <span className={`h-1 rounded-full transition-[width,background-color] duration-200 ${
+                                            isActive
+                                                ? 'w-12 bg-[#F39200]'
+                                                : 'w-10 bg-zinc-200 group-hover/indicator:bg-zinc-300'
+                                        }`} aria-hidden="true" />
+                                    </button>
                                 );
                             })}
                         </div>

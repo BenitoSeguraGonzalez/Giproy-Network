@@ -856,7 +856,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
         fetchDetalle();
         // NO limpiar setActivePresupuesto(null) en el cleanup del efecto de carga
         // porque causa parpadeos vacíos entre cambios leves de props.
-    }, [presupuestoId, proyectoId, setActivePresupuesto, setActiveProyecto, currentEmpresaId, refreshNotesSummary, markBudgetOpened]);
+    }, [activePresupuesto, presupuestoId, proyectoId, setActivePresupuesto, setActiveProyecto, currentEmpresaId, refreshNotesSummary, markBudgetOpened]);
 
     useEffect(() => {
         if (!activePresupuesto?.id) return;

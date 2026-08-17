@@ -1,3 +1,5 @@
+const legacyFormEnabled = Boolean(import.meta.env.VITE_ENABLE_LEGACY_BIM_FORMS);
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, ClipboardCheck, RotateCcw, Send, X, XCircle } from 'lucide-react';
 
@@ -68,7 +70,7 @@ export default function BimCdeSubmittalsPanel({ projectId, empresaId, api = bimM
         <header className="flex h-10 items-center gap-2 border-b border-slate-200 px-3"><ClipboardCheck size={16} className="text-orange-600" /><h3 className="text-sm font-semibold text-slate-800">Submittals y planos de ingenieria</h3><button type="button" onClick={() => setCreateOpen(true)} className="ml-auto inline-flex h-7 items-center gap-1 bg-orange-600 px-2.5 text-[11px] font-semibold text-white"><ClipboardCheck size={13}/>Nuevo expediente</button></header>
         <div className="bim-adaptive-master-detail grid min-h-0 text-xs">
             <div className="border-r border-slate-200 p-3">
-                {false && <form className="hidden" onSubmit={create}>
+                {legacyFormEnabled && <form className="hidden" onSubmit={create}>
                     <input className="col-span-2 border border-slate-300 px-2 py-1.5" required minLength={3} aria-label="Titulo submittal" placeholder="Titulo del expediente" value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} />
                     <select className="border border-slate-300 px-2 py-1.5" aria-label="Tipo submittal" value={draft.submittal_type} onChange={(event) => setDraft({ ...draft, submittal_type: event.target.value })}>{Object.entries(TYPES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
                     <input className="border border-slate-300 px-2 py-1.5" required aria-label="Disciplina submittal" placeholder="Disciplina" value={draft.discipline} onChange={(event) => setDraft({ ...draft, discipline: event.target.value })} />

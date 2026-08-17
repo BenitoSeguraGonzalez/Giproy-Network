@@ -1,12 +1,6 @@
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'framer-motion';
-import { AlertCircle, ArrowDown, ArrowUp, BarChart3, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeftRight, ChevronsRight, CircleCheck, CircleX, Diamond, Download, Gauge, History, Link2, Loader2, Lock, LockOpen, Maximize2, Pencil, Pin, PinOff, Route, RotateCcw, RotateCw, Settings, SlidersHorizontal, TimerReset, Trash2, TriangleAlert, Upload, X, ZoomIn, ZoomOut } from 'lucide-react';
-import ClearSearchField from '../ui/ClearSearchField';
-import AppHint from '../ui/AppHint';
-import ProjectSegmentedSwitch from './ProjectSegmentedSwitch';
-import { ControlRail, ControlRailDivider, ControlRailIconButton, ControlRailSection, ControlRailTooltip } from '../ui/ControlRail';
-import GridColumnManager, { useGridColumnSettings } from './GridColumnManager';
+import { useGridColumnSettings } from '../../hooks/useGridColumnSettings';
 import { includesNormalized } from '../../utils/normalizeSearch';
 import { normalizeTextInputValue } from '../../utils/normalizeInputValue';
 import useAdaptiveLayout from '../../hooks/useAdaptiveLayout';
@@ -24,7 +18,7 @@ import { resolveApuLineUnitDescription } from '../../utils/unitOptions';
 import {
     buildGanttSplitPeriodSlots,
     buildGanttSubbarSplitPreview,
-    buildGanttInitialParentId as buildGanttInitialParentIdFromHelper,
+    buildGanttInitialParentId as _buildGanttInitialParentIdFromHelper,
     buildInitialValoradoSubbars,
     mergeGanttSubbarsSequentially,
     moveGanttSubbarsByDays,
@@ -48,18 +42,16 @@ import {
     resolveDependencyVerticalAnchors,
 } from './cronogramasGanttDependencies';
 import { resolveBackendCriticalPathMembership, resolveCriticalEdgeKeys } from './cronogramasGanttCriticalPath';
-import { buildDeferredZoomViewport, clampGanttZoom } from './cronogramasGanttZoom';
+import { clampGanttZoom } from './cronogramasGanttZoom';
 import { buildVirtualRowMetrics, resolveTimelineVirtualWindow, resolveVerticalVirtualWindow } from './cronogramasGanttVirtualization';
 import { buildGanttApuPlanningSignals, clampFloatingPanelPosition } from './cronogramasGanttApuPlanning';
 import { clampMoveDayDeltaToBounds, isTaskBarDraggable, resolveSubbarClickSelection, resolveSubbarPointerSelection } from './cronogramasGanttInteraction';
 import { applyManualMilestoneDependencyLagUpdates, buildTaskMoveGuideModel, resolveGhostSubbarVisuals, resolveTaskMoveGuideAnchors } from './cronogramasGanttDragPreview';
 import { normalizeManualMilestonesConfig } from './cronogramasGanttManualMilestones';
-import AnimatedSelect from '../ui/AnimatedSelect';
-import AnimatedDateInput from '../ui/AnimatedDateInput';
-import MotionScrollbar from '../ui/MotionScrollbar';
-import SoftSelectToggle from '../ui/SoftSelectToggle';
+import { lazyWithChunkRecovery } from '../../utils/lazyImportRecovery';
 
 const GanttParetoModal = React.lazy(() => import('./GanttParetoModal'));
+const GanttApuPlanningSignalsPanel = lazyWithChunkRecovery(() => import('./GanttApuPlanningSignalsPanel'));
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_GRID_COLUMN_WIDTHS = [76, 108, 336, 156, 92, 126, 156, 102, 186, 118, 118];
@@ -436,7 +428,7 @@ const resolveVisibleBarActionButtonLayout = ({
     };
 };
 
-const resolveVisibleBarSecondaryActionLayout = ({
+const _resolveVisibleBarSecondaryActionLayout = ({
     barLeftPx = 0,
     barWidthPx = 0,
     viewportScrollLeft = 0,
@@ -1099,7 +1091,7 @@ const formatDateTime = (value) => {
     return `${formatDate(parsed)} ${String(parsed.getHours()).padStart(2, '0')}:${String(parsed.getMinutes()).padStart(2, '0')}`;
 };
 
-const formatDateRangeCompact = (startValue, endValue) => {
+const _formatDateRangeCompact = (startValue, endValue) => {
     const start = normalizeDate(startValue);
     const end = normalizeDate(endValue);
     if (!start && !end) return 'Sin ventana';
@@ -1118,7 +1110,7 @@ const openDurationGovernanceAlert = () => appAlert({
     tone: 'info',
 });
 
-const toNativeDate = (value) => {
+const _toNativeDate = (value) => {
     const parsed = normalizeDate(value);
     if (!parsed) return '';
     return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
@@ -1183,177 +1175,7 @@ const formatCurrency = (value, currency = 'USD', decimals = 2) => new Intl.Numbe
     maximumFractionDigits: decimals,
 }).format(Number(value || 0));
 
-const APU_PLANNING_SIGNAL_PRESENTATION = {
-    ok: {
-        label: 'OK',
-        Icon: CircleCheck,
-        chipClassName: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-    },
-    review: {
-        label: 'Revisar',
-        Icon: TriangleAlert,
-        chipClassName: 'border-amber-200 bg-amber-50 text-amber-800',
-    },
-    error: {
-        label: 'Inconsistente',
-        Icon: CircleX,
-        chipClassName: 'border-rose-200 bg-rose-50 text-rose-700',
-    },
-    unavailable: {
-        label: 'Sin datos',
-        Icon: AlertCircle,
-        chipClassName: 'border-zinc-200 bg-zinc-100 text-zinc-600',
-    },
-};
-
-const GanttApuPlanningSignalsPanel = ({
-    model,
-    pinned = false,
-    currency = 'USD',
-    moneyDecimals = 2,
-    onTogglePinned,
-    onDragPointerDown,
-    onDragPointerMove,
-    onDragPointerEnd,
-    onPointerEnter,
-    onPointerLeave,
-}) => {
-    const overallPresentation = APU_PLANNING_SIGNAL_PRESENTATION[model?.overallStatus]
-        || APU_PLANNING_SIGNAL_PRESENTATION.unavailable;
-    const OverallIcon = overallPresentation.Icon;
-    const metrics = model?.metrics || {};
-    const unit = model?.activity?.unit || 'u';
-    const metricRows = model?.available ? [
-        {
-            label: 'Capacidad',
-            values: [
-                ['Ciclo gobernante', formatNumber(metrics.governingCycle, 4), `h/${unit}`],
-                ['Factor plan', formatNumber(metrics.planningFactor * 100, 2), '%'],
-                ['Producción teórica', formatNumber(metrics.theoreticalProduction, 4), `${unit}/h`],
-                ['Producción plan', formatNumber(metrics.plannedProduction, 4), `${unit}/h`],
-                ['Duración neta', formatNumber(metrics.netDurationHours, 4), 'h'],
-                ['Duración plan', formatNumber(metrics.plannedDurationDays, 4), 'd'],
-            ],
-        },
-        {
-            label: 'Recursos',
-            values: [
-                ['Trabajo MO neto', formatNumber(metrics.laborNetHours, 4), 'HH'],
-                ['Trabajo MO plan', formatNumber(metrics.laborPlannedHours, 4), 'HH'],
-                ['Cuadrilla nominal', formatNumber(metrics.nominalCrew, 2), 'pers.'],
-                ['Cuadrilla equivalente', formatNumber(metrics.equivalentCrew, 2), 'pers.'],
-                ['Carga de cuadrilla', formatNumber(metrics.crewLoad * 100, 2), '%'],
-                ['Equipos plan', formatNumber(metrics.equipmentPlannedHours, 4), 'EH'],
-            ],
-        },
-        {
-            label: 'Costo unitario',
-            values: [
-                ['Costo directo', formatCurrency(metrics.plannedDirectUnitCost, currency, moneyDecimals), ''],
-                ['% indirecto', formatNumber(metrics.indirectPercentage, 2), '%'],
-                ['Costo indirecto', formatCurrency(
-                    metrics.plannedUnitPrice - metrics.plannedDirectUnitCost,
-                    currency,
-                    moneyDecimals,
-                ), ''],
-                ['Precio plan', formatCurrency(metrics.plannedUnitPrice, currency, moneyDecimals), ''],
-            ],
-        },
-    ] : [];
-
-    return (
-        <section
-            id="gantt-apu-planning-signals-panel"
-            data-testid="gantt-apu-planning-signals-panel"
-            className="flex max-h-full flex-col overflow-hidden rounded-[1rem] border border-zinc-200 bg-white shadow-[0_6px_12px_rgba(15,23,42,0.12)]"
-            onPointerEnter={onPointerEnter}
-            onPointerLeave={onPointerLeave}
-            aria-label="Semáforos de planificación del APU seleccionado"
-        >
-            <div
-                data-testid="gantt-apu-planning-signals-drag-handle"
-                className="flex cursor-move touch-none select-none items-start justify-between gap-3 border-b border-zinc-200 px-4 py-3"
-                onPointerDown={onDragPointerDown}
-                onPointerMove={onDragPointerMove}
-                onPointerUp={onDragPointerEnd}
-                onPointerCancel={onDragPointerEnd}
-                title="Arrastra para mover el panel"
-            >
-                <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Gauge className="h-4 w-4 shrink-0 text-[#136191]" />
-                        <h3 className="text-[12px] font-black text-zinc-900">Semáforos APU</h3>
-                        <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[9px] font-black ${overallPresentation.chipClassName}`}>
-                            <OverallIcon className="h-3 w-3" />
-                            {overallPresentation.label}
-                        </span>
-                    </div>
-                    <p className="mt-1 truncate text-[11px] font-semibold text-zinc-600">
-                        {model?.activity?.code ? `${model.activity.code} · ` : ''}
-                        {model?.activity?.description || 'Selecciona una actividad calculable vinculada a un APU.'}
-                    </p>
-                    {model?.available ? (
-                        <p className="mt-1 text-[10px] font-medium text-zinc-500">
-                            Gobierna: <span className="font-bold text-zinc-700">{model.activity.governingResourceName}</span>
-                            {model.activity.governingCandidateCount > 1 ? ` · ${model.activity.governingCandidateCount} candidatos` : ''}
-                        </p>
-                    ) : null}
-                </div>
-                <button
-                    type="button"
-                    onPointerDown={(event) => event.stopPropagation()}
-                    onClick={onTogglePinned}
-                    className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[0.75rem] border px-2.5 text-[9px] font-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/35 ${
-                        pinned
-                            ? 'border-[#F39200]/45 bg-[#fff7ed] text-[#F39200]'
-                            : 'border-zinc-200 bg-white text-zinc-600 hover:border-[#136191]/35 hover:text-[#136191]'
-                    }`}
-                    aria-pressed={pinned}
-                >
-                    {pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
-                    {pinned ? 'Desacoplar' : 'Fijar'}
-                </button>
-            </div>
-
-            <div className="gantt-dark-scrollbar min-h-0 overflow-y-auto px-4 py-3">
-                {!model?.available ? (
-                    <div className="flex items-start gap-2 rounded-[0.85rem] bg-zinc-100 px-3 py-3 text-zinc-700">
-                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-zinc-500" />
-                        <p className="text-[11px] font-semibold leading-relaxed">
-                            {model?.reason || 'No hay información suficiente para calcular los indicadores.'}
-                        </p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="space-y-3">
-                            {metricRows.map((group) => (
-                                <div key={group.label}>
-                                    <div className="mb-1.5 flex items-center gap-2">
-                                        <span className="text-[10px] font-black text-zinc-800">{group.label}</span>
-                                        <span className="h-px flex-1 bg-zinc-200" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                                        {group.values.map(([label, value, valueUnit]) => (
-                                            <div key={label} className="flex min-w-0 items-baseline justify-between gap-2 py-1">
-                                                <span className="truncate text-[9px] font-semibold text-zinc-500">{label}</span>
-                                                <span className="shrink-0 text-[10px] font-black tabular-nums text-zinc-900">
-                                                    {value}{valueUnit ? <span className="ml-1 text-[8px] text-zinc-500">{valueUnit}</span> : null}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                    </>
-                )}
-            </div>
-        </section>
-    );
-};
-
-const formatOperationalDuration = (durationDays, config = {}) => {
+const _formatOperationalDuration = (durationDays, config = {}) => {
     const safeDays = Math.max(0, Number(durationDays || 0));
     const dailyHours = Math.max(1, Number(config?.jornada_laboral_horas || 8));
     const minutesPerDay = Math.max(1, Math.round(dailyHours * 60));
@@ -1376,7 +1198,7 @@ const formatOperationalDuration = (durationDays, config = {}) => {
 const resolvePeriodStartAt = (period) => normalizeDate(period?.starts_at || period?.start_date || period?.start);
 const resolvePeriodEndAt = (period, config = {}) => {
     const end = normalizeDate(period?.ends_at || period?.end_date || period?.end);
-    return end ? applyGanttWorkdayFinishTime(end, config) : null;
+    return end ? applyGanttWork_dayFinishTime(end, config) : null;
 };
 
 const measureGanttWorkWindowHours = (startAtValue, endAtValue, config = {}) => {
@@ -1402,7 +1224,7 @@ const measureGanttWorkWindowHours = (startAtValue, endAtValue, config = {}) => {
                 });
             } else {
                 const dayStart = applyGanttWorkdayStartTime(cursor, config);
-                const dayEnd = applyGanttWorkdayFinishTime(cursor, config);
+                const dayEnd = applyGanttWork_dayFinishTime(cursor, config);
                 const overlapStart = startAt > dayStart ? startAt : dayStart;
                 const overlapEnd = endAt < dayEnd ? endAt : dayEnd;
                 if (overlapEnd > overlapStart) {
@@ -1420,7 +1242,7 @@ const buildGanttPreviewDistributionForPeriods = (periods, taskStart, taskEnd, co
     if (!Array.isArray(periods) || !periods.length) return [];
     const startAt = applyGanttWorkdayStartTime(taskStart, config);
     const endAt = normalizeDate(taskEnd) || startAt;
-    const finishAt = applyGanttWorkdayFinishTime(endAt, config) || startAt;
+    const finishAt = applyGanttWork_dayFinishTime(endAt, config) || startAt;
     if (!startAt) {
         return Array.from({ length: periods.length }, () => Number((100 / periods.length).toFixed(2)));
     }
@@ -1461,7 +1283,7 @@ const buildGanttResourceHistogram = (rows, timelineSegments, config = {}) => {
 
     return timelineSegments.map((segment) => {
         const segmentStart = applyGanttWorkdayStartTime(segment.start, config);
-        const segmentEnd = applyGanttWorkdayFinishTime(segment.end, config);
+        const segmentEnd = applyGanttWork_dayFinishTime(segment.end, config);
         const segmentWorkHours = measureGanttWorkWindowHours(segmentStart, segmentEnd, config);
         let totalCrewHours = 0;
         let equiposCrewHours = 0;
@@ -1603,7 +1425,7 @@ const summarizeGanttConflictReliefRecommendations = (entries = []) => {
     });
 };
 
-const buildGanttPreCrashingRecommendations = (rows = [], drafts = {}, config = {}, planningMap = new Map()) => {
+const buildGanttPreCrashingRecommendations = (rows = [], drafts = {}, _config = {}, planningMap = new Map()) => {
     if (!Array.isArray(rows) || !rows.length || !(planningMap instanceof Map) || planningMap.size === 0) {
         return [];
     }
@@ -1714,9 +1536,9 @@ const buildGanttConflictReliefSessionEntries = (rows = [], drafts = {}, config =
             const draft = drafts[lineId] || {};
             const pending = getGanttPendingApprovalState(row, draft);
             if (String(pending?.source || '') !== 'gantt_conflict_relief') return null;
-            const effectiveRow = applyGanttRowDraft(row, draft, config);
+            const _effectiveRow = applyGanttRowDraft(row, draft, config);
             const currentStart = shiftToGanttLaborableDate(row.start_date, config, 1);
-            const draftStart = shiftToGanttLaborableDate(effectiveRow.start_date, config, 1);
+            const draftStart = shiftToGanttLaborableDate(_effectiveRow.start_date, config, 1);
             return {
                 id: lineId,
                 codigo: row.codigo_item || lineId,
@@ -1761,8 +1583,8 @@ const summarizeGanttConflictReliefSessionEntries = (entries = []) => {
     });
 };
 
-const buildGanttResourceEditorImpactPreview = (row, effectiveRow, valorado, config = {}) => {
-    if (!row || !effectiveRow || !valorado?.periods?.length) return null;
+const buildGanttResourceEditorImpactPreview = (row, _effectiveRow, valorado, config = {}) => {
+    if (!row || !_effectiveRow || !valorado?.periods?.length) return null;
     const lineId = String(row?.budget_line_id ?? row?.presupuesto_linea_id ?? row?.linea_id ?? '');
     if (!lineId) return null;
 
@@ -1776,8 +1598,8 @@ const buildGanttResourceEditorImpactPreview = (row, effectiveRow, valorado, conf
         : buildGanttPreviewDistributionForPeriods(periods, row.start_date, row.end_date || row.start_date, config);
     const nextDistribution = buildGanttPreviewDistributionForPeriods(
         periods,
-        effectiveRow.start_date,
-        effectiveRow.end_date || effectiveRow.start_date,
+        _effectiveRow.start_date,
+        _effectiveRow.end_date || _effectiveRow.start_date,
         config,
     );
 
@@ -1823,7 +1645,7 @@ const buildGanttResourceEditorImpactPreview = (row, effectiveRow, valorado, conf
 const GanttResourceEditorModal = ({
     open,
     row,
-    effectiveRow,
+    _effectiveRow,
     project,
     selectedBudget,
     selectedBudgetDetail,
@@ -1834,7 +1656,7 @@ const GanttResourceEditorModal = ({
     onCancel,
     onReset,
     onAccept,
-    onChangeResourceUnits,
+    _onChangeResourceUnits,
     onChangeDuration,
     onChangeDraftMetadata,
 }) => {
@@ -1850,48 +1672,48 @@ const GanttResourceEditorModal = ({
     const activeResourceInputRef = useRef(null);
     const cancelledResourceInputRef = useRef(null);
     const lastResourceEditorResetVersionRef = useRef(resetVersion);
-    const shouldSkipCancelledResourceInput = (inputKey) => cancelledResourceInputRef.current === inputKey;
+    const _shouldSkipCancelledResourceInput = (inputKey) => cancelledResourceInputRef.current === inputKey;
     const [governancePickerOpen, setGovernancePickerOpen] = useState(false);
     const [subcontractDurationInput, setSubcontractDurationInput] = useState('');
     const [subcontractTypeMenuOpen, setSubcontractTypeMenuOpen] = useState(false);
     const subcontractDraft = useMemo(() => ({
-        duration: effectiveRow?.dias_calendario ?? effectiveRow?.dias_utiles ?? row?.dias_calendario ?? row?.dias_utiles ?? 0,
+        duration: _effectiveRow?.dias_calendario ?? _effectiveRow?.dias_utiles ?? row?.dias_calendario ?? row?.dias_utiles ?? 0,
         metadata: {
             ...(row?.metadata || {}),
-            ...(effectiveRow?.metadata || {}),
+            ...(_effectiveRow?.metadata || {}),
         },
-    }), [effectiveRow?.dias_calendario, effectiveRow?.dias_utiles, effectiveRow?.metadata, row?.dias_calendario, row?.dias_utiles, row?.metadata]);
+    }), [_effectiveRow?.dias_calendario, _effectiveRow?.dias_utiles, _effectiveRow?.metadata, row?.dias_calendario, row?.dias_utiles, row?.metadata]);
     const rowDeclaredSubcontracted = useMemo(
-        () => isSubcontractedRow(effectiveRow || row, subcontractDraft),
-        [effectiveRow, row, subcontractDraft]
+        () => isSubcontractedRow(_effectiveRow || row, subcontractDraft),
+        [_effectiveRow, row, subcontractDraft]
     );
     const subcontractDisplayUnit = useMemo(
-        () => resolveGanttRowDurationDisplayUnit(effectiveRow || row, subcontractDraft, 'day'),
-        [effectiveRow, row, subcontractDraft]
+        () => resolveGanttRowDurationDisplayUnit(_effectiveRow || row, subcontractDraft, 'day'),
+        [_effectiveRow, row, subcontractDraft]
     );
     const persistedDurationDays = useMemo(
-        () => Math.max(0, Number(effectiveRow?.dias_calendario ?? effectiveRow?.dias_utiles ?? row?.dias_calendario ?? row?.dias_utiles ?? 0)),
-        [effectiveRow?.dias_calendario, effectiveRow?.dias_utiles, row?.dias_calendario, row?.dias_utiles]
+        () => Math.max(0, Number(_effectiveRow?.dias_calendario ?? _effectiveRow?.dias_utiles ?? row?.dias_calendario ?? row?.dias_utiles ?? 0)),
+        [_effectiveRow?.dias_calendario, _effectiveRow?.dias_utiles, row?.dias_calendario, row?.dias_utiles]
     );
     const subcontractRowKey = String(row?.budget_line_id ?? row?.linea_id ?? row?.id ?? '');
     const subcontractDurationInputValue = useMemo(() => (
-        resolveSubcontractDurationInputValue(effectiveRow || row, subcontractDraft, config, subcontractDisplayUnit)
-    ), [config, effectiveRow, row, subcontractDisplayUnit, subcontractDraft]);
+        resolveSubcontractDurationInputValue(_effectiveRow || row, subcontractDraft, config, subcontractDisplayUnit)
+    ), [config, _effectiveRow, row, subcontractDisplayUnit, subcontractDraft]);
 
     useEffect(() => {
         if (!open || !row?.apu_id) {
-            setApuState({ loading: false, error: '', data: null });
+            queueMicrotask(() => setApuState({ loading: false, error: '', data: null }));
             return;
         }
 
         const cached = apuResourceCache.get(row.apu_id);
         if (cached) {
-            setApuState({ loading: false, error: '', data: cached });
+            queueMicrotask(() => setApuState({ loading: false, error: '', data: cached }));
             return;
         }
 
         let active = true;
-        setApuState({ loading: true, error: '', data: null });
+        queueMicrotask(() => setApuState({ loading: true, error: '', data: null }));
         apusApi.getById(row.apu_id)
             .then((response) => {
                 if (!active) return;
@@ -1918,18 +1740,18 @@ const GanttResourceEditorModal = ({
     useEffect(() => {
         const projectBaseId = Number(project?.base_trabajo_id || 0);
         if (!open || projectBaseId <= 0) {
-            setBaseState({ loading: false, error: '', data: null });
+            queueMicrotask(() => setBaseState({ loading: false, error: '', data: null }));
             return;
         }
 
         const cached = baseTrabajoCache.get(projectBaseId);
         if (cached) {
-            setBaseState({ loading: false, error: '', data: cached });
+            queueMicrotask(() => setBaseState({ loading: false, error: '', data: cached }));
             return;
         }
 
         let active = true;
-        setBaseState({ loading: true, error: '', data: null });
+        queueMicrotask(() => setBaseState({ loading: true, error: '', data: null }));
         basesTrabajoApi.getById(projectBaseId)
             .then((response) => {
                 if (!active) return;
@@ -1955,19 +1777,19 @@ const GanttResourceEditorModal = ({
 
     useEffect(() => {
         if (!open) return;
-        setSubcontractTypeMenuOpen(false);
-        setSubcontractDurationInput(
-            resolveSubcontractDurationInputValue(effectiveRow || row, subcontractDraft, config, subcontractDisplayUnit)
-        );
-    }, [config, open, persistedDurationDays, row?.apu_id, subcontractDisplayUnit, subcontractRowKey]);
+        queueMicrotask(() => setSubcontractTypeMenuOpen(false));
+        queueMicrotask(() => setSubcontractDurationInput(
+            resolveSubcontractDurationInputValue(_effectiveRow || row, subcontractDraft, config, subcontractDisplayUnit)
+        ));
+    }, [_effectiveRow, config, open, persistedDurationDays, row, row?.apu_id, subcontractDisplayUnit, subcontractDraft, subcontractRowKey]);
 
-    const isReady = Boolean(open && row && effectiveRow);
+    const isReady = Boolean(open && row && _effectiveRow);
 
     const dailyHours = resolveGanttDailyHours(config);
     const budgetQuantity = Number(row?.cantidad || 0);
-    const valoradoImpact = buildGanttResourceEditorImpactPreview(row, effectiveRow, valorado, config);
+    const _valoradoImpact = buildGanttResourceEditorImpactPreview(row, _effectiveRow, valorado, config);
     const apuCostModel = resolveGanttCostModel(row, {});
-    const currentUnits = String(effectiveRow?.recursos_asumidos ?? row?.recursos_asumidos ?? row?.recursos_calculados ?? 1);
+    const currentUnits = String(_effectiveRow?.recursos_asumidos ?? row?.recursos_asumidos ?? row?.recursos_calculados ?? 1);
     const quantityUnitLabel = resolveApuLineUnitDescription({ unidad: row?.unidad }, 'u') || 'u';
     const moneyDecimals = valorado?.dec_moneda ?? 2;
     const moneyCurrency = valorado?.moneda || 'USD';
@@ -1991,20 +1813,20 @@ const GanttResourceEditorModal = ({
     const indirectFactor = Math.max(0, resolvedIndirectPercent) / 100;
     const apuLines = apuState.data?.lineas || [];
     const persistedResourceDrafts = useMemo(
-        () => getPersistedResourceDrafts(row, effectiveRow),
-        [effectiveRow, row]
+        () => getPersistedResourceDrafts(row, _effectiveRow),
+        [_effectiveRow, row]
     );
     const persistedResourceQuantityDrafts = useMemo(
-        () => getPersistedResourceQuantityDrafts(row, effectiveRow),
-        [effectiveRow, row]
+        () => getPersistedResourceQuantityDrafts(row, _effectiveRow),
+        [_effectiveRow, row]
     );
     const persistedResourceSourceLineDrafts = useMemo(
-        () => getPersistedResourceSourceLineDrafts(row, effectiveRow),
-        [effectiveRow, row]
+        () => getPersistedResourceSourceLineDrafts(row, _effectiveRow),
+        [_effectiveRow, row]
     );
     const persistedResourceWorkPolicies = useMemo(
-        () => getPersistedResourceWorkPolicies(row, effectiveRow),
-        [effectiveRow, row]
+        () => getPersistedResourceWorkPolicies(row, _effectiveRow),
+        [_effectiveRow, row]
     );
     const normalizeResourceLabel = (value) => {
         if (!value) return 'Sin descripción';
@@ -2020,13 +1842,13 @@ const GanttResourceEditorModal = ({
     const operationalResourcesSnapshot = useMemo(() => {
         const metadata = {
             ...(row?.metadata || {}),
-            ...(effectiveRow?.metadata || {}),
+            ...(_effectiveRow?.metadata || {}),
         };
         const snapshot = metadata?.[APU_OPERATIONAL_RESOURCES_METADATA_KEY];
         return snapshot && typeof snapshot === 'object' && Array.isArray(snapshot.resources)
             ? snapshot
             : null;
-    }, [effectiveRow, row]);
+    }, [_effectiveRow, row]);
     const operationalSnapshotResources = operationalResourcesSnapshot?.resources || [];
     const shouldUseOperationalSnapshotResources = operationalSnapshotResources.length > 0
         && Boolean(operationalResourcesSnapshot?.has_nested);
@@ -2149,12 +1971,14 @@ const GanttResourceEditorModal = ({
                 nextQuantityDrafts[item.id] = resourceQuantityDrafts[item.id] ?? activeQuantity;
             }
         });
-        setResourceDrafts(nextDrafts);
-        setResourceInputValues(nextInputValues);
-        setResourceQuantityDrafts(nextQuantityDrafts);
-        setResourceSourceLineDrafts(nextSourceLineDrafts);
-        setResourceWorkPolicies(nextWorkPolicies);
-    }, [open, persistedApuWorkPolicy, persistedResourceDrafts, persistedResourceQuantityDrafts, persistedResourceSourceLineDrafts, resetVersion, visibleResourceLines]);
+        queueMicrotask(() => {
+            setResourceDrafts(nextDrafts);
+            setResourceInputValues(nextInputValues);
+            setResourceQuantityDrafts(nextQuantityDrafts);
+            setResourceSourceLineDrafts(nextSourceLineDrafts);
+            setResourceWorkPolicies(nextWorkPolicies);
+        });
+    }, [open, persistedApuWorkPolicy, persistedResourceDrafts, persistedResourceQuantityDrafts, persistedResourceSourceLineDrafts, resetVersion, resourceInputValues, resourceQuantityDrafts, visibleResourceLines]);
 
     const activeResourceLines = useMemo(() => (
         visibleResourceLines.map((item) => {
@@ -2300,8 +2124,8 @@ const GanttResourceEditorModal = ({
     ), [activeResourceLines, resourceDrafts]);
 
     const persistedGovernanceOverride = useMemo(
-        () => getPersistedGovernanceOverride(row, effectiveRow),
-        [effectiveRow, row]
+        () => getPersistedGovernanceOverride(row, _effectiveRow),
+        [_effectiveRow, row]
     );
 
     const backendDominantResource = useMemo(
@@ -2349,10 +2173,7 @@ const GanttResourceEditorModal = ({
         ];
     }, [
         activeResourceLines,
-        automaticDominantResource?.activeRendimiento,
-        automaticDominantResource?.draftRendimiento,
-        automaticDominantResource?.id,
-        automaticDominantResource?.rendimiento,
+        automaticDominantResource,
         dominantCategoryId,
     ]);
 
@@ -2448,10 +2269,10 @@ const GanttResourceEditorModal = ({
     const workHours = useMemo(() => {
         if (isSubcontracted) {
             return Number(
-                effectiveRow?.trabajo_gobernante
+                _effectiveRow?.trabajo_gobernante
                 ?? row?.trabajo_gobernante
-                ?? effectiveRow?.trabajo_total
-                ?? effectiveRow?.horas_total
+                ?? _effectiveRow?.trabajo_total
+                ?? _effectiveRow?.horas_total
                 ?? 0
             ) || 0;
         }
@@ -2460,13 +2281,13 @@ const GanttResourceEditorModal = ({
             : 0;
         if (localWorkHours > 0) return localWorkHours;
         return Number(
-            effectiveRow?.trabajo_gobernante
+            _effectiveRow?.trabajo_gobernante
             || row?.trabajo_gobernante
-            || effectiveRow?.trabajo_total
-            || effectiveRow?.horas_total
+            || _effectiveRow?.trabajo_total
+            || _effectiveRow?.horas_total
             || 0
         );
-    }, [budgetQuantity, effectiveRow?.horas_total, effectiveRow?.trabajo_gobernante, effectiveRow?.trabajo_total, governingPerformance, isSubcontracted, row?.trabajo_gobernante]);
+    }, [budgetQuantity, _effectiveRow?.horas_total, _effectiveRow?.trabajo_gobernante, _effectiveRow?.trabajo_total, governingPerformance, isSubcontracted, row?.trabajo_gobernante]);
 
     const duration = useMemo(() => (
         isSubcontracted
@@ -2476,21 +2297,21 @@ const GanttResourceEditorModal = ({
 
     const lightEditorPlanningSignals = useMemo(() => buildGanttApuPlanningSignals({
         row,
-        effectiveRow,
+        _effectiveRow,
         durationModel: {
-            ...(resolveGanttDurationModel(row, effectiveRow) || {}),
+            ...(resolveGanttDurationModel(row, _effectiveRow) || {}),
             jornada_horas: dailyHours,
             governing_performance_hours_per_unit: governingPerformance,
             governing_resource_name: dominantResource?.label || dominantGovernanceCategory || '',
         },
-        costModel: resolveGanttCostModel(row, effectiveRow),
+        costModel: resolveGanttCostModel(row, _effectiveRow),
         dailyHours,
         indirectPercentage: resolvedIndirectPercent,
     }), [
         dailyHours,
         dominantGovernanceCategory,
         dominantResource?.label,
-        effectiveRow,
+        _effectiveRow,
         governingPerformance,
         resolvedIndirectPercent,
         row,
@@ -2514,11 +2335,11 @@ const GanttResourceEditorModal = ({
     useEffect(() => {
         if (!open || typeof onChangeDuration !== 'function') return;
         if (isSubcontracted) return;
-        const persistedDuration = Number(effectiveRow?.dias_calendario ?? effectiveRow?.dias_utiles ?? row?.dias_calendario ?? row?.dias_utiles ?? 0);
+        const persistedDuration = Number(_effectiveRow?.dias_calendario ?? _effectiveRow?.dias_utiles ?? row?.dias_calendario ?? row?.dias_utiles ?? 0);
         if (!(duration >= 0) || !Number.isFinite(duration)) return;
         if (Math.abs(persistedDuration - duration) <= 0.0001) return;
         onChangeDuration(duration);
-    }, [duration, effectiveRow?.dias_calendario, effectiveRow?.dias_utiles, isSubcontracted, onChangeDuration, open, row?.dias_calendario, row?.dias_utiles]);
+    }, [duration, _effectiveRow?.dias_calendario, _effectiveRow?.dias_utiles, isSubcontracted, onChangeDuration, open, row?.dias_calendario, row?.dias_utiles]);
 
     const persistResourceContributionDraft = (itemId, sourceLines, policy = activeApuWorkPolicy) => {
         const normalizedLines = orderGanttSourceLinesParentFirst(
@@ -2638,7 +2459,7 @@ const GanttResourceEditorModal = ({
         openResourceContributionEditor(item);
     };
 
-    const handleResourceQuantityChange = (itemId, rawValue) => {
+    const _handleResourceQuantityChange = (itemId, rawValue) => {
         const normalized = parsePositiveNumber(rawValue);
         setResourceQuantityDrafts((prev) => ({ ...prev, [itemId]: normalized }));
     };
@@ -2690,7 +2511,7 @@ const GanttResourceEditorModal = ({
         });
     };
 
-    const handleResourceQuantityBlur = (itemId) => {
+    const _handleResourceQuantityBlur = (itemId) => {
         const normalized = parsePositiveNumber(resourceQuantityDrafts[itemId]);
         const item = activeResourceLines.find((resource) => resource.id === itemId);
         const lockedValues = item?.lockRendimiento
@@ -2716,7 +2537,7 @@ const GanttResourceEditorModal = ({
     useEffect(() => {
         if (!governancePickerOpen) return;
         if (governanceManualCandidates.length < 2) {
-            setGovernancePickerOpen(false);
+            queueMicrotask(() => setGovernancePickerOpen(false));
         }
     }, [governanceManualCandidates.length, governancePickerOpen]);
 
@@ -3008,7 +2829,7 @@ const GanttResourceEditorModal = ({
                                                 onBlur={() => {
                                                     if (typeof onChangeDuration !== 'function') return;
                                                     onChangeDuration(convertVisibleDurationToDays(subcontractDurationInput, subcontractDisplayUnit, config));
-                                                    setSubcontractDurationInput(resolveSubcontractDurationInputValue(effectiveRow || row, {
+                                                    setSubcontractDurationInput(resolveSubcontractDurationInputValue(_effectiveRow || row, {
                                                         ...subcontractDraft,
                                                         duration: convertVisibleDurationToDays(subcontractDurationInput, subcontractDisplayUnit, config),
                                                     }, config, subcontractDisplayUnit));
@@ -3022,7 +2843,7 @@ const GanttResourceEditorModal = ({
                                                         event.currentTarget.blur();
                                                     }
                                                 }}
-                                                placeholder={`0 ${resolveGanttDurationTypePresentation(effectiveRow || row, subcontractDraft, config, subcontractDisplayUnit).label}`}
+                                                placeholder={`0 ${resolveGanttDurationTypePresentation(_effectiveRow || row, subcontractDraft, config, subcontractDisplayUnit).label}`}
                                                 className="mt-1 w-full bg-transparent text-[13px] font-black leading-none text-zinc-900 outline-none"
                                             />
                                         ) : (
@@ -3055,7 +2876,7 @@ const GanttResourceEditorModal = ({
                                                                                 gantt_duration_display_unit: option.id,
                                                                             });
                                                                         }
-                                                                        setSubcontractTypeMenuOpen(false);
+                                                                        queueMicrotask(() => setSubcontractTypeMenuOpen(false));
                                                                     }}
                                                                     className={`flex w-full items-center justify-between rounded-[0.75rem] px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.08em] transition ${
                                                                         selected
@@ -3561,7 +3382,7 @@ const applyGanttWorkdayStartTime = (value, config = {}) => {
     return next;
 };
 
-const applyGanttWorkdayFinishTime = (value, config = {}) => {
+const applyGanttWork_dayFinishTime = (value, config = {}) => {
     const start = applyGanttWorkdayStartTime(value, config);
     if (!start) return null;
     start.setMinutes(start.getMinutes() + Math.round(Math.max(1, Number(config?.jornada_laboral_horas || 8)) * 60));
@@ -3686,7 +3507,7 @@ const resolveGanttWorkdayWindow = (value, config = {}) => {
         };
     }
     const start = applyGanttWorkdayStartTime(parsed, config);
-    const finish = applyGanttWorkdayFinishTime(parsed, config);
+    const finish = applyGanttWork_dayFinishTime(parsed, config);
     if (!start || !finish) return null;
     return { start, finish };
 };
@@ -3726,7 +3547,7 @@ const shiftToGanttWorkingDateTime = (value, config = {}, direction = 1) => {
     while (guard < 31) {
         if (!isGanttLaborableDate(current, config)) {
             current = shiftToGanttLaborableDate(current, config, step) || current;
-            current = (step < 0 ? applyGanttWorkdayFinishTime(current, config) : applyGanttWorkdayStartTime(current, config)) || current;
+            current = (step < 0 ? applyGanttWork_dayFinishTime(current, config) : applyGanttWorkdayStartTime(current, config)) || current;
             guard += 1;
             continue;
         }
@@ -3739,7 +3560,7 @@ const shiftToGanttWorkingDateTime = (value, config = {}, direction = 1) => {
                 pivot.setDate(pivot.getDate() - 1);
                 pivot.setHours(23, 59, 0, 0);
                 current = shiftToGanttLaborableDate(pivot, config, step) || pivot;
-                current = applyGanttWorkdayFinishTime(current, config) || current;
+                current = applyGanttWork_dayFinishTime(current, config) || current;
                 guard += 1;
                 continue;
             }
@@ -3751,7 +3572,7 @@ const shiftToGanttWorkingDateTime = (value, config = {}, direction = 1) => {
             pivot.setDate(pivot.getDate() + step);
             pivot.setHours(step < 0 ? 23 : 0, step < 0 ? 59 : 0, 0, 0);
             current = shiftToGanttLaborableDate(pivot, config, step) || pivot;
-            current = (step < 0 ? applyGanttWorkdayFinishTime(current, config) : applyGanttWorkdayStartTime(current, config)) || current;
+            current = (step < 0 ? applyGanttWork_dayFinishTime(current, config) : applyGanttWorkdayStartTime(current, config)) || current;
             guard += 1;
             continue;
         }
@@ -4016,16 +3837,16 @@ const buildNormalizedDependencies = (targetId, rawDependencies = []) => {
     return Array.from(bySource.values());
 };
 
-const normalizeRowDependencies = (row, draft = {}, predecessorIds = null) => {
+const normalizeRowDependencies = (row, draft = {}, _predecessorIds = null) => {
     const targetId = normalizeDependencyEndpointId(row?.budget_line_id ?? row?.presupuesto_linea_id ?? row?.linea_id);
     const explicitDependenciesState = getRowExplicitDependencies(row, draft);
     const normalizedExplicitDependencies = explicitDependenciesState.hasExplicitDependencies
         ? buildNormalizedDependencies(targetId, explicitDependenciesState.dependencies)
         : [];
 
-    if (predecessorIds !== null) {
+    if (_predecessorIds !== null) {
         const requestedIds = Array.from(
-            new Set((Array.isArray(predecessorIds) ? predecessorIds : [])
+            new Set((Array.isArray(_predecessorIds) ? _predecessorIds : [])
                 .map(normalizeDependencyEndpointId)
                 .filter(Boolean))
         );
@@ -4391,7 +4212,7 @@ const resolveDraggedDependencyLagPatch = (dependency, lagDays, config = {}, cont
     };
 };
 
-const addGanttDays = (value, days, config = {}) => {
+const _addGanttDays = (value, days, config = {}) => {
     const parsed = normalizeDate(value);
     if (!parsed) return null;
     return addGanttWorkDays(parsed, days, config);
@@ -4746,14 +4567,14 @@ const detectDependencyCycle = (rows, drafts = {}) => {
     return null;
 };
 
-const validatePredecessors = (row, predecessorIds, rows) => {
+const validatePredecessors = (row, _predecessorIds, rows) => {
     const validIds = new Set((rows || [])
         .filter((item) => item.is_calculable || isManualMilestoneRow(item))
         .map((item) => normalizeDependencyEndpointId(item.budget_line_id ?? item.linea_id))
         .filter(Boolean));
     const currentId = normalizeDependencyEndpointId(row?.budget_line_id ?? row?.linea_id);
     const normalized = Array.from(
-        new Set((predecessorIds || []).map(normalizeDependencyEndpointId).filter(Boolean))
+        new Set((_predecessorIds || []).map(normalizeDependencyEndpointId).filter(Boolean))
     );
     const invalid = normalized.filter((item) => !validIds.has(item));
     const futureOrSelf = normalized.filter((item) => item === currentId);
@@ -4881,10 +4702,10 @@ const buildTimelineSegments = (rows, scale, config = {}, bounds = {}) => {
     if (scale === 'hour') {
         const workdayHours = resolveGanttDailyHours(config);
         cursor = applyGanttWorkdayStartTime(minDate, config);
-        end = applyGanttWorkdayFinishTime(maxDate, config);
+        end = applyGanttWork_dayFinishTime(maxDate, config);
         while (cursor <= end) {
             const dayStart = applyGanttWorkdayStartTime(cursor, config);
-            const dayFinish = applyGanttWorkdayFinishTime(cursor, config);
+            const _dayFinish = applyGanttWork_dayFinishTime(cursor, config);
             for (let hourIndex = 0; hourIndex < workdayHours; hourIndex += 1) {
                 const start = new Date(dayStart);
                 start.setMinutes(start.getMinutes() + (hourIndex * 60));
@@ -5159,7 +4980,7 @@ const resolveGanttSubbarStatusPresentation = (status) => {
     };
 };
 
-const resolveGanttSubbarSourcePresentation = (source) => {
+const _resolveGanttSubbarSourcePresentation = (source) => {
     const normalized = String(source || '').trim().toLowerCase();
     if (normalized === 'gantt_workday_auto_segment') {
         return {
@@ -5393,8 +5214,8 @@ const resolveGanttSubbarParentInitialId = (subbar = null) => (
     ).trim()
 );
 
-const buildGanttInitialParentId = (budgetLineId = '', periodId = '') => {
-    return buildGanttInitialParentIdFromHelper(budgetLineId, periodId);
+const _buildGanttInitialParentId = (budgetLineId = '', periodId = '') => {
+    return _buildGanttInitialParentIdFromHelper(budgetLineId, periodId);
 };
 
 const createGanttOperationalSubbarId = (baseId = 'subbar') => (
@@ -5673,7 +5494,7 @@ const buildSingleSubbarMoveDraft = ({
     };
 };
 
-const splitGanttOperationalSubbar = (subbar = null) => {
+const _splitGanttOperationalSubbar = (subbar = null) => {
     const start = normalizeDate(subbar?.starts_at);
     const end = normalizeDate(subbar?.ends_at);
     if (!start || !end || end.getTime() <= start.getTime()) return null;
@@ -5933,7 +5754,7 @@ const resolveSplitDialogParentWindowMs = (subbar = null) => {
     return end.getTime() - start.getTime();
 };
 
-const resolveSplitDialogPartDurationMs = (partPercent = 0, parentPercent = 100, subbar = null) => {
+const _resolveSplitDialogPartDurationMs = (partPercent = 0, parentPercent = 100, subbar = null) => {
     const safeParentPercent = Math.max(SPLIT_DIALOG_EPSILON, Number(parentPercent || 100));
     const parentWindowMs = Math.max(0, resolveSplitDialogParentWindowMs(subbar));
     return Math.max(0, parentWindowMs * (Math.max(0, Number(partPercent || 0)) / safeParentPercent));
@@ -6276,7 +6097,7 @@ const buildGanttSubbarLabelMap = (row = null, visuals = []) => {
     }));
 };
 
-const toNativeDateInputValue = (value, config = {}) => {
+const _toNativeDateInputValue = (value, config = {}) => {
     const parsed = applyGanttWorkdayStartTime(value, config);
     if (!parsed) return '';
     const year = parsed.getFullYear();
@@ -6493,7 +6314,7 @@ const parsePositiveNumber = (value) => {
 
 const resolveGanttDailyHours = (config = {}) => Math.max(1, Number(config?.jornada_laboral_horas || 8));
 
-const toNativeDateTimeValue = (value, config = {}, mode = 'start') => {
+const _toNativeDateTimeValue = (value, _config = {}, _mode = 'start') => {
     const parsed = normalizeDate(value);
     if (!parsed) return '';
     const year = parsed.getFullYear();
@@ -6504,8 +6325,8 @@ const toNativeDateTimeValue = (value, config = {}, mode = 'start') => {
     return `${year}-${month}-${day}T${hour}:${minute}:00`;
 };
 
-const toNativeDateTimeInputValue = (value, config = {}, mode = 'start') => {
-    const nativeValue = toNativeDateTimeValue(value, config, mode);
+const _toNativeDateTimeInputValue = (value, config = {}, mode = 'start') => {
+    const nativeValue = _toNativeDateTimeValue(value, config, mode);
     return nativeValue ? nativeValue.slice(0, 16) : '';
 };
 
@@ -6628,8 +6449,8 @@ const resolveGanttEffortHours = (row, draft = {}, config = {}) => {
     return duration * resolveGanttDailyHours(config) * crew;
 };
 
-const resolveDurationCrewDraftPatch = (row, previousDraft = {}, patch = {}, config = {}) => {
-    return { ...patch };
+const resolveDurationCrewDraftPatch = (row, _previousDraft = {}, _patch = {}, _config = {}) => {
+    return { ..._patch };
 };
 
 const applyGanttRowDraft = (row, draft = {}, config = {}) => {
@@ -6694,10 +6515,10 @@ const resolveGanttRowsWithDependencySchedule = (rows = [], drafts = {}, config =
         const lineId = String(row?.budget_line_id ?? row?.linea_id ?? '');
         if (!lineId) return;
         const draft = drafts[lineId] || {};
-        const effectiveRow = row?.is_calculable
+        const _effectiveRow = row?.is_calculable
             ? applyGanttRowDraft(row, draft, config)
             : row;
-        nextRows.set(lineId, effectiveRow);
+        nextRows.set(lineId, _effectiveRow);
         if (isSchedulableGanttRow(row, draft) || isManualMilestoneRow(row, draft)) {
             calculableIds.push(lineId);
             incoming.set(lineId, []);
@@ -6748,10 +6569,10 @@ const resolveGanttRowsWithDependencySchedule = (rows = [], drafts = {}, config =
         const targetDraft = drafts[targetId] || {};
         const constrainedStarts = dependencies
             .map((edge) => {
-                const sourceEffective = nextRows.get(edge.sourceId);
-                if (!sourceEffective) return null;
+                const _sourceEffective = nextRows.get(edge.sourceId);
+                if (!_sourceEffective) return null;
                 return resolveDependencyTargetStart(
-                    sourceEffective,
+                    _sourceEffective,
                     {},
                     targetRow,
                     targetDraft,
@@ -6775,8 +6596,8 @@ const resolveGanttRowsWithDependencySchedule = (rows = [], drafts = {}, config =
         const previousEffective = nextRows.get(targetId) || targetRow;
         nextRows.set(targetId, {
             ...previousEffective,
-            start_date: toNativeDateTimeValue(nextStart, config, 'start'),
-            end_date: toNativeDateTimeValue(nextFinish, config, 'finish'),
+            start_date: _toNativeDateTimeValue(nextStart, config, 'start'),
+            end_date: _toNativeDateTimeValue(nextFinish, config, 'finish'),
             dias_calendario: duration,
             dias_utiles: duration,
             duracion_horas: duration * resolveGanttDailyHours(config),
@@ -6789,7 +6610,7 @@ const resolveGanttRowsWithDependencySchedule = (rows = [], drafts = {}, config =
     });
 };
 
-const hasPersistedResourcePendingApproval = (row = null, draft = {}) => {
+const _hasPersistedResourcePendingApproval = (row = null, draft = {}) => {
     const metadata = {
         ...(row?.metadata || {}),
         ...(draft?.metadata || {}),
@@ -7031,12 +6852,12 @@ const resolveGanttCrashingReview = (row = null, draft = {}) => {
     return crashingReview && typeof crashingReview === 'object' ? crashingReview : null;
 };
 
-const buildEquipmentOwnershipGapMessage = (source = null) => {
+const _buildEquipmentOwnershipGapMessage = (source = null) => {
     if (!source?.equipment_cost_traceability_gap) return '';
     return 'El costo de Equipos y Herramientas sigue en modo proxy porque la capa clásica todavía no distingue equipo propio inactivo vs equipo alquilado activo.';
 };
 
-const buildCrashingBlockerMessage = (source = null) => {
+const _buildCrashingBlockerMessage = (source = null) => {
     if (!source?.blocked_for_real_crashing) return '';
     if (source?.blocking_reason === 'pending_equipment_ownership_model') {
         return 'Pendiente para crashing económico real: falta modelar ownership clásico de equipos (`propio` vs `alquilado`).';
@@ -7044,7 +6865,7 @@ const buildCrashingBlockerMessage = (source = null) => {
     return 'Pendiente para crashing económico real por datos clásicos faltantes.';
 };
 
-const getEconomicConfidenceBadge = (source = null) => {
+const _getEconomicConfidenceBadge = (source = null) => {
     if (source?.economic_confidence_level === 'traceable') {
         return { label: 'Trazable', tone: 'emerald' };
     }
@@ -7054,14 +6875,14 @@ const getEconomicConfidenceBadge = (source = null) => {
     return null;
 };
 
-const resolveGanttCostPreview = (row = null, draft = {}, effectiveRow = null) => {
+const resolveGanttCostPreview = (row = null, draft = {}, _effectiveRow = null) => {
     const costModel = resolveGanttCostModel(row, draft);
     if (!row?.is_calculable || !costModel) return null;
 
     const baseDurationDays = Number(row?.dias_calendario ?? row?.dias_utiles ?? 0);
     const visibleDurationDays = Number(
-        effectiveRow?.dias_calendario
-        ?? effectiveRow?.dias_utiles
+        _effectiveRow?.dias_calendario
+        ?? _effectiveRow?.dias_utiles
         ?? getGanttRowDuration(row, draft)
         ?? 0
     );
@@ -7090,10 +6911,10 @@ const resolveGanttCostPreview = (row = null, draft = {}, effectiveRow = null) =>
 const resolveGanttBudgetPricePreview = (
     row = null,
     draft = {},
-    effectiveRow = null,
+    _effectiveRow = null,
     { indirectPercentage = 0, moneyDecimals = 2 } = {},
 ) => {
-    const directPreview = resolveGanttCostPreview(row, draft, effectiveRow);
+    const directPreview = resolveGanttCostPreview(row, draft, _effectiveRow);
     if (!row?.is_calculable || !directPreview) return null;
 
     const quantity = parseOptionalNumericValue(row?.cantidad) ?? 0;
@@ -7159,8 +6980,8 @@ const buildGanttApprovalCostSummary = (rows = [], drafts = {}, config = {}, opti
         if (!row?.is_calculable) return acc;
         const lineId = String(row?.budget_line_id ?? row?.linea_id ?? '');
         const draft = drafts?.[lineId] || {};
-        const effectiveRow = applyGanttRowDraft(row, draft, config);
-        const preview = resolveGanttBudgetPricePreview(row, draft, effectiveRow, options);
+        const _effectiveRow = applyGanttRowDraft(row, draft, config);
+        const preview = resolveGanttBudgetPricePreview(row, draft, _effectiveRow, options);
         const costModel = resolveGanttCostModel(row, draft);
         if (!preview || !costModel) return acc;
 
@@ -7606,7 +7427,7 @@ const buildDraftFromConfirmedSnapshot = (row = null, draft = {}, config = {}) =>
     if (!snapshot) return null;
     const startDate = shiftToGanttWorkingDateTime(snapshot.start_date, config, 1);
     return {
-        start_date: toNativeDateTimeValue(startDate, config, 'start'),
+        start_date: _toNativeDateTimeValue(startDate, config, 'start'),
         duration: Number(snapshot.duration ?? row?.dias_calendario ?? row?.dias_utiles ?? 0),
         end_date: snapshot.end_date || null,
         progress_pct: Number(snapshot.progress_pct ?? row?.progress_pct ?? 0),
@@ -7844,17 +7665,17 @@ const summarizeGanttDiffEntries = (entries = []) => {
 };
 
 const buildGanttBaselineSnapshot = (row, draft = {}, config = {}) => {
-    const effectiveRow = applyGanttRowDraft(row, draft, config);
-    const startDate = shiftToGanttWorkingDateTime(effectiveRow.start_date, config, 1);
+    const _effectiveRow = applyGanttRowDraft(row, draft, config);
+    const startDate = shiftToGanttWorkingDateTime(_effectiveRow.start_date, config, 1);
     const duration = getGanttRowDuration(row, draft);
     const endDate = resolveGanttRowFinishDate(row, { ...draft, start_date: startDate, duration }, config);
     return {
         captured_at: new Date().toISOString(),
-        start_date: toNativeDateTimeValue(startDate, config, 'start'),
-        end_date: toNativeDateTimeValue(endDate, config, 'finish'),
+        start_date: _toNativeDateTimeValue(startDate, config, 'start'),
+        end_date: _toNativeDateTimeValue(endDate, config, 'finish'),
         duration: Number(duration || 0),
-        progress_pct: Number(effectiveRow.progress_pct || 0),
-        assumed_resource_units: Number(effectiveRow.recursos_asumidos || 0),
+        progress_pct: Number(_effectiveRow.progress_pct || 0),
+        assumed_resource_units: Number(_effectiveRow.recursos_asumidos || 0),
     };
 };
 
@@ -7879,7 +7700,7 @@ const buildGanttUnconstrainedScheduleSnapshot = (row, draft = {}, config = {}) =
         delete normalizedDraft.end_date;
     }
 
-    const effectiveRow = applyGanttRowDraft(row, normalizedDraft, config);
+    const _effectiveRow = applyGanttRowDraft(row, normalizedDraft, config);
     const startDate = shiftToGanttWorkingDateTime(
         normalizedDraft.start_date || row?.start_date,
         config,
@@ -7897,11 +7718,11 @@ const buildGanttUnconstrainedScheduleSnapshot = (row, draft = {}, config = {}) =
     );
     return {
         captured_at: new Date().toISOString(),
-        start_date: toNativeDateTimeValue(startDate, config, 'start'),
-        end_date: toNativeDateTimeValue(endDate, config, 'finish'),
+        start_date: _toNativeDateTimeValue(startDate, config, 'start'),
+        end_date: _toNativeDateTimeValue(endDate, config, 'finish'),
         duration: Number(duration || 0),
-        progress_pct: Number(effectiveRow?.progress_pct || 0),
-        assumed_resource_units: Number(effectiveRow?.recursos_asumidos || 0),
+        progress_pct: Number(_effectiveRow?.progress_pct || 0),
+        assumed_resource_units: Number(_effectiveRow?.recursos_asumidos || 0),
     };
 };
 
@@ -7935,7 +7756,7 @@ const resolveDependencyPersistenceContract = (row, draft = {}, metadata = {}, co
     };
 };
 
-const getSegmentSnapVisual = (currentXPx, segmentWidth, segmentCount) => {
+const _getSegmentSnapVisual = (currentXPx, segmentWidth, segmentCount) => {
     if (!Number.isFinite(currentXPx) || !Number.isFinite(segmentWidth) || segmentWidth <= 0 || segmentCount <= 0) {
         return null;
     }
@@ -8254,11 +8075,11 @@ const getRowBranchKey = (row) => {
     return segments.slice(0, -1).join('.');
 };
 
-const buildGroupedRowHighlightModel = (rows = [], drafts = {}, selectedRowId = null) => {
+const _buildGroupedRowHighlightModel = (rows = [], drafts = {}, selectedRowId = null) => {
     if (!selectedRowId) {
         return {
             relatedIds: new Set(),
-            predecessorIds: new Set(),
+            _predecessorIds: new Set(),
             successorIds: new Set(),
         };
     }
@@ -8268,13 +8089,13 @@ const buildGroupedRowHighlightModel = (rows = [], drafts = {}, selectedRowId = n
     if (!selectedRow) {
         return {
             relatedIds: new Set([normalizedSelectedId]),
-            predecessorIds: new Set(),
+            _predecessorIds: new Set(),
             successorIds: new Set(),
         };
     }
 
     const relatedIds = new Set([normalizedSelectedId]);
-    const predecessorIds = new Set();
+    const _predecessorIds = new Set();
     const successorIds = new Set();
     const selectedBranchKey = getRowBranchKey(selectedRow);
 
@@ -8298,7 +8119,7 @@ const buildGroupedRowHighlightModel = (rows = [], drafts = {}, selectedRowId = n
 
         directPredecessors.forEach((rowId) => {
             if (rowMap.has(rowId)) {
-                predecessorIds.add(rowId);
+                _predecessorIds.add(rowId);
                 relatedIds.add(rowId);
             }
         });
@@ -8356,7 +8177,7 @@ const buildGroupedRowHighlightModel = (rows = [], drafts = {}, selectedRowId = n
 
     return {
         relatedIds,
-        predecessorIds,
+        _predecessorIds,
         successorIds,
     };
 };
@@ -8636,14 +8457,14 @@ const buildInteractionDraft = (interaction, dayDelta, config = {}) => {
         const nextStart = shiftDateByDays(interaction.originalStartDate, dayDelta, config);
         if (!nextStart) return null;
         return {
-            start_date: toNativeDateTimeValue(nextStart, config, 'start'),
+            start_date: _toNativeDateTimeValue(nextStart, config, 'start'),
             duration: interaction.originalDuration,
         };
     }
 
     if (interaction.type === 'resize-end') {
         return {
-            start_date: toNativeDateTimeValue(interaction.originalStartDate, config, 'start'),
+            start_date: _toNativeDateTimeValue(interaction.originalStartDate, config, 'start'),
             duration: Math.max(1, interaction.originalDuration + dayDelta),
         };
     }
@@ -8653,7 +8474,7 @@ const buildInteractionDraft = (interaction, dayDelta, config = {}) => {
         const nextStart = shiftDateByDays(interaction.originalStartDate, clampedDelta, config);
         if (!nextStart) return null;
         return {
-            start_date: toNativeDateTimeValue(nextStart, config, 'start'),
+            start_date: _toNativeDateTimeValue(nextStart, config, 'start'),
             duration: Math.max(1, interaction.originalDuration - clampedDelta),
         };
     }
@@ -8741,9 +8562,11 @@ const resolveManualMilestoneMovePreview = ({
     };
 };
 
+const toNativeDateTimeValue = _toNativeDateTimeValue;
+
 const normalizePreviewCommitDateValue = (value, config = {}) => {
     const parsed = normalizeDate(value);
-    return parsed ? toNativeDateTimeValue(parsed, config, 'start') : '';
+    return parsed ? _toNativeDateTimeValue(parsed, config, 'start') : '';
 };
 
 const normalizePreviewCommitPatchMap = (patches = {}, config = {}) => {
@@ -8808,9 +8631,12 @@ const CronogramaGantt = ({
     onDirtyStateChange,
     onPresentationSnapshotChange,
 }) => {
+    const ganttOperationalToolbarEnabled = import.meta.env.VITE_ENABLE_GANTT_OPERATIONAL_TOOLBAR !== 'false';
+    const legacyCalendarConfigEnabled = Boolean(import.meta.env.VITE_ENABLE_LEGACY_GANTT_CALENDAR_CONFIG);
+    const legacyCalendarImpactEnabled = Boolean(import.meta.env.VITE_ENABLE_LEGACY_GANTT_CALENDAR_IMPACT);
     const { user } = useContext(AuthContext) || {};
     const adaptiveLayout = useAdaptiveLayout({ moduleKey: 'gantt' });
-    const forceCompactOperationalPanel = true;
+    const _forceCompactOperationalPanel = true;
     const baseRows = useMemo(() => (Array.isArray(displayRows) ? displayRows : []), [displayRows]);
     const fallbackProjectStartDate = trabajo?.fecha_inicio || detail?.fecha_inicio || project?.fecha_inicio || null;
     const [timeScale, setTimeScale] = useState(resolveAutoTimeScale(1));
@@ -8833,14 +8659,14 @@ const CronogramaGantt = ({
     const [ganttSearch, setGanttSearch] = useState('');
     const [cpmNavigatorMode, setCpmNavigatorMode] = useState(null);
     const [activeCpmNavigatorIndex, setActiveCpmNavigatorIndex] = useState(-1);
-    const [durationDisplayUnit, setDurationDisplayUnit] = useState('day');
+    const [_durationDisplayUnit, _setDurationDisplayUnit] = useState('day');
     const [durationDisplayMenuRowId, setDurationDisplayMenuRowId] = useState(null);
     const [subcontractDurationInputs, setSubcontractDurationInputs] = useState({});
     const [zoomLevel, setZoomLevel] = useState(1);
     const [zoomInput, setZoomInput] = useState('100');
     const [isTimeScaleLocked, setIsTimeScaleLocked] = useState(false);
-    const [editingZoom, setEditingZoom] = useState(false);
-    const [zoomMenuOpen, setZoomMenuOpen] = useState(false);
+    const [_editingZoom, setEditingZoom] = useState(false);
+    const [_zoomMenuOpen, setZoomMenuOpen] = useState(false);
     const [focusMode, setFocusMode] = useState(() => (
         typeof window !== 'undefined' && window.innerWidth < 1100 ? 'table' : 'balanced'
     ));
@@ -8848,7 +8674,7 @@ const CronogramaGantt = ({
     const [configPanelOpen, setConfigPanelOpen] = useState(false);
     const visualPreferencesStorageKey = useMemo(
         () => resolveGanttVisualPreferencesStorageKey(user, project),
-        [project?.codigo, project?.codigo_root, project?.id, project?.revision, user?.email, user?.id, user?.usuario_id]
+        [project, user]
     );
     const ganttColumnsStorageKey = useMemo(
         () => `${visualPreferencesStorageKey}:grid-columns`,
@@ -8864,7 +8690,7 @@ const CronogramaGantt = ({
     ));
     const [configSaving, setConfigSaving] = useState(false);
     const [configSaved, setConfigSaved] = useState(false);
-    const [configError, setConfigError] = useState('');
+    const [_configError, setConfigError] = useState('');
     const [manualSuccessorDependencyOverlays, setManualSuccessorDependencyOverlays] = useState({});
     const manualMilestonesForRows = useMemo(() => {
         const sourceMilestones = configDraft?.manual_milestones || trabajo?.config?.manual_milestones || [];
@@ -8916,13 +8742,13 @@ const CronogramaGantt = ({
     );
     const [holidayDraft, setHolidayDraft] = useState({ date: '', name: '' });
     const [selectedHolidayDate, setSelectedHolidayDate] = useState('');
-    const [visibleHolidayMonthIndex, setVisibleHolidayMonthIndex] = useState(0);
+    const [_visibleHolidayMonthIndex, setVisibleHolidayMonthIndex] = useState(0);
     const [holidayCalendarModalOpen, setHolidayCalendarModalOpen] = useState(false);
     const [calendarWorkspaceTab, setCalendarWorkspaceTab] = useState('config');
     const [manualMilestoneDrafts, setManualMilestoneDrafts] = useState({});
     const [ganttError, setGanttError] = useState('');
     const [paretoOpen, setParetoOpen] = useState(false);
-    const [interopMenuOpen, setInteropMenuOpen] = useState(false);
+    const [_interopMenuOpen, _setInteropMenuOpen] = useState(false);
     const [toolsMenuOpen, setToolsMenuOpen] = useState(false);
     const [approvalSaving, setApprovalSaving] = useState(false);
     const [restoreConfirmedSaving, setRestoreConfirmedSaving] = useState(false);
@@ -8938,7 +8764,7 @@ const CronogramaGantt = ({
     const [ganttRedoStack, setGanttRedoStack] = useState([]);
     const [ganttHistorySaving, setGanttHistorySaving] = useState(false);
     const ganttHistoryApplyingRef = useRef(false);
-    const [importingMsProject, setImportingMsProject] = useState(false);
+    const [_importingMsProject, setImportingMsProject] = useState(false);
     const importMsProjectInputRef = useRef(null);
     const toolsButtonRef = useRef(null);
     const toolsMenuRef = useRef(null);
@@ -8952,7 +8778,7 @@ const CronogramaGantt = ({
     const [apuPlanningSignalsDragging, setApuPlanningSignalsDragging] = useState(false);
     const [configPanelStyle, setConfigPanelStyle] = useState(null);
     const [timeScaleMenuOpen, setTimeScaleMenuOpen] = useState(false);
-    const [timeScaleMenuStyle, setTimeScaleMenuStyle] = useState(null);
+    const [_timeScaleMenuStyle, setTimeScaleMenuStyle] = useState(null);
     const toolsHoverTimeoutRef = useRef(null);
     const timeScaleButtonRef = useRef(null);
     const dragPreviewFrameRef = useRef(null);
@@ -9059,7 +8885,7 @@ const CronogramaGantt = ({
         configDraftRef.current = configDraft;
     }, [configDraft]);
 
-    const clearPersistedAffordanceHover = useCallback(() => {
+    const _clearPersistedAffordanceHover = useCallback(() => {
         if (hoverPersistedAffordanceTimeoutRef.current) {
             window.clearTimeout(hoverPersistedAffordanceTimeoutRef.current);
             hoverPersistedAffordanceTimeoutRef.current = null;
@@ -9181,27 +9007,27 @@ const CronogramaGantt = ({
         ]
     );
     const selectedDurationDisplayOption = useMemo(
-        () => GANTT_DURATION_DISPLAY_UNITS.find((item) => item.id === durationDisplayUnit) || GANTT_DURATION_DISPLAY_UNITS[1],
-        [durationDisplayUnit]
+        () => GANTT_DURATION_DISPLAY_UNITS.find((item) => item.id === _durationDisplayUnit) || GANTT_DURATION_DISPLAY_UNITS[1],
+        [_durationDisplayUnit]
     );
     const formatVisibleDurationForRow = useCallback(
         (row, draft = {}, durationDays = 0, decimals = 2) => {
-            const rowDisplayUnit = resolveGanttRowDurationDisplayUnit(row, draft, durationDisplayUnit);
+            const rowDisplayUnit = resolveGanttRowDurationDisplayUnit(row, draft, _durationDisplayUnit);
             return formatGanttDurationDisplay(durationDays, rowDisplayUnit, configDraft, decimals);
         },
-        [configDraft, durationDisplayUnit]
+        [configDraft, _durationDisplayUnit]
     );
     const formatVisibleDuration = useCallback(
-        (durationDays, decimals = 2) => formatGanttDurationDisplay(durationDays, durationDisplayUnit, configDraft, decimals),
-        [configDraft, durationDisplayUnit]
+        (durationDays, decimals = 2) => formatGanttDurationDisplay(durationDays, _durationDisplayUnit, configDraft, decimals),
+        [configDraft, _durationDisplayUnit]
     );
     const formatSignedVisibleDuration = useCallback(
         (durationDays, decimals = 2) => {
             const numericValue = Number(durationDays || 0);
             const sign = numericValue < 0 ? '-' : '';
-            return `${sign}${formatGanttDurationDisplay(Math.abs(numericValue), durationDisplayUnit, configDraft, decimals)}`;
+            return `${sign}${formatGanttDurationDisplay(Math.abs(numericValue), _durationDisplayUnit, configDraft, decimals)}`;
         },
-        [configDraft, durationDisplayUnit]
+        [configDraft, _durationDisplayUnit]
     );
     const ganttBaseColumns = useMemo(() => {
         if (focusMode === 'table') return buildGanttColumnDefinitions(TABLE_GRID_COLUMN_WIDTHS);
@@ -9287,7 +9113,7 @@ const CronogramaGantt = ({
             scheduleConfig,
             1,
         );
-        const projectEnd = applyGanttWorkdayFinishTime(
+        const projectEnd = applyGanttWork_dayFinishTime(
             detail?.fecha_finalizacion || trabajo?.fecha_fin || project?.fecha_fin_estimada,
             scheduleConfig,
         );
@@ -9319,8 +9145,8 @@ const CronogramaGantt = ({
         [detail?.fecha_finalizacion, project?.fecha_fin_estimada, trabajo?.fecha_fin]
     );
     const projectFinishDelaySummary = useMemo(() => {
-        const targetFinish = applyGanttWorkdayFinishTime(projectFinishTargetDisplay, scheduleConfig);
-        const calculatedFinish = applyGanttWorkdayFinishTime(projectFinishReference, scheduleConfig);
+        const targetFinish = applyGanttWork_dayFinishTime(projectFinishTargetDisplay, scheduleConfig);
+        const calculatedFinish = applyGanttWork_dayFinishTime(projectFinishReference, scheduleConfig);
         if (!targetFinish || !calculatedFinish) return null;
 
         const targetAnchor = new Date(targetFinish);
@@ -9427,9 +9253,9 @@ const CronogramaGantt = ({
         () => holidayItemMap.get(selectedHolidayDate) || [],
         [holidayItemMap, selectedHolidayDate]
     );
-    const visibleHolidayMonth = useMemo(
-        () => holidayCalendarMonths[visibleHolidayMonthIndex] || holidayCalendarMonths[0] || null,
-        [holidayCalendarMonths, visibleHolidayMonthIndex]
+    const _visibleHolidayMonth = useMemo(
+        () => holidayCalendarMonths[_visibleHolidayMonthIndex] || holidayCalendarMonths[0] || null,
+        [holidayCalendarMonths, _visibleHolidayMonthIndex]
     );
     const selectedHolidayDay = useMemo(
         () => holidayCalendarDayMap.get(selectedHolidayDate) || null,
@@ -9474,7 +9300,7 @@ const CronogramaGantt = ({
             configDraft,
             1,
         );
-        const finishDate = applyGanttWorkdayFinishTime(
+        const finishDate = applyGanttWork_dayFinishTime(
             projectFinishTargetDisplay || projectFinishReference,
             configDraft,
         );
@@ -9531,13 +9357,13 @@ const CronogramaGantt = ({
         }),
         [resourceCapacityReference, resourceHistogram]
     );
-    const resourceHistogramPeak = useMemo(
+    const _resourceHistogramPeak = useMemo(
         () => resourceHistogramWithCapacity.reduce((peak, segment) => (
             !peak || segment.demandTotal > peak.demandTotal ? segment : peak
         ), null),
         [resourceHistogramWithCapacity]
     );
-    const resourceHistogramTopSegments = useMemo(
+    const _resourceHistogramTopSegments = useMemo(
         () => [...resourceHistogramWithCapacity]
             .sort((left, right) => right.demandTotal - left.demandTotal)
             .slice(0, 6),
@@ -9592,7 +9418,7 @@ const CronogramaGantt = ({
     const exportCapabilities = trabajo?.export_capabilities;
     const directMppAvailable = !!exportCapabilities?.direct_mpp_available;
     const directExportReason = exportCapabilities?.direct_export_reason;
-    const effectiveMsProjectAvailable = directMppAvailable;
+    const _effectiveMsProjectAvailable = directMppAvailable;
     const msProjectStatusMessage = useMemo(
         () => summarizeMsProjectReason(directExportReason),
         [directExportReason],
@@ -9787,7 +9613,7 @@ const CronogramaGantt = ({
         }
     }, []);
 
-    const clearViewportInteractionLock = useCallback(() => {
+    const _clearViewportInteractionLock = useCallback(() => {
         if (viewportInteractionLockReleaseRef.current) {
             window.cancelAnimationFrame(viewportInteractionLockReleaseRef.current);
             viewportInteractionLockReleaseRef.current = null;
@@ -10404,12 +10230,12 @@ const CronogramaGantt = ({
         const rowLayouts = scheduledRows.map((row, index) => {
             const lineId = String(resolveRowLineId(row) || row.budget_line_id || row.linea_id || '');
             const draft = drafts[lineId] || {};
-            const effectiveRow = applyGanttRowDraft(row, draft, configDraft);
+            const _effectiveRow = applyGanttRowDraft(row, draft, configDraft);
             const planningNode = displayPlanningMap.get(lineId) || planningAnalysis.get(lineId) || null;
             const isCritical = Boolean(row.is_calculable && isPlanningNodeCriticalPathMember(planningNode));
             const heightPx = resolveGanttRowHeightPx(row);
             const centerY = cursorY + (heightPx / 2);
-            const baseGeometry = getBarVisualGeometry(effectiveRow, timelineSegments, segmentColumnWidth, configDraft);
+            const baseGeometry = getBarVisualGeometry(_effectiveRow, timelineSegments, segmentColumnWidth, configDraft);
             const geometry = baseGeometry
                 ? {
                     ...baseGeometry,
@@ -10449,8 +10275,8 @@ const CronogramaGantt = ({
                     codigo: row.codigo_item || '',
                     descripcion: formatCronogramaDescripcion(row),
                     predecessors: row.predecessors || row.predecesoras || '',
-                    start_date: effectiveRow.start_date || row.start_date || null,
-                    end_date: effectiveRow.end_date || row.end_date || null,
+                    start_date: _effectiveRow.start_date || row.start_date || null,
+                    end_date: _effectiveRow.end_date || row.end_date || null,
                     duration: getGanttRowDuration(row, draft),
                     is_calculable: Boolean(row.is_calculable),
                     is_milestone: Boolean(row?.is_milestone || row?.milestone || isManualMilestoneRow(row, draft)),
@@ -10605,6 +10431,7 @@ const CronogramaGantt = ({
         planningAnalysis,
         scheduledRows,
         schedulableRowMeta,
+        scheduleConfig,
         segmentColumnWidth,
         taskItemByLineId,
         timelineSegments,
@@ -10721,7 +10548,7 @@ const CronogramaGantt = ({
         const rawMilestoneStart = configDraft?.fecha_inicio_proyecto || fallbackProjectStartDate || anchorRow?.start_date || null;
         const calendarAlignedMilestoneStart = shiftToGanttWorkingDateTime(rawMilestoneStart, configDraft, 1);
         const defaultMilestoneStart = calendarAlignedMilestoneStart
-            ? toNativeDateTimeValue(calendarAlignedMilestoneStart, configDraft, 'start')
+            ? _toNativeDateTimeValue(calendarAlignedMilestoneStart, configDraft, 'start')
             : rawMilestoneStart;
         const nextMilestone = {
             id: milestoneId,
@@ -10738,7 +10565,7 @@ const CronogramaGantt = ({
             },
         }));
         await persistManualMilestones([...manualMilestones, nextMilestone], { selectLineId: milestoneLineId });
-    }, [calculableLineIdSet, configDraft?.fecha_inicio_proyecto, fallbackProjectStartDate, manualMilestones, persistManualMilestones, rows, selectedTaskId]);
+    }, [calculableLineIdSet, configDraft, fallbackProjectStartDate, manualMilestones, persistManualMilestones, rows, selectedTaskId]);
     const handleManualMilestoneDraftChange = useCallback((lineId, patch = {}) => {
         setManualMilestoneDrafts((current) => ({
             ...current,
@@ -10933,7 +10760,7 @@ const CronogramaGantt = ({
         }
 
         return { lineId: null, row: null, error: 'No se encontró ninguna tarea con esa referencia.', suggestions: [] };
-    }, [getTaskReferenceLabel, schedulableRowMeta, taskItemByLineId, visibleSchedulableRows]);
+    }, [getTaskReferenceLabel, schedulableRowMeta, taskItemByLineId, taskLineIdByItem, visibleSchedulableRows]);
     const resolvePredecessorSourceLineId = useCallback((rawReference, targetLineId = null) => {
         const normalizedReference = String(rawReference || '').trim();
         if (!normalizedReference) {
@@ -10982,7 +10809,7 @@ const CronogramaGantt = ({
         }
 
         return { lineId: null, row: null, error: 'No se encontró ninguna tarea con esa referencia.', suggestions: [] };
-    }, [getTaskReferenceLabel, schedulableRowMeta, taskItemByLineId, visibleSchedulableRows]);
+    }, [getTaskReferenceLabel, schedulableRowMeta, taskItemByLineId, taskLineIdByItem, visibleSchedulableRows]);
     const formatDependencyShortcode = useCallback((referenceLineId, dependency, options = {}) => {
         const referenceRole = options.referenceRole === 'source' ? 'source' : 'target';
         const fallbackLineId = referenceRole === 'source' ? dependency?.source_id : dependency?.target_id;
@@ -11062,7 +10889,7 @@ const CronogramaGantt = ({
         });
         return next;
     }, [drafts, schedulableRowMeta, visibleSchedulableRows]);
-    const visibleCalculableOrderMap = useMemo(
+    const _visibleCalculableOrderMap = useMemo(
         () => new Map(visibleCalculableRows.map((row, index) => [String(row.budget_line_id), index])),
         [visibleCalculableRows]
     );
@@ -11099,7 +10926,7 @@ const CronogramaGantt = ({
         () => new Map(manualMilestoneReorderRows.map((entry) => [entry.lineId, entry])),
         [manualMilestoneReorderRows]
     );
-    const criticalTaskCount = useMemo(
+    const _criticalTaskCount = useMemo(
         () => Array.from(displayPlanningMap.values()).filter((node) => isPlanningNodeCriticalPathMember(node)).length,
         [displayPlanningMap]
     );
@@ -11180,7 +11007,7 @@ const CronogramaGantt = ({
             observer.disconnect();
         };
     }, [rows, effectiveDataGridViewportWidth, cpmNavigatorMode, activeCpmNavigatorMatchId, ganttGridLayoutSignature, syncRowHeights]);
-    const milestoneCount = useMemo(
+    const _milestoneCount = useMemo(
         () => Array.from(planningAnalysis.values()).filter((node) => node.isMilestone).length,
         [planningAnalysis]
     );
@@ -11188,7 +11015,7 @@ const CronogramaGantt = ({
         () => buildGanttConflictReliefRecommendations(visibleCalculableRows, overCapacityRowMap, displayPlanningMap),
         [displayPlanningMap, overCapacityRowMap, visibleCalculableRows]
     );
-    const topConflictReliefRecommendations = useMemo(
+    const _topConflictReliefRecommendations = useMemo(
         () => conflictReliefRecommendations.slice(0, 5),
         [conflictReliefRecommendations]
     );
@@ -11196,7 +11023,7 @@ const CronogramaGantt = ({
         () => buildGanttPreCrashingRecommendations(visibleCalculableRows, drafts, configDraft, displayPlanningMap),
         [configDraft, displayPlanningMap, drafts, visibleCalculableRows]
     );
-    const preCrashingSummary = useMemo(() => (
+    const _preCrashingSummary = useMemo(() => (
         preCrashingRecommendations.reduce((summary, entry) => {
             summary.total += 1;
             if (entry?.equipmentOwnershipGap) {
@@ -11211,7 +11038,7 @@ const CronogramaGantt = ({
             proxyEquipment: 0,
         })
     ), [preCrashingRecommendations]);
-    const conflictReliefSummary = useMemo(
+    const _conflictReliefSummary = useMemo(
         () => summarizeGanttConflictReliefRecommendations(conflictReliefRecommendations),
         [conflictReliefRecommendations]
     );
@@ -11223,7 +11050,7 @@ const CronogramaGantt = ({
         () => summarizeGanttConflictReliefSessionEntries(conflictReliefSessionEntries),
         [conflictReliefSessionEntries]
     );
-    const hiddenConflictReliefSessionCount = Math.max(0, conflictReliefSessionEntries.length - 6);
+    const _hiddenConflictReliefSessionCount = Math.max(0, conflictReliefSessionEntries.length - 6);
     const hasRestorableGanttState = useMemo(
         () => (
             Object.keys(drafts).length > 0
@@ -11266,7 +11093,7 @@ const CronogramaGantt = ({
             .filter(Boolean),
         [configDraft, drafts, visibleCalculableRows]
     );
-    const approvalDiffSummary = useMemo(
+    const _approvalDiffSummary = useMemo(
         () => summarizeGanttDiffEntries(approvalDiffEntries),
         [approvalDiffEntries]
     );
@@ -11293,7 +11120,7 @@ const CronogramaGantt = ({
         });
     }, [drafts, hasPendingApprovalChanges, onDirtyStateChange, pendingApprovalRows.length, pendingApprovalTargetCount]);
 
-    const resourcePressureSummary = useMemo(() => visibleCalculableRows.reduce((accumulator, row) => {
+    const _resourcePressureSummary = useMemo(() => visibleCalculableRows.reduce((accumulator, row) => {
         const lineId = String(row.budget_line_id);
         const pressure = resolveResourcePressureState(row, drafts[lineId] || {});
         if (!pressure) return accumulator;
@@ -11445,7 +11272,7 @@ const CronogramaGantt = ({
         const row = schedulableRowMeta.get(selectedLineId) || calculableRowMeta.get(selectedLineId) || null;
         if (!row) return null;
         const draft = drafts[selectedLineId] || {};
-        const effectiveRow = applyGanttRowDraft(row, draft, configDraft);
+        const _effectiveRow = applyGanttRowDraft(row, draft, configDraft);
         if (selectedSubbarKey) {
             const [, selectedSegmentId] = String(selectedSubbarKey).split('::');
             if (selectedSegmentId) {
@@ -11461,7 +11288,7 @@ const CronogramaGantt = ({
         }
         return normalizeDate(
             draft?.start_date
-            || effectiveRow?.start_date
+            || _effectiveRow?.start_date
             || row?.start_date
             || row?.end_date
         );
@@ -11956,6 +11783,7 @@ const CronogramaGantt = ({
         };
     }, []);
 
+    // These handlers are initialized below and intentionally resolved through the render snapshot at invocation time.
     const createDependencyFromSourceToTarget = useCallback(async (sourceId, targetId, options = {}) => {
         const normalizedSourceId = String(sourceId || '');
         const normalizedTargetId = String(targetId || '');
@@ -11992,7 +11820,7 @@ const CronogramaGantt = ({
                 lag_days: requestedLagDays,
                 lag_unit: requestedLagUnit,
                 ...(targetIsManual && alignedStartDate
-                    ? { start_date: toNativeDateTimeValue(alignedStartDate, configDraft, 'start') }
+                    ? { start_date: _toNativeDateTimeValue(alignedStartDate, configDraft, 'start') }
                     : {}),
             });
             if (!manualDependencySaved) return false;
@@ -12018,7 +11846,7 @@ const CronogramaGantt = ({
                             .filter((value) => Number.isFinite(value) && value > 0)
                             .join(', '),
                         dependencies: nextDependencies,
-                        start_date: toNativeDateTimeValue(alignedStartDate, configDraft, 'start'),
+                        start_date: _toNativeDateTimeValue(alignedStartDate, configDraft, 'start'),
                         duration: targetDraft.duration ?? targetRow.dias_calendario ?? targetRow.dias_utiles ?? 0,
                     };
                     const draftSnapshot = {
@@ -12076,8 +11904,8 @@ const CronogramaGantt = ({
 
         const sourceDraft = drafts[normalizedSourceId] || {};
         const targetDraft = drafts[normalizedTargetId] || {};
-        const sourceEffective = applyGanttRowDraft(sourceRow, sourceDraft, configDraft);
-        const targetEffective = applyGanttRowDraft(targetRow, targetDraft, configDraft);
+        const _sourceEffective = applyGanttRowDraft(sourceRow, sourceDraft, configDraft);
+        const _targetEffective = applyGanttRowDraft(targetRow, targetDraft, configDraft);
         const dependencyForAlignment = {
             source_id: Number(normalizedSourceId),
             target_id: Number(normalizedTargetId),
@@ -12113,7 +11941,7 @@ const CronogramaGantt = ({
             dependencies: nextDependencies,
             ...(alignedStartDate
                 ? {
-                    start_date: toNativeDateTimeValue(alignedStartDate, configDraft, 'start'),
+                    start_date: _toNativeDateTimeValue(alignedStartDate, configDraft, 'start'),
                     duration: targetDraft.duration ?? targetRow.dias_calendario ?? targetRow.dias_utiles ?? 0,
                 }
                 : {}),
@@ -12139,7 +11967,9 @@ const CronogramaGantt = ({
             actionLabel: '',
         });
         return true;
-    }, [configDraft, drafts, handleSave, persistManualMilestoneDependency, schedulableRowMeta]);
+    // The remaining handlers are assigned later in the render and must not be evaluated here (TDZ-safe snapshot).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [calculableRowMeta, configDraft, drafts, persistManualMilestoneDependency, schedulableRowMeta]);
 
     dragDraftsRef.current = drafts;
     dragTimelineMetricsRef.current = timelineMetrics;
@@ -12725,8 +12555,8 @@ const CronogramaGantt = ({
                         const sourceRow = schedulableRowMeta.get(sourceId) || calculableRowMeta.get(sourceId) || null;
                         const sourceDraft = runtimeDrafts[sourceId] || {};
                         if (!sourceRow || !movedStart) return dependency;
-                        const sourceEffective = applyGanttRowDraft(sourceRow, sourceDraft, runtimeConfigDraft);
-                        const sourceStart = shiftToGanttWorkingDateTime(sourceEffective.start_date || sourceRow.start_date, runtimeConfigDraft, 1);
+                        const _sourceEffective = applyGanttRowDraft(sourceRow, sourceDraft, runtimeConfigDraft);
+                        const sourceStart = shiftToGanttWorkingDateTime(_sourceEffective.start_date || sourceRow.start_date, runtimeConfigDraft, 1);
                         const sourceDuration = Math.max(0, Number(getGanttRowDuration(sourceRow, sourceDraft) || 0));
                         const sourceFinish = sourceStart
                             ? (sourceDuration <= 0 ? sourceStart : addInclusiveGanttDuration(sourceStart, sourceDuration, runtimeConfigDraft))
@@ -13353,7 +13183,7 @@ const CronogramaGantt = ({
         () => (selectedTaskRow ? applyGanttRowDraft(selectedTaskRow, selectedTaskDraft, configDraft) : null),
         [configDraft, selectedTaskDraft, selectedTaskRow]
     );
-    const selectedTaskGovernance = useMemo(
+    const _selectedTaskGovernance = useMemo(
         () => (selectedTaskRow ? resolveGanttGovernanceState(selectedTaskRow, selectedTaskDraft) : null),
         [selectedTaskDraft, selectedTaskRow]
     );
@@ -13369,7 +13199,7 @@ const CronogramaGantt = ({
         () => (selectedTaskRow ? resolveBackendCpmDiagnostics(selectedTaskRow, selectedTaskDraft) : null),
         [selectedTaskDraft, selectedTaskRow]
     );
-    const selectedTaskRecommendedSchedule = useMemo(
+    const _selectedTaskRecommendedSchedule = useMemo(
         () => (selectedTaskRow ? resolveBackendCpmRecommendedSchedule(selectedTaskRow, selectedTaskDraft) : null),
         [selectedTaskDraft, selectedTaskRow]
     );
@@ -13398,11 +13228,11 @@ const CronogramaGantt = ({
         () => (selectedTaskRow ? resolveGanttCostModel(selectedTaskRow, selectedTaskDraft) : null),
         [selectedTaskDraft, selectedTaskRow]
     );
-    const selectedTaskCrashingReview = useMemo(
+    const _selectedTaskCrashingReview = useMemo(
         () => (selectedTaskRow ? resolveGanttCrashingReview(selectedTaskRow, selectedTaskDraft) : null),
         [selectedTaskDraft, selectedTaskRow]
     );
-    const selectedTaskCostPreview = useMemo(
+    const _selectedTaskCostPreview = useMemo(
         () => (selectedTaskRow ? resolveGanttBudgetPricePreview(selectedTaskRow, selectedTaskDraft, selectedTaskEffectiveRow, {
             indirectPercentage: resolvedBudgetIndirectPercent,
             moneyDecimals: valorado?.dec_moneda ?? 2,
@@ -13412,7 +13242,7 @@ const CronogramaGantt = ({
     const selectedTaskApuPlanningSignals = useMemo(
         () => buildGanttApuPlanningSignals({
             row: selectedTaskRow,
-            effectiveRow: selectedTaskEffectiveRow,
+            _effectiveRow: selectedTaskEffectiveRow,
             durationModel: selectedTaskDurationModel,
             costModel: selectedTaskCostModel,
             dailyHours: resolveGanttDailyHours(configDraft),
@@ -13430,11 +13260,11 @@ const CronogramaGantt = ({
         () => (selectedTaskRow ? getGanttDurationModelReconciliation(selectedTaskRow, selectedTaskDraft) : null),
         [selectedTaskDraft, selectedTaskRow]
     );
-    const selectedTaskDurationFreshness = useMemo(
+    const _selectedTaskDurationFreshness = useMemo(
         () => (selectedTaskRow ? resolveDurationModelReconciliationFreshness(selectedTaskRow, selectedTaskDraft) : null),
         [selectedTaskDraft, selectedTaskRow]
     );
-    const selectedTaskDurationSignal = useMemo(
+    const _selectedTaskDurationSignal = useMemo(
         () => (selectedTaskRow ? resolveDurationModelRowSignal(selectedTaskRow, selectedTaskDraft) : null),
         [selectedTaskDraft, selectedTaskRow]
     );
@@ -13442,7 +13272,7 @@ const CronogramaGantt = ({
         () => (selectedTaskRow ? resolveDurationModelAdoptionState(selectedTaskRow, selectedTaskDraft) : null),
         [selectedTaskDraft, selectedTaskRow]
     );
-    const selectedTaskDurationComparison = useMemo(() => {
+    const _selectedTaskDurationComparison = useMemo(() => {
         if (!selectedTaskEffectiveRow || !selectedTaskDurationModel || !selectedTaskDurationAdoption?.eligible) {
             return null;
         }
@@ -13456,7 +13286,7 @@ const CronogramaGantt = ({
             eficiencia: Number(selectedTaskDurationModel.factor_eficiencia ?? 1),
         };
     }, [selectedTaskDurationAdoption, selectedTaskDurationModel, selectedTaskEffectiveRow]);
-    const selectedTaskResourcePressure = useMemo(
+    const _selectedTaskResourcePressure = useMemo(
         () => (selectedTaskRow ? resolveResourcePressureState(selectedTaskRow, selectedTaskDraft) : null),
         [selectedTaskDraft, selectedTaskRow]
     );
@@ -13468,7 +13298,7 @@ const CronogramaGantt = ({
         () => (activeTaskLineId ? conflictReliefRecommendations.find((entry) => entry.id === String(activeTaskLineId)) || null : null),
         [activeTaskLineId, conflictReliefRecommendations]
     );
-    const selectedTaskPreCrashingRecommendation = useMemo(
+    const _selectedTaskPreCrashingRecommendation = useMemo(
         () => (activeTaskLineId ? preCrashingRecommendations.find((entry) => entry.id === String(activeTaskLineId)) || null : null),
         [activeTaskLineId, preCrashingRecommendations]
     );
@@ -13584,7 +13414,7 @@ const CronogramaGantt = ({
         () => selectedTaskSubbars.length > 1,
         [selectedTaskSubbars.length]
     );
-    const selectedTaskSubbarVisual = useMemo(() => {
+    const _selectedTaskSubbarVisual = useMemo(() => {
         if (!selectedVisualTaskRow || !selectedVisualSubbar) return null;
         const selectedVisuals = buildGanttSubbarVisuals(selectedVisualTaskRow, selectedVisualTaskDraft, timelineSegments, segmentColumnWidth, configDraft, valorado, effectiveTimeScale);
         return selectedVisuals.find((segment) => String(segment.id) === String(selectedVisualSubbar.id)) || null;
@@ -13649,7 +13479,7 @@ const CronogramaGantt = ({
         if (!panel) return;
         panel.scrollTo({ top: 0, behavior: 'auto' });
     }, [contextTaskId, selectedSubbarKey]);
-    const selectedTaskSubbarStatusSummary = useMemo(() => {
+    const _selectedTaskSubbarStatusSummary = useMemo(() => {
         if (!selectedTaskSubbars.length) return [];
         const counts = new Map();
         selectedTaskSubbars.forEach((segment) => {
@@ -13686,7 +13516,7 @@ const CronogramaGantt = ({
             interparentMergeCount: 0,
         });
     }, [selectedTaskSubbars]);
-    const selectedTaskSubbarWindow = useMemo(() => {
+    const _selectedTaskSubbarWindow = useMemo(() => {
         if (!selectedTaskSubbars.length) {
             return {
                 startsAt: null,
@@ -13741,7 +13571,7 @@ const CronogramaGantt = ({
             next: next && resolveGanttSubbarParentInitialId(next) !== selectedParent ? next : null,
         };
     }, [selectedTaskAdjacentSubbars, selectedTaskSubbar]);
-    const selectedTaskSubbarShare = useMemo(() => {
+    const _selectedTaskSubbarShare = useMemo(() => {
         if (!selectedTaskSubbar) {
             return {
                 percentShare: 0,
@@ -13773,7 +13603,7 @@ const CronogramaGantt = ({
         const end = normalizeDate(selectedTaskSubbar.ends_at);
         if (!start || !end) return '';
         return formatVisibleDuration(Math.max(0, (end.getTime() - start.getTime()) / DAY_MS), 2);
-    }, [selectedTaskSubbar]);
+    }, [formatVisibleDuration, selectedTaskSubbar]);
     const selectedTaskValoradoPeriodSummary = useMemo(() => {
         if (!selectedTaskRow || !selectedTaskSubbars.length || !valorado?.periods?.length) return null;
         const budgetLineId = resolveGanttBudgetLineId(selectedTaskRow);
@@ -13862,7 +13692,7 @@ const CronogramaGantt = ({
         () => Boolean(selectedTaskValoradoPeriodSummary?.activePeriod?.isOverCap) && Boolean(selectedTaskSubbar),
         [selectedTaskSubbar, selectedTaskValoradoPeriodSummary]
     );
-    const selectedTaskOperationalReadiness = useMemo(() => {
+    const _selectedTaskOperationalReadiness = useMemo(() => {
         const totalSubbars = selectedTaskSubbars.length;
         const conflictCount = Number(selectedTaskValoradoPeriodSummary?.conflicts?.length || 0);
         const draftCount = selectedTaskSubbars.filter((segment) => String(segment?.status || '').trim().toLowerCase() === 'draft_session').length;
@@ -13923,8 +13753,8 @@ const CronogramaGantt = ({
                 : 'La línea ya está segmentada, pero todavía conserva una mezcla de estados internos.',
             toneClassName: 'border-zinc-200 bg-zinc-50 text-zinc-700',
         };
-    }, [selectedTaskOperationalSummary?.hasManualTemporalWindow, selectedTaskSubbars, selectedTaskValoradoPeriodSummary]);
-    const selectedTaskOperationalMode = useMemo(() => {
+    }, [selectedTaskOperationalSummary, selectedTaskSubbars, selectedTaskValoradoPeriodSummary]);
+    const _selectedTaskOperationalMode = useMemo(() => {
         if (!selectedTaskOperationalSummary) return null;
         if (selectedTaskSubbars.length) {
             return {
@@ -13966,8 +13796,8 @@ const CronogramaGantt = ({
             || null;
         const nextEditor = {
             lineId,
-            startsAt: toNativeDateTimeInputValue(fallbackStart, configDraft, 'start'),
-            endsAt: toNativeDateTimeInputValue(fallbackEnd, configDraft, 'finish'),
+            startsAt: _toNativeDateTimeInputValue(fallbackStart, configDraft, 'start'),
+            endsAt: _toNativeDateTimeInputValue(fallbackEnd, configDraft, 'finish'),
         };
         setManualTemporalEditor((current) => (
             current.lineId === nextEditor.lineId
@@ -14120,7 +13950,7 @@ const CronogramaGantt = ({
         if (!selectedTaskRow || !selectedTaskConflictShiftWindow?.hasWindow) return;
         const lineId = String(selectedTaskRow.budget_line_id ?? selectedTaskRow.linea_id);
         updateDraft(lineId, {
-            start_date: toNativeDateTimeValue(selectedTaskConflictShiftWindow.suggestedStart, configDraft, 'start'),
+            start_date: _toNativeDateTimeValue(selectedTaskConflictShiftWindow.suggestedStart, configDraft, 'start'),
             metadata: buildPendingApprovalMetadata(selectedTaskRow, selectedTaskDraft, {
                 source: 'gantt_conflict_relief',
                 reason: 'schedule',
@@ -14128,7 +13958,7 @@ const CronogramaGantt = ({
         });
     };
 
-    const handleClearConflictReliefDraft = (lineId) => {
+    const _handleClearConflictReliefDraft = (lineId) => {
         const targetLineId = String(lineId);
         const row = calculableRowMeta.get(targetLineId);
         if (!row) return;
@@ -14158,7 +13988,7 @@ const CronogramaGantt = ({
         });
     };
 
-    const handleClearAllConflictReliefDrafts = async () => {
+    const _handleClearAllConflictReliefDrafts = async () => {
         if (!conflictReliefSessionEntries.length) return;
         const confirmed = await appConfirm({
             title: 'Limpiar tanteos de alivio',
@@ -14211,17 +14041,17 @@ const CronogramaGantt = ({
     }, [defaultSelectedHolidayDate, holidayCalendarDayMap, selectedHolidayDate]);
     useEffect(() => {
         if (!holidayCalendarMonths.length) {
-            if (visibleHolidayMonthIndex !== 0) {
+            if (_visibleHolidayMonthIndex !== 0) {
                 setVisibleHolidayMonthIndex(0);
             }
             return;
         }
-        if (visibleHolidayMonthIndex < 0 || visibleHolidayMonthIndex >= holidayCalendarMonths.length) {
+        if (_visibleHolidayMonthIndex < 0 || _visibleHolidayMonthIndex >= holidayCalendarMonths.length) {
             setVisibleHolidayMonthIndex(0);
         }
-    }, [holidayCalendarMonths, visibleHolidayMonthIndex]);
+    }, [holidayCalendarMonths, _visibleHolidayMonthIndex]);
 
-    const updateDraft = (lineId, patch) => {
+    const updateDraft = useCallback((lineId, patch) => {
         setGanttError('');
         setDrafts((prev) => {
             const previousDraft = prev[lineId] || {};
@@ -14296,7 +14126,7 @@ const CronogramaGantt = ({
                 [lineId]: nextDraft,
             };
         });
-    };
+    }, [calculableRowMeta, configDraft, valorado]);
 
     const handleOpenSubbarFineTuning = useCallback(async (lineId, subbarId) => {
         const normalizedId = String(lineId || '');
@@ -14316,7 +14146,7 @@ const CronogramaGantt = ({
         setSubbarFineTuneDialog({
             lineId: normalizedId,
             subbarId: normalizedSubbarId,
-            startsAt: toNativeDateTimeInputValue(targetSubbar.starts_at, configDraft, 'start'),
+            startsAt: _toNativeDateTimeInputValue(targetSubbar.starts_at, configDraft, 'start'),
             error: '',
         });
         setTaskActionMenu(null);
@@ -14485,7 +14315,7 @@ const CronogramaGantt = ({
         });
     };
 
-    const handleAdoptSelectedTaskRemainingDuration = () => {
+    const _handleAdoptSelectedTaskRemainingDuration = () => {
         if (!contextTaskId || !selectedTaskRow || !selectedTaskDurationAdoption?.eligible) return;
         const lineId = String(contextTaskId);
         const nextMetadata = {
@@ -14507,7 +14337,7 @@ const CronogramaGantt = ({
         });
     };
 
-    const handleRevertSelectedTaskRemainingDuration = () => {
+    const _handleRevertSelectedTaskRemainingDuration = () => {
         if (!contextTaskId || !selectedTaskDurationReconciliation) return;
         const lineId = String(contextTaskId);
         setGanttError('');
@@ -14543,7 +14373,7 @@ const CronogramaGantt = ({
         });
     };
 
-    const applyDraftPatches = (patches) => {
+    const applyDraftPatches = useCallback((patches) => {
         const patchEntries = Object.entries(patches || {}).filter(([, patch]) => patch && Object.keys(patch).length > 0);
         if (!patchEntries.length) return;
         setGanttError('');
@@ -14580,9 +14410,9 @@ const CronogramaGantt = ({
 
             return nextDrafts;
         });
-    };
+    }, [calculableRowMeta, configDraft]);
 
-const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
+const buildLineSavePayload = useCallback((row, draftOverride = null, options = {}) => {
         if (!row?.is_calculable) return null;
         const lineId = String(row.budget_line_id);
         const draft = draftOverride || drafts[lineId] || {};
@@ -14615,7 +14445,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         const restoredSnapshot = dependencyPersistence.restoredSnapshot;
         const persistedStartSource = restoredSnapshot?.start_date || draft.start_date || row.start_date;
         const startDate = shiftToGanttWorkingDateTime(persistedStartSource, configDraft, 1);
-        const serializedStartDate = toNativeDateTimeValue(startDate, configDraft, 'start');
+        const serializedStartDate = _toNativeDateTimeValue(startDate, configDraft, 'start');
         return {
             lineId,
             draft,
@@ -14631,7 +14461,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             payload: {
                 start_date: serializedStartDate,
                 duration: Number(duration),
-                end_date: toNativeDateTimeValue(resolveGanttRowFinishDate(row, { ...draft, start_date: startDate, duration }, configDraft), configDraft, 'finish'),
+                end_date: _toNativeDateTimeValue(resolveGanttRowFinishDate(row, { ...draft, start_date: startDate, duration }, configDraft), configDraft, 'finish'),
                 progress_pct: Number(progress),
                 assumed_resource_units: Number(crew),
                 predecessors,
@@ -14639,9 +14469,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 metadata: dependencyPersistence.metadata,
             },
         };
-    };
+    }, [configDraft, drafts]);
 
-    const buildDependentScheduleDrafts = (sourceLineId, draftSnapshot = drafts) => {
+    const buildDependentScheduleDrafts = useCallback((sourceLineId, draftSnapshot = drafts) => {
         const successorsByPredecessor = new Map();
 
         visibleCalculableRows.forEach((row) => {
@@ -14704,7 +14534,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                     if (nextStart && (!currentStart || nextStart.getTime() !== currentStart.getTime())) {
                         patches[targetId] = {
                             ...targetDraft,
-                            start_date: toNativeDateTimeValue(nextStart, configDraft, 'start'),
+                            start_date: _toNativeDateTimeValue(nextStart, configDraft, 'start'),
                             duration,
                         };
                         changed = true;
@@ -14718,7 +14548,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         setGanttError('Se detuvo la cascada: posible ciclo o relación inestable entre dependencias.');
 
         return patches;
-    };
+    }, [calculableRowMeta, configDraft, drafts, schedulableRowMeta, scheduleConfig, visibleCalculableRows]);
 
     const buildManualMilestoneCascadeShiftDrafts = (sourceLineId, _dayDelta = 0, draftSnapshot = drafts) => {
         if (!sourceLineId) return {};
@@ -14799,7 +14629,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         setGanttRedoStack([]);
     };
 
-    const validateGanttCandidateIntegrity = (candidateDrafts = {}, options = {}) => {
+    const validateGanttCandidateIntegrity = useCallback((candidateDrafts = {}, options = {}) => {
         const toleranceMs = 10 * 60 * 1000;
         const projectStartBoundary = shiftToGanttWorkingDateTime(configDraft?.fecha_inicio_proyecto, configDraft, 1);
         const rowsToValidate = options.rowsToValidate || visibleCalculableRows;
@@ -14853,9 +14683,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             }
         }
         return { ok: true, message: '' };
-    };
+    }, [calculableRowMeta, configDraft, schedulableRowMeta, scheduleConfig, visibleCalculableRows]);
 
-    const persistDraftPatches = async (patches, options = {}) => {
+    const persistDraftPatches = useCallback(async (patches, options = {}) => {
         const patchEntries = Object.entries(patches || {}).filter(([, patch]) => patch && Object.keys(patch).length > 0);
         if (!patchEntries.length) return null;
 
@@ -14869,7 +14699,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
 
         const linePayloadMap = {};
         const serializedCycleDrafts = { ...candidateDrafts };
-        for (const [lineId, patch] of patchEntries) {
+        for (const [lineId, _patch] of patchEntries) {
             const row = calculableRowMeta.get(String(lineId));
             if (!row?.is_calculable) continue;
             const built = buildLineSavePayload(row, candidateDrafts[String(lineId)], {
@@ -14939,7 +14769,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         } finally {
             setSavingId(null);
         }
-    };
+    }, [buildLineSavePayload, calculableRowMeta, configDraft, drafts, onSaveTrabajoDraftBatch, onSaveTrabajoLine, rows, validateGanttCandidateIntegrity]);
 
     const buildPredecessorShortcodeText = useCallback((targetLineId) => {
         const normalizedTargetId = String(targetLineId || '');
@@ -15099,7 +14929,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 inputValue: '',
                 preview: { error: '', conflict: null },
                 isEditing: false,
-                isSaving: false,
+                _isSaving: false,
             };
         }
         const persistedValue = buildPredecessorShortcodeText(lineId);
@@ -15109,7 +14939,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 inputValue: persistedValue,
                 preview: { error: '', conflict: null },
                 isEditing: false,
-                isSaving: false,
+                _isSaving: false,
             };
         }
         const inputValue = Object.prototype.hasOwnProperty.call(dependencyShortcodeDrafts, lineId)
@@ -15120,7 +14950,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             inputValue,
             preview: buildDependencyShortcodePreviewDiagnostics(lineId, inputValue),
             isEditing: dependencyShortcodeEditingRowId === lineId,
-            isSaving: dependencyShortcodeSavingRowId === lineId,
+            _isSaving: dependencyShortcodeSavingRowId === lineId,
         };
     }, [
         buildDependencyShortcodePreviewDiagnostics,
@@ -15129,32 +14959,31 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         dependencyShortcodeEditingRowId,
         dependencyShortcodeSavingRowId,
         drafts,
-        isManualMilestoneRow,
     ]);
     const resolveRowDependencyNetworkState = useCallback((row, draft = {}, lineId = '') => {
         if (!isSchedulableGanttRow(row, draft)) {
             return {
-                predecessorIds: [],
+                _predecessorIds: [],
                 predecessorValidation: { valid: true, invalid: [], futureOrSelf: [], normalized: [] },
-                successorEntries: [],
+                _successorEntries: [],
                 successorTooltip: '',
                 hasPersistentDependency: false,
             };
         }
-        const predecessorIds = getRowPredecessorIds(row, draft);
-        const predecessorValidation = validatePredecessors(row, predecessorIds, rows);
-        const successorEntries = successorMap.get(String(lineId)) || [];
-        const successorTooltip = successorEntries
+        const _predecessorIds = getRowPredecessorIds(row, draft);
+        const predecessorValidation = validatePredecessors(row, _predecessorIds, rows);
+        const _successorEntries = successorMap.get(String(lineId)) || [];
+        const successorTooltip = _successorEntries
             .map((item) => `${item.codigo} - ${item.descripcion}`)
             .join('\n');
         return {
-            predecessorIds,
+            _predecessorIds,
             predecessorValidation,
-            successorEntries,
+            _successorEntries,
             successorTooltip,
-            hasPersistentDependency: predecessorValidation.normalized.length > 0 || successorEntries.length > 0,
+            hasPersistentDependency: predecessorValidation.normalized.length > 0 || _successorEntries.length > 0,
         };
-    }, [getRowPredecessorIds, rows, successorMap]);
+    }, [rows, successorMap]);
     const resolveRowPredecessorCandidates = useCallback((row) => {
         if (!isSchedulableGanttRow(row)) return [];
         const rowId = Number(row.budget_line_id);
@@ -15361,7 +15190,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 (latest, item) => (item.getTime() > latest.getTime() ? item : latest),
                 dependencyStarts[0],
             );
-            initialPatches[normalizedTargetId].start_date = toNativeDateTimeValue(alignedStartDate, configDraft, 'start');
+            initialPatches[normalizedTargetId].start_date = _toNativeDateTimeValue(alignedStartDate, configDraft, 'start');
             initialPatches[normalizedTargetId].duration = targetDraft.duration ?? targetRow.dias_calendario ?? targetRow.dias_utiles ?? 0;
         }
 
@@ -15370,7 +15199,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         if (!hasAnyActiveDependency(normalizedTargetId, candidateDrafts) && projectStart) {
             accumulatedPatches[normalizedTargetId] = {
                 ...(accumulatedPatches[normalizedTargetId] || candidateDrafts[normalizedTargetId] || {}),
-                start_date: toNativeDateTimeValue(projectStart, configDraft, 'start'),
+                start_date: _toNativeDateTimeValue(projectStart, configDraft, 'start'),
             };
             candidateDrafts[normalizedTargetId] = accumulatedPatches[normalizedTargetId];
         }
@@ -15380,7 +15209,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             if (hasAnyActiveDependency(sourceId, candidateDrafts) || !projectStart) return;
             accumulatedPatches[String(sourceId)] = {
                 ...(accumulatedPatches[String(sourceId)] || drafts[String(sourceId)] || {}),
-                start_date: toNativeDateTimeValue(projectStart, configDraft, 'start'),
+                start_date: _toNativeDateTimeValue(projectStart, configDraft, 'start'),
             };
             candidateDrafts[String(sourceId)] = accumulatedPatches[String(sourceId)];
         });
@@ -15589,7 +15418,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         resolveAdjacentDependencyShortcodeLineId,
     ]);
 
-    const persistOperationalLineMetadata = async (lineId, metadataPatch, options = {}) => {
+    const persistOperationalLineMetadata = useCallback(async (lineId, metadataPatch, options = {}) => {
         const normalizedLineId = String(lineId || '');
         if (!normalizedLineId || !metadataPatch || typeof metadataPatch !== 'object') return null;
         return persistDraftPatches({
@@ -15600,7 +15429,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             primaryLineId: normalizedLineId,
             source: options.source || 'gantt_operational_patch',
         });
-    };
+    }, [persistDraftPatches]);
 
     const buildManualMilestoneDraftBase = (milestones = []) => (
         (Array.isArray(milestones) ? milestones : []).reduce((accumulator, milestone) => {
@@ -15615,7 +15444,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         }, {})
     );
 
-    const buildManualMilestoneDependencyDraftBase = (milestones = [], draftSnapshot = drafts) => (
+    const buildManualMilestoneDependencyDraftBase = useCallback((milestones = [], draftSnapshot = drafts) => (
         (Array.isArray(milestones) ? milestones : []).reduce((accumulator, milestone) => {
             const sourceLineId = buildManualMilestoneLineId(milestone?.id);
             if (!sourceLineId) return accumulator;
@@ -15642,9 +15471,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             });
             return accumulator;
         }, {})
-    );
+    ), [calculableRowMeta, drafts]);
 
-    const applyGanttHistoryState = async (entry, stateKey, source) => {
+    const applyGanttHistoryState = useCallback(async (entry, stateKey, source) => {
         const state = entry?.[stateKey] || {};
         let lineDrafts = state.drafts || {};
         const manualSnapshot = state.manualMilestones;
@@ -15711,9 +15540,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             setSelectedTaskId(selectLineId);
         }
         return true;
-    };
+    }, [buildDependentScheduleDrafts, buildManualMilestoneDependencyDraftBase, drafts, persistDraftPatches, persistManualMilestones]);
 
-    const handleUndoGanttOperation = async () => {
+    const handleUndoGanttOperation = useCallback(async () => {
         if (ganttHistorySaving || !ganttUndoStack.length) return;
         const entry = ganttUndoStack[ganttUndoStack.length - 1];
         setGanttHistorySaving(true);
@@ -15727,9 +15556,9 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             ganttHistoryApplyingRef.current = false;
             setGanttHistorySaving(false);
         }
-    };
+    }, [applyGanttHistoryState, ganttHistorySaving, ganttUndoStack]);
 
-    const handleRedoGanttOperation = async () => {
+    const handleRedoGanttOperation = useCallback(async () => {
         if (ganttHistorySaving || !ganttRedoStack.length) return;
         const entry = ganttRedoStack[ganttRedoStack.length - 1];
         setGanttHistorySaving(true);
@@ -15743,7 +15572,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             ganttHistoryApplyingRef.current = false;
             setGanttHistorySaving(false);
         }
-    };
+    }, [applyGanttHistoryState, ganttHistorySaving, ganttRedoStack]);
 
     useEffect(() => {
         const isEditableTarget = (target) => {
@@ -15776,14 +15605,14 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         return () => {
             window.removeEventListener('keydown', handleGanttHistoryShortcut, true);
         };
-    }, [ganttHistorySaving, ganttRedoStack.length, ganttUndoStack.length, selectedTaskId, taskActionMenu?.lineId, trabajoSaving, savingId]);
+    }, [ganttHistorySaving, ganttRedoStack.length, ganttUndoStack.length, handleRedoGanttOperation, handleUndoGanttOperation, selectedTaskId, taskActionMenu?.lineId, trabajoSaving, savingId]);
 
     dragApplyDraftPatchesRef.current = applyDraftPatches;
     dragBuildDependentScheduleDraftsRef.current = buildDependentScheduleDrafts;
     dragBuildManualMilestoneCascadeShiftDraftsRef.current = buildManualMilestoneCascadeShiftDrafts;
     dragPersistDraftPatchesRef.current = persistDraftPatches;
 
-    const undoDraft = (lineId) => {
+    const _undoDraft = (lineId) => {
         setDraftHistory((prevHistory) => {
             const lineHistory = prevHistory[lineId] || [];
             if (!lineHistory.length) return prevHistory;
@@ -15926,7 +15755,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                     if (!hasAnyActiveDependency(normalizedTaskTargetId, candidateDrafts) && projectStart) {
                         patches[normalizedTaskTargetId] = {
                             ...nextTargetDraft,
-                            start_date: toNativeDateTimeValue(projectStart, configDraft, 'start'),
+                            start_date: _toNativeDateTimeValue(projectStart, configDraft, 'start'),
                         };
                         candidateDrafts[normalizedTaskTargetId] = patches[normalizedTaskTargetId];
                     }
@@ -15985,7 +15814,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         if (!hasAnyActiveDependency(persistedTargetId, candidateDrafts) && projectStart) {
             patches[persistedTargetId] = {
                 ...nextTargetDraft,
-                start_date: toNativeDateTimeValue(projectStart, configDraft, 'start'),
+                start_date: _toNativeDateTimeValue(projectStart, configDraft, 'start'),
             };
             candidateDrafts[persistedTargetId] = patches[persistedTargetId];
         }
@@ -15997,7 +15826,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         ) {
             patches[persistedSourceId] = {
                 ...(drafts[persistedSourceId] || {}),
-                start_date: toNativeDateTimeValue(projectStart, configDraft, 'start'),
+                start_date: _toNativeDateTimeValue(projectStart, configDraft, 'start'),
             };
             candidateDrafts[persistedSourceId] = patches[persistedSourceId];
         }
@@ -16024,8 +15853,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         if (!targetRow) return;
         const lineId = String(path.targetId);
         const targetDraft = drafts[lineId] || {};
-        const predecessorIds = getRowPredecessorIds(targetRow, targetDraft);
-        const dependencies = normalizeRowDependencies(targetRow, targetDraft, predecessorIds)
+        const _predecessorIds = getRowPredecessorIds(targetRow, targetDraft);
+        const dependencies = normalizeRowDependencies(targetRow, targetDraft, _predecessorIds)
             .map((dependency) => (Number(dependency.source_id) === Number(path.sourceId)
                 ? {
                     ...dependency,
@@ -16037,7 +15866,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 : dependency));
         const nextDraft = {
             ...targetDraft,
-            predecessors: predecessorIds.join(', '),
+            predecessors: _predecessorIds.join(', '),
             dependencies,
         };
         const draftSnapshot = {
@@ -16058,7 +15887,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         await handleSave(targetRow, drafts[String(path.targetId)] || {});
     };
 
-    async function handleSave(row, draftOverride = null, options = {}) {
+    const handleSave = useCallback(async (row, draftOverride = null, options = {}) => {
         if (!row.is_calculable || typeof onSaveTrabajoLine !== 'function') return;
         const lineId = String(row.budget_line_id);
         const built = buildLineSavePayload(row, draftOverride, options);
@@ -16089,7 +15918,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         } finally {
             setSavingId(null);
         }
-    }
+    }, [buildLineSavePayload, drafts, onSaveTrabajoLine, rows]);
 
     const persistConfirmedRowsBatch = async (targetRows = [], {
         source = 'gantt_approval',
@@ -16700,6 +16529,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         });
     };
 
+    const _startDependencyLink = startDependencyLink;
+
     const beginDependencyLinkFromDragInteraction = useCallback((interaction, pointerClientX, pointerClientY) => {
         if (!interaction?.lineId) return false;
         const contentElement = contentRef.current;
@@ -16731,7 +16562,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         return true;
     }, [flushBufferedDragPreview]);
 
-    const commitZoomInput = () => {
+    const _commitZoomInput = () => {
         const trimmed = String(zoomInput || '').trim().replace('%', '');
         if (!trimmed) {
             setZoomInput(String(Math.round(zoomLevel * 100)));
@@ -16779,7 +16610,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         });
     };
 
-    const applyPresetZoom = (value) => {
+    const _applyPresetZoom = (value) => {
         const normalized = normalizeZoomLevel(Number(value) / 100);
         captureTimelineAnchor();
         flushBufferedZoomTargetLevel(normalized);
@@ -16795,7 +16626,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         setZoomInput(String(Math.round(zoomLevel * 100)));
     };
 
-    const openZoomMenuHover = () => {
+    const _openZoomMenuHover = () => {
         if (zoomMenuTimerRef.current) {
             window.clearTimeout(zoomMenuTimerRef.current);
         }
@@ -16805,7 +16636,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         }, 90);
     };
 
-    const closeZoomMenuHover = () => {
+    const _closeZoomMenuHover = () => {
         if (zoomMenuTimerRef.current) {
             window.clearTimeout(zoomMenuTimerRef.current);
             zoomMenuTimerRef.current = null;
@@ -16872,10 +16703,10 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         commitTimelineViewportSnapshot,
         commitVerticalViewportSnapshot,
         effectiveTimeScale,
-        finalizeZoomPreview,
-        flushBufferedZoomTargetLevel,
         segmentColumnWidth,
         selectedHolidayDate,
+        finalizeZoomPreview,
+        flushBufferedZoomTargetLevel,
         selectedHolidayDay?.isoDate,
         timelineSegments,
         timelineWidthPx,
@@ -16905,7 +16736,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         toggleApuPlanningSignalsPinned();
     }, [handleSelectTaskRow, toggleApuPlanningSignalsPinned]);
 
-    const handleToggleTaskContext = useCallback((lineId, subbarId = null) => {
+    const _handleToggleTaskContext = useCallback((lineId, subbarId = null) => {
         const normalizedId = String(lineId);
         setSelectedTaskId(normalizedId);
         if (subbarId) {
@@ -17022,8 +16853,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         });
         setManualTemporalEditor((current) => ({
             ...current,
-            startsAt: toNativeDateTimeInputValue(selectedTaskRow?.start_date || resolveVisibleRowStartDate(selectedTaskRow, projectStartConfigDisplay), configDraft, 'start'),
-            endsAt: toNativeDateTimeInputValue(selectedTaskRow?.end_date || selectedTaskRow?.start_date || resolveVisibleRowStartDate(selectedTaskRow, projectStartConfigDisplay), configDraft, 'finish'),
+            startsAt: _toNativeDateTimeInputValue(selectedTaskRow?.start_date || resolveVisibleRowStartDate(selectedTaskRow, projectStartConfigDisplay), configDraft, 'start'),
+            endsAt: _toNativeDateTimeInputValue(selectedTaskRow?.end_date || selectedTaskRow?.start_date || resolveVisibleRowStartDate(selectedTaskRow, projectStartConfigDisplay), configDraft, 'finish'),
         }));
     }, [activeTaskLineId, configDraft, persistOperationalLineMetadata, projectStartConfigDisplay, selectedTaskDraft, selectedTaskOperationalSummary, selectedTaskRow, selectedTaskSubbars]);
 
@@ -17567,7 +17398,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 tone: 'danger',
             });
         }
-    }, [activeTaskLineId, onApplyValoradoLineDistribution, onMergeInterparentSubbars, selectedTaskDraft, selectedTaskInterparentNeighbors.next, selectedTaskInterparentNeighbors.previous, selectedTaskOperationalSummary, selectedTaskRow, selectedTaskSubbar, selectedTaskSubbars, selectedTaskValoradoRow, valorado]);
+    }, [activeTaskLineId, onApplyValoradoLineDistribution, onMergeInterparentSubbars, selectedTaskInterparentNeighbors.next, selectedTaskInterparentNeighbors.previous, selectedTaskRow, selectedTaskSubbar, selectedTaskSubbars, selectedTaskValoradoRow, valorado]);
 
     const focusGanttStartInput = useCallback((lineId) => {
         const rowNode = rowRefs.current.get(String(lineId));
@@ -17674,7 +17505,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         });
     }, [confirmCpmSensitiveManualEdit, focusGanttStartInput, handleOpenSubbarFineTuning]);
 
-    const handleOpenDependencyManager = useCallback((lineId) => {
+    const _handleOpenDependencyManager = useCallback((lineId) => {
         const normalizedId = String(lineId);
         setQuickSuccessorSourceId(null);
         setSelectedTaskId(normalizedId);
@@ -17752,7 +17583,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         }
     }, [createDependencyFromSourceToTarget, quickSuccessorDependencyType, quickSuccessorItemInput, quickSuccessorLagUnit, quickSuccessorLagValue, resolveSuccessorTargetLineId]);
 
-    const handleOperationalPanelContainerClick = (event) => {
+    const _handleOperationalPanelContainerClick = (event) => {
         if (typeof onToggleOperationalPanel !== 'function') return;
         const target = event.target instanceof HTMLElement ? event.target : null;
         if (!target) return;
@@ -17763,7 +17594,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         onToggleOperationalPanel();
     };
 
-    const handleOperationalPanelContainerKeyDown = (event) => {
+    const _handleOperationalPanelContainerKeyDown = (event) => {
         if (typeof onToggleOperationalPanel !== 'function') return;
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -17905,7 +17736,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
     };
 
     const handleAddAdvancedDateException = () => {
-        const isoDate = holidayDraft.date || toNativeDateInputValue(projectStartConfigDisplay, configDraft);
+        const isoDate = holidayDraft.date || _toNativeDateInputValue(projectStartConfigDisplay, configDraft);
         if (!isoDate) return;
         updateAdvancedCalendarDraft((current) => ({
             ...current,
@@ -17951,7 +17782,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         setConfigPanelOpen(false);
     };
 
-    const handleSaveGanttConfig = async () => {
+    const _handleSaveGanttConfig = async () => {
         if (typeof onSaveTrabajoConfig !== 'function') return;
         const payload = resolveGanttConfigDraft(configDraft);
         setConfigSaving(true);
@@ -18087,7 +17918,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         }
     };
 
-    const handleMsProjectExportClick = async () => {
+    const _handleMsProjectExportClick = async () => {
         if (directMppAvailable) {
             await onExportMsProject?.('mpp');
             return;
@@ -18099,7 +17930,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         });
     };
 
-    const handleMsProjectImportClick = async () => {
+    const _handleMsProjectImportClick = async () => {
         const shouldImport = await appConfirm({
             title: 'Importar XML MS Project',
             message: 'La importación actualizará fechas, duración, avance y dependencias del Gantt. No modificará presupuesto, APUs ni recursos. Usa preferentemente un XML exportado desde GiProy o conserva el campo Text1/OutlineNumber de las partidas.',
@@ -18288,8 +18119,6 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         }
     }, [
         captureTimelineAnchor,
-        finalizeZoomPreview,
-        flushBufferedZoomTargetLevel,
         scheduleBufferedZoomTargetLevel,
         zoomLevel,
     ]);
@@ -18415,7 +18244,8 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         scheduleDependencyEditorPositionUpdate();
         window.addEventListener('resize', scheduleDependencyEditorPositionUpdate);
         window.addEventListener('scroll', scheduleDependencyEditorPositionUpdate, true);
-        timelineViewportRef.current?.addEventListener('scroll', scheduleDependencyEditorPositionUpdate);
+        const timelineViewport = timelineViewportRef.current;
+        timelineViewport?.addEventListener('scroll', scheduleDependencyEditorPositionUpdate);
 
         return () => {
             if (frameId !== null) {
@@ -18423,7 +18253,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
             }
             window.removeEventListener('resize', scheduleDependencyEditorPositionUpdate);
             window.removeEventListener('scroll', scheduleDependencyEditorPositionUpdate, true);
-            timelineViewportRef.current?.removeEventListener('scroll', scheduleDependencyEditorPositionUpdate);
+            timelineViewport?.removeEventListener('scroll', scheduleDependencyEditorPositionUpdate);
         };
     }, [
         isReducedInteractionDetail,
@@ -18805,7 +18635,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
         } finally {
             setReorderingLineId(null);
         }
-    }, [appAlert, detail?.empresa_id, onReloadFromBudget, persistManualMilestones, project?.empresa_id, resolveTaskRowMoveAvailability, selectedBudget?.empresa_id, user?.empresa_id]);
+    }, [detail?.empresa_id, onReloadFromBudget, persistManualMilestones, project?.empresa_id, resolveTaskRowMoveAvailability, selectedBudget?.empresa_id, user?.empresa_id]);
     const quickSuccessorDialogRow = quickSuccessorDialog?.sourceId
         ? schedulableRowMeta.get(String(quickSuccessorDialog.sourceId)) || null
         : null;
@@ -19135,7 +18965,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                     </ControlRail>
 
                     <div className="flex min-w-0 flex-[1.2_1_20rem] items-center justify-end gap-1.5">
-                        {true ? (
+                        {ganttOperationalToolbarEnabled ? (
                             <>
                                 <ControlRail className="h-[60px] min-w-0 flex-1 gap-1.5 px-2 py-1.5">
                                     <div className="relative flex h-full shrink-0 items-center gap-1.5">
@@ -19198,33 +19028,42 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     style={apuPlanningSignalsPanelStyle}
                                                     data-dragging={apuPlanningSignalsDragging ? 'true' : 'false'}
                                                 >
-                                                    <GanttApuPlanningSignalsPanel
-                                                        model={selectedTaskApuPlanningSignals}
-                                                        pinned={apuPlanningSignalsPinned}
-                                                        currency={valorado?.moneda || 'USD'}
-                                                        moneyDecimals={valorado?.dec_moneda ?? 2}
-                                                        onTogglePinned={toggleApuPlanningSignalsPinned}
-                                                        onDragPointerDown={startApuPlanningSignalsDrag}
-                                                        onDragPointerMove={moveApuPlanningSignals}
-                                                        onDragPointerEnd={finishApuPlanningSignalsDrag}
-                                                        onPointerEnter={openApuPlanningSignals}
-                                                        onPointerLeave={scheduleCloseApuPlanningSignals}
-                                                    />
+                                                    <React.Suspense
+                                                        fallback={(
+                                                            <div
+                                                                className="flex min-h-28 items-center justify-center rounded-[1rem] border border-zinc-200 bg-white px-4 text-[10px] font-bold text-zinc-600 shadow-[0_6px_12px_rgba(15,23,42,0.12)]"
+                                                                role="status"
+                                                                aria-live="polite"
+                                                            >
+                                                                Cargando señales APU
+                                                            </div>
+                                                        )}
+                                                    >
+                                                        <GanttApuPlanningSignalsPanel
+                                                            model={selectedTaskApuPlanningSignals}
+                                                            pinned={apuPlanningSignalsPinned}
+                                                            currency={valorado?.moneda || 'USD'}
+                                                            moneyDecimals={valorado?.dec_moneda ?? 2}
+                                                            onTogglePinned={toggleApuPlanningSignalsPinned}
+                                                            onDragPointerDown={startApuPlanningSignalsDrag}
+                                                            onDragPointerMove={moveApuPlanningSignals}
+                                                            onDragPointerEnd={finishApuPlanningSignalsDrag}
+                                                            onPointerEnter={openApuPlanningSignals}
+                                                            onPointerLeave={scheduleCloseApuPlanningSignals}
+                                                        />
+                                                    </React.Suspense>
                                                 </div>,
                                                 document.body
                                             )
                                             : null}
                                         {toolsMenuOpen && toolsMenuStyle
                                             ? createPortal(
-                                                <motion.div
+                                                <div
                                                     ref={toolsMenuRef}
-                                                    initial={{ opacity: 0, y: -6, scale: 0.96 }}
-                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                    transition={{ type: 'spring', stiffness: 300, damping: 25, mass: 0.82 }}
                                                     style={toolsMenuStyle}
                                                     onMouseEnter={openToolsMenu}
                                                     onMouseLeave={scheduleCloseToolsMenu}
-                                                    className="overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#11141a] p-3 text-white shadow-[0_22px_50px_rgba(0,0,0,0.38)] ring-1 ring-black/30"
+                                                    className="animate-in fade-in slide-in-from-top-1 zoom-in-95 overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#11141a] p-3 text-white shadow-[0_22px_50px_rgba(0,0,0,0.38)] ring-1 ring-black/30 duration-150 motion-reduce:animate-none"
                                                 >
                                                     <div className="mb-2 px-1">
                                                         <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/38">Gantt</p>
@@ -19307,7 +19146,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                             Factory reset
                                                         </button>
                                                     </div>
-                                                </motion.div>,
+                                                </div>,
                                                 document.body
                                             )
                                             : null}
@@ -19564,7 +19403,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     <AnimatedDateInput
                                                         type="date"
                                                         variant="compact"
-                                                        value={toNativeDateInputValue(projectStartConfigDisplay, configDraft)}
+                                                        value={_toNativeDateInputValue(projectStartConfigDisplay, configDraft)}
                                                         onChange={(event) => handleConfigField('fecha_inicio_proyecto', event.target.value)}
                                                         className="h-7 w-[146px] rounded-[0.65rem] border border-white/10 bg-[#0f1218] px-2 text-right text-[11px] font-black text-white outline-none focus:border-[#F39200] focus:ring-2 focus:ring-[#F39200]/20"
                                                     />
@@ -19575,7 +19414,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         <AnimatedDateInput
                                                             type="date"
                                                             variant="compact"
-                                                            value={toNativeDateInputValue(projectFinishTargetDisplay, configDraft)}
+                                                            value={_toNativeDateInputValue(projectFinishTargetDisplay, configDraft)}
                                                             onChange={(event) => handleConfigField('fecha_fin_objetivo_proyecto', event.target.value)}
                                                             className="h-7 w-[146px] rounded-[0.65rem] border border-white/10 bg-[#0f1218] px-2 text-right text-[11px] font-black text-white outline-none focus:border-[#F39200] focus:ring-2 focus:ring-[#F39200]/20"
                                                         />
@@ -19680,7 +19519,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                {false && calendarWorkspaceTab === 'config' ? (
+                                                {legacyCalendarConfigEnabled && calendarWorkspaceTab === 'config' ? (
                                                 <div className="rounded-[0.9rem] border border-cyan-400/18 bg-cyan-500/[0.07] px-3 py-3">
                                                     <div className="flex flex-wrap items-start justify-between gap-3">
                                                         <div className="min-w-0">
@@ -19813,7 +19652,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     ) : null}
                                                 </div>
                                                 ) : null}
-                                                {false && calendarWorkspaceTab === 'impact' ? (
+                                                {legacyCalendarImpactEnabled && calendarWorkspaceTab === 'impact' ? (
                                                 <div className="rounded-[0.9rem] border border-sky-400/18 bg-sky-500/[0.08] px-3 py-3">
                                                     <div className="flex flex-wrap items-start justify-between gap-2">
                                                         <div>
@@ -20025,18 +19864,18 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         const index = rowVirtualWindow.startIndex + visibleIndex;
                         const lineId = String(resolveRowLineId(row) || row.budget_line_id || row.linea_id || '');
                         const draft = drafts[lineId] || {};
-                        const effectiveRow = applyGanttRowDraft(row, draft, configDraft);
+                        const _effectiveRow = applyGanttRowDraft(row, draft, configDraft);
                         const effectiveFinishDate = row.is_calculable ? resolveGanttRowFinishDate(row, draft, scheduleConfig) : null;
                         const rowHeightPx = resolveGanttRowHeightPx(row);
                         const planningNode = displayPlanningMap.get(lineId) || planningAnalysis.get(lineId);
                         const cpmDiagnostics = resolveBackendCpmDiagnostics(row, draft);
                         const scheduleAlignment = resolveBackendCpmScheduleAlignment(row, draft);
-                        const recommendedSchedule = resolveBackendCpmRecommendedSchedule(row, draft);
+                        const _recommendedSchedule = resolveBackendCpmRecommendedSchedule(row, draft);
                         const durationModelSignal = resolveDurationModelRowSignal(row, draft);
-                        const durationTypePresentation = resolveGanttDurationTypePresentation(row, draft, configDraft, durationDisplayUnit);
+                        const durationTypePresentation = resolveGanttDurationTypePresentation(row, draft, configDraft, _durationDisplayUnit);
                         const operationalSummary = resolveGanttOperationalSummary(row, draft);
                         const subbarVisuals = buildGanttSubbarVisuals(row, draft, timelineSegments, segmentColumnWidth, scheduleConfig, valorado, effectiveTimeScale);
-                        const operationalTooltip = subbarVisuals.length
+                        const _operationalTooltip = subbarVisuals.length
                             ? `${subbarVisuals.length} tramo(s) operativo(s) visible(s).${operationalSummary.hasSubbars ? `\n${operationalSummary.acceptedSubbarCount} aceptada(s) · ${operationalSummary.confirmedSubbarCount} confirmada(s).` : '\nDerivados del Cronograma Valorado como tramos iniciales.'}${operationalSummary.hasManualTemporalWindow ? '\nIncluye ventana temporal manual operativa.' : ''}`
                             : operationalSummary.hasManualTemporalWindow
                                 ? 'La línea mantiene una ventana temporal manual operativa persistida en Gantt.'
@@ -20056,23 +19895,23 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         const isRowSchedulable = isSchedulableGanttRow(row, draft);
                         const isMilestone = isGanttMilestone(row, draft);
                         const isCritical = Boolean(isRowSchedulable && isPlanningNodeCriticalPathMember(planningNode));
-                        const isDirty = Object.keys(draft).length > 0;
-                        const isSaving = savingId === lineId;
+                        const _isDirty = Object.keys(draft).length > 0;
+                        const _isSaving = savingId === lineId;
                         const indent = row.level * 16;
                         const dependencyUiState = resolveRowDependencyUiState(row, draft, lineId);
-                        const predecessorIds = dependencyUiState.predecessorIds;
+                        const _predecessorIds = dependencyUiState._predecessorIds;
                         const predecessorValidation = dependencyUiState.predecessorValidation;
-                        const successorEntries = dependencyUiState.successorEntries;
+                        const _successorEntries = dependencyUiState._successorEntries;
                         const dependencyConstraintDiagnostics = dependencyUiState.diagnostics;
                         const dominantDependencyConstraint = dependencyUiState.dominantConstraint;
-                        const dominantDependencySourceRow = dependencyUiState.dominantSourceRow;
+                        const _dominantDependencySourceRow = dependencyUiState.dominantSourceRow;
                         const dominantDependencyShortcode = dependencyUiState.dominantShortcode;
                         const dominantDependencyTooltip = dependencyUiState.dominantTooltip;
                         const dependencyConflictTooltip = dependencyUiState.conflictTooltip;
                         const dependencyShortcodeEditorState = dependencyUiState.editor;
                         const predecessorShortcodeValue = dependencyShortcodeEditorState.persistedValue;
                         const dependencyShortcodeInputValue = dependencyShortcodeEditorState.inputValue;
-                        const dependencyShortcodePreview = dependencyShortcodeEditorState.preview;
+                        const _dependencyShortcodePreview = dependencyShortcodeEditorState.preview;
                         const isSavedHighlight = savedHighlightId === lineId;
                         const governanceState = resolveGanttGovernanceState(row, draft);
                         const cpmManualReconciliation = getGanttCpmManualReconciliation(row, draft);
@@ -20107,7 +19946,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                             : row.is_calculable
                                 ? zebraClass
                                 : (index % 2 === 0 ? 'bg-slate-50/75' : 'bg-slate-100/70');
-                        const rowStickyClass = isPendingSubcontract
+                        const _rowStickyClass = isPendingSubcontract
                             ? 'bg-sky-100/80'
                             : row.is_calculable
                                 ? (index % 2 === 0 ? 'bg-white' : 'bg-zinc-50')
@@ -20489,7 +20328,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     autoFocus
                                                     openOnMount
                                                     compactFullDisplay
-                                                    value={toNativeDateTimeInputValue(draft.start_date ?? resolveVisibleRowStartDate(row, projectStartConfigDisplay))}
+                                                    value={_toNativeDateTimeInputValue(draft.start_date ?? resolveVisibleRowStartDate(row, projectStartConfigDisplay))}
                                                     onChange={(event) => updateDraft(lineId, { start_date: normalizeDateTimeInput(event.target.value) })}
                                                     onBlur={() => setEditingStartRowId((current) => (current === lineId ? null : current))}
                                                     onKeyDown={(event) => {
@@ -20519,7 +20358,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 autoFocus
                                                 openOnMount
                                                 compactFullDisplay
-                                                value={toNativeDateTimeInputValue(manualMilestoneDrafts[lineId]?.start_date ?? manualMilestoneByLineId.get(lineId)?.start_date ?? row.start_date)}
+                                                value={_toNativeDateTimeInputValue(manualMilestoneDrafts[lineId]?.start_date ?? manualMilestoneByLineId.get(lineId)?.start_date ?? row.start_date)}
                                                 onChange={(event) => handleManualMilestoneDraftChange(lineId, { start_date: normalizeDateTimeInput(event.target.value) })}
                                                 onBlur={() => {
                                                     setEditingStartRowId((current) => (current === lineId ? null : current));
@@ -20572,7 +20411,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                             row,
                                                             Object.prototype.hasOwnProperty.call(draft, 'duration') ? draft : {},
                                                             configDraft,
-                                                            durationDisplayUnit,
+                                                            _durationDisplayUnit,
                                                         )}
                                                     onChange={(event) => {
                                                         const rawValue = normalizeSubcontractDurationInputString(event.target.value);
@@ -20588,14 +20427,14 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                 row,
                                                                 Object.prototype.hasOwnProperty.call(draft, 'duration') ? draft : {},
                                                                 configDraft,
-                                                                durationDisplayUnit,
+                                                                _durationDisplayUnit,
                                                             );
                                                         updateDraft(lineId, {
                                                             duration: rawValue === ''
                                                                 ? 0
                                                                 : convertVisibleDurationToDays(
                                                                     rawValue,
-                                                                    resolveGanttRowDurationDisplayUnit(row, draft, durationDisplayUnit),
+                                                                    resolveGanttRowDurationDisplayUnit(row, draft, _durationDisplayUnit),
                                                                     configDraft,
                                                                 ),
                                                         });
@@ -20694,7 +20533,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                     setDurationDisplayMenuRowId(null);
                                                                 }}
                                                                 className={`flex w-full items-center justify-between rounded-[0.8rem] border px-2 py-2 text-left transition ${
-                                                                    resolveGanttRowDurationDisplayUnit(row, draft, durationDisplayUnit) === option.id
+                                                                    resolveGanttRowDurationDisplayUnit(row, draft, _durationDisplayUnit) === option.id
                                                                         ? 'border-[#F39200]/35 bg-[#fff7ed] text-[#F39200]'
                                                                         : 'border-transparent bg-white text-zinc-600 hover:border-sky-100 hover:bg-sky-50 hover:text-[#136191]'
                                                                 }`}
@@ -20837,7 +20676,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 >
                                                     <Pencil className="h-3 w-3" />
                                                 </button>
-                                                {dependencyShortcodeEditorState.isSaving ? (
+                                                {dependencyShortcodeEditorState._isSaving ? (
                                                     <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-[#F39200]" />
                                                 ) : null}
                                             </div>
@@ -22519,7 +22358,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                     type="datetime-local"
                                                                     variant="compact"
                                                                     step="60"
-                                                                    value={toNativeDateTimeInputValue(
+                                                                    value={_toNativeDateTimeInputValue(
                                                                         part.starts_at || (index === 0 ? splitDialogTargetSubbar?.starts_at : null),
                                                                         configDraft,
                                                                     'start',
@@ -22654,14 +22493,14 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         const effectiveDraft = isPreviewingSingleSubbar
                             ? draft
                             : previewDraft ? { ...draft, ...previewDraft } : draft;
-                        const effectiveRow = applyGanttRowDraft(row, effectiveDraft, configDraft);
+                        const _effectiveRow = applyGanttRowDraft(row, effectiveDraft, configDraft);
                         const effectiveFinishDate = row.is_calculable ? resolveGanttRowFinishDate(row, effectiveDraft, configDraft) : null;
                         const rowHeightPx = resolveGanttRowHeightPx(row);
                         const planningNode = displayPlanningMap.get(lineId) || planningAnalysis.get(lineId);
                         const scheduleAlignment = resolveBackendCpmScheduleAlignment(row, draft);
-                        const recommendedSchedule = resolveBackendCpmRecommendedSchedule(row, draft);
+                        const _recommendedSchedule = resolveBackendCpmRecommendedSchedule(row, draft);
                         const durationModelSignal = resolveDurationModelRowSignal(row, draft);
-                        const durationTypePresentation = resolveGanttDurationTypePresentation(row, draft, configDraft, durationDisplayUnit);
+                        const durationTypePresentation = resolveGanttDurationTypePresentation(row, draft, configDraft, _durationDisplayUnit);
                         const operationalSummary = resolveGanttOperationalSummary(row, effectiveDraft);
                         const subbarVisuals = buildGanttSubbarVisuals(row, effectiveDraft, timelineSegments, segmentColumnWidth, configDraft, valorado, effectiveTimeScale);
                         const isDraggingSingleSubbar = activePreview?.type === 'move' && activePreview?.interactionScope === 'subbar' && Boolean(activePreview?.segmentId);
@@ -22703,7 +22542,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                             isDraggingSingleSubbar,
                             activeSegmentId: activePreview?.segmentId || '',
                         });
-                        const operationalTooltip = subbarVisuals.length
+                        const _operationalTooltip = subbarVisuals.length
                             ? `${subbarVisuals.length} tramo(s) operativo(s) visible(s).${operationalSummary.hasSubbars ? `\n${operationalSummary.acceptedSubbarCount} aceptada(s) · ${operationalSummary.confirmedSubbarCount} confirmada(s).` : '\nDerivados del Cronograma Valorado como tramos iniciales.'}${operationalSummary.hasManualTemporalWindow ? '\nIncluye ventana temporal manual operativa.' : ''}`
                             : operationalSummary.hasManualTemporalWindow
                                 ? 'La línea mantiene una ventana temporal manual operativa persistida en Gantt.'
@@ -22714,28 +22553,28 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         const isRowSchedulable = isSchedulableGanttRow(row, draft);
                         const isMilestone = isGanttMilestone(row, draft);
                         const isCritical = Boolean(isRowSchedulable && isPlanningNodeCriticalPathMember(planningNode));
-                        const geometryRow = effectiveRow;
+                        const geometryRow = _effectiveRow;
                         const baseGeometryRow = applyGanttRowDraft(row, draft, configDraft);
                         const ghostGeometryRow = previewDraft ? baseGeometryRow : null;
                         const bar = buildBarGeometry(geometryRow, timelineSegments, segmentColumnWidth, scheduleConfig);
                         const baseBarGeometry = buildBarGeometry(baseGeometryRow, timelineSegments, segmentColumnWidth, configDraft);
-                        const isDirty = Object.keys(draft).length > 0;
-                        const isSaving = savingId === lineId;
+                        const _isDirty = Object.keys(draft).length > 0;
+                        const _isSaving = savingId === lineId;
                         const indent = row.level * 16;
                         const dependencyUiState = resolveRowDependencyUiState(row, draft, lineId);
-                        const predecessorIds = dependencyUiState.predecessorIds;
+                        const _predecessorIds = dependencyUiState._predecessorIds;
                         const predecessorValidation = dependencyUiState.predecessorValidation;
-                        const successorEntries = dependencyUiState.successorEntries;
+                        const _successorEntries = dependencyUiState._successorEntries;
                         const dependencyConstraintDiagnostics = dependencyUiState.diagnostics;
                         const dominantDependencyConstraint = dependencyUiState.dominantConstraint;
-                        const dominantDependencySourceRow = dependencyUiState.dominantSourceRow;
+                        const _dominantDependencySourceRow = dependencyUiState.dominantSourceRow;
                         const dominantDependencyShortcode = dependencyUiState.dominantShortcode;
                         const dominantDependencyTooltip = dependencyUiState.dominantTooltip;
                         const dependencyConflictTooltip = dependencyUiState.conflictTooltip;
                         const dependencyShortcodeEditorState = dependencyUiState.editor;
                         const predecessorShortcodeValue = dependencyShortcodeEditorState.persistedValue;
                         const dependencyShortcodeInputValue = dependencyShortcodeEditorState.inputValue;
-                        const dependencyShortcodePreview = dependencyShortcodeEditorState.preview;
+                        const _dependencyShortcodePreview = dependencyShortcodeEditorState.preview;
                         const cpmDiagnostics = resolveBackendCpmDiagnostics(row, draft);
                         const successorTooltip = dependencyUiState.successorTooltip;
                         const predecessorCandidates = dependencyUiState.predecessorCandidates;
@@ -22777,10 +22616,10 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                             Number(
                                 activePreview?.type
                                     ? activePreview.baseDuration
-                                    : effectiveRow.dias_calendario || effectiveRow.dias_utiles || 0
+                                    : _effectiveRow.dias_calendario || _effectiveRow.dias_utiles || 0
                             )
                         );
-                        let previewStart = effectiveRow.start_date;
+                        let previewStart = _effectiveRow.start_date;
                         let previewDurationValue = previewDuration;
                         if (activePreview?.baseStartDate) {
                             if (
@@ -22882,7 +22721,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                         const zebraClass = index % 2 === 0 ? 'bg-white' : 'bg-zinc-50/55';
                         const stickyZebraClass = index % 2 === 0 ? 'bg-white' : 'bg-zinc-50';
                         const rowBaseClass = row.is_calculable ? zebraClass : (index % 2 === 0 ? 'bg-slate-50/75' : 'bg-slate-100/70');
-                        const rowStickyClass = row.is_calculable ? stickyZebraClass : (index % 2 === 0 ? 'bg-slate-50' : 'bg-slate-100');
+                        const _rowStickyClass = row.is_calculable ? stickyZebraClass : (index % 2 === 0 ? 'bg-slate-50' : 'bg-slate-100');
                         const isSearchMatch = ganttSearchMatchIds.has(lineId);
                         const isActiveSearchMatch = activeGanttSearchMatchId === lineId;
                         const isCpmNavigatorMatch = cpmNavigatorMatchIds.has(lineId);
@@ -22959,7 +22798,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 ? 'bg-emerald-50'
                                                 : isSelectedTaskRow
                                                     ? 'bg-sky-100/95'
-                                                    : rowStickyClass
+                                                    : _rowStickyClass
                                         } ${isSearchMatch ? 'ring-1 ring-inset ring-[#F39200]/35' : ''} ${isActiveSearchMatch ? 'bg-[#fff7ed] ring-2 ring-inset ring-[#F39200]/70' : ''} ${isCpmNavigatorMatch ? 'ring-1 ring-inset ring-[#136191]/18' : ''} ${isActiveCpmNavigatorMatch ? 'bg-[#eff6ff] ring-2 ring-inset ring-[#136191]/55' : ''} ${isSelectedTaskRow ? 'ring-2 ring-inset ring-[#136191]/55 shadow-[inset_0_0_0_1px_rgba(14,116,144,0.16)]' : ''}`}
                                         style={{
                                             gridTemplateColumns: ganttLayout.dataGridColumns,
@@ -23114,7 +22953,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                             </GanttHeaderTooltip>
                                                         ) : null}
                                                         {subbarVisuals.length > 0 || operationalSummary.hasManualTemporalWindow ? (
-                                                            <GanttHeaderTooltip content={operationalTooltip}>
+                                                            <GanttHeaderTooltip content={_operationalTooltip}>
                                                                 <span className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full border px-1.5 text-[7px] font-black tracking-[0.08em] ${
                                                                     subbarVisuals.length > 0
                                                                         ? 'border-sky-200 bg-sky-50 text-sky-700'
@@ -23156,7 +22995,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                     <div>
                                                                         <div className="text-[9px] font-black uppercase tracking-[0.14em] text-[#F39200]">Dependencias</div>
                                                                         <div className="mt-1 text-[10px] font-black uppercase tracking-[0.1em] text-zinc-500">
-                                                                            Predecesoras {predecessorValidation.normalized.length} · Sucesoras {successorEntries.length}
+                                                                            Predecesoras {predecessorValidation.normalized.length} · Sucesoras {_successorEntries.length}
                                                                         </div>
                                                                     </div>
                                                                     <div className="flex items-center gap-2">
@@ -23201,12 +23040,12 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                         }) : (
                                                                             <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-zinc-300">Sin predecesoras</span>
                                                                         )}
-                                                                        {successorEntries.length ? (
+                                                                        {_successorEntries.length ? (
                                                                             <GanttHeaderTooltip content={successorTooltip}>
                                                                                 <button
                                                                                     type="button"
                                                                                     onClick={() => {
-                                                                                        const firstSuccessor = successorEntries[0];
+                                                                                        const firstSuccessor = _successorEntries[0];
                                                                                         if (!firstSuccessor) return;
                                                                                         setSelectedDependencyKey(`${lineId}-${firstSuccessor.id}`);
                                                                                         scrollRowIntoViewById(firstSuccessor.id);
@@ -23214,7 +23053,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                                     }}
                                                                                     className="rounded-full border border-[#F39200]/25 bg-[#fff7ed] px-2 py-1 text-[8px] font-black uppercase tracking-[0.1em] text-[#F39200] transition hover:border-[#F39200] hover:bg-[#F39200] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200]/25"
                                                                                 >
-                                                                                    Ver sucesoras {successorEntries.length}
+                                                                                    Ver sucesoras {_successorEntries.length}
                                                                                 </button>
                                                                             </GanttHeaderTooltip>
                                                                         ) : null}
@@ -23278,7 +23117,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 openOnMount
                                                 compactFullDisplay
                                                 className={GANTT_INLINE_INPUT_CLASS}
-                                                value={draft.start_date ?? toNativeDateTimeInputValue(resolveVisibleRowStartDate(row, projectStartConfigDisplay), configDraft, 'start')}
+                                                value={draft.start_date ?? _toNativeDateTimeInputValue(resolveVisibleRowStartDate(row, projectStartConfigDisplay), configDraft, 'start')}
                                                 onChange={(e) => updateDraft(lineId, { start_date: e.target.value })}
                                                 onBlur={() => setEditingStartRowId((current) => (current === lineId ? null : current))}
                                                 onKeyDown={(e) => {
@@ -23361,7 +23200,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                                     setDurationDisplayMenuRowId(null);
                                                                 }}
                                                                 className={`flex w-full items-center justify-between rounded-[0.8rem] border px-2 py-2 text-left transition ${
-                                                                    resolveGanttRowDurationDisplayUnit(row, draft, durationDisplayUnit) === option.id
+                                                                    resolveGanttRowDurationDisplayUnit(row, draft, _durationDisplayUnit) === option.id
                                                                         ? 'border-[#F39200]/35 bg-[#fff7ed] text-[#F39200]'
                                                                         : 'border-transparent bg-white text-zinc-600 hover:border-sky-100 hover:bg-sky-50 hover:text-[#136191]'
                                                                 }`}
@@ -23414,7 +23253,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                 <div className={`flex min-h-[38px] items-center gap-2 rounded-[0.9rem] border px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] transition duration-150 ${
                                                     isDependencyShortcodeEditing
                                                                 ? 'border-[#0F7CC1]/28 bg-[#f8fcff] ring-2 ring-[#0F7CC1]/10'
-                                                                : dependencyShortcodePreview?.conflict
+                                                                : _dependencyShortcodePreview?.conflict
                                                                     ? 'border-amber-300 bg-amber-50/70'
                                                                     : 'border-zinc-200 bg-white hover:border-[#0F7CC1]/30'
                                                 }`}>
@@ -23497,20 +23336,20 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                     >
                                                         <Pencil className="h-3.5 w-3.5" />
                                                     </button>
-                                                    {dependencyShortcodeEditorState.isSaving ? (
+                                                    {dependencyShortcodeEditorState._isSaving ? (
                                                         <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-[#F39200]" />
                                                     ) : null}
                                                 </div>
-                                                {dependencyShortcodePreview?.conflict ? (
+                                                {_dependencyShortcodePreview?.conflict ? (
                                                     <p
                                                         className="mt-1 text-[8px] font-bold tracking-[0.04em] text-amber-700"
-                                                        title={dependencyShortcodePreview.conflict.message || 'Conflicto relacional detectado en esta combinación.'}
+                                                        title={_dependencyShortcodePreview.conflict.message || 'Conflicto relacional detectado en esta combinación.'}
                                                     >
-                                                        {dependencyShortcodePreview.conflict.message || 'Conflicto relacional detectado en esta combinación.'}
+                                                        {_dependencyShortcodePreview.conflict.message || 'Conflicto relacional detectado en esta combinación.'}
                                                     </p>
-                                                ) : dependencyShortcodePreview?.error ? (
+                                                ) : _dependencyShortcodePreview?.error ? (
                                                     <p className="mt-1 text-[8px] font-bold tracking-[0.04em] text-rose-700">
-                                                        {dependencyShortcodePreview.error}
+                                                        {_dependencyShortcodePreview.error}
                                                     </p>
                                                 ) : null}
                                             </>
@@ -23779,7 +23618,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                                                         {renderTaskEnvelope && !displayedOperationalSubbars.length && !approximateTaskVisualDuration ? (
                                                             <div
                                                                 className={`absolute inset-y-[2px] left-[2px] rounded-[0.18rem] ${isCritical ? 'bg-[linear-gradient(180deg,#ff6464_0%,#d92525_52%,#a90000_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_1px_2px_rgba(159,0,0,0.20)]' : 'bg-[linear-gradient(145deg,#9ccfee_0%,#4b9fd1_48%,#136191_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_1px_3px_rgba(19,97,145,0.18)]'}`}
-                                                                style={{ width: `${approximateTaskVisualDuration ? Math.max(2, exactTaskInnerWidthPx * (Math.min(100, Math.max(0, clamp(Number(effectiveRow.progress_pct || 0), 0, 100))) / 100)) : Math.min(100, Math.max(0, clamp(Number(effectiveRow.progress_pct || 0), 0, 100)))}${approximateTaskVisualDuration ? 'px' : '%'}` }}
+                                                                style={{ width: `${approximateTaskVisualDuration ? Math.max(2, exactTaskInnerWidthPx * (Math.min(100, Math.max(0, clamp(Number(_effectiveRow.progress_pct || 0), 0, 100))) / 100)) : Math.min(100, Math.max(0, clamp(Number(_effectiveRow.progress_pct || 0), 0, 100)))}${approximateTaskVisualDuration ? 'px' : '%'}` }}
                                                             />
                                                         ) : null}
                                                         {!isDraggingSingleSubbar && displayedOperationalSubbars.length && selectedVisualSubbar && String(selectedVisualTaskId || '') === lineId ? (() => {
@@ -24644,7 +24483,7 @@ const buildLineSavePayload = (row, draftOverride = null, options = {}) => {
                 key={`${resourceEditorRowId || 'closed'}:${resourceEditorSessionVersion}`}
                 open={Boolean(resourceEditorRow)}
                 row={resourceEditorRow}
-                effectiveRow={resourceEditorEffectiveRow}
+                _effectiveRow={resourceEditorEffectiveRow}
                 project={project}
                 selectedBudget={selectedBudget}
                 selectedBudgetDetail={selectedBudgetDetail}

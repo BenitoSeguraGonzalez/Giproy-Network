@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronRight, ChevronDown, Layers, Briefcase, Search, Users } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { includesNormalized } from '../../utils/normalizeSearch';
 import ClearSearchField from './ClearSearchField';
 
@@ -89,7 +89,7 @@ const EDTTreeSelector = ({ nodes, selectedId, onSelect, assignedStats = {} }) =>
 
                 <AnimatePresence>
                     {isExpanded && hasChildren && (
-                        <motion.div
+                        <Motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
@@ -98,7 +98,7 @@ const EDTTreeSelector = ({ nodes, selectedId, onSelect, assignedStats = {} }) =>
                             <div className="py-1">
                                 {node.children.map(child => renderNode(child, depth + 1))}
                             </div>
-                        </motion.div>
+                        </Motion.div>
                     )}
                 </AnimatePresence>
             </div>

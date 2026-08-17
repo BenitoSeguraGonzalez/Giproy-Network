@@ -1,3 +1,5 @@
+const legacyFormEnabled = Boolean(import.meta.env.VITE_ENABLE_LEGACY_BIM_FORMS);
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, CircleHelp, Clock3, Send, X, XCircle } from 'lucide-react';
 
@@ -92,7 +94,7 @@ export default function BimCdeRfiPanel({ projectId, empresaId, selectedElement =
         </header>
         <div className="bim-adaptive-master-detail grid min-h-0 text-xs">
             <div className="border-r border-slate-200 p-3">
-                {false && <form className="hidden" onSubmit={create}>
+                {legacyFormEnabled && <form className="hidden" onSubmit={create}>
                     <input className="col-span-2 min-w-0 border border-slate-300 px-2 py-1.5" required minLength={3} aria-label="Asunto RFI" placeholder="Asunto" value={draft.subject} onChange={(event) => setDraft({ ...draft, subject: event.target.value })} />
                     <textarea className="col-span-2 min-h-20 resize-y border border-slate-300 px-2 py-1.5" required minLength={5} aria-label="Pregunta RFI" placeholder="Pregunta tecnica" value={draft.question} onChange={(event) => setDraft({ ...draft, question: event.target.value })} />
                     <select className="min-w-0 border border-slate-300 px-2 py-1.5" aria-label="Prioridad RFI" value={draft.priority} onChange={(event) => setDraft({ ...draft, priority: event.target.value })}><option value="low">Baja</option><option value="normal">Normal</option><option value="high">Alta</option><option value="critical">Critica</option></select>

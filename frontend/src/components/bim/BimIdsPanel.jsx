@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Download, FileCheck2, ShieldCheck, Upload } from 'lucide-react';
 
 import { bimModelsApi } from '../../api/bimModels';
@@ -12,17 +12,17 @@ const BimIdsPanel = ({ projectId, versionId, empresaId, onSelectGuid }) => {
     const [exceptionFindingId, setExceptionFindingId] = useState(null);
     const [exceptionReason, setExceptionReason] = useState('');
 
-    const refreshProfiles = async () => {
+    const refreshProfiles = useCallback(async () => {
         if (!projectId) return;
         const items = await bimModelsApi.listIdsProfiles(projectId, empresaId);
         setProfiles(items || []);
         if (!profileId && items?.length) setProfileId(String(items[0].id));
-    };
+    }, [empresaId, profileId, projectId]);
 
     useEffect(() => {
         setValidation(null);
         refreshProfiles().catch(() => setProfiles([]));
-    }, [empresaId, projectId, versionId]);
+    }, [refreshProfiles, versionId]);
 
     const importFile = async (event) => {
         const file = event.target.files?.[0];

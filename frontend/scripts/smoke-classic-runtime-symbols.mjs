@@ -5,6 +5,19 @@ const ganttSource = readFileSync(new URL('../src/components/projects/CronogramaG
 const cronogramasSource = readFileSync(new URL('../src/components/projects/Cronogramas.jsx', import.meta.url), 'utf8');
 const marketplaceSource = readFileSync(new URL('../src/pages/Marketplace.jsx', import.meta.url), 'utf8');
 const edtValoradaSource = readFileSync(new URL('../src/components/presupuestos/EdtValoradaModal.jsx', import.meta.url), 'utf8');
+const appRouterSource = readFileSync(new URL('../src/routes/AppRouter.jsx', import.meta.url), 'utf8');
+
+for (const importStatement of [
+    "import { lazy, Suspense } from 'react';",
+    "import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';",
+    "import ErrorBoundary from '../components/ErrorBoundary';",
+]) {
+    assert.equal(
+        appRouterSource.includes(importStatement),
+        true,
+        `AppRouter debe conservar el import runtime: ${importStatement}`,
+    );
+}
 
 assert.equal(
     ganttSource.includes('activeSubbar?.id || periodToken'),

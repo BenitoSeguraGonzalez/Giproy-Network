@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
-import { getMarketplaceOwnershipTone } from '../components/marketplace/MarketplaceOriginBadgeSet';
+import { getMarketplaceOwnershipTone } from '../utils/marketplaceOwnershipTone';
 import { applyTrimmedPaste } from '../utils/pasteSanitizer';
 import { getLicenseBannerMessage, getLicenseBannerTone, getLicenseStatusLabel, getLicenseStatusTone } from '../utils/licenseStatusUi';
 import { getCompanyDisplayName } from '../utils/companyDisplayName';
@@ -137,11 +137,11 @@ const AppLayout = ({ children }) => {
             || displayResolution.height < MIN_DESKTOP_DISPLAY_HEIGHT;
 
         if (!isBelowMinimum) {
-            setShowResWarning(false);
+            queueMicrotask(() => setShowResWarning(false));
             return;
         }
 
-        setShowResWarning((prev) => (prev ? prev : true));
+        queueMicrotask(() => setShowResWarning((prev) => (prev ? prev : true)));
     }, [displayResolution.height, displayResolution.width]);
 
     const currentAnnouncement = announcementQueue[0] || null;
@@ -212,7 +212,7 @@ const AppLayout = ({ children }) => {
                 if (isMounted) {
                     setLicenseNotificationQueue(nextQueue);
                 }
-            } catch (error) {
+            } catch {
                 if (isMounted) {
                     setLicenseNotificationQueue([]);
                 }
@@ -228,9 +228,9 @@ const AppLayout = ({ children }) => {
 
     useEffect(() => {
         if (!canSeeTransferSignal) {
-            setTransferSignal((current) => (
+            queueMicrotask(() => setTransferSignal((current) => (
                 current.total === 0 && current.nuevos === 0 ? current : { total: 0, nuevos: 0 }
-            ));
+            )));
             return undefined;
         }
 
@@ -244,7 +244,7 @@ const AppLayout = ({ children }) => {
                     total: Number(data?.total ?? metrics.recibidos ?? 0) || 0,
                     nuevos: Number(metrics.nuevos ?? 0) || 0,
                 });
-            } catch (error) {
+            } catch {
                 if (isMounted) {
                     setTransferSignal({ total: 0, nuevos: 0 });
                 }
@@ -362,7 +362,7 @@ const AppLayout = ({ children }) => {
         }
         try {
             await licenseNotificationsApi.acknowledge(notification.id);
-        } catch (error) {
+        } catch {
             setLicenseNotificationQueue((current) => [notification, ...current]);
         }
     };

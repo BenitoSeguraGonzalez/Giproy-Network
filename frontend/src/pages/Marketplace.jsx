@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, ChevronDown, ChevronRight, CircleAlert, CreditCard, Eye, Play, ShoppingBag, ShoppingCart, Store } from 'lucide-react';
 
@@ -124,10 +124,6 @@ const ensurePayPalSdk = ({ clientId, currency = 'USD', intent = 'capture', compo
 
     return paypalSdkPromise;
 };
-
-const isSystemProduct = (product) =>
-    (product?.seller?.rol || '').toLowerCase() === 'superadministrador';
-
 const formatCurrency = (amount, currency = 'USD') => {
     const value = Number(amount || 0);
     try {
@@ -949,7 +945,7 @@ const RecentProductRow = ({ product, onOpenDetails }) => (
     </button>
 );
 
-const StorefrontControlTile = ({ icon: Icon, label, dark = false, onClick }) => (
+const StorefrontControlTile = ({ icon, label, dark = false, onClick }) => (
     <button
         type="button"
         onClick={onClick}
@@ -959,12 +955,12 @@ const StorefrontControlTile = ({ icon: Icon, label, dark = false, onClick }) => 
                 : 'border-zinc-200 bg-white text-zinc-700 hover:border-[#F39200]/35 hover:text-[#1A1A1A]'
         }`}
     >
-        <Icon className="h-4 w-4 shrink-0" />
+        {React.createElement(icon, { className: 'h-4 w-4 shrink-0' })}
         <span className="whitespace-nowrap">{label}</span>
     </button>
 );
 
-const StorefrontToggleTile = ({ icon: Icon, label, active = false, onClick }) => (
+const StorefrontToggleTile = ({ icon, label, active = false, onClick }) => (
     <button
         type="button"
         onClick={onClick}
@@ -974,7 +970,7 @@ const StorefrontToggleTile = ({ icon: Icon, label, active = false, onClick }) =>
                 : 'border-zinc-200 bg-white text-zinc-700 hover:border-[#136191]/35 hover:text-[#136191]'
         }`}
     >
-        <Icon className="h-4 w-4 shrink-0" />
+        {React.createElement(icon, { className: 'h-4 w-4 shrink-0' })}
         <span className="whitespace-nowrap">{label}</span>
     </button>
 );
@@ -1005,7 +1001,7 @@ const Marketplace = () => {
     const [appliedPriceFloor, setAppliedPriceFloor] = useState(0);
     const [saasCatalogOnly, setSaasCatalogOnly] = useState(() => new URLSearchParams(location.search).get('saas') === '1');
     const [visibleCount, setVisibleCount] = useState(INITIAL_RENDER_COUNT);
-    const [preloadedCount, setPreloadedCount] = useState(INITIAL_RENDER_COUNT + PRECACHE_BUFFER_SIZE);
+    const [, setPreloadedCount] = useState(INITIAL_RENDER_COUNT + PRECACHE_BUFFER_SIZE);
     const [sortMenuOpen, setSortMenuOpen] = useState(false);
     const [cartLines, setCartLines] = useState([]);
     const [cartLastActivityAt, setCartLastActivityAt] = useState(null);
@@ -1529,7 +1525,7 @@ const Marketplace = () => {
         if (optionsContainerRef.current) {
             optionsContainerRef.current.scrollTop = 0;
         }
-    }, [query, selectedCategory, selectedSort, appliedPriceCap, appliedPriceFloor, saasCatalogOnly]);
+    }, [query, selectedCategory, selectedSort, appliedPriceCap, appliedPriceFloor, saasCatalogOnly, totalResults]);
 
     const visibleProducts = useMemo(() => {
         return filteredProducts.slice(0, visibleCount);

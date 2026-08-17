@@ -12,7 +12,6 @@ import CommonReportPreviewModal from '../reporting/CommonReportPreviewModal';
 import ReportGenerationModal from '../reporting/ReportGenerationModal';
 import { buildReportFileName, sanitizeReportContext } from '../../utils/reportFileName';
 import { downloadBlobResponse } from '../../utils/blobDownload';
-import { roundDecimal } from '../../utils/math';
 import {
     divideDecimalNumber,
     roundDecimalNumber,

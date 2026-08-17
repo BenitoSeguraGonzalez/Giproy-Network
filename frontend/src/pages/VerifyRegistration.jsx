@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { Card, CardHeader, CardDescription, CardContent } from '../components/ui/card';
 import { LiquidButton } from '../components/ui/liquid-button';
-import { motion } from 'framer-motion';
 import { publicAuthApi } from '../api/publicAuth';
 import LogoGiproyCompleto from '../assets/LogoGiproyCompleto.png';
 
