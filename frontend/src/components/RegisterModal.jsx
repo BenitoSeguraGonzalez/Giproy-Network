@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { LiquidButton } from './ui/liquid-button';
 import { APP_MODAL_CLOSE_BUTTON_CLASS } from './ui/app-modal';
 import { maestrosApi } from '../api/maestros';
 import { publicAuthApi } from '../api/publicAuth';
@@ -8,6 +10,8 @@ import { appAlert } from '../utils/appDialog';
 import { formatInternationalPhone, getInternationalPhoneValidationMessage, resolveCountryPhonePrefix } from '../utils/phoneFormatter';
 import { validarRucEcuador, requiereValidacionRucEcuador } from '../utils/rucValidator';
 import { detectConnectionCountry, getRegistrationCountryPolicy, resolveDetectedCountry } from '../utils/registrationCountry';
+import PersonnelFormFields from './PersonnelFormFields';
+import MotionScrollbar from './ui/MotionScrollbar';
 
 const MotionDiv = motion.div;
 

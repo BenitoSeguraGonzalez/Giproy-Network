@@ -1,5 +1,11 @@
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { AlertCircle, ArrowDown, ArrowUp, BarChart3, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeftRight, ChevronsRight, CircleCheck, CircleX, Diamond, Download, Gauge, History, Link2, Loader2, Lock, LockOpen, Maximize2, Pencil, Pin, PinOff, Route, RotateCcw, RotateCw, Settings, SlidersHorizontal, TimerReset, Trash2, TriangleAlert, Upload, X, ZoomIn, ZoomOut } from 'lucide-react';
+import ClearSearchField from '../ui/ClearSearchField';
+import AppHint from '../ui/AppHint';
+import ProjectSegmentedSwitch from './ProjectSegmentedSwitch';
+import { ControlRail, ControlRailDivider, ControlRailIconButton, ControlRailSection, ControlRailTooltip } from '../ui/ControlRail';
+import GridColumnManager from './GridColumnManager';
 import { useGridColumnSettings } from '../../hooks/useGridColumnSettings';
 import { includesNormalized } from '../../utils/normalizeSearch';
 import { normalizeTextInputValue } from '../../utils/normalizeInputValue';
@@ -48,6 +54,10 @@ import { buildGanttApuPlanningSignals, clampFloatingPanelPosition } from './cron
 import { clampMoveDayDeltaToBounds, isTaskBarDraggable, resolveSubbarClickSelection, resolveSubbarPointerSelection } from './cronogramasGanttInteraction';
 import { applyManualMilestoneDependencyLagUpdates, buildTaskMoveGuideModel, resolveGhostSubbarVisuals, resolveTaskMoveGuideAnchors } from './cronogramasGanttDragPreview';
 import { normalizeManualMilestonesConfig } from './cronogramasGanttManualMilestones';
+import AnimatedSelect from '../ui/AnimatedSelect';
+import AnimatedDateInput from '../ui/AnimatedDateInput';
+import MotionScrollbar from '../ui/MotionScrollbar';
+import SoftSelectToggle from '../ui/SoftSelectToggle';
 import { lazyWithChunkRecovery } from '../../utils/lazyImportRecovery';
 
 const GanttParetoModal = React.lazy(() => import('./GanttParetoModal'));

@@ -6,6 +6,7 @@ const cronogramasSource = readFileSync(new URL('../src/components/projects/Crono
 const marketplaceSource = readFileSync(new URL('../src/pages/Marketplace.jsx', import.meta.url), 'utf8');
 const edtValoradaSource = readFileSync(new URL('../src/components/presupuestos/EdtValoradaModal.jsx', import.meta.url), 'utf8');
 const appRouterSource = readFileSync(new URL('../src/routes/AppRouter.jsx', import.meta.url), 'utf8');
+const dashboardSource = readFileSync(new URL('../src/pages/Dashboard.jsx', import.meta.url), 'utf8');
 
 for (const importStatement of [
     "import { lazy, Suspense } from 'react';",
@@ -16,6 +17,21 @@ for (const importStatement of [
         appRouterSource.includes(importStatement),
         true,
         `AppRouter debe conservar el import runtime: ${importStatement}`,
+    );
+}
+
+for (const importStatement of [
+    '    Calculator,',
+    '    Building2,',
+    '    ShieldCheck,',
+    '    Wrench,',
+    '    ArrowUpRight,',
+    "import { Card, CardContent } from '../components/ui/card';",
+]) {
+    assert.equal(
+        dashboardSource.includes(importStatement),
+        true,
+        `Dashboard debe conservar el import runtime JSX: ${importStatement}`,
     );
 }
 

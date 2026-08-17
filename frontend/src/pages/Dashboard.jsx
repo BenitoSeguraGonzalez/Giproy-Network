@@ -1,10 +1,16 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
-
-
+import {
+    Calculator,
+    Building2,
+    ShieldCheck,
+    Wrench,
+    ArrowUpRight,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 const MotionDiv = motion.div;
+import { Card, CardContent } from '../components/ui/card';
 
 const Dashboard = () => {
     const { user } = useContext(AuthContext);

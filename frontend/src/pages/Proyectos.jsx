@@ -1,4 +1,4 @@
-import { cloneElement, useState, useEffect, useContext, useCallback, useMemo, useRef } from 'react';
+import { Fragment, cloneElement, useState, useEffect, useContext, useCallback, useMemo, Suspense, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { proyectosApi } from '../api/proyectos';
 import { proyectoDetalleApi } from '../api/proyectoDetalle';
@@ -6,9 +6,21 @@ import { presupuestosApi } from '../api/presupuestos';
 import { basesTrabajoApi } from '../api/basesTrabajo';
 import projectCalendarEntriesApi from '../api/projectCalendarEntries';
 import personalTodosApi from '../api/personalTodos';
+import { PLANTILLAS_OPCIONES } from '../constants/plantillas';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { LiquidButton } from '../components/ui/liquid-button';
+import ProjectHeaderActionButton from '../components/projects/ProjectHeaderActionButton';
+import { ProjectSectionIconButton } from '../components/projects/ProjectSectionReportButton';
+import { Input } from '../components/ui/input';
+import { Textarea } from '../components/ui/textarea';
+import AppHint from '../components/ui/AppHint';
+import { Label } from '../components/ui/label';
+import ClearSearchField from '../components/ui/ClearSearchField';
 import { motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import {
     ArrowLeft,
+    ArrowRight,
     Plus,
     Building2,
     X,
@@ -28,7 +40,26 @@ import {
     Eye,
     Play,
     LayoutList,
-    KanbanSquare
+    KanbanSquare,
+    Search,
+    Filter,
+    Save,
+    Network,
+    ListTree,
+    Calendar,
+    ChevronRight,
+    ChevronDown,
+    Settings2,
+    ArchiveX,
+    XCircle,
+    UserPlus,
+    Database,
+    PanelLeftClose,
+    PanelLeftOpen,
+    ListTodo,
+    MessageSquareText,
+    Store,
+    RotateCcw,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 

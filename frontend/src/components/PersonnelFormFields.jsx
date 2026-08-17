@@ -1,9 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import SearchableSelect from './ui/searchable-select';
 import { maestrosApi } from '../api/maestros';
 import { formatInternationalPhone, getInternationalPhoneValidationMessage, resolveCountryPhonePrefix } from '../utils/phoneFormatter';
 import { validarRucEcuador, requiereValidacionRucEcuador } from '../utils/rucValidator';
 import { publicAuthApi } from '../api/publicAuth';
 import { getRegistrationCountryPolicy } from '../utils/registrationCountry';
+import AnimatedSelect from './ui/AnimatedSelect';
 
 const PERSONNEL_SECTION_CLASS = 'rounded-[1.15rem] border border-[#ececec] bg-white p-4 shadow-[4px_4px_12px_#e1e1e1,-4px_-4px_12px_#ffffff]';
 const PERSONNEL_SECTION_TITLE_CLASS = 'mb-4 text-[10px] font-black text-[#F39200] uppercase tracking-[0.2em] border-b border-orange-100 pb-2';
