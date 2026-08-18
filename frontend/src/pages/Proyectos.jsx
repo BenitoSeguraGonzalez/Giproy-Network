@@ -70,6 +70,7 @@ import { useFormatters } from '../hooks/useFormatters';
 import { includesNormalized } from '../utils/normalizeSearch';
 import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
 import useMarketplaceOriginsMap from '../hooks/useMarketplaceOriginsMap';
+import MarketplaceOriginBadgeSet from '../components/marketplace/MarketplaceOriginBadgeSet';
 import { lazyWithChunkRecovery } from '../utils/lazyImportRecovery';
 import { useBimFeatureAccess } from '../hooks/bim/useBimFeatureAccess';
 
