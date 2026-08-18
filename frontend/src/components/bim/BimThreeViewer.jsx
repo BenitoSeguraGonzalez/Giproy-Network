@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { Box, ChevronDown, Layers3, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { Box, ChevronDown, Layers3, RotateCcw, SlidersHorizontal, X } from 'lucide-react';
 import { adaptViewerArtifactToElements } from './bimViewerArtifactAdapter';
 import useBimRenderQuality from '../../hooks/useBimRenderQuality';
 import BimRenderQualityControl from './BimRenderQualityControl';
@@ -104,6 +104,7 @@ const BimThreeViewer = ({
     const controlsRef = useRef(null);
     const onSelectElementRef = useRef(onSelectElement);
     const [raycastHit, setRaycastHit] = useState(null);
+    const [inspectorOpen, setInspectorOpen] = useState(false);
     const [focusedElement, setFocusedElement] = useState(null);
     const [viewControlsOpen, setViewControlsOpen] = useState(false);
     const renderQuality = useBimRenderQuality();
@@ -132,10 +133,15 @@ const BimThreeViewer = ({
         () => visibleThreeElements.find((element) => element.id === selectedElement?.id) || null,
         [visibleThreeElements, selectedElement?.id],
     );
+    const inspectedElementId = raycastHit?.elementId || selectedElement?.id || null;
     const inspectedSceneElement = useMemo(() => {
-        const inspectedId = raycastHit?.elementId || selectedElement?.id;
-        return visibleThreeElements.find((element) => element.id === inspectedId) || null;
-    }, [raycastHit?.elementId, selectedElement?.id, visibleThreeElements]);
+        return visibleThreeElements.find((element) => element.id === inspectedElementId) || null;
+    }, [inspectedElementId, visibleThreeElements]);
+
+    useEffect(() => {
+        setInspectorOpen(Boolean(inspectedElementId));
+    }, [inspectedElementId]);
+
     const inspectedProperties = inspectedSceneElement?.properties_json || inspectedSceneElement?.metadata_json?.properties || {};
     const inspectedPropertyCount =
         Number(inspectedSceneElement?.metadata_json?.viewer_artifact?.property_count) || Object.keys(inspectedProperties || {}).length;
@@ -411,11 +417,14 @@ const BimThreeViewer = ({
                     </p>
                     {raycastHit ? <p className="mt-0.5 text-orange-700">{raycastHit.ifcClass || 'IFC'} · {raycastHit.globalId || raycastHit.elementId}</p> : null}
                 </div>
-                {inspectedSceneElement ? (
-                    <aside className="pointer-events-none absolute right-3 top-3 w-[min(280px,calc(100%-1.5rem))] rounded-2xl border border-zinc-200 bg-white/95 p-3 text-[11px] shadow-sm">
+                {inspectedSceneElement && inspectorOpen ? (
+                    <aside className="pointer-events-auto absolute right-3 top-3 w-[min(280px,calc(100%-1.5rem))] rounded-2xl border border-zinc-200 bg-white/95 p-3 text-[11px] shadow-sm">
                         <p className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">
                             Inspector 3D
                         </p>
+                        <button type="button" aria-label="Cerrar inspector 3D" title="Cerrar inspector" onClick={() => setInspectorOpen(false)} className="absolute right-2 top-2 grid size-7 place-items-center rounded-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
+                            <X className="size-3.5" aria-hidden="true" />
+                        </button>
                         <p className="mt-1 truncate text-sm font-black uppercase tracking-tight text-zinc-900">
                             {inspectedSceneElement.name || inspectedSceneElement.element_type || 'Elemento BIM'}
                         </p>
