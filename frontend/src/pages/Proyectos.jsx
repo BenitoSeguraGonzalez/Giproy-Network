@@ -83,6 +83,7 @@ const FormulaPolinomicaTab = lazyWithChunkRecovery(() => import('../components/p
 const PresupuestoDetail = lazyWithChunkRecovery(() => import('../components/presupuestos/PresupuestoDetail'));
 const BimTab = lazyWithChunkRecovery(() => import('../components/projects/BimTab'));
 const ProjectRecycleModal = lazyWithChunkRecovery(() => import('../components/projects/ProjectRecycleModal'));
+const DatosProyecto = lazyWithChunkRecovery(() => import('../components/projects/DatosProyecto'));
 
 const MotionDiv = motion.div;
 const MotionAside = motion.aside;
