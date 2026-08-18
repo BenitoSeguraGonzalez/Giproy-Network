@@ -2,8 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowRight,
+  Bookmark,
   Box,
   CalendarRange,
+  FileUp,
+  Layers3,
+  ListFilter,
   CheckCircle2,
   ClipboardCheck,
   GitMerge,
@@ -80,6 +84,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
   const [activeVersionId, setActiveVersionId] = useState(null);
   const [selectedElement, setSelectedElement] = useState(null);
   const [viewerMode, setViewerMode] = useState("3d");
+  const [activeModelPanel, setActiveModelPanel] = useState("elements");
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [selectedBudgetLine, setSelectedBudgetLine] = useState(null);
   const [omniClassEnabled, setOmniClassEnabled] = useState(true);
@@ -152,7 +157,34 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
   }, [access?.resolved_company_id, project?.id]);
   const goTo = (next) => setStage(next);
   const empresaId = access?.resolved_company_id;
-  const modelStage = <div className="grid h-full min-h-0 min-w-0 flex-1 gap-3 overflow-hidden p-3 xl:grid-cols-[minmax(0,1fr)_22rem]"><div className="flex min-h-0 min-w-0 flex-col overflow-hidden"><div className="flex h-10 shrink-0 items-center justify-between border border-b-0 border-zinc-200 bg-white px-3"><span className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">Inspección del modelo</span><div className="flex items-center gap-1" role="group" aria-label="Modo de inspección"><button type="button" title="Inspección 3D" aria-label="Inspección 3D" aria-pressed={viewerMode === "3d"} onClick={() => setViewerMode("3d")} className={`grid size-7 place-items-center rounded-md border text-xs ${viewerMode === "3d" ? "border-orange-500 bg-orange-50 text-orange-700" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}><Box className="size-3.5" aria-hidden="true" /></button><button type="button" title="Inspección 2D (respaldo)" aria-label="Inspección 2D, respaldo" aria-pressed={viewerMode === "2d"} onClick={() => setViewerMode("2d")} className={`grid size-7 place-items-center rounded-md border text-[10px] font-bold ${viewerMode === "2d" ? "border-orange-500 bg-orange-50 text-orange-700" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}>2D</button></div></div><div className="min-h-0 flex-1 overflow-hidden">{viewerMode === "3d" ? <BimThreeViewer elements={effectiveWorkspace?.elements || []} ready={Boolean(effectiveWorkspace?.elements?.length)} selectedElement={selectedElement} onSelectElement={setSelectedElement} activeVersionLabel={effectiveWorkspace?.active_version_label} /> : <BimCanvasViewer elements={effectiveWorkspace?.elements || []} ready={Boolean(effectiveWorkspace?.elements?.length)} error={error} selectedElement={selectedElement} onSelectElement={setSelectedElement} activeVersionLabel={effectiveWorkspace?.active_version_label} />}</div></div><aside className="min-h-0 min-w-0 space-y-3 overflow-y-auto"><BimElementExplorerPanel elements={effectiveWorkspace?.elements || []} selectedElementId={selectedElement?.id || selectedElement?.global_id} onSelectElement={setSelectedElement} /><BimVersionSelector models={effectiveWorkspace?.models || []} activeVersionId={activeVersionId || effectiveWorkspace?.active_version_id} onSelectVersion={setActiveVersionId} /><BimImportJobsPanel projectId={project?.id} empresaId={empresaId} onImportReady={refresh} /><BimSavedViewsPanel views={viewStates} onCreate={async (payload) => { await bimViewStatesApi.createByProject(project?.id, { ...payload, version_id: activeVersionId || effectiveWorkspace?.active_version_id || null }, empresaId); refresh(); }} /></aside></div>;
+  const modelStage = <div className="grid h-full min-h-0 min-w-0 flex-1 gap-3 overflow-hidden p-3 xl:grid-cols-[minmax(0,1fr)_22rem]"><div className="flex min-h-0 min-w-0 flex-col overflow-hidden"><div className="flex h-10 shrink-0 items-center justify-between border border-b-0 border-zinc-200 bg-white px-3"><span className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">Inspección del modelo</span><div className="flex items-center gap-1" role="group" aria-label="Modo de inspección"><button type="button" title="Inspección 3D" aria-label="Inspección 3D" aria-pressed={viewerMode === "3d"} onClick={() => setViewerMode("3d")} className={`grid size-7 place-items-center rounded-md border text-xs ${viewerMode === "3d" ? "border-orange-500 bg-orange-50 text-orange-700" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}><Box className="size-3.5" aria-hidden="true" /></button><button type="button" title="Inspección 2D (respaldo)" aria-label="Inspección 2D, respaldo" aria-pressed={viewerMode === "2d"} onClick={() => setViewerMode("2d")} className={`grid size-7 place-items-center rounded-md border text-[10px] font-bold ${viewerMode === "2d" ? "border-orange-500 bg-orange-50 text-orange-700" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}>2D</button></div></div><div className="min-h-0 flex-1 overflow-hidden">{viewerMode === "3d" ? <BimThreeViewer elements={effectiveWorkspace?.elements || []} ready={Boolean(effectiveWorkspace?.elements?.length)} selectedElement={selectedElement} onSelectElement={setSelectedElement} activeVersionLabel={effectiveWorkspace?.active_version_label} /> : <BimCanvasViewer elements={effectiveWorkspace?.elements || []} ready={Boolean(effectiveWorkspace?.elements?.length)} error={error} selectedElement={selectedElement} onSelectElement={setSelectedElement} activeVersionLabel={effectiveWorkspace?.active_version_label} />}</div></div><aside className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50" data-bim-model-options>
+  <div className="shrink-0 border-b border-zinc-200 bg-white p-2">
+    <div className="mb-2 flex items-center gap-2 px-1">
+      <Layers3 className="size-4 text-orange-600" aria-hidden="true" />
+      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-600">Opciones del modelo</p>
+    </div>
+    <div className="grid grid-cols-2 gap-1" role="tablist" aria-label="Opciones del modelo BIM">
+      {[
+        { id: "elements", label: "Elementos", icon: ListFilter, count: effectiveWorkspace?.elements?.length || 0 },
+        { id: "versions", label: "Versiones", icon: Layers3, count: effectiveWorkspace?.versions?.length || 0 },
+        { id: "imports", label: "Importar IFC", icon: FileUp },
+        { id: "views", label: "Vistas", icon: Bookmark, count: viewStates?.length || 0 },
+      ].map(({ id, label, icon: TabIcon, count: tabCount }) => (
+        <button key={id} type="button" role="tab" aria-selected={activeModelPanel === id} onClick={() => setActiveModelPanel(id)} className={"inline-flex min-w-0 items-center justify-center gap-1.5 rounded-md border px-2 py-2 text-[10px] font-semibold transition-colors " + (activeModelPanel === id ? "border-orange-300 bg-orange-50 text-orange-800" : "border-transparent text-zinc-600 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-950")}>
+          {React.createElement(TabIcon, { className: "size-3.5 shrink-0", "aria-hidden": true })}
+          <span className="truncate">{label}</span>
+          {typeof tabCount === "number" ? <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[9px] tabular-nums text-zinc-600">{tabCount}</span> : null}
+        </button>
+      ))}
+    </div>
+  </div>
+  <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2">
+    {activeModelPanel === "elements" ? <BimElementExplorerPanel elements={effectiveWorkspace?.elements || []} selectedElementId={selectedElement?.id || selectedElement?.global_id} onSelectElement={setSelectedElement} /> : null}
+    {activeModelPanel === "versions" ? <BimVersionSelector models={effectiveWorkspace?.models || []} activeVersionId={activeVersionId || effectiveWorkspace?.active_version_id} onSelectVersion={setActiveVersionId} /> : null}
+    {activeModelPanel === "imports" ? <BimImportJobsPanel projectId={project?.id} empresaId={empresaId} onImportReady={refresh} /> : null}
+    {activeModelPanel === "views" ? <BimSavedViewsPanel views={viewStates} onCreate={async (payload) => { await bimViewStatesApi.createByProject(project?.id, { ...payload, version_id: activeVersionId || effectiveWorkspace?.active_version_id || null }, empresaId); refresh(); }} /> : null}
+  </div>
+</aside></div>;
   const stagePanel = {
     model: modelStage,
     costs: <BimCostEstimatePanel projectId={project?.id} empresaId={empresaId} embedded onSelectLine={setSelectedBudgetLine} />,
