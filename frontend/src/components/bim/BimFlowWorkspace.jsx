@@ -92,6 +92,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
   const { workspace, viewStates, loading, error, warnings, refresh } = useBimProjectWorkspace(
     project?.id,
     access?.enabled,
+    activeVersionId,
   );
   const effectiveWorkspace = workspaceOverride || workspace;
   const effectiveDomainState = domainStateOverride || domainState;

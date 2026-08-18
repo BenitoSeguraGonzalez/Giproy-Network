@@ -6,8 +6,8 @@ export const bimLinksApi = {
         const response = await axiosInstance.get(`/bim/projects/${projectId}/links`, withTenantConfig({}, empresaId));
         return response.data;
     },
-    listElementsByProject: async (projectId, empresaId = null) => {
-        const response = await axiosInstance.get(`/bim/projects/${projectId}/elements`, withTenantConfig({}, empresaId));
+    listElementsByProject: async (projectId, empresaId = null, versionId = null) => {
+        const response = await axiosInstance.get(`/bim/projects/${projectId}/elements`, withTenantConfig({ params: versionId ? { version_id: versionId } : {} }, empresaId));
         return response.data;
     },
     searchElementsByProject: async (projectId, params = {}, empresaId = null) => {
