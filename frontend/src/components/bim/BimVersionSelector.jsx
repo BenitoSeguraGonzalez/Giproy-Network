@@ -174,7 +174,7 @@ const BimVersionSelector = ({ models, activeVersionId, onSelectVersion }) => {
                     </p>
                 </div>
             ) : (
-                <div className="space-y-2">
+                <div className="min-w-0 max-w-full space-y-2 overflow-x-hidden">
                     {filteredVersions.map((version) => {
                         const isActive = version.id === activeVersionId;
                         return (
@@ -182,14 +182,14 @@ const BimVersionSelector = ({ models, activeVersionId, onSelectVersion }) => {
                                 key={version.id}
                                 type="button"
                                 onClick={() => onSelectVersion?.(version.id)}
-                                className={`rounded-xl border px-3 py-2 ${
+                                className={`block w-full min-w-0 max-w-full overflow-hidden rounded-xl border px-3 py-2 text-left ${
                                     isActive
                                         ? 'border-[#F39200] bg-orange-50 text-[#F39200]'
                                         : 'border-zinc-200 bg-white text-zinc-600 hover:border-[#F39200]'
                                 }`}
                             >
-                                <div className="flex items-center justify-between gap-3">
-                                    <div className="min-w-0">
+                                <div className="flex min-w-0 items-start justify-between gap-3">
+                                    <div className="min-w-0 flex-1">
                                         <p className="text-[11px] font-black uppercase tracking-widest">
                                             {version.version_label}
                                         </p>
@@ -205,32 +205,32 @@ const BimVersionSelector = ({ models, activeVersionId, onSelectVersion }) => {
                                             ) : null}
                                         </div>
                                     </div>
-                                    <span className="rounded-full border border-current px-2 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                                    <span className="max-w-[45%] shrink-0 truncate rounded-full border border-current px-2 py-0.5 text-[9px] font-black uppercase tracking-widest">
                                         {version.status}
                                     </span>
                                 </div>
                                 <div className="mt-3 grid gap-2 text-left text-[10px] font-semibold text-zinc-500">
-                                    <div className="flex items-center justify-between gap-3">
+                                    <div className="flex min-w-0 items-start justify-between gap-3">
                                         <span>Elementos</span>
                                         <span className="font-black text-zinc-700">{version.element_count ?? 0}</span>
                                     </div>
-                                    <div className="flex items-center justify-between gap-3">
+                                    <div className="flex min-w-0 items-start justify-between gap-3">
                                         <span>Niveles</span>
                                         <span className="font-black text-zinc-700">{version.storey_count ?? 0}</span>
                                     </div>
-                                    <div className="flex items-center justify-between gap-3">
+                                    <div className="flex min-w-0 items-start justify-between gap-3">
                                         <span>Creada</span>
                                         <span className="font-black text-zinc-700">{formatDateTime(version.fecha_creacion)}</span>
                                     </div>
-                                    <div className="flex items-center justify-between gap-3">
+                                    <div className="flex min-w-0 items-start justify-between gap-3">
                                         <span>Origen</span>
                                         <span className="truncate text-right font-black text-zinc-700">
                                             {version.sourceFilename || 'Sin archivo'}
                                         </span>
                                     </div>
                                     {version.notes ? (
-                                        <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-2 py-2 text-[10px] text-zinc-600">
-                                            {version.notes}
+                                        <div className="min-w-0 rounded-xl border border-zinc-200 bg-zinc-50 px-2 py-2 text-[10px] text-zinc-600">
+                                            <span className="block break-all">{version.notes}</span>
                                         </div>
                                     ) : null}
                                 </div>
