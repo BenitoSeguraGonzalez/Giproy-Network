@@ -104,7 +104,6 @@ const BimThreeViewer = ({
     const controlsRef = useRef(null);
     const onSelectElementRef = useRef(onSelectElement);
     const [raycastHit, setRaycastHit] = useState(null);
-    const [raycastHover, setRaycastHover] = useState(null);
     const [focusedElement, setFocusedElement] = useState(null);
     const [viewControlsOpen, setViewControlsOpen] = useState(false);
     const renderQuality = useBimRenderQuality();
@@ -134,9 +133,9 @@ const BimThreeViewer = ({
         [visibleThreeElements, selectedElement?.id],
     );
     const inspectedSceneElement = useMemo(() => {
-        const inspectedId = raycastHover?.elementId || raycastHit?.elementId || selectedElement?.id;
+        const inspectedId = raycastHit?.elementId || selectedElement?.id;
         return visibleThreeElements.find((element) => element.id === inspectedId) || null;
-    }, [raycastHit?.elementId, raycastHover?.elementId, selectedElement?.id, visibleThreeElements]);
+    }, [raycastHit?.elementId, selectedElement?.id, visibleThreeElements]);
     const inspectedProperties = inspectedSceneElement?.properties_json || inspectedSceneElement?.metadata_json?.properties || {};
     const inspectedPropertyCount =
         Number(inspectedSceneElement?.metadata_json?.viewer_artifact?.property_count) || Object.keys(inspectedProperties || {}).length;
@@ -289,24 +288,6 @@ const BimThreeViewer = ({
             return hit?.object?.userData?.element || null;
         };
 
-        const readElementHit = (element) =>
-            element
-                ? {
-                      elementId: element.id,
-                      globalId: element.global_id || '',
-                      ifcClass: element.ifc_class || '',
-                  }
-                : null;
-
-        const hoverElement = (event) => {
-            const nextHover = readElementHit(findRaycastElement(event));
-            setRaycastHover((current) =>
-                current?.elementId === nextHover?.elementId ? current : nextHover,
-            );
-        };
-        const leaveElement = () => {
-            setRaycastHover((current) => (current ? null : current));
-        };
         const pickElement = (event) => {
             const element = findRaycastElement(event);
             if (!element) {
@@ -323,8 +304,6 @@ const BimThreeViewer = ({
             }
         };
 
-        renderer.domElement.addEventListener('pointermove', hoverElement);
-        renderer.domElement.addEventListener('pointerleave', leaveElement);
         renderer.domElement.addEventListener('pointerdown', pickElement);
 
         const animate = () => {
@@ -339,8 +318,6 @@ const BimThreeViewer = ({
             if (animationRef.current) {
                 window.cancelAnimationFrame(animationRef.current);
             }
-            renderer.domElement.removeEventListener('pointermove', hoverElement);
-            renderer.domElement.removeEventListener('pointerleave', leaveElement);
             renderer.domElement.removeEventListener('pointerdown', pickElement);
             controls.dispose();
             scene.traverse((node) => {
@@ -373,9 +350,9 @@ const BimThreeViewer = ({
             data-bim-three-raycast-hit={raycastHit?.elementId || ''}
             data-bim-three-raycast-global-id={raycastHit?.globalId || ''}
             data-bim-three-raycast-ifc-class={raycastHit?.ifcClass || ''}
-            data-bim-three-hover-element={raycastHover?.elementId || ''}
-            data-bim-three-hover-global-id={raycastHover?.globalId || ''}
-            data-bim-three-hover-ifc-class={raycastHover?.ifcClass || ''}
+            data-bim-three-hover-element=""
+            data-bim-three-hover-global-id=""
+            data-bim-three-hover-ifc-class=""
             data-bim-three-controls="orbit"
             data-bim-three-focus-element={focusedElement?.elementId || ''}
             data-bim-three-focus-global-id={focusedElement?.globalId || ''}
