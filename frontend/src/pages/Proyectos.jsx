@@ -10,6 +10,7 @@ import { PLANTILLAS_OPCIONES } from '../constants/plantillas';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { LiquidButton } from '../components/ui/liquid-button';
 import ProjectHeaderActionButton from '../components/projects/ProjectHeaderActionButton';
+import ProjectSegmentedSwitch from '../components/projects/ProjectSegmentedSwitch';
 import { ProjectSectionIconButton } from '../components/projects/ProjectSectionReportButton';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
