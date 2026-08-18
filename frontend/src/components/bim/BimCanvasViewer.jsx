@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Building2, Link2, Maximize2, Move, Search } from 'lucide-react';
+import { Building2, Link2, Maximize2, Minus, Move, Plus, Search } from 'lucide-react';
 
 const VIEWER_BACKGROUND = '#F8FAFC';
 const GRID_COLOR = '#E4E4E7';
@@ -639,6 +639,18 @@ const BimCanvasViewer = ({
         onSelectElement?.(hitElement);
     };
 
+    const adjustZoom = (factor) => {
+        setViewport((current) => {
+            const nextScale = Math.min(2.5, Math.max(0.55, current.scale * factor));
+            if (nextScale === current.scale || !canvasSize.width || !canvasSize.height) return current;
+            const centerX = canvasSize.width / 2;
+            const centerY = canvasSize.height / 2;
+            const worldCenterX = (centerX - current.offsetX) / current.scale;
+            const worldCenterY = (centerY - current.offsetY) / current.scale;
+            return { scale: nextScale, offsetX: centerX - worldCenterX * nextScale, offsetY: centerY - worldCenterY * nextScale };
+        });
+    };
+
     const handleResetViewport = () => {
         setViewport({ scale: 1, offsetX: 24, offsetY: 24 });
     };
@@ -846,6 +858,15 @@ const BimCanvasViewer = ({
                 ref={containerRef}
                 className="relative flex flex-1 overflow-hidden bg-[linear-gradient(135deg,#F8FAFC_0%,#EEF2F7_100%)]"
             >
+                <div className="pointer-events-auto absolute right-3 top-3 z-20 flex items-center gap-1 rounded-xl border border-zinc-200 bg-white/95 p-1 shadow-md backdrop-blur" data-bim-canvas-zoom-controls aria-label="Controles de zoom 2D">
+                    <button type="button" onClick={() => adjustZoom(0.9)} title="Alejar" aria-label="Alejar" className="grid size-8 place-items-center rounded-lg text-zinc-700 hover:bg-orange-50 hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
+                        <Minus className="size-4" aria-hidden="true" />
+                    </button>
+                    <span className="min-w-12 text-center text-[10px] font-black tabular-nums text-zinc-600" aria-live="polite">{Math.round(viewport.scale * 100)}%</span>
+                    <button type="button" onClick={() => adjustZoom(1.1)} title="Acercar" aria-label="Acercar" className="grid size-8 place-items-center rounded-lg text-zinc-700 hover:bg-orange-50 hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
+                        <Plus className="size-4" aria-hidden="true" />
+                    </button>
+                </div>
                 {!ready ? (
                     <div className="flex flex-1 items-center justify-center px-8 py-10">
                         <div className="w-full max-w-xl rounded-[1.5rem] border border-dashed border-zinc-300 bg-white/75 px-8 py-10 text-center backdrop-blur">

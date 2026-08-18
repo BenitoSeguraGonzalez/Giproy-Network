@@ -299,10 +299,14 @@ const BimThreeViewer = ({
                 : null;
 
         const hoverElement = (event) => {
-            setRaycastHover(readElementHit(findRaycastElement(event)));
+            const nextHover = readElementHit(findRaycastElement(event));
+            setRaycastHover((current) =>
+                current?.elementId === nextHover?.elementId ? current : nextHover,
+            );
         };
-        const leaveElement = () => setRaycastHover(null);
-
+        const leaveElement = () => {
+            setRaycastHover((current) => (current ? null : current));
+        };
         const pickElement = (event) => {
             const element = findRaycastElement(event);
             if (!element) {
