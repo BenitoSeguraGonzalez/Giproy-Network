@@ -105,6 +105,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
     }),
     [effectiveWorkspace],
   );
+  const versionCount = (effectiveWorkspace?.models || []).reduce((total, model) => total + (model.versions || []).length, 0);
   const hasModel = metrics.models > 0 || metrics.elements > 0;
   const coordinationBlocked = effectiveDomainState.budget !== "ready" || effectiveDomainState.gantt !== "ready" || !hasModel;
   useEffect(() => {
@@ -167,7 +168,7 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
     <div className="grid grid-cols-2 gap-1" role="tablist" aria-label="Opciones del modelo BIM">
       {[
         { id: "elements", label: "Elementos", icon: ListFilter, count: effectiveWorkspace?.elements?.length || 0 },
-        { id: "versions", label: "Versiones", icon: Layers3, count: effectiveWorkspace?.versions?.length || 0 },
+        { id: "versions", label: "Versiones", icon: Layers3, count: versionCount },
         { id: "imports", label: "Importar IFC", icon: FileUp },
         { id: "views", label: "Vistas", icon: Bookmark, count: viewStates?.length || 0 },
       ].map(({ id, label, icon: TabIcon, count: tabCount }) => (

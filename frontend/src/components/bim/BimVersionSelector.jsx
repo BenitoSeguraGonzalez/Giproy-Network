@@ -229,7 +229,7 @@ const BimVersionSelector = ({ models, activeVersionId, onSelectVersion, projectI
                                     </div>
                                     <div className="flex min-w-0 items-start justify-between gap-3">
                                         <span>Origen</span>
-                                        <span className="truncate text-right font-black text-zinc-700">
+                                        <span className="min-w-0 max-w-[65%] truncate break-all text-right font-black text-zinc-700">
                                             {version.sourceFilename || 'Sin archivo'}
                                         </span>
                                     </div>
