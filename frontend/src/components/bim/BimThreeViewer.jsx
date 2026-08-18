@@ -445,7 +445,7 @@ const BimThreeViewer = ({
                     {raycastHit ? <p className="mt-0.5 text-orange-700">{raycastHit.ifcClass || 'IFC'} Â· {raycastHit.globalId || raycastHit.elementId}</p> : null}
                 </div>
                 {inspectedSceneElement && inspectorOpen ? (
-                    <aside className="pointer-events-auto absolute right-3 top-3 w-[min(280px,calc(100%-1.5rem))] rounded-2xl border border-zinc-200 bg-white/95 p-3 text-[11px] shadow-sm">
+                    <aside className="pointer-events-auto absolute right-3 top-28 w-[min(280px,calc(100%-1.5rem))] rounded-2xl border border-zinc-200 bg-white/95 p-3 text-[11px] shadow-sm">
                         <p className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">
                             Inspector 3D
                         </p>
