@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Layers3, Search } from 'lucide-react';
+import { Check, Layers3, Loader2, Search, Trash2 } from 'lucide-react';
+import { bimModelsApi } from '../../api/bimModels';
 
 const formatDateTime = (value) => {
     if (!value) {
@@ -39,9 +40,11 @@ const buildDisciplineSummary = (versions = []) => {
         .slice(0, 4);
 };
 
-const BimVersionSelector = ({ models, activeVersionId, onSelectVersion }) => {
+const BimVersionSelector = ({ models, activeVersionId, onSelectVersion, projectId, empresaId, onVersionsChanged }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterMode, setFilterMode] = useState('all');
+    const [actionId, setActionId] = useState(null);
+    const [message, setMessage] = useState('');
     const versions = useMemo(
         () =>
             models.flatMap((model) =>
@@ -144,7 +147,7 @@ const BimVersionSelector = ({ models, activeVersionId, onSelectVersion }) => {
                         </button>
                     </div>
                     <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
-                        {filteredVersions.length} versiones BIM visibles
+                        {filteredVersions.length} versiones BIM visibles{message ? ' · ' + message : ''}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.16em]">
                         <span className="rounded-full border border-zinc-200 bg-white px-2 py-1 text-zinc-600">
@@ -178,10 +181,12 @@ const BimVersionSelector = ({ models, activeVersionId, onSelectVersion }) => {
                     {filteredVersions.map((version) => {
                         const isActive = version.id === activeVersionId;
                         return (
-                            <button
+                            <div
                                 key={version.id}
-                                type="button"
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => onSelectVersion?.(version.id)}
+                                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onSelectVersion?.(version.id); }}
                                 className={`block w-full min-w-0 max-w-full overflow-hidden rounded-xl border px-3 py-2 text-left ${
                                     isActive
                                         ? 'border-[#F39200] bg-orange-50 text-[#F39200]'
@@ -234,8 +239,14 @@ const BimVersionSelector = ({ models, activeVersionId, onSelectVersion }) => {
                                         </div>
                                     ) : null}
                                 </div>
-                            </button>
-                        );
+                            <div className="mt-3 flex items-center justify-between gap-2 border-t border-zinc-100 pt-2">
+                                <span className="text-[9px] font-semibold text-zinc-400">{isActive ? 'Vista seleccionada' : 'Seleccionar para inspeccionar'}</span>
+                                <div className="flex items-center gap-1">
+                                    {!version.is_active ? <button type="button" disabled={Boolean(actionId)} onClick={async (event) => { event.stopPropagation(); setActionId(version.id); setMessage(''); try { await bimModelsApi.activateVersion(projectId, version.id, empresaId); onSelectVersion?.(version.id); onVersionsChanged?.(); setMessage('Versión activada.'); } catch (error) { setMessage(error?.response?.data?.detail || 'No se pudo activar la versión.'); } finally { setActionId(null); } }} className="inline-flex h-7 items-center gap-1 rounded-md border border-emerald-200 px-2 text-[9px] font-bold text-emerald-700 hover:bg-emerald-50 disabled:opacity-50" title="Activar versión">{actionId === version.id ? <Loader2 className="size-3 animate-spin" /> : <Check className="size-3" />}Activar</button> : null}
+                                    {!version.is_active ? <button type="button" disabled={Boolean(actionId)} onClick={async (event) => { event.stopPropagation(); if (!window.confirm('Eliminar esta versión BIM? Esta acción no se puede deshacer.')) return; setActionId(version.id); setMessage(''); try { await bimModelsApi.deleteVersion(projectId, version.id, empresaId); if (String(activeVersionId) === String(version.id)) onSelectVersion?.(null); onVersionsChanged?.(); setMessage('Versión eliminada.'); } catch (error) { setMessage(error?.response?.data?.detail || 'No se pudo eliminar la versión.'); } finally { setActionId(null); } }} className="inline-flex h-7 items-center gap-1 rounded-md border border-rose-200 px-2 text-[9px] font-bold text-rose-700 hover:bg-rose-50 disabled:opacity-50" title="Eliminar versión"><Trash2 className="size-3" />Eliminar</button> : null}
+                                </div>
+                            </div>
+                            </div>                        );
                     })}
                 </div>
             )}

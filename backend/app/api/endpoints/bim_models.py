@@ -6,6 +6,7 @@ from urllib.parse import urlsplit
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse, Response
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_active_user, get_db
@@ -3028,6 +3029,63 @@ def decide_bim_version_review(
     db.commit()
     db.refresh(version)
     return version.bim_model
+
+
+@router.post("/projects/{project_id}/versions/{version_id}/activate", response_model=BimModelResponse)
+def activate_bim_version(
+    project_id: int,
+    version_id: int,
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
+    if not access.enabled or not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="No tienes permisos para activar versiones BIM.")
+    version = db.query(BimModelVersion).join(BimModelVersion.bim_model).filter(
+        BimModelVersion.id == version_id,
+        BimModelVersion.bim_model.has(proyecto_id=project.id, empresa_id=project.empresa_id),
+    ).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="Version BIM no encontrada.")
+    db.query(BimModelVersion).filter(
+        BimModelVersion.bim_model_id == version.bim_model_id,
+        BimModelVersion.id != version.id,
+    ).update({BimModelVersion.is_active: False}, synchronize_session=False)
+    version.is_active = True
+    db.commit()
+    db.refresh(version)
+    return version.bim_model
+
+
+@router.delete("/projects/{project_id}/versions/{version_id}")
+def delete_bim_version(
+    project_id: int,
+    version_id: int,
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
+    if not access.enabled or not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="No tienes permisos para eliminar versiones BIM.")
+    version = db.query(BimModelVersion).join(BimModelVersion.bim_model).filter(
+        BimModelVersion.id == version_id,
+        BimModelVersion.bim_model.has(proyecto_id=project.id, empresa_id=project.empresa_id),
+    ).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="Version BIM no encontrada.")
+    if version.is_active:
+        raise HTTPException(status_code=409, detail="Activa otra version antes de eliminar esta version BIM.")
+    try:
+        db.delete(version)
+        db.commit()
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="No se puede eliminar esta version porque tiene referencias BIM dependientes.") from exc
+    return {"deleted": True, "version_id": version_id}
 
 
 @router.get(

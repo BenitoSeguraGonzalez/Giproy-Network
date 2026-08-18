@@ -901,6 +901,14 @@ export const bimModelsApi = {
         );
         return response.data;
     },
+    activateVersion: async (projectId, versionId, empresaId = null) => {
+        const response = await axiosInstance.post('/bim/projects/' + projectId + '/versions/' + versionId + '/activate', null, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    deleteVersion: async (projectId, versionId, empresaId = null) => {
+        const response = await axiosInstance.delete('/bim/projects/' + projectId + '/versions/' + versionId, withTenantConfig({}, empresaId));
+        return response.data;
+    },
     decideVersionReview: async (projectId, versionId, payload, empresaId = null) => {
         const response = await axiosInstance.post(`/bim/projects/${projectId}/versions/${versionId}/review-decision`, payload, withTenantConfig({}, empresaId));
         return response.data;

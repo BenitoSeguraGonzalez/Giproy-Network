@@ -163,6 +163,23 @@ const BimThreeViewer = ({
         setFocusedElement(null);
     };
 
+    const handleSetView = (view) => {
+        const camera = cameraRef.current;
+        const controls = controlsRef.current;
+        if (!camera || !controls) return;
+        const positions = {
+            top: [0, 520, 0.01],
+            front: [0, 260, 560],
+            right: [560, 260, 0],
+            iso: [260, 260, 360],
+        };
+        const [x, y, z] = positions[view] || positions.iso;
+        camera.position.set(x, y, z);
+        controls.target.set(0, 0, 0);
+        camera.lookAt(0, 0, 0);
+        controls.update();
+    };
+
     const handleFocusSelectedElement = () => {
         const camera = cameraRef.current;
         const controls = controlsRef.current;
@@ -389,7 +406,7 @@ const BimThreeViewer = ({
                 {viewControlsOpen ? <div className="absolute right-3 top-10 z-30 w-[min(34rem,calc(100%-1.5rem))] rounded-md border border-zinc-300 bg-white p-3 shadow-xl">
                     <div className="flex items-center gap-1.5">
                         <button type="button" title="Restablecer vista" aria-label="Restablecer vista" data-bim-three-reset-view="true" onClick={handleResetCamera} disabled={!ready || preparedElements.length === 0} className="grid size-8 place-items-center rounded-md border border-zinc-200 text-zinc-700 hover:border-orange-500 disabled:opacity-40"><RotateCcw className="size-3.5" /></button>
-                        <button type="button" title="Enfocar selección" aria-label="Enfocar selección" data-bim-three-focus-selected="true" onClick={handleFocusSelectedElement} disabled={!ready || !selectedSceneElement} className="grid size-8 place-items-center rounded-md border border-zinc-200 text-zinc-700 hover:border-orange-500 disabled:opacity-40"><Box className="size-3.5" /></button>
+                        <button type="button" title="Enfocar selecciÃ³n" aria-label="Enfocar selecciÃ³n" data-bim-three-focus-selected="true" onClick={handleFocusSelectedElement} disabled={!ready || !selectedSceneElement} className="grid size-8 place-items-center rounded-md border border-zinc-200 text-zinc-700 hover:border-orange-500 disabled:opacity-40"><Box className="size-3.5" /></button>
                         <BimRenderQualityControl {...renderQuality} />
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-2 border-t border-zinc-100 pt-3">
@@ -399,6 +416,16 @@ const BimThreeViewer = ({
                 </div> : null}
             </div>
             <div className="relative min-h-[320px] flex-1 bg-zinc-50" ref={mountRef}>
+                <div className="pointer-events-auto absolute right-3 top-3 z-20 flex flex-col items-center gap-1" data-bim-three-orientation-gizmo>
+                    <div className="grid size-12 place-items-center rounded-lg border border-zinc-300 bg-white/90 text-[9px] font-black uppercase tracking-wide text-zinc-500 shadow-sm" title="Gizmo de orientación">3D</div>
+                    <div className="grid grid-cols-3 gap-1">
+                        <button type="button" aria-label="Vista superior" title="Vista superior" onClick={() => handleSetView('top')} className="grid size-7 place-items-center rounded-md border border-zinc-200 bg-white/90 text-[9px] font-bold text-zinc-600 hover:border-orange-500 hover:text-orange-700">T</button>
+                        <button type="button" aria-label="Vista frontal" title="Vista frontal" onClick={() => handleSetView('front')} className="grid size-7 place-items-center rounded-md border border-zinc-200 bg-white/90 text-[9px] font-bold text-zinc-600 hover:border-orange-500 hover:text-orange-700">F</button>
+                        <button type="button" aria-label="Vista derecha" title="Vista derecha" onClick={() => handleSetView('right')} className="grid size-7 place-items-center rounded-md border border-zinc-200 bg-white/90 text-[9px] font-bold text-zinc-600 hover:border-orange-500 hover:text-orange-700">R</button>
+                    </div>
+                    <button type="button" aria-label="Vista isométrica" title="Vista isométrica" onClick={() => handleSetView('iso')} className="h-7 rounded-md border border-orange-200 bg-orange-50 px-2 text-[9px] font-bold text-orange-700 hover:border-orange-500">ISO</button>
+                </div>
+
                 {!ready || visibleThreeElements.length === 0 ? (
                     <div className="absolute inset-0 flex items-center justify-center p-8 text-center">
                         <div>
@@ -413,9 +440,9 @@ const BimThreeViewer = ({
                 ) : null}
                 <div className="pointer-events-none absolute bottom-3 left-3 rounded-md border border-zinc-200 bg-white/90 px-2.5 py-1.5 text-[10px] text-zinc-600 shadow-sm">
                     <p className="font-semibold text-zinc-800">
-                        {activeVersionLabel || 'Version BIM'} {activeStoreyName ? `· ${activeStoreyName}` : ''}
+                        {activeVersionLabel || 'Version BIM'} {activeStoreyName ? `Â· ${activeStoreyName}` : ''}
                     </p>
-                    {raycastHit ? <p className="mt-0.5 text-orange-700">{raycastHit.ifcClass || 'IFC'} · {raycastHit.globalId || raycastHit.elementId}</p> : null}
+                    {raycastHit ? <p className="mt-0.5 text-orange-700">{raycastHit.ifcClass || 'IFC'} Â· {raycastHit.globalId || raycastHit.elementId}</p> : null}
                 </div>
                 {inspectedSceneElement && inspectorOpen ? (
                     <aside className="pointer-events-auto absolute right-3 top-3 w-[min(280px,calc(100%-1.5rem))] rounded-2xl border border-zinc-200 bg-white/95 p-3 text-[11px] shadow-sm">
@@ -451,7 +478,7 @@ const BimThreeViewer = ({
                                         Material / sistema
                                     </p>
                                     <p className="mt-1 truncate font-bold text-[#0F4D73]">
-                                        {[inspectedMaterial, inspectedSystem].filter(Boolean).join(' · ')}
+                                        {[inspectedMaterial, inspectedSystem].filter(Boolean).join(' Â· ')}
                                     </p>
                                 </div>
                             ) : null}
