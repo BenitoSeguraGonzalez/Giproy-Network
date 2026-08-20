@@ -1,5 +1,6 @@
 import { Fragment, cloneElement, useState, useEffect, useContext, useCallback, useMemo, Suspense, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { PresupuestoProvider } from '../context/PresupuestoContext';
 import { proyectosApi } from '../api/proyectos';
 import { proyectoDetalleApi } from '../api/proyectoDetalle';
 import { presupuestosApi } from '../api/presupuestos';
@@ -72,6 +73,7 @@ import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
 import useMarketplaceOriginsMap from '../hooks/useMarketplaceOriginsMap';
 import MarketplaceOriginBadgeSet from '../components/marketplace/MarketplaceOriginBadgeSet';
 import { lazyWithChunkRecovery } from '../utils/lazyImportRecovery';
+import { normalizeBudgetCollection } from '../utils/budgetResponse';
 import { useBimFeatureAccess } from '../hooks/bim/useBimFeatureAccess';
 
 const Stakeholders = lazyWithChunkRecovery(() => import('../components/projects/Stakeholders'));
@@ -906,7 +908,7 @@ const Proyectos = () => {
                 setResolvingPresupuesto(true);
                 const empId = selectedProject.empresa_id || selectedEmpresa?.id || user?.empresa_id;
                 const response = await presupuestosApi.getByProyecto(selectedProject.id, empId);
-                const presupuestos = response?.data || [];
+                const presupuestos = normalizeBudgetCollection(response);
 
                 if (!cancelled) {
                     if (presupuestos.length === 0) {
@@ -1783,7 +1785,7 @@ const Proyectos = () => {
                 revisions.map(async (rev) => {
                     try {
                         const presRes = await presupuestosApi.getByProyecto(rev.id, rev.empresa_id || empIdForApi);
-                        const presupuestos = presRes?.data || [];
+                        const presupuestos = normalizeBudgetCollection(presRes);
                         const operativo = presupuestos[0] || null;
                         revisionBudgets[rev.id] = buildRevisionBudgetEntry(
                             operativo,
@@ -1907,7 +1909,7 @@ const Proyectos = () => {
                         revisionProject.id,
                         revisionProject.empresa_id || empresaId
                     );
-                    const presupuestos = presRes?.data || [];
+                    const presupuestos = normalizeBudgetCollection(presRes);
                     revisionBudgets[revisionProject.id] = buildRevisionBudgetEntry(
                         presupuestos[0] || null,
                         revisionProject.moneda || rootProject?.moneda || 'USD'
@@ -2813,7 +2815,7 @@ const Proyectos = () => {
                 (revisions || []).map(async (revisionProject) => {
                     try {
                         const presRes = await presupuestosApi.getByProyecto(revisionProject.id, revisionProject.empresa_id || empIdForApi);
-                        const presupuestos = presRes?.data || [];
+                        const presupuestos = normalizeBudgetCollection(presRes);
                         revisionBudgets[revisionProject.id] = buildRevisionBudgetEntry(
                             presupuestos[0] || null,
                             revisionProject.moneda || project.moneda || 'USD'

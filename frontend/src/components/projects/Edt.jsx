@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, User, ChevronRight, ChevronDown, GripVertical, Fol
 import { edtApi } from '../../api/edt';
 import reportingApi from '../../api/reporting';
 import { presupuestosApi } from '../../api/presupuestos';
+import { normalizeBudgetCollection } from '../../utils/budgetResponse';
 import { cronogramasApi } from '../../api/cronogramas';
 import { stakeholdersApi, rolesApi } from '../../api/stakeholders';
 import { AuthContext } from '../../context/AuthContext';
@@ -808,7 +809,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
         try {
             setBudgetLoading(true);
             const response = await presupuestosApi.getByProyecto(project.id, empId);
-            const budget = response?.data?.[0] || null;
+            const budget = normalizeBudgetCollection(response)[0] || null;
             if (!budget?.id) {
                 setActiveBudget(null);
                 return;

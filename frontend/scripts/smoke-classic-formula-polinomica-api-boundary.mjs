@@ -23,7 +23,7 @@ for (const importStatement of [
 }
 
 for (const token of [
-    'presupuestosApi.getByProyecto(projectId)',
+    'presupuestosApi.getByProyecto(projectId, empresaId)',
     'polinomicaApi.getIndicesInec()',
     'polinomicaApi.getResources(budgetId)',
     'polinomicaApi.getFormula(budgetId)',

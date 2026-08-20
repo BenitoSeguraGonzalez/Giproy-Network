@@ -76,6 +76,7 @@
     "smoke:classic-frontend-quality": "node scripts/smoke-classic-frontend-quality.mjs",
     "smoke:classic-gantt-performance": "node scripts/smoke-classic-gantt-performance-guards.mjs",
     "smoke:classic-projects-visual": "node scripts/smoke-classic-projects-visual-quality.mjs",
+    "smoke:classic-proyectos-budget-bootstrap": "node scripts/smoke-classic-proyectos-budget-bootstrap.mjs",
     "smoke:classic-project-delete-modal": "node scripts/smoke-classic-project-delete-modal-single-source.mjs",
     "smoke:classic-project-recycle-lazy": "node scripts/smoke-classic-project-recycle-lazy-boundary.mjs",
     "smoke:classic-runtime-symbols": "node scripts/smoke-classic-runtime-symbols.mjs",

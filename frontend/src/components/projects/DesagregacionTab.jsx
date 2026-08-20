@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo, useRef, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { presupuestosApi } from '../../api/presupuestos';
+import { normalizeBudgetCollection } from '../../utils/budgetResponse';
 import { apusApi } from '../../api/apus';
 import { recursosApi } from '../../api/recursos';
 import { edtApi } from '../../api/edt';
@@ -507,15 +508,19 @@ const DesagregacionTab = ({ project }) => {
     useEffect(() => {
         const fetchData = async () => {
             if (!project?.id) return;
+            setSelectedPresId(null);
+            setBudgetData(null);
             try {
                 setLoading(true);
-                const empresaId = selectedEmpresa?.id;
+                const empresaId = project?.empresa_id || selectedEmpresa?.id || user?.empresa_id;
                 const [presupuestoResult, edtResult] = await Promise.allSettled([
-                    presupuestosApi.getAll({ proyecto_id: project.id }),
+                    presupuestosApi.getAll({ proyecto_id: project.id, empresa_id: empresaId }),
                     edtApi.getTree(project.id, empresaId)
                 ]);
 
-                const presData = presupuestoResult.status === 'fulfilled' ? presupuestoResult.value : [];
+                const presData = presupuestoResult.status === 'fulfilled'
+                    ? normalizeBudgetCollection(presupuestoResult.value)
+                    : [];
                 if (presupuestoResult.status === 'rejected') {
                     globalThis.reportClientError?.("Error cargando presupuestos de desagregación:", presupuestoResult.reason);
                 }
@@ -540,7 +545,7 @@ const DesagregacionTab = ({ project }) => {
             }
         };
         fetchData();
-    }, [project?.id, project?.revision, selectedEmpresa]);
+    }, [project?.empresa_id, project?.id, project?.revision, selectedEmpresa?.id, user?.empresa_id]);
 
     // Cargar detalle del presupuesto seleccionado
     useEffect(() => {
@@ -548,11 +553,13 @@ const DesagregacionTab = ({ project }) => {
             if (!selectedPresId) return;
             try {
                 setLoadingDetails(true);
-                const data = await presupuestosApi.getById(selectedPresId, selectedEmpresa?.id);
-                setBudgetData(data);
+                const empresaId = project?.empresa_id || selectedEmpresa?.id || user?.empresa_id;
+                const data = await presupuestosApi.getById(selectedPresId, empresaId);
+                const detalle = Array.isArray(data?.detalle) ? data.detalle : [];
+                setBudgetData({ ...data, detalle });
                 
                 // Cargar VAE de todos los APUs en el presupuesto
-                const apuIds = [...new Set(data.detalle.filter(d => d.apu_id).map(d => d.apu_id))];
+                const apuIds = [...new Set(detalle.filter(d => d.apu_id).map(d => d.apu_id))];
                 loadApusVAE(apuIds);
 
             } catch (error) {
@@ -562,7 +569,7 @@ const DesagregacionTab = ({ project }) => {
             }
         };
         fetchBudgetDetails();
-    }, [selectedPresId, selectedEmpresa, loadApusVAE]);
+    }, [loadApusVAE, project?.empresa_id, selectedEmpresa?.id, selectedPresId, user?.empresa_id]);
 
     // Funciones para el Selector de CPC
     const handleOpenCpcModal = (recurso) => {
@@ -1519,7 +1526,7 @@ const DesagregacionTab = ({ project }) => {
                                                                     </div>
                                                                 </TableCell>
                                                                 <TableCell>
-                                                                    <span className={`font-mono text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded ${hasCpc ? 'text-[#F39200] bg-orange-50' : isNestedApu ? 'text-transparent' : 'text-zinc-400 border border-dashed border-zinc-200'}`}>
+                                                                    <span className={`font-mono text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded ${hasCpc ? 'text-orange-700 bg-orange-50' : isNestedApu ? 'text-transparent' : 'text-zinc-400 border border-dashed border-zinc-200'}`}>
                                                                         {isNestedApu ? '' : (cpcCode || 'SIN CPC')}
                                                                     </span>
                                                                 </TableCell>

@@ -1,3 +1,5 @@
+export { normalizeBudgetCollection } from '../../utils/budgetResponse.js';
+
 export const shouldAttemptGanttBudgetFallback = ({
     scheduleTab,
     resolvedBudgetId,

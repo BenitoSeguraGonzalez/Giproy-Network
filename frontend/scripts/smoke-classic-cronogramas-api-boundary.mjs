@@ -242,19 +242,19 @@ assert.doesNotMatch(
 
 assert.match(
     ganttSource,
-    /const handleRendimientoChange = \(itemId, rawValue\) => \{[\s\S]*?setResourceDrafts\(\(prev\) => \(\{ \.\.\.prev, \[itemId\]: normalized \}\)\);[\s\S]*?\r?\n    \};\r?\n\r?\n    const handleResourceQuantityChange/s,
+    /const handleRendimientoChange = \(itemId, rawValue\) => \{[\s\S]*?setResourceDrafts\(\(prev\) => \(\{ \.\.\.prev, \[itemId\]: normalized \}\)\);[\s\S]*?\r?\n    \};\r?\n\r?\n    const handleResourceQuantityEditorOpen/s,
     'CronogramaGantt debe permitir escribir rendimiento sin persistir/formatear metadata en cada tecla',
 );
 
 assert.match(
     ganttSource,
-    /const handleResourceQuantityChange = \(itemId, rawValue\) => \{[\s\S]*?setResourceQuantityDrafts\(\(prev\) => \(\{ \.\.\.prev, \[itemId\]: normalized \}\)\);[\s\S]*?\r?\n    \};\r?\n\r?\n    const handleResourceQuantityBlur/s,
+    /const _handleResourceQuantityChange = \(itemId, rawValue\) => \{[\s\S]*?setResourceQuantityDrafts\(\(prev\) => \(\{ \.\.\.prev, \[itemId\]: normalized \}\)\);[\s\S]*?\r?\n    \};\r?\n\r?\n    const persistRendimientoDraft/s,
     'CronogramaGantt debe permitir escribir cantidad sin persistir/formatear metadata en cada tecla',
 );
 
 assert.match(
     ganttSource,
-    /const handleResourceQuantityBlur = \(itemId\) => \{[\s\S]*?persistLockedResourceQuantityDraft\(itemId, lockedValues\.cantidad, newRendimiento\);[\s\S]*?persistResourceQuantityDraft\(itemId, normalized\);[\s\S]*?const handleRendimientoBlur = \(itemId\) => \{[\s\S]*?persistRendimientoDraft\(itemId, normalized\);/s,
+    /const _handleResourceQuantityBlur = \(itemId\) => \{[\s\S]*?persistLockedResourceQuantityDraft\(itemId, lockedValues\.cantidad, newRendimiento\);[\s\S]*?persistResourceQuantityDraft\(itemId, normalized\);[\s\S]*?const handleRendimientoBlur = \(itemId\) => \{[\s\S]*?persistRendimientoDraft\(itemId, normalized\);/s,
     'CronogramaGantt debe persistir cantidad y rendimiento al confirmar la entrada',
 );
 
@@ -320,7 +320,7 @@ assert.match(
 
 assert.match(
     ganttSource,
-    /lastResourceEditorResetVersionRef\.current !== resetVersion[\s\S]*?activeResourceInputRef\.current = null;[\s\S]*?cancelledResourceInputRef\.current = null;[\s\S]*?resetVersion, visibleResourceLines/s,
+    /lastResourceEditorResetVersionRef\.current !== resetVersion[\s\S]*?activeResourceInputRef\.current = null;[\s\S]*?cancelledResourceInputRef\.current = null;[\s\S]*?\}, \[[\s\S]*?resetVersion[\s\S]*?visibleResourceLines\]\);/s,
     'El editor light debe invalidar el input activo y reconstruir su tabla local al restaurar',
 );
 

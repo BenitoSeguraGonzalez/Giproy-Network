@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { polinomicaApi } from '../../api/polinomica';
 import { presupuestosApi } from '../../api/presupuestos';
+import { normalizeBudgetCollection } from '../../utils/budgetResponse';
 import reportingApi from '../../api/reporting';
 import { extractBlobErrorMessage } from '../../utils/apiBlobErrors';
 import { appAlert } from '../../utils/appDialog';
@@ -56,7 +57,7 @@ const FORMULA_DARK_PILL_BUTTON =
   'inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-[0.85rem] border border-white/8 bg-[#15181d] px-3.5 text-[9px] font-black uppercase tracking-[0.16em] text-white/82 shadow-[3px_3px_8px_rgba(0,0,0,0.32),-2px_-2px_6px_rgba(255,255,255,0.045)] transition-all duration-200 hover:border-white/14 hover:bg-[#1b1f25] hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-white/8 disabled:hover:bg-[#15181d] disabled:hover:text-white/82';
 
 const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
-  const { user } = useContext(AuthContext);
+  const { user, selectedEmpresa } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [formulaData, setFormulaData] = useState(null);
@@ -120,8 +121,9 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
     if (!projectId) return;
     setLoading(true);
     try {
-      const response = await presupuestosApi.getByProyecto(projectId);
-      const budgets = response.data;
+      const empresaId = activeRevision?.empresa_id || selectedEmpresa?.id || user?.empresa_id;
+      const response = await presupuestosApi.getByProyecto(projectId, empresaId);
+      const budgets = normalizeBudgetCollection(response);
       const currentPres = budgets.find((budget) => budget.revision === activeRevision?.revision) || budgets[0];
       if (!currentPres) {
         setError('No se encontró un presupuesto activo para este proyecto');
@@ -134,7 +136,7 @@ const FormulaPolinomicaTab = ({ projectId, activeRevision }) => {
     } finally {
       setLoading(false);
     }
-  }, [projectId, activeRevision?.revision]);
+  }, [activeRevision?.empresa_id, activeRevision?.revision, projectId, selectedEmpresa?.id, user?.empresa_id]);
 
   const fetchIndicesCatalog = useCallback(async () => {
     try {

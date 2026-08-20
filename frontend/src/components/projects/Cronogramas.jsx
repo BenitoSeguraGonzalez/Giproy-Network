@@ -42,7 +42,11 @@ import { appAlert, appConfirm } from '../../utils/appDialog';
 import { extractBlobErrorMessage } from '../../utils/apiBlobErrors';
 import AppHint from '../ui/AppHint';
 import { downloadBlobResponse } from '../../utils/blobDownload';
-import { resolveEffectiveGanttBootstrapState, shouldAttemptGanttBudgetFallback } from './cronogramasGanttBootstrap';
+import {
+    normalizeBudgetCollection,
+    resolveEffectiveGanttBootstrapState,
+    shouldAttemptGanttBudgetFallback,
+} from './cronogramasGanttBootstrap';
 import { buildReportFileName, sanitizeReportContext } from '../../utils/reportFileName';
 import { GIPROY_BUDGET_PRODUCTIVITY_UPDATED_EVENT } from '../../utils/cronogramaSyncEvents';
 import { lazyWithChunkRecovery } from '../../utils/lazyImportRecovery';
@@ -5890,14 +5894,12 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                     budgetPromise,
                 ]);
                 if (!active) return;
-                const normalizedBudgetList = Array.isArray(budgetListRaw)
-                    ? budgetListRaw
-                    : (Array.isArray(budgetListRaw?.data) ? budgetListRaw.data : []);
+                const normalizedBudgetList = normalizeBudgetCollection(budgetListRaw);
                 let resolvedBudgets = normalizedBudgetList;
                 if (resolvedBudgets.length === 0) {
                     try {
                         const fallbackBudgetResponse = await presupuestosApi.getByProyecto(project.id, empId);
-                        const fallbackBudgets = Array.isArray(fallbackBudgetResponse?.data) ? fallbackBudgetResponse.data : [];
+                        const fallbackBudgets = normalizeBudgetCollection(fallbackBudgetResponse);
                         if (fallbackBudgets.length > 0) {
                             resolvedBudgets = fallbackBudgets;
                         }
@@ -5956,7 +5958,7 @@ const Cronogramas = ({ project, initialProjectDetail = null }) => {
                     12000,
                     'La resolución del presupuesto operativo tardó demasiado.',
                 );
-                const fallbackBudgets = Array.isArray(fallbackBudgetResponse?.data) ? fallbackBudgetResponse.data : [];
+                const fallbackBudgets = normalizeBudgetCollection(fallbackBudgetResponse);
                 if (!active) return;
                 if (fallbackBudgets.length > 0) {
                     const ordered = [...fallbackBudgets].sort((a, b) => (Number(b.revision || 0) - Number(a.revision || 0)) || (Number(b.id || 0) - Number(a.id || 0)));
