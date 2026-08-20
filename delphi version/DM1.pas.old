@@ -80,7 +80,7 @@ uses
   uGiProyMigration_v1_0_2;
 
 const
-  GoogleApi = 'AIzaSyDq6cn-KLsi0pOxr1vYR5ELV9Kf_ck_Xvw';
+  GoogleApi = '';
   URLCurrency =
     'https://www.xe.com/currencyconverter/convert/?Amount=1&From=USD&To=';
   salsaKey = 'E8E3E105D8885187EB0408A1D1F57CD5';
@@ -124,7 +124,7 @@ const
   URL_POLITICA_PRIVACIDAD = 'https://giproy.com/politica-de-privacidad/';
 
   // contraseña Online: G4^Xs&=h4f
-  // Gemini API KEY: AIzaSyB2kv9voHKfZipp7Qo1MAPXozPtN7cCo8w
+  // Gemini API KEY: 
   // DeepSeek API KEY: sk-8e1cd7e08e7946869a60220f0579f50f
 
   // https://nordvpn.com/es/what-is-my-ip/

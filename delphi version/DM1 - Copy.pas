@@ -42,7 +42,7 @@ uses
   System.SyncObjs, System.Generics.Collections, uApiGiProy, fProductoTienda;
 
 const
-  GoogleApi = 'AIzaSyDq6cn-KLsi0pOxr1vYR5ELV9Kf_ck_Xvw';
+  GoogleApi = '';
   URLCurrency = 'https://www.xe.com/currencyconverter/convert/?Amount=1&From=USD&To=';
   salsaKey = 'E8E3E105D8885187EB0408A1D1F57CD5';
   factorConversionDias = 1.36;
@@ -82,7 +82,7 @@ const
   L3 = 'GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON giproylocal_4.* TO ''Giproy''@''localhost'';';
   {*)}
 
-  // Gemini API KEY: AIzaSyB2kv9voHKfZipp7Qo1MAPXozPtN7cCo8w
+  // Gemini API KEY: 
 
   // https://nordvpn.com/es/what-is-my-ip/
   // giproylocal

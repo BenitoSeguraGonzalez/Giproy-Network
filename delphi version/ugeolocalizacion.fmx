@@ -4219,7 +4219,7 @@ object frmGeolocalizacion: TfrmGeolocalizacion
                   Size.PlatformDefault = False
                   TabOrder = 1
                   OnCaptureScreenShot = gMaps_1CaptureScreenShot
-                  APIKey = 'AIzaSyDq6cn-KLsi0pOxr1vYR5ELV9Kf_ck_Xvw'
+                  APIKey = ''
                   Polylines = <>
                   Polygons = <>
                   Circles = <>
