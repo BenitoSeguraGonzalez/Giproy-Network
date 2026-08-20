@@ -97,6 +97,16 @@ try {
     throw new Error(`${error.message}. URL=${readyPage.url()} body=${(await readyPage.locator("body").innerText()).slice(0, 800)} errors=${readyErrors.join(" | ")}`);
   }
   assert.match(await readyPage.locator('[data-bim-coordination-gate]').innerText(), /lista para revisión/, "El estado listo debe desbloquear coordinación");
+  await readyPage.getByRole("navigation", { name: "Flujo operativo BIM" }).getByRole("button", { name: "Modelo", exact: true }).click();
+  assert.equal(await readyPage.locator('[data-bim-viewer-empty="3d"]').count(), 1, "3D debe mostrar estado vacio sin seleccion explicita");
+  await readyPage.getByRole("button", { name: "Inspección 2D, respaldo" }).click();
+  assert.equal(await readyPage.locator('[data-bim-viewer-empty="2d"]').count(), 1, "2D debe mostrar estado vacio sin seleccion explicita");
+  await readyPage.getByRole("button", { name: "Inspección 3D" }).click();
+  await readyPage.getByRole("tab", { name: "Importar IFC", exact: true }).click();
+  assert.equal(await readyPage.locator('[data-bim-fragments-product]').count(), 0, "La pantalla de importación no debe mantener montado el visor pesado");
+  await readyPage.getByRole("button", { name: /Nueva carga/ }).click();
+  assert.equal(await readyPage.getByRole("dialog", { name: "Nueva carga IFC" }).count(), 1, "El diálogo de carga IFC debe abrirse sin bloquear el navegador");
+  await readyPage.getByRole("button", { name: "Cancelar" }).click();
   await readyPage.getByRole("navigation", { name: "Flujo operativo BIM" }).getByRole("button", { name: "Coordinación", exact: true }).click();
   await readyPage.waitForTimeout(1500);
   await readyPage.screenshot({ path: `${process.env.TEMP || "."}/giproy-bim-flow-workspace-coordination-ready-1920x1080.png`, fullPage: true });

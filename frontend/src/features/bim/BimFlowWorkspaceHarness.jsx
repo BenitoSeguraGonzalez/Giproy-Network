@@ -16,7 +16,7 @@ const sampleElements = Array.from({ length: 13 }, (_, index) => ({
 createRoot(document.getElementById("root")).render(
   <AuthContext.Provider value={{ user: { id: 7, empresa_id: 11 }, selectedEmpresa: { id: 11 } }}>
     <div className="h-screen min-h-[1080px] bg-zinc-100 p-4">
-      <BimFlowWorkspace project={{ id: 91, nombre: "BuildingSMART IFC4 · local" }} access={{ enabled: false, resolved_company_id: 11 }} workspaceOverride={ready ? { models: [{ id: 1, nombre: "Building Architecture" }], versions: [{ id: 1, version_label: "BS-IFC4-R01" }], elements: sampleElements, recent_links: [] } : null} domainStateOverride={ready ? { budget: "ready", gantt: "ready" } : null} />
+      <BimFlowWorkspace project={{ id: 91, nombre: "BuildingSMART IFC4 · local" }} access={{ enabled: false, resolved_company_id: 11 }} workspaceOverride={ready ? { active_version_id: 1, active_version_label: "BS-IFC4-R01", models: [{ id: 1, nombre: "Building Architecture" }], versions: [{ id: 1, version_label: "BS-IFC4-R01" }], elements: sampleElements, recent_links: [] } : null} domainStateOverride={ready ? { budget: "ready", gantt: "ready" } : null} />
     </div>
   </AuthContext.Provider>,
 );
