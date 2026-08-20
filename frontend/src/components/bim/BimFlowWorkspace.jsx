@@ -31,7 +31,7 @@ import { proyectosApi } from "../../api/proyectos";
 import { bimViewStatesApi } from "../../api/bimViewStates";
 import BimSavedViewsPanel from "./BimSavedViewsPanel";
 import BimCanvasViewer from "./BimCanvasViewer";
-import BimThreeViewer from "./BimThreeViewer";
+import BimFragmentsViewport from "./BimFragmentsViewport";
 
 const STAGES = [
   { id: "overview", label: "Inicio", icon: ClipboardCheck },
@@ -77,6 +77,16 @@ const stageCopy = {
 };
 
 const count = (value) => (Array.isArray(value) ? value.length : 0);
+
+const BimViewerEmptyState = ({ mode }) => (
+  <div className="grid h-full min-h-[360px] place-items-center bg-zinc-50 px-6 text-center" data-bim-viewer-empty={mode.toLowerCase()}>
+    <div className="max-w-sm">
+      <Box className="mx-auto size-8 text-zinc-400" aria-hidden="true" />
+      <p className="mt-3 text-sm font-semibold text-zinc-700">No has seleccionado un modelo para visualizar.</p>
+      <p className="mt-1 text-xs leading-5 text-zinc-500">Selecciona una versión BIM en el panel de Versiones para abrir la representación {mode}.</p>
+    </div>
+  </div>
+);
 
 export default function BimFlowWorkspace({ project, access, onNavigateTarget, workspaceOverride = null, domainStateOverride = null }) {
   const [stage, setStage] = useState("overview");
@@ -159,7 +169,8 @@ export default function BimFlowWorkspace({ project, access, onNavigateTarget, wo
   }, [access?.resolved_company_id, project?.id]);
   const goTo = (next) => setStage(next);
   const empresaId = access?.resolved_company_id;
-  const modelStage = <div className="grid h-full min-h-0 min-w-0 flex-1 gap-3 overflow-hidden p-3 xl:grid-cols-[22rem_minmax(0,1fr)]"><div className="order-2 flex min-h-0 min-w-0 flex-col overflow-hidden xl:order-2"><div className="flex h-10 shrink-0 items-center justify-between border border-b-0 border-zinc-200 bg-white px-3"><span className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">Inspección del modelo</span><div className="flex items-center gap-1" role="group" aria-label="Modo de inspección"><button type="button" title="Inspección 3D" aria-label="Inspección 3D" aria-pressed={viewerMode === "3d"} onClick={() => setViewerMode("3d")} className={`grid size-7 place-items-center rounded-md border text-xs ${viewerMode === "3d" ? "border-orange-500 bg-orange-50 text-orange-700" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}><Box className="size-3.5" aria-hidden="true" /></button><button type="button" title="Inspección 2D (respaldo)" aria-label="Inspección 2D, respaldo" aria-pressed={viewerMode === "2d"} onClick={() => setViewerMode("2d")} className={`grid size-7 place-items-center rounded-md border text-[10px] font-bold ${viewerMode === "2d" ? "border-orange-500 bg-orange-50 text-orange-700" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}>2D</button></div></div><div className="min-h-0 flex-1 overflow-hidden">{viewerMode === "3d" ? <BimThreeViewer elements={effectiveWorkspace?.elements || []} ready={Boolean(effectiveWorkspace?.elements?.length)} selectedElement={selectedElement} onSelectElement={setSelectedElement} activeVersionLabel={effectiveWorkspace?.active_version_label} /> : <BimCanvasViewer elements={effectiveWorkspace?.elements || []} ready={Boolean(effectiveWorkspace?.elements?.length)} error={error} selectedElement={selectedElement} onSelectElement={setSelectedElement} activeVersionLabel={effectiveWorkspace?.active_version_label} />}</div></div><aside className="order-1 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 xl:order-1" data-bim-model-options>
+  const selectedVersionId = activeVersionId || effectiveWorkspace?.active_version_id || null;
+  const modelStage = <div className="grid h-full min-h-0 min-w-0 flex-1 gap-3 overflow-hidden p-3 xl:grid-cols-[22rem_minmax(0,1fr)]"><div className="order-2 flex min-h-0 min-w-0 flex-col overflow-hidden xl:order-2"><div className="flex h-10 shrink-0 items-center justify-between border border-b-0 border-zinc-200 bg-white px-3"><span className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">Inspección del modelo</span><div className="flex items-center gap-1" role="group" aria-label="Modo de inspección"><button type="button" title="Inspección 3D" aria-label="Inspección 3D" aria-pressed={viewerMode === "3d"} onClick={() => setViewerMode("3d")} className={`grid size-7 place-items-center rounded-md border text-xs ${viewerMode === "3d" ? "border-orange-500 bg-orange-50 text-orange-700" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}><Box className="size-3.5" aria-hidden="true" /></button><button type="button" title="Inspección 2D (respaldo)" aria-label="Inspección 2D, respaldo" aria-pressed={viewerMode === "2d"} onClick={() => setViewerMode("2d")} className={`grid size-7 place-items-center rounded-md border text-[10px] font-bold ${viewerMode === "2d" ? "border-orange-500 bg-orange-50 text-orange-700" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}>2D</button></div></div><div className="min-h-0 flex-1 overflow-hidden">{viewerMode === "3d" ? (selectedVersionId ? <BimFragmentsViewport projectId={project?.id} versionId={selectedVersionId} empresaId={empresaId} onSelectGuid={(guid) => setSelectedElement((effectiveWorkspace?.elements || []).find((element) => element.global_id === guid) || { global_id: guid, nombre: "Elemento IFC" })} /> : <BimViewerEmptyState mode="3D" />) : (effectiveWorkspace?.elements?.length ? <BimCanvasViewer elements={effectiveWorkspace?.elements || []} ready error={error} selectedElement={selectedElement} onSelectElement={setSelectedElement} activeVersionLabel={effectiveWorkspace?.active_version_label} /> : <BimViewerEmptyState mode="2D" />)}</div></div><aside className="order-1 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 xl:order-1" data-bim-model-options>
   <div className="shrink-0 border-b border-zinc-200 bg-white p-2">
     <div className="mb-2 flex items-center gap-2 px-1">
       <Layers3 className="size-4 text-orange-600" aria-hidden="true" />

@@ -145,7 +145,7 @@ const BimImportJobsPanel = ({ projectId, empresaId, onImportReady }) => {
     };
     const decideVersion = async (decision) => {
         if (!qualityReport?.version_id || reviewReason.trim().length < 5) { setMessage('Indica un motivo de revisión de al menos 5 caracteres.'); return; }
-        try { setQualityLoading(true); await bimModelsApi.decideVersionReview(projectId, qualityReport.version_id, { decision, reason: reviewReason.trim() }, empresaId); setMessage(`Versión ${decision === 'accepted' ? 'aceptada' : decision === 'rejected' ? 'rechazada' : 'enviada a corrección'}.`); setReviewReason(''); setRefreshToken((value) => value + 1); } catch (error) { setMessage(error?.response?.data?.detail || 'No se pudo guardar la decisión de revisión.'); } finally { setQualityLoading(false); }
+        try { setQualityLoading(true); await bimModelsApi.decideVersionReview(projectId, qualityReport.version_id, { decision, reason: reviewReason.trim() }, empresaId); setMessage(`Versión ${decision === 'accepted' ? 'aceptada' : decision === 'rejected' ? 'rechazada' : 'enviada a corrección'}.`); setReviewReason(''); setRefreshToken((value) => value + 1); onImportReadyRef.current?.(); } catch (error) { setMessage(error?.response?.data?.detail || 'No se pudo guardar la decisión de revisión.'); } finally { setQualityLoading(false); }
     };
 
     return (

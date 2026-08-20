@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Blend, Box, EyeOff, Focus, RefreshCw, RotateCcw, Ruler, ScanLine, View } from 'lucide-react';
-import { FragmentsModels } from '@thatopen/fragments';
+import { FragmentsModels, IfcImporter } from '@thatopen/fragments';
 import fragmentsWorkerUrl from '@thatopen/fragments/worker?url';
+import webIfcWasmUrl from 'web-ifc/web-ifc.wasm?url';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 import { bimModelsApi } from '../../api/bimModels';
@@ -70,7 +71,7 @@ const BimFragmentsViewport = ({
     const onViewerStateAppliedRef = useRef(onViewerStateApplied);
     const viewerStateDataRef = useRef(null);
     const appliedViewStateTokenRef = useRef(null);
-    const [state, setState] = useState({ status: 'idle', error: '', bytes: 0, localIds: 0, selectedGuid: '' });
+    const [state, setState] = useState({ status: 'idle', error: '', bytes: 0, localIds: 0, selectedGuid: '', source: '' });
     const [recoveryToken, setRecoveryToken] = useState(0);
     const [federationVisibleCount, setFederationVisibleCount] = useState(0);
     const [selectedLocalId, setSelectedLocalId] = useState(null);
@@ -137,6 +138,7 @@ const BimFragmentsViewport = ({
                 setReviewState(EMPTY_REVIEW_STATE);
                 setState((current) => ({ ...current, status: 'loading', error: '' }));
                 let artifactBytes;
+                let artifactSource = 'registered_fragments';
                 let memberPayloads;
                 if (loadMemberBytes) {
                     memberPayloads = (await Promise.all(renderMembers.map(async (member) => ({
@@ -150,12 +152,23 @@ const BimFragmentsViewport = ({
                 } else {
                     memberPayloads = (await Promise.all(renderMembers.map(async (member) => {
                         const artifacts = await bimModelsApi.listArtifacts(projectId, member.version_id, empresaId);
-                        const artifact = (artifacts || []).find((item) => item.artifact_type === 'fragments' && item.status === 'active');
-                        if (!artifact) return null;
-                        const bytes = await bimModelsApi.downloadArtifact(projectId, artifact.id, empresaId);
-                        return { ...member, bytes };
+                        const fragmentsArtifact = (artifacts || []).find((item) => item.artifact_type === 'fragments' && item.status === 'active');
+                        if (fragmentsArtifact) {
+                            const bytes = await bimModelsApi.downloadArtifact(projectId, fragmentsArtifact.id, empresaId);
+                            return { ...member, bytes, artifactSource: 'registered_fragments' };
+                        }
+                        const sourceArtifact = (artifacts || []).find((item) => item.artifact_type === 'source_ifc' && item.status === 'active');
+                        if (!sourceArtifact) return null;
+                        const sourceBytes = await bimModelsApi.downloadArtifact(projectId, sourceArtifact.id, empresaId);
+                        const importer = new IfcImporter();
+                        importer.wasm = { path: webIfcWasmUrl, absolute: true };
+                        importer.includeUniqueAttributes = true;
+                        importer.includeRelationNames = true;
+                        const bytes = await importer.process({ bytes: sourceBytes, raw: false });
+                        return { ...member, bytes, artifactSource: 'source_ifc' };
                     }))).filter(Boolean);
                     artifactBytes = memberPayloads[0]?.bytes;
+                    artifactSource = memberPayloads[0]?.artifactSource || artifactSource;
                 }
                 if (disposed) return;
                 const mount = mountNode;
@@ -356,6 +369,7 @@ const BimFragmentsViewport = ({
                         bytes: memberPayloads.reduce((total, member) => total + member.bytes.byteLength, 0),
                         localIds: memberLocalIds.reduce((total, member) => total + member.localIds.length, 0),
                         selectedGuid: '',
+                        source: artifactSource,
                     });
                     setFederationVisibleCount(memberPayloads.filter((member) => member.enabled !== false).length);
                 }
@@ -705,6 +719,7 @@ const BimFragmentsViewport = ({
             data-bim-fragments-product-bytes={state.bytes}
             data-bim-fragments-product-local-ids={state.localIds}
             data-bim-fragments-product-selection={state.selectedGuid}
+            data-bim-fragments-product-source={state.source}
             data-bim-review-hidden={reviewState.hiddenCount}
             data-bim-review-isolated={reviewState.isolated}
             data-bim-review-ghosted={reviewState.ghosted}

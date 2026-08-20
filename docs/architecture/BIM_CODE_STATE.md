@@ -1246,6 +1246,23 @@ intercambio end-to-end.
 - Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
   98,36%; los gates externos no cambian.
 
+## Visor IFC real y estados vacios del Modelo - 2026-08-20
+
+- `TASK-2062` / `BIM-TASK-0196` conecta `BimFlowWorkspace` con
+  `BimFragmentsViewport` para consumir el artifact `fragments` activo de la
+  version seleccionada o convertir su artifact `source_ifc` mediante
+  `IfcImporter` y el WASM de `web-ifc`.
+- Se retira del flujo productivo el reemplazo geometrico sintético que podía
+  mostrar siempre la misma retícula aunque el IFC no existiera o cambiara.
+- 2D y 3D muestran un estado vacío explícito cuando no hay selección; una
+  versión seleccionada sin artifact real muestra indisponibilidad, sin datos
+  BIM inventados.
+- La decisión de revisión refresca el workspace para que aceptar o rechazar
+  una nueva versión no deje el visor anclado al estado anterior.
+- Build, contrato BIM, smoke DOM del workspace y smoke del importador IFC pasan.
+  La prueba visual autenticada contra un backend/app en ejecución sigue
+  pendiente; no se declara certificación de flujo real ni despliegue.
+
 ## Error BIM serializable en la interfaz React - 2026-07-22
 
 - `BIM-TASK-0190` evita el crash React `#31` al normalizar el error de carga
