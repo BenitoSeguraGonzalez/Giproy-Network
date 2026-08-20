@@ -832,10 +832,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
         const fetchDetalle = async () => {
             if (!presupuestoId) return;
             try {
-                // Solo mostrar loading si no tenemos data previa o el ID cambió
-                if (!activePresupuesto || activePresupuesto.id !== presupuestoId) {
-                    setLoading(true);
-                }
+                setLoading(true);
                 
                 const [presData, projData] = await Promise.all([
                     presupuestosApi.getById(presupuestoId, currentEmpresaId),
@@ -856,7 +853,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
         fetchDetalle();
         // NO limpiar setActivePresupuesto(null) en el cleanup del efecto de carga
         // porque causa parpadeos vacíos entre cambios leves de props.
-    }, [activePresupuesto, presupuestoId, proyectoId, setActivePresupuesto, setActiveProyecto, currentEmpresaId, refreshNotesSummary, markBudgetOpened]);
+    }, [presupuestoId, proyectoId, setActivePresupuesto, setActiveProyecto, currentEmpresaId, refreshNotesSummary, markBudgetOpened]);
 
     useEffect(() => {
         if (!activePresupuesto?.id) return;
