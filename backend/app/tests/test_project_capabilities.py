@@ -3,16 +3,19 @@ from fastapi import HTTPException
 
 from app.models.proyecto import Proyecto
 from app.models.proyecto_asignacion import ProyectoAsignacion
+from app.models.presupuesto import Presupuesto
 from app.models.usuario import Usuario
 from app.services.project_capability import (
     PROFILE_CAPABILITIES,
     PROJECT_ACTION_CAPABILITIES,
     PROJECT_CAPABILITIES,
+    MODULE_BASE_CAPABILITIES,
     resolve_project_capabilities,
     save_project_capability_grant,
 )
 from app.api.endpoints.presupuestos import _verify_module_access as verify_budget_access
 from app.api.endpoints.cronogramas_trabajo import _verify_module_access as verify_schedule_access
+from app.api.endpoints.polinomica import _verify_module_access as verify_formula_access
 
 
 def test_action_inventory_is_complete_and_uses_only_canonical_capabilities():
@@ -61,6 +64,45 @@ def test_project_technical_operator_does_not_inherit_economic_approval(db, sampl
     assert "bim.admin" in resolved.capabilities
     assert "budget.approve" not in resolved.capabilities
     assert "schedule.baseline.approve" not in resolved.capabilities
+
+
+@pytest.mark.parametrize("role", ["administrador", "superadministrador"])
+def test_technical_operators_can_read_classic_budget_and_schedule_modules(db, sample_empresa, role):
+    project = _project(db, sample_empresa, f"CAP-{role[:3].upper()}")
+    user = Usuario(
+        email=f"{role}-classic@example.com",
+        hashed_password="x",
+        nombre_completo=role,
+        empresa_id=sample_empresa.id,
+        rol=role,
+    )
+    db.add(user); db.commit(); db.refresh(user)
+    budget = Presupuesto(
+        codigo=f"{project.codigo}-PRES",
+        revision=1,
+        descripcion="Presupuesto de prueba",
+        proyecto_id=project.id,
+        empresa_id=sample_empresa.id,
+    )
+    db.add(budget); db.commit(); db.refresh(budget)
+
+    resolved = resolve_project_capabilities(
+        db,
+        project_id=project.id,
+        user_id=user.id,
+        company_id=sample_empresa.id,
+        role=user.rol,
+    )
+
+    for module in ("presupuestos", "formula_polinomica", "desagregacion"):
+        assert MODULE_BASE_CAPABILITIES[module] <= resolved.capabilities
+    assert MODULE_BASE_CAPABILITIES["cronogramas"] <= resolved.capabilities
+    assert "budget.approve" not in resolved.capabilities
+    assert "schedule.baseline.approve" not in resolved.capabilities
+
+    verify_budget_access(db, project.id, user.id)
+    verify_schedule_access(db, project.id, user.id)
+    assert verify_formula_access(db, budget.id, user).id == budget.id
 
 
 def test_project_capability_grant_rejects_cross_tenant_and_unknown_capability(db, sample_empresa):
