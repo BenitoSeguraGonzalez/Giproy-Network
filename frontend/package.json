@@ -73,6 +73,7 @@
     "smoke:bim-erp-exchange": "node scripts/validate-bim-erp-exchange-dom.mjs",
     "smoke:bim-integration-gateway": "node scripts/validate-bim-integration-gateway-dom.mjs",
     "smoke:bim-flow-workspace": "node scripts/validate-bim-flow-workspace-contract.mjs && node scripts/validate-bim-flow-workspace-dom.mjs",
+    "smoke:bim-ifc-worker": "node scripts/validate-bim-ifc-worker-contract.mjs",
     "smoke:classic-precios-unitarios-ui": "node scripts/smoke-classic-precios-unitarios-ui-guards.mjs",
     "smoke:classic-frontend-quality": "node scripts/smoke-classic-frontend-quality.mjs",
     "smoke:classic-gantt-performance": "node scripts/smoke-classic-gantt-performance-guards.mjs",
