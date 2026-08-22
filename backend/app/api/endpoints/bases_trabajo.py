@@ -431,6 +431,9 @@ def delete_base_trabajo(
         deleted_by_user_id=current_user.id,
         reason="Base de trabajo movida a papelera por el usuario.",
     )
+    # Materializar antes de registrar la auditoría: ese commit expira la entidad y
+    # el filtro global de papelera impide que Pydantic la recargue después.
+    response = BaseTrabajoResponse.model_validate(deleted)
     record_audit_event(
         db,
         module="bases_trabajo",
@@ -447,7 +450,7 @@ def delete_base_trabajo(
             "retention_days": base_trabajo_repo.RECYCLE_RETENTION_DAYS,
         },
     )
-    return deleted
+    return response
 
 @router.post("/{id}/activate", response_model=BaseTrabajoResponse)
 def activate_base_trabajo(

@@ -1,5 +1,18 @@
 # HANDOFF
 
+## 2026-08-11 - Gate BIM de dossier desbloqueado
+
+- `TASK-2048` / `BIM-TASK-0195` corrigen la intercepción del modal de entrega.
+- El diálogo usa portal, mantiene teclado y devuelve el foco al disparador.
+- Contrato BIM, Playwright DOM y build frontend pasan localmente.
+- Sin cambios de API, datos, tenant, permisos, licencias o feature flags.
+- Beta `task2048-20260811`: cuatro servicios healthy; home, health y OpenAPI
+  públicos 200. Backup `giproy-beta-20260811-134818.sql.gz`.
+- `TASK-2049` corrige el diagnóstico Alembic: `001122334455` sí existe y está en
+  `head`. El fallo usó una imagen predeterminada antigua sin el tag de release.
+- Backup `giproy-beta-20260811-135545.sql.gz`; `upgrade heads` y `current`
+  correctos con `task2048-20260811`, sin stamp manual ni cambios de esquema.
+
 ## 2026-07-22 - Recuperacion de imagen referencial de proyecto
 
 - `TASK-2036` confirma divergencia entre PostgreSQL y el volumen persistente:
@@ -10543,3 +10556,15 @@ Validar TASK activa y CHANGELOG.
   home `200`, BIM anonimo `401` y sin migraciones.
 - Rollback: fuentes `deploy/backups/bim-role-governance-20260722-102609` e
   imagenes backend/frontend `bim-role-predeploy-20260722-102609`.
+# 2026-08-11 - Registro internacional de empresas
+
+- `TASK-2047` separa la política fiscal por país: Ecuador conserva RUC/SRI y
+  España/otros países usan identificación y razón social declaradas.
+- El formulario público deja de forzar Ecuador; Playwright confirma cero
+  requests SRI para España en 375x812 y 1440x900.
+- La creación administrativa aplica el mismo contrato y muestra errores
+  accionables. Sin migración, cambios JWT, tenant, permisos ni BIM.
+- Suite backend: 915 passed, 2 skipped; build y baseline enterprise correctos.
+- Publicación no cerrada: el contrato BIM vigente pasa, pero su harness DOM
+  encuentra una superposición preexistente al cerrar `nuevo dossier`; debe
+  resolverse bajo BIM-TASK independiente antes de certificar el deploy.

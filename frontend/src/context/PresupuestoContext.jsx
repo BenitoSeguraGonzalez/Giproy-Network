@@ -78,22 +78,6 @@ export const PresupuestoProvider = ({ children }) => {
         return toDecimalNumber(linea?.precio_total || 0, '0');
     }, []);
 
-    const recalculateBudgetSnapshot = useCallback((presupuesto) => {
-        if (!presupuesto) return presupuesto;
-        const decMoneda = Number(presupuesto.dec_moneda ?? 2);
-        const detalle = Array.isArray(presupuesto.detalle) ? presupuesto.detalle : [];
-        const subtotal = roundDecimalNumber(
-            detalle.reduce((acc, linea) => {
-                const isStructural = (linea?.tipo || '') === 'CUENTA_PAQUETE';
-                const isDesynced = !isStructural && linea?.apu_id == null;
-                if (isDesynced) return acc;
-                return sumDecimalNumber([acc, linea?.precio_total || 0], { decimals: 6 });
-            }, 0),
-            decMoneda
-        );
-        return applyBudgetTotalsFromSubtotal(presupuesto, subtotal);
-    }, [applyBudgetTotalsFromSubtotal]);
-
     const patchLineInActivePresupuesto = useCallback((updatedLine) => {
         if (!updatedLine?.id) return;
         startTransition(() => setActivePresupuesto((prev) => {
@@ -212,14 +196,14 @@ export const PresupuestoProvider = ({ children }) => {
     }, []);
 
     // Default configs in case no budget is active
-    const config = {
+    const config = useMemo(() => ({
         iva_aplicado: activePresupuesto?.iva_aplicado ?? 15.00,
         indirectos_porcentaje: activePresupuesto?.indirectos_porcentaje ?? 0,
         indirectos_total: activePresupuesto?.indirectos_total ?? 0,
         dec_moneda: activePresupuesto?.dec_moneda ?? 2,
         dec_calculos: activePresupuesto?.dec_calculos ?? 4,
         moneda: activePresupuesto?.moneda ?? 'USD'
-    };
+    }), [activePresupuesto]);
 
     const refreshActivePresupuesto = useCallback(async (manualId = null, options = {}) => {
         const id = manualId || activePresupuestoIdRef.current;
@@ -231,7 +215,7 @@ export const PresupuestoProvider = ({ children }) => {
         } catch (error) {
             globalThis.reportClientError?.("Error al refrescar presupuesto:", error);
         }
-    }, [currentEmpresaId]); // Quitamos activePresupuesto?.id para estabilidad
+    }, [currentEmpresaId]);
 
     const updateApuInBudget = useCallback(async (lineaId, updateData) => {
         try {
@@ -341,7 +325,7 @@ export const PresupuestoProvider = ({ children }) => {
             globalThis.reportClientError?.("Error al refrescar resumen de notas:", error);
             return null;
         }
-    }, [currentEmpresaId]); // Quitamos activePresupuesto?.id
+    }, [currentEmpresaId, activePresupuesto?.id]);
 
     const markBudgetOpened = useCallback(async (presupuestoId = null) => {
         const targetId = presupuestoId || activePresupuesto?.id;
@@ -351,7 +335,7 @@ export const PresupuestoProvider = ({ children }) => {
         } catch (error) {
             globalThis.reportClientError?.("Error registrando apertura del presupuesto:", error);
         }
-    }, [currentEmpresaId]); // Quitamos activePresupuesto?.id
+    }, [currentEmpresaId, activePresupuesto?.id]);
 
     const dataValue = useMemo(() => ({
         activePresupuesto,

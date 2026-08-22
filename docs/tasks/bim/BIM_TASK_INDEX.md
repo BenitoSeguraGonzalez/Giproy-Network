@@ -33,6 +33,7 @@ nuevas ejecuciones BIM deben usar la estructura paralela de este directorio.
 | `BIM-TASK-0016` | N/A | Migracion Alembic del dominio BIM principal |
 | `BIM-TASK-0017` | N/A | Gobierno runtime de esquema BIM y tests focales |
 | `BIM-TASK-0018` | N/A | Contratos API BIM bajo flags y tenant |
+| `BIM-TASK-0195` | `TASK-2048` | Modal de dossier por encima del workspace |
 | `BIM-TASK-0019` | N/A | Importacion JSON BIM y workspace activo |
 | `BIM-TASK-0020` | N/A | Links BIM latentes con EDT |
 | `BIM-TASK-0021` | N/A | Links BIM latentes con APUs y Presupuesto |
@@ -272,6 +273,7 @@ iniciada.
 | `BIM-TASK-0191` | Cerrada en beta: administrador de empresa como operador BIM, carga IFC visible y politica de roles canonica |
 | `BIM-TASK-0192` | En progreso: fundacion adaptativa BIM por viewport logico, contenedor e interaccion |
 | `BIM-TASK-0193` | En progreso documental: cuestionario y plan de adecuacion transversal BIM |
+| `BIM-TASK-0194` | En progreso: adaptador Leaflet permisivo y retiro de dependencias Hippocratic-2.1 |
 
 ## Orden de ejecucion
 

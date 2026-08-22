@@ -6,6 +6,7 @@ from urllib.parse import urlsplit
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse, Response
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_active_user, get_db
@@ -28,7 +29,9 @@ from app.schemas.bim_model import (
     BimModelResponse,
     BimViewerArtifactResponse,
     BimWorkspaceSummaryResponse,
+    BimVersionReviewDecisionRequest,
 )
+from app.models.bim_model_version import BimModelVersion
 from app.services.bim.artifact_service import generate_viewer_artifact
 from app.services.bim.demo_bootstrap import bootstrap_demo_bim_project
 from app.services.bim.feature_flags import resolve_bim_feature_access
@@ -197,6 +200,7 @@ from app.services.bim.coordination_service import (
     apply_proposal as apply_coordination_proposal,
     recover_proposal as recover_coordination_proposal,
     list_coordination_sets,
+    list_conflicts as list_coordination_conflicts,
     reconcile_link_identity,
     list_links as list_coordination_links,
     list_proposals as list_coordination_proposals,
@@ -1522,6 +1526,26 @@ def get_project_coordination_coverage(project_id: int, coordination_set_id: int,
     project = _resolve_project(db, project_id, current_user, empresa_id)
     _require_coordination_access(db, project, current_user, "coordination.view")
     return build_coordination_coverage(db, coordination_set_id=coordination_set_id, project_id=project.id, company_id=project.empresa_id)
+
+
+@router.get("/projects/{project_id}/coordination-sets/{coordination_set_id}/conflicts")
+def get_project_coordination_conflicts(
+    project_id: int,
+    coordination_set_id: int,
+    conflict_status: str = Query("open", alias="status", pattern="^(open|resolved|dismissed|all)$"),
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    _require_coordination_access(db, project, current_user, "coordination.view")
+    return list_coordination_conflicts(
+        db,
+        coordination_set_id=coordination_set_id,
+        project_id=project.id,
+        company_id=project.empresa_id,
+        status=conflict_status,
+    )
 
 
 @router.post("/projects/{project_id}/coordination-sets/{coordination_set_id}/proposals", status_code=status.HTTP_201_CREATED)
@@ -2979,6 +3003,89 @@ def read_bim_ifc_quality_report(
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     return serialize_ifc_quality_report(report)
+
+
+@router.post("/projects/{project_id}/versions/{version_id}/review-decision", response_model=BimModelResponse)
+def decide_bim_version_review(
+    project_id: int,
+    version_id: int,
+    payload: BimVersionReviewDecisionRequest,
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
+    if not access.enabled or not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="No tienes permisos para decidir la revisión BIM.")
+    version = db.query(BimModelVersion).join(BimModelVersion.bim_model).filter(BimModelVersion.id == version_id, BimModelVersion.bim_model.has(proyecto_id=project.id, empresa_id=project.empresa_id)).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="Versión BIM no encontrada.")
+    version.status = payload.decision
+    version.notes = payload.reason
+    version.is_active = payload.decision == "accepted"
+    if version.is_active:
+        db.query(BimModelVersion).filter(BimModelVersion.bim_model_id == version.bim_model_id, BimModelVersion.id != version.id).update({BimModelVersion.is_active: False}, synchronize_session=False)
+    db.commit()
+    db.refresh(version)
+    return version.bim_model
+
+
+@router.post("/projects/{project_id}/versions/{version_id}/activate", response_model=BimModelResponse)
+def activate_bim_version(
+    project_id: int,
+    version_id: int,
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
+    if not access.enabled or not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="No tienes permisos para activar versiones BIM.")
+    version = db.query(BimModelVersion).join(BimModelVersion.bim_model).filter(
+        BimModelVersion.id == version_id,
+        BimModelVersion.bim_model.has(proyecto_id=project.id, empresa_id=project.empresa_id),
+    ).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="Version BIM no encontrada.")
+    db.query(BimModelVersion).filter(
+        BimModelVersion.bim_model_id == version.bim_model_id,
+        BimModelVersion.id != version.id,
+    ).update({BimModelVersion.is_active: False}, synchronize_session=False)
+    version.is_active = True
+    db.commit()
+    db.refresh(version)
+    return version.bim_model
+
+
+@router.delete("/projects/{project_id}/versions/{version_id}")
+def delete_bim_version(
+    project_id: int,
+    version_id: int,
+    empresa_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user),
+):
+    project = _resolve_project(db, project_id, current_user, empresa_id)
+    access = resolve_bim_feature_access(db=db, user_id=current_user.id, company_id=project.empresa_id, role=current_user.rol)
+    if not access.enabled or not is_bim_company_operator(current_user.rol):
+        raise HTTPException(status_code=403, detail="No tienes permisos para eliminar versiones BIM.")
+    version = db.query(BimModelVersion).join(BimModelVersion.bim_model).filter(
+        BimModelVersion.id == version_id,
+        BimModelVersion.bim_model.has(proyecto_id=project.id, empresa_id=project.empresa_id),
+    ).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="Version BIM no encontrada.")
+    if version.is_active:
+        raise HTTPException(status_code=409, detail="Activa otra version antes de eliminar esta version BIM.")
+    try:
+        db.delete(version)
+        db.commit()
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="No se puede eliminar esta version porque tiene referencias BIM dependientes.") from exc
+    return {"deleted": True, "version_id": version_id}
 
 
 @router.get(

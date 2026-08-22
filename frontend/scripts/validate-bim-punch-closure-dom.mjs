@@ -11,6 +11,7 @@ try {
     browser = await chromium.launch({ headless: true, executablePath: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe' });
     for (const viewport of [{ width: 1920, height: 900 }, { width: 2560, height: 1300 }]) {
         const page = await browser.newPage({ viewport }); await page.goto(`${url}/bim-punch-closure-harness.html`); await page.locator('[data-bim-punch-closure]').waitFor();
+        await page.getByRole('button', { name: /Nuevo cierre|Crear cierre/i }).click();
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
         if (viewport.width === 1920) { await page.getByLabel('Revisión de cierre punch').fill('PC-1'); await page.getByLabel('Verificación de cierre punch').fill('Recorrido final y evidencias conformes'); await page.getByRole('button', { name: 'Presentar cierre' }).click(); await page.waitForFunction(() => document.body.textContent.includes('PC-1')); await page.getByLabel('Motivo de decisión de cierre punch').fill('Punch list cerrada y verificada'); await page.getByRole('button', { name: 'Aceptar' }).click(); await page.waitForFunction(() => document.body.textContent.includes('accepted')); }
         await page.close();

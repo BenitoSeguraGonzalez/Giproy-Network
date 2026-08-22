@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Database, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
@@ -16,7 +16,7 @@ const AdminGlobalIntegraciones = () => {
     const [reviews, setReviews] = useState([]);
     const [drafts, setDrafts] = useState({});
 
-    const loadStatus = async () => {
+    const loadStatus = useCallback(async () => {
         if (!isSuperadmin) return setLoading(false);
         setLoading(true);
         try {
@@ -28,9 +28,9 @@ const AdminGlobalIntegraciones = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isSuperadmin]);
 
-    useEffect(() => { loadStatus(); }, [isSuperadmin]);
+    useEffect(() => { loadStatus(); }, [loadStatus]);
 
     const syncProvince = async (code) => {
         setSyncing(code);

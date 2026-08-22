@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const files = {
+    index: readFileSync(new URL('../src/pages/PreciosUnitarios.jsx', import.meta.url), 'utf8'),
     recursos: readFileSync(new URL('../src/pages/Recursos.jsx', import.meta.url), 'utf8'),
     apus: readFileSync(new URL('../src/pages/APUs.jsx', import.meta.url), 'utf8'),
     subcategorias: readFileSync(new URL('../src/pages/Subcategorias.jsx', import.meta.url), 'utf8'),
@@ -9,7 +10,20 @@ const files = {
     bulkDelete: readFileSync(new URL('../src/components/precios-unitarios/BulkDeleteConfirmModal.jsx', import.meta.url), 'utf8'),
 };
 
-for (const [name, source] of Object.entries(files)) {
+assert.match(
+    files.index,
+    /<button[\s\S]*disabled=\{isDisabled\}[\s\S]*aria-describedby=\{isDisabled/,
+    'El indice de Precios Unitarios debe usar controles de navegacion semanticos y exponer el estado disabled.',
+);
+
+assert.equal(
+    files.index.includes('getMarketplaceOwnershipTone'),
+    false,
+    'El indice de Precios Unitarios no debe recalcular un tono que no consume.',
+);
+
+for (const name of ['recursos', 'apus', 'subcategorias', 'resourceEditor', 'bulkDelete']) {
+    const source = files[name];
     assert.equal(source.includes('AppModalShell'), true, `${name} debe usar AppModalShell para modales clasicos.`);
 }
 

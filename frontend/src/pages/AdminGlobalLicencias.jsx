@@ -25,32 +25,6 @@ import { getLicenseStatusLabel, getLicenseStatusTone } from '../utils/licenseSta
 import AnimatedSelect from '../components/ui/AnimatedSelect';
 import AnimatedDateInput from '../components/ui/AnimatedDateInput';
 
-const statusMeta = {
-    ok: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-    warning: 'border-orange-200 bg-orange-50 text-[#F39200]',
-    exceeded: 'border-red-200 bg-red-50 text-red-600',
-    disabled: 'border-zinc-200 bg-zinc-50 text-zinc-500',
-};
-
-const statusLabels = {
-    ok: 'Disponible',
-    warning: 'Completa',
-    exceeded: 'Excedida',
-    disabled: 'Sin cupo',
-};
-
-const licenseMeta = {
-    active: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-    expired: 'border-red-200 bg-red-50 text-red-600',
-    pending: 'border-blue-200 bg-blue-50 text-blue-700',
-};
-
-const licenseLabels = {
-    active: 'Vigente',
-    expired: 'Vencida',
-    pending: 'Pendiente',
-};
-
 const licenseFilterOptions = [
     { value: 'all', label: 'Todos' },
     { value: 'active', label: 'Vigentes' },
@@ -400,17 +374,6 @@ const QuotaModal = ({ isOpen, empresa, catalog, formState, onChange, onClose, on
         </AppModalShell>
     );
 };
-
-const metricChip = (used, limit, status) => (
-    <div className="rounded-2xl border border-zinc-200 bg-zinc-50/60 px-4 py-3">
-        <div className="flex items-center justify-between gap-3">
-            <span className="text-lg font-black tracking-tight text-zinc-900">{used} / {limit}</span>
-            <span className={`rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] ${statusMeta[status] || statusMeta.ok}`}>
-                {statusLabels[status] || status}
-            </span>
-        </div>
-    </div>
-);
 
 const resolveConectaErrorMessage = (error) => {
     const detail = error?.response?.data?.detail;
@@ -1566,7 +1529,7 @@ const AdminGlobalLicencias = () => {
                                                             await adminLicensesApi.recalculateUsage(item.empresa_id);
                                                             loadSummary();
                                                             appAlert({ title: 'Éxito', message: 'Métricas recalculadas correctamente.' });
-                                                        } catch (e) {
+                                                        } catch {
                                                             appAlert({ title: 'Error', message: 'No se pudo recalcular el uso.' });
                                                         }
                                                     }}

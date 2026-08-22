@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertCircle, CheckCircle2, HelpCircle, Loader2, Mail, Save, X } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
@@ -66,9 +66,9 @@ const AdminGlobalEmail = () => {
     const [testing, setTesting] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
 
-    const readValue = (settings, key, fallback = '') => settings?.[key]?.valor ?? fallback;
+    const readValue = useCallback((settings, key, fallback = '') => settings?.[key]?.valor ?? fallback, []);
 
-    const syncFormFromSettings = (settings = {}) => {
+    const syncFormFromSettings = useCallback((settings = {}) => {
         setForm({
             EMAIL_BACKEND: readValue(settings, 'EMAIL_BACKEND', 'smtp') || 'smtp',
             EMAIL_FROM_EMAIL: readValue(settings, 'EMAIL_FROM_EMAIL', ''),
@@ -83,7 +83,7 @@ const AdminGlobalEmail = () => {
             GMAIL_2SV_CONFIRMED: readValue(settings, 'GMAIL_2SV_CONFIRMED', 'false') || 'false',
             GMAIL_APP_PASSWORD_CONFIRMED: readValue(settings, 'GMAIL_APP_PASSWORD_CONFIRMED', 'false') || 'false',
         });
-    };
+    }, [readValue]);
 
     useEffect(() => {
         if (!isSuperadmin) {
@@ -105,7 +105,7 @@ const AdminGlobalEmail = () => {
         };
 
         loadSettings();
-    }, [isSuperadmin]);
+    }, [isSuperadmin, syncFormFromSettings]);
 
     const status = useMemo(() => {
         const backend = readValue(emailSettings, 'EMAIL_BACKEND', 'mock');
@@ -117,7 +117,7 @@ const AdminGlobalEmail = () => {
             from,
             ready: String(backend).toLowerCase() === 'smtp' && Boolean(host) && Boolean(from),
         };
-    }, [emailSettings]);
+    }, [emailSettings, readValue]);
 
     const updateForm = (key, value) => setForm((current) => {
         const next = { ...current, [key]: value };

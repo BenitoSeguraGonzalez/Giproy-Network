@@ -143,9 +143,16 @@ MODULE_BASE_CAPABILITIES = {
     "bim": {"project.view", "bim.view", "bim.review", "bim.schedule.view", "coordination.view"},
     "stakeholders": {"project.view"},
     "formula_polinomica": {"project.view", "budget.view"},
+    "desagregacion": {"project.view", "budget.view"},
 }
 
-TECHNICAL_OPERATOR_CAPABILITIES = set(PROFILE_CAPABILITIES["administrador_bim"])
+# Administrators retain the technical/BIM profile, plus read access to the
+# classic economic and planning modules. Mutating/approval capabilities remain
+# explicit and are intentionally not inherited here.
+TECHNICAL_OPERATOR_CAPABILITIES = set(PROFILE_CAPABILITIES["administrador_bim"]) | {
+    "budget.view",
+    "schedule.view",
+}
 
 
 @dataclass(frozen=True)

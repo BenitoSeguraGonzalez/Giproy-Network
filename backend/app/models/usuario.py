@@ -35,6 +35,12 @@ class Usuario(Base):
     fecha_aceptacion_politica_privacidad = Column(DateTime(timezone=True), nullable=True)
     fecha_aceptacion_politicas_comunicacion = Column(DateTime(timezone=True), nullable=True)
     fecha_autorizacion_publicidad = Column(DateTime(timezone=True), nullable=True)
+    acepta_terminos = Column(Boolean, default=False, nullable=False)
+    terminos_version = Column(String(32), nullable=True)
+    terminos_sha256 = Column(String(64), nullable=True)
+    privacidad_version = Column(String(32), nullable=True)
+    privacidad_sha256 = Column(String(64), nullable=True)
+    consentimiento_origen = Column(String(32), nullable=True)
     ruc_verificado = Column(Boolean, default=False)  # Si el RUC fue verificado
     ruc_provenance = Column(String(50), nullable=True)
     

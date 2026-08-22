@@ -22,7 +22,7 @@ try {
     await waitForServer();
     const browser = await chromium.launch({ headless: true, executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' });
     try {
-        for (const viewport of [{ width: 1280, height: 820 }, { width: 390, height: 844 }]) {
+        for (const viewport of [{ width: 1920, height: 1080 }, { width: 2560, height: 1440 }]) {
             const page = await browser.newPage({ viewport });
             const errors = [];
             page.on('pageerror', (error) => errors.push(error.message));
@@ -56,6 +56,7 @@ try {
             assert.equal(canvasPixels, true);
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
             assert.deepEqual(errors, []);
+            await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-timeline-4d-${viewport.width}x${viewport.height}.png`, fullPage: true });
             await page.close();
         }
     } finally { await browser.close(); }

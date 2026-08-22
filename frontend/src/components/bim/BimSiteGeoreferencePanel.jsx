@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Crosshair, Eye, EyeOff, Layers3, MapPin, Plus, Save, Trash2 } from 'lucide-react';
-import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap, WMSTileLayer } from 'react-leaflet';
+import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap, WMSTileLayer } from '../maps/LeafletMap';
 import 'leaflet/dist/leaflet.css';
 
 import { bimModelsApi } from '../../api/bimModels';
@@ -12,7 +12,7 @@ const DEFAULT_SITE = {
 
 const DEFAULT_LAYERS = [{
     key: 'openstreetmap', name: 'OpenStreetMap', kind: 'basemap', service_type: 'xyz',
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; OpenStreetMap',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
     layer_name: null, min_zoom: 3, max_zoom: 22, opacity: 1, visible: true, order: 0,
 }];
 
@@ -36,7 +36,7 @@ const BimSiteGeoreferencePanel = ({ projectId, empresaId, activeVersionId, onSel
     const [catalogReason, setCatalogReason] = useState('');
     const [savingCatalog, setSavingCatalog] = useState(false);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         if (!projectId) return;
         try {
             setLoading(true);
@@ -62,9 +62,9 @@ const BimSiteGeoreferencePanel = ({ projectId, empresaId, activeVersionId, onSel
         } finally {
             setLoading(false);
         }
-    };
+    }, [api, empresaId, projectId]);
 
-    useEffect(() => { load(); }, [projectId, empresaId]);
+    useEffect(() => { load(); }, [load]);
 
     const updateNumber = (field, value) => setForm((current) => ({ ...current, [field]: Number(value) || 0 }));
     const updateOrigin = (index, value) => setForm((current) => {
@@ -180,42 +180,42 @@ const BimSiteGeoreferencePanel = ({ projectId, empresaId, activeVersionId, onSel
                         <div className="flex items-center gap-2"><Layers3 className="h-3.5 w-3.5 text-zinc-500" /><span className="text-[11px] font-semibold text-zinc-800">Servicios cartográficos</span></div>
                         <span className="text-[10px] font-medium text-zinc-500" data-bim-map-layer-count>{layers.length} capas{catalog ? ` · r${catalog.revision}` : ''}</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-3 p-2.5">
+                    <div className="grid grid-cols-1 gap-x-3 p-2.5 sm:grid-cols-2">
                         {layers.map((layer) => (
-                            <div key={layer.key} className="flex h-9 min-w-0 items-center gap-2 border-b border-zinc-100" data-bim-map-layer={layer.key}>
-                                <button type="button" onClick={() => toggleLayer(layer.key)} className="inline-flex h-7 w-7 shrink-0 items-center justify-center text-zinc-500" aria-label={`${layer.visible ? 'Ocultar' : 'Mostrar'} ${layer.name}`} title={`${layer.visible ? 'Ocultar' : 'Mostrar'} ${layer.name}`}>{layer.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}</button>
+                            <div key={layer.key} className="flex min-h-11 min-w-0 items-center gap-2 border-b border-zinc-100" data-bim-map-layer={layer.key}>
+                                <button type="button" onClick={() => toggleLayer(layer.key)} className="inline-flex h-11 w-11 shrink-0 items-center justify-center text-zinc-500" aria-label={`${layer.visible ? 'Ocultar' : 'Mostrar'} ${layer.name}`} title={`${layer.visible ? 'Ocultar' : 'Mostrar'} ${layer.name}`}>{layer.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}</button>
                                 <span className="min-w-0 flex-1 truncate text-[10px] font-medium text-zinc-700">{layer.name} · {layer.service_type.toUpperCase()}</span>
                                 <input type="range" min="0.1" max="1" step="0.1" value={layer.opacity} onChange={(event) => updateOpacity(layer.key, event.target.value)} className="w-16" aria-label={`Opacidad ${layer.name}`} />
-                                <button type="button" onClick={() => removeLayer(layer.key)} className="inline-flex h-7 w-7 shrink-0 items-center justify-center text-zinc-400 hover:text-red-600" aria-label={`Eliminar ${layer.name}`} title={`Eliminar ${layer.name}`}><Trash2 className="h-3.5 w-3.5" /></button>
+                                <button type="button" onClick={() => removeLayer(layer.key)} className="inline-flex h-11 w-11 shrink-0 items-center justify-center text-zinc-400 hover:text-red-600" aria-label={`Eliminar ${layer.name}`} title={`Eliminar ${layer.name}`}><Trash2 className="h-3.5 w-3.5" /></button>
                             </div>
                         ))}
                     </div>
-                    <div className="grid grid-cols-[minmax(120px,0.7fr)_88px_88px_minmax(220px,1.4fr)_minmax(100px,0.7fr)_32px] gap-2 border-t border-zinc-200 p-2.5">
-                        <input value={layerDraft.name} onChange={(event) => setLayerDraft((current) => ({ ...current, name: event.target.value }))} placeholder="Nombre de capa" className="h-8 min-w-0 rounded border border-zinc-200 px-2 text-[10px]" />
-                        <select value={layerDraft.kind} onChange={(event) => setLayerDraft((current) => ({ ...current, kind: event.target.value }))} className="h-8 rounded border border-zinc-200 px-1 text-[10px]" aria-label="Tipo de capa"><option value="overlay">Overlay</option><option value="basemap">Base</option></select>
-                        <select value={layerDraft.service_type} onChange={(event) => setLayerDraft((current) => ({ ...current, service_type: event.target.value }))} className="h-8 rounded border border-zinc-200 px-1 text-[10px]" aria-label="Protocolo cartográfico"><option value="xyz">XYZ</option><option value="wms">WMS</option></select>
-                        <input value={layerDraft.url} onChange={(event) => setLayerDraft((current) => ({ ...current, url: event.target.value }))} placeholder="URL del servicio" className="h-8 min-w-0 rounded border border-zinc-200 px-2 text-[10px]" />
-                        <input value={layerDraft.layer_name} onChange={(event) => setLayerDraft((current) => ({ ...current, layer_name: event.target.value }))} placeholder="Capa WMS" disabled={layerDraft.service_type !== 'wms'} className="h-8 min-w-0 rounded border border-zinc-200 px-2 text-[10px] disabled:bg-zinc-50" />
-                        <button type="button" onClick={addLayer} className="inline-flex h-8 w-8 items-center justify-center rounded bg-zinc-800 text-white" aria-label="Añadir servicio cartográfico" title="Añadir servicio cartográfico"><Plus className="h-4 w-4" /></button>
+                    <div className="grid grid-cols-1 gap-2 border-t border-zinc-200 p-2.5 sm:grid-cols-2 xl:grid-cols-[minmax(120px,0.7fr)_88px_88px_minmax(220px,1.4fr)_minmax(100px,0.7fr)_44px]">
+                        <input value={layerDraft.name} onChange={(event) => setLayerDraft((current) => ({ ...current, name: event.target.value }))} placeholder="Nombre de capa" aria-label="Nombre de capa" className="h-11 min-w-0 rounded border border-zinc-200 px-2 text-[10px]" />
+                        <select value={layerDraft.kind} onChange={(event) => setLayerDraft((current) => ({ ...current, kind: event.target.value }))} className="h-11 rounded border border-zinc-200 px-1 text-[10px]" aria-label="Tipo de capa"><option value="overlay">Overlay</option><option value="basemap">Base</option></select>
+                        <select value={layerDraft.service_type} onChange={(event) => setLayerDraft((current) => ({ ...current, service_type: event.target.value }))} className="h-11 rounded border border-zinc-200 px-1 text-[10px]" aria-label="Protocolo cartográfico"><option value="xyz">XYZ</option><option value="wms">WMS</option></select>
+                        <input value={layerDraft.url} onChange={(event) => setLayerDraft((current) => ({ ...current, url: event.target.value }))} placeholder="URL del servicio" aria-label="URL del servicio cartográfico" className="h-11 min-w-0 rounded border border-zinc-200 px-2 text-[10px]" />
+                        <input value={layerDraft.layer_name} onChange={(event) => setLayerDraft((current) => ({ ...current, layer_name: event.target.value }))} placeholder="Capa WMS" aria-label="Nombre de capa WMS" disabled={layerDraft.service_type !== 'wms'} className="h-11 min-w-0 rounded border border-zinc-200 px-2 text-[10px] disabled:bg-zinc-50" />
+                        <button type="button" onClick={addLayer} className="inline-flex h-11 w-11 items-center justify-center rounded bg-zinc-800 text-white" aria-label="Añadir servicio cartográfico" title="Añadir servicio cartográfico"><Plus className="h-4 w-4" /></button>
                     </div>
                     <div className="flex gap-2 border-t border-zinc-200 p-2.5">
-                        <input value={catalogReason} onChange={(event) => setCatalogReason(event.target.value)} placeholder="Justificación del catálogo" className="h-8 min-w-0 flex-1 rounded border border-zinc-200 px-2 text-[10px]" />
-                        <button type="button" onClick={saveCatalog} disabled={savingCatalog || catalogReason.trim().length < 3} className="inline-flex h-8 w-8 items-center justify-center rounded bg-[#F39200] text-white disabled:opacity-40" aria-label="Guardar servicios cartográficos" title="Guardar servicios cartográficos"><Save className="h-3.5 w-3.5" /></button>
+                        <input value={catalogReason} onChange={(event) => setCatalogReason(event.target.value)} placeholder="Justificación del catálogo" aria-label="Justificación del catálogo cartográfico" className="h-11 min-w-0 flex-1 rounded border border-zinc-200 px-2 text-[10px]" />
+                        <button type="button" onClick={saveCatalog} disabled={savingCatalog || catalogReason.trim().length < 3} className="inline-flex h-11 w-11 items-center justify-center rounded bg-[#F39200] text-white disabled:opacity-40" aria-label="Guardar servicios cartográficos" title="Guardar servicios cartográficos"><Save className="h-3.5 w-3.5" /></button>
                     </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                     <label className="text-[10px] font-medium text-zinc-600">Latitud<input type="number" step="0.000001" value={form.latitude} onChange={(event) => updateNumber('latitude', event.target.value)} className="mt-1 h-8 w-full rounded border border-zinc-200 px-2 text-xs" /></label>
                     <label className="text-[10px] font-medium text-zinc-600">Longitud<input type="number" step="0.000001" value={form.longitude} onChange={(event) => updateNumber('longitude', event.target.value)} className="mt-1 h-8 w-full rounded border border-zinc-200 px-2 text-xs" /></label>
                     <label className="text-[10px] font-medium text-zinc-600">Altitud<input type="number" step="0.1" value={form.altitude} onChange={(event) => updateNumber('altitude', event.target.value)} className="mt-1 h-8 w-full rounded border border-zinc-200 px-2 text-xs" /></label>
                 </div>
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                     {['X', 'Y', 'Z'].map((axis, index) => <label key={axis} className="text-[10px] font-medium text-zinc-600">Origen {axis}<input type="number" step="0.01" value={form.local_origin[index]} onChange={(event) => updateOrigin(index, event.target.value)} className="mt-1 h-8 w-full rounded border border-zinc-200 px-2 text-xs" /></label>)}
                     <label className="text-[10px] font-medium text-zinc-600">Rumbo<input type="number" min="0" max="359.999" step="0.1" value={form.heading_degrees} onChange={(event) => updateNumber('heading_degrees', event.target.value)} className="mt-1 h-8 w-full rounded border border-zinc-200 px-2 text-xs" /></label>
                     <label className="text-[10px] font-medium text-zinc-600">Zoom<input type="number" min="3" max="22" value={form.map_zoom} onChange={(event) => updateNumber('map_zoom', event.target.value)} className="mt-1 h-8 w-full rounded border border-zinc-200 px-2 text-xs" /></label>
                 </div>
                 <div className="flex gap-2">
-                    <label className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md border border-zinc-200 px-2"><Crosshair className="h-3.5 w-3.5 shrink-0 text-zinc-400" aria-hidden="true" /><span className="sr-only">Justificación de georreferencia</span><input value={form.justification} onChange={(event) => setForm((current) => ({ ...current, justification: event.target.value }))} placeholder="Justificación topográfica" className="min-w-0 flex-1 text-xs outline-none" /></label>
-                    <button type="button" onClick={save} disabled={saving || loading || form.justification.trim().length < 3} className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#F39200] text-white disabled:opacity-40" aria-label="Guardar georreferencia BIM" title="Guardar georreferencia BIM"><Save className="h-4 w-4" /></button>
+                    <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-md border border-zinc-200 px-2"><Crosshair className="h-3.5 w-3.5 shrink-0 text-zinc-400" aria-hidden="true" /><span className="sr-only">Justificación de georreferencia</span><input value={form.justification} onChange={(event) => setForm((current) => ({ ...current, justification: event.target.value }))} placeholder="Justificación topográfica" className="min-w-0 flex-1 text-xs outline-none" /></label>
+                    <button type="button" onClick={save} disabled={saving || loading || form.justification.trim().length < 3} className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-[#F39200] text-white disabled:opacity-40" aria-label="Guardar georreferencia BIM" title="Guardar georreferencia BIM"><Save className="h-4 w-4" /></button>
                 </div>
                 {message ? <p className="text-[10px] font-medium text-zinc-600" role="status">{message}</p> : null}
             </div>

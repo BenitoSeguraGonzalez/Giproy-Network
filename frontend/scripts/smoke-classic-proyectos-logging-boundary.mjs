@@ -29,7 +29,6 @@ for (const token of [
     'await proyectosApi.create(payload, empId)',
     'const renderCreateProjectModal = () => (',
     '{renderCreateProjectModal()}',
-    'const handleOpenRevisionModal = async (project, options = {}) => {',
     "const { mode = 'open', targetColumnId = null } = options;",
     'const rootCode = project.codigo_root || project.codigo;',
     'const empIdForApi = project.empresa_id;',
@@ -45,6 +44,10 @@ for (const token of [
     'await activateProjectSelection(createdRevision, { replace: true })',
     'Clonar Proyecto Completo',
     'aria-label={`Clonar proyecto completo ${project.nombre || project.codigo || project.id}`}',
+    'const requestId = ++projectFetchRequestRef.current;',
+    'if (requestId !== projectFetchRequestRef.current) return false;',
+    'const data = Array.isArray(response) ? response : [];',
+    'const detailBatchSize = 8;',
 ]) {
     assert.equal(
         proyectosSource.includes(token),
@@ -52,6 +55,12 @@ for (const token of [
         `Proyectos debe conservar flujo critico: ${token}`,
     );
 }
+
+assert.match(
+    proyectosSource,
+    /const handleOpenRevisionModal = (?:useCallback\(\s*)?async \(project, options = \{\}\) => \{/,
+    'Proyectos debe conservar el flujo de apertura de revisiones',
+);
 
 for (const token of [
     'ArchiveX',

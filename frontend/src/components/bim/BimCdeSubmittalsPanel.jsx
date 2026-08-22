@@ -1,5 +1,7 @@
+const legacyFormEnabled = Boolean(import.meta.env.VITE_ENABLE_LEGACY_BIM_FORMS);
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, ClipboardCheck, RotateCcw, Send, XCircle } from 'lucide-react';
+import { CheckCircle2, ClipboardCheck, RotateCcw, Send, X, XCircle } from 'lucide-react';
 
 import { bimModelsApi } from '../../api/bimModels';
 
@@ -19,6 +21,7 @@ export default function BimCdeSubmittalsPanel({ projectId, empresaId, api = bimM
     const [resubmit, setResubmit] = useState({ document_id: '', submission_notes: '' });
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
+    const [createOpen, setCreateOpen] = useState(false);
 
     const load = useCallback(async () => {
         if (!projectId) return;
@@ -31,6 +34,7 @@ export default function BimCdeSubmittalsPanel({ projectId, empresaId, api = bimM
     }, [api, empresaId, projectId]);
 
     useEffect(() => { load(); }, [load]);
+    useEffect(() => { const onKey = (event) => event.key === 'Escape' && setCreateOpen(false); window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey); }, []);
     const selected = useMemo(() => items.find((item) => String(item.id) === selectedId) || null, [items, selectedId]);
     const userName = (id) => assignees.find((item) => item.id === id)?.name || `Usuario ${id}`;
     const documentCode = (id) => documents.find((item) => item.id === id)?.document_code || `Documento ${id}`;
@@ -63,10 +67,10 @@ export default function BimCdeSubmittalsPanel({ projectId, empresaId, api = bimM
     };
 
     return <section className="border border-slate-200 bg-white" data-bim-cde-submittals>
-        <header className="flex h-10 items-center gap-2 border-b border-slate-200 px-3"><ClipboardCheck size={16} className="text-orange-600" /><h3 className="text-sm font-semibold text-slate-800">Submittals y planos de ingenieria</h3></header>
+        <header className="flex h-10 items-center gap-2 border-b border-slate-200 px-3"><ClipboardCheck size={16} className="text-orange-600" /><h3 className="text-sm font-semibold text-slate-800">Submittals y planos de ingenieria</h3><button type="button" onClick={() => setCreateOpen(true)} className="ml-auto inline-flex h-7 items-center gap-1 bg-orange-600 px-2.5 text-[11px] font-semibold text-white"><ClipboardCheck size={13}/>Nuevo expediente</button></header>
         <div className="bim-adaptive-master-detail grid min-h-0 text-xs">
             <div className="border-r border-slate-200 p-3">
-                <form className="grid grid-cols-2 gap-2" onSubmit={create}>
+                {legacyFormEnabled && <form className="hidden" onSubmit={create}>
                     <input className="col-span-2 border border-slate-300 px-2 py-1.5" required minLength={3} aria-label="Titulo submittal" placeholder="Titulo del expediente" value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} />
                     <select className="border border-slate-300 px-2 py-1.5" aria-label="Tipo submittal" value={draft.submittal_type} onChange={(event) => setDraft({ ...draft, submittal_type: event.target.value })}>{Object.entries(TYPES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
                     <input className="border border-slate-300 px-2 py-1.5" required aria-label="Disciplina submittal" placeholder="Disciplina" value={draft.discipline} onChange={(event) => setDraft({ ...draft, discipline: event.target.value })} />
@@ -76,7 +80,7 @@ export default function BimCdeSubmittalsPanel({ projectId, empresaId, api = bimM
                     <select className="col-span-2 border border-slate-300 px-2 py-1.5" required aria-label="Documento submittal" value={draft.document_id} onChange={(event) => setDraft({ ...draft, document_id: event.target.value })}><option value="">Documento CDE vigente</option>{documents.map((item) => <option key={item.id} value={item.id}>{item.document_code} · {item.title}</option>)}</select>
                     <textarea className="col-span-2 min-h-16 resize-y border border-slate-300 px-2 py-1.5" aria-label="Notas submittal" placeholder="Notas de emision" value={draft.submission_notes} onChange={(event) => setDraft({ ...draft, submission_notes: event.target.value })} />
                     <button type="submit" disabled={busy} className="col-span-2 inline-flex h-8 items-center justify-center gap-1 bg-orange-600 font-semibold text-white disabled:opacity-40"><ClipboardCheck size={14} />Crear expediente</button>
-                </form>
+                </form>}
                 <div className="mt-3 space-y-1 border-t border-slate-200 pt-3" data-bim-submittal-list>{items.map((item) => <button key={item.id} type="button" onClick={() => setSelectedId(String(item.id))} className={`flex h-10 w-full items-center gap-2 border px-2 text-left ${item.id === selected?.id ? 'border-orange-300 bg-orange-50' : 'border-slate-200'}`}><strong className="w-16">{item.submittal_number}</strong><span className="min-w-0 flex-1 truncate">{item.title}</span><span className="text-[10px] uppercase text-slate-500">{STATUS[item.status]}</span></button>)}</div>
             </div>
             <div className="min-w-0 p-3" data-bim-submittal-detail>
@@ -97,5 +101,6 @@ export default function BimCdeSubmittalsPanel({ projectId, empresaId, api = bimM
                 <p className="mt-3 text-[10px] text-slate-500">Expediente BIM aislado. No modifica Documentos, Compras ni Contratos de GiProy Clasico.</p>{error ? <p role="alert" className="mt-2 text-rose-700">{error}</p> : null}
             </div>
         </div>
+        {createOpen ? <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/35 p-6"><form className="w-full max-w-2xl overflow-hidden rounded-xl bg-white shadow-2xl" onSubmit={(event) => { create(event); setCreateOpen(false); }} role="dialog" aria-modal="true" aria-labelledby="submittal-create-title"><header className="flex min-h-12 items-center border-b border-slate-200 px-5"><div><h3 id="submittal-create-title" className="text-sm font-semibold text-slate-900">Nuevo expediente submittal</h3><p className="text-[11px] text-slate-500">Define disciplina, revisor, fecha y documento CDE vigente.</p></div><button type="button" onClick={() => setCreateOpen(false)} aria-label="Cerrar nuevo expediente" className="ml-auto inline-flex size-8 items-center justify-center text-slate-500"><X size={16}/></button></header><div className="grid grid-cols-2 gap-3 p-5"><input className="col-span-2 h-9 border border-slate-300 px-3 text-xs" required minLength={3} aria-label="Titulo submittal" placeholder="Título del expediente" value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })}/><select className="h-9 border border-slate-300 px-2 text-xs" aria-label="Tipo submittal" value={draft.submittal_type} onChange={(event) => setDraft({ ...draft, submittal_type: event.target.value })}>{Object.entries(TYPES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><input className="h-9 border border-slate-300 px-3 text-xs" required aria-label="Disciplina submittal" placeholder="Disciplina" value={draft.discipline} onChange={(event) => setDraft({ ...draft, discipline: event.target.value })}/><input className="h-9 border border-slate-300 px-3 text-xs" aria-label="Seccion especificacion submittal" placeholder="Sección de especificación" value={draft.specification_section} onChange={(event) => setDraft({ ...draft, specification_section: event.target.value })}/><select className="h-9 border border-slate-300 px-2 text-xs" required aria-label="Revisor submittal" value={draft.reviewer_id} onChange={(event) => setDraft({ ...draft, reviewer_id: event.target.value })}><option value="">Revisor</option>{assignees.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><input className="h-9 border border-slate-300 px-3 text-xs" required type="datetime-local" aria-label="Fecha requerida submittal" value={draft.required_at} onChange={(event) => setDraft({ ...draft, required_at: event.target.value })}/><select className="h-9 border border-slate-300 px-2 text-xs" required aria-label="Documento submittal" value={draft.document_id} onChange={(event) => setDraft({ ...draft, document_id: event.target.value })}><option value="">Documento CDE vigente</option>{documents.map((item) => <option key={item.id} value={item.id}>{item.document_code} · {item.title}</option>)}</select><textarea className="col-span-2 h-20 resize-none border border-slate-300 p-3 text-xs" aria-label="Notas submittal" placeholder="Notas de emisión" value={draft.submission_notes} onChange={(event) => setDraft({ ...draft, submission_notes: event.target.value })}/></div><footer className="flex min-h-12 items-center justify-end gap-2 border-t border-slate-200 px-5"><button type="button" onClick={() => setCreateOpen(false)} className="h-8 px-3 text-xs">Cancelar</button><button type="submit" disabled={busy} className="h-8 bg-orange-600 px-4 text-xs font-semibold text-white disabled:opacity-40">Crear expediente</button></footer></form></div> : null}
     </section>;
 }

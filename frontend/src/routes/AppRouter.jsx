@@ -5,6 +5,7 @@ import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
 import VerifyRegistration from '../pages/VerifyRegistration';
 import RucReviewStatus from '../pages/RucReviewStatus';
+import LegalDocument from '../pages/LegalDocument';
 import ProtectedRoute from '../components/ProtectedRoute';
 import AppLayout from '../layouts/AppLayout';
 import { PresupuestoProvider } from '../context/PresupuestoContext';
@@ -51,10 +52,15 @@ const OtrosServicios = lazyWithChunkRecovery(() => import('../pages/Placeholders
 })));
 
 const RouteFallback = () => (
-    <div className="min-h-[40vh] flex items-center justify-center bg-[#F8FAFC]">
+    <div
+        className="min-h-[40vh] flex items-center justify-center bg-[var(--surface-subtle)]"
+        role="status"
+        aria-live="polite"
+        aria-label="Cargando módulo"
+    >
         <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-4 border-zinc-200 border-t-[#F39200] rounded-full animate-spin" />
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Cargando modulo</p>
+            <div className="w-10 h-10 border-4 border-zinc-200 border-t-[#F39200] rounded-full animate-spin" aria-hidden="true" />
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-zinc-600">Cargando módulo</p>
         </div>
     </div>
 );
@@ -95,6 +101,7 @@ const AppRouter = () => {
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/verify-registration" element={<VerifyRegistration />} />
                 <Route path="/ruc-review" element={<RucReviewStatus />} />
+                <Route path="/legal/:document" element={<LegalDocument />} />
 
                 {/* Rutas protegidas — con encabezado persistente (AppLayout) */}
                 <Route path="/" element={withProtectedLayout(<Dashboard />)} />

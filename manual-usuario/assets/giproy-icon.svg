@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="GiProy">
+  <defs>
+    <linearGradient id="g" x1="8" y1="64" x2="120" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E3571C"/>
+      <stop offset=".48" stop-color="#F39200"/>
+      <stop offset="1" stop-color="#F0B12A"/>
+    </linearGradient>
+  </defs>
+  <rect x="7" y="7" width="114" height="114" rx="23" fill="url(#g)"/>
+  <path d="M43.8 29.5C45.1 25.9 48.5 23.5 52.4 23.5H78.4C83.2 23.5 87.1 27.4 87.1 32.2V40.1C87.1 43.7 84.2 46.6 80.6 46.6H36.6L43.8 29.5Z" fill="#fff"/>
+  <path d="M34.8 65.1C36.2 61.5 39.6 59.1 43.4 59.1H82.8C87.6 59.1 91.5 63 91.5 67.8V76.1C91.5 79.7 88.6 82.6 85 82.6H27.4L34.8 65.1Z" fill="#fff"/>
+  <path d="M26.1 99.8C27.4 96.2 30.9 93.8 34.7 93.8H90C94.8 93.8 98.7 97.7 98.7 102.5V110.1C98.7 113.7 95.8 116.6 92.2 116.6H19L26.1 99.8Z" fill="#fff"/>
+</svg>

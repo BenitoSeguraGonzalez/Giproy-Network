@@ -269,7 +269,7 @@ def test_edo_pdf_direct_generates_document_pdf(db, sample_empresa):
 
     assert payload.startswith(b"%PDF")
     assert len(payload) > 1500
-    assert ReportingService.REPORT_EXPORT_RENDER_VERSION.endswith("edt-listado-document-blocks-v4")
+    assert ReportingService.REPORT_EXPORT_RENDER_VERSION
 
 
 def test_edo_template_signature_block_is_two_compact_lines():

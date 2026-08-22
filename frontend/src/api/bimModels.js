@@ -289,6 +289,12 @@ export const bimModelsApi = {
     getCoordinationCoverage: async (projectId, coordinationSetId, empresaId = null) => (
         await axiosInstance.get(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/coverage`, withTenantConfig({}, empresaId))
     ).data,
+    listCoordinationConflicts: async (projectId, coordinationSetId, empresaId = null, status = 'open') => (
+        await axiosInstance.get(
+            `/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/conflicts`,
+            withTenantConfig({ params: { status } }, empresaId),
+        )
+    ).data,
     createCoordinationProposal: async (projectId, coordinationSetId, payload, empresaId = null) => (
         await axiosInstance.post(`/bim/projects/${projectId}/coordination-sets/${coordinationSetId}/proposals`, payload, withTenantConfig({}, empresaId))
     ).data,
@@ -893,6 +899,18 @@ export const bimModelsApi = {
             null,
             withTenantConfig({}, empresaId),
         );
+        return response.data;
+    },
+    activateVersion: async (projectId, versionId, empresaId = null) => {
+        const response = await axiosInstance.post('/bim/projects/' + projectId + '/versions/' + versionId + '/activate', null, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    deleteVersion: async (projectId, versionId, empresaId = null) => {
+        const response = await axiosInstance.delete('/bim/projects/' + projectId + '/versions/' + versionId, withTenantConfig({}, empresaId));
+        return response.data;
+    },
+    decideVersionReview: async (projectId, versionId, payload, empresaId = null) => {
+        const response = await axiosInstance.post(`/bim/projects/${projectId}/versions/${versionId}/review-decision`, payload, withTenantConfig({}, empresaId));
         return response.data;
     },
     listArtifacts: async (projectId, versionId, empresaId = null) => {

@@ -284,6 +284,13 @@ def check_frontend(root: Path, results: list[CheckResult]) -> None:
         [node, "scripts/smoke-classic-precios-unitarios-ui-guards.mjs"],
         frontend,
     )
+    run_command(
+        root,
+        results,
+        "frontend:smoke classic runtime symbols",
+        [node, "scripts/smoke-classic-runtime-symbols.mjs"],
+        frontend,
+    )
 
 
 def check_frontend_architecture(root: Path, results: list[CheckResult]) -> None:

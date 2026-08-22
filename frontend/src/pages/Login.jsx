@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useCallback } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card';
@@ -76,7 +76,7 @@ const Login = () => {
                 setAccounts(foundAccounts);
                 setStep('selection');
             }
-        } catch (err) {
+        } catch {
             setError("Error al verificar la cuenta. Intente más tarde.");
         } finally {
             setIsLoading(false);

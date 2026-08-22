@@ -1,0 +1,2007 @@
+{
+  "generated_at": "2026-08-03T12:30:13.785Z",
+  "scope": "Interfaz de empresa; se excluyen deliberadamente las páginas AdminGlobal.",
+  "summary": {
+    "files": 93,
+    "aria_labels": 445,
+    "titles": 418,
+    "modal_titles": 29,
+    "button_text": 140,
+    "undocumented_controls": 0
+  },
+  "files": [
+    {
+      "file": "frontend/src/pages/Proyectos.jsx",
+      "aria_labels": [
+        "Cerrar"
+      ],
+      "titles": [
+        "Adicionar al día",
+        "Análisis previo para generar proyecto clásico",
+        "Analizar",
+        "Calendario del portafolio",
+        "Cancelar",
+        "Cerrar",
+        "Cerrar historial",
+        "Clonar Proyecto Completo",
+        "Crear proyecto",
+        "Diagnóstico",
+        "Diagnóstico SOCE/SERCOP",
+        "Eliminar revisión",
+        "Entrar a revisión aprobada",
+        "Enviar a revision",
+        "Filtros",
+        "Gestión de personal",
+        "Importar SOCE/SERCOP",
+        "Lectura técnica encontrada antes de crear el proyecto",
+        "Mover proyecto a papelera",
+        "Nuevo Proyecto",
+        "Papelera",
+        "Papelera de proyectos",
+        "Retención operativa de 7 días antes del borrado definitivo.",
+        "Revisiones disponibles",
+        "Seleccionar",
+        "Sincronización técnica y administrativa",
+        "Vista mensual mixta con hitos, revisiones, anotaciones y comunicados",
+        "Volver"
+      ],
+      "modal_titles": [
+        "Calendario del portafolio",
+        "Diagnóstico SOCE/SERCOP",
+        "Importar SOCE/SERCOP",
+        "Nuevo Proyecto",
+        "Papelera de proyectos"
+      ],
+      "button_text": [
+        "Actualizar",
+        "Calendario",
+        "Cancelar",
+        "Crear Proyecto",
+        "Guardar",
+        "Reintentar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/BasesTrabajo.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Clonar",
+        "Editar",
+        "Eliminar",
+        "Establezca los parámetros técnicos y regionales de su repositorio.",
+        "Historial de sincronización",
+        "Papelera de bases",
+        "Retención operativa de 7 días antes del borrado definitivo.",
+        "Sincronizar base de proyecto",
+        "Sincronizar faltantes desde base maestra",
+        "Ver historial de sincronización"
+      ],
+      "modal_titles": [
+        "Establezca los parámetros técnicos y regionales de su repositorio.",
+        "Historial de sincronización",
+        "Papelera de bases",
+        "Sincronizar base de proyecto"
+      ],
+      "button_text": [
+        "Actualizar",
+        "Papelera"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/Subcategorias.jsx",
+      "aria_labels": [
+        "Cancelar"
+      ],
+      "titles": [
+        "¿Borrar subcategorías seleccionadas?",
+        "Arrastrar para reordenar o mover de categoría",
+        "Borrar",
+        "Borrar seleccionados",
+        "Cancelar",
+        "Duplicar",
+        "Editar",
+        "Exportar seleccionados",
+        "Importar desde portapapeles",
+        "Importar subcategorías",
+        "Limpiar selección",
+        "Pegue datos desde Excel o portapapeles",
+        "Seleccionar visibles"
+      ],
+      "modal_titles": [
+        "Importar subcategorías"
+      ],
+      "button_text": [
+        "Agregar Primera Subcategoría",
+        "Importar",
+        "Nueva Subcategoría"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/Recursos.jsx",
+      "aria_labels": [
+        "Cancelar"
+      ],
+      "titles": [
+        "¿Borrar recursos seleccionados?",
+        "Asignar CPC",
+        "Borrar",
+        "Cancelar",
+        "Duplicar",
+        "Editar",
+        "Importación Masiva de Recursos",
+        "Mostrar solo recursos sin Código CPC en el alcance activo",
+        "Reconocimiento previo desde Excel o portapapeles"
+      ],
+      "modal_titles": [
+        "Asignar CPC",
+        "Importación Masiva de Recursos"
+      ],
+      "button_text": [
+        "Crear Primer Recurso",
+        "Nuevo Recurso"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/APUs.jsx",
+      "aria_labels": [
+        "Cancelar",
+        "Cerrar",
+        "Confirmar y finalizar",
+        "Crear unidad",
+        "Importar selección",
+        "Volver",
+        "Volver al módulo Proyecto"
+      ],
+      "titles": [
+        "¿Borrar APUs seleccionados?",
+        "Ajuste directo desde APU",
+        "Arrastrar para reordenar dentro de esta categoría",
+        "Borrar",
+        "Borrar seleccionados",
+        "Cancelar",
+        "Cerrar",
+        "Confirmar y finalizar",
+        "Conflictos de Importación",
+        "Crear unidad",
+        "Duplicar",
+        "Editar",
+        "Editar APU anidado",
+        "Editar recurso",
+        "Editar Recurso",
+        "El precio base se edita desde el recurso (botón Lápiz)",
+        "Esta unidad estará disponible exclusivamente para la base activa.",
+        "Generando reporte",
+        "Generar reporte de seleccionados",
+        "Importar APUs en Bloque",
+        "Importar desde Base",
+        "Importar desde otra base de trabajo externa",
+        "Importar desde portapapeles",
+        "Importar selección",
+        "Limpiar búsqueda",
+        "Limpiar selección",
+        "Nueva Unidad para APUs",
+        "Pega el listado en formato descripción + unidad para crearlos como registros base.",
+        "Seleccionar visibles",
+        "Volver",
+        "Volver al módulo Proyecto"
+      ],
+      "modal_titles": [
+        "Conflictos de Importación",
+        "Importar APUs en Bloque",
+        "Importar desde Base",
+        "Nueva Unidad para APUs"
+      ],
+      "button_text": [
+        "Autodecisión",
+        "Base Ext.",
+        "Importar",
+        "Volver al módulo Proyecto",
+        "Volver al padre"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/Community.jsx",
+      "aria_labels": [
+        "Administración",
+        "Crear sección",
+        "Crear tema",
+        "Métricas"
+      ],
+      "titles": [
+        "Administración",
+        "Cerrar publicación",
+        "Crear sección",
+        "Crear tema",
+        "Editar publicación propia",
+        "Eliminar publicación",
+        "Eliminar publicación propia",
+        "Métricas",
+        "Ocultar publicación",
+        "Publicación fijada"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Aplicar sanción",
+        "Cancelar",
+        "Enviar",
+        "Marcar todas",
+        "Nueva publicación",
+        "Publicar",
+        "Reintentar",
+        "Reintentar carga",
+        "Restablecer filtros"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/EnviosTransferencias.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Cancelar envio",
+        "Historial",
+        "Importar",
+        "Rechazar",
+        "Revalidar compras"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Cancelar",
+        "Confirmar empresa",
+        "Enviar",
+        "Validación",
+        "Validar",
+        "Volver"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/Marketplace.jsx",
+      "aria_labels": [
+        "Precio maximo",
+        "Precio minimo"
+      ],
+      "titles": [
+        "Abrir carrito",
+        "Quitar del carrito",
+        "Volver al dashboard"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Completar datos",
+        "Limpiar filtros"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/MarketplaceProductDetail.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Alcance comercial",
+        "Compra segura y útil",
+        "Ir al panel de compra",
+        "Revisar opiniones",
+        "Ver campos visibles"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/MarketplaceOrderDetail.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Preparando el detalle postcompra",
+        "Pulso postcompra"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/MarketplaceBuyerDashboard.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Activos entregados",
+        "Activos entregados, acceso operativo y vínculo con pedido origen",
+        "Bandeja funcional de compras, pagos y acciones transversales",
+        "Bandeja operativa del comprador para seguir pedidos y operar activos entregados",
+        "Biblioteca comprador",
+        "Biblioteca de compra",
+        "Compras recientes",
+        "Mis compras",
+        "Ningún activo coincide con el filtro actual",
+        "Ningún pedido coincide con el filtro actual",
+        "Preparando biblioteca y pedidos",
+        "Todavía no hay activos entregados",
+        "Todavía no hay pedidos en esta empresa"
+      ],
+      "modal_titles": [
+        "Biblioteca de compra",
+        "Mis compras"
+      ],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/SellerDashboard.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Bandeja funcional de productos, estados y acciones comerciales",
+        "Bandeja funcional de ventas, pedidos y trazabilidad comercial",
+        "Catálogo publicado",
+        "Categorías marketplace",
+        "Configuración comercial",
+        "Edición concentrada y más limpia",
+        "Frente operativo para correcciones, reenvíos, nuevas revisiones y catálogo pausado",
+        "Gobierno del catálogo base de Tienda para Sistema",
+        "Identidad comercial",
+        "Mis ventas",
+        "Moderación",
+        "Moderación comercial",
+        "No hay frentes de moderación abiertos",
+        "Panel vendedor",
+        "Ventas",
+        "Ventas recientes",
+        "Vinculación con activo origen"
+      ],
+      "modal_titles": [
+        "Catálogo publicado",
+        "Categorías marketplace",
+        "Moderación comercial",
+        "Ventas"
+      ],
+      "button_text": [
+        "Cancelar edición"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/MarketplaceAdminDashboard.jsx",
+      "aria_labels": [
+        "Seleccionar archivos"
+      ],
+      "titles": [
+        "Categorías",
+        "Categorías bloqueadas temporalmente",
+        "Categorías registradas",
+        "Configuración del producto",
+        "Crear producto",
+        "Datos de compras públicas",
+        "Formas de pago",
+        "Formas de pago del sistema",
+        "Gobierno operativo de readiness, activación y configuración del checkout",
+        "Identidad comercial",
+        "Meta común del producto",
+        "No hay productos para esta combinación de filtros",
+        "No hay ventas para esta combinación",
+        "No se pudieron cargar las categorías",
+        "No se pudieron cargar las formas de pago",
+        "No se pudieron cargar las ventas del sistema",
+        "No se pudieron cargar los productos",
+        "Panel Administrador",
+        "Producto con metadatos comunes y metadatos propios de licitación",
+        "Productos",
+        "Seguimiento de pedidos marketplace y validación manual de transferencias",
+        "Seleccionar archivos",
+        "Submódulo administrativo del catálogo global de Tienda",
+        "Submódulo de estructura comercial de Tienda",
+        "Todavía no hay categorías",
+        "Todavía no hay productos registrados",
+        "Ventas Sistema",
+        "Ventas y transferencias"
+      ],
+      "modal_titles": [
+        "Categorías",
+        "Formas de pago",
+        "Producto con metadatos comunes y metadatos propios de licitación",
+        "Productos",
+        "Ventas Sistema"
+      ],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/pages/Settings.jsx",
+      "aria_labels": [],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Actualizar Información Empresarial",
+        "Backup Empresa",
+        "Guardar Configuración de Plantillas",
+        "Guardar Configuración de Proyecto",
+        "Guardar Preferencias",
+        "Validar Backup",
+        "Validar copia",
+        "Ver intentos",
+        "Ver internas"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimActualCostLedgerPanel.jsx",
+      "aria_labels": [],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Conciliar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimAsBuiltAcceptancePanel.jsx",
+      "aria_labels": [
+        "Actualizar entregas as-built",
+        "Criterios de aceptación as-built",
+        "Declaración as-built",
+        "Motivo de decisión as-built",
+        "Revisión de entrega as-built",
+        "Versión as-built"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Presentar para aceptación"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCanvasViewer.jsx",
+      "aria_labels": [],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Encuadrar activo",
+        "Encuadrar escena",
+        "Encuadrar vinculados",
+        "Reset vista"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCdeCollaborationPanel.jsx",
+      "aria_labels": [
+        "Actualizar actividad CDE",
+        "En línea"
+      ],
+      "titles": [
+        "Actualizar actividad CDE"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCdeDashboardPanel.jsx",
+      "aria_labels": [
+        "Actualizar resumen CDE"
+      ],
+      "titles": [
+        "Acusar alerta"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCdeDocumentsPanel.jsx",
+      "aria_labels": [
+        "Archivo documental CDE",
+        "Categoria documental CDE",
+        "Codigo documental CDE",
+        "Documento CDE seleccionado",
+        "Guardar ACL CDE",
+        "Motivo de archivo CDE",
+        "Notas documentales CDE",
+        "Titulo documental CDE",
+        "Usuario ACL CDE",
+        "Version documental CDE"
+      ],
+      "titles": [
+        "Descargar revision",
+        "Guardar acceso"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Archivar",
+        "Registrar revision"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCdeReviewPanel.jsx",
+      "aria_labels": [
+        "Documento de revisión",
+        "Enviar comentario",
+        "Responsable de revisión",
+        "Revisión documental",
+        "Vencimiento de revisión"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Crear revisión"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCdeRfiPanel.jsx",
+      "aria_labels": [
+        "Asunto RFI",
+        "Documento RFI",
+        "Filtrar RFI por estado",
+        "GlobalId RFI",
+        "Motivo transicion RFI",
+        "Pregunta RFI",
+        "Prioridad RFI",
+        "Responsable RFI",
+        "Respuesta RFI",
+        "Vencimiento RFI"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Crear borrador"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCdeSubmittalsPanel.jsx",
+      "aria_labels": [
+        "Comentario submittal",
+        "Disciplina submittal",
+        "Documento submittal",
+        "Fecha requerida submittal",
+        "Notas reenvio submittal",
+        "Notas submittal",
+        "Nuevo documento submittal",
+        "Revisor submittal",
+        "Seccion especificacion submittal",
+        "Tipo submittal",
+        "Titulo submittal"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Crear expediente",
+        "Reenviar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCommissioningRegistryPanel.jsx",
+      "aria_labels": [
+        "Activo de la prueba",
+        "Actualizar commissioning",
+        "Código de protocolo",
+        "Código de sistema",
+        "Descripción de sistema",
+        "Disciplina de sistema",
+        "Fabricante del activo",
+        "Lista de comprobación",
+        "Modelo del activo",
+        "Motivo de decisión commissioning",
+        "Nombre de protocolo",
+        "Nombre de sistema",
+        "Nombre del activo",
+        "Referencia de evidencia",
+        "Resultado de prueba",
+        "Resultado técnico",
+        "Serie del activo",
+        "Sistema del activo",
+        "Tag del activo",
+        "Tipo de activo",
+        "Tipo de registro commissioning"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Presentar prueba",
+        "Registrar activo",
+        "Registrar sistema"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimConstructiblePartitionPanel.jsx",
+      "aria_labels": [
+        "Eje de partición",
+        "Eliminar preview",
+        "Número de segmentos",
+        "Preview de partición",
+        "Revisión de partición"
+      ],
+      "titles": [
+        "Eliminar preview"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Crear preview",
+        "Materializar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCostChangeOrdersPanel.jsx",
+      "aria_labels": [
+        "Actualizar cambios",
+        "Contrato de cambio",
+        "Delta de coste aprobado",
+        "Delta de coste solicitado",
+        "Delta de plazo aprobado",
+        "Delta de plazo solicitado",
+        "Descripción del cambio",
+        "Motivo de decisión de cambio",
+        "Motivo de transición de cambio",
+        "Número de cambio",
+        "Título del cambio"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Crear PCO"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCostContractsPanel.jsx",
+      "aria_labels": [
+        "Actualizar contratos",
+        "Contraparte contractual",
+        "Estimación aprobada",
+        "Fecha final",
+        "Fecha inicial",
+        "Importe comprometido",
+        "Motivo de transición contractual",
+        "Número de contrato",
+        "Objeto del contrato"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Crear contrato"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCostEstimatePanel.jsx",
+      "aria_labels": [
+        "Actualizar estimaciones",
+        "Motivo de decisión de estimación",
+        "QTO aprobado",
+        "Revisión de estimación"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Crear estimación"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCostForecastPanel.jsx",
+      "aria_labels": [
+        "Actualizar forecast",
+        "Estimado por completar",
+        "Justificación forecast",
+        "Moneda forecast",
+        "Motivo de decisión forecast",
+        "Revisión forecast"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Crear forecast"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCostPaymentsPanel.jsx",
+      "aria_labels": [
+        "Actualizar solicitudes",
+        "Bruto certificado",
+        "Bruto solicitado",
+        "Contrato activo",
+        "Fin del periodo",
+        "Inicio del periodo",
+        "Motivo de certificación",
+        "Número de solicitud",
+        "Retención certificada",
+        "Retención solicitada"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Crear solicitud",
+        "Enviar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCostSovPanel.jsx",
+      "aria_labels": [
+        "Actualizar SOV",
+        "Añadir línea SOV",
+        "Contrato SOV",
+        "Motivo de decisión SOV",
+        "Revisión SOV"
+      ],
+      "titles": [
+        "Actualizar",
+        "Añadir línea",
+        "Eliminar línea"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Crear revisión SOV"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimCrewsTimecardsPanel.jsx",
+      "aria_labels": [
+        "Actividad del parte",
+        "Actualizar cuadrillas",
+        "Código de cuadrilla",
+        "Cuadrilla del parte",
+        "Especialidad de cuadrilla",
+        "Fecha del parte",
+        "Frente del parte",
+        "Horas extra",
+        "Horas regulares",
+        "Nombre de cuadrilla",
+        "Nota de cuadrilla",
+        "Nota del parte",
+        "Producción instalada",
+        "Tamaño de cuadrilla",
+        "Unidad instalada",
+        "Vista de cuadrillas"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Crear cuadrilla",
+        "Registrar parte"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimEquipmentMotionPanel.jsx",
+      "aria_labels": [
+        "Nombre de equipo BIM",
+        "Playback de trayectoria"
+      ],
+      "titles": [
+        "Crear equipo BIM"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Crear trayectoria base"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimErpExchangePanel.jsx",
+      "aria_labels": [
+        "Actualizar paquetes ERP",
+        "Fecha de corte ERP",
+        "Generar paquete ERP",
+        "Justificación del paquete ERP",
+        "Motivo de publicación ERP"
+      ],
+      "titles": [
+        "Actualizar paquetes ERP",
+        "Generar paquete ERP"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimFederationPanel.jsx",
+      "aria_labels": [
+        "Agregar version a federacion",
+        "Guardar revision de federacion",
+        "Justificacion de la federacion",
+        "Modelo desalineado"
+      ],
+      "titles": [
+        "Guardar revision de federacion"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimFieldDiaryPanel.jsx",
+      "aria_labels": [
+        "Actualizar diario de obra",
+        "Diario desde",
+        "Diario hasta",
+        "Filtrar frente del diario"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimFieldDocumentsPanel.jsx",
+      "aria_labels": [
+        "Actualizar documentos de campo",
+        "Filtrar categoría documental"
+      ],
+      "titles": [
+        "Actualizar documentos",
+        "Descargar revisión vigente"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimFieldIssuesPanel.jsx",
+      "aria_labels": [
+        "Actualizar incidencias",
+        "Agregar evidencia fotográfica",
+        "Cancelar nueva incidencia",
+        "Estado de incidencia",
+        "Filtrar estado de incidencia",
+        "Guardar observación",
+        "Nueva incidencia de campo",
+        "Nueva observación de campo"
+      ],
+      "titles": [
+        "Abrir contexto BIM",
+        "Actualizar",
+        "Nueva incidencia"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Crear incidencia"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimFieldReportPanel.jsx",
+      "aria_labels": [
+        "AC de campo",
+        "Actividad de campo 4D",
+        "Avance de campo porcentual",
+        "BAC de campo",
+        "Cantidad instalada en campo",
+        "Diario de campo BIM",
+        "Evidencia fotográfica de campo",
+        "Fecha del reporte de campo",
+        "Frente de campo 4D",
+        "Horas de equipo",
+        "Horas de mano de obra",
+        "Moneda del coste de campo",
+        "PV de campo",
+        "Unidad instalada en campo"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Registrar campo"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimFieldResourcesPanel.jsx",
+      "aria_labels": [
+        "Actividad del movimiento",
+        "Actualizar recursos de Campo",
+        "Cantidad del movimiento",
+        "Fecha del movimiento",
+        "Frente del movimiento",
+        "Nota del movimiento",
+        "Recurso de Campo",
+        "Referencia del movimiento"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Registrar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimFragmentsHarness.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Aislar la categoria IFC activa en el canvas fragments nativo",
+        "Alternar visibilidad de la categoria IFC",
+        "Alternar visibilidad del elemento seleccionado en fragments",
+        "Restaurar visibilidad del modelo fragments"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Reset",
+        "Sel.",
+        "Solo cat.",
+        "Visibilidad"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimFragmentsViewport.jsx",
+      "aria_labels": [
+        "Aislar selección",
+        "Alternar ghost",
+        "Alternar plano de corte",
+        "Alternar proyección",
+        "Herramientas de revisión BIM",
+        "Medir selección",
+        "Ocultar selección",
+        "Posición del plano de corte",
+        "Reintentar carga Fragments",
+        "Restablecer revisión BIM",
+        "Unidad de medición"
+      ],
+      "titles": [
+        "Aislar selección",
+        "Alternar ghost",
+        "Alternar plano de corte",
+        "Alternar proyección",
+        "Medir selección",
+        "Ocultar selección",
+        "Reintentar carga Fragments",
+        "Restablecer revisión BIM"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimGanttPanel.jsx",
+      "aria_labels": [
+        "Cargando Gantt BIM",
+        "Centrar actividad seleccionada",
+        "Escala del Gantt BIM",
+        "Línea base del Gantt BIM"
+      ],
+      "titles": [
+        "Centrar selección",
+        "Mostrar solo actividades vinculadas",
+        "Mostrar solo ruta crítica"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimHandoverDossierPanel.jsx",
+      "aria_labels": [
+        "Actualizar dossiers digitales",
+        "Motivo de decisión del dossier",
+        "Notas de ensamblado del dossier",
+        "Revisión del dossier digital"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Ensamblar dossier"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimIdsPanel.jsx",
+      "aria_labels": [
+        "Ejecutar validacion IDS",
+        "Exportar validacion IDS",
+        "Motivo de excepcion IDS",
+        "Perfil IDS"
+      ],
+      "titles": [
+        "Ejecutar validacion IDS",
+        "Exportar validacion IDS",
+        "Importar perfil IDS"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Guardar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimImportJobsPanel.jsx",
+      "aria_labels": [
+        "Actualizar importaciones IFC"
+      ],
+      "titles": [
+        "Actualizar importaciones IFC",
+        "Cancelar importación",
+        "Reintentar importación",
+        "Seleccionar archivo IFC"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Cargar y procesar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimIntegrationGatewayPanel.jsx",
+      "aria_labels": [
+        "Actualizar integraciones BIM",
+        "Copiar secreto del webhook BIM",
+        "Crear conector BIM",
+        "Motivo de cambio del conector BIM",
+        "Nombre del conector BIM",
+        "URL HTTPS del webhook BIM"
+      ],
+      "titles": [
+        "Actualizar integraciones BIM",
+        "Copiar secreto del webhook BIM",
+        "Crear conector BIM",
+        "Reintentar entrega"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimIssuesPanel.jsx",
+      "aria_labels": [
+        "Comentario de incidencia",
+        "Crear incidencia desde el contexto",
+        "Exportar BCF",
+        "Titulo de incidencia"
+      ],
+      "titles": [
+        "Crear incidencia desde el contexto",
+        "Exportar BCF"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Crear",
+        "Enviar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimLinksPanel.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Eliminar vínculo BIM"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimOperationsTransitionPanel.jsx",
+      "aria_labels": [
+        "Actualizar transiciones a Operaciones",
+        "Criterios de preparación",
+        "Fecha efectiva",
+        "Motivo de decisión de transición",
+        "Notas de transición",
+        "Organización operadora",
+        "Revisión de transición",
+        "Rol responsable"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Presentar transición"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimPlanActualPanel.jsx",
+      "aria_labels": [
+        "Actividades de línea base 4D",
+        "Agregar dependencia 4D",
+        "Cargando plan-real 4D",
+        "Fecha de corte plan-real 4D",
+        "Lag en días 4D",
+        "Línea base 4D",
+        "Nombre de línea base 4D",
+        "Predecesora 4D",
+        "Quitar dependencia 4D",
+        "Revisión de línea base 4D",
+        "Sucesora 4D",
+        "Tipo de dependencia 4D"
+      ],
+      "titles": [
+        "Agregar dependencia",
+        "Enfocar en modelo",
+        "Plan",
+        "Quitar dependencia",
+        "Real"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Guardar línea base"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimProductivityProposalPanel.jsx",
+      "aria_labels": [
+        "Actividad para rendimiento 4D",
+        "Cantidad de cuadrillas",
+        "Cantidad para rendimiento 4D",
+        "Código de recurso 4D",
+        "Destino de propuesta de rendimiento",
+        "ID destino de rendimiento",
+        "Motivo de decisión de rendimiento",
+        "Nombre de recurso 4D",
+        "Rendimiento por cuadrilla y día"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Proponer rendimiento"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimPunchClosurePanel.jsx",
+      "aria_labels": [
+        "Actualizar cierres punch",
+        "Criterios de cierre punch",
+        "Motivo de decisión de cierre punch",
+        "Revisión de cierre punch",
+        "Verificación de cierre punch"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Presentar cierre"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimQualityReportPanel.jsx",
+      "aria_labels": [
+        "Actualizar reporte de calidad IFC"
+      ],
+      "titles": [
+        "Actualizar reporte de calidad IFC",
+        "Este reporte no constituye certificación buildingSMART"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Generar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimQuantityProposalPanel.jsx",
+      "aria_labels": [
+        "Cantidad BIM",
+        "Codigo de coste latente",
+        "Codigo WBS latente",
+        "Destino 5D",
+        "ID destino 5D",
+        "Modo de cantidades",
+        "Motivo de decision 5D",
+        "Motivo de decision QTO",
+        "Revision QTO",
+        "Snapshot QTO"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Generar",
+        "Proponer",
+        "Verificar paquete 5D"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimRenderQualityControl.jsx",
+      "aria_labels": [
+        "Calidad de renderizado BIM"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimReportsPanel.jsx",
+      "aria_labels": [
+        "Fecha de corte del informe",
+        "Línea base del informe",
+        "Recurso del informe",
+        "Tipo de informe BIM"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "CSV",
+        "Vista previa"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimResourceCapacityPanel.jsx",
+      "aria_labels": [
+        "Capacidad diaria",
+        "Código de recurso",
+        "Histograma de demanda diaria",
+        "Linea base para nivelacion",
+        "Nombre de recurso",
+        "Recurso para histograma",
+        "Revision de nivelacion",
+        "Tipo de recurso",
+        "Unidad del recurso"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Agregar recurso",
+        "Simular nivelacion"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimSafetyRiskPanel.jsx",
+      "aria_labels": [
+        "Observación de inspección",
+        "Prioridad de punch item",
+        "Resultado de inspección",
+        "Título de punch item"
+      ],
+      "titles": [
+        "Actualizar",
+        "Agregar hallazgo"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Nueva zona",
+        "Registrar inspección"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimScheduleInterchangePanel.jsx",
+      "aria_labels": [
+        "Archivo de planificacion",
+        "Formato de intercambio",
+        "Moneda del cronograma",
+        "Motivo de decision de planificacion",
+        "Zona horaria del cronograma"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Analizar archivo",
+        "Exportar",
+        "Guardar revision BIM"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimScheduleLinkPanel.jsx",
+      "aria_labels": [
+        "Actividad 4D",
+        "Aprobar vínculo 4D",
+        "Cargando planificación 4D",
+        "Motivo de decisión 4D",
+        "Motivo del vínculo 4D",
+        "Proponer vínculo 4D",
+        "Rechazar vínculo 4D",
+        "Tipo de vínculo 4D"
+      ],
+      "titles": [
+        "Aprobar vínculo",
+        "Proponer vínculo",
+        "Rechazar vínculo"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimShellContextBar.jsx",
+      "aria_labels": [
+        "Actualizar workspace BIM",
+        "Herramientas del visor BIM",
+        "Modo del visor",
+        "Mostrar plano BIM 2D",
+        "Mostrar u ocultar explorer BIM",
+        "Mostrar u ocultar inspector BIM",
+        "Mostrar visor 3D Fragments",
+        "Restablecer contexto BIM"
+      ],
+      "titles": [
+        "Actualizar workspace BIM",
+        "Mostrar u ocultar explorer BIM",
+        "Mostrar u ocultar inspector BIM",
+        "Plano BIM 2D",
+        "Restablecer contexto BIM",
+        "Visor 3D Fragments"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimSiteGeoreferencePanel.jsx",
+      "aria_labels": [
+        "Añadir servicio cartográfico",
+        "Guardar georreferencia BIM",
+        "Guardar servicios cartográficos",
+        "Protocolo cartográfico",
+        "Tipo de capa"
+      ],
+      "titles": [
+        "Añadir servicio cartográfico",
+        "Guardar georreferencia BIM",
+        "Guardar servicios cartográficos"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimSpaceTimeConflictPanel.jsx",
+      "aria_labels": [
+        "Actualizar conflictos",
+        "Enfocar conflicto en el modelo"
+      ],
+      "titles": [
+        "Actualizar conflictos",
+        "Enfocar conflicto"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimThreeViewer.jsx",
+      "aria_labels": [],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Enfocar elemento",
+        "Reset",
+        "Reset vista 3D"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimTimeline4dPanel.jsx",
+      "aria_labels": [
+        "Activar secuencia 4D",
+        "Actividad visible 4D",
+        "Avanzar un día 4D",
+        "Calculando secuencia 4D",
+        "Enfocar actividad 4D",
+        "Posición temporal 4D",
+        "Reiniciar secuencia 4D",
+        "Retroceder un día 4D",
+        "Velocidad de reproducción 4D"
+      ],
+      "titles": [
+        "Avanzar un día",
+        "Enfocar actividad en modelo",
+        "Retroceder un día",
+        "Volver al inicio"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimTreePanel.jsx",
+      "aria_labels": [
+        "Página anterior",
+        "Página siguiente",
+        "Vista de árbol",
+        "Vista de tabla",
+        "Vista del explorer BIM"
+      ],
+      "titles": [
+        "Página anterior",
+        "Página siguiente",
+        "Vista de árbol",
+        "Vista de tabla"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimUnplannedEventsPanel.jsx",
+      "aria_labels": [
+        "Actividad del evento",
+        "Coste real del evento",
+        "Descripción del evento",
+        "Días de impacto",
+        "Fecha del evento",
+        "Frente del evento",
+        "Motivo de decisión del evento",
+        "Tipo de evento",
+        "Título del evento"
+      ],
+      "titles": [
+        "Actualizar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Registrar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimVersionComparePanel.jsx",
+      "aria_labels": [
+        "Filtrar tipo de cambio",
+        "Versión base",
+        "Versión objetivo"
+      ],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimViewStateToolbar.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Guardar vista BIM actual",
+        "Refrescar vistas BIM"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Cancelar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimWorkfrontScenarioPanel.jsx",
+      "aria_labels": [
+        "Actividad del componente BIM",
+        "Actividad del escenario 4D",
+        "Baseline del escenario 4D",
+        "Cargando frentes 4D",
+        "Código de componente BIM",
+        "Código de frente BIM",
+        "Desplazamiento del escenario en días",
+        "Frente del componente BIM",
+        "Guardar componente construible",
+        "Guardar frente BIM",
+        "Nombre de componente BIM",
+        "Nombre de escenario 4D",
+        "Nombre de frente BIM",
+        "Revisión de escenario 4D"
+      ],
+      "titles": [
+        "Enfocar componente",
+        "Guardar componente",
+        "Guardar frente"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Calcular escenario"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/bim/BimWorkspaceV2.jsx",
+      "aria_labels": [
+        "Abrir administración BIM",
+        "Actualizar BIM",
+        "Administración BIM",
+        "Espacios de trabajo BIM",
+        "Modo del visor",
+        "Mostrar u ocultar explorador",
+        "Mostrar u ocultar panel contextual",
+        "Planificación temporal",
+        "Redimensionar explorador",
+        "Redimensionar panel contextual",
+        "Redimensionar panel temporal",
+        "Restablecer contexto",
+        "Restablecer layout",
+        "Resultados BIM"
+      ],
+      "titles": [
+        "Actualizar BIM",
+        "Administración BIM",
+        "Cargar y revisar modelos IFC",
+        "Disponible cuando exista un plano mapeado",
+        "Mostrar u ocultar explorador",
+        "Mostrar u ocultar panel contextual",
+        "Restablecer contexto",
+        "Restablecer layout"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Dividida"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/CronogramaGantt.jsx",
+      "aria_labels": [
+        "Abrir acciones rápidas",
+        "Abrir calendario laboral del proyecto",
+        "Abrir Pareto del Gantt",
+        "Abrir y fijar semáforos APU de esta actividad",
+        "Acercar timeline",
+        "Ajustar ancho entre grid y timeline",
+        "Ajustar el Gantt completo al viewport",
+        "Alejar timeline",
+        "Ayuda sobre modo de trabajo",
+        "Cancelar",
+        "Cerrar ajuste fino",
+        "Cerrar ajuste trazable",
+        "Cerrar aviso de sincronización",
+        "Cerrar calendario laboral del proyecto",
+        "Cerrar comparativa",
+        "Cerrar configuración de Gantt",
+        "Cerrar confirmación",
+        "Cerrar contexto",
+        "Cerrar creador de dependencia",
+        "Confirmar cronograma",
+        "Crear hito manual",
+        "Editar dependencia seleccionada",
+        "Eliminar excepción",
+        "Eliminar franja",
+        "Escala temporal del Gantt",
+        "Guardar borrador operativo del APU",
+        "Guardar dependencia",
+        "Herramientas del Gantt",
+        "Ir a esta fecha en el Gantt",
+        "Recargar festivos oficiales",
+        "Resetear calendario",
+        "Restaurar ajustes del modal",
+        "Romper dependencia",
+        "Semáforos de planificación del APU seleccionado",
+        "Viewport del Gantt",
+        "Vista del Gantt",
+        "Zoom interactivo del Gantt"
+      ],
+      "titles": [
+        "Abrir acciones rápidas",
+        "Abrir calendario laboral del proyecto",
+        "Abrir menú de tarea",
+        "Arrastra para mover el panel",
+        "Arrastrar hito verticalmente",
+        "Cambiar magnitud de duración contractual",
+        "Cambiar magnitud visual de duración",
+        "Cancelar",
+        "Cerrar creador de dependencia",
+        "Cerrar editor de dependencia",
+        "Deshacer último movimiento del Gantt (Ctrl+Z)",
+        "Duración contractual manual de la partida subcontratada",
+        "Editar dependencia seleccionada",
+        "Editar duración desde recursos y rendimientos",
+        "Editar inicio del hito",
+        "Editar inicio programado",
+        "Eliminar hito",
+        "Fin del proyecto",
+        "Guardar borrador operativo del APU",
+        "Hoy",
+        "Inicio del proyecto",
+        "Ir a esta fecha en el Gantt",
+        "Mover hito una línea hacia abajo",
+        "Mover hito una línea hacia arriba",
+        "Posición anterior durante el movimiento",
+        "Quitar festivo del día",
+        "Quitar predecesora",
+        "Recargar festivos oficiales",
+        "Rehacer último movimiento del Gantt (Ctrl+U)",
+        "Relaciones derivadas desde la columna Predecesoras",
+        "Resetear calendario",
+        "Restaurar ajustes del modal",
+        "Semáforos de planificación del APU",
+        "Vista previa del subtramo arrastrado"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Añadir",
+        "Añadir fecha",
+        "Aplicar",
+        "Aplicar tanteo",
+        "Limpiar",
+        "Recargar oficiales",
+        "Resetear calendario"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/Cronogramas.jsx",
+      "aria_labels": [
+        "Abrir calendario",
+        "Aplicar configuración",
+        "Contraer Curva S",
+        "Copiar distribución de la fila seleccionada",
+        "Cuadrar 100%",
+        "Limpiar overrides",
+        "Pegar distribución en filas seleccionadas",
+        "Recalcular caja",
+        "Recalcular desde Gantt"
+      ],
+      "titles": [
+        "Aplicar borrador por partidas",
+        "Buscar siguiente coincidencia",
+        "Contraer Curva S",
+        "Descartar lineas invalidadas del borrador Gantt",
+        "Generando reporte",
+        "Ingresa la capacidad máxima disponible",
+        "Liberar el Gantt para otro usuario",
+        "Línea solo materiales pendiente de definir tiempo manual para derivación temporal real.",
+        "Periodo anterior (Flecha Izquierda)",
+        "Periodos",
+        "Preparar borrador financiero",
+        "Preparar reajuste desde la base vigente",
+        "Reabre esas lineas en el editor light y acepta para recalcularlas desde la base vigente",
+        "Recursos",
+        "Reporte de recursos necesarios entre dos fechas",
+        "Reportes de Recursos",
+        "Siguiente periodo (Flecha Derecha)",
+        "Uso de Recursos por Rango",
+        "Ver propuesta financiera"
+      ],
+      "modal_titles": [
+        "Uso de Recursos por Rango"
+      ],
+      "button_text": [
+        "Actualizar",
+        "Cancelar",
+        "Descartar propuesta",
+        "Generar",
+        "Guardar",
+        "Revertir"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/DatosProyecto.jsx",
+      "aria_labels": [
+        "Cerrar visor de georreferenciación",
+        "Cerrar visor de imagen",
+        "Cerrar visor PDF",
+        "Normativa aplicable"
+      ],
+      "titles": [
+        "Abrir georreferenciación en pantalla completa para localizar o ajustar la posición.",
+        "Descargar PDF",
+        "Eliminar PDF",
+        "Generando reporte",
+        "Subir imagen referencial",
+        "Ver georreferenciación en pantalla completa",
+        "Ver imagen en pantalla completa",
+        "Ver PDF"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/DesagregacionTab.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Asignar CPC del APU para este proyecto",
+        "Buscar siguiente coincidencia",
+        "Generando reporte"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/Edo.jsx",
+      "aria_labels": [
+        "Cerrar",
+        "Eliminar selección EDO",
+        "Limpiar búsqueda EDO",
+        "Limpiar selección EDO",
+        "Mover selección EDO",
+        "Nuevo hito principal"
+      ],
+      "titles": [
+        "Añadir hito",
+        "Asignar responsable",
+        "Cerrar",
+        "Editar",
+        "Eliminar",
+        "Mover abajo",
+        "Mover arriba",
+        "Mover elementos",
+        "Nodo jerárquico de la estructura organizacional",
+        "Seleccione el hito de destino",
+        "Stakeholder del directorio común del proyecto"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Cancelar",
+        "Crear"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/Edt.jsx",
+      "aria_labels": [
+        "Cerrar",
+        "Eliminar selección EDT",
+        "Limpiar búsqueda EDT",
+        "Limpiar selección EDT",
+        "Mover selección EDT",
+        "Nueva cuenta principal"
+      ],
+      "titles": [
+        "Añadir cuenta",
+        "Asignar stakeholder",
+        "Cerrar",
+        "Editar",
+        "Eliminar",
+        "Mover abajo",
+        "Mover arriba",
+        "Mover elementos",
+        "Nodo estructural de la EDT",
+        "Seleccione la cuenta destino",
+        "Stakeholder del directorio común del proyecto"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Cancelar",
+        "Crear"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/FormulaPolinomicaTab.jsx",
+      "aria_labels": [
+        "Ajustar ancho entre recursos e índices"
+      ],
+      "titles": [
+        "Generando reporte"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/GanttParetoModal.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Fin de ventana",
+        "Inicio de ventana"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/GridColumnManager.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Bajar columna",
+        "Subir columna"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Reset"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/HierarchyGraphView.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Abrir acciones",
+        "Acciones del responsable",
+        "Acercar",
+        "Alejar",
+        "Cerrar acciones",
+        "Cerrar minimapa",
+        "Coincidencia anterior",
+        "Editar",
+        "Editar responsable",
+        "Eliminar",
+        "Eliminar responsable",
+        "Mover",
+        "Siguiente coincidencia"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Centrar",
+        "Eliminar selección",
+        "Limpiar selección",
+        "Mover selección",
+        "Reset"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/MergeInterparentModal.jsx",
+      "aria_labels": [],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Cancelar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/projects/Stakeholders.jsx",
+      "aria_labels": [
+        "Nuevo stakeholder"
+      ],
+      "titles": [
+        "Cerrar",
+        "Editar stakeholder",
+        "Eliminar stakeholder",
+        "Generando reporte",
+        "Nuevo stakeholder"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/presupuestos/ApuBudgetEditor.jsx",
+      "aria_labels": [
+        "Cerrar editor APU"
+      ],
+      "titles": [
+        "Cerrar editor APU",
+        "Edición directa desde composición APU",
+        "Editar APU anidado",
+        "Editar recurso",
+        "Indirecto operativo del proyecto/revisión activa",
+        "Modificar Recurso"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Volver al padre"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/presupuestos/EdtValoradaModal.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Árbol económico sincronizado con la EDT del proyecto y el presupuesto activo.",
+        "EDT Valorada",
+        "Generando reporte",
+        "Generar Diccionario de la EDT",
+        "Generar EDT Valorada Profecional",
+        "Generar Listado de EDT"
+      ],
+      "modal_titles": [
+        "EDT Valorada"
+      ],
+      "button_text": [
+        "Cerrar"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/presupuestos/IndirectosModal.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Añadir cuenta seleccionada"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Cancelar",
+        "Crear cuenta"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/presupuestos/LineasPresupuestoTab.jsx",
+      "aria_labels": [
+        "Limpiar selección"
+      ],
+      "titles": [
+        "Bloquear línea Equipo",
+        "Buscar siguiente coincidencia",
+        "Editar APU",
+        "Eliminar Linea",
+        "Precio unitario funcional con indirectos aplicados",
+        "Proponer ajuste Equipo"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/presupuestos/NotasGeneralesModal.jsx",
+      "aria_labels": [],
+      "titles": [],
+      "modal_titles": [],
+      "button_text": [
+        "Cerrar",
+        "Guardar Nota",
+        "Revisar Ortografía"
+      ],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/presupuestos/PresupuestoDetail.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Aplicar cantidades desde el portapapeles a partir de la línea seleccionada",
+        "Cerrar minimapa",
+        "Generando reporte",
+        "Minimapa EDT del presupuesto",
+        "Notas",
+        "Pareto",
+        "Reporte de presupuesto"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/presupuestos/TanteoTab.jsx",
+      "aria_labels": [],
+      "titles": [
+        "Cerrar tanteo",
+        "Roja = rendimiento mayor, Azul = rendimiento igual, Verde = rendimiento menor"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/precios-unitarios/BulkDeleteConfirmModal.jsx",
+      "aria_labels": [
+        "Cancelar",
+        "Continuar",
+        "Dar marcha atrás"
+      ],
+      "titles": [
+        "Cancelar",
+        "Continuar",
+        "Dar marcha atrás"
+      ],
+      "modal_titles": [],
+      "button_text": [],
+      "undocumented_controls": []
+    },
+    {
+      "file": "frontend/src/components/precios-unitarios/ResourceEditorModal.jsx",
+      "aria_labels": [
+        "Cancelar"
+      ],
+      "titles": [
+        "Cancelar"
+      ],
+      "modal_titles": [],
+      "button_text": [
+        "Revisar Ortografía"
+      ],
+      "undocumented_controls": []
+    }
+  ]
+}

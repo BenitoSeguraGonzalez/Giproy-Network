@@ -104,23 +104,25 @@ def test_reference_equivalent_flow_maps_gantt_periodization_to_cash_flow():
         datetime(2014, 8, 4, tzinfo=timezone.utc),
         datetime(2014, 8, 30, tzinfo=timezone.utc),
     )
+    mapped_ratios = [*reference_ratios, 0.0]
     footer = CronogramaFooter(
-        inversion_parcial=[reference_total * ratio for ratio in reference_ratios],
-        inversion_acumulada=[reference_total for _ in reference_ratios],
-        avance_parcial_pct=[ratio * 100 for ratio in reference_ratios],
-        avance_acumulado_pct=[100.0 for _ in reference_ratios],
+        inversion_parcial=[reference_total * ratio for ratio in mapped_ratios],
+        inversion_acumulada=[reference_total for _ in mapped_ratios],
+        avance_parcial_pct=[ratio * 100 for ratio in mapped_ratios],
+        avance_acumulado_pct=[100.0 for _ in mapped_ratios],
     )
     cash_flow = _build_cash_flow_from_footer(periods, footer)
 
-    assert len(periods) == 4
+    assert len(periods) == 5
     assert [period.starts_at.date().isoformat() for period in periods] == [
         "2014-08-04",
-        "2014-09-03",
-        "2014-10-03",
-        "2014-11-02",
+        "2014-09-01",
+        "2014-10-01",
+        "2014-11-01",
+        "2014-12-01",
     ]
     assert [round(value / 100, 6) for value in distribution] == [
-        round(value, 6) for value in reference_ratios
+        round(value, 6) for value in [*reference_ratios, 0.0]
     ]
-    assert [point.cost for point in cash_flow] == pytest.approx([reference_total, 0, 0, 0])
+    assert [point.cost for point in cash_flow] == pytest.approx([reference_total, 0, 0, 0, 0])
     assert cash_flow[-1].cumulative_cost == pytest.approx(reference_total)

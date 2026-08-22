@@ -37,7 +37,11 @@ def sanitize_audit_payload(value: Any, *, depth: int = 0) -> Any:
         return f"[BINARY {len(value)} bytes]"
     if isinstance(value, str) and len(value) > 4000:
         return value[:4000] + "[TRUNCATED]"
-    return value
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    # Las columnas JSON deben recibir únicamente valores JSON nativos. Fechas,
+    # Decimal, UUID y enums se conservan mediante su representación estable.
+    return str(value)
 
 
 def _canonical_json(value: Any) -> str:

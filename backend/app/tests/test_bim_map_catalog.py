@@ -29,7 +29,7 @@ def _payload(key="osm"):
 
 
 def test_bim_map_catalog_endpoints_are_registered():
-    routes = {(route.path, method) for route in app.routes for method in getattr(route, "methods", set())}
+    routes = {(path, method.upper()) for path, operations in app.openapi()["paths"].items() for method in operations}
     path = "/api/v1/bim/projects/{project_id}/map-catalog"
     assert (path, "GET") in routes
     assert (path, "PUT") in routes

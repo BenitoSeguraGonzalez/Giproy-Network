@@ -1,5 +1,6 @@
 from .empresa import Empresa
 from .usuario import Usuario
+from .legal_acceptance import LegalAcceptance
 from .password_reset import PasswordResetToken
 from .registration_verification import RegistrationVerificationToken
 from .proyecto import Proyecto

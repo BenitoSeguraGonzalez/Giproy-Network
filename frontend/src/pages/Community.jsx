@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft,
@@ -215,11 +215,6 @@ const getValidDate = (value) => {
     return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
-const formatCommunityDate = (value) => {
-    const parsed = getValidDate(value);
-    return parsed ? parsed.toLocaleString() : 'Sin actividad';
-};
-
 const getForumCategoryPresentation = (scope, categoryName = '', isActive = false) => {
     const normalized = String(categoryName || '').toLowerCase();
     if (normalized.includes('alert') || normalized.includes('moder') || normalized.includes('norm')) {
@@ -381,8 +376,8 @@ const Community = () => {
         ? SANCTION_OPTIONS
         : SANCTION_OPTIONS.filter((option) => option.value === 'bloqueo_interno');
     const managementScope = activeTab === 'mensajes_directos' ? 'interno_empresa' : activeTab;
-    const currentTopics = topicsByScope[managementScope] || [];
-    const currentCategories = categoriesByScope[managementScope] || [];
+    const currentTopics = useMemo(() => topicsByScope[managementScope] || [], [managementScope, topicsByScope]);
+    const currentCategories = useMemo(() => categoriesByScope[managementScope] || [], [categoriesByScope, managementScope]);
     const selectedTopicId = selectedTopicByScope[managementScope];
     const selectedTopic = currentTopics.find((topic) => String(topic.id) === String(selectedTopicId)) || null;
     const canCreateCurrentScopeStructures = managementScope !== 'mensajes_directos';
@@ -423,10 +418,6 @@ const Community = () => {
         });
         return index;
     }, [sanctionAppeals]);
-    const pendingAppeals = useMemo(
-        () => sanctionAppeals.filter((appeal) => appeal.status === 'abierta'),
-        [sanctionAppeals]
-    );
     const appealSummary = useMemo(() => ({
         total: sanctionAppeals.length,
         abiertas: sanctionAppeals.filter((appeal) => appeal.status === 'abierta').length,
@@ -564,7 +555,7 @@ const Community = () => {
         : activeTab === 'interno_empresa'
             ? 'Buscar en Mi Empresa...'
             : 'Buscar en Público...';
-    const directoryPosts = allPostsByScope[activeTab] || [];
+    const directoryPosts = useMemo(() => allPostsByScope[activeTab] || [], [activeTab, allPostsByScope]);
     const topicMetricsById = useMemo(() => {
         const index = {};
         currentTopics.forEach((topic) => {
@@ -614,7 +605,7 @@ const Community = () => {
         latestPost: null,
         latestAt: 0,
     }) : null;
-    const sortTopicsByFollowAndActivity = (items) => (
+    const sortTopicsByFollowAndActivity = useCallback((items) => (
         [...(items || [])].sort((left, right) => {
             const leftFollowing = Boolean(left?.is_following);
             const rightFollowing = Boolean(right?.is_following);
@@ -624,10 +615,10 @@ const Community = () => {
             if (leftLatestAt !== rightLatestAt) return rightLatestAt - leftLatestAt;
             return String(left?.nombre || '').localeCompare(String(right?.nombre || ''), 'es', { sensitivity: 'base' });
         })
-    );
+    ), [topicMetricsById]);
     const orderedCurrentTopics = useMemo(
         () => sortTopicsByFollowAndActivity(currentTopics),
-        [currentTopics, topicMetricsById],
+        [currentTopics, sortTopicsByFollowAndActivity],
     );
     const forumScopeAppearance = useMemo(() => getForumScopeAppearance(activeTab), [activeTab]);
     const forumDirectoryRows = useMemo(() => {
@@ -713,7 +704,7 @@ const Community = () => {
                 if (leftOrder !== rightOrder) return leftOrder - rightOrder;
                 return String(left.category?.nombre || '').localeCompare(String(right.category?.nombre || ''), 'es', { sensitivity: 'base' });
             });
-    }, [activeTab, currentCategories, currentTopics, postSearchTerm, selectedTopicId, topicMetricsById]);
+    }, [activeTab, currentCategories, currentTopics, postSearchTerm, selectedTopicId, sortTopicsByFollowAndActivity, topicMetricsById]);
 
     const resetTopicForm = () => {
         setTopicForm(EMPTY_TOPIC_FORM);
@@ -723,11 +714,6 @@ const Community = () => {
     const resetCategoryForm = () => {
         setCategoryForm(EMPTY_CATEGORY_FORM);
         setEditingCategoryId(null);
-    };
-
-    const openStructureModal = (tab = 'topic') => {
-        setStructureModalTab(tab);
-        setIsStructureModalOpen(true);
     };
 
     const closeStructureModal = () => {
@@ -767,7 +753,7 @@ const Community = () => {
         setPostRepliesById((current) => ({ ...current, [postId]: items }));
     };
 
-    const loadCommunityData = async () => {
+    const loadCommunityData = useCallback(async () => {
         const requestId = loadRequestRef.current + 1;
         loadRequestRef.current = requestId;
         if (loadFailsafeTimerRef.current) {
@@ -924,7 +910,7 @@ const Community = () => {
                 setLoading(false);
             }
         }
-    };
+    }, [empresaId, isCommunityModerator, isSuperadmin, selectedThreadId]);
 
     useEffect(() => () => {
         if (loadFailsafeTimerRef.current) {
@@ -934,7 +920,7 @@ const Community = () => {
 
     useEffect(() => {
         loadCommunityData();
-    }, [empresaId]);
+    }, [empresaId, loadCommunityData]);
 
     useEffect(() => {
         resetTopicForm();
@@ -972,7 +958,7 @@ const Community = () => {
             empresa_id: empresaId || '',
             rol: 'usuario_comunidad',
         }));
-    }, [empresaId]);
+    }, [empresaId, loadCommunityData]);
 
     useEffect(() => {
         const loadPaises = async () => {
@@ -1234,13 +1220,6 @@ const Community = () => {
         setSanctionForm((current) => ({ ...current, target_user_id: String(candidate.id) }));
     };
 
-    const handlePrepareSanctionForUser = (userId) => {
-        if (!userId) return;
-        setSelectedModerationUserId(userId);
-        setSanctionForm((current) => ({ ...current, target_user_id: String(userId) }));
-        setShowControlPanel(true);
-    };
-
     const handlePrepareSanctionFromInfraction = (infraction) => {
         if (!infraction?.target_user_id) return;
         const suggestedSanctionType = infraction.scope === 'publico' ? 'bloqueo_publico' : 'bloqueo_interno';
@@ -1283,7 +1262,8 @@ const Community = () => {
         }
         setCommunityUserSubmitting(true);
         try {
-            const { confirmPassword, ...payload } = communityUserForm;
+            const payload = { ...communityUserForm };
+            delete payload.confirmPassword;
             await usuariosApi.create({
                 ...payload,
                 empresa_id: empresaId,
@@ -2644,7 +2624,6 @@ const Community = () => {
                                                     </div>
                                                 ) : forumDirectoryRows.map((row) => {
                                                     const { Icon, accent } = getForumCategoryPresentation(activeTab, row.category?.nombre, row.isActive);
-                                                    const rowHasSelectedTopic = row.topics.some((topic) => String(topic.id) === String(selectedTopicId));
                                                     return (
                                                     <div key={row.id} className={`px-6 py-5 ${row.isActive ? 'bg-gradient-to-r from-orange-50/90 via-[#FFF8E8] to-white' : 'bg-transparent'}`}>
                                                         <div className="space-y-4">

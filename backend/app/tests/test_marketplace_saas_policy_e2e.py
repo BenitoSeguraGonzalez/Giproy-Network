@@ -156,7 +156,7 @@ def test_marketplace_saas_policy_full_app_flow_with_mock_company(db):
     )
     products_by_slug = _bootstrap_saas_catalog(db, superadmin)
     standard_license = products_by_slug["sistema-licencia-estandar-mensual"]
-    conecta_pack = products_by_slug["sistema-pack-conecta-mensual"]
+    conecta_pack = products_by_slug["sistema-conecta-transferencias"]
 
     current_user_ref = {"user": buyer_admin}
     try:
@@ -240,7 +240,7 @@ def test_marketplace_saas_policy_full_app_flow_with_mock_company(db):
             )
             assert confirmed_conecta.status_code == 200, confirmed_conecta.text
             assert confirmed_conecta.json()["status"] == "completed"
-            assert confirmed_conecta.json()["items"][0]["delivered_entity_type"] == "saas_right"
+            assert confirmed_conecta.json()["items"][0]["delivered_entity_type"] == "transfer_extra_recipient_pack"
             assert (
                 db.query(LicenseNotificationEvent)
                 .filter(
@@ -319,7 +319,7 @@ def test_marketplace_saas_policy_full_app_flow_with_mock_company(db):
         .filter(MarketplaceOrderItem.product_id.in_([standard_license.id, conecta_pack.id]))
         .all()
     )
-    assert {row[0] for row in delivered_items} >= {"empresa_licencia", "saas_right"}
+    assert {row[0] for row in delivered_items} >= {"empresa_licencia", "transfer_extra_recipient_pack"}
 
     events = {
         row[0]
@@ -330,7 +330,7 @@ def test_marketplace_saas_policy_full_app_flow_with_mock_company(db):
         )
     }
     assert "license_marketplace_purchase_activated" in events
-    assert "saas_right_marketplace_purchase_activated" in events
+    assert "transfer_conecta_pack_marketplace_activated" in events
     assert "saas_conecta_slot_assigned" in events
     assert db.query(SaasConectaSlot).filter(SaasConectaSlot.empresa_id == buyer_company.id).count() == 1
     bank_transfer_method = (

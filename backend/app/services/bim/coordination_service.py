@@ -417,6 +417,44 @@ def list_links(db: Session, *, coordination_set_id: int, project_id: int, compan
     return [serialize_link(item) for item in db.query(CoordinationLink).filter(CoordinationLink.coordination_set_id == coordination_set_id).order_by(CoordinationLink.id).all()]
 
 
+def list_conflicts(
+    db: Session,
+    *,
+    coordination_set_id: int,
+    project_id: int,
+    company_id: int,
+    status: str | None = "open",
+) -> list[dict]:
+    _coordination_set(db, coordination_set_id=coordination_set_id, project_id=project_id, company_id=company_id)
+    query = db.query(CoordinationConflict).filter(
+        CoordinationConflict.coordination_set_id == coordination_set_id,
+        CoordinationConflict.proyecto_id == project_id,
+        CoordinationConflict.empresa_id == company_id,
+    )
+    if status and status != "all":
+        query = query.filter(CoordinationConflict.status == status)
+    rows = query.order_by(
+        CoordinationConflict.severity.desc(),
+        CoordinationConflict.fecha_creacion.asc(),
+        CoordinationConflict.id.asc(),
+    ).all()
+    return [
+        {
+            "id": item.id,
+            "conflict_type": item.conflict_type,
+            "severity": item.severity,
+            "status": item.status,
+            "entity_refs": item.entity_refs_json or [],
+            "detail": item.detail_json or {},
+            "resolution": item.resolution,
+            "resolved_by": item.resolved_by,
+            "resolved_at": item.resolved_at,
+            "created_at": item.fecha_creacion,
+        }
+        for item in rows
+    ]
+
+
 def build_coverage(db: Session, *, coordination_set_id: int, project_id: int, company_id: int) -> dict:
     coordination = _coordination_set(db, coordination_set_id=coordination_set_id, project_id=project_id, company_id=company_id)
     links = db.query(CoordinationLink).filter(CoordinationLink.coordination_set_id == coordination_set_id, CoordinationLink.status != "retired").all()
@@ -831,7 +869,13 @@ def classification_summary(db: Session, *, project_id: int, company_id: int) -> 
         status = "partial"
     else:
         status = "unresolved"
-    return {"status": status, "total": len(rows), "counts": dict(counts), "warning_required": status != "coordinated"}
+    return {
+        "enabled": bool(company and company.use_omniclass),
+        "status": status,
+        "total": len(rows),
+        "counts": dict(counts),
+        "warning_required": status != "coordinated",
+    }
 
 
 def _classification_values(element: BimElement) -> list[tuple[str, str]]:

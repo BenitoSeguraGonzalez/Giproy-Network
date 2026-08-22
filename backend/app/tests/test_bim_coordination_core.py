@@ -31,6 +31,7 @@ from app.services.bim.coordination_service import (
     reconcile_link_identity,
     make_coordination_set_official,
     ingest_classification_candidates,
+    list_conflicts,
     upsert_classification_resolution,
 )
 
@@ -66,6 +67,16 @@ def test_coordination_set_allows_missing_domains_and_quantified_many_to_many_lin
     conflicts = db.query(CoordinationConflict).filter(CoordinationConflict.coordination_set_id == coordination["id"]).all()
     assert len(conflicts) == 2
     assert {item.severity for item in conflicts} == {"error"}
+
+    visible_conflicts = list_conflicts(
+        db,
+        coordination_set_id=coordination["id"],
+        project_id=project.id,
+        company_id=sample_empresa.id,
+    )
+    assert len(visible_conflicts) == 2
+    assert all(item["status"] == "open" for item in visible_conflicts)
+    assert all(item["detail"]["allocation_percent"] == 110.0 for item in visible_conflicts)
 
 
 def test_coordination_sets_support_every_operational_domain_combination_and_tenant_scope(db, sample_empresa):

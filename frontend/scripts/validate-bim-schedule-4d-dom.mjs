@@ -25,11 +25,12 @@ try {
         executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     });
     try {
-        for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
+        for (const viewport of [{ width: 1920, height: 1080 }, { width: 2560, height: 1440 }]) {
             const page = await browser.newPage({ viewport });
             const errors = [];
             page.on('pageerror', (error) => errors.push(error.message));
             await page.goto(`${baseUrl}/bim-schedule-4d-harness.html`);
+            assert.equal(await page.getByText('Actividad sincronizada con la selección vigente del Gantt.').count(), 1);
             await page.getByLabel('Motivo del vínculo 4D').fill('Secuencia revisada por coordinación');
             await page.getByLabel('Proponer vínculo 4D').click();
             await page.waitForSelector('[data-bim-4d-proposal-status="pending"]');
@@ -39,6 +40,7 @@ try {
             const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
             assert.equal(overflow, false);
             assert.deepEqual(errors, []);
+            await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-schedule-link-${viewport.width}x${viewport.height}.png`, fullPage: true });
             await page.close();
         }
     } finally {

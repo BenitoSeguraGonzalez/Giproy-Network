@@ -60,6 +60,6 @@ def test_issue_attachment_migration_is_additive_and_reversible():
 
 
 def test_issue_attachment_endpoints_are_registered():
-    paths = {route.path for route in app.routes}
+    paths = set(app.openapi()["paths"])
     assert "/api/v1/bim/projects/{project_id}/issues/{issue_id}/attachments" in paths
     assert "/api/v1/bim/projects/{project_id}/issues/{issue_id}/attachments/{attachment_id}/content" in paths

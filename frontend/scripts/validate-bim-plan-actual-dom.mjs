@@ -22,7 +22,7 @@ try {
     await waitForServer();
     const browser = await chromium.launch({ headless: true, executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' });
     try {
-        for (const viewport of [{ width: 1280, height: 820 }, { width: 390, height: 844 }]) {
+        for (const viewport of [{ width: 1920, height: 1080, label: '1920x1080' }, { width: 2560, height: 1440, label: '2560x1440' }]) {
             const page = await browser.newPage({ viewport });
             const errors = [];
             page.on('pageerror', (error) => errors.push(error.message));
@@ -31,7 +31,11 @@ try {
             assert.equal(await page.locator('[data-bim-deviation-status="behind"]').count(), 1);
             await page.getByLabel('Enfocar A-042 en modelo').click();
             await page.waitForSelector('[data-focused-guid="GUID-4D-001"]');
-            await page.locator('[data-bim-baseline-editor] summary').click();
+            assert.equal(await page.getByRole('columnheader', { name: 'Avance plan / real' }).count(), 1);
+            assert.equal(await page.getByText('1 de 2 actividades').count(), 0);
+            await page.getByRole('button', { name: 'Crear línea base' }).click();
+            assert.equal(await page.getByRole('dialog', { name: 'Crear línea base 4D' }).count(), 1);
+            await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-plan-actual-baseline-${viewport.label}.png`, fullPage: true });
             await page.getByLabel('Nombre de línea base 4D').fill('Baseline revisión 2');
             await page.getByLabel('Revisión de línea base 4D').fill('BL-002');
             await page.getByLabel('Agregar dependencia 4D').click();
@@ -40,6 +44,7 @@ try {
             assert.equal(await page.getByLabel('Línea base 4D', { exact: true }).inputValue(), '92');
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
             assert.deepEqual(errors, []);
+            await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-plan-actual-${viewport.label}.png`, fullPage: true });
             await page.close();
         }
     } finally { await browser.close(); }

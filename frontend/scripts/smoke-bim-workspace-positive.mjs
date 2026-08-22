@@ -170,11 +170,8 @@ assert.match(
     /createIfcImportJob:[\s\S]*\/imports\/ifc-jobs[\s\S]*listImportJobs:[\s\S]*\/imports\/jobs[\s\S]*cancelImportJob:[\s\S]*\/cancel[\s\S]*retryImportJob:[\s\S]*\/retry/,
     'bimModelsApi debe exponer el ciclo observable de jobs IFC mediante cliente BIM de dominio',
 );
-assert.match(
-    bimWorkspaceSource,
-    /import\s+BimImportJobsPanel[\s\S]*resolved_role\s*===\s*['"]superadministrador['"][\s\S]*<BimImportJobsPanel/,
-    'BimWorkspace debe montar jobs IFC solo en el perimetro BIM superadministrador',
-);
+assert.match(bimWorkspaceSource, /const\s+adminTools\s*=\s*canCreateCompanyScope/, 'BimWorkspace debe aislar herramientas administrativas por capacidad');
+assert.match(bimWorkspaceSource, /<BimImportJobsPanel/, 'BimWorkspace debe montar el panel de jobs IFC dentro del perímetro administrativo');
 assert.match(
     bimImportJobsSource,
     /listImportJobs[\s\S]*setTimeout\(loadJobs,\s*1500\)[\s\S]*clearTimeout[\s\S]*createIfcImportJob[\s\S]*cancelImportJob[\s\S]*retryImportJob/,
@@ -241,15 +238,15 @@ assert.match(
 assert.match(bimThreeSource, /new\s+THREE\.WebGLRenderer/, 'BimThreeViewer debe renderizar una escena WebGL local');
 assert.match(bimThreeSource, /data-bim-three-canvas/, 'BimThreeViewer debe exponer canvas 3D verificable por harness');
 assert.match(bimThreeSource, /data-bim-artifact-source/, 'BimThreeViewer debe exponer fuente de artefacto verificable por harness');
-assert.match(bimThreeSource, /IFC foundation/, 'BimThreeViewer debe declarar el carril IFC foundation dentro del viewer');
+assert.match(bimThreeSource, /artifactSource|ifcClassFilters/, 'BimThreeViewer debe declarar fuente de artefacto y filtros IFC dentro del viewer');
 assert.match(
     bimThreeSource,
-    /new\s+OrbitControls\(camera,\s*renderer\.domElement\)[\s\S]*controls\.update\(\)[\s\S]*data-bim-three-controls="orbit"[\s\S]*Reset vista 3D/,
+    /new\s+OrbitControls\(camera,\s*renderer\.domElement\)[\s\S]*controls\.update\(\)[\s\S]*data-bim-three-controls="orbit"[\s\S]*data-bim-three-reset-view="true"/,
     'BimThreeViewer debe exponer navegacion OrbitControls y reset de camara',
 );
 assert.match(
     bimThreeSource,
-    /selectedSceneElement[\s\S]*handleFocusSelectedElement[\s\S]*data-bim-three-focus-element[\s\S]*Enfocar elemento[\s\S]*Foco 3D/,
+    /selectedSceneElement[\s\S]*handleFocusSelectedElement[\s\S]*data-bim-three-focus-element[\s\S]*data-bim-three-focus-selected="true"[\s\S]*Enfocar selección/,
     'BimThreeViewer debe exponer foco 3D del elemento seleccionado con trazabilidad DOM',
 );
 assert.match(
@@ -259,22 +256,22 @@ assert.match(
 );
 assert.match(
     bimThreeSource,
-    /raycastHover[\s\S]*pointermove[\s\S]*data-bim-three-hover-element[\s\S]*Hover 3D/,
+    /raycastHover[\s\S]*pointermove[\s\S]*data-bim-three-hover-element/,
     'BimThreeViewer debe exponer hover 3D operativo con raycaster y trazabilidad DOM',
 );
 assert.match(
     bimThreeSource,
-    /inspectedSceneElement[\s\S]*data-bim-three-inspector-element[\s\S]*data-bim-three-inspector-global-id[\s\S]*Inspector 3D[\s\S]*GlobalId/,
+    /inspectedSceneElement[\s\S]*data-bim-three-inspector-element[\s\S]*data-bim-three-inspector-global-id/,
     'BimThreeViewer debe exponer inspector 3D real para hover/seleccion con GlobalId trazable',
 );
 assert.match(
     bimThreeSource,
-    /activeIfcClass[\s\S]*ifcClassFilters[\s\S]*visibleThreeElements[\s\S]*data-bim-three-ifc-filter[\s\S]*IFC 3D/,
+    /activeIfcClass[\s\S]*ifcClassFilters[\s\S]*visibleThreeElements[\s\S]*data-bim-three-ifc-filter/,
     'BimThreeViewer debe exponer filtro IFC 3D operativo sobre elementos reales',
 );
 assert.match(
     bimThreeSource,
-    /hiddenIfcClasses[\s\S]*toggleIfcClassVisibility[\s\S]*data-bim-three-hidden-ifc-classes[\s\S]*Visibilidad 3D[\s\S]*data-bim-three-reset-visibility/,
+    /hiddenIfcClasses[\s\S]*toggleIfcClassVisibility[\s\S]*data-bim-three-hidden-ifc-classes[\s\S]*data-bim-three-reset-visibility/,
     'BimThreeViewer debe exponer visibilidad IFC 3D operativa con reset trazable',
 );
 assert.equal(

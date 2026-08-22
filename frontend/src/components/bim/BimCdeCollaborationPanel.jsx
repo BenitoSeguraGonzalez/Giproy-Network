@@ -133,6 +133,7 @@ const BimCdeCollaborationPanel = ({ projectId, empresaId, selectedElement = null
         const heartbeatTimer = globalThis.setInterval(() => {
             if (!disposed && globalThis.document?.visibilityState !== 'hidden') heartbeat().catch(() => {});
         }, HEARTBEAT_INTERVAL_MS);
+        const sessionKeyValue = sessionKey.current;
         return () => {
             disposed = true;
             globalThis.clearInterval(pollTimer);
@@ -140,7 +141,7 @@ const BimCdeCollaborationPanel = ({ projectId, empresaId, selectedElement = null
             globalThis.removeEventListener?.('online', recover);
             globalThis.removeEventListener?.('offline', handleOffline);
             globalThis.document?.removeEventListener('visibilitychange', handleVisibility);
-            api.leaveCdePresence(projectId, { session_key: sessionKey.current }, empresaId).catch(() => {});
+            api.leaveCdePresence(projectId, { session_key: sessionKeyValue }, empresaId).catch(() => {});
         };
     }, [api, empresaId, heartbeat, projectId, refresh, scopeKey]);
 

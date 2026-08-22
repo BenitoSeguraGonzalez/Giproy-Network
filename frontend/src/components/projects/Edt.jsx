@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, User, ChevronRight, ChevronDown, GripVertical, Fol
 import { edtApi } from '../../api/edt';
 import reportingApi from '../../api/reporting';
 import { presupuestosApi } from '../../api/presupuestos';
+import { normalizeBudgetCollection } from '../../utils/budgetResponse';
 import { cronogramasApi } from '../../api/cronogramas';
 import { stakeholdersApi, rolesApi } from '../../api/stakeholders';
 import { AuthContext } from '../../context/AuthContext';
@@ -170,7 +171,7 @@ const normalizeStakeholderNodePayload = (formData) => ({
 const EdtModalHeader = ({
     title,
     subtitle,
-    icon: Icon = ListTree,
+    icon = ListTree,
     iconClassName = 'text-emerald-400',
     iconWrapClassName = 'border-emerald-300/20 bg-emerald-400/10',
     closeButtonClassName = EDT_MODAL_CLOSE_BUTTON,
@@ -180,7 +181,7 @@ const EdtModalHeader = ({
     <div className="flex items-center justify-between gap-4 border-b border-[#101318] bg-[#111318] px-5 py-4">
         <div className="flex min-w-0 items-center gap-3">
             <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border ${iconWrapClassName}`}>
-                <Icon className={`h-[18px] w-[18px] ${iconClassName}`} />
+                {React.createElement(icon, { className: `h-[18px] w-[18px] ${iconClassName}` })}
             </span>
             <div className="min-w-0">
                 <h2 className="text-sm font-black uppercase tracking-tight text-white">{title}</h2>
@@ -751,7 +752,6 @@ const EdtNodeItem = ({ node, level = 0, isExpanded, expandedNodes, onToggle, onA
 
 const Edt = ({ project, initialFocusNodeId = null }) => {
     const { user, selectedEmpresa } = useContext(AuthContext);
-    const normalizedRole = (user?.rol || '').toLowerCase();
     const empId = selectedEmpresa?.id || user?.empresa_id || null;
     const [tree, setTree] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -809,7 +809,7 @@ const Edt = ({ project, initialFocusNodeId = null }) => {
         try {
             setBudgetLoading(true);
             const response = await presupuestosApi.getByProyecto(project.id, empId);
-            const budget = response?.data?.[0] || null;
+            const budget = normalizeBudgetCollection(response)[0] || null;
             if (!budget?.id) {
                 setActiveBudget(null);
                 return;

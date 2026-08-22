@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Layers3, Search } from 'lucide-react';
+import { Check, Layers3, Loader2, Search, Trash2 } from 'lucide-react';
+import { bimModelsApi } from '../../api/bimModels';
 
 const formatDateTime = (value) => {
     if (!value) {
@@ -39,9 +40,11 @@ const buildDisciplineSummary = (versions = []) => {
         .slice(0, 4);
 };
 
-const BimVersionSelector = ({ models, activeVersionId, onSelectVersion }) => {
+const BimVersionSelector = ({ models, activeVersionId, onSelectVersion, projectId, empresaId, onVersionsChanged }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterMode, setFilterMode] = useState('all');
+    const [actionId, setActionId] = useState(null);
+    const [message, setMessage] = useState('');
     const versions = useMemo(
         () =>
             models.flatMap((model) =>
@@ -144,7 +147,7 @@ const BimVersionSelector = ({ models, activeVersionId, onSelectVersion }) => {
                         </button>
                     </div>
                     <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
-                        {filteredVersions.length} versiones BIM visibles
+                        {filteredVersions.length} versiones BIM visibles{message ? ' · ' + message : ''}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.16em]">
                         <span className="rounded-full border border-zinc-200 bg-white px-2 py-1 text-zinc-600">
@@ -174,22 +177,24 @@ const BimVersionSelector = ({ models, activeVersionId, onSelectVersion }) => {
                     </p>
                 </div>
             ) : (
-                <div className="space-y-2">
+                <div className="min-w-0 max-w-full space-y-2 overflow-x-hidden">
                     {filteredVersions.map((version) => {
                         const isActive = version.id === activeVersionId;
                         return (
-                            <button
+                            <div
                                 key={version.id}
-                                type="button"
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => onSelectVersion?.(version.id)}
-                                className={`rounded-xl border px-3 py-2 ${
+                                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onSelectVersion?.(version.id); }}
+                                className={`block w-full min-w-0 max-w-full overflow-hidden rounded-xl border px-3 py-2 text-left ${
                                     isActive
                                         ? 'border-[#F39200] bg-orange-50 text-[#F39200]'
                                         : 'border-zinc-200 bg-white text-zinc-600 hover:border-[#F39200]'
                                 }`}
                             >
-                                <div className="flex items-center justify-between gap-3">
-                                    <div className="min-w-0">
+                                <div className="flex min-w-0 items-start justify-between gap-3">
+                                    <div className="min-w-0 flex-1">
                                         <p className="text-[11px] font-black uppercase tracking-widest">
                                             {version.version_label}
                                         </p>
@@ -205,37 +210,43 @@ const BimVersionSelector = ({ models, activeVersionId, onSelectVersion }) => {
                                             ) : null}
                                         </div>
                                     </div>
-                                    <span className="rounded-full border border-current px-2 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                                    <span className="max-w-[45%] shrink-0 truncate rounded-full border border-current px-2 py-0.5 text-[9px] font-black uppercase tracking-widest">
                                         {version.status}
                                     </span>
                                 </div>
                                 <div className="mt-3 grid gap-2 text-left text-[10px] font-semibold text-zinc-500">
-                                    <div className="flex items-center justify-between gap-3">
+                                    <div className="flex min-w-0 items-start justify-between gap-3">
                                         <span>Elementos</span>
                                         <span className="font-black text-zinc-700">{version.element_count ?? 0}</span>
                                     </div>
-                                    <div className="flex items-center justify-between gap-3">
+                                    <div className="flex min-w-0 items-start justify-between gap-3">
                                         <span>Niveles</span>
                                         <span className="font-black text-zinc-700">{version.storey_count ?? 0}</span>
                                     </div>
-                                    <div className="flex items-center justify-between gap-3">
+                                    <div className="flex min-w-0 items-start justify-between gap-3">
                                         <span>Creada</span>
                                         <span className="font-black text-zinc-700">{formatDateTime(version.fecha_creacion)}</span>
                                     </div>
-                                    <div className="flex items-center justify-between gap-3">
+                                    <div className="flex min-w-0 items-start justify-between gap-3">
                                         <span>Origen</span>
-                                        <span className="truncate text-right font-black text-zinc-700">
+                                        <span className="min-w-0 max-w-[65%] break-all whitespace-normal overflow-hidden text-right font-black text-zinc-700">
                                             {version.sourceFilename || 'Sin archivo'}
                                         </span>
                                     </div>
                                     {version.notes ? (
-                                        <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-2 py-2 text-[10px] text-zinc-600">
-                                            {version.notes}
+                                        <div className="min-w-0 rounded-xl border border-zinc-200 bg-zinc-50 px-2 py-2 text-[10px] text-zinc-600">
+                                            <span className="block break-all">{version.notes}</span>
                                         </div>
                                     ) : null}
                                 </div>
-                            </button>
-                        );
+                            <div className="mt-3 flex items-center justify-between gap-2 border-t border-zinc-100 pt-2">
+                                <span className="text-[9px] font-semibold text-zinc-400">{isActive ? 'Vista seleccionada' : 'Seleccionar para inspeccionar'}</span>
+                                <div className="flex items-center gap-1">
+                                    {!version.is_active ? <button type="button" disabled={Boolean(actionId)} onClick={async (event) => { event.stopPropagation(); setActionId(version.id); setMessage(''); try { await bimModelsApi.activateVersion(projectId, version.id, empresaId); onSelectVersion?.(version.id); onVersionsChanged?.(); setMessage('Versión activada.'); } catch (error) { setMessage(error?.response?.data?.detail || 'No se pudo activar la versión.'); } finally { setActionId(null); } }} className="inline-flex h-7 items-center gap-1 rounded-md border border-emerald-200 px-2 text-[9px] font-bold text-emerald-700 hover:bg-emerald-50 disabled:opacity-50" title="Activar versión">{actionId === version.id ? <Loader2 className="size-3 animate-spin" /> : <Check className="size-3" />}Activar</button> : null}
+                                    {!version.is_active ? <button type="button" disabled={Boolean(actionId)} onClick={async (event) => { event.stopPropagation(); if (!window.confirm('Eliminar esta versión BIM? Esta acción no se puede deshacer.')) return; setActionId(version.id); setMessage(''); try { await bimModelsApi.deleteVersion(projectId, version.id, empresaId); if (String(activeVersionId) === String(version.id)) onSelectVersion?.(null); onVersionsChanged?.(); setMessage('Versión eliminada.'); } catch (error) { setMessage(error?.response?.data?.detail || 'No se pudo eliminar la versión.'); } finally { setActionId(null); } }} className="inline-flex h-7 items-center gap-1 rounded-md border border-rose-200 px-2 text-[9px] font-bold text-rose-700 hover:bg-rose-50 disabled:opacity-50" title="Eliminar versión"><Trash2 className="size-3" />Eliminar</button> : null}
+                                </div>
+                            </div>
+                            </div>                        );
                     })}
                 </div>
             )}

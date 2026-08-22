@@ -1,25 +1,27 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import {
     Calculator,
     Building2,
     ShieldCheck,
     Wrench,
-    ArrowUpRight
+    ArrowUpRight,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 const MotionDiv = motion.div;
 import { Card, CardContent } from '../components/ui/card';
 
 const Dashboard = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
+    const shouldReduceMotion = useReducedMotion();
     const cardsViewportRef = useRef(null);
     const moduleCardRefs = useRef({});
     const [activeModuleId, setActiveModuleId] = useState('unit-prices');
 
-    const modules = [
+    const modules = useMemo(() => {
+        const availableModules = [
         {
             id: 'unit-prices',
             title: 'Precios Unitarios',
@@ -47,10 +49,10 @@ const Dashboard = () => {
             color: 'bg-zinc-50',
             borderColor: 'border-zinc-200'
         }
-    ];
+        ];
 
-    if (user?.rol?.toLowerCase() === 'superadministrador') {
-        modules.push({
+        if (user?.rol?.toLowerCase() === 'superadministrador') {
+            availableModules.push({
             id: 'admin-global',
             title: 'Administración Global',
             description: 'Gobierno de plataforma, comunicados, auditoría y herramientas del sistema.',
@@ -58,14 +60,15 @@ const Dashboard = () => {
             path: '/admin-global',
             color: 'bg-violet-50',
             borderColor: 'border-violet-200'
-        });
-    }
-
-    useEffect(() => {
-        if (!modules.some((module) => module.id === activeModuleId)) {
-            setActiveModuleId(modules[0]?.id || '');
+            });
         }
-    }, [activeModuleId, modules]);
+
+        return availableModules;
+    }, [user?.rol]);
+
+    const effectiveActiveModuleId = modules.some((module) => module.id === activeModuleId)
+        ? activeModuleId
+        : (modules[0]?.id || '');
 
     useEffect(() => {
         const viewport = cardsViewportRef.current;
@@ -109,9 +112,9 @@ const Dashboard = () => {
                 <div className="flex h-full min-h-0 w-full max-w-[1480px] flex-1 flex-col overflow-hidden self-center">
                     <header className="mb-10 flex-shrink-0">
                         <MotionDiv
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
+                            transition={{ duration: shouldReduceMotion ? 0.12 : 0.24 }}
                         >
                             <h2 className="text-4xl font-black tracking-tight text-[#1A1A1A] sm:text-5xl">
                                 Consola de <span className="text-[#F39200]">Operaciones</span>
@@ -138,15 +141,18 @@ const Dashboard = () => {
                                     onFocus={() => setActiveModuleId(module.id)}
                                 >
                                     <MotionDiv
-                                        initial={{ opacity: 0, y: 30 }}
+                                        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.5, delay: 0.1 * index }}
-                                        whileHover={{ y: -8 }}
+                                        transition={{ duration: shouldReduceMotion ? 0.12 : 0.24, delay: shouldReduceMotion ? 0 : 0.04 * index }}
+                                        whileHover={shouldReduceMotion ? undefined : { y: -3 }}
                                     >
-                                        <Card
+                                        <button
+                                            type="button"
                                             onClick={() => navigate(module.path)}
-                                            className="group h-full cursor-pointer overflow-hidden rounded-3xl border-none bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col"
+                                            className="group block h-full w-full rounded-3xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] focus-visible:ring-offset-2"
+                                            aria-label={`Ingresar al módulo ${module.title}`}
                                         >
+                                        <Card className="h-full cursor-pointer overflow-hidden rounded-3xl border-none bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-shadow duration-200 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col">
                                             <CardContent className="flex h-full flex-col p-10">
                                                 <div className={`mb-8 flex h-16 w-16 items-center justify-center rounded-2xl border ${module.borderColor} ${module.color} shadow-sm transition-transform duration-300 group-hover:scale-110`}>
                                                     {module.icon}
@@ -164,12 +170,13 @@ const Dashboard = () => {
                                                     <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400 transition-colors group-hover:text-[#F39200]">
                                                         Ingresar al módulo
                                                     </span>
-                                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-100 bg-zinc-50 transition-all group-hover:bg-[#F39200]">
+                                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-100 bg-zinc-50 transition-[background-color,border-color] duration-200 group-hover:bg-[#F39200]">
                                                         <ArrowUpRight className="h-5 w-5 text-zinc-400 transition-colors group-hover:text-white" />
                                                     </div>
                                                 </div>
                                             </CardContent>
                                         </Card>
+                                        </button>
                                     </MotionDiv>
                                 </div>
                             ))}
@@ -184,21 +191,23 @@ const Dashboard = () => {
                         </div>
                         <div className="flex gap-4">
                             {modules.map((module) => {
-                                const isActive = module.id === activeModuleId;
+                                const isActive = module.id === effectiveActiveModuleId;
                                 return (
                                     <button
                                         key={`${module.id}-indicator`}
                                         type="button"
                                         onClick={() => handleIndicatorClick(module.id)}
-                                        className={`h-1 rounded-full transition-all duration-200 ${
-                                            isActive
-                                                ? 'w-12 bg-[#F39200]'
-                                                : 'w-10 bg-zinc-200 hover:bg-zinc-300'
-                                        }`}
+                                        className="group/indicator flex h-11 w-12 items-center justify-center rounded-lg focus-visible:outline-none"
                                         title={`Ir a ${module.title}`}
                                         aria-label={`Ir a ${module.title}`}
                                         aria-pressed={isActive}
-                                    />
+                                    >
+                                        <span className={`h-1 rounded-full transition-[width,background-color] duration-200 ${
+                                            isActive
+                                                ? 'w-12 bg-[#F39200]'
+                                                : 'w-10 bg-zinc-200 group-hover/indicator:bg-zinc-300'
+                                        }`} aria-hidden="true" />
+                                    </button>
                                 );
                             })}
                         </div>

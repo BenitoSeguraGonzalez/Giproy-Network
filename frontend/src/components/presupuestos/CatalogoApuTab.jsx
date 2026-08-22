@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useContext, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useContext, useRef, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import subcategoriasItemsApi from '../../api/subcategoriasItems';
 import apusApi from '../../api/apus';
@@ -152,14 +152,14 @@ const CatalogoApuTab = ({
 
     const isSearchControlled = controlledSearchTerm != null;
     const searchTerm = isSearchControlled ? controlledSearchTerm : internalSearchTerm;
-    const setSearchTerm = (value) => {
+    const setSearchTerm = useCallback((value) => {
         const sanitized = sanitizeCatalogSearchValue(value);
         if (isSearchControlled) {
             onSearchTermChange?.(sanitized);
             return;
         }
         setInternalSearchTerm(sanitized);
-    };
+    }, [isSearchControlled, onSearchTermChange]);
 
     const renderedSearchValue = useMemo(() => {
         const sanitized = sanitizeCatalogSearchValue(searchTerm);
@@ -169,7 +169,7 @@ const CatalogoApuTab = ({
     useEffect(() => {
         if (renderedSearchValue === searchTerm) return;
         setSearchTerm(renderedSearchValue);
-    }, [renderedSearchValue, searchTerm]);
+    }, [renderedSearchValue, searchTerm, setSearchTerm]);
 
     const groupedData = useMemo(() => {
         const term = normalizeApuSearchToken(renderedSearchValue);
@@ -197,15 +197,6 @@ const CatalogoApuTab = ({
         }).filter(Boolean);
     }, [apus, subcategorias, renderedSearchValue]);
 
-    const syncSummary = useMemo(() => {
-        return apus.reduce((acc, apu) => {
-            if (apu?.sync_status === 'diverged') acc.diverged += 1;
-            else if (apu?.content_origin === 'local') acc.local += 1;
-            else if (apu?.content_origin === 'inherited') acc.inherited += 1;
-            else acc.native += 1;
-            return acc;
-        }, { inherited: 0, local: 0, diverged: 0, native: 0 });
-    }, [apus]);
     const visibleApuCount = useMemo(
         () => groupedData.reduce((acc, sub) => acc + (sub?.items?.length || 0), 0),
         [groupedData]

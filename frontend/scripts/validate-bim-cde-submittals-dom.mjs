@@ -18,6 +18,7 @@ try {
     const page = await context.newPage(); const errors = [];
     page.on('pageerror', (error) => errors.push(error.message)); page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
     await page.goto(`${baseUrl}/bim-cde-submittals-harness.html`, { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: 'Nuevo expediente' }).click();
     await page.getByLabel('Titulo submittal').fill('Plano de taller fachada'); await page.getByLabel('Revisor submittal').selectOption('8');
     await page.getByLabel('Fecha requerida submittal').fill('2027-07-20T12:00'); await page.getByLabel('Documento submittal').selectOption('91'); await page.getByLabel('Notas submittal').fill('Primera emision');
     await page.getByRole('button', { name: 'Crear expediente' }).click(); await page.getByText('SUB-0001 · REV 01 · Borrador').waitFor();

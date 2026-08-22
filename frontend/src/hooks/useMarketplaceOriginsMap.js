@@ -8,7 +8,7 @@ export const useMarketplaceOriginsMap = () => {
 
     useEffect(() => {
         let cancelled = false;
-        setLoading(true);
+        queueMicrotask(() => setLoading(true));
         marketplaceApi
             .getOrigins()
             .then((response) => {

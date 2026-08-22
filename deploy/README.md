@@ -12,6 +12,27 @@ aislada y repetible.
 - Redes externas esperadas en el servidor: `proxy` y `backend`.
 - BIM queda apagado por defecto con `BIM_ENABLED=false`.
 
+## Fuente Git reproducible desde beta
+
+El servidor beta mantiene una clave dedicada de lectura para Gitea en
+`/home/benito/.ssh/giproy_beta_release_ed25519`. Está registrada en
+`BenitoSegura/Giproy-Netword` como `giproy-beta-release-readonly` y se consume
+mediante el alias SSH `gitea-beta`; la clave privada no sale del servidor.
+
+Para materializar un release futuro, usar la URL SSH y un SHA completo:
+
+```bash
+GIPROY_RELEASE_REPOSITORY=ssh://gitea-beta/BenitoSegura/Giproy-Netword.git \
+GIPROY_RELEASE_REF=<sha-completo> \
+./deploy/scripts/giproy-beta-checkout-release.sh
+```
+
+Validación operativa:
+
+```bash
+git ls-remote ssh://gitea-beta/BenitoSegura/Giproy-Netword.git
+```
+
 ## Primer despliegue en el servidor
 
 Directorio esperado:
@@ -59,6 +80,20 @@ ese Traefik. Por eso el host inicial recomendado es:
 ```bash
 GIPROY_HOST=giproy.excomconsultores.com
 ```
+
+### Recreación segura del WAF después de cambiar el frontend
+
+El WAF Nginx resuelve `BACKEND` al arrancar y puede conservar la IP anterior
+del contenedor frontend. Después de recrear `giproy-beta-frontend`, recrear
+también únicamente el WAF para evitar que una ruta de GiProy sirva otro
+proyecto:
+
+```bash
+GIPROY_IMAGE_TAG=<tag> docker compose -f deploy/docker-compose.beta.yml up -d --force-recreate waf
+```
+
+Verificar desde Traefik que `/auth/login` contiene `GIPROY | Engineering ERP`
+antes de validar el despliegue públicamente.
 
 ## Operacion recurrente
 

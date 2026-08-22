@@ -130,7 +130,7 @@ await page.route('**/gantt-ff-fixture.json', async (route) => {
 });
 
 await page.goto(`${baseUrl}/gantt-ff-harness.html`, { waitUntil: 'domcontentloaded' });
-await page.waitForSelector('text=187 PARTIDAS', { timeout: 30000 });
+await page.waitForSelector('text=187 PARTIDAS', { state: 'attached', timeout: 30000 });
 await page.waitForSelector('[role="scrollbar"][aria-orientation="horizontal"]', { timeout: 30000 });
 await page.evaluate(() => {
   [...document.querySelectorAll('.giproy-motion-scrollbar-hide')].forEach((viewport) => {

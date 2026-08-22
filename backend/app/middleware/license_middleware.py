@@ -19,6 +19,7 @@ class LicenseMiddleware(BaseHTTPMiddleware):
             "/api/v1/login/",
             "/api/v1/auth/",
             "/api/v1/register",
+            "/api/v1/legal/manifest",
             "/api/v1/admin-maintenance/",
             "/api/v1/system-announcements/",
             "/api/v1/password-recovery/",

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Building2, Link2, Maximize2, Move, Search } from 'lucide-react';
+import { Building2, Link2, Maximize2, Minus, Move, Plus, Search } from 'lucide-react';
 
 const VIEWER_BACKGROUND = '#F8FAFC';
 const GRID_COLOR = '#E4E4E7';
@@ -165,14 +165,16 @@ const buildElementLayout = (elements = []) => {
 
         const width = 64 + ((element.id % 3) * 18);
         const height = 42 + ((element.id % 4) * 12);
-        const column = index % 4;
-        const row = Math.floor(index / 4);
+        // Distribuir la escena derivada en una retícula apaisada: el canvas
+        // debe aprovechar el ancho de trabajo sin crear una columna infinita.
+        const column = index % 10;
+        const row = Math.floor(index / 10);
         const offsetSeed = element.id % 11;
 
         return {
             ...element,
-            x: 48 + column * 122 + offsetSeed * 1.5,
-            y: 48 + row * 96 + (offsetSeed % 5) * 4,
+            x: 48 + column * 102 + offsetSeed * 1.5,
+            y: 48 + row * 72 + (offsetSeed % 5) * 4,
             width,
             height,
             geometrySource: 'derived',
@@ -310,7 +312,7 @@ const BimCanvasViewer = ({
         height: canvasSize.height / viewport.scale,
     };
 
-    const fitElements = (targetElements = []) => {
+    const fitElements = useCallback((targetElements = []) => {
         if (!canvasSize.width || !canvasSize.height || targetElements.length === 0) {
             return;
         }
@@ -326,14 +328,14 @@ const BimCanvasViewer = ({
 
         setViewport({
             scale: nextScale,
-            offsetX: padding - targetBounds.minX * nextScale,
-            offsetY: padding - targetBounds.minY * nextScale,
+            offsetX: (canvasSize.width - targetBounds.width * nextScale) / 2 - targetBounds.minX * nextScale,
+            offsetY: (canvasSize.height - targetBounds.height * nextScale) / 2 - targetBounds.minY * nextScale,
         });
-    };
+    }, [canvasSize.height, canvasSize.width]);
 
-    const fitScene = () => {
+    const fitScene = useCallback(() => {
         fitElements(laidOutElements);
-    };
+    }, [fitElements, laidOutElements]);
 
     const handleFitLinked = () => {
         fitElements(linkedLaidOutElements);
@@ -381,12 +383,12 @@ const BimCanvasViewer = ({
     }, [canvasSize.height, canvasSize.width, laidOutElements, selectedElement]);
 
     useEffect(() => {
-        fitSelectedCallback();
+        queueMicrotask(() => fitSelectedCallback());
     }, [fitSelectedCallback]);
 
     useEffect(() => {
-        fitScene();
-    }, [activeIfcClass, canvasSize.height, canvasSize.width, showOnlyLinked]);
+        queueMicrotask(() => fitScene());
+    }, [activeIfcClass, canvasSize.height, canvasSize.width, fitScene, showOnlyLinked]);
 
     useEffect(() => {
         if (activeIfcClass === 'all') {
@@ -394,9 +396,9 @@ const BimCanvasViewer = ({
         }
         const availableClasses = new Set(elements.map((element) => element.ifc_class || 'Sin clase IFC'));
         if (!availableClasses.has(activeIfcClass)) {
-            setActiveIfcClass('all');
+            queueMicrotask(() => setActiveIfcClass('all'));
         }
-    }, [activeIfcClass, elements]);
+    }, [activeIfcClass, elements, validationIssuesByElementId]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -560,6 +562,7 @@ const BimCanvasViewer = ({
         laidOutElements,
         linkedElementIdSet,
         elementLinkCounts,
+        validationIssuesByElementId,
         highlightedElementIdSet,
         selectedElement?.id,
         selectedLink?.bim_element_id,
@@ -636,6 +639,18 @@ const BimCanvasViewer = ({
         onSelectElement?.(hitElement);
     };
 
+    const adjustZoom = (factor) => {
+        setViewport((current) => {
+            const nextScale = Math.min(2.5, Math.max(0.55, current.scale * factor));
+            if (nextScale === current.scale || !canvasSize.width || !canvasSize.height) return current;
+            const centerX = canvasSize.width / 2;
+            const centerY = canvasSize.height / 2;
+            const worldCenterX = (centerX - current.offsetX) / current.scale;
+            const worldCenterY = (centerY - current.offsetY) / current.scale;
+            return { scale: nextScale, offsetX: centerX - worldCenterX * nextScale, offsetY: centerY - worldCenterY * nextScale };
+        });
+    };
+
     const handleResetViewport = () => {
         setViewport({ scale: 1, offsetX: 24, offsetY: 24 });
     };
@@ -693,63 +708,80 @@ const BimCanvasViewer = ({
             data-bim-canvas-ifc-filter={activeIfcClass}
             data-bim-canvas-filtered-elements={filteredElements.length}
             data-bim-canvas-ifc-filter-count={ifcClassFilters.length}
-            className="flex min-h-[320px] flex-col rounded-[1.5rem] border border-zinc-200 bg-white"
+            className="flex h-full min-h-[320px] min-w-0 max-w-full flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white"
         >
-            <div className="border-b border-zinc-200 px-5 py-4">
-                <div className="flex items-center justify-between gap-3">
+            <div className="overflow-hidden border-b border-zinc-200 px-2 py-1.5">
+                <div className="flex min-w-0 flex-nowrap items-center gap-1">
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400">Canvas BIM</p>
-                        <h3 className="mt-1 text-sm font-black uppercase tracking-widest text-zinc-900">
-                            Viewer tecnico 2D incubado
+                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-zinc-400">Modelo BIM</p>
+                        <h3 className="mt-0.5 text-xs font-bold text-zinc-900">
+                            Inspección 2D
                         </h3>
                     </div>
                     <button
                         type="button"
                         onClick={() => setShowOnlyLinked((current) => !current)}
-                        className={`inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-[10px] font-black uppercase tracking-[0.18em] transition-colors ${
+                        title="Mostrar solo elementos vinculados"
+                        aria-label="Mostrar solo elementos vinculados"
+                        className={`inline-flex size-8 shrink-0 items-center justify-center rounded-lg border px-0 text-[9px] font-bold transition-colors ${
                             showOnlyLinked
                                 ? 'border-orange-200 bg-orange-50 text-[#F39200]'
                                 : 'border-zinc-200 bg-white text-zinc-600 hover:border-[#F39200] hover:text-[#F39200]'
                         }`}
                     >
                         <Link2 className="h-4 w-4" />
-                        {showOnlyLinked ? 'Mostrando vinculados' : 'Solo vinculados'}
+                        <span className="sr-only">{showOnlyLinked ? 'Mostrando vinculados' : 'Solo vinculados'}</span>
                     </button>
                     <button
                         type="button"
                         onClick={fitScene}
-                        className="inline-flex h-9 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200]"
+                        title="Encuadrar escena"
+                        aria-label="Encuadrar escena"
+                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white px-0 text-[9px] font-bold transition-colors hover:border-[#F39200] hover:text-[#F39200]"
                     >
                         <Maximize2 className="h-4 w-4" />
-                        Encuadrar escena
+                        <span className="sr-only">Encuadrar escena</span>
                     </button>
                     <button
                         type="button"
                         onClick={handleFitLinked}
+                        title="Encuadrar elementos vinculados"
+                        aria-label="Encuadrar elementos vinculados"
                         disabled={linkedLaidOutElements.length === 0}
-                        className="inline-flex h-9 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white px-0 text-[9px] font-bold text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                         <Link2 className="h-4 w-4" />
-                        Encuadrar vinculados
+                        <span className="sr-only">Encuadrar vinculados</span>
                     </button>
                     <button
                         type="button"
                         onClick={handleFitSelected}
+                        title="Encuadrar elemento activo"
+                        aria-label="Encuadrar elemento activo"
                         disabled={!selectedElement}
-                        className="inline-flex h-9 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white px-0 text-[9px] font-bold text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                         <Building2 className="h-4 w-4" />
-                        Encuadrar activo
+                        <span className="sr-only">Encuadrar activo</span>
                     </button>
                     <button
                         type="button"
                         onClick={handleResetViewport}
-                        className="inline-flex h-9 items-center rounded-xl border border-zinc-200 bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200]"
+                        title="Restablecer vista"
+                        aria-label="Restablecer vista"
+                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white px-0 text-[9px] font-bold text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200]"
                     >
-                        Reset vista
+                        <span className="sr-only">Reset vista</span>
                     </button>
+                    <label className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2 text-[9px] font-bold uppercase tracking-[0.1em] text-zinc-600">
+                        <span className="sr-only">Filtrar clase IFC</span>
+                        <select value={activeIfcClass} onChange={(event) => setActiveIfcClass(event.target.value)} className="max-w-32 bg-transparent text-[9px] font-bold uppercase outline-none">
+                            <option value="all">IFC todas</option>
+                            {ifcClassFilters.map((item) => <option key={item.ifcClass} value={item.ifcClass}>{item.ifcClass} ({item.count})</option>)}
+                        </select>
+                    </label>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="hidden">
                     <button
                         type="button"
                         onClick={() => setActiveIfcClass('all')}
@@ -776,7 +808,7 @@ const BimCanvasViewer = ({
                         </button>
                     ))}
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+                <div className="hidden">
                     <span className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
                         <Search className="h-3.5 w-3.5" />
                         Zoom {Math.round(viewport.scale * 100)}%
@@ -796,7 +828,7 @@ const BimCanvasViewer = ({
                         </span>
                     ) : null}
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+                <div className="hidden">
                     <span className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-600">
                         Visibles {laidOutElements.length}
                     </span>
@@ -826,6 +858,15 @@ const BimCanvasViewer = ({
                 ref={containerRef}
                 className="relative flex flex-1 overflow-hidden bg-[linear-gradient(135deg,#F8FAFC_0%,#EEF2F7_100%)]"
             >
+                <div className="pointer-events-auto absolute right-3 top-3 z-20 flex items-center gap-1 rounded-xl border border-zinc-200 bg-white/95 p-1 shadow-md backdrop-blur" data-bim-canvas-zoom-controls aria-label="Controles de zoom 2D">
+                    <button type="button" onClick={() => adjustZoom(0.9)} title="Alejar" aria-label="Alejar" className="grid size-8 place-items-center rounded-lg text-zinc-700 hover:bg-orange-50 hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
+                        <Minus className="size-4" aria-hidden="true" />
+                    </button>
+                    <span className="min-w-12 text-center text-[10px] font-black tabular-nums text-zinc-600" aria-live="polite">{Math.round(viewport.scale * 100)}%</span>
+                    <button type="button" onClick={() => adjustZoom(1.1)} title="Acercar" aria-label="Acercar" className="grid size-8 place-items-center rounded-lg text-zinc-700 hover:bg-orange-50 hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
+                        <Plus className="size-4" aria-hidden="true" />
+                    </button>
+                </div>
                 {!ready ? (
                     <div className="flex flex-1 items-center justify-center px-8 py-10">
                         <div className="w-full max-w-xl rounded-[1.5rem] border border-dashed border-zinc-300 bg-white/75 px-8 py-10 text-center backdrop-blur">
@@ -935,8 +976,8 @@ const BimCanvasViewer = ({
                                 </div>
                             </div>
                         ) : null}
-                        <div className="pointer-events-none absolute bottom-4 left-4 rounded-2xl border border-zinc-200 bg-white/90 px-4 py-3 text-xs text-zinc-500 shadow-sm backdrop-blur">
-                            <p className="font-black uppercase tracking-[0.16em] text-zinc-700">
+                        <div className="hidden">
+                            <p className="font-bold uppercase tracking-[0.12em] text-zinc-700">
                                 {laidOutElements.length} elementos visibles
                             </p>
                             <p className="mt-1">Rueda: zoom • arrastra: paneo • clic: seleccionar</p>
@@ -959,9 +1000,9 @@ const BimCanvasViewer = ({
                             ) : null}
                             {error ? <p className="mt-2 font-bold text-rose-500">No se pudo actualizar el workspace BIM.</p> : null}
                         </div>
-                        <div className="pointer-events-none absolute left-4 top-4 rounded-2xl border border-zinc-200 bg-white/90 px-4 py-3 text-xs text-zinc-500 shadow-sm backdrop-blur">
+                        <div className="hidden">
                             <p className="font-black uppercase tracking-[0.16em] text-zinc-700">Leyenda BIM</p>
-                            <div className="mt-3 flex flex-col gap-2">
+                            <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
                                 <div className="flex items-center gap-2">
                                     <span className="h-3 w-3 rounded-full border border-zinc-400 bg-[#CBD5E1]" />
                                     <span>Elemento sin vínculos</span>
@@ -987,7 +1028,7 @@ const BimCanvasViewer = ({
                                     <span>Advertencia de validación</span>
                                 </div>
                             </div>
-                            <div className="mt-3 border-t border-zinc-200 pt-3 text-[11px]">
+                            <div className="mt-2 border-t border-zinc-200 pt-2 text-[10px]">
                                 <p>
                                     Geometría importada:{' '}
                                     {laidOutElements.filter((element) => element.geometrySource === 'imported').length}
@@ -996,7 +1037,7 @@ const BimCanvasViewer = ({
                                 <p>Total visibles: {laidOutElements.length}</p>
                             </div>
                         </div>
-                        <div className="pointer-events-none absolute right-4 top-4 rounded-2xl border border-zinc-200 bg-white/90 p-3 text-xs text-zinc-500 shadow-sm backdrop-blur">
+                        <div className="hidden">
                             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-700">Minimapa BIM</p>
                             <div
                                 ref={minimapRef}
@@ -1016,7 +1057,7 @@ const BimCanvasViewer = ({
                                         handleMinimapPointerDown(simulatedEvent);
                                     }
                                 }}
-                                className="relative mt-2 h-24 w-36 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50"
+                                className="relative mt-1 h-20 w-28 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50"
                             >
                                 {laidOutElements.map((element) => {
                                     const isActive = element.id === selectedElement?.id;

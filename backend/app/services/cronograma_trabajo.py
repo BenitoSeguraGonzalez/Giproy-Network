@@ -747,28 +747,16 @@ class CronogramaTrabajoService:
             if not candidate.is_absolute():
                 candidate = (self._resolve_repo_root() / candidate).resolve()
             return candidate
-        return (
-            self._resolve_repo_root()
-            / "Complementos"
-            / "Aspose.Tasks for Java 20.2 (25 Feb 2020) Retail + License Key"
-            / "Aspose.Total.lic"
-        )
+        return None
 
-    def _resolve_aspose_tasks_java_jar_path(self) -> Path:
+    def _resolve_aspose_tasks_java_jar_path(self) -> Optional[Path]:
         raw_value = os.getenv(ASPOSE_TASKS_JAVA_JAR_ENV, "").strip()
         if raw_value:
             candidate = Path(raw_value)
             if not candidate.is_absolute():
                 candidate = (self._resolve_repo_root() / candidate).resolve()
             return candidate
-        return (
-            self._resolve_repo_root()
-            / "Complementos"
-            / "Aspose.Tasks for Java 20.2 (25 Feb 2020) Retail + License Key"
-            / "aspose-tasks-20.2-java"
-            / "lib"
-            / "aspose-tasks-20.2-jdk17.jar"
-        )
+        return None
 
     def _resolve_aspose_tasks_java_runner_path(self) -> Path:
         return (
@@ -968,6 +956,14 @@ class CronogramaTrabajoService:
             }
 
         jar_path = self._resolve_aspose_tasks_java_jar_path()
+        if not jar_path:
+            return {
+                "available": False,
+                "reason": f"No se configuró `{ASPOSE_TASKS_JAVA_JAR_ENV}` para habilitar generación .mpp server-side.",
+                "project_path": None,
+                "template_path": None,
+                "provider": "aspose_tasks_java",
+            }
         if not jar_path.exists():
             return {
                 "available": False,
@@ -3464,19 +3460,11 @@ class CronogramaTrabajoService:
                         holiday_dates,
                     )
                     if candidate_start is not None:
-                        if (
-                            project_start_boundary is not None
-                            and candidate_start < project_start_boundary
-                        ):
-                            row_reference = (
-                                str(getattr(row, "codigo_item", "") or "").strip()
-                                or str(getattr(row, "descripcion", "") or "").strip()
-                                or f"Línea {getattr(row, 'presupuesto_linea_id', '')}"
-                            )
-                            raise ValueError(
-                                "Operación cancelada: ninguna tarea puede iniciar antes de la fecha/hora de inicio del proyecto. "
-                                f"La tarea {row_reference} comienza en {candidate_start.isoformat()} y el proyecto inicia en {project_start_boundary.isoformat()}."
-                            )
+                        if project_start_boundary is not None:
+                            # Una relación FF/SF puede calcular hacia atrás un inicio
+                            # anterior al proyecto. El dato derivado se acota; las
+                            # fechas manuales inválidas continúan rechazándose abajo.
+                            candidate_start = max(candidate_start, project_start_boundary)
                         constrained_starts.append(candidate_start)
                 start_date = (
                     max(constrained_starts)
@@ -3840,6 +3828,12 @@ class CronogramaTrabajoService:
                     visible_anchor + timedelta(days=float(activity.es)),
                     config,
                 )
+                while recommended_start is not None and not self._is_workday(
+                    recommended_start, config, holiday_dates
+                ):
+                    recommended_start = self._align_to_workday_start(
+                        recommended_start + timedelta(days=1), config
+                    )
                 recommended_finish = (
                     self._build_finish_from_start(
                         recommended_start,
@@ -3851,13 +3845,13 @@ class CronogramaTrabajoService:
                     else None
                 )
             drift_start_days = (
-                round(visible_start_days - float(activity.es), 4)
-                if visible_start_days is not None
+                round((visible_start - recommended_start).total_seconds() / 86400.0, 4)
+                if visible_start is not None and recommended_start is not None
                 else None
             )
             drift_finish_days = (
-                round(visible_finish_days - float(activity.ef), 4)
-                if visible_finish_days is not None
+                round((visible_finish - recommended_finish).total_seconds() / 86400.0, 4)
+                if visible_finish is not None and recommended_finish is not None
                 else None
             )
             drift_duration_days = round(

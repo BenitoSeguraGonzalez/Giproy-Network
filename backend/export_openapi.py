@@ -23,7 +23,7 @@ def export_openapi():
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(openapi_schema, f, indent=2, ensure_ascii=False)
         
-    print(f"✅ Success: OpenAPI schema exported to {output_path}")
+    print(f"Success: OpenAPI schema exported to {output_path}")
 
 if __name__ == "__main__":
     export_openapi()

@@ -136,7 +136,7 @@ await page.route('**/gantt-ff-fixture.json', async (route) => {
 });
 
 await page.goto(`${baseUrl}/gantt-ff-harness.html`, { waitUntil: 'domcontentloaded' });
-await page.waitForSelector('text=187 PARTIDAS', { timeout: 30000 });
+await page.waitForSelector('text=187 PARTIDAS', { state: 'attached', timeout: 30000 });
 await page.waitForSelector('[data-gantt-left-vscroll-layer="true"] [role="scrollbar"]', { timeout: 30000 });
 await page.waitForSelector('[data-gantt-timeline-vscroll-layer="true"] [role="scrollbar"]', { timeout: 30000 });
 await page.waitForTimeout(700);

@@ -6,6 +6,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app/backend
 
+# El contexto de build debe excluir licencias/keys propietarias. La evidencia
+# distribuible se genera fuera de la imagen mediante scripts/compliance.
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \

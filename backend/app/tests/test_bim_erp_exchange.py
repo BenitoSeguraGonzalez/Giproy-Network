@@ -13,7 +13,7 @@ from app.services.bim.erp_exchange_service import create_erp_exchange_package, g
 
 
 def test_bim_erp_exchange_endpoints_are_registered():
-    routes = {(route.path, method) for route in app.routes for method in getattr(route, "methods", set())}
+    routes = {(path, method.upper()) for path, operations in app.openapi()["paths"].items() for method in operations}
     base = "/api/v1/bim/projects/{project_id}/erp-exchange/packages"
     assert (base, "GET") in routes
     assert (base, "POST") in routes

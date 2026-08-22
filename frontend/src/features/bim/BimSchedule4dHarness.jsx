@@ -29,9 +29,9 @@ const BimSchedule4dHarness = () => {
         },
     };
     return (
-        <main className="min-h-screen bg-[#F2F4F7] p-3" data-bim-schedule-4d-harness>
-            <div className="mx-auto w-full max-w-md">
-                <BimScheduleLinkPanel projectId={1} empresaId={1} element={{ id: 41, global_id: 'GUID-4D-001', nombre: 'Muro nivel 1' }} api={api} />
+        <main className="h-screen overflow-hidden bg-[#F2F4F7] p-6" data-bim-schedule-4d-harness>
+            <div className="ml-auto h-full w-[22rem] overflow-hidden border border-zinc-200 bg-white">
+                <BimScheduleLinkPanel projectId={1} empresaId={1} element={{ id: 41, global_id: 'GUID-4D-001', nombre: 'Muro nivel 1' }} selectedActivityId={71} api={api} />
             </div>
         </main>
     );

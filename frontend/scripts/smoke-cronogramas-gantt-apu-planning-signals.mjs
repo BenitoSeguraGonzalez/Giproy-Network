@@ -112,16 +112,18 @@ const componentSource = await readFile(
     path.resolve(scriptDir, '../src/components/projects/CronogramaGantt.jsx'),
     'utf8',
 );
+const panelSource = await readFile(
+    path.resolve(scriptDir, '../src/components/projects/GanttApuPlanningSignalsPanel.jsx'),
+    'utf8',
+);
 for (const marker of [
     'gantt-apu-planning-signals-button',
-    'gantt-apu-planning-signals-panel',
     'openApuPlanningSignals',
     'scheduleCloseApuPlanningSignals',
     'toggleApuPlanningSignalsPinned',
     'openApuPlanningSignalsForRow',
     'toggleApuPlanningSignalsForRow',
     'clampFloatingPanelPosition',
-    'gantt-apu-planning-signals-drag-handle',
     'startApuPlanningSignalsDrag',
     'setPointerCapture?.(event.pointerId)',
     'moveApuPlanningSignals',
@@ -136,15 +138,32 @@ for (const marker of [
     assert.ok(componentSource.includes(marker), `Missing planning signals interaction marker: ${marker}`);
 }
 
+for (const marker of [
+    "lazyWithChunkRecovery(() => import('./GanttApuPlanningSignalsPanel'))",
+    'role="status"',
+    'Cargando señales APU',
+]) {
+    assert.ok(componentSource.includes(marker), `Missing lazy panel boundary marker: ${marker}`);
+}
+
+for (const marker of [
+    'gantt-apu-planning-signals-panel',
+    'gantt-apu-planning-signals-drag-handle',
+    'onPointerDown={onDragPointerDown}',
+    'aria-pressed={pinned}',
+]) {
+    assert.ok(panelSource.includes(marker), `Missing planning signals presentation marker: ${marker}`);
+}
+
 assert.equal(
     componentSource.split('aria-label="Abrir y fijar semáforos APU de esta actividad"').length - 1,
     2,
     'Expected a row-level planning signals trigger in both Gantt row layouts',
 );
 
-const unitCostSection = componentSource.slice(
-    componentSource.indexOf("label: 'Costo unitario'"),
-    componentSource.indexOf("label: 'Costo unitario'") + 900,
+const unitCostSection = panelSource.slice(
+    panelSource.indexOf("label: 'Costo unitario'"),
+    panelSource.indexOf("label: 'Costo unitario'") + 900,
 );
 for (const marker of [
     "['Costo directo'",
@@ -161,7 +180,7 @@ assert.ok(
     'Expected the requested unit cost presentation order',
 );
 assert.ok(!unitCostSection.includes('Directo exacto'), 'Directo exacto must not be rendered');
-assert.ok(!componentSource.includes('>Validaciones<'), 'The redundant validations block must not be rendered');
+assert.ok(!panelSource.includes('>Validaciones<'), 'The redundant validations block must not be rendered');
 
 for (const marker of [
     'lightEditorPlanningSignals',

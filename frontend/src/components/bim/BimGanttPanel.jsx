@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CalendarRange, Crosshair, Flame, Link2, LoaderCircle, Search, ZoomIn } from 'lucide-react';
+import { CalendarRange, Crosshair, Flame, Funnel, Link2, LoaderCircle, Search, ZoomIn } from 'lucide-react';
 
 import { bimModelsApi } from '../../api/bimModels';
 
@@ -45,6 +45,7 @@ export default function BimGanttPanel({
     const [searchTerm, setSearchTerm] = useState('');
     const [onlyLinked, setOnlyLinked] = useState(false);
     const [onlyCritical, setOnlyCritical] = useState(false);
+    const [filtersOpen, setFiltersOpen] = useState(false);
     const [scale, setScale] = useState('standard');
     const [viewport, setViewport] = useState({ scrollTop: 0, height: 240 });
 
@@ -159,22 +160,20 @@ export default function BimGanttPanel({
 
     return (
         <section className="flex h-full min-h-0 flex-col bg-white" data-bim-gantt data-bim-gantt-selected-activities={selectedIds.size} data-bim-gantt-selected-guid={selectedGuid}>
-            <div className="flex min-h-11 shrink-0 items-center gap-2 border-b border-zinc-200 px-2.5 py-1.5">
-                <CalendarRange className="h-4 w-4 shrink-0 text-[#F39200]" aria-hidden="true" />
-                <select className="h-8 w-48 rounded-md border border-zinc-300 bg-white px-2 text-xs font-semibold text-zinc-700" aria-label="Línea base del Gantt BIM" value={baselineId} onChange={(event) => setBaselineId(event.target.value)}>
+            <div className="flex h-12 shrink-0 items-center gap-2 border-b border-zinc-200 px-3" data-bim-gantt-toolbar>
+                <div className="flex shrink-0 items-center gap-2 border-r border-zinc-200 pr-3"><CalendarRange className="h-4 w-4 text-[#F39200]" aria-hidden="true" /><select className="h-8 w-52 rounded-md border border-zinc-300 bg-white px-2 text-xs font-semibold text-zinc-700" aria-label="Línea base del Gantt BIM" value={baselineId} onChange={(event) => setBaselineId(event.target.value)}>
                     <option value="">Sin línea base</option>
                     {baselines.map((baseline) => <option key={baseline.id} value={baseline.id}>{baseline.revision} · {baseline.name}</option>)}
-                </select>
-                <label className="flex h-8 min-w-48 flex-1 items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50 px-2 focus-within:border-[#F39200]">
+                </select></div>
+                <label className="flex h-8 min-w-64 max-w-2xl flex-1 items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50 px-2 focus-within:border-[#F39200]">
                     <Search className="h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
                     <span className="sr-only">Buscar actividad 4D</span>
                     <input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Código, actividad o GlobalId" className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-zinc-400" />
                 </label>
-                <button type="button" onClick={() => setOnlyLinked((value) => !value)} className={`inline-flex h-8 items-center gap-1.5 rounded-md border px-2 text-xs font-semibold ${onlyLinked ? 'border-[#F39200] bg-orange-50 text-[#b86d00]' : 'border-zinc-200 text-zinc-600 hover:border-[#F39200]'}`} aria-pressed={onlyLinked} title="Mostrar solo actividades vinculadas"><Link2 className="h-3.5 w-3.5" />Vinculadas</button>
-                <button type="button" onClick={() => setOnlyCritical((value) => !value)} className={`inline-flex h-8 items-center gap-1.5 rounded-md border px-2 text-xs font-semibold ${onlyCritical ? 'border-rose-300 bg-rose-50 text-rose-700' : 'border-zinc-200 text-zinc-600 hover:border-rose-300'}`} aria-pressed={onlyCritical} title="Mostrar solo ruta crítica"><Flame className="h-3.5 w-3.5" />Críticas</button>
-                <label className="flex h-8 items-center gap-1 rounded-md border border-zinc-200 px-2 text-xs text-zinc-600"><ZoomIn className="h-3.5 w-3.5" /><span className="sr-only">Escala temporal</span><select value={scale} onChange={(event) => setScale(event.target.value)} className="bg-transparent font-semibold outline-none" aria-label="Escala del Gantt BIM">{Object.entries(SCALE_OPTIONS).map(([value, option]) => <option key={value} value={value}>{option.label}</option>)}</select></label>
+                <div className="relative shrink-0"><button type="button" onClick={() => setFiltersOpen((value) => !value)} className={`inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-semibold ${onlyLinked || onlyCritical ? 'border-[#F39200] bg-orange-50 text-[#b86d00]' : 'border-zinc-200 text-zinc-600 hover:border-zinc-400'}`} aria-expanded={filtersOpen} aria-controls="bim-gantt-filters"><Funnel className="h-3.5 w-3.5" />Filtros{onlyLinked || onlyCritical ? <span className="rounded-full bg-[#F39200] px-1.5 text-[9px] text-white">{Number(onlyLinked) + Number(onlyCritical)}</span> : null}</button>{filtersOpen ? <div id="bim-gantt-filters" className="absolute right-0 top-10 z-50 w-56 border border-zinc-200 bg-white p-2 shadow-lg"><p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Mostrar únicamente</p><button type="button" onClick={() => setOnlyLinked((value) => !value)} className="flex h-9 w-full items-center gap-2 px-2 text-left text-xs text-zinc-700 hover:bg-zinc-50" aria-pressed={onlyLinked}><span className={`grid size-4 place-items-center border ${onlyLinked ? 'border-[#F39200] bg-[#F39200] text-white' : 'border-zinc-300'}`}>{onlyLinked ? '✓' : ''}</span><Link2 className="h-3.5 w-3.5" />Actividades vinculadas</button><button type="button" onClick={() => setOnlyCritical((value) => !value)} className="flex h-9 w-full items-center gap-2 px-2 text-left text-xs text-zinc-700 hover:bg-zinc-50" aria-pressed={onlyCritical}><span className={`grid size-4 place-items-center border ${onlyCritical ? 'border-rose-600 bg-rose-600 text-white' : 'border-zinc-300'}`}>{onlyCritical ? '✓' : ''}</span><Flame className="h-3.5 w-3.5" />Ruta crítica</button></div> : null}</div>
+                <label className="flex h-8 shrink-0 items-center gap-1 rounded-md border border-zinc-200 px-2 text-xs text-zinc-600"><ZoomIn className="h-3.5 w-3.5" /><span className="sr-only">Escala temporal</span><select value={scale} onChange={(event) => setScale(event.target.value)} className="bg-transparent font-semibold outline-none" aria-label="Escala del Gantt BIM">{Object.entries(SCALE_OPTIONS).map(([value, option]) => <option key={value} value={value}>{option.label}</option>)}</select></label>
                 <button type="button" onClick={() => centerActivity(primaryActivityId || selectedActivityIds[0] || Array.from(matchingGuidIds)[0])} disabled={!selectedIds.size} className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 text-zinc-600 hover:border-[#F39200] hover:text-[#F39200] disabled:opacity-35" title="Centrar selección" aria-label="Centrar actividad seleccionada"><Crosshair className="h-3.5 w-3.5" /></button>
-                <span className="whitespace-nowrap text-[10px] font-semibold tabular-nums text-zinc-500">{filteredActivities.length}/{gantt?.activities.length || 0} · {gantt?.critical_path_activity_ids.length || 0} críticas</span>
+                <span className="ml-auto whitespace-nowrap border-l border-zinc-200 pl-3 text-[10px] font-semibold tabular-nums text-zinc-500">{filteredActivities.length}/{gantt?.activities.length || 0} actividades · {gantt?.critical_path_activity_ids.length || 0} críticas</span>
                 {loading ? <LoaderCircle className="h-4 w-4 animate-spin text-zinc-400 motion-reduce:animate-none" aria-label="Cargando Gantt BIM" /> : null}
             </div>
 

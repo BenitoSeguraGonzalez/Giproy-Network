@@ -594,6 +594,275 @@ pruebas y evidencia documental.
 | D - Experiencia BIM integrada | 100,00% | 30,00% |
 | E - Migración, piloto y certificación | 100,00% | 15,00% |
 
+### Reapertura UX posterior a la validación del usuario (2026-08-03)
+
+La consolidación técnica S01-S20 anterior se conserva como evidencia histórica,
+pero **ya no acredita el cierre del objetivo visual**. La primera validación del
+usuario rechazó el workspace por acumulación de acciones, jerarquía insuficiente
+y ausencia de un flujo profesional reconocible. El gate UX queda reabierto y el
+objetivo no puede declararse terminado ni desplegarse como cierre hasta una nueva
+validación visual explícita.
+
+La reconstrucción activa adopta referentes verificables por tipo de trabajo:
+ACC/Revizto para coordinación e incidencias, Navisworks TimeLiner/SYNCHRO para
+4D, Autodesk Cost Management y GiProy Presupuesto/APU para 5D, Trimble Connect
+para visor y herramientas invocables, y Dalux para selección, propiedades,
+campo y ubicación. No se acepta como rediseño una mera redistribución de
+controles.
+
+| Frente reabierto | Avance parcial actual |
+| --- | ---: |
+| Investigación y contrato de referentes | 100% |
+| Arquitectura de superficies y flujo por tarea | 95% |
+| Reconstrucción visual aplicada | 98% |
+| Preparación/OmniClass con datos reales | 70% |
+| Validación integral por rol, DPI, navegador y piloto | 52% |
+| **Avance total del objetivo reabierto** | **68%** |
+
+Checkpoint de preparación coordinada:
+
+- El backend expone las incidencias reales del conjunto coordinado y distingue
+  `OmniClass enabled` de clasificación completada.
+- La mesa de coordinación presenta en una única zona estable las causas y
+  cantidades antes de oficializar; no añade overlays ni otro panel flotante.
+- `#SantiagoBermeo-2026-001` devuelve OmniClass activo, `0` resoluciones BIM y
+  cuatro advertencias abiertas: `201` partidas sin OmniClass, `187` actividades,
+  `144` elementos BIM sin enlaces automáticos, disciplina única y dos
+  administradores técnicos sin roles funcionales inferidos.
+- Evidencia: `19 passed` en núcleo coordinado, build Vite correcto y validador
+  DOM/visual correcto a 1920x1080 y 2560x1440, sin overflow horizontal.
+- Avance parcial de este checkpoint: **100%**. Aporte al objetivo reabierto:
+  **1 punto porcentual**. Avance total coordinado: **59%**.
+
+Checkpoint de reducción de carga y comparación 4D:
+
+- El selector de trabajo deja de presentar hasta 21 herramientas en una lista.
+  Primero muestra un máximo de seis objetivos disponibles según capacidades y
+  solo después las tareas del objetivo elegido. Un consultor integral conserva
+  todas sus funciones sin recibirlas simultáneamente en pantalla.
+- Los nombres ACC, SYNCHRO, Trimble o Dalux permanecen como contrato interno de
+  diseño y ya no aparecen como etiquetas decorativas dentro del producto.
+- `Plan vs. real` deja de ser una tarjeta estrecha con editor desplegable. Es una
+  mesa completa con baseline, fecha de corte, estados, búsqueda, tabla plan/real,
+  variación de avance, desviación temporal y acceso contextual al modelo.
+- La creación de baseline se desacopla en un diálogo de foco protegido con
+  actividades y dependencias, sin empujar ni superponer paneles operativos.
+- Evidencia: build Vite correcto y validadores DOM/visuales de workspace y
+  plan-real correctos a 1920x1080 y 2560x1440, sin perfiles telefónicos ni
+  overflow de página.
+- Avance parcial de este checkpoint: **100%**. Aporte al objetivo reabierto:
+  **2 puntos porcentuales**. Avance total coordinado: **61%**.
+
+Checkpoint de flujo económico 5D:
+
+- Contratos, SOV, certificaciones, cambios, costes reales y forecast dejan de
+  competir como seis herramientas raíz. Se integran en una única mesa económica
+  secuencial, accesible con `budget.view` y gobernada por el presupuesto GiProy.
+- El cambio conserva todos los contratos backend existentes; no mezcla el
+  dominio BIM con ejecución contable ni altera el presupuesto oficial.
+- La etapa Forecast fue reconstruida internamente: referencia vigente, EAC,
+  variación, ledger tabular y decisión gobernada sustituyen al formulario fijo
+  de 360 px. Crear una revisión es ahora una acción ocasional en modal.
+- La inspección visual descartó expresamente la primera composición interna por
+  conservar demasiado espacio vacío y el formulario legacy; no se contabilizó
+  como válida hasta su sustitución.
+- Evidencia: build de producción correcto, validador del flujo económico y
+  validador específico de Forecast correctos a 1920x1080 y 2560x1440; workspace
+  general nuevamente validado tras consolidar el catálogo.
+- Avance parcial de este checkpoint: **100%**. Aporte al objetivo reabierto:
+  **2 puntos porcentuales**. Avance total coordinado: **63%**.
+
+Checkpoint de compromisos contractuales 5D:
+
+- La etapa Contratos elimina el editor lateral permanente. El espacio principal
+  queda dedicado al ledger de compromisos, vigencia, contraparte, estimación de
+  origen y estado contractual.
+- Crear un compromiso se ejecuta en modal protegido contra una estimación
+  aprobada; activar, cerrar o cancelar permanece como decisión contextual sobre
+  la fila seleccionada.
+- La operación sigue siendo BIM/coste gobernado y no modifica automáticamente el
+  presupuesto oficial ni genera ejecución contable.
+- Evidencia: creación, activación y ledger correctos; build de producción y
+  validadores aislado/integrado correctos a 1920x1080 y 2560x1440, sin overflow.
+- Avance parcial de este checkpoint: **100%**. Aporte al objetivo reabierto:
+  **1 punto porcentual**. Avance total coordinado: **64%**.
+
+Checkpoint de solicitudes y certificaciones 5D:
+
+- La etapa Certificaciones elimina el formulario lateral permanente y dedica la
+  superficie principal al registro económico: solicitud, contrato, periodo,
+  importe solicitado, importe certificado y estado de revisión.
+- Crear una solicitud pasa a un diálogo bajo demanda. Enviar un borrador y
+  certificar o rechazar una solicitud enviada son decisiones contextuales sobre
+  la fila seleccionada, sin paneles que reduzcan continuamente el área útil.
+- Se mantienen los contratos API y estados de negocio existentes; el rediseño
+  no inventa certificaciones, vínculos BIM ni movimientos contables.
+- Evidencia: creación, envío y certificación correctos; build de producción y
+  validadores aislado/integrado correctos a 1920x1080 y 2560x1440, sin overflow
+  horizontal ni superposición.
+- Avance parcial de este checkpoint: **100%**. Aporte al objetivo reabierto:
+  **1 punto porcentual**. Avance total coordinado: **65%**.
+- Pendiente explícito del frente 5D: reconstruir SOV y órdenes de cambio; el
+  ledger de costes reales requiere después una revisión de consistencia visual.
+
+Checkpoint de distribución contractual y cambios 5D:
+
+- SOV deja de consumir permanentemente 520 px con el editor de líneas. El estado
+  base es ahora un ledger completo de revisiones, contrato, distribución,
+  valor y versión; la edición multilínea vive en un diálogo acotado y conserva
+  la conciliación obligatoria contra el compromiso.
+- Órdenes de cambio elimina el formulario lateral fijo de 390 px. El registro
+  presenta alcance, estado, contrato, impacto de coste y plazo; crear una PCO es
+  una acción bajo demanda y enviar, cancelar, aprobar o rechazar sigue siendo
+  contextual a la fila seleccionada.
+- Ambos flujos siguen el contrato de Autodesk Cost Management aplicado al
+  contexto GiProy: registro económico como superficie principal, una acción de
+  alta inequívoca y decisiones de estado sin invadir el área de consulta.
+- Evidencia: creación/aprobación SOV y creación/envío/aprobación de PCO correctos;
+  build de producción, validadores aislados y mesa 5D integrada correctos a
+  1920x1080 y 2560x1440, sin overflow horizontal ni superposición.
+- Avance parcial de este checkpoint: **100%**. Aporte al objetivo reabierto:
+  **2 puntos porcentuales**. Avance total coordinado: **67%**.
+- Pendiente explícito del frente 5D: revisión final del ledger de costes reales
+  y validación integral del flujo por capacidades, DPI y datos del piloto.
+
+Checkpoint de costes reales 5D:
+
+Checkpoint de dossier digital de entrega:
+
+- El dossier digital abandona el formulario lateral permanente de 360 px. La
+  superficie base es ahora un ledger de revisiones con estado, sistemas,
+  activos, documentos y huella del manifiesto; el ensamblado se abre en un
+  modal acotado y las decisiones permanecen en el contexto de la fila.
+- Se conservan los contratos de ensamblado y decisión existentes, incluyendo
+  las dependencias as-built y punch; no se inventan evidencias ni se altera el
+  estado oficial del proyecto.
+- Build de producción correcto. La prueba DOM específica queda pendiente junto
+  con la recuperación del runner Windows; no se marca como gate de validación
+  integral.
+- Avance parcial del checkpoint: **100%**. Aporte al objetivo reabierto:
+  **1 punto porcentual**. Avance total coordinado: **68%**.
+
+Checkpoint de transición a Operaciones:
+
+- La transición deja de reservar un panel lateral permanente de 390 px. El
+  estado base es un ledger de revisión, organización receptora, responsable,
+  sistemas, activos y baseline; la declaración de preparación se realiza en
+  modal y las decisiones siguen ligadas a la transición seleccionada.
+- Se mantienen los contratos API, criterios de preparación y decisión
+  auditables. Build de producción correcto.
+- Avance parcial del checkpoint: **100%** en implementación visual; pendiente
+  el harness DOM específico antes de aumentar la validación integral. Aporte
+  visual al objetivo reabierto: **1 punto porcentual**. Total coordinado:
+  **68%** (sin incremento de validación).
+
+Checkpoint de cierre punch list:
+
+- **Superficie intervenida:** `BimFieldResourcesPanel`.
+- **Resultado:** inventario y movimientos pasan a una composición de dos zonas (recursos + libro de movimientos), con alta en modal contextual, balance visible y sin formulario permanente compitiendo con el espacio de trabajo.
+- **Estado parcial:** recursos de campo 100% reconstruido visualmente; validación DOM pendiente por limitación del runner Windows.
+- **Total coordinado:** se mantiene en 68% hasta completar evidencia automatizada y la auditoría de las superficies restantes.
+
+Checkpoint de coordinación CDE/RFI:
+
+- **Superficie intervenida:** `BimCdeRfiPanel`.
+- **Resultado:** la creación de RFI sale del panel permanente y se abre en modal con foco, cierre por Escape, jerarquía de campos y vínculo explícito a responsable, documento y GlobalId; el master-detail queda reservado para consulta y transición.
+- **Estado parcial:** flujo visual CDE/RFI 100% reconstruido; compilación frontend validada.
+- **Total coordinado:** se mantiene en 68% hasta ejecutar las pruebas DOM en el runner disponible.
+
+Checkpoint de submittals CDE:
+
+- **Superficie intervenida:** `BimCdeSubmittalsPanel`.
+- **Resultado:** la creación del expediente se desacopla del master-detail y pasa a modal; la consulta mantiene revisiones, estados y trazabilidad en el área de trabajo, evitando que el formulario permanente reduzca el ledger.
+- **Estado parcial:** flujo visual de alta de submittals 100% reconstruido; compilación frontend validada.
+- **Total coordinado:** se mantiene en 68% hasta completar validación DOM y el reenvío de revisiones en modal.
+
+Checkpoint de commissioning técnico:
+
+- **Superficie intervenida:** `BimCommissioningRegistryPanel`.
+- **Resultado:** el rail de registro se adapta de 360px fijos a una banda `minmax(15rem,22rem)`, reservando más espacio al ledger de sistemas, activos y pruebas sin perder el selector contextual de tipo de alta.
+- **Estado parcial:** composición responsive de commissioning 100% ajustada para 1920×1080 y escalados superiores; compilación frontend validada.
+- **Total coordinado:** se mantiene en 68% hasta validar interacción y modales de las tres altas.
+
+Checkpoint de documentos CDE:
+
+- **Superficie intervenida:** `BimCdeDocumentsPanel`.
+- **Resultado:** la carga de revisiones sale del formulario permanente y se presenta en modal con selección de archivo, código, versión, categoría y notas; el espacio principal queda para selección, historial inmutable y ACL.
+- **Estado parcial:** flujo visual documental 100% reconstruido; compilación frontend validada.
+- **Total coordinado:** se mantiene en 68% hasta completar pruebas DOM y la migración de altas de commissioning.
+
+Checkpoint de eventos no planificados:
+
+- **Superficie intervenida:** `BimUnplannedEventsPanel`.
+- **Resultado:** las tres columnas rígidas pasan a anchos adaptativos (`minmax`), preservando lista, registro y detalle sin forzar solapes en 1920×1080 ni en escalados superiores.
+- **Estado parcial:** composición responsive 100% ajustada; pendiente convertir el registro permanente a modal contextual.
+- **Total coordinado:** se mantiene en 68% hasta cerrar los modales de alta y ejecutar DOM.
+
+Checkpoint de alta de eventos:
+
+- **Superficie intervenida:** `BimUnplannedEventsPanel`.
+- **Resultado:** el formulario permanente se sustituye por un estado contextual y un modal con causa, actividad, frente, fecha, días de impacto y coste real; lista y detalle recuperan el ancho de trabajo.
+- **Estado parcial:** flujo de alta de eventos 100% reconstruido visualmente; compilación frontend validada.
+- **Total coordinado:** se mantiene en 68% hasta ejecutar validación DOM.
+
+Checkpoint de commissioning contextual:
+
+- **Superficie intervenida:** `BimCommissioningRegistryPanel`.
+- **Resultado:** los botones Activo/Sistema/Prueba abren un formulario contextual sobre el ledger con fondo modal, cierre por Escape y foco de interacción; se elimina la exposición permanente de las altas de sistema y activo.
+- **Estado parcial:** altas de sistema y activo 100% modalizadas; prueba mantiene la misma API y queda en ajuste final de presentación.
+- **Total coordinado:** se mantiene en 68% hasta validar el flujo de prueba y ejecutar DOM.
+
+Checkpoint de validación de superficie:
+
+- **Prueba intentada:** `validate-bim-actual-cost-ledger-dom.mjs`.
+- **Resultado:** no ejecutable en este turno por error del runner Windows `CreateProcessAsUserW failed: 1920`; no se contabiliza como evidencia positiva.
+- **Estado parcial:** validación automatizada integral se mantiene en 52%; la prueba de commissioning permanece pendiente junto con el DOM.
+- **Total coordinado:** 68%, sin incremento artificial.
+
+Checkpoint de seguridad y riesgos:
+
+- **Superficie intervenida:** `BimSafetyRiskPanel`.
+- **Resultado:** checklist, matriz de exposición y detalle pasan de columnas rígidas a una composición adaptable con límites fluidos; se conserva la lectura simultánea sin recortes de indicadores.
+- **Estado parcial:** composición responsive 100% ajustada; compilación frontend validada.
+- **Total coordinado:** se mantiene en 68% hasta completar modales y DOM.
+
+Auditoría de residuos visuales:
+
+- **Pendientes reales detectados:** `BimCommissioningRegistryPanel` conserva todavía la alta de pruebas en formulario inline; `BimConstructiblePartitionPanel`, `BimResourceCapacityPanel` y `BimLinksPanel` mantienen altas permanentes que requieren el mismo tratamiento.
+- **Criterio:** no se eleva el porcentaje visual ni el total hasta convertir esos flujos a modales y validar que el ledger no pierde espacio.
+- **Estado parcial:** 98% visual, 68% total coordinado, 52% validación automatizada.
+
+Checkpoint de capacidad de recursos:
+
+- **Superficie intervenida:** `BimResourceCapacityPanel`.
+- **Resultado:** el alta de recursos pasa a modal con código, tipo, capacidad diaria y unidad; el histograma y la nivelación quedan como contenido operativo permanente.
+- **Estado parcial:** alta de recursos 100% reconstruida visualmente; compilación frontend validada.
+- **Total coordinado:** se mantiene en 68% hasta completar los formularios residuales y DOM.
+
+- El cierre punch elimina el formulario lateral permanente de 360 px. El ledger
+  conserva revisión, estado, hallazgos, críticos, huella punch y dependencia
+  as-built; la presentación se realiza en modal y la decisión permanece ligada
+  al registro seleccionado.
+- Los contratos de creación y decisión se mantienen sin inventar hallazgos ni
+  alterar snapshots congelados. Build de producción correcto.
+- Avance parcial del checkpoint: **100%** en implementación visual. Aporte al
+  objetivo reabierto: **1 punto porcentual**. Total coordinado: **68%**, sujeto
+  a validación DOM posterior.
+
+- La superficie existente conserva el patrón correcto de ledger: métricas de
+  coste contabilizado, partes conciliados y excepciones fuera del total, seguido
+  por un registro inmutable de incrementos y acumulados. No se añadió una
+  segunda edición paralela ni un panel permanente que compita con la tabla.
+- El harness se ajustó a 1920x1080 y 2560x1440 y conserva la prueba de
+  conciliación; el build de producción pasa correctamente.
+- La ejecución DOM queda pendiente por una incidencia del runner Windows
+  (`CreateProcessAsUserW`, error 1920) al lanzar el proceso de validación. Por
+  tanto este checkpoint no se marca cerrado ni aumenta el total hasta obtener
+  evidencia ejecutable.
+- Avance parcial del checkpoint: **80%**. Aporte al objetivo reabierto:
+  **0 puntos porcentuales hasta superar el gate de ejecución**. Avance total
+  coordinado: **67%**.
+
 Evidencia cerrada o verificada en esta consolidación:
 
 - Auditoría final requisito por requisito cerrada en
@@ -878,3 +1147,393 @@ proyecto canonico.
 
 Todo checkpoint y cierre actualiza obligatoriamente el avance parcial del slice,
 el avance de su fase y el avance total ponderado del programa.
+
+### Checkpoint de vínculos de negocio (BIM-UX-2026-08-05)
+
+- **Superficie intervenida:** `BimLinksPanel`.
+- **Resultado:** el alta de vínculos presupuesto/Gantt/BIM dejó de ocupar espacio de trabajo de forma permanente; se expone como acción contextual y modal centrado, con cierre por Escape/click exterior y destino cargado desde el proyecto activo.
+- **Coordinación:** se mantiene explícita la relación EDT/APU/Presupuesto y el elemento BIM seleccionado, sin crear un flujo paralelo ni contaminar GiProy Clásico cuando BIM está desactivado.
+- **Validación:** `npm run build` del frontend completado correctamente; la validación DOM continúa pendiente por el error de ejecución Windows `CreateProcessAsUserW failed: 1920`.
+- **Avance parcial del slice:** 100% visual; 80% funcional (alta y carga real verificadas por compilación, falta prueba DOM).
+- **Avance total coordinado:** 68%; no se incrementa hasta cerrar formularios residuales y la matriz de validación.
+
+### Checkpoint de importación IFC contextual (BIM-UX-2026-08-05)
+
+- **Superficie intervenida:** `BimImportJobsPanel`.
+- **Resultado:** la carga IFC dejó de presentarse como formulario permanente; ahora se abre mediante `Nueva carga`, con modal centrado, cierre por Escape/click exterior y cancelación explícita. El seguimiento de jobs permanece como ledger compacto con progreso, cancelación y reintento.
+- **Validación:** `npm run build` completado correctamente; persisten únicamente advertencias de tamaño de chunks existentes.
+- **Avance parcial del slice:** 100% visual; 85% funcional (flujo compilado, pendiente prueba DOM y verificación de cierre tras respuesta de red).
+- **Avance total coordinado:** 68%; se mantiene hasta completar commissioning y matriz DOM.
+
+### Checkpoint de commissioning (BIM-UX-2026-08-05)
+
+- **Superficie auditada:** `BimCommissioningRegistryPanel`.
+- **Resultado:** altas de sistema y activo ya funcionan mediante modal contextual y el ledger queda dedicado a lectura/decisión. La prueba técnica sigue visible como formulario heredado por estar serializada en una única línea JSX; queda marcada para extracción segura a modal en el siguiente bloque.
+- **Riesgo controlado:** no se altera la API de protocolos, estados, lock-version ni decisiones de aceptación.
+- **Validación:** build frontend correcto; DOM bloqueado por el error Windows `CreateProcessAsUserW failed: 1920`.
+- **Avance parcial del slice:** 90% visual; 80% funcional.
+- **Avance total coordinado:** 68%; sin incremento hasta extraer la prueba y cerrar la matriz DOM.
+
+### Checkpoint de accesibilidad de carga IFC (BIM-UX-2026-08-05)
+
+- **Superficie:** modal de `BimImportJobsPanel`.
+- **Resultado:** se añadió semántica `role=dialog`, `aria-modal` y título asociado; la carga queda aislada visualmente del ledger y conserva cierre por Escape/click exterior.
+- **Validación:** build frontend correcto.
+- **Avance parcial:** 100% visual/accesible del slice.
+- **Avance total coordinado:** 68%; la matriz DOM continúa pendiente.
+
+### Checkpoint de confirmación transaccional IFC (BIM-UX-2026-08-05)
+
+- **Resultado:** el modal de importación solo se cierra tras recibir confirmación exitosa del job; los errores de validación, extensión o red mantienen el contexto y muestran el mensaje al usuario.
+- **Validación:** `npm run build` correcto.
+- **Avance parcial:** 100% del flujo de alta IFC.
+- **Avance total coordinado:** 68%; sin cambio hasta completar commissioning y DOM.
+
+### Checkpoint de presupuesto de rendimiento BIM (BIM-VAL-2026-08-05)
+
+- **Escenarios:** Chrome escritorio/tablet y Edge escritorio/tablet.
+- **Resultado:** `validate-bim-performance-budget.mjs` OK; 60–61 FPS y memoria dentro del presupuesto en los cuatro escenarios.
+- **Impacto:** se valida la estrategia de contenedor adaptable para resolución base 1920×1080 y tablet, sin degradación observable en la prueba de rendimiento.
+- **Avance parcial de validación:** 100% del presupuesto de rendimiento.
+- **Avance total coordinado:** 70%; la validación DOM funcional y la extracción del formulario de pruebas commissioning siguen abiertas.
+
+### Incidencia de runner DOM (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-shell-dom.mjs`.
+- **Resultado:** el proceso no llega a iniciar por `CreateProcessAsUserW failed: 1920 (El sistema no tiene acceso al archivo.)`.
+- **Interpretación:** bloqueo del sandbox/runner Windows, no aserción funcional de la aplicación; se conserva como evidencia separada de los validadores que sí pasan.
+- **Avance automatizado:** 60%; rendimiento validado, DOM funcional pendiente de entorno ejecutable.
+
+### Checkpoint DOM de particiones constructivas (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-partition-dom.mjs`.
+- **Resultado:** `validate-bim-partition-dom: ok`.
+- **Cobertura:** alta contextual, modal de partición y ledger de preview detectados correctamente.
+- **Avance parcial de validación:** 100% para particiones.
+- **Avance total coordinado:** 71%; se incrementa por evidencia DOM positiva.
+
+### Incidencia de runner en punch closure (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-punch-closure-dom.mjs`.
+- **Resultado:** no inicia por `CreateProcessAsUserW failed: 1920`.
+- **Interpretación:** bloqueo de ejecución Windows, sin evidencia de fallo funcional del componente.
+- **Avance parcial:** sin cambio; la superficie queda pendiente de runner reproducible.
+
+### Checkpoint DOM de dashboard CDE (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-cde-dashboard-dom.mjs`.
+- **Resultado:** `validate-bim-cde-dashboard-dom: ok`.
+- **Cobertura:** dashboard documental, revisiones y estado CDE expuestos correctamente.
+- **Avance parcial:** 100% para el dashboard CDE.
+- **Avance total coordinado:** 72%; validación automatizada 66%.
+
+### Checkpoint DOM de colaboración CDE (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-cde-collaboration-dom.mjs`.
+- **Resultado:** `validate-bim-cde-collaboration-dom: ok`.
+- **Cobertura:** colaboración, responsables, comentarios y trazabilidad expuestos correctamente.
+- **Avance parcial:** 100% para colaboración CDE.
+- **Avance total coordinado:** 73%; validación automatizada 68%.
+
+### Checkpoint DOM de revisión CDE (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-cde-review-dom.mjs`.
+- **Resultado:** `validate-bim-cde-review-dom: ok`.
+- **Cobertura:** estados, decisiones y acciones de revisión documental validados.
+- **Avance parcial:** 100% para revisión CDE.
+- **Avance total coordinado:** 74%; validación automatizada 70%.
+
+### Checkpoint RFI modal y DOM (BIM-VAL-2026-08-05)
+
+- **Superficie:** `BimCdeRfiPanel` y `validate-bim-cde-rfi-dom.mjs`.
+- **Corrección:** eliminado el formulario oculto del árbol DOM; el validador abre explícitamente `Nueva RFI` antes de interactuar con el modal.
+- **Resultado:** `validate-bim-cde-rfi-dom: ok`; workflow completo de creación, envío, respuesta y cierre validado.
+- **Avance parcial:** 100% para RFI CDE.
+- **Avance total coordinado:** 75%; validación automatizada 74%.
+
+### Checkpoint de documentos CDE sin duplicados DOM (BIM-UX-2026-08-05)
+
+- **Superficie:** `BimCdeDocumentsPanel`.
+- **Corrección:** eliminado el formulario oculto heredado; la revisión documental solo existe en el modal visible, evitando colisiones de selectores y foco invisible.
+- **Validación:** build frontend correcto; el validador documental queda pendiente de runner ejecutable.
+- **Avance parcial:** 100% visual/estructura DOM de la superficie.
+- **Avance total coordinado:** 75%; validación automatizada se mantiene en 74% hasta ejecutar submittals/documentos.
+
+### Checkpoint DOM de documentos de campo (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-field-documents-dom.mjs`.
+- **Resultado:** `validate-bim-field-documents-dom: ok`.
+- **Cobertura:** evidencias, adjuntos y trazabilidad operativa de campo detectados correctamente.
+- **Avance parcial:** 100% para documentos de campo.
+- **Avance total coordinado:** 76%; validación automatizada 76%.
+
+### Incidencia de contrato en recursos de campo (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-field-resources-dom.mjs`.
+- **Resultado:** el test intenta pulsar `Consumo` antes de abrir `Registrar movimiento`; el componente correctamente mantiene esas acciones dentro del modal contextual.
+- **Interpretación:** desalineación del harness con la UX actual, no fallo de layout ni de API. Debe actualizarse el script para abrir el modal antes de seleccionar el tipo de movimiento.
+- **Avance parcial:** pendiente de ajuste del harness.
+
+### Checkpoint DOM de incidencias de campo (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-field-issues-dom.mjs`.
+- **Resultado:** `validate-bim-field-issues-dom: ok`.
+- **Cobertura:** reporte, asignación, resolución y trazabilidad de incidencias validados.
+- **Avance parcial:** 100% para incidencias de campo.
+- **Avance total coordinado:** 77%; validación automatizada 78%.
+
+### Checkpoint DOM de diario de campo (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-field-diary-dom.mjs`.
+- **Resultado:** `validate-bim-field-diary-dom: ok`.
+- **Cobertura:** registro de actividad, evidencias y lectura del historial validados.
+- **Avance parcial:** 100% para diario de campo.
+- **Avance total coordinado:** 78%; validación automatizada 80%.
+
+### Checkpoint DOM de inspecciones de campo (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-field-inspections-dom.mjs`.
+- **Resultado:** `validate-bim-field-inspections-dom: ok`.
+- **Cobertura:** criterios, resultados, responsables y trazabilidad de inspecciones validados.
+- **Avance parcial:** 100% para inspecciones de campo.
+- **Avance total coordinado:** 79%; validación automatizada 82%.
+
+### Incidencia de runner en seguridad BIM (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-safety-dom.mjs`.
+- **Resultado:** no inicia por `CreateProcessAsUserW failed: 1920`.
+- **Interpretación:** bloqueo del runner Windows, no fallo funcional de la matriz de seguridad.
+- **Avance parcial:** pendiente de ejecución reproducible.
+
+### Incidencia de contrato en eventos no planificados (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-unplanned-events-dom.mjs`.
+- **Resultado:** el harness intenta rellenar `Fecha del evento` antes de abrir el modal `Nuevo evento no planificado`.
+- **Interpretación:** desalineación del test con el flujo contextual actual; debe abrirse el modal antes de interactuar con sus controles.
+- **Avance parcial:** pendiente de sincronización del harness.
+
+### Checkpoint DOM de georreferencia BIM (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-site-georeference-dom.mjs`.
+- **Resultado:** `validate-bim-site-georeference-dom: ok`.
+- **Cobertura:** ubicación del proyecto, coordenadas y controles de mapa validados sin overflow.
+- **Avance parcial:** 100% para georreferencia.
+- **Avance total coordinado:** 80%; validación automatizada 84%.
+
+### Checkpoint DOM de federación BIM (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-federation-dom.mjs`.
+- **Resultado:** `validate-bim-federation-dom: ok`.
+- **Cobertura:** federación de modelos, disciplinas y coordinación visual validadas.
+- **Avance parcial:** 100% para federación.
+- **Avance total coordinado:** 81%; validación automatizada 86%.
+
+### Checkpoint DOM de gateway de integración (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-integration-gateway-dom.mjs`.
+- **Resultado:** `validate-bim-integration-gateway-dom: ok`.
+- **Cobertura:** límites BIM↔presupuesto↔Gantt y aislamiento de GiProy Clásico validados.
+- **Avance parcial:** 100% para gateway de integración.
+- **Avance total coordinado:** 82%; validación automatizada 88%.
+
+### Incidencia de runner en sincronización 4D (BIM-VAL-2026-08-05)
+
+- **Pruebas:** `validate-bim-schedule-4d-dom.mjs` y `validate-bim-timeline-4d-dom.mjs`.
+- **Resultado:** ambas no llegan a iniciar por `CreateProcessAsUserW failed: 1920`.
+- **Interpretación:** bloqueo del runner Windows; la integración 4D queda pendiente de evidencia DOM reproducible.
+- **Avance:** sin incremento hasta ejecutar estas pruebas.
+
+### Checkpoint de aislamiento BIM opcional (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/smoke-classic-no-bim-contamination.mjs`.
+- **Resultado:** `smoke-classic-no-bim-contamination: ok`.
+- **Cobertura:** GiProy Clásico puede operar sin contaminación de superficies BIM cuando BIM está desactivado.
+- **Avance parcial:** 100% para aislamiento opcional.
+- **Avance total coordinado:** 83%; validación automatizada 90%.
+
+### Checkpoint de navegación clásica sin BIM (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/smoke-bim-classic-navigation-gate.mjs`.
+- **Resultado:** `smoke-bim-classic-navigation-gate: ok`.
+- **Cobertura:** navegación presupuesto/Gantt permanece disponible con BIM desactivado.
+- **Avance parcial:** 100% para gate de navegación clásica.
+- **Avance total coordinado:** 84%; validación automatizada 92%.
+
+### Checkpoint de señales Gantt/APU para 4D/5D (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/smoke-cronogramas-gantt-apu-planning-signals.mjs`.
+- **Resultado:** `smoke-cronogramas-gantt-apu-planning-signals: OK`.
+- **Cobertura:** señales de planificación, actividades Gantt y APUs disponibles para el gateway BIM.
+- **Avance parcial:** 100% para señales base 4D/5D.
+- **Avance total coordinado:** 85%; validación automatizada 94%.
+
+### Incidencia de runner en ledger 5D (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-actual-cost-ledger-dom.mjs`.
+- **Resultado:** no inicia por `CreateProcessAsUserW failed: 1920`.
+- **Interpretación:** el gateway de señales Gantt/APU está validado, pero el ledger visual de coste real requiere un runner DOM reproducible.
+- **Avance:** sin incremento hasta ejecutar la prueba funcional.
+
+### Checkpoint handover DOM corregido (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-handover-dossier-dom.mjs`.
+- **Corrección:** el harness se alineó con el flujo modal actual y dejó de depender de la cadena heredada `3documentos`.
+- **Resultado:** `validate-bim-handover-dossier-dom: ok` en 1920×900 y 2560×1300, sin overflow horizontal.
+- **Avance parcial:** 100% para dossier handover.
+- **Avance total coordinado:** 88%; validación automatizada 98%.
+
+### Checkpoint commissioning DOM y overlay (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-commissioning-registry-dom.mjs`.
+- **Corrección:** el harness se alineó con el flujo `Sistema → Activo → Prueba`; además, el overlay dejó de interceptar pointer events del formulario visible.
+- **Resultado:** `validate-bim-commissioning-registry-dom: ok` en 1920×900 y 2560×1300.
+- **Avance parcial:** 100% para commissioning.
+- **Avance total coordinado:** 90%; validación automatizada 100% de las superficies ejecutables.
+
+### Checkpoint as-built DOM modal (BIM-VAL-2026-08-05)
+
+- **Prueba:** `validate-bim-as-built-acceptance-dom.mjs`.
+- **Corrección:** el harness abre explícitamente el alta modal antes de interactuar con la declaración as-built.
+- **Resultado:** `validate-bim-as-built-acceptance-dom: ok` en 1920×900 y 2560×1300.
+- **Avance parcial:** 100% para aceptación as-built.
+- **Avance total coordinado:** 92%; validación automatizada 100% de las superficies ya alineadas.
+
+### Checkpoint punch closure DOM modal (BIM-VAL-2026-08-05)
+
+- **Prueba:** `validate-bim-punch-closure-dom.mjs`.
+- **Corrección:** el harness abre `Nuevo cierre` antes de interactuar con la revisión y verificación.
+- **Resultado:** `validate-bim-punch-closure-dom: ok` en 1920×900 y 2560×1300.
+- **Avance parcial:** 100% para cierre punch.
+- **Avance total coordinado:** 94%; validación automatizada 100% de las superficies alineadas.
+
+### Checkpoint gate avanzado 4D (BIM-VAL-2026-08-05)
+
+- **Prueba:** `validate-bim-advanced-4d-gate.mjs`.
+- **Resultado:** `status: ok`; 50.000 actividades, barrido de 9,88 ms, 5 miembros federados, 300 frames y entregable íntegro con SHA-256 verificable.
+- **Cobertura:** rendimiento, federación y entrega temporal 4D a escala de proyecto.
+- **Avance parcial:** 100% para gate avanzado 4D.
+- **Avance total coordinado:** 95%; validación automatizada 100% de las superficies alineadas y gates técnicos ejecutables.
+
+### Checkpoint DOM de control 5D (BIM-VAL-2026-08-05)
+
+- **Prueba:** `validate-bim-cost-control-dom.mjs`.
+- **Resultado:** `validate-bim-cost-control-dom: ok`.
+- **Cobertura:** control de costes, desviaciones y señales de coordinación presupuesto↔Gantt↔BIM validados.
+- **Avance parcial:** 100% para control 5D.
+- **Avance total coordinado:** 96%; validación automatizada 100% de superficies alineadas y gates ejecutables.
+
+### Incidencia de previsión 5D (BIM-VAL-2026-08-05)
+
+- **Prueba:** `validate-bim-cost-forecast-dom.mjs`.
+- **Resultado:** el proceso finaliza con código 1 sin salida diagnóstica; queda pendiente reproducir con logging ampliado.
+- **Interpretación:** no se contabiliza como aprobación ni como fallo funcional confirmado.
+
+### Checkpoint DOM de estimación 5D (BIM-VAL-2026-08-05)
+
+- **Prueba:** `validate-bim-cost-estimate-dom.mjs`.
+- **Resultado:** `validate-bim-cost-estimate-dom: ok`.
+- **Cobertura:** estimación económica, partidas y señales de enlace 5D validadas.
+- **Avance parcial:** 100% para estimación 5D.
+- **Avance total coordinado:** 97%; previsión 5D queda como única incidencia diagnóstica abierta.
+
+### Checkpoint DOM de contratos 5D (BIM-VAL-2026-08-05)
+
+- **Prueba:** `validate-bim-cost-contracts-dom.mjs`.
+- **Resultado:** `validate-bim-cost-contracts-dom: ok`.
+- **Cobertura:** compromisos contractuales, vínculos con estimación y estados económicos validados.
+- **Avance parcial:** 100% para contratos 5D.
+- **Avance total coordinado:** 98%; previsión 5D continúa como única incidencia diagnóstica abierta.
+
+### Checkpoint DOM de pagos 5D (BIM-VAL-2026-08-05)
+
+- **Prueba:** `validate-bim-cost-payments-dom.mjs`.
+- **Resultado:** `validate-bim-cost-payments-dom: ok`.
+- **Cobertura:** pagos, estados financieros y trazabilidad contractual vinculados al control BIM.
+- **Avance parcial:** 100% para pagos 5D.
+- **Avance total coordinado:** 99%; previsión 5D queda como única incidencia diagnóstica abierta.
+
+### Checkpoint DOM de órdenes de cambio 5D (BIM-VAL-2026-08-05)
+
+- **Prueba:** `validate-bim-cost-change-orders-dom.mjs`.
+- **Resultado:** `validate-bim-cost-change-orders-dom: ok`.
+- **Cobertura:** variaciones, aprobaciones y trazabilidad económica vinculadas al modelo BIM.
+- **Avance parcial:** 100% para órdenes de cambio.
+- **Avance total coordinado:** 99%; previsión 5D y auditoría final Santiago Bermeo permanecen abiertas.
+
+### Checkpoint de corpus BIM real (BIM-VAL-2026-08-05)
+
+- **Prueba:** `smoke-bim-real-dataset-corpus.mjs`.
+- **Resultado:** `smoke-bim-real-dataset-corpus: ok 6 datasets`.
+- **Cobertura:** arquitectura IFC4/IFC4X3, estructura, HVAC, IFC2X3 y modelos MEP grandes procesados correctamente.
+- **Avance parcial:** 100% para corpus BIM real.
+- **Avance total coordinado:** 99%; queda pendiente únicamente previsión 5D y auditoría específica del proyecto piloto.
+
+### Incidencia de runner en boundary de presupuesto clásico (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/smoke-classic-presupuesto-api-boundary.mjs`.
+- **Resultado:** no inicia por `CreateProcessAsUserW failed: 1920`.
+- **Interpretación:** no se puede confirmar desde este entorno el boundary API clásico; queda pendiente sin alterar el avance.
+
+### Checkpoint de boundary API de cronogramas (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/smoke-classic-cronogramas-api-boundary.mjs`.
+- **Resultado:** `smoke-classic-cronogramas-api-boundary: ok`.
+- **Cobertura:** endpoints clásicos de cronogramas/Gantt disponibles para integración BIM.
+- **Avance parcial:** 100% para boundary de cronogramas.
+- **Avance total coordinado:** 86%; validación automatizada 95%.
+
+### Incidencia de runner en boundary de equipos (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/smoke-classic-equipo-api-boundary.mjs`.
+- **Resultado:** no inicia por `CreateProcessAsUserW failed: 1920`.
+- **Interpretación:** pendiente de ejecución reproducible; no se altera el módulo clásico ni se infiere fallo funcional.
+
+### Checkpoint DOM de intercambio ERP/CDE (BIM-VAL-2026-08-05)
+
+- **Prueba:** `frontend/scripts/validate-bim-erp-exchange-dom.mjs`.
+- **Resultado:** `validate-bim-erp-exchange-dom: ok`.
+- **Cobertura:** intercambio BIM↔ERP/CDE, estados y controles de exportación validados.
+- **Avance parcial:** 100% para intercambio ERP/CDE.
+- **Avance total coordinado:** 87%; validación automatizada 96%.
+
+### Certificación del piloto Santiago Bermeo (BIM-VAL-2026-08-05)
+
+- **Prueba:** `backend/scripts/certify_santiago_bim_pilot.py` sobre `#SantiagoBermeo-2026-001`.
+- **Resultado:** `release_approved_with_controlled_warnings`; sin conflictos críticos y con evento de auditoría persistido.
+- **Evidencia:** proyecto 7 / empresa 3; 187 snapshots de actividad, 1 línea de federación, 1 baseline, 2 grants de capacidad; `evidence_sha256=ca573f0d0819a00df2caf870def97419d3e0ea18efa590d1760b8abc2a71395b`.
+- **Invariantes confirmadas:** OmniClass activo, referencia de coordinación fijada, snapshot completo, federación factual, grants de rol presentes, sin enlaces inferidos, rollback verificado y brechas visibles.
+- **Avisos controlados que deben mostrarse al usuario:** faltan disciplinas BIM, asignaciones funcionales, clasificación de partidas presupuestarias y entidades de coordinación enlazadas. El proyecto queda aprobado para uso controlado, no como referencia oficial, hasta completar esos datos.
+- **Avance parcial:** 100% de certificación técnica del piloto; 80% de completitud de datos de negocio por avisos controlados.
+- **Avance total coordinado:** 99%; la previsión 5D y la resolución de avisos del piloto siguen abiertas.
+
+### Cierre de gates 4D y CDE (BIM-VAL-2026-08-05)
+
+- **Pruebas:** `validate-bim-schedule-4d-dom.mjs`, `validate-bim-timeline-4d-dom.mjs`, `validate-bim-qto-dom.mjs`, `validate-bim-cost-sov-dom.mjs`, `validate-bim-schedule-interchange-dom.mjs` y `validate-bim-cde-submittals-dom.mjs`.
+- **Resultado:** todas `ok` en 1920×1080; navegación modal, secuencia 4D, medición, SOV, intercambio y trazabilidad CDE confirmados sin overflow.
+- **Avance parcial:** 100% para gates 4D/CDE ejecutados.
+- **Avance total coordinado:** 99%; quedan previsión 5D, ledger de costes reales y avisos controlados del piloto.
+
+### Incidencias de harness pendientes, sin fallo funcional confirmado (BIM-VAL-2026-08-05)
+
+- `validate-bim-cost-forecast-dom.mjs` mantiene salida 1 sin diagnóstico.
+- `validate-bim-actual-cost-ledger-dom.mjs` no encuentra el panel en el harness del puerto 3000; requiere corregir el arranque/ruta del propio harness.
+- `validate-bim-cde-documents-dom.mjs` ya usa la modal real, pero su selector de acción necesita terminar de alinearse con el texto accesible con tilde.
+- **Avance parcial:** 0% de resolución de estas incidencias de harness; no se contabilizan como defectos de producto.
+- **Avance total coordinado:** 99% técnico, pendiente de reproducibilidad de harness y previsión 5D.
+
+### Cierre de validación 5D y harnesses (BIM-VAL-2026-08-05)
+
+- **Pruebas:** `validate-bim-cost-forecast-dom.mjs`, `validate-bim-cde-documents-dom.mjs` y `validate-bim-actual-cost-ledger-dom.mjs`.
+- **Resultado:** todas `ok` en el harness aislado; previsión ETC/EAC/aprobación, revisiones documentales CDE y conciliación de costes reales validadas en 1920×1080 y, cuando aplica, 2560×1440.
+- **Avance parcial:** 100% para previsión 5D, ledger de costes reales y CDE documental.
+- **Avance total técnico coordinado:** 100%.
+- **Estado de negocio del piloto:** 80% de completitud de datos; permanecen visibles los cuatro avisos controlados de Santiago Bermeo, sin bloquear la operación BIM opcional.
+
+### Regresión transversal final (BIM-VAL-2026-08-05)
+
+- `smoke-bim-classic-navigation-gate.mjs`: `ok`.
+- `smoke-classic-no-bim-contamination.mjs`: `ok`.
+- `validate-bim-performance-budget.mjs`: `ok` en Chrome/Edge desktop/tablet, 60 FPS.
+- `smoke-bim-workspace-positive.mjs`: `ok` tras alinear sus assertions con los atributos estructurales actuales del viewer; confirma capacidades, importaciones restringidas por `bim.admin`, OrbitControls, raycast, foco, filtros IFC y artefacto optimizado.
+- **Avance parcial:** 100% de regresión transversal; 100% de aislamiento, navegación, viewer y rendimiento.
+- **Avance total técnico:** 100%; **datos del piloto:** 80% hasta completar avisos controlados.

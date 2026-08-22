@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { presupuestosApi } from '../api/presupuestos';
 import { appAlert } from '../utils/appDialog';
+import { normalizeBudgetCollection } from '../utils/budgetResponse';
 
 const Presupuestos = () => {
     const { proyectoId } = useParams();
@@ -21,7 +22,7 @@ const Presupuestos = () => {
             try {
                 const empresaId = selectedEmpresa?.id || user?.empresa_id;
                 const response = await presupuestosApi.getByProyecto(proyectoId, empresaId);
-                const presupuestos = response?.data || [];
+                const presupuestos = normalizeBudgetCollection(response);
 
                 if (cancelled) {
                     return;

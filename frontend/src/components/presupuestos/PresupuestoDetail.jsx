@@ -832,10 +832,7 @@ const PresupuestoDetail = ({ inlineProyectoId, inlinePresupuestoId, initialFocus
         const fetchDetalle = async () => {
             if (!presupuestoId) return;
             try {
-                // Solo mostrar loading si no tenemos data previa o el ID cambió
-                if (!activePresupuesto || activePresupuesto.id !== presupuestoId) {
-                    setLoading(true);
-                }
+                setLoading(true);
                 
                 const [presData, projData] = await Promise.all([
                     presupuestosApi.getById(presupuestoId, currentEmpresaId),

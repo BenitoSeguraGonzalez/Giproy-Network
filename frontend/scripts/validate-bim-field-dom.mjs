@@ -22,12 +22,12 @@ try {
     await waitForServer();
     const browser = await chromium.launch({ headless: true, executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' });
     try {
-        for (const viewport of [{ width: 1280, height: 820 }, { width: 390, height: 844 }]) {
+        for (const viewport of [{ width: 1920, height: 1080 }, { width: 2560, height: 1440 }]) {
             const page = await browser.newPage({ viewport });
             const errors = [];
             page.on('pageerror', (error) => errors.push(error.message));
             await page.goto(`${baseUrl}/bim-field-harness.html`);
-            await page.locator('[data-bim-field-editor] summary').click();
+            await page.getByText('3 · Recursos y control de coste').click();
             await page.getByLabel('Avance de campo porcentual').fill('50');
             await page.getByLabel('Cantidad instalada en campo').fill('10');
             await page.getByLabel('Horas de mano de obra').fill('32');
@@ -36,13 +36,14 @@ try {
             await page.getByLabel('AC de campo', { exact: true }).fill('450');
             await page.getByLabel('Diario de campo BIM').fill('Montaje verificado en el frente norte.');
             await page.getByLabel('Evidencia fotográfica de campo').setInputFiles({ name: 'avance-frente.png', mimeType: 'image/png', buffer: Buffer.from('89504e470d0a1a0a', 'hex') });
-            await page.getByRole('button', { name: 'Registrar campo' }).click();
+            await page.getByRole('button', { name: 'Registrar avance' }).click();
             const latest = page.locator('[data-bim-field-latest="141"]');
             await latest.waitFor();
             assert.match(await latest.textContent(), /50%.*500.*0\.8333.*1\.1111/s);
             await page.getByRole('button', { name: 'Abrir evidencia avance-frente.png' }).waitFor();
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
             assert.deepEqual(errors, []);
+            await page.screenshot({ path: `${process.env.TEMP || '.'}/giproy-bim-field-progress-${viewport.width}x${viewport.height}.png`, fullPage: true });
             await page.close();
         }
     } finally { await browser.close(); }

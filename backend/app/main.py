@@ -89,6 +89,7 @@ MAINTENANCE_EXACT_PATHS = {
     "/api/v1/login/access-token",
     "/api/v1/login/logout",
     "/api/v1/register",
+    "/api/v1/legal/manifest",
     "/api/v1/usuarios/me",
     "/api/v1/admin-maintenance/active",
     "/api/v1/system-announcements/active",

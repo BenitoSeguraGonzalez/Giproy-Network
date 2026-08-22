@@ -1,5 +1,14 @@
 # Estado Real del Codigo BIM
 
+## Actualizacion 2026-08-11 - Mapa sin dependencia Hippocratic
+
+- `TASK-2046` / `BIM-TASK-0194` retiran `react-leaflet` y
+  `@react-leaflet/core` del runtime publicado.
+- Un adaptador React local conserva XYZ, WMS, puntos, tooltips y selección sobre
+  Leaflet BSD-2-Clause, con atribución OpenStreetMap completa.
+- Build, smoke visual BIM, aislamiento anti-BIM y mapa Classic están correctos;
+  no cambia API, esquema ni datos BIM.
+
 ## Actualizacion 2026-07-22 - Gobierno de roles y carga IFC visible
 
 - `TASK-2038` / `BIM-TASK-0191` reconocen al administrador de empresa como
@@ -1236,6 +1245,23 @@ intercambio end-to-end.
   rollback en `deploy/backups/display-resolution-20260722-141704`.
 - Implementacion tecnica autorizada: 61/61, 100%. Liberacion general: 60/61,
   98,36%; los gates externos no cambian.
+
+## Visor IFC real y estados vacios del Modelo - 2026-08-20
+
+- `TASK-2062` / `BIM-TASK-0196` conecta `BimFlowWorkspace` con
+  `BimFragmentsViewport` para consumir el artifact `fragments` activo de la
+  version seleccionada o convertir su artifact `source_ifc` mediante
+  `IfcImporter` y el WASM de `web-ifc`.
+- Se retira del flujo productivo el reemplazo geometrico sintético que podía
+  mostrar siempre la misma retícula aunque el IFC no existiera o cambiara.
+- 2D y 3D muestran un estado vacío explícito cuando no hay selección; una
+  versión seleccionada sin artifact real muestra indisponibilidad, sin datos
+  BIM inventados.
+- La decisión de revisión refresca el workspace para que aceptar o rechazar
+  una nueva versión no deje el visor anclado al estado anterior.
+- Build, contrato BIM, smoke DOM del workspace y smoke del importador IFC pasan.
+  La prueba visual autenticada contra un backend/app en ejecución sigue
+  pendiente; no se declara certificación de flujo real ni despliegue.
 
 ## Error BIM serializable en la interfaz React - 2026-07-22
 

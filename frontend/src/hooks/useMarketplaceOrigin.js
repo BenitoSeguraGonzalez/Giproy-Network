@@ -15,12 +15,12 @@ export const useMarketplaceOrigin = (entityType, entityId) => {
 
     useEffect(() => {
         if (!entityType || !entityId) {
-            setOrigin(null);
+            queueMicrotask(() => setOrigin(null));
             return;
         }
 
         let cancelled = false;
-        setLoading(true);
+        queueMicrotask(() => setLoading(true));
         marketplaceApi
             .getOrigins({ entity_type: entityType, entity_id: entityId })
             .then((response) => {
@@ -32,7 +32,7 @@ export const useMarketplaceOrigin = (entityType, entityId) => {
             .catch((error) => {
                 if (!cancelled) {
                     globalThis.reportClientError?.('Error cargando origen marketplace:', error);
-                    setOrigin(null);
+                    queueMicrotask(() => setOrigin(null));
                 }
             })
             .finally(() => {

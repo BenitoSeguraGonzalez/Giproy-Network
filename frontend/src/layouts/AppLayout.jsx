@@ -21,6 +21,7 @@ import {
     ChevronRight,
     ShieldCheck,
     AlertCircle,
+    CircleHelp,
     Building2,
     HardDrive,
     RadioTower,
@@ -28,7 +29,7 @@ import {
 } from 'lucide-react';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
-import { getMarketplaceOwnershipTone } from '../components/marketplace/MarketplaceOriginBadgeSet';
+import { getMarketplaceOwnershipTone } from '../utils/marketplaceOwnershipTone';
 import { applyTrimmedPaste } from '../utils/pasteSanitizer';
 import { getLicenseBannerMessage, getLicenseBannerTone, getLicenseStatusLabel, getLicenseStatusTone } from '../utils/licenseStatusUi';
 import { getCompanyDisplayName } from '../utils/companyDisplayName';
@@ -41,6 +42,7 @@ import {
 } from '../utils/displayResolution';
 import GiproyIconGradient from '../assets/GiproyIconGradient.svg';
 import GiproyWordmarkWhite from '../assets/GiproyWordmarkWhite.png';
+import ContextualHelpPanel from '../components/ui/ContextualHelpPanel';
 
 const AppLayout = ({ children }) => {
     const { user, logout, selectedEmpresa, setSelectedEmpresa, selectedBaseTrabajo, activeProject, licenseInfo } = useContext(AuthContext);
@@ -54,6 +56,7 @@ const AppLayout = ({ children }) => {
     const [licenseNotificationQueue, setLicenseNotificationQueue] = useState([]);
     const [transferSignal, setTransferSignal] = useState({ total: 0, nuevos: 0 });
     const [activeMaintenance, setActiveMaintenance] = useState(null);
+    const [showContextualHelp, setShowContextualHelp] = useState(false);
     const isSuperadmin = user?.rol?.toLowerCase() === 'superadministrador';
     const roleKey = user?.rol?.toLowerCase();
     const canSeeTransferSignal = ['superadministrador', 'administrador'].includes(roleKey);
@@ -134,11 +137,11 @@ const AppLayout = ({ children }) => {
             || displayResolution.height < MIN_DESKTOP_DISPLAY_HEIGHT;
 
         if (!isBelowMinimum) {
-            setShowResWarning(false);
+            queueMicrotask(() => setShowResWarning(false));
             return;
         }
 
-        setShowResWarning((prev) => (prev ? prev : true));
+        queueMicrotask(() => setShowResWarning((prev) => (prev ? prev : true)));
     }, [displayResolution.height, displayResolution.width]);
 
     const currentAnnouncement = announcementQueue[0] || null;
@@ -209,7 +212,7 @@ const AppLayout = ({ children }) => {
                 if (isMounted) {
                     setLicenseNotificationQueue(nextQueue);
                 }
-            } catch (error) {
+            } catch {
                 if (isMounted) {
                     setLicenseNotificationQueue([]);
                 }
@@ -225,9 +228,9 @@ const AppLayout = ({ children }) => {
 
     useEffect(() => {
         if (!canSeeTransferSignal) {
-            setTransferSignal((current) => (
+            queueMicrotask(() => setTransferSignal((current) => (
                 current.total === 0 && current.nuevos === 0 ? current : { total: 0, nuevos: 0 }
-            ));
+            )));
             return undefined;
         }
 
@@ -241,7 +244,7 @@ const AppLayout = ({ children }) => {
                     total: Number(data?.total ?? metrics.recibidos ?? 0) || 0,
                     nuevos: Number(metrics.nuevos ?? 0) || 0,
                 });
-            } catch (error) {
+            } catch {
                 if (isMounted) {
                     setTransferSignal({ total: 0, nuevos: 0 });
                 }
@@ -359,7 +362,7 @@ const AppLayout = ({ children }) => {
         }
         try {
             await licenseNotificationsApi.acknowledge(notification.id);
-        } catch (error) {
+        } catch {
             setLicenseNotificationQueue((current) => [notification, ...current]);
         }
     };
@@ -681,6 +684,16 @@ const AppLayout = ({ children }) => {
 
                 <div className={`flex items-center ${isPortableWorkspace ? 'gap-2' : 'gap-6'} shrink-0`}>
                     <AdaptiveLayoutControl layout={adaptiveLayout} />
+                    <button
+                        type="button"
+                        onClick={() => setShowContextualHelp(true)}
+                        className={`${isPortableWorkspace ? 'h-11 w-11' : 'h-10 w-10'} inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-600 shadow-sm transition-colors hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700`}
+                        title="Abrir guía de trabajo"
+                        aria-label="Abrir guía de trabajo"
+                        data-contextual-help-trigger="shell"
+                    >
+                        <CircleHelp className={`${isPortableWorkspace ? 'w-4 h-4' : 'w-5 h-5'}`} />
+                    </button>
                     <div className={`flex items-center gap-3 ${isPortableWorkspace ? '' : 'pr-6 border-r border-zinc-200'}`}>
                         <div className={`text-right ${isPortableWorkspace ? 'hidden' : 'hidden md:block'}`}>
                             <p className="text-xs font-black uppercase tracking-tight text-[#1A1A1A]">{user?.nombre_completo}</p>
@@ -754,6 +767,17 @@ const AppLayout = ({ children }) => {
 
             {/* Contenido de la página actual */}
             <div className="flex-1 overflow-hidden relative">
+                {showContextualHelp ? (
+                    <ContextualHelpPanel
+                        guide={location.pathname.startsWith('/proyectos') ? 'project' : 'overview'}
+                        context={{
+                            projectLabel: activeProject?.descripcion || activeProject?.nombre,
+                            companyLabel: selectedEmpresaLabel,
+                            roleLabel: user?.rol,
+                        }}
+                        onClose={() => setShowContextualHelp(false)}
+                    />
+                ) : null}
                 {shouldBlockContent ? (
                     <div className="h-full bg-[#F2F4F7] flex items-center justify-center p-8">
                         <div className="w-full max-w-2xl bg-white border border-orange-200 rounded-[2rem] p-8 shadow-2xl">

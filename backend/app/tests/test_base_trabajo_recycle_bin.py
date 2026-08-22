@@ -24,7 +24,8 @@ def _admin_user(db, empresa_id: int) -> Usuario:
 
 
 def test_base_trabajo_delete_moves_to_recycle_bin_restore_and_purge(db, sample_empresa):
-    current_user = _admin_user(db, sample_empresa.id)
+    company_id = sample_empresa.id
+    current_user = _admin_user(db, company_id)
     base = base_trabajo_repo.create(
         db,
         BaseTrabajoCreate(
@@ -33,7 +34,7 @@ def test_base_trabajo_delete_moves_to_recycle_bin_restore_and_purge(db, sample_e
             tipo="Base Maestra",
             activa=True,
         ),
-        sample_empresa.id,
+        company_id,
     )
     base_id = base.id
 
@@ -41,12 +42,12 @@ def test_base_trabajo_delete_moves_to_recycle_bin_restore_and_purge(db, sample_e
     app.dependency_overrides[get_current_active_user] = lambda: current_user
     try:
         with TestClient(app) as client:
-            delete_response = client.delete(f"/api/v1/bases-trabajo/{base_id}?empresa_id={sample_empresa.id}")
-            normal_list = client.get(f"/api/v1/bases-trabajo/?empresa_id={sample_empresa.id}")
-            recycle_list = client.get(f"/api/v1/bases-trabajo/papelera?empresa_id={sample_empresa.id}")
-            restore_response = client.post(f"/api/v1/bases-trabajo/papelera/{base_id}/restore?empresa_id={sample_empresa.id}")
-            delete_again_response = client.delete(f"/api/v1/bases-trabajo/{base_id}?empresa_id={sample_empresa.id}")
-            purge_response = client.delete(f"/api/v1/bases-trabajo/papelera/{base_id}/purge?empresa_id={sample_empresa.id}")
+            delete_response = client.delete(f"/api/v1/bases-trabajo/{base_id}?empresa_id={company_id}")
+            normal_list = client.get(f"/api/v1/bases-trabajo/?empresa_id={company_id}")
+            recycle_list = client.get(f"/api/v1/bases-trabajo/papelera?empresa_id={company_id}")
+            restore_response = client.post(f"/api/v1/bases-trabajo/papelera/{base_id}/restore?empresa_id={company_id}")
+            delete_again_response = client.delete(f"/api/v1/bases-trabajo/{base_id}?empresa_id={company_id}")
+            purge_response = client.delete(f"/api/v1/bases-trabajo/papelera/{base_id}/purge?empresa_id={company_id}")
     finally:
         app.dependency_overrides.clear()
 

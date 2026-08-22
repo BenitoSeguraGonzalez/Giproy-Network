@@ -17,6 +17,7 @@ export default function BimResourceCapacityPanel({ projectId, empresaId, api = b
     const [draft, setDraft] = useState(EMPTY_RESOURCE);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
+    const [createOpen, setCreateOpen] = useState(false);
 
     const loadResources = useCallback(async () => {
         if (!projectId) return;
@@ -36,6 +37,7 @@ export default function BimResourceCapacityPanel({ projectId, empresaId, api = b
     }, [api, empresaId, projectId]);
 
     useEffect(() => { loadResources(); }, [loadResources]);
+    useEffect(() => { const onKey = (event) => event.key === 'Escape' && setCreateOpen(false); window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey); }, []);
 
     useEffect(() => {
         let active = true;
@@ -113,10 +115,10 @@ export default function BimResourceCapacityPanel({ projectId, empresaId, api = b
         <section className="rounded border border-slate-200 bg-white" data-bim-resource-capacity>
             <header className="flex items-center gap-2 border-b border-slate-200 px-3 py-2">
                 <BarChart3 size={16} className="text-orange-600" />
-                <h3 className="text-sm font-semibold text-slate-800">Recursos y capacidad 4D</h3>
+                <h3 className="text-sm font-semibold text-slate-800">Recursos y capacidad 4D</h3><button type="button" onClick={() => setCreateOpen(true)} className="ml-auto inline-flex h-7 items-center gap-1 bg-orange-600 px-2.5 text-[11px] font-semibold text-white"><Plus size={13}/>Nuevo recurso</button>
             </header>
             <div className="space-y-3 p-3">
-                <form className="grid grid-cols-2 gap-2" onSubmit={createResource}>
+                <form className="hidden" onSubmit={createResource}>
                     <input className="min-w-0 rounded border border-slate-300 px-2 py-1.5 text-xs" aria-label="Código de recurso" placeholder="Código" required value={draft.code} onChange={(event) => setDraft({ ...draft, code: event.target.value })} />
                     <input className="min-w-0 rounded border border-slate-300 px-2 py-1.5 text-xs" aria-label="Nombre de recurso" placeholder="Nombre" required value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} />
                     <select className="rounded border border-slate-300 px-2 py-1.5 text-xs" aria-label="Tipo de recurso" value={draft.resource_type} onChange={(event) => setDraft({ ...draft, resource_type: event.target.value })}>
@@ -169,7 +171,7 @@ export default function BimResourceCapacityPanel({ projectId, empresaId, api = b
                     ))}
                 </div>
                 {error ? <p className="text-xs text-red-700" role="alert">{error}</p> : null}
-            </div>
+            </div>{createOpen ? <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/35 p-6"><form className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl" onSubmit={(event) => { createResource(event); setCreateOpen(false); }} role="dialog" aria-modal="true" aria-labelledby="resource-create-title"><header className="flex min-h-12 items-center border-b border-slate-200 px-5"><div><h3 id="resource-create-title" className="text-sm font-semibold">Nuevo recurso 4D</h3><p className="text-[11px] text-slate-500">Define capacidad diaria y unidad para el histograma.</p></div><button type="button" onClick={() => setCreateOpen(false)} aria-label="Cerrar nuevo recurso" className="ml-auto inline-flex size-8 items-center justify-center text-slate-500"><X size={16}/></button></header><div className="grid grid-cols-2 gap-3 p-5"><input autoFocus className="h-9 border border-slate-300 px-3 text-xs" aria-label="Código de recurso" placeholder="Código" required value={draft.code} onChange={(event) => setDraft({ ...draft, code: event.target.value })}/><input className="h-9 border border-slate-300 px-3 text-xs" aria-label="Nombre de recurso" placeholder="Nombre" required value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })}/><select className="h-9 border border-slate-300 px-2 text-xs" aria-label="Tipo de recurso" value={draft.resource_type} onChange={(event) => setDraft({ ...draft, resource_type: event.target.value })}><option value="labor">Mano de obra</option><option value="equipment">Equipo</option><option value="material">Material</option><option value="location">Espacio</option><option value="cost">Costo</option></select><div className="flex gap-2"><input className="w-1/2 border border-slate-300 px-2 text-xs" aria-label="Capacidad diaria" type="number" min="0.01" step="0.01" required value={draft.capacity_per_day} onChange={(event) => setDraft({ ...draft, capacity_per_day: event.target.value })}/><input className="w-1/2 border border-slate-300 px-2 text-xs" aria-label="Unidad del recurso" required value={draft.unit} onChange={(event) => setDraft({ ...draft, unit: event.target.value })}/></div></div><footer className="flex min-h-12 items-center justify-end gap-2 border-t border-slate-200 px-5"><button type="button" onClick={() => setCreateOpen(false)} className="h-8 px-3 text-xs">Cancelar</button><button type="submit" disabled={busy} className="h-8 bg-orange-600 px-4 text-xs font-semibold text-white">Agregar recurso</button></footer></form></div> : null}
         </section>
     );
 }

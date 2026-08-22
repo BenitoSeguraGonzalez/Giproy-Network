@@ -42,6 +42,7 @@ class UsuarioRegister(BaseModel):
     apellidos: Optional[str] = None
     alias: Optional[str] = None
     empresa_alias: Optional[str] = None
+    empresa_nombre: Optional[str] = None
     nacionalidad: Optional[str] = None
     profesion: Optional[str] = None
     ciudad: Optional[str] = None
@@ -52,6 +53,9 @@ class UsuarioRegister(BaseModel):
     acepta_politica_privacidad: bool = False
     acepta_politicas_comunicacion: bool = False
     autoriza_publicidad: bool = False
+    acepta_terminos: bool = False
+    terminos_version: Optional[str] = None
+    privacidad_version: Optional[str] = None
     ruc_verification_token: Optional[str] = None
 
 

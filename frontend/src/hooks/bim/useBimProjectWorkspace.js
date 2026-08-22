@@ -21,7 +21,7 @@ const EMPTY_WORKSPACE = {
     recent_links: [],
 };
 
-export function useBimProjectWorkspace(projectId, enabled) {
+export function useBimProjectWorkspace(projectId, enabled, selectedVersionId = null) {
     const { user, selectedEmpresa } = useContext(AuthContext);
     const [workspace, setWorkspace] = useState(EMPTY_WORKSPACE);
     const [viewStates, setViewStates] = useState([]);
@@ -50,7 +50,7 @@ export function useBimProjectWorkspace(projectId, enabled) {
                 const [workspaceResult, statesResult, elementsResult, linksResult] = await Promise.allSettled([
                     bimModelsApi.getWorkspace(projectId, empresaId),
                     bimViewStatesApi.listByProject(projectId, empresaId),
-                    bimLinksApi.listElementsByProject(projectId, empresaId),
+                    bimLinksApi.listElementsByProject(projectId, empresaId, selectedVersionId),
                     bimLinksApi.listByProject(projectId, empresaId),
                 ]);
                 if (workspaceResult.status === 'rejected') throw workspaceResult.reason;
@@ -62,6 +62,10 @@ export function useBimProjectWorkspace(projectId, enabled) {
                     setWorkspace({
                         ...EMPTY_WORKSPACE,
                         ...workspaceResult.value,
+                        active_version_id: selectedVersionId || workspaceResult.value.active_version_id,
+                        active_version_label: selectedVersionId
+                            ? workspaceResult.value.models?.flatMap((model) => model.versions || []).find((version) => version.id === selectedVersionId)?.version_label || workspaceResult.value.active_version_label
+                            : workspaceResult.value.active_version_label,
                         elements: elementsResult.status === 'fulfilled' ? (elementsResult.value || []) : [],
                         recent_links: linksResult.status === 'fulfilled' ? (linksResult.value || []) : [],
                     });
@@ -86,7 +90,7 @@ export function useBimProjectWorkspace(projectId, enabled) {
         return () => {
             cancelled = true;
         };
-    }, [enabled, projectId, reloadToken, selectedEmpresa?.id, user, user?.empresa_id]);
+    }, [enabled, projectId, reloadToken, selectedEmpresa?.id, selectedVersionId, user, user?.empresa_id]);
 
     return {
         workspace,

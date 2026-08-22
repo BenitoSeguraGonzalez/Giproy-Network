@@ -1,5 +1,7 @@
+const legacyFormEnabled = Boolean(import.meta.env.VITE_ENABLE_LEGACY_BIM_FORMS);
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Archive, Download, FileStack, History, LockKeyhole, Save, Upload } from 'lucide-react';
+import { Archive, Download, FileStack, History, LockKeyhole, Save, Upload, X } from 'lucide-react';
 
 import { bimModelsApi } from '../../api/bimModels';
 
@@ -20,6 +22,7 @@ export default function BimCdeDocumentsPanel({ projectId, empresaId, api = bimMo
     const [canManageAcl, setCanManageAcl] = useState(false);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
+    const [uploadOpen, setUploadOpen] = useState(false);
 
     const loadDocuments = useCallback(async () => {
         if (!projectId) return;
@@ -34,6 +37,7 @@ export default function BimCdeDocumentsPanel({ projectId, empresaId, api = bimMo
     }, [api, empresaId, includeArchived, projectId]);
 
     useEffect(() => { loadDocuments(); }, [loadDocuments]);
+    useEffect(() => { const onKey = (event) => event.key === 'Escape' && setUploadOpen(false); window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey); }, []);
     useEffect(() => {
         let active = true;
         if (!selectedId) { setRevisions([]); return undefined; }
@@ -102,9 +106,9 @@ export default function BimCdeDocumentsPanel({ projectId, empresaId, api = bimMo
     };
 
     return <section className="border border-slate-200 bg-white" data-bim-cde-documents>
-        <header className="flex items-center gap-2 border-b border-slate-200 px-3 py-2"><FileStack size={16} className="text-orange-600" /><h3 className="text-sm font-semibold text-slate-800">Documentos CDE</h3><label className="ml-auto flex items-center gap-1 text-[10px] text-slate-600"><input type="checkbox" checked={includeArchived} onChange={(event) => setIncludeArchived(event.target.checked)} />Archivados</label></header>
+        <header className="flex items-center gap-2 border-b border-slate-200 px-3 py-2"><FileStack size={16} className="text-orange-600" /><h3 className="text-sm font-semibold text-slate-800">Documentos CDE</h3><button type="button" onClick={() => setUploadOpen(true)} className="ml-auto inline-flex h-7 items-center gap-1 bg-orange-600 px-2.5 text-[11px] font-semibold text-white"><Upload size={13}/>Nueva revisión</button><label className="flex items-center gap-1 text-[10px] text-slate-600"><input type="checkbox" checked={includeArchived} onChange={(event) => setIncludeArchived(event.target.checked)} />Archivados</label></header>
         <div className="space-y-3 p-3 text-xs">
-            <form className="grid grid-cols-2 gap-2" onSubmit={upload}>
+            {legacyFormEnabled && <form className="hidden" onSubmit={upload}>
                 <input className="min-w-0 border border-slate-300 px-2 py-1.5" required aria-label="Codigo documental CDE" placeholder="Codigo documental" value={draft.document_code} onChange={(event) => setDraft({ ...draft, document_code: event.target.value })} />
                 <input className="min-w-0 border border-slate-300 px-2 py-1.5" required aria-label="Version documental CDE" placeholder="Version, p. ej. P01" value={draft.version_label} onChange={(event) => setDraft({ ...draft, version_label: event.target.value })} />
                 <input className="col-span-2 min-w-0 border border-slate-300 px-2 py-1.5" required aria-label="Titulo documental CDE" placeholder="Titulo" value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} />
@@ -112,7 +116,7 @@ export default function BimCdeDocumentsPanel({ projectId, empresaId, api = bimMo
                 <label className="flex min-w-0 cursor-pointer items-center gap-1 border border-dashed border-slate-300 px-2 py-1.5 text-slate-600"><Upload size={13} /><span className="truncate">{draft.file?.name || 'Seleccionar archivo'}</span><input className="sr-only" type="file" required aria-label="Archivo documental CDE" onChange={(event) => setDraft({ ...draft, file: event.target.files?.[0] || null })} /></label>
                 <input className="col-span-2 min-w-0 border border-slate-300 px-2 py-1.5" aria-label="Notas documentales CDE" placeholder="Notas de emision" value={draft.notes} onChange={(event) => setDraft({ ...draft, notes: event.target.value })} />
                 <button type="submit" disabled={busy || !draft.file || !draft.version_label.trim()} className="col-span-2 inline-flex h-8 items-center justify-center gap-1 bg-orange-600 font-semibold text-white disabled:opacity-40"><Upload size={14} />Registrar revision</button>
-            </form>
+            </form>}
             <div className="border-t border-slate-200 pt-3">
                 <select className="w-full border border-slate-300 px-2 py-1.5" aria-label="Documento CDE seleccionado" value={selectedId} onChange={(event) => setSelectedId(event.target.value)}><option value="">Sin documentos</option>{documents.map((item) => <option key={item.id} value={item.id}>{item.document_code} · {item.title}{item.status === 'archived' ? ' · ARCHIVADO' : ''}</option>)}</select>
                 {selected ? <div className="mt-2 flex items-center gap-2 text-[10px]"><span className="bg-slate-100 px-1.5 py-0.5 font-semibold">{CATEGORY_LABELS[selected.category] || selected.category}</span><strong className="text-slate-700">REV {String(selected.current_revision).padStart(3, '0')}</strong><span className="truncate text-slate-500">{selected.current?.checksum_sha256?.slice(0, 12)}</span></div> : null}
@@ -131,5 +135,6 @@ export default function BimCdeDocumentsPanel({ projectId, empresaId, api = bimMo
             <p className="text-[10px] text-slate-500">Repositorio BIM aislado. No modifica Documentos de Proyecto clasico.</p>
             {error ? <p role="alert" className="text-rose-700">{error}</p> : null}
         </div>
+        {uploadOpen ? <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/35 p-6"><form className="w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl" onSubmit={(event) => { upload(event); setUploadOpen(false); }} role="dialog" aria-modal="true" aria-labelledby="cde-upload-title"><header className="flex min-h-12 items-center border-b border-slate-200 px-5"><div><h3 id="cde-upload-title" className="text-sm font-semibold text-slate-900">Nueva revisión documental</h3><p className="text-[11px] text-slate-500">Incorpora una revisión al repositorio CDE BIM.</p></div><button type="button" onClick={() => setUploadOpen(false)} aria-label="Cerrar nueva revisión" className="ml-auto inline-flex size-8 items-center justify-center text-slate-500"><X size={16}/></button></header><div className="grid grid-cols-2 gap-3 p-5"><input autoFocus className="h-9 border border-slate-300 px-3 text-xs" required aria-label="Codigo documental CDE" placeholder="Código documental" value={draft.document_code} onChange={(event) => setDraft({ ...draft, document_code: event.target.value })}/><input className="h-9 border border-slate-300 px-3 text-xs" required aria-label="Version documental CDE" placeholder="Versión P01" value={draft.version_label} onChange={(event) => setDraft({ ...draft, version_label: event.target.value })}/><input className="col-span-2 h-9 border border-slate-300 px-3 text-xs" required aria-label="Titulo documental CDE" placeholder="Título" value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })}/><select className="h-9 border border-slate-300 px-2 text-xs" aria-label="Categoria documental CDE" value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value })}>{Object.entries(CATEGORY_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><label className="flex h-9 cursor-pointer items-center gap-2 border border-dashed border-slate-300 px-3 text-xs text-slate-600"><Upload size={13}/><span className="truncate">{draft.file?.name || 'Seleccionar archivo'}</span><input className="sr-only" type="file" required aria-label="Archivo documental CDE" onChange={(event) => setDraft({ ...draft, file: event.target.files?.[0] || null })}/></label><input className="col-span-2 h-9 border border-slate-300 px-3 text-xs" aria-label="Notas documentales CDE" placeholder="Notas de emisión" value={draft.notes} onChange={(event) => setDraft({ ...draft, notes: event.target.value })}/></div><footer className="flex min-h-12 items-center justify-end gap-2 border-t border-slate-200 px-5"><button type="button" onClick={() => setUploadOpen(false)} className="h-8 px-3 text-xs">Cancelar</button><button type="submit" disabled={busy || !draft.file || !draft.version_label.trim()} className="h-8 bg-orange-600 px-4 text-xs font-semibold text-white disabled:opacity-40">Registrar revisión</button></footer></form></div> : null}
     </section>;
 }

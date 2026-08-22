@@ -9,6 +9,42 @@ import { bimModelsApi } from '../../api/bimModels';
 import useBimRenderQuality from '../../hooks/useBimRenderQuality';
 import BimRenderQualityControl from './BimRenderQualityControl';
 
+const createIfcConversionTask = (sourceBytes) => {
+    const worker = new Worker(new URL('./ifcFragmentsWorker.js', import.meta.url), { type: 'module' });
+    let settled = false;
+    let rejectTask;
+    const promise = new Promise((resolve, reject) => {
+        rejectTask = reject;
+        worker.onmessage = (event) => {
+            if (settled) return;
+            settled = true;
+            worker.terminate();
+            if (!event.data?.ok) {
+                reject(new Error(event.data?.error || 'No se pudo convertir el IFC.'));
+                return;
+            }
+            resolve(new Uint8Array(event.data.bytes));
+        };
+        worker.onerror = (event) => {
+            if (settled) return;
+            settled = true;
+            worker.terminate();
+            reject(new Error(event.message || 'El worker de conversión IFC falló.'));
+        };
+    });
+    const input = sourceBytes.slice().buffer;
+    worker.postMessage({ bytes: input }, [input]);
+    return {
+        promise,
+        cancel: () => {
+            if (settled) return;
+            settled = true;
+            rejectTask(new Error('Conversión IFC cancelada.'));
+            worker.terminate();
+        },
+    };
+};
+
 const REVIEW_BUTTON_CLASS =
     'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition-colors hover:border-[#F39200] hover:text-[#F39200] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] disabled:cursor-not-allowed disabled:opacity-35';
 const EMPTY_REVIEW_STATE = {
@@ -70,7 +106,7 @@ const BimFragmentsViewport = ({
     const onViewerStateAppliedRef = useRef(onViewerStateApplied);
     const viewerStateDataRef = useRef(null);
     const appliedViewStateTokenRef = useRef(null);
-    const [state, setState] = useState({ status: 'idle', error: '', bytes: 0, localIds: 0, selectedGuid: '' });
+    const [state, setState] = useState({ status: 'idle', error: '', bytes: 0, localIds: 0, selectedGuid: '', source: '' });
     const [recoveryToken, setRecoveryToken] = useState(0);
     const [federationVisibleCount, setFederationVisibleCount] = useState(0);
     const [selectedLocalId, setSelectedLocalId] = useState(null);
@@ -115,6 +151,7 @@ const BimFragmentsViewport = ({
     }, [clipOffset, measurementUnit, reviewState, selectedLocalId, state.selectedGuid, versionId]);
 
     useEffect(() => {
+        const mountNode = mountRef.current;
         if (!versionId || (!projectId && !loadBytes)) {
             onAvailabilityRef.current?.(false);
             setState({ status: 'idle', error: '', bytes: 0, localIds: 0, selectedGuid: '' });
@@ -128,6 +165,7 @@ const BimFragmentsViewport = ({
         let canvas = null;
         let handlePointerDown = null;
         let handleContextLost = null;
+        let conversionTask = null;
 
         const run = async () => {
             try {
@@ -136,6 +174,7 @@ const BimFragmentsViewport = ({
                 setReviewState(EMPTY_REVIEW_STATE);
                 setState((current) => ({ ...current, status: 'loading', error: '' }));
                 let artifactBytes;
+                let artifactSource = 'registered_fragments';
                 let memberPayloads;
                 if (loadMemberBytes) {
                     memberPayloads = (await Promise.all(renderMembers.map(async (member) => ({
@@ -149,15 +188,23 @@ const BimFragmentsViewport = ({
                 } else {
                     memberPayloads = (await Promise.all(renderMembers.map(async (member) => {
                         const artifacts = await bimModelsApi.listArtifacts(projectId, member.version_id, empresaId);
-                        const artifact = (artifacts || []).find((item) => item.artifact_type === 'fragments' && item.status === 'active');
-                        if (!artifact) return null;
-                        const bytes = await bimModelsApi.downloadArtifact(projectId, artifact.id, empresaId);
-                        return { ...member, bytes };
+                        const fragmentsArtifact = (artifacts || []).find((item) => item.artifact_type === 'fragments' && item.status === 'active');
+                        if (fragmentsArtifact) {
+                            const bytes = await bimModelsApi.downloadArtifact(projectId, fragmentsArtifact.id, empresaId);
+                            return { ...member, bytes, artifactSource: 'registered_fragments' };
+                        }
+                        const sourceArtifact = (artifacts || []).find((item) => item.artifact_type === 'source_ifc' && item.status === 'active');
+                        if (!sourceArtifact) return null;
+                        const sourceBytes = await bimModelsApi.downloadArtifact(projectId, sourceArtifact.id, empresaId);
+                        conversionTask = createIfcConversionTask(sourceBytes);
+                        const bytes = await conversionTask.promise;
+                        return { ...member, bytes, artifactSource: 'source_ifc' };
                     }))).filter(Boolean);
                     artifactBytes = memberPayloads[0]?.bytes;
+                    artifactSource = memberPayloads[0]?.artifactSource || artifactSource;
                 }
                 if (disposed) return;
-                const mount = mountRef.current;
+                const mount = mountNode;
                 if (!mount) throw new Error('No se pudo montar el canvas Fragments.');
                 if (!artifactBytes?.byteLength || !memberPayloads?.length) throw new Error('No hay artifacts Fragments activos para la federacion.');
 
@@ -355,6 +402,7 @@ const BimFragmentsViewport = ({
                         bytes: memberPayloads.reduce((total, member) => total + member.bytes.byteLength, 0),
                         localIds: memberLocalIds.reduce((total, member) => total + member.localIds.length, 0),
                         selectedGuid: '',
+                        source: artifactSource,
                     });
                     setFederationVisibleCount(memberPayloads.filter((member) => member.enabled !== false).length);
                 }
@@ -369,6 +417,7 @@ const BimFragmentsViewport = ({
         run();
         return () => {
             disposed = true;
+            conversionTask?.cancel();
             runtimeRef.current = null;
             resizeObserver?.disconnect();
             if (canvas && handlePointerDown) canvas.removeEventListener('pointerdown', handlePointerDown);
@@ -376,9 +425,9 @@ const BimFragmentsViewport = ({
             controls?.dispose();
             if (fragments) void fragments.dispose();
             renderer?.dispose();
-            mountRef.current?.replaceChildren();
+            mountNode?.replaceChildren();
         };
-    }, [empresaId, federationStructureKey, loadBytes, loadMemberBytes, projectId, recoveryToken, renderQuality.pixelRatio, versionId]);
+    }, [empresaId, federationStructureKey, loadBytes, loadMemberBytes, projectId, recoveryToken, renderMembers, renderQuality.pixelRatio, versionId]);
 
     useEffect(() => {
         const runtime = runtimeRef.current;
@@ -704,6 +753,7 @@ const BimFragmentsViewport = ({
             data-bim-fragments-product-bytes={state.bytes}
             data-bim-fragments-product-local-ids={state.localIds}
             data-bim-fragments-product-selection={state.selectedGuid}
+            data-bim-fragments-product-source={state.source}
             data-bim-review-hidden={reviewState.hiddenCount}
             data-bim-review-isolated={reviewState.isolated}
             data-bim-review-ghosted={reviewState.ghosted}
@@ -774,7 +824,17 @@ const BimFragmentsViewport = ({
                     </div>
                 ) : null}
             </div>
-            <div ref={mountRef} className="relative min-h-[360px] flex-1 bg-[#f7f7f5]" />
+            <div ref={mountRef} className="relative min-h-[360px] flex-1 bg-[#f7f7f5]">
+                {state.status === 'loading' ? (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#f7f7f5] px-6 text-center" role="status">
+                        <div>
+                            <Box className="mx-auto mb-3 h-8 w-8 animate-pulse text-[#F39200]" />
+                            <p className="text-sm font-bold text-zinc-800">Preparando visor 3D</p>
+                            <p className="mt-1 max-w-sm text-xs leading-5 text-zinc-500">El IFC se está procesando fuera del hilo principal. Puedes seguir usando el resto de GiProy.</p>
+                        </div>
+                    </div>
+                ) : null}
+            </div>
             {state.error ? <p className="border-t border-zinc-100 px-3 py-2 text-xs font-semibold text-rose-700" role="alert">{state.error}</p> : null}
         </section>
     );

@@ -135,7 +135,7 @@ def test_resolve_rows_dates_finish_finish_aligns_target_finish_to_source_finish(
     assert resolved[1].start_date > datetime(2026, 3, 30, 0, 0, 0)
 
 
-def test_resolve_rows_dates_finish_finish_rejects_start_before_project_start():
+def test_resolve_rows_dates_finish_finish_floors_start_to_project_boundary():
     config = CronogramaTrabajoConfig(
         jornada_laboral_horas=8,
         hora_inicio_jornada=8,
@@ -170,23 +170,21 @@ def test_resolve_rows_dates_finish_finish_rejects_start_before_project_start():
         ),
     ]
 
-    try:
-        cronograma_trabajo_service._resolve_rows_dates(
-            rows,
-            datetime(2026, 3, 24, 8, 0, 0),
-            {
-                "1": {"start_date": "2026-03-24T08:00:00"},
-                "2": {
-                    "dependencies": [{"source_id": 1, "type": "FF", "lag_days": 0}],
-                },
+    project_start = datetime(2026, 3, 24, 8, 0, 0)
+    resolved = cronograma_trabajo_service._resolve_rows_dates(
+        rows,
+        project_start,
+        {
+            "1": {"start_date": "2026-03-24T08:00:00"},
+            "2": {
+                "dependencies": [{"source_id": 1, "type": "FF", "lag_days": 0}],
             },
-            config,
-        )
-    except ValueError as error:
-        assert "ninguna tarea puede iniciar antes" in str(error)
-        assert "1.1.2" in str(error)
-    else:
-        raise AssertionError("La relacion FF debio rechazarse por iniciar antes del proyecto")
+        },
+        config,
+    )
+
+    assert resolved[1].start_date >= project_start
+    assert resolved[1].end_date >= resolved[0].end_date
 
 
 def test_decorate_rows_with_cpm_metadata_marks_critical_path_without_changing_visible_schedule():
@@ -312,10 +310,10 @@ def test_decorate_rows_with_cpm_metadata_reports_schedule_drift_without_mutating
     assert enriched[1].metadata["cpm_schedule_alignment"]["has_drift"] is True
     assert enriched[1].metadata["cpm_schedule_alignment"]["status"] == "warning"
     assert enriched[1].metadata["cpm_schedule_alignment"]["drift_start_days"] == -3.0
-    assert enriched[1].metadata["cpm_schedule_alignment"]["drift_duration_days"] == 0.0
+    assert enriched[1].metadata["cpm_schedule_alignment"]["drift_duration_days"] == 1.0
     assert enriched[1].metadata["cpm_schedule_alignment"]["recommended_start"] == "2026-04-13T08:00:00"
-    assert enriched[1].metadata["cpm_schedule_alignment"]["recommended_finish"] == "2026-04-14T16:00:00"
-    assert enriched[1].metadata["cpm_schedule_alignment"]["recommended_duration_days"] == 2.0
+    assert enriched[1].metadata["cpm_schedule_alignment"]["recommended_finish"] == "2026-04-13T16:00:00"
+    assert enriched[1].metadata["cpm_schedule_alignment"]["recommended_duration_days"] == 1.0
     assert enriched[1].metadata["cpm_schedule_alignment"]["manual_reconciliation_eligible"] is True
     assert enriched[1].metadata["cpm_schedule_alignment"]["manual_reconciliation_reason"] == ""
 

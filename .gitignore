@@ -113,6 +113,10 @@ docs/runtime/*
 *.key
 *.crt
 *.cert
+*.lic
+*.pfx
+*.p12
+*.jks
 secrets/
 .secrets/
 *.gpg
@@ -153,3 +157,11 @@ authorized_keys
 .turbo/
 .bun/
 .yarn/
+.next/
+.vercel/
+
+# Perfil temporal del navegador usado para capturar el manual
+manual-usuario/.capture-browser/
+
+# Evidencia de release generada (se adjunta al expediente, no al código fuente)
+dist/compliance/

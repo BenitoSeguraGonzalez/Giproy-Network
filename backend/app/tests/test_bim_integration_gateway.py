@@ -16,7 +16,7 @@ from app.tests.test_bim_erp_exchange import _context
 
 
 def test_bim_integration_gateway_endpoints_are_registered():
-    routes = {(route.path, method) for route in app.routes for method in getattr(route, "methods", set())}
+    routes = {(path, method.upper()) for path, operations in app.openapi()["paths"].items() for method in operations}
     base = "/api/v1/bim/projects/{project_id}/integration"
     assert (f"{base}/subscriptions", "GET") in routes
     assert (f"{base}/subscriptions", "POST") in routes

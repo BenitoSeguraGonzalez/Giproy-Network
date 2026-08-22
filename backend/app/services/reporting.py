@@ -1577,6 +1577,15 @@ class ReportingService:
             ],
             fill=orange,
         )
+        attribution = "© OpenStreetMap contributors · openstreetmap.org/copyright"
+        text_box = draw.textbbox((0, 0), attribution)
+        text_width = text_box[2] - text_box[0]
+        text_height = text_box[3] - text_box[1]
+        padding = 5
+        attribution_x = max(width - text_width - (padding * 2), 0)
+        attribution_y = max(height - text_height - (padding * 2), 0)
+        draw.rectangle((attribution_x, attribution_y, width, height), fill=(255, 255, 255))
+        draw.text((attribution_x + padding, attribution_y + padding), attribution, fill=(24, 24, 27))
 
         buffer = io.BytesIO()
         canvas_image.save(buffer, format="PNG", optimize=True)

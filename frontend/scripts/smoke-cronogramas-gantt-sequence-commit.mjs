@@ -177,8 +177,8 @@ assert.match(
 
 assert.match(
     ganttSource,
-    /<motion\.div[\s\S]*?Herramientas[\s\S]*?min-h-\[46px\][\s\S]*?Factory reset/,
-    'El menu de herramientas del Gantt debe abrir animado y usar filas oscuras tipo tarjeta',
+    /<div[\s\S]*?animate-in fade-in slide-in-from-top-1 zoom-in-95[\s\S]*?motion-reduce:animate-none[\s\S]*?Herramientas[\s\S]*?min-h-\[46px\][\s\S]*?Factory reset/,
+    'El menu de herramientas del Gantt debe abrir animado por CSS, respetar movimiento reducido y usar filas oscuras tipo tarjeta',
 );
 
 assert.match(

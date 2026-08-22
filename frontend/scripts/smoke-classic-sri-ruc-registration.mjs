@@ -15,6 +15,10 @@ for (const token of [
 assert.equal(register.includes('En revisión manual'), true);
 assert.equal(register.includes('certificate_code'), true);
 assert.equal(personnel.includes('catálogo PostgreSQL'), true);
+assert.equal(personnel.includes("consulta SRI se aplica únicamente a Ecuador"), true);
+assert.equal(register.includes("countryLocked={false}"), true, 'El país debe permanecer editable en el registro público.');
+assert.equal(register.includes("pais: 'Ecuador'"), false, 'El registro público no debe forzar Ecuador.');
+assert.equal(register.includes("isRucRequired && rucLookup?.requires_manual_review"), true);
 assert.equal(admin.includes('24'), true);
 
 for (const source of [api, register, personnel, admin]) {

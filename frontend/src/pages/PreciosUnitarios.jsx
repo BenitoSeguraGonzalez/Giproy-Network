@@ -3,20 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import useMarketplaceOrigin from '../hooks/useMarketplaceOrigin';
-import MarketplaceOriginBadgeSet, { getMarketplaceOwnershipTone } from '../components/marketplace/MarketplaceOriginBadgeSet';
+import MarketplaceOriginBadgeSet from '../components/marketplace/MarketplaceOriginBadgeSet';
 import {
     Database,
     LayoutGrid,
     Wrench,
     FileSpreadsheet,
     ArrowLeft,
-    ChevronRight
+    ChevronRight,
 } from 'lucide-react';
+
+
 const PreciosUnitarios = () => {
     const navigate = useNavigate();
     const { selectedBaseTrabajo } = useContext(AuthContext);
     const activeBaseOrigin = useMarketplaceOrigin('base_trabajo', selectedBaseTrabajo?.id);
-    const activeBaseTone = getMarketplaceOwnershipTone(activeBaseOrigin);
 
     const menuItems = [
         {
@@ -65,7 +66,12 @@ const PreciosUnitarios = () => {
         <div className="h-full min-h-0 flex flex-col bg-[#F8FAFC] overflow-hidden">
             <div className="flex-shrink-0 z-40 bg-white/80 backdrop-blur-md border-b border-zinc-200 px-8 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-zinc-100 rounded-xl transition-colors">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/dashboard')}
+                        aria-label="Volver al panel principal"
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] focus-visible:ring-offset-2"
+                    >
                         <ArrowLeft className="w-5 h-5 text-zinc-500" />
                     </button>
                     <div>
@@ -75,10 +81,10 @@ const PreciosUnitarios = () => {
                 </div>
 
                 {selectedBaseTrabajo && (
-                    <div className="flex items-center gap-3 bg-zinc-900 px-6 py-2 rounded-2xl border border-zinc-800 shadow-xl shadow-black/10 transition-all hover:scale-105">
+                    <div className="flex items-center gap-3 bg-zinc-900 px-6 py-2 rounded-2xl border border-zinc-800 shadow-lg shadow-black/10 transition-[border-color,box-shadow] duration-200">
                         <Database className="w-4 h-4 text-[#F39200] animate-pulse" />
                         <div className="flex flex-col">
-                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500 italic">Base Técnica Activa</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400">Base Técnica Activa</span>
                             <div className="flex items-center gap-2 mt-0.5">
                                 <MarketplaceOriginBadgeSet
                                     origin={activeBaseOrigin}
@@ -99,10 +105,13 @@ const PreciosUnitarios = () => {
                         const isDisabled = item.requiredBase && !selectedBaseTrabajo;
 
                         return (
-                            <div
+                            <button
+                                type="button"
                                 key={item.id}
-                                onClick={() => !isDisabled && navigate(item.path)}
-                                className={`group relative overflow-hidden bg-white border border-zinc-200 p-10 rounded-[2.5rem] transition-all duration-500 
+                                disabled={isDisabled}
+                                onClick={() => navigate(item.path)}
+                                aria-describedby={isDisabled ? `${item.id}-requirement` : undefined}
+                                className={`group relative w-full overflow-hidden bg-white border border-zinc-200 p-10 rounded-[2.5rem] text-left transition-[border-color,box-shadow,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39200] focus-visible:ring-offset-2
                                     ${isDisabled
                                         ? 'opacity-60 cursor-not-allowed grayscale-[0.5]'
                                         : 'cursor-pointer hover:border-zinc-300 hover:shadow-2xl hover:shadow-black/5 active:scale-[0.98]'}`}
@@ -120,19 +129,19 @@ const PreciosUnitarios = () => {
                                 </p>
 
                                 {isDisabled && (
-                                    <div className="absolute top-6 right-6 flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200">
+                                    <div id={`${item.id}-requirement`} className="absolute top-6 right-6 flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full border border-zinc-200">
                                         <Database className="w-3 h-3" />
-                                        <span className="text-[8px] font-black uppercase tracking-widest">Base Requerida</span>
+                                        <span className="text-[10px] font-black uppercase tracking-[0.14em]">Base requerida</span>
                                     </div>
                                 )}
 
                                 <div className="absolute bottom-10 right-10 flex items-center">
-                                    <div className={`p-3 rounded-full transition-all duration-500 ${isDisabled ? 'bg-zinc-50 text-zinc-300' : 'bg-white text-zinc-300 border border-zinc-200 group-hover:text-[#F39200] group-hover:border-amber-200 group-hover:bg-amber-50'}`}>
+                                    <div className={`p-3 rounded-full transition-[color,background-color,border-color] duration-200 ${isDisabled ? 'bg-zinc-50 text-zinc-500' : 'bg-white text-amber-800 border border-zinc-200 group-hover:text-amber-950 group-hover:border-amber-300 group-hover:bg-amber-50'}`}>
                                         <ChevronRight className="w-5 h-5" />
                                     </div>
                                 </div>
 
-                            </div>
+                            </button>
                         );
                     })}
                 </div>

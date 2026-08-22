@@ -5,6 +5,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 import logging
+import hashlib
+import hmac
 import secrets
 import uuid
 import jwt
@@ -24,6 +26,7 @@ from app.utils.email_utils import send_registration_verification_email, send_res
 from app.models.empresa import Empresa
 from app.models.empresa_licencia import EmpresaLicencia
 from app.models.usuario import Usuario
+from app.models.legal_acceptance import LegalAcceptance
 from app.core.debug_logger import log_debug as log_auth
 from app.services.audit_event import record_audit_event
 from app.services.license_policy import get_license_login_notice, get_license_status
@@ -97,6 +100,13 @@ def _normalize_register_email(email: str) -> str:
 
 def _normalize_register_ruc(ruc: Optional[str]) -> Optional[str]:
     normalized = normalize_ruc(ruc)
+    return normalized or None
+
+
+def _normalize_register_tax_identifier(value: Optional[str], *, is_ecuador: bool) -> Optional[str]:
+    if is_ecuador:
+        return _normalize_register_ruc(value)
+    normalized = str(value or "").strip().upper()
     return normalized or None
 
 
@@ -375,19 +385,38 @@ def register_validar_ruc(
     return usuario_service.validar_ruc_public(ruc=ruc, db=db)
 
 
+@router.get("/legal/manifest")
+def legal_manifest() -> dict:
+    from app.core.legal_documents import public_legal_manifest
+
+    return public_legal_manifest()
+
+
 @router.post("/register", response_model=RegisterPendingResponse)
-def register_user(*, db: Session = Depends(get_db), user_in: UsuarioRegister) -> dict:
+def register_user(request: Request, *, db: Session = Depends(get_db), user_in: UsuarioRegister) -> dict:
+    from app.core.legal_documents import (
+        PRIVACY_SHA256, PRIVACY_VERSION, TERMS_SHA256, TERMS_VERSION,
+    )
+
+    if not user_in.acepta_terminos or not user_in.acepta_politica_privacidad:
+        raise HTTPException(status_code=400, detail="Debe aceptar los Términos y la Política de Privacidad vigentes.")
+    if user_in.terminos_version != TERMS_VERSION or user_in.privacidad_version != PRIVACY_VERSION:
+        raise HTTPException(status_code=409, detail="Los documentos legales cambiaron. Revise y acepte la versión vigente.")
     email = _normalize_register_email(user_in.email)
-    ruc = _normalize_register_ruc(user_in.ruc)
-    if (user_in.pais or "").strip().lower() != "ecuador":
-        raise HTTPException(status_code=400, detail="El registro fiscal automatizado está disponible inicialmente para Ecuador.")
+    country = _normalize_public_register_text(user_in.pais)
+    if not country:
+        raise HTTPException(status_code=400, detail="Debe seleccionar el país de la empresa.")
+    is_ecuador = country.casefold() == "ecuador"
+    ruc = _normalize_register_tax_identifier(user_in.ruc, is_ecuador=is_ecuador)
     _purge_expired_pending_registration_tokens(db, email=email)
     if ruc:
         _purge_expired_pending_registration_tokens(db, ruc=ruc)
     user = db.query(Usuario).filter(func.lower(Usuario.email) == email).first()
     if user:
         raise HTTPException(status_code=400, detail="Ya existe un registro con este correo electrónico.")
-    if not ruc or len(ruc) != 13:
+    if not ruc or len(ruc) > 20:
+        raise HTTPException(status_code=400, detail="La identificación fiscal debe contener entre 1 y 20 caracteres.")
+    if is_ecuador and (len(ruc) != 13 or not ruc.isdigit()):
         raise HTTPException(status_code=400, detail="El RUC empresarial debe contener exactamente 13 dígitos.")
     if db.query(Empresa.id).filter(Empresa.ruc == ruc).first():
         raise HTTPException(status_code=400, detail="No es posible completar el registro con los datos indicados.")
@@ -396,22 +425,28 @@ def register_user(*, db: Session = Depends(get_db), user_in: UsuarioRegister) ->
             raise HTTPException(status_code=400, detail="El móvil debe tener un formato válido.")
         user_in.movil = normalize_phone(user_in.movil, user_in.pais)
 
-    fiscal_data = lookup_ruc(db, ruc)
+    fiscal_data = lookup_ruc(db, ruc) if is_ecuador else None
     manual_approval = None
-    if fiscal_data and fiscal_data.get("source") == "sri_certificate":
+    if is_ecuador and fiscal_data and fiscal_data.get("source") == "sri_certificate":
         if user_in.ruc_verification_token:
             manual_approval = consume_registration_token(
                 db, raw_token=user_in.ruc_verification_token, ruc=ruc, email=email
             )
         if manual_approval is None:
             raise HTTPException(status_code=409, detail="El RUC requiere el enlace personal de aprobación enviado por correo.")
-    elif not fiscal_data:
+    elif is_ecuador and not fiscal_data:
         raise HTTPException(
             status_code=409,
             detail="El RUC no consta en la importación vigente. Solicita verificación; quedará En revisión manual.",
         )
 
-    empresa_nombre = fiscal_data["business_name"]
+    empresa_nombre = (
+        fiscal_data["business_name"]
+        if is_ecuador
+        else _normalize_public_register_text(user_in.empresa_nombre)
+    )
+    if not empresa_nombre:
+        raise HTTPException(status_code=400, detail="Debe indicar la razón social o nombre legal de la empresa.")
     empresa_alias = _normalize_public_register_text(user_in.empresa_alias)
     
     new_empresa = Empresa(
@@ -419,16 +454,20 @@ def register_user(*, db: Session = Depends(get_db), user_in: UsuarioRegister) ->
         alias=empresa_alias,
         ruc=ruc,
         email=email,
-        contacto_nombre=empresa_nombre,
+        contacto_nombre=_normalize_public_register_text(user_in.nombre_completo),
         contacto_email=email,
         contacto_telefono=user_in.movil,
-        fiscal_status=fiscal_data.get("status"),
-        fiscal_taxpayer_type=fiscal_data.get("taxpayer_type"),
-        fiscal_start_date=fiscal_data.get("start_date"),
-        fiscal_economic_activity=fiscal_data.get("economic_activity"),
-        fiscal_source=fiscal_data.get("source"),
-        fiscal_source_date=fiscal_data.get("source_date"),
-        fiscal_verified_at=datetime.now(timezone.utc),
+        localidad=user_in.ciudad,
+        canton=user_in.canton,
+        provincia=user_in.provincia,
+        pais=country,
+        fiscal_status=fiscal_data.get("status") if fiscal_data else None,
+        fiscal_taxpayer_type=fiscal_data.get("taxpayer_type") if fiscal_data else None,
+        fiscal_start_date=fiscal_data.get("start_date") if fiscal_data else None,
+        fiscal_economic_activity=fiscal_data.get("economic_activity") if fiscal_data else None,
+        fiscal_source=fiscal_data.get("source") if fiscal_data else "self_declared",
+        fiscal_source_date=fiscal_data.get("source_date") if fiscal_data else None,
+        fiscal_verified_at=datetime.now(timezone.utc) if fiscal_data else None,
         activa=False,
         limite_administradores=1,
         limite_usuarios=0,
@@ -462,7 +501,7 @@ def register_user(*, db: Session = Depends(get_db), user_in: UsuarioRegister) ->
         ciudad=user_in.ciudad,
         provincia=user_in.provincia,
         canton=user_in.canton,
-        pais=user_in.pais,
+        pais=country,
         movil=user_in.movil,
         acepta_politica_privacidad=user_in.acepta_politica_privacidad,
         fecha_aceptacion_politica_privacidad=now if user_in.acepta_politica_privacidad else None,
@@ -470,8 +509,32 @@ def register_user(*, db: Session = Depends(get_db), user_in: UsuarioRegister) ->
         fecha_aceptacion_politicas_comunicacion=now if user_in.acepta_politicas_comunicacion else None,
         autoriza_publicidad=user_in.autoriza_publicidad,
         fecha_autorizacion_publicidad=now if user_in.autoriza_publicidad else None
+        ,acepta_terminos=True
+        ,terminos_version=TERMS_VERSION
+        ,terminos_sha256=TERMS_SHA256
+        ,privacidad_version=PRIVACY_VERSION
+        ,privacidad_sha256=PRIVACY_SHA256
+        ,consentimiento_origen="registro_web"
     )
     db.add(new_user)
+    db.flush()
+    remote_address = request.client.host if request.client else ""
+    ip_hmac = hmac.new(settings.SECRET_KEY.encode("utf-8"), remote_address.encode("utf-8"), hashlib.sha256).hexdigest() if remote_address else None
+    user_agent = request.headers.get("user-agent", "")
+    user_agent_sha256 = hashlib.sha256(user_agent.encode("utf-8")).hexdigest() if user_agent else None
+    evidence = [
+        ("terms", TERMS_VERSION, TERMS_SHA256, True, "contract"),
+        ("privacy", PRIVACY_VERSION, PRIVACY_SHA256, True, "service_and_legal"),
+        ("communications", TERMS_VERSION, TERMS_SHA256, user_in.acepta_politicas_comunicacion, "informational_messages"),
+        ("advertising", PRIVACY_VERSION, PRIVACY_SHA256, user_in.autoriza_publicidad, "marketing"),
+    ]
+    for document_type, version, digest, accepted, purpose in evidence:
+        db.add(LegalAcceptance(
+            usuario_id=new_user.id, empresa_id=new_empresa.id, document_type=document_type,
+            document_version=version, document_sha256=digest, accepted=accepted,
+            purpose=purpose, origin="registro_web", request_ip_hmac=ip_hmac,
+            user_agent_sha256=user_agent_sha256, accepted_at=now,
+        ))
     try:
         db.commit()
     except Exception:

@@ -42,6 +42,7 @@ planificacion legacy y no deben reutilizarse para cerrar trabajo BIM nuevo.
 ### TASK madre de control BIM
 
 - [BIM-TASK-0000](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0000.md)
+- [BIM-TASK-0194 - Adaptador Leaflet permisivo](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0194.md)
 
 ### Subtasks del programa BIM
 
@@ -192,6 +193,9 @@ Al retomar el programa BIM, el orden correcto es:
   vacio, resize, seleccion GUID, recovery y disposal desktop/tablet/movil
 - shell UX profesional cubierta con contexto empresa/proyecto/modelo/version,
   toolbar funcional, modos Fragments/2D y explorer/inspector adaptables
+- el workspace de Modelo consume el artifact Fragments activo o convierte el
+  `source_ifc` de la version seleccionada con `IfcImporter`; no conserva una
+  geometria sintética de reemplazo y expresa ausencia de seleccion en 2D/3D
 - explorer BIM cubierto con arbol/tabla, agrupaciones, busqueda servidor sobre
   propiedades y paginacion real validada con mas de mil elementos
 - herramientas Fragments de revision cubiertas para ocultar, aislar, ghost,
@@ -379,6 +383,7 @@ beta como frontend-only; conserva imagen y fuentes previas para rollback.
 - [BIM-TASK-0188](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0188.md) - Adaptador controlado Primavera P6 XER
 - [BIM-TASK-0189](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0189.md) - Resolucion fisica compatible en workspace BIM
 - [BIM-TASK-0190](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0190.md) - Error BIM serializable en la interfaz React
+- [BIM-TASK-0196](/e:/Repositorios/GiProy%20Network/docs/tasks/bim/BIM-TASK-0196.md) - Visor IFC real por version y estados vacios 2D/3D
 - [BIM_CONFORMANCE_EVIDENCE.md](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_CONFORMANCE_EVIDENCE.md) - Evidencia ISO 19650/openBIM y limites de certificacion
 - [BIM_GATE_E_PILOT_PROTOCOL.md](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_GATE_E_PILOT_PROTOCOL.md) - Contrato de diez jornadas y dos revisiones reales
 - [BIM_GATE_K_RELEASE_PROTOCOL.md](/e:/Repositorios/GiProy%20Network/docs/architecture/BIM_GATE_K_RELEASE_PROTOCOL.md) - Condiciones acumulativas de liberacion general

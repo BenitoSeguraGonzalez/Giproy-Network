@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import { PLANTILLAS_OPCIONES } from '../constants/plantillas';
 import { Trash2, Edit2, Plus, Save, X, Building2, Users, Settings as SettingsIcon, Shield, Camera, Globe, ChevronDown, Check, AlertCircle, Info, RefreshCw, Loader2, CheckCircle2, XCircle, AlertTriangle, Briefcase, FileText, Eye, ShieldCheck, Search, Power, ArrowLeft, Building, Loader2 as LoaderIcon, CheckCircle2 as CheckIcon, XCircle as XIcon, AlertTriangle as AlertIcon, ShieldCheck as ShieldIcon } from 'lucide-react';
@@ -333,7 +333,7 @@ const Settings = () => {
         } finally {
             setLoading(false);
         }
-    }, [activeTab, user?.rol, user?.empresa_id, selectedEmpresa?.id, selectedBaseTrabajo?.tipo, selectedBaseTrabajo?.id, isSuperAdmin]);
+    }, [activeTab, user?.empresa_id, selectedEmpresa?.id, selectedBaseTrabajo?.tipo, selectedBaseTrabajo?.id, isSuperAdmin, setSelectedEmpresa]);
 
     const fetchPaises = useCallback(async () => {
         try {
@@ -658,7 +658,7 @@ const Settings = () => {
         if (requestedTab === 'usuarios' && user?.rol !== 'usuario') {
             setActiveTab('usuarios');
         }
-    }, [requestedTab, user?.rol, isSuperAdmin]);
+    }, [requestedTab, user?.rol, isSuperAdmin, navigate]);
 
     useEffect(() => {
         fetchData();
@@ -709,6 +709,7 @@ const Settings = () => {
         setDeleteEmpresaStep(1);
         setShowDeleteEmpresaModal(true);
     };
+
 
     const handleDeleteEmpresaConfirm = async () => {
         if (!empresaToDelete) return;
@@ -766,7 +767,7 @@ const Settings = () => {
             fetchData();
         } catch (error) {
             globalThis.reportClientError?.("Error al procesar empresa:", error);
-            appAlert("Error al procesar empresa");
+            appAlert(error.response?.data?.detail || "Error al procesar empresa");
         }
     };
 
@@ -884,7 +885,7 @@ const Settings = () => {
             empresa_id: user.empresa_id || '',
         });
         marketplaceProfileEditHandledRef.current = true;
-    }, [requestedEditUser, user, isSuperAdmin]);
+    }, [requestedEditUser, user, isSuperAdmin, navigate]);
 
     const handleDeleteUsuario = async (u) => {
         const role = (u.rol || '').toLowerCase();
@@ -1442,15 +1443,15 @@ const Settings = () => {
                                         Uso de OmniClass
                                     </Label>
                                     <p className="text-[10px] text-zinc-500 font-medium leading-relaxed">
-                                        Si se desactiva, GiProy conserva los códigos de origen pero deja de resolver la estructura común en catálogos, APUs, presupuesto, Gantt y BIM.
+                                        Si se desactiva, GiProy conserva los códigos de origen pero deja de resolver la estructura común en catálogos, APUs, presupuesto, Gantt y modelos coordinados.
                                     </p>
                                     {miEmpresa?.use_omniclass === false ? (
                                         <div className="mt-3 border border-amber-300 bg-amber-50 p-3 text-[10px] font-semibold leading-relaxed text-amber-950" role="alert">
                                             <div className="flex gap-2">
                                             <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                                            <span>Ruptura estructural activa: presupuesto, planificación y modelos BIM pueden usar clasificaciones incompatibles. Los vínculos se conservarán, pero no podrán considerarse plenamente coordinados.</span>
+                                            <span>Ruptura estructural activa: presupuesto, planificación y modelos digitales pueden usar clasificaciones incompatibles. Los vínculos se conservarán, pero no podrán considerarse plenamente coordinados.</span>
                                             </div>
-                                            <label className="mt-3 flex items-start gap-2 normal-case tracking-normal"><Checkbox checked={omniclassBreakAcknowledged} onCheckedChange={(checked) => setOmniclassBreakAcknowledged(checked === true)} className="mt-0.5" /><span>Comprendo que Presupuesto, Gantt y BIM dejarán de compartir una clasificación contractual común.</span></label>
+                                            <label className="mt-3 flex items-start gap-2 normal-case tracking-normal"><Checkbox checked={omniclassBreakAcknowledged} onCheckedChange={(checked) => setOmniclassBreakAcknowledged(checked === true)} className="mt-0.5" /><span>Comprendo que Presupuesto, Gantt y los modelos digitales dejarán de compartir una clasificación contractual común.</span></label>
                                             <Label htmlFor="omniclass-change-reason" className="mt-3 block text-[10px] font-bold text-amber-950">Motivo de desactivación</Label>
                                             <textarea id="omniclass-change-reason" value={omniclassChangeReason} onChange={(event) => setOmniclassChangeReason(event.target.value)} rows={3} className="mt-1 w-full resize-none rounded-lg border border-amber-300 bg-white p-2 text-xs font-medium text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600" placeholder="Explique por qué el proyecto operará sin coordinación OmniClass" />
                                         </div>
@@ -2030,12 +2031,6 @@ const Settings = () => {
                                                                 onClick={() => {
                                                                     setCompanyBackupInternalRestoreTarget(item);
                                                                     setCompanyBackupRestoreResult(null);
-                                                                    setCompanyBackupRestoreConfirmations({
-                                                                        impact: '',
-                                                                        companyName: '',
-                                                                        userEmail: '',
-                                                                        phrase: '',
-                                                                    });
                                                                 }}
                                                                 className="inline-flex min-h-[36px] items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-3 text-[9px] font-black uppercase tracking-[0.16em] text-red-700 transition-colors hover:bg-red-50"
                                                             >
@@ -2878,7 +2873,7 @@ const Settings = () => {
 
                     <div className="flex-1">
                         <AnimatePresence mode="wait">
-                            <motion.div
+                            <Motion.div
                                 key={activeTab}
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -2891,14 +2886,16 @@ const Settings = () => {
                                         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Sincronizando Sistema...</p>
                                     </div>
                                 ) : (
-                                    activeTab === 'preferencias' ? renderPreferencias() :
+                                    activeTab === 'empresas' ? renderEmpresas() :
+                                            activeTab === 'superadmins' ? renderSuperadmins() :
+                                            activeTab === 'preferencias' ? renderPreferencias() :
                                             activeTab === 'mi-empresa' ? renderMiEmpresa() :
                                                 activeTab === 'backup-empresa' ? renderCompanyBackupPanel() :
                                                 activeTab === 'config-proyecto' ? renderProyectoConfig() :
                                                     activeTab === 'plantillas' ? renderPlantillasConfig() :
                                                         renderUsuarios()
                                 )}
-                            </motion.div>
+                            </Motion.div>
                         </AnimatePresence>
                     </div>
                 </div>
@@ -2967,8 +2964,9 @@ const Settings = () => {
                                     </div>
                                     <div className="grid grid-cols-1 gap-4">
                                         <div className="space-y-2">
-                                            <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">RUC</Label>
-                                            <Input required value={newEmpresa.ruc} onChange={e => setNewEmpresa({ ...newEmpresa, ruc: e.target.value })} className="h-12 rounded-xl bg-zinc-50 border-zinc-200" />
+                                            <Label className="text-[10px] uppercase font-black tracking-widest text-zinc-400 ml-1">{newEmpresa.pais === 'Ecuador' ? 'RUC' : 'Identificación fiscal'}</Label>
+                                            <Input required maxLength={newEmpresa.pais === 'Ecuador' ? 13 : 20} inputMode={newEmpresa.pais === 'Ecuador' ? 'numeric' : 'text'} value={newEmpresa.ruc} onChange={e => setNewEmpresa({ ...newEmpresa, ruc: e.target.value })} className="h-12 rounded-xl bg-zinc-50 border-zinc-200" />
+                                            {newEmpresa.pais && newEmpresa.pais !== 'Ecuador' && <p className="text-[9px] font-bold text-zinc-500 ml-1">NIF/NIE/CIF o identificador fiscal equivalente. No se consulta el SRI.</p>}
                                         </div>
                                     </div>
                                     <div className="space-y-2">

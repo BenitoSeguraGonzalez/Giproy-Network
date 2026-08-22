@@ -37,9 +37,9 @@ const StatusLine = ({ label, values }) => {
     );
 };
 
-const Metric = ({ icon: Icon, label, value, detail, alert }) => (
+const Metric = ({ icon, label, value, detail, alert }) => (
     <div className="min-w-0 border-r border-zinc-200 px-4 last:border-r-0">
-        <div className="flex items-center gap-2 text-zinc-500"><Icon className="h-4 w-4" aria-hidden="true" /><span className="truncate text-[10px] font-semibold uppercase">{label}</span></div>
+        <div className="flex items-center gap-2 text-zinc-500">{React.createElement(icon, { className: 'h-4 w-4', 'aria-hidden': true })}<span className="truncate text-[10px] font-semibold uppercase">{label}</span></div>
         <div className="mt-1 flex items-baseline gap-2"><strong className="text-xl font-semibold text-zinc-900">{value}</strong>{detail ? <span className={`text-[10px] font-semibold ${alert ? 'text-rose-600' : 'text-zinc-500'}`}>{detail}</span> : null}</div>
     </div>
 );

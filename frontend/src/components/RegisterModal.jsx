@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, AlertCircle } from 'lucide-react';
 import { LiquidButton } from './ui/liquid-button';
 import { APP_MODAL_CLOSE_BUTTON_CLASS } from './ui/app-modal';
 import { maestrosApi } from '../api/maestros';
 import { publicAuthApi } from '../api/publicAuth';
-import PersonnelFormFields from './PersonnelFormFields';
-import MotionScrollbar from './ui/MotionScrollbar';
 import LogoGiproyCompleto from '../assets/LogoGiproyCompleto.png';
 import { appAlert } from '../utils/appDialog';
 import { formatInternationalPhone, getInternationalPhoneValidationMessage, resolveCountryPhonePrefix } from '../utils/phoneFormatter';
 import { validarRucEcuador, requiereValidacionRucEcuador } from '../utils/rucValidator';
+import { detectConnectionCountry, getRegistrationCountryPolicy, resolveDetectedCountry } from '../utils/registrationCountry';
+import PersonnelFormFields from './PersonnelFormFields';
+import MotionScrollbar from './ui/MotionScrollbar';
 
 const MotionDiv = motion.div;
 
@@ -25,7 +26,6 @@ const REGISTER_REQUIRED_FIELDS = [
     ['profesion', 'Profesión / cargo'],
     ['pais', 'País'],
     ['provincia', 'Provincia'],
-    ['canton', 'Cantón'],
     ['ciudad', 'Ciudad'],
     ['movil', 'Móvil de contacto'],
 ];
@@ -34,17 +34,53 @@ const isBlank = (value) => String(value ?? '').trim().length === 0;
 
 const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value ?? '').trim());
 
-const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
+const RegisterModal = ({ isOpen, onClose }) => {
     const formScrollRef = useRef(null);
+    const dialogRef = useRef(null);
+    const closeButtonRef = useRef(null);
+    const countryManuallySelectedRef = useRef(false);
     const [formData, setFormData] = useState({
         nombre_completo: '',
         email: '',
         password: '',
         confirmPassword: '',
         // Campos extendidos
-        ruc: '', nombres: '', apellidos: '', alias: '', empresa_alias: '', nacionalidad: '', profesion: '', ciudad: '', provincia: '', canton: '', pais: 'Ecuador', movil: '',
+        ruc: '', nombres: '', apellidos: '', alias: '', empresa_alias: '', empresa_nombre: '', nacionalidad: '', profesion: '', ciudad: '', provincia: '', canton: '', pais: '', movil: '',
         acepta_politica_privacidad: false, acepta_politicas_comunicacion: false, autoriza_publicidad: false
+        , acepta_terminos: false, terminos_version: null, privacidad_version: null
     });
+
+    useEffect(() => {
+        if (!isOpen) return undefined;
+        const previouslyFocused = document.activeElement;
+        closeButtonRef.current?.focus();
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                onClose();
+                return;
+            }
+            if (event.key !== 'Tab' || !dialogRef.current) return;
+            const focusable = [...dialogRef.current.querySelectorAll(
+                'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+            )];
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            previouslyFocused?.focus?.();
+        };
+    }, [isOpen, onClose]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [step, setStep] = useState(1); // 1: Form, 2: Success
@@ -52,17 +88,18 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
     const [rucLookup, setRucLookup] = useState(null);
     const [certificateCode, setCertificateCode] = useState('');
     const [manualReviewStatus, setManualReviewStatus] = useState(null);
+    const [countryDetectionStatus, setCountryDetectionStatus] = useState('idle');
     const isRucRequired = requiereValidacionRucEcuador(formData.pais);
+    const countryPolicy = getRegistrationCountryPolicy(formData.pais);
     const canSubmit = !isLoading
         && !isBlank(formData.email) && isValidEmail(formData.email)
         && !isBlank(formData.password)
         && !isBlank(formData.ruc) && (!isRucRequired || rucVerified)
+        && (isRucRequired || !isBlank(formData.empresa_nombre))
         && formData.password === formData.confirmPassword
         && formData.acepta_politica_privacidad
-        && formData.acepta_politicas_comunicacion
-        && formData.autoriza_publicidad;
+        && formData.acepta_terminos;
     const [paises, setPaises] = useState([]);
-    const [countryDetected, setCountryDetected] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -70,21 +107,38 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
             if (approvedToken) {
                 setFormData(prev => ({ ...prev, ruc_verification_token: approvedToken }));
             }
-            setFormData(prev => (isBlank(prev.pais) ? { ...prev, pais: 'Ecuador' } : prev));
             const fetchPaises = async () => {
                 try {
                     const data = await maestrosApi.getPaises();
-                    setPaises(Array.isArray(data) ? data : []);
-                } catch (err) {
+                    const availableCountries = Array.isArray(data) ? data : [];
+                    setPaises(availableCountries);
+                    if (countryManuallySelectedRef.current || formData.pais) return;
+                    setCountryDetectionStatus('detecting');
+                    const detected = await detectConnectionCountry();
+                    const country = resolveDetectedCountry(detected, availableCountries);
+                    if (country && !countryManuallySelectedRef.current) {
+                        setFormData(prev => prev.pais ? prev : { ...prev, pais: country.nombre });
+                        setCountryDetectionStatus('detected');
+                    } else {
+                        setCountryDetectionStatus('generic');
+                    }
+                } catch {
                     setPaises([]);
+                    setCountryDetectionStatus('generic');
                 }
             };
             fetchPaises();
 
-            setFormData(prev => ({ ...prev, pais: 'Ecuador' }));
-            setCountryDetected(true);
+            publicAuthApi.getLegalManifest()
+                .then((manifest) => setFormData(prev => ({
+                    ...prev,
+                    terminos_version: manifest.terms.version,
+                    privacidad_version: manifest.privacy.version,
+                })))
+                .catch(() => setError('No se pudo verificar la versión de los documentos legales. Intente nuevamente.'));
+
         }
-    }, [isOpen]);
+    }, [isOpen, formData.pais]);
 
     const handleManualReview = async () => {
         setError(null);
@@ -111,9 +165,15 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
         e.preventDefault();
         setError(null);
 
-        const missingFields = REGISTER_REQUIRED_FIELDS
+        const requiredFields = countryPolicy.requiresCanton
+            ? [...REGISTER_REQUIRED_FIELDS, ['canton', 'Cantón']]
+            : REGISTER_REQUIRED_FIELDS;
+        const missingFields = requiredFields
             .filter(([key]) => isBlank(formData[key]))
             .map(([, label]) => label);
+        if (!requiereValidacionRucEcuador(formData.pais) && isBlank(formData.empresa_nombre)) {
+            missingFields.push('Razón social / nombre legal');
+        }
 
         if (missingFields.length > 0) {
             await appAlert({
@@ -147,6 +207,14 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
             await appAlert({
                 title: 'Política requerida',
                 message: 'Debe aceptar la política de privacidad para crear la empresa y su usuario administrador.',
+                tone: 'warning',
+            });
+            return;
+        }
+        if (!formData.acepta_terminos) {
+            await appAlert({
+                title: 'Términos requeridos',
+                message: 'Debe aceptar los Términos y Condiciones vigentes para crear la cuenta.',
                 tone: 'warning',
             });
             return;
@@ -214,6 +282,10 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
         <AnimatePresence>
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm">
                 <MotionDiv
+                    ref={dialogRef}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="register-dialog-title"
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -223,7 +295,9 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
                     <div className="h-1.5 bg-gradient-to-r from-[#F39200] via-[#E94E1B] to-[#F39200]" />
 
                     <button
+                        ref={closeButtonRef}
                         onClick={onClose}
+                        aria-label="Cerrar registro"
                         className={`${APP_MODAL_CLOSE_BUTTON_CLASS} absolute right-6 top-6 z-10`}
                     >
                         <X className="h-4 w-4" />
@@ -234,15 +308,17 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
                             <>
                                 <div className="text-center mb-8 flex flex-col items-center">
                                     <img src={LogoGiproyCompleto} alt="GIPROY Logo" className="h-12 w-auto object-contain mb-4" />
-                                    <h2 className="text-3xl font-black uppercase tracking-tight text-zinc-900 leading-none italic">Registro de Cuenta</h2>
+                                    <h2 id="register-dialog-title" className="text-3xl font-black uppercase tracking-tight text-zinc-900 leading-none italic">Registro de Cuenta</h2>
                                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mt-3 italic">GIPROY NETWORK SYSTEM V3.0</p>
                                 </div>
 
                                 {error && (
                                     <MotionDiv
+                                        role="alert"
+                                        aria-live="assertive"
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        className="mb-8 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-2xl flex items-center gap-4"
+                                        className="mb-8 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-4"
                                     >
                                         <AlertCircle className="w-6 h-6 text-red-500 shrink-0" />
                                         <p className="text-xs font-black text-red-700 uppercase tracking-tight">{error}</p>
@@ -260,14 +336,19 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess }) => {
                                                 setFormData={setFormData}
                                                 paises={paises}
                                                 publicRegister
-                                                countryLocked={countryDetected}
+                                                countryLocked={false}
+                                                countryDetectionStatus={countryDetectionStatus}
+                                                onCountryChange={() => {
+                                                    countryManuallySelectedRef.current = true;
+                                                    setCountryDetectionStatus('manual');
+                                                }}
                                                 onRucStatusChange={(verified, lookup) => {
                                                     setRucVerified(verified);
                                                     setRucLookup(lookup);
                                                     if (verified) setManualReviewStatus(null);
                                                 }}
                                             />
-                                            {rucLookup?.requires_manual_review && (
+                                            {isRucRequired && rucLookup?.requires_manual_review && (
                                                 <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
                                                     <p className="text-xs font-black text-amber-900">En revisión manual</p>
                                                     <p className="mt-1 text-[11px] text-amber-800">El RUC no consta en la importación vigente. Indica el código del certificado SRI; no adjuntes documentos.</p>

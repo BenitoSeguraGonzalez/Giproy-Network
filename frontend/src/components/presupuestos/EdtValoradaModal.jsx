@@ -12,7 +12,6 @@ import CommonReportPreviewModal from '../reporting/CommonReportPreviewModal';
 import ReportGenerationModal from '../reporting/ReportGenerationModal';
 import { buildReportFileName, sanitizeReportContext } from '../../utils/reportFileName';
 import { downloadBlobResponse } from '../../utils/blobDownload';
-import { roundDecimal } from '../../utils/math';
 import {
     divideDecimalNumber,
     roundDecimalNumber,
@@ -307,6 +306,10 @@ const EdtValoradaModal = ({ isOpen, onClose, onNavigateToNode }) => {
         }
     }, [selectedNode, selectedNodeId, setSelectedNodeId]);
 
+    const [generatingReport, setGeneratingReport] = useState(null);
+    const [reportPreview, setReportPreview] = useState(null);
+    const [showReportPreview, setShowReportPreview] = useState(false);
+
     if (!isOpen) {
         return null;
     }
@@ -331,10 +334,6 @@ const EdtValoradaModal = ({ isOpen, onClose, onNavigateToNode }) => {
         onNavigateToNode?.(nodeId);
         onClose();
     };
-
-    const [generatingReport, setGeneratingReport] = useState(null);
-    const [reportPreview, setReportPreview] = useState(null);
-    const [showReportPreview, setShowReportPreview] = useState(false);
 
     const handleDownloadEdtReport = async (type) => {
         if (!activeProyecto?.id) return;

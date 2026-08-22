@@ -20,9 +20,8 @@ import {
 } from '../utils/marketplaceCompare';
 import { pushMarketplaceRecentlyViewed } from '../utils/marketplaceRecentlyViewed';
 import { getMarketplaceSellerDisplayName } from '../utils/marketplaceSeller';
+import { isMarketplaceSystemProduct, MARKETPLACE_TYPE_LABELS } from '../utils/marketplaceProductMeta';
 import {
-    isMarketplaceSystemProduct,
-    MARKETPLACE_TYPE_LABELS,
     MarketplaceActionTile,
     MarketplaceEmptyState,
     MarketplaceHero,
